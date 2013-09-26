@@ -1,1 +1,30 @@
-exportPattern("^[[:alpha:]]+")
+import("stats", "Formula")
+
+importFrom("numDeriv", "hessian")
+
+export(
+  "crch",
+  "crch.control",
+  "crch.fit",
+  
+  "hxlr"
+)
+
+## methods for crch
+S3method("coef", "crch")
+S3method("fitted", "crch")
+S3method("logLik", "crch")
+S3method("predict", "crch")
+S3method("print", "crch")
+S3method("print", "summary.crch")
+S3method("residuals", "crch")
+S3method("summary", "crch")
+S3method("terms", "crch")
+S3method("vcov", "crch")
+
+## methods for hxlr
+S3method("logLik", "hxlr")
+S3method("predict", "hxlr")
+S3method("print", "hxlr")
+S3method("print", "summary.hxlr")
+S3method("summary", "hxlr")
