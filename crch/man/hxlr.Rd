@@ -15,21 +15,22 @@
 }
 
 \usage{
-  hxlr(formula, scale = ~ NULL, data, weights = NULL, thresholds, ...)
+  hxlr(formula, data, subset, na.action, weights, thresholds, control, ...)
 }
 
 \arguments{
-  \item{formula}{A formula expression of the form response ~ predictors.
-    Response has to be an (ordered) factor, usually derived through cutting a continuous
-    variable into categories.}
-  \item{scale}{Optional formula expression of the form ~ predictors. These predictors are
-    used to predict the scale (dispersion) of the latent logistic distribution.}
+  \item{formula}{A formula expression of the form y ~ x | z where y is the response, x are predictor variables for the location and z are predictor variables for the scale of the latent distribution.
+    Response can either be a continuous variable or a factor.}
   \item{data}{An optional data frame containing the variables occurring in the formulas.}
+  \item{subset} An optional vector specifying a subset of observations to be
+          used in the fitting process.
+  \item{na.action} A function which indicates what should happen when the data contain ‘NA’s. Default is na.omit
   \item{weights}{Optional case weights in fitting.}
-  \item{thresholds}{Vector of (transformed) thresholds that were used to cut the continuous
-    variable into categories. Data frames or matrices with multiple columns are allowed as well.
+  \item{thresholds}{Vector of (transformed) thresholds that are used to cut the continuous
+    response into categories. Data frames or matrices with multiple columns are allowed as well.
     Then each column is used as predictor variable for the intercept model.}
-  \item{\dots}{Additional parameters passed to \code{\link[ordinal]{clm}}. Not all tested!}
+  \item{control} A list of control parameters passed to \code{\link{optim}}. Default is \code{\link{control.hxlr}}
+  \item{\dots}{Additional parameters passed to \code{\link[ordinal]{clm}}. }
 }
 
 \details{
@@ -42,26 +43,31 @@ predict the scale of the latent logistic distribution.
 
 \value{
   An object of class \code{"hxlr"}, i.e., a list with the following elements.
-  \item{coefficients}{List of coefficients for intercept model, predictors, and scale model.}
-  \item{coefficients2}{List of converted coefficients for location and scale.}
+  \item{coefficients}{List of converted coefficients for location and scale.}
+  \item{coefficients.CLM}{List of CLM coefficients for intercept model, predictors, and scale model.}
+  \item{fitted.values}{List of fitted location and scale parameters.}
   \item{optim}{Output from optimization.}
-  \item{loglik}{Log-likelihood.}
+  \item{method}{Optimization method used for \code{\link{optim}}}
+  \item{method}{list of control parameters used for \code{\link{optim}}}
   \item{start}{Starting values of coefficients used in the optimization.}
-  \item{thresholds}{Thresholds.}
-  \item{data}{Data frame containing the variables occurring in the formulas.}
-  \item{formula}{Formula}
-  \item{scale}{Formula expression for scale model.}
+  \item{weights}{case weights used for fitting.}
   \item{nobs}{Number of observations in data set.}
-  \item{call}{Function call.}
-  \item{converged}{Logical variable whether optimization has converged or not.}
+  \item{loglik}{Log-likelihood.}
   \item{vcov}{Covariance matrix.}
+  \item{converged}{Logical variable whether optimization has converged or not.}
+  \item{iterations}{Number of iterations in optimization.}
+  \item{call}{Function call.}
+  \item{scale}{Formula expression for scale model.}
+  \item{terms}{The terms objects used.}
+  \item{levels}{list of levels of the factors used in fitting for location and scale respectively.}
+  \item{thresholds}{Thresholds.}
 }
 
 \references{
   Messner JW, Mayr GJ, Zeileis A, Wilks DS (2013).
     Extending Extended Logistic Regression to Effectively Utilize the Ensemble Spread.
     Working Paper 2013-21. Working Papers in Economics and Statistics,
-    Research Platform Empirical and Experimental Economics, Universit�t Innsbruck.
+    Research Platform Empirical and Experimental Economics, Universität Innsbruck.
     \url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-21}
 
   Wilks DS (2009).
@@ -73,13 +79,11 @@ predict the scale of the latent logistic distribution.
 
 \examples{
 data("rrr_ibk")
-rrr_ibk <- na.omit(rrr_ibk)
 q <- unique(quantile(rrr_ibk$rrr, seq(0.1, 0.9, 0.1)))
-rrr_ibk$rrr.cat <- cut(rrr_ibk$rrr, c(-Inf, q, Inf))
 
 ## fit ordinary extended logistic regression with ensemble mean as 
 ## predictor variable
-XLR <- hxlr(rrr.cat ~ sqrtensmean, data = rrr_ibk, thresholds = sqrt(q))
+XLR <- hxlr(sqrt(rrr) ~ sqrtensmean, data = rrr_ibk, thresholds = sqrt(q))
 ## print
 XLR
 ## summary
@@ -88,11 +92,11 @@ summary(XLR)
 
 ## fit ordinary extended logistic regression with ensemble mean 
 ## and standard deviation as predictor variables
-XLRS <- hxlr(rrr.cat ~ sqrtensmean + sqrtenssd, data = rrr_ibk, 
+XLRS <- hxlr(sqrt(rrr) ~ sqrtensmean + sqrtenssd, data = rrr_ibk, 
 thresholds = sqrt(q))
 ## fit heteroskedastic extended logistic regression with ensemble 
 ## standard deviation as predictor for the scale
-HXLR <- hxlr(rrr.cat ~ sqrtensmean, scale = ~sqrtenssd, 
+HXLR <- hxlr(sqrt(rrr) ~ sqrtensmean | sqrtenssd, 
 data = rrr_ibk, thresholds = sqrt(q))
 
 ## compare AIC of different models
@@ -111,15 +115,15 @@ N <- NROW(rrr_ibk)
 ## function that returns model fits
 fits <- function(data, weights = rep(1, N)) {
   list(
-    "XLR"    = hxlr(rrr.cat ~ sqrtensmean,
+    "XLR"    = hxlr(sqrt(rrr) ~ sqrtensmean,
 data = data, weights = weights, thresholds = sqrt(q)),
-    "XLR:S"  = hxlr(rrr.cat ~ sqrtensmean + sqrtenssd,
+    "XLR:S"  = hxlr(sqrt(rrr) ~ sqrtensmean + sqrtenssd,
 data = data, weights = weights, thresholds = sqrt(q)),
-    "XLR:SM" = hxlr(rrr.cat ~ sqrtensmean + I(sqrtensmean*sqrtenssd), 
+    "XLR:SM" = hxlr(sqrt(rrr) ~ sqrtensmean + I(sqrtensmean*sqrtenssd), 
 data = data, weights = weights, thresholds = sqrt(q)),
-    "HXLR"   = hxlr(rrr.cat ~ sqrtensmean, scale = ~ sqrtenssd,
+    "HXLR"   = hxlr(sqrt(rrr) ~ sqrtensmean | sqrtenssd,
 data = data, weights = weights, thresholds = sqrt(q)),
-    "HXLR:S" = hxlr(rrr.cat ~ sqrtensmean + sqrtenssd, scale = ~ sqrtenssd, 
+    "HXLR:S" = hxlr(sqrt(rrr) ~ sqrtensmean + sqrtenssd | sqrtenssd, 
 data = data, weights = weights, thresholds = sqrt(q))
   )
 }
@@ -138,7 +142,7 @@ for(i in 1:10) {
   ## testdata
   testdata <- rrr_ibk[testIndex,]
   ## observations    
-  obs <- c(obs, rrr_ibk$rrr.cat[testIndex])
+  obs <- c(obs, rrr_ibk$rrr[testIndex])
   ## estimation
   modelfits <- fits(rrr_ibk, weights)
   ## Prediction
@@ -154,7 +158,7 @@ rps <- function(pred, obs) {
   apply((OBS-pred)^2, 1, sum)
 }
 ## compute rps
-RPS <- lapply(pred, rps, obs = obs)
+RPS <- lapply(pred, rps, obs = as.numeric(cut(obs, c(-Inf, q, Inf))))
 
 ## bootstrapping mean rps 
 rpsall <- NULL

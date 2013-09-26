@@ -4,7 +4,7 @@ Version: 0.1-0
 Date: 2013-09-26
 Authors@R: c(person(given = "Jakob", family = "Messner", role = c("aut", "cre"), email = "Jakob.Messner@uibk.ac.at"),
              person(given = "Achim", family = "Zeileis", role = "aut", email = "Achim.Zeileis@R-project.org"))
-Depends: R (>= 2.10.0), formula.tools
+Depends: R (>= 2.10.0)
 Imports: stats, Formula, numDeriv, ordinal
 Suggests: lmtest
 Description: Different approaches to censored regression with conditional heteroskedasticity are provided.
