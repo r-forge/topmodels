@@ -103,7 +103,7 @@ library("lmtest")
 lrtest(XLR, XLRS)
 lrtest(XLR, HXLR)
 
-
+\dontrun{
 ##############################################################################
 ## Cross-validation and bootstrapping RPS for different models 
 ## (like in Messner 2013)
@@ -166,6 +166,7 @@ for(i in 1:250) {
 rpssall <- 1 - rpsall/rpsall[,1]
 boxplot(rpssall[,-1], ylab = "RPSS", main = "RPSS relative to XLR")
 abline(h = 0, lty = 2)
+}
 }
 
 \keyword{regression}
