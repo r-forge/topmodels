@@ -13,23 +13,17 @@
   This is a wrapper function for \code{\link[ordinal]{clm}} (from package \pkg{ordinal}) to fit
   (heteroskedastic) extended logistic regression (HXLR) models (Messner et al. 2013).
 }
-
 \usage{
   hxlr(formula, data, subset, na.action, weights, thresholds, control, ...)
 }
-
 \arguments{
-  \item{formula}{A formula expression of the form y ~ x | z where y is the response, x are predictor variables for the location and z are predictor variables for the scale of the latent distribution.
-    Response can either be a continuous variable or a factor.}
+  \item{formula}{A formula expression of the form y ~ x | z where y is the response, x are predictor variables for the location and z are predictor variables for the scale of the latent distribution. Response can either be a continuous variable or a factor.}
   \item{data}{An optional data frame containing the variables occurring in the formulas.}
-  \item{subset} An optional vector specifying a subset of observations to be
-          used in the fitting process.
-  \item{na.action} A function which indicates what should happen when the data contain ‘NA’s. Default is na.omit
+  \item{subset}{An optional vector specifying a subset of observations to be used in the fitting process.}
+  \item{na.action}{A function which indicates what should happen when the data contain ‘NA’s. Default is na.omit}
   \item{weights}{Optional case weights in fitting.}
-  \item{thresholds}{Vector of (transformed) thresholds that are used to cut the continuous
-    response into categories. Data frames or matrices with multiple columns are allowed as well.
-    Then each column is used as predictor variable for the intercept model.}
-  \item{control} A list of control parameters passed to \code{\link{optim}}. Default is \code{\link{control.hxlr}}
+  \item{thresholds}{Vector of (transformed) thresholds that are used to cut the continuous response into categories. Data frames or matrices with multiple columns are allowed as well. Then each column is used as predictor variable for the intercept model.}
+  \item{control}{A list of control parameters passed to \code{\link{optim}}. Default is \code{\link{control.hxlr}}}
   \item{\dots}{Additional parameters passed to \code{\link[ordinal]{clm}}. }
 }
 
@@ -78,12 +72,12 @@ predict the scale of the latent logistic distribution.
 \seealso{\code{\link{predict.hxlr}}, \code{\link[ordinal]{clm}}}
 
 \examples{
-data("rrr_ibk")
-q <- unique(quantile(rrr_ibk$rrr, seq(0.1, 0.9, 0.1)))
+data("rainIbk")
+q <- unique(quantile(rainIbk$rain, seq(0.1, 0.9, 0.1)))
 
 ## fit ordinary extended logistic regression with ensemble mean as 
 ## predictor variable
-XLR <- hxlr(sqrt(rrr) ~ sqrtensmean, data = rrr_ibk, thresholds = sqrt(q))
+XLR <- hxlr(sqrt(rain) ~ sqrtensmean, data = rainIbk, thresholds = sqrt(q))
 ## print
 XLR
 ## summary
@@ -92,12 +86,12 @@ summary(XLR)
 
 ## fit ordinary extended logistic regression with ensemble mean 
 ## and standard deviation as predictor variables
-XLRS <- hxlr(sqrt(rrr) ~ sqrtensmean + sqrtenssd, data = rrr_ibk, 
+XLRS <- hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = rainIbk, 
 thresholds = sqrt(q))
 ## fit heteroskedastic extended logistic regression with ensemble 
 ## standard deviation as predictor for the scale
-HXLR <- hxlr(sqrt(rrr) ~ sqrtensmean | sqrtenssd, 
-data = rrr_ibk, thresholds = sqrt(q))
+HXLR <- hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, 
+data = rainIbk, thresholds = sqrt(q))
 
 ## compare AIC of different models
 AIC(XLR, XLRS, HXLR)
@@ -111,19 +105,19 @@ lrtest(XLR, HXLR)
 ##############################################################################
 ## Cross-validation and bootstrapping RPS for different models 
 ## (like in Messner 2013)
-N <- NROW(rrr_ibk)
+N <- NROW(rainIbk)
 ## function that returns model fits
 fits <- function(data, weights = rep(1, N)) {
   list(
-    "XLR"    = hxlr(sqrt(rrr) ~ sqrtensmean,
+    "XLR"    = hxlr(sqrt(rain) ~ sqrtensmean,
 data = data, weights = weights, thresholds = sqrt(q)),
-    "XLR:S"  = hxlr(sqrt(rrr) ~ sqrtensmean + sqrtenssd,
+    "XLR:S"  = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd,
 data = data, weights = weights, thresholds = sqrt(q)),
-    "XLR:SM" = hxlr(sqrt(rrr) ~ sqrtensmean + I(sqrtensmean*sqrtenssd), 
+    "XLR:SM" = hxlr(sqrt(rain) ~ sqrtensmean + I(sqrtensmean*sqrtenssd), 
 data = data, weights = weights, thresholds = sqrt(q)),
-    "HXLR"   = hxlr(sqrt(rrr) ~ sqrtensmean | sqrtenssd,
+    "HXLR"   = hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd,
 data = data, weights = weights, thresholds = sqrt(q)),
-    "HXLR:S" = hxlr(sqrt(rrr) ~ sqrtensmean + sqrtenssd | sqrtenssd, 
+    "HXLR:S" = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd | sqrtenssd, 
 data = data, weights = weights, thresholds = sqrt(q))
   )
 }
@@ -140,11 +134,11 @@ for(i in 1:10) {
   ## weights that are used for fitting the models
   weights <- as.numeric(table(factor(trainIndex, levels = c(1:N))))
   ## testdata
-  testdata <- rrr_ibk[testIndex,]
+  testdata <- rainIbk[testIndex,]
   ## observations    
-  obs <- c(obs, rrr_ibk$rrr[testIndex])
+  obs <- c(obs, rainIbk$rain[testIndex])
   ## estimation
-  modelfits <- fits(rrr_ibk, weights)
+  modelfits <- fits(rainIbk, weights)
   ## Prediction
   pred2 <- lapply(modelfits, predict, newdata = testdata, type = "cumprob")
   pred <- mapply(rbind, pred, pred2, SIMPLIFY = FALSE)

@@ -37,10 +37,6 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
   Z <- model.matrix(mtZ, mf)
   
   
-  ## factorize response if numeric 
-  if(!is.factor(Y)) Y <- cut(Y, c(-Inf, thresholds, Inf))
-  ## new formula with factorized response
-  mformula <- reformulate(attr(mtX, "term.labels"), response = "Y")
 
 
   ## obtain correct subset of predvars/dataClasses to terms
@@ -72,8 +68,19 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
   mtZ <- .add_predvars_and_dataClasses(mtZ, mf)
 
 
+  ## factorize response if numeric 
+  if(!is.factor(Y)) Y <- cut(Y, c(-Inf, thresholds, Inf))
+  ## new formula with factorized response
+  mformula <- reformulate(attr(mtX, "term.labels"), response = "Y")
   ## sanity checks
   if(length(Y) < 1) stop("empty model")
+  if(any(summary(Y)==0)) {
+    warning("Intervals with no data! Corresponding threshold ignored")
+    thresholds <- thresholds[-which(summary(data$ff.cat)==0)]
+    Y <- droplevels(Y)
+  }
+    
+
 
   ## convenience variables
   n <- length(Y)
@@ -126,8 +133,8 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
   ## starting values
   if(is.null(start)) {
     ## starting values from clm fit, threshold coefficients set to 0 and 1
-    strt <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights, ...)$coefficients[-(1:nrow(q))]
-    strt <- c(0, rep(1, p-1)/(p-1), strt)
+    strt <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights, ...)
+    strt <- c(0, rep(1, p-1)/(p-1), strt$beta, strt$zeta)
   }
   if(is.list(start)) start <- do.call("c", start) 
   if(length(start) > p + length(attr(mt, "term.labels"))) {
@@ -136,7 +143,6 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
   }
 
   ## estimation
-#  opt <- nlminb(start=strt, objective=nll2, envir=env)
   opt <- optim(par = strt, fn = nll2, envir = env, method = method, hessian = hessian, control = control)
 
   if(opt$convergence > 0) {
@@ -148,11 +154,17 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
 
   ## compute Hessian
   vcov <- if (hessian) solve(as.matrix(opt$hessian)) else NULL
+
+  if (hessian) {
+    colnames(vcov) <- rownames(vcov) <- c(
+      colnames(q), tail(colnames(X),-1),
+      tail(colnames(Z),-1)
+      )
+  }
   
   ## coefficients
   par <- opt$par
   nbeta <- length(par) - p - length(attr(mtZ, "term.labels"))
-  
   ## intercept coefficients
   alpha <- par[1:p]
   names(alpha) <- colnames(q)
@@ -261,9 +273,8 @@ print.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
   if(!x$converged) {
     cat("model did not converge\n")
   } else {
-    cat("CLM coefficients:\n")
     if(length(x$coefficients.CLM$location) | length(x$coefficients.CLM$intercept)) {
-      cat(paste("Coefficients:\n", sep = ""))
+      cat(paste("Coefficients (location model):\n", sep = ""))
        print.default(format(c(x$coefficients.CLM$intercept, x$coefficients.CLM$location), digits = digits), print.gap = 2, quote = FALSE)
        cat("\n")
     } else cat("No coefficients\n\n")
@@ -273,7 +284,7 @@ print.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
       cat("\n")
     } else cat("No coefficients (in scale model)\n\n")
     cat("---\n")
-    cat("converted coefficients for location and scale:\n")
+    cat("converted coefficients for location and scale of latent distribution:\n")
     if(length(x$coefficients$location)) {
       cat(paste("Coefficients (location model):\n", sep = ""))
       print.default(format(x$coefficients$location, digits = digits), print.gap = 2, quote = FALSE)
@@ -349,4 +360,58 @@ print.summary.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
 terms.hxlr <- function(x, model = c("location", "scale", "full"), ...) x$terms[[match.arg(model)]]
 
 fitted.hxlr <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
+
+coef.hxlr <- function(object, model = c("full", "intercept", "location", "scale"), type = c("CLM", "latent"), ...) {
+  type<- match.arg(type)
+  model <- match.arg(model)
+  cf <- switch(type, 
+    "CLM" = {
+      object$coefficients.CLM
+    },
+    "latent" = {
+      object$coefficients
+    }
+  )
+  switch(model,
+    "location" = {
+      c(cf$location, cf$intercept)
+    },
+    "scale" = {
+      cf$scale
+    },
+    "full" = {
+      cf <- c(cf$intercept, cf$location, cf$scale)
+      names(cf) <- colnames(object$vcov)
+      cf
+    }
+  )
+}
+
+
+vcov.hxlr <- function(object, model = c("full", "intercept", "location", "scale"), ...) {
+  vc <- object$vcov
+  k <- length(object$coefficients.CLM$intercept)
+  l <- length(object$coefficients.CLM$location)
+  m <- length(object$coefficients.CLM$scale)
+
+  model <-  match.arg(model)
+
+  switch(model,
+    "intercept" = {
+      vc[seq.int(length.out = k) , seq.int(length.out = k), drop = FALSE]
+    },
+    "location" = {
+      vc[seq.int(length.out = l) + k, seq.int(length.out = l) + k, drop = FALSE]
+    },
+    "scale" = {
+      vc <- vc[seq.int(length.out = m) + k + l, seq.int(length.out = m) + k + l, drop = FALSE]
+      colnames(vc) <- rownames(vc) <- names(object$coefficients.CLM$scale)
+      vc
+    },
+    "full" = {
+      vc
+    }
+  )
+}
+
 
