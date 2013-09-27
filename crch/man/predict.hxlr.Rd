@@ -9,15 +9,15 @@ regression (HXLR) models.
 }
 
 \usage{
-\method{predict}{hxlr}(object, newdata = object$data,
+\method{predict}{hxlr}(object, newdata = NULL,
   type = c("class", "probability", "cumprob", "location", "scale"),
-  thresholds = object$thresholds, \dots)
+  thresholds = object$thresholds, na.action = na.pass, \dots)
 }
 
 \arguments{
   \item{object}{An object of class \code{"hxlr"}.}
   \item{newdata}{An optional data frame in which to look for variables
-    with which to predict. If omitted, same data as for fitting is used.}
+    with which to predict.}
   \item{type}{Type of prediction: \code{"probability"} returns data frame with
     category probabilities, \code{"cumprob"} returns cumulative probabilities,
     \code{"location"} and \code{"scale"} return the location and scale of the
@@ -27,6 +27,7 @@ regression (HXLR) models.
     (for types \code{"probability"}, \code{"cumprob"}, and \code{"class"}).
     Can be different from thresholds used for fitting. If omitted, the same
     thresholds as for fitting are used.}
+  \item{na.action}{A function which indicates what should happen when the data contain ‘NA’s. Default is na.pass}
   \item{\dots}{Currently not used.}
 }
 
