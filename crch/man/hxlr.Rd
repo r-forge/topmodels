@@ -7,11 +7,11 @@
 \alias{print.summary.hxlr}
 \alias{logLik.hxlr}
 
-\title{Heteroskedastic Extended Logistic Regression}
+\title{Heteroscedastic Extended Logistic Regression}
 
 \description{
   This is a wrapper function for \code{\link[ordinal]{clm}} (from package \pkg{ordinal}) to fit
-  (heteroskedastic) extended logistic regression (HXLR) models (Messner et al. 2013).
+  (heteroscedastic) extended logistic regression (HXLR) models (Messner et al. 2013).
 }
 \usage{
   hxlr(formula, data, subset, na.action, weights, thresholds, control, ...)
@@ -30,7 +30,7 @@
 \details{
 Extended logistic regression (Wilks 2009) extends binary logistic regression to multi-category
 responses by including the thresholds, that are used to cut a continuous variable into categories,
-in the regression equation. Heteroskedastic extended logistic regression (Messner et al. 2013)
+in the regression equation. Heteroscedastic extended logistic regression (Messner et al. 2013)
 extends this model further and allows to add additional predictor variables that are used to
 predict the scale of the latent logistic distribution.
 }
@@ -88,7 +88,7 @@ summary(XLR)
 ## and standard deviation as predictor variables
 XLRS <- hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = rainIbk, 
 thresholds = sqrt(q))
-## fit heteroskedastic extended logistic regression with ensemble 
+## fit heteroscedastic extended logistic regression with ensemble 
 ## standard deviation as predictor for the scale
 HXLR <- hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, 
 data = rainIbk, thresholds = sqrt(q))

@@ -1,10 +1,10 @@
 \name{predict.hxlr}
 \alias{predict.hxlr}
 
-\title{Predictions for Heteroskedastic Extended Logistic Regressions}
+\title{Predictions for Heteroscedastic Extended Logistic Regressions}
 
 \description{
-Computes various types of predictions for heteroskedastic extended logistic
+Computes various types of predictions for heteroscedastic extended logistic
 regression (HXLR) models.
 }
 
