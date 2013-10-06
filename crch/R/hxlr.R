@@ -104,7 +104,7 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
 
   stopifnot(requireNamespace("ordinal"))
   ## get environment from clm
-  env <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights, doFit = FALSE, ...)
+  env <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights, doFit = FALSE)
   
   ## thresholds can also be data.frame with several columns (predictor variables for intercept model)
   q <- model.matrix(~ thresholds)
@@ -133,7 +133,7 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
   ## starting values
   if(is.null(start)) {
     ## starting values from clm fit, threshold coefficients set to 0 and 1
-    strt <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights, ...)
+    strt <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights)
     strt <- c(0, rep(1, p-1)/(p-1), strt$beta, strt$zeta)
   }
   if(is.list(start)) start <- do.call("c", start) 
@@ -174,25 +174,21 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
   delta2 <- tail(par, length(attr(mtZ, "term.labels")))
 
 
-
-  ## coefficients for location and scale (gamma, delta)
-  if(p ==2) {
-    gamma <- c(-alpha[1], beta)/alpha[2]
-    delta <- c(-log(alpha[2]), delta2)
-    names(delta)[1] <- "(Intercept)"
-  } else {gamma <- delta <- NULL}
+  
+  ## fitted values
+  intercepts <- drop(model.matrix(~thresholds) %*% alpha)
+  location <- drop(X %*% c(0,beta))
+  scale <- drop(Z %*% c(0, delta2))
 
   ## output
   rval <- list(
-    coefficients = list(location = gamma, scale = delta),
-    coefficients.CLM = list(intercept = alpha, location = beta, scale = delta2),
-    fitted.values = list(location = drop(X %*% gamma),  scale = exp(drop(Z %*% delta))),
+    coefficients = list(intercept = alpha, location = beta, scale = delta2),
+    fitted.values = list(intercepts = intercepts, location = location,  scale = scale),
     optim = opt, 
     method = method,
     control = control,
     start = strt,
     weights = weights, 
-    nobs = n,
     loglik = - opt$value,
     vcov = vcov,
     converged = converged, 
@@ -227,14 +223,16 @@ predict.hxlr <- function(object, newdata = NULL,
   thresholds = object$thresholds, na.action = na.pass, ...)
 {
   type <- match.arg(type)
-  
+
   if(missing(newdata)) {
-    mu <- object$fitted.values$location
-    sigma <- object$fitted.values$scale
+    intercepts <- object$fitted.values$intercepts
+    location <- object$fitted.values$location
+    scale <- object$fitted.values$scale
   } else {
     ## get coefficients
-    gamma <- object$coefficients$location
-    delta <- object$coefficients$scale
+    alpha <- object$coefficients$intercept
+    beta <- object$coefficients$location
+    delta2 <- object$coefficients$scale
 
     mf <- model.frame(delete.response(object$terms$full), newdata, na.action = na.action, xlev = object$levels$full)
 
@@ -242,20 +240,27 @@ predict.hxlr <- function(object, newdata = NULL,
     x <- model.matrix(delete.response(object$terms$location), mf)
     z <- model.matrix(object$terms$scale, mf)
     
-    ## location and scale 
-    mu <- drop(x %*% gamma)
-    sigma <- exp(drop(z %*% delta))
+
+    intercepts <- drop(model.matrix(~thresholds) %*% alpha)
+    location <- drop(x %*% c(0,beta))
+    scale <- drop(z %*% c(0, delta2))
   }
 
+  ## location and scale of latent distribution
+  if(type %in% c("location", "scale")) {
+    if(NCOL(thresholds)>1) stop("location and scale can only be determined for single column thresholds")
+    mu <- (location - object$coefficients$intercept[1])/object$coefficients$intercept[2]
+    sigma <- exp(scale - log(object$coefficients$intercept[2]))
+  } else {
   ## cumulative probabilities P(y<threshold[i]|x)
-  cumprob <- NULL
-  for(i in 1:length(thresholds)) { 
-    cumprob <- cbind(cumprob, plogis((thresholds[i] - mu)/sigma))
-  }
+  intercepts2 <- t(matrix(rep(intercepts, length(location)),  NROW(thresholds), length(location)))
+  location2 <- matrix(rep(location, NROW(thresholds)), length(location), NROW(thresholds))
+  scale2 <- matrix(rep(scale, NROW(thresholds)), length(scale), NROW(thresholds))
+  cumprob <- plogis((intercepts2-location)/exp(scale2))
   
   ## category probabilities P(threshold[i-1]<=y<threshold[i]|x)
   prob <- t(apply(cbind(0, cumprob, 1), 1, diff))
-
+  }
   rval <- switch(type,
       "location" = mu,
       "scale" = sigma,
@@ -267,35 +272,60 @@ predict.hxlr <- function(object, newdata = NULL,
   return(rval)
 }
 
+
+fitted.hxlr <- function(object, type = c("class", "probability", "cumprob", "location", "scale"), ...) {
+
+  type <- match.arg(type)
+
+  intercepts <- object$fitted.values$intercepts
+  location <- object$fitted.values$location
+  scale <- object$fitted.values$scale
+
+  ## location and scale of latent distribution
+  if(type %in% c("location", "scale")) {
+    if(NCOL(thresholds)>1) stop("location and scale can only be determined for single column thresholds")
+    mu <- (location - object$coefficients$intercept[1])/object$coefficients$intercept[2]
+    sigma <- exp(scale - log(object$coefficients$intercept[2]))
+  } else {
+  ## cumulative probabilities P(y<threshold[i]|x)
+  intercepts2 <- t(matrix(rep(intercepts, length(location)),  NROW(thresholds), length(location)))
+  location2 <- matrix(rep(location, NROW(thresholds)), length(location), NROW(thresholds))
+  scale2 <- matrix(rep(scale, NROW(thresholds)), length(scale), NROW(thresholds))
+  cumprob <- plogis((intercepts2-location)/exp(scale2))
+  
+  ## category probabilities P(threshold[i-1]<=y<threshold[i]|x)
+  prob <- t(apply(cbind(0, cumprob, 1), 1, diff))
+  }
+  rval <- switch(type,
+      "location" = mu,
+      "scale" = sigma,
+      "cumprob" = cumprob,
+      "probability" = prob,
+      "class" = apply(prob, 1, which.max)
+    )
+
+  return(rval)
+
+}
+
+
 print.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
 {
   cat("\nCall:", deparse(x$call, width.cutoff = floor(getOption("width") * 0.85)), "", sep = "\n")
   if(!x$converged) {
     cat("model did not converge\n")
   } else {
-    if(length(x$coefficients.CLM$location) | length(x$coefficients.CLM$intercept)) {
+    if(length(x$coefficients$location) | length(x$coefficients$intercept)) {
       cat(paste("Coefficients (location model):\n", sep = ""))
-       print.default(format(c(x$coefficients.CLM$intercept, x$coefficients.CLM$location), digits = digits), print.gap = 2, quote = FALSE)
+       print.default(format(c(x$coefficients$intercept, x$coefficients$location), digits = digits), print.gap = 2, quote = FALSE)
        cat("\n")
     } else cat("No coefficients\n\n")
-    if(length(x$coefficients.CLM$scale)) {
-      cat(paste("Coefficients (scale model with log link):\n", sep = ""))
-      print.default(format(x$coefficients.CLM$scale, digits = digits), print.gap = 2, quote = FALSE)
-      cat("\n")
-    } else cat("No coefficients (in scale model)\n\n")
-    cat("---\n")
-    cat("converted coefficients for location and scale of latent distribution:\n")
-    if(length(x$coefficients$location)) {
-      cat(paste("Coefficients (location model):\n", sep = ""))
-      print.default(format(x$coefficients$location, digits = digits), print.gap = 2, quote = FALSE)
-      cat("\n")
-    } else cat("No coefficients (in location model)\n\n")
     if(length(x$coefficients$scale)) {
       cat(paste("Coefficients (scale model with log link):\n", sep = ""))
       print.default(format(x$coefficients$scale, digits = digits), print.gap = 2, quote = FALSE)
       cat("\n")
     } else cat("No coefficients (in scale model)\n\n")
-    cat("\n")
+    cat("---\n")
   }
   invisible(x)
 }
@@ -303,25 +333,25 @@ print.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
 summary.hxlr <- function(object, ...)
 {
   ## extend coefficient table
-  k <- length(object$coefficients.CLM$intercept)
-  l <- length(object$coefficients.CLM$location)
-  m <- length(object$coefficients.CLM$scale)
-  cf <- as.vector(do.call("c", object$coefficients.CLM))
+  k <- length(object$coefficients$intercept)
+  l <- length(object$coefficients$location)
+  m <- length(object$coefficients$scale)
+  cf <- as.vector(do.call("c", object$coefficients))
   se <- sqrt(diag(object$vcov))
   cf <- cbind(cf, se, cf/se, 2 * pnorm(-abs(cf/se)))
   colnames(cf) <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
-  if(length(object$coefficients.CLM$scale)) {
+  if(length(object$coefficients$scale)) {
     cf <- list(
       intercept = cf[seq.int(length.out = k), , drop = FALSE],
       location = cf[seq.int(length.out = l) + k, , drop = FALSE],
       scale = cf[seq.int(length.out = m) + l + k, , drop = FALSE])
-    rownames(cf$scale) <- names(object$coefficients.CLM$scale)
+    rownames(cf$scale) <- names(object$coefficients$scale)
   } else {
     cf <- list(intercept = cf[seq.int(length.out = k), , drop = FALSE], location = cf[seq.int(length.out = l) + k, , drop = FALSE])
   }
-  rownames(cf$intercept) <- names(object$coefficients.CLM$intercept)
-  rownames(cf$location) <- names(object$coefficients.CLM$location)
-  object$coefficients.CLM <- cf
+  rownames(cf$intercept) <- names(object$coefficients$intercept)
+  rownames(cf$location) <- names(object$coefficients$location)
+  object$coefficients <- cf
 
   ## delete some slots
   object$fitted.values <- object$terms <- object$levels <- object$contrasts <- NULL
@@ -338,17 +368,17 @@ print.summary.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
   if(!x$converged) {
     cat("model did not converge\n")
   } else {
-    if(NROW(x$coefficients.CLM$location) | NROW(x$coefficients.CLM$intercept)) {
+    if(NROW(x$coefficients$location) | NROW(x$coefficients$intercept)) {
       cat(paste("\nCoefficients:\n", sep = ""))
-      printCoefmat(rbind(x$coefficients.CLM$intercept, x$coefficients.CLM$location), digits = digits, signif.legend = FALSE)
+      printCoefmat(rbind(x$coefficients$intercept, x$coefficients$location), digits = digits, signif.legend = FALSE)
     } 
 
-    if(NROW(x$coefficients.CLM$scale)) {
+    if(NROW(x$coefficients$scale)) {
       cat(paste("\nlog-scale coefficients:\n", sep = ""))
-      printCoefmat(x$coefficients.CLM$scale, digits = digits, signif.legend = FALSE)
+      printCoefmat(x$coefficients$scale, digits = digits, signif.legend = FALSE)
     } 
 
-    if(getOption("show.signif.stars") & any(do.call("rbind", x$coefficients.CLM)[, 4L] < 0.1))
+    if(getOption("show.signif.stars") & any(do.call("rbind", x$coefficients)[, 4L] < 0.1))
       cat("---\nSignif. codes: ", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1", "\n")
     cat("Log-likelihood:", formatC(x$loglik, digits = digits),
       "on", sum(sapply(x$coefficients, NROW)), "Df\n")
@@ -359,29 +389,35 @@ print.summary.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
 
 terms.hxlr <- function(x, model = c("location", "scale", "full"), ...) x$terms[[match.arg(model)]]
 
-fitted.hxlr <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
 coef.hxlr <- function(object, model = c("full", "intercept", "location", "scale"), type = c("CLM", "latent"), ...) {
   type<- match.arg(type)
   model <- match.arg(model)
-  cf <- switch(type, 
-    "CLM" = {
-      object$coefficients.CLM
-    },
-    "latent" = {
-      object$coefficients
-    }
-  )
+  cf <- object$coefficients
+
+  if(type == "latent") {  
+    ## coefficients for location and scale (gamma, delta)
+    gamma <- with(cf, c(-intercept[1], location)/intercept[2])
+    delta <- with(cf, c(-log(intercept[2]), scale))
+    names(delta)[1] <- "(Intercept)"
+
+    cf <- list(intercept = NULL, location = gamma, scale = delta)
+  }
+
+
   switch(model,
+    "intercept" = {
+      cf$intercept
+    },
     "location" = {
-      c(cf$location, cf$intercept)
+      cf$location
     },
     "scale" = {
       cf$scale
     },
     "full" = {
       cf <- c(cf$intercept, cf$location, cf$scale)
-      names(cf) <- colnames(object$vcov)
+#      names(cf) <- c(names(cf$intercept), names(cf$location), names(cf$scale))
       cf
     }
   )
