@@ -2,7 +2,7 @@
 \alias{rainIbk}
 \docType{data}
 \title{
-precipitation observations and forecasts for Innsbruck
+Precipitation Observations and Forecasts for Innsbruck
 }
 \description{
 Accumulated 5-8 days precipitation amount for Innsbruck. Data includes GEFS reforecasts (Hamill et al. 2012) and observations from SYNOP station Innsbruck Airport (11120) from 2000-01-01 to 2013-09-17.
@@ -22,7 +22,8 @@ Accumulated 5-8 days precipitation amount for Innsbruck. Data includes GEFS refo
 %}
 \source{
 Observations:
-Source: http://www.ogimet.com/synops.phtml.en
+http://www.ogimet.com/synops.phtml.en
+
 Reforecasts: http://www.esrl.noaa.gov/psd/forecasts/reforecast2/
 }
 \references{

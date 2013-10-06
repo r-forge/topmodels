@@ -2,10 +2,6 @@
 \encoding{latin1}
 
 \alias{hxlr}
-\alias{print.hxlr}
-\alias{summary.hxlr}
-\alias{print.summary.hxlr}
-\alias{logLik.hxlr}
 
 \title{Heteroscedastic Extended Logistic Regression}
 
@@ -14,17 +10,17 @@
   (heteroscedastic) extended logistic regression (HXLR) models (Messner et al. 2013).
 }
 \usage{
-  hxlr(formula, data, subset, na.action, weights, thresholds, control, ...)
+hxlr(formula, data, subset, na.action, weights, thresholds, control, ...)
 }
 \arguments{
-  \item{formula}{A formula expression of the form y ~ x | z where y is the response, x are predictor variables for the location and z are predictor variables for the scale of the latent distribution. Response can either be a continuous variable or a factor.}
-  \item{data}{An optional data frame containing the variables occurring in the formulas.}
-  \item{subset}{An optional vector specifying a subset of observations to be used in the fitting process.}
-  \item{na.action}{A function which indicates what should happen when the data contain ‘NA’s. Default is na.omit}
-  \item{weights}{Optional case weights in fitting.}
-  \item{thresholds}{Vector of (transformed) thresholds that are used to cut the continuous response into categories. Data frames or matrices with multiple columns are allowed as well. Then each column is used as predictor variable for the intercept model.}
-  \item{control}{A list of control parameters passed to \code{\link{optim}}. Default is \code{\link{control.hxlr}}}
-  \item{\dots}{Additional parameters passed to \code{\link[ordinal]{clm}}. }
+  \item{formula}{a formula expression of the form \code{y ~ x | z} where \code{y} is the response and \code{x} and \code{z} are regressor variables for the location and the scale of the latend distribution respectively. Response can either be a continuous variable or a factor.}
+  \item{data}{an optional data frame containing the variables occurring in the formulas.}
+  \item{subset}{an optional vector specifying a subset of observations to be used in the fitting process.}
+  \item{na.action}{a function which indicates what should happen when the data contain \code{NA}s. Default is na.omit}
+  \item{weights}{optional case weights in fitting.}
+  \item{thresholds}{vector of (transformed) thresholds that are used to cut the continuous response into categories. Data frames or matrices with multiple columns are allowed as well. Then each column is used as predictor variable for the intercept model.}
+  \item{control}{a list of control parameters passed to \code{\link{optim}}. Default is \code{\link{hxlr.control}}}
+  \item{\dots}{arguments to be used to form the default \code{control} argument if it is not supplied directly.}
 }
 
 \details{
@@ -37,31 +33,29 @@ predict the scale of the latent logistic distribution.
 
 \value{
   An object of class \code{"hxlr"}, i.e., a list with the following elements.
-  \item{coefficients}{List of converted coefficients for location and scale.}
-  \item{coefficients.CLM}{List of CLM coefficients for intercept model, predictors, and scale model.}
-  \item{fitted.values}{List of fitted location and scale parameters.}
-  \item{optim}{Output from optimization.}
-  \item{method}{Optimization method used for \code{\link{optim}}}
-  \item{method}{list of control parameters used for \code{\link{optim}}}
-  \item{start}{Starting values of coefficients used in the optimization.}
+  \item{coefficients}{list of CLM coefficients for intercept model, location, and scale model.}
+  \item{fitted.values}{list of fitted location and scale parameters.}
+  \item{optim}{output from optimization from \code{\link{optim}}.}
+  \item{method}{Optimization method used for \code{\link{optim}}.}
+  \item{control}{list of control parameters passed to \code{\link{optim}}}
+  \item{start}{starting values of coefficients used in the optimization.}
   \item{weights}{case weights used for fitting.}
-  \item{nobs}{Number of observations in data set.}
-  \item{loglik}{Log-likelihood.}
-  \item{vcov}{Covariance matrix.}
-  \item{converged}{Logical variable whether optimization has converged or not.}
-  \item{iterations}{Number of iterations in optimization.}
-  \item{call}{Function call.}
-  \item{scale}{Formula expression for scale model.}
-  \item{terms}{The terms objects used.}
+  \item{loglik}{log-likelihood.}
+  \item{vcov}{covariance matrix.}
+  \item{converged}{logical variable whether optimization has converged or not.}
+  \item{iterations}{number of iterations in optimization.}
+  \item{call}{function call.}
+  \item{scale}{the formula supplied.}
+  \item{terms}{the \code{terms} objects used.}
   \item{levels}{list of levels of the factors used in fitting for location and scale respectively.}
-  \item{thresholds}{Thresholds.}
+  \item{thresholds}{the thresholds supplied.}
 }
 
 \references{
   Messner JW, Mayr GJ, Zeileis A, Wilks DS (2013).
     Extending Extended Logistic Regression to Effectively Utilize the Ensemble Spread.
     Working Paper 2013-21. Working Papers in Economics and Statistics,
-    Research Platform Empirical and Experimental Economics, Universität Innsbruck.
+    Research Platform Empirical and Experimental Economics, Universitaet Innsbruck.
     \url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-21}
 
   Wilks DS (2009).
