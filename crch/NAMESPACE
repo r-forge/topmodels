@@ -6,8 +6,8 @@ export(
   "crch",
   "crch.control",
   "crch.fit",
-  
-  "hxlr"
+  "hxlr",
+  "hxlr.control"
 )
 
 ## methods for crch
