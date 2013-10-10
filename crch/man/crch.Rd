@@ -60,6 +60,8 @@ crch.fit(x, z, y, left, right, dist = "student", df = NULL,
   \item{start}{starting values of coefficients used in the optimization.}
   \item{weights}{case weights used for fitting.}
   \item{offset}{the offset used.}
+  \item{n}{number of observations.}
+  \item{nobs}{number of observations with non-zero weights.}
   \item{loglik}{log-likelihood.}
   \item{vcov}{covariance matrix.}
   \item{converged}{logical variable whether optimization has converged or not.}

@@ -40,6 +40,8 @@ predict the scale of the latent logistic distribution.
   \item{control}{list of control parameters passed to \code{\link{optim}}}
   \item{start}{starting values of coefficients used in the optimization.}
   \item{weights}{case weights used for fitting.}
+  \item{n}{number of observations.}
+  \item{nobs}{number of observations with non-zero weights.}
   \item{loglik}{log-likelihood.}
   \item{vcov}{covariance matrix.}
   \item{converged}{logical variable whether optimization has converged or not.}
