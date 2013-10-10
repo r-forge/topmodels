@@ -79,8 +79,6 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   ## convenience variables
   n <- length(Y)
 
-  ## distribution
-  dist <- match.arg(dist)
 
   ## weights
   weights <- model.weights(mf)
@@ -141,6 +139,7 @@ crch.fit <- function(x, z, y, left, right, dist = "student", df = NULL,
   n <- NROW(x)  
   k <- NCOL(x)
   if(is.null(weights)) weights <- rep.int(1, n)
+  nobs <- sum(weights > 0)
   dfest <- dist == "student" & is.null(df)
   if(is.null(offset)) offset <- rep.int(0, n)
   if(!is.list(offset)) offset <- list(location = offset, scale = rep.int(0, n))
@@ -255,6 +254,8 @@ crch.fit <- function(x, z, y, left, right, dist = "student", df = NULL,
     start = start,  
     weights = if(identical(as.vector(weights), rep.int(1, n))) NULL else weights,
     offset = list(location = if(identical(offset[[1L]], rep.int(0, n))) NULL else offset[[1L]],
+    n = n,
+    nobs = nobs,
     scale = if(identical(offset[[2L]], rep.int(0, n))) NULL else offset[[2L]]),
     loglik = ll,
     vcov = vcov,
