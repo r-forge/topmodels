@@ -69,6 +69,13 @@ predict the scale of the latent logistic distribution.
 
 \examples{
 data("rainIbk")
+## mean and standard deviation of square root transformed ensemble forecasts
+rainIbk$sqrtensmean <- apply(sqrt(rainIbk[,grep('^rainfc',names(rainIbk))]),
+  1, mean)
+rainIbk$sqrtenssd   <- apply(sqrt(rainIbk[,grep('^rainfc',names(rainIbk))]),
+  1, sd)
+
+## climatological deciles
 q <- unique(quantile(rainIbk$rain, seq(0.1, 0.9, 0.1)))
 
 ## fit ordinary extended logistic regression with ensemble mean as 

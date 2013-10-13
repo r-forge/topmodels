@@ -82,6 +82,12 @@ crch.fit(x, z, y, left, right, dist = "student", df = NULL,
 
 \examples{
 data("rainIbk")
+## mean and standard deviation of square root transformed ensemble forecasts
+rainIbk$sqrtensmean <- apply(sqrt(rainIbk[,grep('^rainfc',names(rainIbk))]),
+  1, mean)
+rainIbk$sqrtenssd   <- apply(sqrt(rainIbk[,grep('^rainfc',names(rainIbk))]),
+  1, sd)
+
 ## fit linear regression model with Gaussian distribution 
 CRCH <- crch(sqrt(rain) ~ sqrtensmean, data = rainIbk, dist = "gaussian")
 ## same as lm?
