@@ -4,17 +4,19 @@
 \alias{fitted.hxlr}
 
 
-\title{Predict Method for HXLR Fits.}
+\title{Predict/fitted Method for HXLR Fits.}
 
 \description{
-Obtains various types of predictions for heteroscedastic extended logistic
-regression (HXLR) models.
+Obtains various types of predictions/fitted values for heteroscedastic
+extended logistic regression (HXLR) models.
 }
 
 \usage{
 \method{predict}{hxlr}(object, newdata = NULL,
         type = c("class", "probability", "cumprob", "location", "scale"),
         thresholds = object$thresholds, na.action = na.pass, \dots)
+\method{fitted}{hxlr}(object, type = c("class", "probability", 
+        "cumprob", "location", "scale"),\dots)
 }
 
 \arguments{
