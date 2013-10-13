@@ -497,10 +497,11 @@ coef.crch <- function(object, model = c("full", "location", "scale", "df"), ...)
 }
 
 
-vcov.crch <- function(object, model = c("full", "location", "scale"), ...) {
+vcov.crch <- function(object, model = c("full", "location", "scale", "df"), ...) {
   vc <- object$vcov
   k <- length(object$coefficients$location)
   m <- length(object$coefficients$scale)
+  l <- length(object$coefficients$df)
 
   model <-  match.arg(model)
 
@@ -511,6 +512,11 @@ vcov.crch <- function(object, model = c("full", "location", "scale"), ...) {
     "scale" = {
       vc <- vc[seq.int(length.out = m) + k, seq.int(length.out = m) + k, drop = FALSE]
       colnames(vc) <- rownames(vc) <- names(object$coefficients$scale)
+      vc
+    },
+    "df" = {
+      vc <- vc[seq.int(length.out = l) + k + m, seq.int(length.out = l) + k + m, drop = FALSE]
+      colnames(vc) <- rownames(vc) <- names(object$coefficients$df)
       vc
     },
     "full" = {
