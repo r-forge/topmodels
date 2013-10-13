@@ -69,7 +69,10 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
 
 
   ## factorize response if numeric 
-  if(!is.factor(Y)) Y <- cut(Y, c(-Inf, thresholds, Inf))
+  if(!is.factor(Y)) {
+    if(NCOL(thresholds)>1) stop("continuous response only allowed for single column thresholds")
+    else Y <- cut(Y, c(-Inf, thresholds, Inf))
+  }
   ## new formula with factorized response
   mformula <- reformulate(attr(mtX, "term.labels"), response = "Y")
   ## sanity checks
@@ -276,12 +279,11 @@ predict.hxlr <- function(object, newdata = NULL,
 
 
 fitted.hxlr <- function(object, type = c("class", "probability", "cumprob", "location", "scale"), ...) {
-
   type <- match.arg(type)
-
   intercepts <- object$fitted.values$intercepts
   location <- object$fitted.values$location
   scale <- object$fitted.values$scale
+  thresholds <- object$thresholds
 
   ## location and scale of latent distribution
   if(type %in% c("location", "scale")) {
@@ -289,14 +291,14 @@ fitted.hxlr <- function(object, type = c("class", "probability", "cumprob", "loc
     mu <- (location - object$coefficients$intercept[1])/object$coefficients$intercept[2]
     sigma <- exp(scale - log(object$coefficients$intercept[2]))
   } else {
-  ## cumulative probabilities P(y<threshold[i]|x)
-  intercepts2 <- t(matrix(rep(intercepts, length(location)),  NROW(thresholds), length(location)))
-  location2 <- matrix(rep(location, NROW(thresholds)), length(location), NROW(thresholds))
-  scale2 <- matrix(rep(scale, NROW(thresholds)), length(scale), NROW(thresholds))
-  cumprob <- plogis((intercepts2-location)/exp(scale2))
-  
-  ## category probabilities P(threshold[i-1]<=y<threshold[i]|x)
-  prob <- t(apply(cbind(0, cumprob, 1), 1, diff))
+    ## cumulative probabilities P(y<threshold[i]|x)
+    intercepts2 <- t(matrix(rep(intercepts, length(location)),  NROW(thresholds), length(location)))
+    location2 <- matrix(rep(location, NROW(thresholds)), length(location), NROW(thresholds))
+    scale2 <- matrix(rep(scale, NROW(thresholds)), length(scale), NROW(thresholds))
+    cumprob <- plogis((intercepts2-location)/exp(scale2))
+    
+    ## category probabilities P(threshold[i-1]<=y<threshold[i]|x)
+    prob <- t(apply(cbind(0, cumprob, 1), 1, diff))
   }
   rval <- switch(type,
       "location" = mu,
@@ -305,9 +307,7 @@ fitted.hxlr <- function(object, type = c("class", "probability", "cumprob", "loc
       "probability" = prob,
       "class" = apply(prob, 1, which.max)
     )
-
   return(rval)
-
 }
 
 
@@ -389,8 +389,7 @@ print.summary.hxlr <- function(x, digits = max(3, getOption("digits") - 3), ...)
   invisible(x)
 }
 
-terms.hxlr <- function(x, model = c("location", "scale", "full"), ...) x$terms[[match.arg(model)]]
-
+terms.hxlr <- function(x, model = c("full", "location", "scale"), ...) x$terms[[match.arg(model)]]
 
 coef.hxlr <- function(object, model = c("full", "intercept", "location", "scale"), type = c("CLM", "latent"), ...) {
   type<- match.arg(type)
@@ -419,18 +418,17 @@ coef.hxlr <- function(object, model = c("full", "intercept", "location", "scale"
     },
     "full" = {
       cf <- c(cf$intercept, cf$location, cf$scale)
-#      names(cf) <- c(names(cf$intercept), names(cf$location), names(cf$scale))
       cf
     }
   )
 }
 
-
-vcov.hxlr <- function(object, model = c("full", "intercept", "location", "scale"), ...) {
+#TODO: vcov for type latent
+vcov.hxlr <- function(object, model = c("full", "intercept", "location", "scale"),...) {
   vc <- object$vcov
-  k <- length(object$coefficients.CLM$intercept)
-  l <- length(object$coefficients.CLM$location)
-  m <- length(object$coefficients.CLM$scale)
+  k <- length(object$coefficients$intercept)
+  l <- length(object$coefficients$location)
+  m <- length(object$coefficients$scale)
 
   model <-  match.arg(model)
 
@@ -443,7 +441,7 @@ vcov.hxlr <- function(object, model = c("full", "intercept", "location", "scale"
     },
     "scale" = {
       vc <- vc[seq.int(length.out = m) + k + l, seq.int(length.out = m) + k + l, drop = FALSE]
-      colnames(vc) <- rownames(vc) <- names(object$coefficients.CLM$scale)
+      colnames(vc) <- rownames(vc) <- names(object$coefficients$scale)
       vc
     },
     "full" = {
