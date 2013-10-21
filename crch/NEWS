@@ -1,0 +1,6 @@
+Changes in Version 0.1-0
+
+  o First official release of the package on CRAN. See citation("crch")
+    for the accompanying manuscripts. Note that the interface of both
+    crch() and hxlr() is still under development and might change in
+    future versions of the package.
