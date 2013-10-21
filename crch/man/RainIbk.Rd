@@ -11,16 +11,10 @@ Airport (11120) from 2000-01-01 to 2013-09-17.
 }
 \usage{data(RainIbk)}
 \format{
-  A data frame with 4977 observations on the following 12 variables.
-  \describe{
-    \item{\code{rain}}{3 days accumulated precipitation amount observations
-    from SYNOP station 11120 (Innsbruck Airport).}
-    \item{\code{rainfc.1}}{5-8 days accumulated precipitation amount forecast
-    for SYNOP station 11120 from GEFS reforecast ensemble member 1.}
-    \item{\code{rainfc.2}, \code{rainfc.3}, \code{rainfc.4}, \code{rainfc.5},
-    \code{rainfc.6}, \code{rainfc.7}, \code{rainfc.8}, \code{rainfc.9},
-    \code{rainfc.10}}{as \code{rainfc.1} but for ensemble members 2-10}
-  }
+  A data frame with 4977 rows. The first column (\code{rain}) are 3 days
+  accumulated precipitation amount observations, Columns 2-12 (\code{rainfc})
+  are 5-8 days accumulated precipitation amount forecasts from the individual
+  ensemble members.
 }
 \source{
 Observations: http://www.ogimet.com/synops.phtml.en
@@ -39,8 +33,7 @@ Bull Amer. Meteor. Soc., in press.
 ## load and prepare data
 data(RainIbk)
 
-## mean and standard deviation of square root transformed ensemble 
-## forecasts
+## mean and standard deviation of square root transformed ensemble forecasts
 RainIbk$sqrtensmean <- 
   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
 RainIbk$sqrtenssd <- 
@@ -53,8 +46,8 @@ sdcat <- cut(RainIbk$sqrtenssd, c(-Inf, quantile(RainIbk$sqrtenssd,
 ## mean forecast errors for each quintile
 m <- NULL
 for(i in levels(sdcat)) {
-  m <- c(m, mean((sqrt(RainIbk$rain)[sdcat == i] 
-    - RainIbk$sqrtensmean[sdcat == i])^2, na.rm = TRUE))
+  m <- c(m, mean((sqrt(RainIbk$rain)[sdcat == i] -
+  RainIbk$sqrtensmean[sdcat == i])^2, na.rm = TRUE))
 }
 
 ## plot
