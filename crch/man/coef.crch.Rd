@@ -19,10 +19,8 @@ Methods for extracting information from fitted \code{crch} objects.
 \usage{
 \method{coef}{crch}(object, model = c("full", "location", "scale", "df"), \dots)
 \method{vcov}{crch}(object, model = c("full", "location", "scale", "df"), \dots)
-\method{terms}{crch}(x, model = c("location", "scale", "full"), 
-        \dots)
-\method{fitted}{crch}(object, type = c("location", "scale"), 
-        \dots)
+\method{terms}{crch}(x, model = c("location", "scale", "full"), \dots)
+\method{fitted}{crch}(object, type = c("location", "scale"), \dots)
 }
 
 \arguments{
@@ -33,21 +31,11 @@ Methods for extracting information from fitted \code{crch} objects.
 }
 
 \details{
-  A set of standard extractor functions for fitted model objects is available for
-  objects of class \code{"crch"}, including methods to the generic functions
-  \code{\link[base]{print}} and \code{\link[base]{summary}} which print the estimated
-  coefficients along with some further information. The \code{summary} in particular
-  supplies partial Wald tests based on the coefficients and the covariance matrix.
-  As usual, the \code{summary} method returns an object of class \code{"summary.crch"}
-  containing the relevant summary statistics which can subsequently be printed
-  using the associated \code{print} method. 
-
-  A \code{\link[stats]{logLik}} method is provided, hence \code{\link[stats]{AIC}}
-  can be called to compute information criteria.
+  In addition to the methods above, a set of standard extractor functions for 
+  \code{"crch"} objects is available, including methods to the generic
+  functions \code{\link[base]{print}}, \code{\link[base]{summary}}, 
+  \code{\link[stats]{logLik}}, and  \code{\link[stats]{residuals}}. 
 }
-
-%\value{
-%}
 
 \seealso{\code{\link{crch}}}
 
