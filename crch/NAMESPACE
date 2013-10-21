@@ -1,7 +1,5 @@
 import("stats", "Formula")
 
-importFrom("numDeriv", "hessian")
-
 export(
   "crch",
   "crch.control",
