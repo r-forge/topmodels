@@ -1,0 +1,37 @@
+citEntry(entry = "Article",
+  title        = "Probabilistic Wind Power Forecasts with an Inverse Power Curve Transformation and Censored Regression",
+  author       = personList(as.person("Jakob W. Messner"),
+                   as.person("Achim Zeileis"),
+		   as.person("Jochen Broecker"),
+		   as.person("Georg J. Mayr")),
+  journal      = "Wind Energy",
+  year         = "2013",
+  note         = "in press, preprint available at \\url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-01}",
+
+  textVersion  =
+  paste("Jakob W. Messner, Achim Zeileis, Jochen Broecker, Georg J. Mayr (2013).",
+        "Probabilistic Wind Power Forecasts with an Inverse Power Curve Transformation and Censored Regression.",
+        "Wind Energy, in press.",
+        "Preprint available at URL http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-01."),
+	
+  header       = "If you use crch() please cite:"
+)
+
+citEntry(entry = "Article",
+  title        = "Extending Extended Logistic Regression to Effectively Utilize the Ensemble Spread",
+  author       = personList(as.person("Jakob W. Messner"),
+                   as.person("Georg J. Mayr"),
+                   as.person("Achim Zeileis"),
+		   as.person("Daniel S. Wilks")),
+  journal      = "Monthly Weather Review",
+  year         = "2013",
+  note         = "in press, preprint available at \\url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-21}",
+
+  textVersion  =
+  paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis, Daniel S. Wilks (2013).",
+        "Extending Extended Logistic Regression to Effectively Utilize the Ensemble Spread.",
+        "Monthly Weather Review, in press.",
+        "Preprint available at URL http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-21."),
+	
+  header       = "If you use hxlr() please cite:"
+)
