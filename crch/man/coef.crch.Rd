@@ -1,5 +1,4 @@
 \name{coef.crch}
-\encoding{latin1}
 \alias{coef.crch}
 \alias{vcov.crch}
 \alias{print.crch}

@@ -1,5 +1,4 @@
 \name{crch.control}
-\encoding{latin1}
 \alias{crch.control}
 
 \title{Auxiliary Function for Controlling crch Fitting}
@@ -10,7 +9,7 @@
 }
 \usage{
 crch.control(method = "BFGS", maxit = 5000, hessian = TRUE,
-  trace = FALSE, start = NULL, ...)}
+  trace = FALSE, start = NULL, \dots)}
 \arguments{
   \item{method}{optimization method passed to \code{\link{optim}}}
   \item{maxit}{the maximum number of iterations.}

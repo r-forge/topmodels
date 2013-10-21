@@ -1,6 +1,4 @@
 \name{hxlr}
-\encoding{latin1}
-
 \alias{hxlr}
 
 \title{Heteroscedastic Extended Logistic Regression}
@@ -11,7 +9,7 @@
   models (Messner et al. 2013).
 }
 \usage{
-hxlr(formula, data, subset, na.action, weights, thresholds, control, ...)
+hxlr(formula, data, subset, na.action, weights, thresholds, control, \dots)
 }
 \arguments{
   \item{formula}{a formula expression of the form \code{y ~ x | z} where
@@ -69,122 +67,121 @@ predict the scale of the latent logistic distribution.
 }
 
 \references{
-  Messner JW, Mayr GJ, Zeileis A, Wilks DS (2013).  Extending Extended Logistic
-  Regression to Effectively Utilize the Ensemble Spread.  Working Paper
-  2013-21. Working Papers in Economics and Statistics, Research Platform
-  Empirical and Experimental Economics, Universitaet Innsbruck.
-  \url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-21}
+  Messner JW, Mayr GJ, Zeileis A, Wilks DS (2013). Extending Extended Logistic
+    Regression to Effectively Utilize the Ensemble Spread. \emph{Monthly Weather
+    Review}, in press. Preprint version available at
+    \url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-21}
 
   Wilks DS (2009).  Extending Logistic Regression to Provide
-  Full-Probability-Distribution MOS Forecasts.  \emph{Meteorological
-  Applications}, \bold{368}, 361--368.
+    Full-Probability-Distribution MOS Forecasts.  \emph{Meteorological
+    Applications}, \bold{368}, 361--368.
 }
 
 \seealso{\code{\link{predict.hxlr}}, \code{\link[ordinal]{clm}}}
 
 \examples{
-    data("RainIbk")
-    ## mean and standard deviation of square root transformed ensemble forecasts
-    RainIbk$sqrtensmean <- 
-      apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
-    RainIbk$sqrtenssd <- 
-      apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
-    
-    ## climatological deciles
-    q <- unique(quantile(RainIbk$rain, seq(0.1, 0.9, 0.1)))
-    
-    ## fit ordinary extended logistic regression with ensemble mean as 
-    ## predictor variable
-    XLR <- hxlr(sqrt(rain) ~ sqrtensmean, data = RainIbk, thresholds = sqrt(q))
-    ## print
-    XLR
-    ## summary
-    summary(XLR)
-    
-    
-    ## fit ordinary extended logistic regression with ensemble mean 
-    ## and standard deviation as predictor variables
-    XLRS <- hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = RainIbk, 
-      thresholds = sqrt(q))
-    ## fit heteroscedastic extended logistic regression with ensemble 
-    ## standard deviation as predictor for the scale
-    HXLR <- hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = RainIbk, 
-      thresholds = sqrt(q))
-    
-    ## compare AIC of different models
-    AIC(XLR, XLRS, HXLR)
-    
-    ## XLRS and HXLR are nested in XLR -> likelihood-ratio-tests
-    library("lmtest")
-    lrtest(XLR, XLRS)
-    lrtest(XLR, HXLR)
-    
-    \dontrun{
-    ###################################################################
-    ## Cross-validation and bootstrapping RPS for different models 
-    ## (like in Messner 2013). 
-    N <- NROW(RainIbk)
-    ## function that returns model fits
-    fits <- function(data, weights = rep(1, N)) {
-      list(
-        "XLR"    = hxlr(sqrt(rain) ~ sqrtensmean, data = data, 
-          weights = weights, thresholds = sqrt(q)),
-        "XLR:S"  = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = data, 
-          weights = weights, thresholds = sqrt(q)),
-        "XLR:SM" = hxlr(sqrt(rain) ~ sqrtensmean + I(sqrtensmean*sqrtenssd), 
-          data = data, weights = weights, thresholds = sqrt(q)),
-        "HXLR"   = hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = data, 
-          weights = weights, thresholds = sqrt(q)),
-        "HXLR:S" = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd | sqrtenssd, 
-          data = data, weights = weights, thresholds = sqrt(q))
-      )
-    }
-    
-    
-    ## cross validation
-    id <- sample(1:10, N, replace = TRUE)
-    obs <- NULL
-    pred <- list(NULL)
-    for(i in 1:10) {
-      ## splitting into test and training data set
-      trainIndex <- which(id != i)     
-      testIndex <- which(id == i)                        
-      ## weights that are used for fitting the models
-      weights <- as.numeric(table(factor(trainIndex, levels = c(1:N))))
-      ## testdata
-      testdata <- RainIbk[testIndex,]
-      ## observations    
-      obs <- c(obs, RainIbk$rain[testIndex])
-      ## estimation
-      modelfits <- fits(RainIbk, weights)
-      ## Prediction
-      pred2 <- lapply(modelfits, predict, newdata = testdata, type = "cumprob")
-      pred <- mapply(rbind, pred, pred2, SIMPLIFY = FALSE)
-    }
-    names(pred) <- c(names(modelfits))
-    
-    ## function to compute RPS
-    rps <- function(pred, obs) {
-      OBS <- NULL
-      for(i in 1:N) 
-        OBS <- rbind(OBS, rep(0:1, c(obs[i] - 1, length(q) - obs[i] + 1)))
-      apply((OBS-pred)^2, 1, sum)
-    }
+data("RainIbk")
+## mean and standard deviation of square root transformed ensemble forecasts
+RainIbk$sqrtensmean <- 
+  apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
+RainIbk$sqrtenssd <- 
+  apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
 
-    ## compute rps
-    RPS <- lapply(pred, rps, obs = as.numeric(cut(obs, c(-Inf, q, Inf))))
-    
-    ## bootstrapping mean rps 
-    rpsall <- NULL
-    for(i in 1:250) {
-      index <- sample(length(obs), replace = TRUE)
-      rpsall <- rbind(rpsall, sapply(RPS, function(x) mean(x[index])))
-    }
-      
-    rpssall <- 1 - rpsall/rpsall[,1]
-    boxplot(rpssall[,-1], ylab = "RPSS", main = "RPSS relative to XLR")
-    abline(h = 0, lty = 2)
-    }
+## climatological deciles
+q <- unique(quantile(RainIbk$rain, seq(0.1, 0.9, 0.1)))
+
+## fit ordinary extended logistic regression with ensemble mean as 
+## predictor variable
+XLR <- hxlr(sqrt(rain) ~ sqrtensmean, data = RainIbk, thresholds = sqrt(q))
+## print
+XLR
+## summary
+summary(XLR)
+
+
+## fit ordinary extended logistic regression with ensemble mean 
+## and standard deviation as predictor variables
+XLRS <- hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = RainIbk, 
+  thresholds = sqrt(q))
+## fit heteroscedastic extended logistic regression with ensemble 
+## standard deviation as predictor for the scale
+HXLR <- hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = RainIbk, 
+  thresholds = sqrt(q))
+
+## compare AIC of different models
+AIC(XLR, XLRS, HXLR)
+
+## XLRS and HXLR are nested in XLR -> likelihood-ratio-tests
+library("lmtest")
+lrtest(XLR, XLRS)
+lrtest(XLR, HXLR)
+
+\dontrun{
+###################################################################
+## Cross-validation and bootstrapping RPS for different models 
+## (like in Messner 2013). 
+N <- NROW(RainIbk)
+## function that returns model fits
+fits <- function(data, weights = rep(1, N)) {
+  list(
+    "XLR"    = hxlr(sqrt(rain) ~ sqrtensmean, data = data, 
+      weights = weights, thresholds = sqrt(q)),
+    "XLR:S"  = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = data, 
+      weights = weights, thresholds = sqrt(q)),
+    "XLR:SM" = hxlr(sqrt(rain) ~ sqrtensmean + I(sqrtensmean*sqrtenssd), 
+      data = data, weights = weights, thresholds = sqrt(q)),
+    "HXLR"   = hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = data, 
+      weights = weights, thresholds = sqrt(q)),
+    "HXLR:S" = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd | sqrtenssd, 
+      data = data, weights = weights, thresholds = sqrt(q))
+  )
+}
+
+
+## cross validation
+id <- sample(1:10, N, replace = TRUE)
+obs <- NULL
+pred <- list(NULL)
+for(i in 1:10) {
+  ## splitting into test and training data set
+  trainIndex <- which(id != i)     
+  testIndex <- which(id == i)			     
+  ## weights that are used for fitting the models
+  weights <- as.numeric(table(factor(trainIndex, levels = c(1:N))))
+  ## testdata
+  testdata <- RainIbk[testIndex,]
+  ## observations    
+  obs <- c(obs, RainIbk$rain[testIndex])
+  ## estimation
+  modelfits <- fits(RainIbk, weights)
+  ## Prediction
+  pred2 <- lapply(modelfits, predict, newdata = testdata, type = "cumprob")
+  pred <- mapply(rbind, pred, pred2, SIMPLIFY = FALSE)
+}
+names(pred) <- c(names(modelfits))
+
+## function to compute RPS
+rps <- function(pred, obs) {
+  OBS <- NULL
+  for(i in 1:N) 
+    OBS <- rbind(OBS, rep(0:1, c(obs[i] - 1, length(q) - obs[i] + 1)))
+  apply((OBS-pred)^2, 1, sum)
+}
+
+## compute rps
+RPS <- lapply(pred, rps, obs = as.numeric(cut(obs, c(-Inf, q, Inf))))
+
+## bootstrapping mean rps 
+rpsall <- NULL
+for(i in 1:250) {
+  index <- sample(length(obs), replace = TRUE)
+  rpsall <- rbind(rpsall, sapply(RPS, function(x) mean(x[index])))
+}
+  
+rpssall <- 1 - rpsall/rpsall[,1]
+boxplot(rpssall[,-1], ylab = "RPSS", main = "RPSS relative to XLR")
+abline(h = 0, lty = 2)
+}
 }
 
 \keyword{regression}

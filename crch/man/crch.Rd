@@ -1,9 +1,6 @@
 \name{crch}
-\encoding{latin1}
-
 \alias{crch}
 \alias{crch.fit}
-
 
 \title{Censored Regression with Conditional Heteroscedasticy}
 
@@ -13,8 +10,8 @@
 \usage{
 crch(formula, data, subset, na.action, weights, offset, 
   dist = c("student", "gaussian", "logistic"), df = NULL, 
-  left = -Inf, right = Inf, control = crch.control(...), 
-  model = TRUE, x = FALSE, y = FALSE, ...)
+  left = -Inf, right = Inf, control = crch.control(\dots), 
+  model = TRUE, x = FALSE, y = FALSE, \dots)
 
 crch.fit(x, z, y, left, right, dist = "student", df = NULL, 
   weights = NULL, offset = NULL, control = crch.control()) 
@@ -98,44 +95,49 @@ fitting takes place.
   \item{model}{if requested, the model frame used.}
 }
 
-
+\references{
+  Messner JW, Zeileis A, Broecker J, Mayr GJ (2013). Probabilistic Wind Power
+    Forecasts with an Inverse Power Curve Transformation and Censored Regression.
+    \emph{Wind Energy}, in press. Preprint version available from
+    \url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-01}.
+}
 
 \seealso{\code{\link{predict.crch}}, \code{\link{crch.control}}}
 
 \examples{
-    data("RainIbk")
-    ## mean and standard deviation of square root transformed ensemble forecasts
-    RainIbk$sqrtensmean <- 
-      apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
-    RainIbk$sqrtenssd <- 
-      apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
+data("RainIbk")
+## mean and standard deviation of square root transformed ensemble forecasts
+RainIbk$sqrtensmean <- 
+  apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
+RainIbk$sqrtenssd <- 
+  apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
 
-    ## fit linear regression model with Gaussian distribution 
-    CRCH <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, dist = "gaussian")
-    ## same as lm?
-    all.equal(coef(lm(sqrt(rain) ~ sqrtensmean, data = RainIbk)),
-      head(coef(CRCH), -1))
-    
-    ## print
-    CRCH
-    ## summary
-    summary(CRCH)
-    
-    ## left censored regression model with censoring point 0:
-    CRCH2 <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, 
-      dist = "gaussian", left = 0)
-    
-    ## left censored regression model with censoring point 0 and 
-    ## conditional heteroscedasticy:
-    CRCH3 <- crch(sqrt(rain) ~ sqrtensmean|sqrtenssd, data = RainIbk, 
-      dist = "gaussian",  left = 0)
-    
-    ## left censored regression model with censoring point 0 and 
-    ## conditional heteroscedasticy with logistic distribution:
-    CRCH4 <- crch(sqrt(rain) ~ sqrtensmean|sqrtenssd, data = RainIbk, 
-      dist = "logistic", left = 0)
-    
-    ## compare AIC 
-    AIC(CRCH, CRCH2, CRCH3, CRCH4)
+## fit linear regression model with Gaussian distribution 
+CRCH <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, dist = "gaussian")
+## same as lm?
+all.equal(coef(lm(sqrt(rain) ~ sqrtensmean, data = RainIbk)),
+  head(coef(CRCH), -1))
+
+## print
+CRCH
+## summary
+summary(CRCH)
+
+## left censored regression model with censoring point 0:
+CRCH2 <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, 
+  dist = "gaussian", left = 0)
+
+## left censored regression model with censoring point 0 and 
+## conditional heteroscedasticy:
+CRCH3 <- crch(sqrt(rain) ~ sqrtensmean|sqrtenssd, data = RainIbk, 
+  dist = "gaussian",  left = 0)
+
+## left censored regression model with censoring point 0 and 
+## conditional heteroscedasticy with logistic distribution:
+CRCH4 <- crch(sqrt(rain) ~ sqrtensmean|sqrtenssd, data = RainIbk, 
+  dist = "logistic", left = 0)
+
+## compare AIC 
+AIC(CRCH, CRCH2, CRCH3, CRCH4)
 }
 \keyword{regression}
