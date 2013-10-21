@@ -1,5 +1,4 @@
 \name{coef.hxlr}
-\encoding{latin1}
 \alias{coef.hxlr}
 \alias{vcov.hxlr}
 \alias{print.hxlr}

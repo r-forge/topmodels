@@ -1,8 +1,7 @@
 \name{predict.crch}
-\encoding{latin1}
 \alias{predict.crch}
 
-\title{Prediction Method for CRCH Fits.}
+\title{Predicted/Fitted Values for CRCH Fits}
 
 \description{
 Obtains various types of predictions for \code{crch} models.

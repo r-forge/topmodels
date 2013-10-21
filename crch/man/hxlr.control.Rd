@@ -1,5 +1,4 @@
 \name{hxlr.control}
-\encoding{latin1}
 \alias{hxlr.control}
 
 \title{Auxiliary Function for Controlling HXLR Fitting}
@@ -10,7 +9,7 @@
 }
 \usage{
 hxlr.control(method = "BFGS", maxit = 5000, hessian = TRUE, 
-  trace = FALSE, start = NULL, ...)}
+  trace = FALSE, start = NULL, \dots)}
 \arguments{
   \item{method}{optimization method used in \code{\link{optim}}}
   \item{maxit}{the maximum number of iterations.}

@@ -1,10 +1,9 @@
 \name{predict.hxlr}
-\encoding{latin1}
 \alias{predict.hxlr}
 \alias{fitted.hxlr}
 
 
-\title{Predict/fitted Method for HXLR Fits.}
+\title{Predict/Fitted Values for HXLR Fits}
 
 \description{
 Obtains various types of predictions/fitted values for heteroscedastic

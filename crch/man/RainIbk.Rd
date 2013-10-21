@@ -1,32 +1,36 @@
 \name{RainIbk}
 \alias{RainIbk}
-\docType{data}
-\title{
-Precipitation Observations and Forecasts for Innsbruck
-}
+
+\title{Precipitation Observations and Forecasts for Innsbruck}
+
 \description{
 Accumulated 5-8 days precipitation amount for Innsbruck. Data includes GEFS
-reforecasts (Hamill et al. 2012) and observations from SYNOP station Innsbruck
+reforecasts (Hamill et al. 2013) and observations from SYNOP station Innsbruck
 Airport (11120) from 2000-01-01 to 2013-09-17.
 }
-\usage{data(RainIbk)}
+
+\usage{data("RainIbk")}
+
 \format{
   A data frame with 4977 rows. The first column (\code{rain}) are 3 days
   accumulated precipitation amount observations, Columns 2-12 (\code{rainfc})
   are 5-8 days accumulated precipitation amount forecasts from the individual
   ensemble members.
 }
+
 \source{
 Observations: http://www.ogimet.com/synops.phtml.en
 
 Reforecasts: http://www.esrl.noaa.gov/psd/forecasts/reforecast2/
 }
+
 \references{
-Hamill, T. M., G. T. Bates, J. S. Whitaker, D. R. Murray, M. Fiorino, 
-T. J. Galarneau, Jr., Y. Zhu, and W. Lapenta, 2013: NOAA's 
-second-generation global medium-range ensemble reforecast data set. 
-Bull Amer. Meteor. Soc., in press.
+  Hamill TM, Bates GT, Whitaker JS, Murray DR, Fiorino M, Galarneau Jr TJ,
+    Zhu Y, Lapenta W (2013). NOAA's Second-Generation Global Medium-Range
+    Ensemble Reforecast Data Set. \emph{Bulletin of the American Meteorological
+    Society}, in press.
 }
+
 \examples{
 ## Spread skill relationship ##
 
@@ -56,4 +60,5 @@ boxplot((sqrt(rain) - sqrtensmean)^2~sdcat, RainIbk,
   ylab = "mean squared error", main = "Spread skill relationship")
 
 }
+
 \keyword{datasets}
