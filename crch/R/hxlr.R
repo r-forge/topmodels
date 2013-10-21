@@ -431,7 +431,19 @@ vcov.hxlr <- function(object, model = c("full", "intercept", "location", "scale"
   m <- length(object$coefficients$scale)
 
   model <-  match.arg(model)
-
+  
+#  if(type == "latent") {
+#    alpha <- object$coefficients$intercept
+#    beta <- object$coefficients$location
+#    delta <- object$coefficients$scale
+#    dh <- cbind(
+#      c(-1/alpha[2], rep(0, l + m + 1)), 
+#      c(alpha[1]/alpha[2]^2, -beta/alpha[2]^2, -1/alpha[2], rep(0,m)),
+#      rbind(0, diag(l)*1/alpha[2], matrix(0, m + 1, l)),
+#      rbind(matrix(0, k + l,  m), diag(m))
+#    )
+#    vc <- dh %*% vc %*% dh
+#  }
   switch(model,
     "intercept" = {
       vc[seq.int(length.out = k) , seq.int(length.out = k), drop = FALSE]
