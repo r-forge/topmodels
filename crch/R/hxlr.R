@@ -423,27 +423,30 @@ coef.hxlr <- function(object, model = c("full", "intercept", "location", "scale"
   )
 }
 
-#TODO: vcov for type latent
-vcov.hxlr <- function(object, model = c("full", "intercept", "location", "scale"),...) {
+
+vcov.hxlr <- function(object, model = c("full", "intercept", "location", "scale"), type = c("CLM", "latent"),...) {
   vc <- object$vcov
   k <- length(object$coefficients$intercept)
   l <- length(object$coefficients$location)
   m <- length(object$coefficients$scale)
-
+  type<- match.arg(type)
   model <-  match.arg(model)
   
-#  if(type == "latent") {
-#    alpha <- object$coefficients$intercept
-#    beta <- object$coefficients$location
-#    delta <- object$coefficients$scale
-#    dh <- cbind(
-#      c(-1/alpha[2], rep(0, l + m + 1)), 
-#      c(alpha[1]/alpha[2]^2, -beta/alpha[2]^2, -1/alpha[2], rep(0,m)),
-#      rbind(0, diag(l)*1/alpha[2], matrix(0, m + 1, l)),
-#      rbind(matrix(0, k + l,  m), diag(m))
-#    )
-#    vc <- dh %*% vc %*% dh
-#  }
+  if(type == "latent") {
+    ## Delta Method
+    alpha <- object$coefficients$intercept
+    beta <- object$coefficients$location
+    delta <- object$coefficients$scale
+    dh <- cbind(
+      c(-1/alpha[2], rep(0, l + m + 1)), 
+      c(alpha[1]/alpha[2]^2, -beta/alpha[2]^2, -1/alpha[2], rep(0,m)),
+      rbind(0, diag(l)*1/alpha[2], matrix(0, m + 1, l)),
+      rbind(matrix(0, k + l,  m), diag(m))
+    )
+    vc <- dh %*% vc %*% t(dh)
+  }
+
+
   switch(model,
     "intercept" = {
       vc[seq.int(length.out = k) , seq.int(length.out = k), drop = FALSE]
