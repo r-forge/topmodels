@@ -18,7 +18,8 @@ objects.
 \usage{
 \method{coef}{hxlr}(object, model = c("full", "intercept", "location", "scale"),
   type = c("CLM", "latent"), \dots)
-\method{vcov}{hxlr}(object, model = c("full", "intercept", "location", "scale"), \dots)
+\method{vcov}{hxlr}(object, model = c("full", "intercept", "location", "scale"), 
+  type = c("CLM", "latent"), \dots)
 \method{terms}{hxlr}(x, model = c("full", "location", "scale"), \dots)
 }
 
