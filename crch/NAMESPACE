@@ -19,6 +19,7 @@ S3method("residuals", "crch")
 S3method("summary", "crch")
 S3method("terms", "crch")
 S3method("vcov", "crch")
+S3method("update", "crch")
 
 ## methods for hxlr
 S3method("logLik", "hxlr")
