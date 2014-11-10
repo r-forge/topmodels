@@ -215,7 +215,7 @@ dddist <- switch(dist,
     gamma <- par[seq.int(length.out = q) + k]
     delta <- if(dfest) tail(par, 1) else NULL
     mu <- drop(x %*% beta) + offset[[1L]]
-    sigma <- exp(drop(z %*% gamma)) + offset[[2L]]
+    sigma <- exp(drop(z %*% gamma) + offset[[2L]])
     df <- if(dfest) exp(delta) else df
     list(
       beta = beta,
