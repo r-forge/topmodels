@@ -9,7 +9,7 @@
   models (Messner et al. 2013).
 }
 \usage{
-hxlr(formula, data, subset, na.action, weights, thresholds, control, \dots)
+hxlr(formula, data, subset, na.action, weights, thresholds, link, control, \dots)
 }
 \arguments{
   \item{formula}{a formula expression of the form \code{y ~ x | z} where
@@ -27,6 +27,8 @@ hxlr(formula, data, subset, na.action, weights, thresholds, control, \dots)
   continuous response into categories. Data frames or matrices with multiple
   columns are allowed as well. Then each column is used as separate predictor
   variable for the intercept model.}
+  \item{link}{link function, i.e., the type of location-scale distribution
+  assumed for the latent distribution. Default is \code{logit}.}
   \item{control}{a list of control parameters passed to \code{\link{optim}}.
   Default is \code{\link{hxlr.control}}}
   \item{\dots}{arguments to be used to form the default \code{control} argument
