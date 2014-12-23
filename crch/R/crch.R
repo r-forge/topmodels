@@ -1,5 +1,5 @@
 crch <- function(formula, data, subset, na.action, weights, offset,
-  dist = c("student", "gaussian", "logistic"), df = NULL,
+  dist = c("gaussian", "logistic", "student"), df = NULL,
   left = -Inf, right = Inf, control = crch.control(...),
   model = TRUE, x = FALSE, y = FALSE, ...)
 {
@@ -132,7 +132,7 @@ crch.control <- function(method = "BFGS", maxit = 5000, hessian = FALSE, trace =
 }
 
 
-crch.fit <- function(x, z, y, left, right, dist = "student", df = NULL,  
+crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,  
   weights = NULL, offset = NULL, control = crch.control()) 
 {
   ## response and regressor matrix
@@ -153,7 +153,7 @@ crch.fit <- function(x, z, y, left, right, dist = "student", df = NULL,
     if(q < 1L) stop("scale regression needs to have at least one parameter")
   }
 
-  dist <- match.arg(dist, c("student", "gaussian", "logistic"))
+  dist <- match.arg(dist, c("gaussian", "logistic", "student"))
   ddist <- switch(dist,
     "student"  = function(x, location, scale, df, log = TRUE) 
       dt((x - location)/scale, df = df, log = log)/scale^(1-log) - 
