@@ -1,7 +1,7 @@
 crch <- function(formula, data, subset, na.action, weights, offset,
   dist = c("gaussian", "logistic", "student"), df = NULL,
   left = -Inf, right = Inf, control = crch.control(...),
-  model = TRUE, x = FALSE, y = FALSE, ...)
+  model = TRUE, x = FALSE, y = FALSE, truncated = FALSE, ...)
 {
   ## call
   cl <- match.call()
@@ -103,8 +103,14 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   offset <- list(location = offsetX, scale = offsetZ)
  
 
-  ## call the actual workhorse: crch.fit() 
-  rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, dist = dist, df = df, weights = weights, offset = offset, control = control)
+  ## call the actual workhorse: crch.fit()/trch.fit()
+  if(truncated) {
+    rval <- trch.fit(x = X, y = Y, z = Z, left = left, right = right, dist = dist, df = df, weights = weights, offset = offset, control = control)
+  } else {
+    rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, dist = dist, df = df, weights = weights, offset = offset, control = control)
+  }
+
+  
 
   ## further model information
   rval$call <- cl
