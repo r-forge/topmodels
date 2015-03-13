@@ -160,28 +160,20 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   }
 
   dist <- match.arg(dist, c("gaussian", "logistic", "student"))
-  ddist <- switch(dist,
-    "student"  = function(x, location, scale, df, log = TRUE) 
-      dt((x - location)/scale, df = df, log = log)/scale^(1-log) - 
-      log*log(scale),
-    "gaussian" = function(x, location, scale, df, log = TRUE) 
-      dnorm((x - location)/scale, log = log)/scale^(1-log) - 
-      log*log(scale),
-    "logistic" = function(x, location, scale, df, log = TRUE) 
-      dlogis((x - location)/scale, log = log)/scale^(1-log) - 
-      log*log(scale)
-  )
-  pdist <- switch(dist,
-    "student"  = function(x, location, scale, df, lower.tail = TRUE, 
-      log.p = TRUE) pt((x - location)/scale, df = df, lower.tail = lower.tail,
-      log.p = log.p),
-    "gaussian" = function(x, location, scale, df, lower.tail = TRUE, 
-      log.p = TRUE) pnorm((x - location)/scale, lower.tail = lower.tail, 
-      log.p = log.p),
-    "logistic" = function(x, location, scale, df, lower.tail = TRUE, 
-      log.p = TRUE) plogis((x - location)/scale, lower.tail = lower.tail, 
-      log.p = log.p)
-  )
+  
+  ## distribution functions
+  dcdist <- switch(dist, 
+    "student"  = dct, 
+    "gaussian" = function(..., df) dcnorm(...), 
+    "logistic" = function(..., df) dclogis(...))
+  scdist <- switch(dist, 
+    "student"  = sct, 
+    "gaussian" = function(..., df) scnorm(...), 
+    "logistic" = function(..., df) sclogis(...))
+  hcdist <- switch(dist, 
+    "student"  = hct, 
+    "gaussian" = function(..., df) hcnorm(...), 
+    "logistic" = function(..., df) hclogis(...))
 
   ## control parameters
   ocontrol <- control
@@ -224,121 +216,37 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   ## objective function
   loglikfun <- function(par) {
     fit <- fitfun(par)
-    ll <- with(fit, ifelse(y <= left, pdist(left, mu, sigma, df, lower.tail = TRUE),
-      ifelse(y >= right, pdist(right, mu, sigma, df, lower.tail = FALSE),
-      ddist(y, mu, sigma, df))))
-
+    ll <- with(fit,  
+      dcdist(y, mu, sigma, df = df, left = left, right = right, log = TRUE))
     return(-sum(weights * ll))
   }
 
-  ## function to evaluate gradients and hessian
+  ## functions to evaluate gradients and hessian
   if(dfest) {
     gradfun <- NULL
-  } else {
+    hessfun <- NULL
+  } else { 
     gradfun <- function(par, type = "gradient") {
       fit <- fitfun(par)
-
-      ## functions used to evaluate gradient and hessian
-      mills <- function(y, lower.tail = TRUE) {
-        with(fit, sigma * ddist(y, mu, sigma, df, log = FALSE)/
-        pdist(y, mu, sigma, df, log.p = FALSE, lower.tail = lower.tail))
-      }
-      ## ddensity/dmu
-      d1 <- with(fit, switch(dist,
-        "student"  = function(x)  
-          (x - mu)/sigma^2 * (df + 1) / (df + (x - mu)^2/sigma^2),
-        "gaussian" = function(x) 
-          (x - mu)/sigma^2,
-        "logistic" = function(x)  
-          (1 - 2 * pdist(-x, - mu, sigma, log.p = FALSE))/sigma)
-      )
-    
-      ## ddensity/dsigma
-      d2 <- function(x) with(fit, d1(x) * (x-mu))
-
-      ## d^2density/dmu^2
-      d3 <- with(fit, switch(dist,
-        "student"  = function(x)  
-          (df + 1)*((x - mu)^2 - df*sigma^2) / (df*sigma^2 + (x - mu)^2)^2,
-        "gaussian" = function(x) 
-          - 1/sigma^2,
-        "logistic" = function(x)  
-          - 2/sigma * ddist(x, mu, sigma, log = FALSE))
-      )     
-    
-      ## d^2density/dsigma^2
-      d5 <- with(fit, switch(dist,
-        "student"  = function(x)  
-          - (x - mu)^2 * (df + 1) / (df*sigma^2 + (x - mu)^2)^2*2*df*sigma^2,
-        "gaussian" = function(x) 
-          2 * d3(x) * (x-mu)^2,
-        "logistic" = function(x)  
-          - d2(x) - 2*(x-mu)^2/sigma*ddist(x,mu,sigma, log = FALSE)
-      ))
+      grad <- with(fit, 
+        scdist(y, mu, sigma, df = df, left = left, right = right))
+      grad <- cbind(grad[,1]*x, grad[,2] * fit$sigma * z)
+      return(-colSums(weights * grad))
+    }
+    hessfun <- function(par) {
+      fit <- fitfun(par)
+      hess <- with(fit, hcdist(y, mu, sigma, left = left, right = right,
+        df = df, which = c("mu", "sigma", "mu.sigma", "sigma.mu")))
+      grad <- with(fit, scdist(y, mu, sigma, left = left, right = right, 
+        df = df, which = "sigma"))
       
-      ## d^2density/dmudsigma
-      d4 <- with(fit, switch(dist,
-        "student"  = function(x)  
-          d5(x) / (x - mu),
-        "gaussian" = function(x) 
-          2 * d3(x) * (x-mu),
-        "logistic" = function(x)  
-          - d1(x) + (x-mu)*d3(x)
-      ))
-
-      ## compute gradient
-      if(type == "gradient") {
-        gradmu <- with(fit, ifelse(y <= left, 
-          - mills(left)/sigma,
-          ifelse(y >= right, 
-            mills(right, lower.tail = FALSE)/sigma,
-            d1(y)
-          ))) * x
-
-        gradsigma <- with(fit, ifelse(y <= left, 
-          - mills(left) * (left - mu)/sigma,
-          ifelse(y >= right, 
-            mills(right, lower.tail = FALSE) * (right - mu)/sigma,
-            d2(y) - 1
-          ))) * z
-  
-        rval <- -colSums(weights * cbind(gradmu, gradsigma))
-      ## compute hessian
-      } else {
-        hessmu <- with(fit, ifelse(y <= left, 
-          -d1(left)/sigma * mills(left) - mills(left)^2/sigma^2,
-          ifelse(y >= right, 
-            d1(right)/sigma * mills(right, lower.tail = FALSE) - 
-              mills(right, lower.tail = FALSE)^2/sigma^2,
-            d3(y)
-          )))
-        hesssigma <- with(fit, ifelse(y <= left, 
-          ((left-mu)/sigma - (left-mu)*d2(left))*mills(left) - 
-            (left - mu)^2/sigma^2 * mills(left)^2,
-          ifelse(y >= right, 
-            (-(right-mu)/sigma + (right-mu)*d2(right))*
-              mills(right, lower.tail = FALSE) 
-              - (right - mu)^2/sigma^2 * mills(right, lower.tail = FALSE)^2,
-            d5(y)
-          )))
-        hessboth <- with(fit, ifelse(y <= left, 
-          (1/sigma - (left-mu)/sigma*d1(left))*mills(left) - 
-            (left - mu)/sigma^2 * mills(left)^2,
-          ifelse(y >= right, 
-            (-1/sigma + (right-mu)/sigma*d1(right))*mills(right, lower.tail = FALSE) - 
-              (right - mu)/sigma^2 * mills(right, lower.tail = FALSE)^2,
-            d4(y)
-          )))
-
-        hessmu <- crossprod(hessmu*x, x)
-        hessmusigma <- crossprod(hessboth*x, z)
-        hesssigmamu <- crossprod(hessboth*z, x)
-        hesssigma <- crossprod(hesssigma*z, z)
-
-        rval <- -cbind(rbind(hessmu, hesssigmamu), rbind(hessmusigma, hesssigma))
-      }
-
-      return(rval)
+      hess[, "d2sigma"] <- (hess[, "d2sigma"] + grad/fit$sigma)*fit$sigma^2
+      hess[, "dmu.dsigma"] <- hess[, "dsigma.dmu"] <- hess[, "dmu.dsigma"]*fit$sigma
+      hessmu <- crossprod(hess[,"d2mu"]*x, x)
+      hessmusigma <- crossprod(hess[,"dmu.dsigma"]*x, z)
+      hesssigmamu <- crossprod(hess[,"dsigma.dmu"]*z, x)
+      hesssigma <- crossprod(hess[,"d2sigma"]*z, z)
+      -cbind(rbind(hessmu, hesssigmamu), rbind(hessmusigma, hesssigma))
     }
   }
 
@@ -357,8 +265,8 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   delta <- fit$delta
   mu <- fit$mu
   sigma <- fit$sigma
-  vcov <- if (hessian) solve(as.matrix(opt$hessian)) else 
-    if(dfest) NULL else solve(gradfun(par, type = "hessian"))
+  vcov <- if (hessian) solve(as.matrix(opt$hessian)) 
+    else solve(hessfun(par))
   ll <- -opt$value
   df <- if(dfest) exp(delta) else df
 
