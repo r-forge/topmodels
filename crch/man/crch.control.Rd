@@ -8,15 +8,17 @@
   to \code{\link{optim}}.
 }
 \usage{
-crch.control(method = "BFGS", maxit = 5000, hessian = TRUE,
+crch.control(method = "BFGS", maxit = 5000, hessian = NULL,
   trace = FALSE, start = NULL, \dots)}
 \arguments{
   \item{method}{optimization method passed to \code{\link{optim}}}
   \item{maxit}{the maximum number of iterations.}
   \item{hessian}{logical. Should the numerical Hessian matrix from the 
     \code{\link{optim}} output be used for estimation of the covariance matrix? 
-    By default the analytical solution is employed. For \code{dist="student"} 
-    without prespecified \code{df}, no analytical solution is available.}
+    For \code{dist="gaussian"}, \code{dist="logistic"}, and \code{dist="student"}
+    with predefined \code{df} analytical solution is employed by default. 
+    For \code{dist="student"} without prespecified \code{df}, no analytical 
+    solution is available and a numerical Hessian matrix is forced.}
   \item{trace}{non-negative integer. If positive, tracing information on the
   progress of the optimization is produced.}
   \item{start}{initial values for the parameters to be optimized over.}
