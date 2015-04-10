@@ -103,17 +103,13 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   offset <- list(location = offsetX, scale = offsetZ)
  
 
-  ## call the actual workhorse: crch.fit()/trch.fit()
-  if(truncated) {
-    rval <- trch.fit(x = X, y = Y, z = Z, left = left, right = right, dist = dist, df = df, weights = weights, offset = offset, control = control)
-  } else {
-    rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, dist = dist, df = df, weights = weights, offset = offset, control = control)
-  }
-
+  ## call the actual workhorse: crch.fit()
+  rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, dist = dist, 
+    df = df, weights = weights, offset = offset, control = control, truncated = truncated)
   
 
   ## further model information
-  rval$call <- cl
+  rval$call <- if(length(control$call)) control$call else cl
   rval$formula <- oformula
   rval$terms <- list(location = mtX, scale = mtZ, full = mt)
   rval$levels <- list(location = .getXlevels(mtX, mf), scale = .getXlevels(mtZ, mf), full = .getXlevels(mt, mf))
@@ -127,7 +123,12 @@ crch <- function(formula, data, subset, na.action, weights, offset,
 }
 
 
-crch.control <- function(method = "BFGS", maxit = 5000, hessian = FALSE, trace = FALSE, start = NULL, ...)
+trch <- function(...) {
+  cl <- match.call()
+  crch(..., truncated = TRUE, call = cl)
+}
+
+crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = FALSE, start = NULL, ...)
 {
   rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, start = start)
   rval <- c(rval, list(...))
@@ -139,7 +140,7 @@ crch.control <- function(method = "BFGS", maxit = 5000, hessian = FALSE, trace =
 
 
 crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,  
-  weights = NULL, offset = NULL, control = crch.control()) 
+  weights = NULL, offset = NULL, control = crch.control(), truncated = FALSE) 
 {
   ## response and regressor matrix
   n <- NROW(x)  
@@ -158,22 +159,30 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
     q <- NCOL(z)
     if(q < 1L) stop("scale regression needs to have at least one parameter")
   }
-
+  
   dist <- match.arg(dist, c("gaussian", "logistic", "student"))
   
   ## distribution functions
-  dcdist <- switch(dist, 
-    "student"  = dct, 
-    "gaussian" = function(..., df) dcnorm(...), 
-    "logistic" = function(..., df) dclogis(...))
-  scdist <- switch(dist, 
-    "student"  = sct, 
-    "gaussian" = function(..., df) scnorm(...), 
-    "logistic" = function(..., df) sclogis(...))
-  hcdist <- switch(dist, 
-    "student"  = hct, 
-    "gaussian" = function(..., df) hcnorm(...), 
-    "logistic" = function(..., df) hclogis(...))
+  if(truncated) {
+    ddist2 <- switch(dist, 
+      "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
+    sdist2 <- switch(dist, 
+      "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+    hdist2 <- switch(dist, 
+      "student"  = htt, "gaussian" = htnorm, "logistic" = htlogis)
+  } else {
+    ddist2 <- switch(dist, 
+      "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
+    sdist2 <- switch(dist, 
+      "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+    hdist2 <- switch(dist, 
+      "student"  = hct, "gaussian" = hcnorm, "logistic" = hclogis)
+  }
+  if(dist != "student") {
+    ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
+    sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
+    hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
+  }
 
   ## control parameters
   ocontrol <- control
@@ -181,6 +190,13 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   hessian <- control$hessian
   start <- control$start
   control$method <- control$hessian <- control$start <- NULL
+
+  if(is.null(hessian)) hessian <- if(dfest) TRUE else FALSE
+  if(!hessian & dfest) {
+    warning("No analytical Hessian can be derived if df is estimated. hessian is set to TRUE")
+    hessian <- TRUE
+  }
+
 
   ## starting values
   if(is.null(start)) {
@@ -217,27 +233,26 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   loglikfun <- function(par) {
     fit <- fitfun(par)
     ll <- with(fit,  
-      dcdist(y, mu, sigma, df = df, left = left, right = right, log = TRUE))
+      ddist(y, mu, sigma, df = df, left = left, right = right, log = TRUE))
     return(-sum(weights * ll))
   }
 
   ## functions to evaluate gradients and hessian
   if(dfest) {
     gradfun <- NULL
-    hessfun <- NULL
   } else { 
     gradfun <- function(par, type = "gradient") {
       fit <- fitfun(par)
       grad <- with(fit, 
-        scdist(y, mu, sigma, df = df, left = left, right = right))
+        sdist(y, mu, sigma, df = df, left = left, right = right))
       grad <- cbind(grad[,1]*x, grad[,2] * fit$sigma * z)
       return(-colSums(weights * grad))
     }
     hessfun <- function(par) {
       fit <- fitfun(par)
-      hess <- with(fit, hcdist(y, mu, sigma, left = left, right = right,
+      hess <- with(fit, hdist(y, mu, sigma, left = left, right = right,
         df = df, which = c("mu", "sigma", "mu.sigma", "sigma.mu")))
-      grad <- with(fit, scdist(y, mu, sigma, left = left, right = right, 
+      grad <- with(fit, sdist(y, mu, sigma, left = left, right = right, 
         df = df, which = "sigma"))
       
       hess[, "d2sigma"] <- (hess[, "d2sigma"] + grad/fit$sigma)*fit$sigma^2
