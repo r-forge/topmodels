@@ -1,5 +1,5 @@
 hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights, 
-  thresholds, control = hxlr.control(...), ...)
+  thresholds, link = "logit", control = hxlr.control(...), ...)
 {
   ## call
   cl <- match.call()
@@ -107,7 +107,7 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
 
   stopifnot(requireNamespace("ordinal"))
   ## get environment from clm
-  env <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights, doFit = FALSE)
+  env <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights, doFit = FALSE, link = link)
   
   ## thresholds can also be data.frame with several columns (predictor variables for intercept model)
   q <- model.matrix(~ thresholds)
@@ -136,7 +136,8 @@ hxlr <- function(formula, data, subset = NULL, na.action = NULL, weights,
   ## starting values
   if(is.null(start)) {
     ## starting values from clm fit, threshold coefficients set to 0 and 1
-    strt <- ordinal::clm(formula = mformula, scale = mtZ, data = data, weights = weights)
+    strt <- ordinal::clm(formula = mformula, scale = mtZ, data = data, 
+      weights = weights, link = link)
     strt <- c(0, rep(1, p-1)/(p-1), strt$beta, strt$zeta)
   }
   if(is.list(start)) start <- do.call("c", start) 
