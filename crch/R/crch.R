@@ -1,4 +1,5 @@
 crch <- function(formula, data, subset, na.action, weights, offset,
+  link = c("log", "identity", "sqrt"), 
   dist = c("gaussian", "logistic", "student"), df = NULL,
   left = -Inf, right = Inf, control = crch.control(...),
   model = TRUE, x = FALSE, y = FALSE, truncated = FALSE, ...)
@@ -69,6 +70,10 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   mtX <- .add_predvars_and_dataClasses(mtX, mf)
   mtZ <- .add_predvars_and_dataClasses(mtZ, mf)
 
+  ## link
+#  link <- match.arg(link)
+
+
   ## distribution
   #if(is.character(dist)) dist <- match.arg(dist)
 
@@ -107,7 +112,7 @@ crch <- function(formula, data, subset, na.action, weights, offset,
  
 
   ## call the actual workhorse: crch.fit()
-  rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, dist = dist, 
+  rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, link = link, dist = dist, 
     df = df, weights = weights, offset = offset, control = control, truncated = truncated)
   
 
@@ -143,7 +148,7 @@ crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = 
 }
 
 
-crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,  
+crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link = "log",
   weights = NULL, offset = NULL, control = crch.control(), truncated = FALSE) 
 {
   ## response and regressor matrix
@@ -170,6 +175,22 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   hessian <- control$hessian
   start <- control$start
   control$method <- control$hessian <- control$start <- NULL
+
+  ## link
+  if(is.character(link)) link <- match.arg(link, c("log", "identity", "sqrt"))
+  if(is.character(link)) {
+    linkstr <- link
+    linkobj <- make.link(linkstr)
+    linkobj$dmu.deta <- make.dmu.deta(linkstr)
+  } else {
+    linkobj <- link
+    linkstr <- link$name
+    if(is.null(linkobj$dmu.deta)) warning("link needs to provide dmu.deta component")
+  }
+  linkfun <- linkobj$linkfun
+  linkinv <- linkobj$linkinv
+  mu.eta <- linkobj$mu.eta
+  dmu.deta <- linkobj$dmu.deta
 
 
   if(is.character(dist)){
@@ -231,18 +252,19 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
     gamma <- par[seq.int(length.out = q) + k]
     delta <- if(dfest) tail(par, 1) else NULL
     mu <- drop(x %*% beta) + offset[[1L]]
-    sigma <- exp(drop(z %*% gamma) + offset[[2L]])
+    zgamma <- drop(z %*% gamma) + offset[[2L]]
+    sigma <- linkinv(zgamma)
     df <- if(dfest) exp(delta) else df
     list(
       beta = beta,
       gamma = gamma,
       delta = delta,
       mu = mu,
+      zgamma = zgamma,
       sigma = sigma,
       df = df
     )
   }
-
   ## objective function
   loglikfun <- function(par) {
     fit <- fitfun(par)
@@ -258,7 +280,7 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
       fit <- fitfun(par)
       grad <- with(fit, 
         sdist(y, mu, sigma, df = df, left = left, right = right))
-      grad <- cbind(grad[,1]*x, grad[,2] * fit$sigma * z)
+      grad <- cbind(grad[,1]*x, grad[,2] * mu.eta(fit$zgamma) * z)
       return(-colSums(weights * grad))
     }
     hessfun <- function(par) {
@@ -267,9 +289,9 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
         df = df, which = c("mu", "sigma", "mu.sigma", "sigma.mu")))
       grad <- with(fit, sdist(y, mu, sigma, left = left, right = right, 
         df = df, which = "sigma"))
-      
-      hess[, "d2sigma"] <- (hess[, "d2sigma"] + grad/fit$sigma)*fit$sigma^2
-      hess[, "dmu.dsigma"] <- hess[, "dsigma.dmu"] <- hess[, "dmu.dsigma"]*fit$sigma
+ ##TODO: implement link function     DONE but test (dmu.deta necessary?)
+      hess[, "d2sigma"] <- hess[, "d2sigma"]*mu.eta(fit$zgamma)^2 + grad*dmu.deta(fit$zgamma)
+      hess[, "dmu.dsigma"] <- hess[, "dsigma.dmu"] <- hess[, "dmu.dsigma"]*mu.eta(fit$zgamma)
       hessmu <- crossprod(hess[,"d2mu"]*x, x)
       hessmusigma <- crossprod(hess[,"dmu.dsigma"]*x, z)
       hesssigmamu <- crossprod(hess[,"dsigma.dmu"]*z, x)
