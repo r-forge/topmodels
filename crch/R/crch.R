@@ -48,16 +48,19 @@ crch <- function(formula, data, subset, na.action, weights, offset,
     ## associated variable labels
     ovar <- sapply(as.list(attr(rval, "variables")), deparse)[-1]
     nvar <- sapply(as.list(attr(nval, "variables")), deparse)[-1]
-    if(!all(ovar %in% nvar)) stop(paste("The following terms variables are not part of the model.frame:",
+    if(!all(ovar %in% nvar)) stop(
+      paste("The following terms variables are not part of the model.frame:",
       paste(ovar[!(ovar %in% nvar)], collapse = ", ")))
     ix <- match(ovar, nvar)
   
     ## subset predvars
-    if(!is.null(attr(rval, "predvars"))) warning("terms already had 'predvars' attribute, now replaced")
+    if(!is.null(attr(rval, "predvars"))) 
+      warning("terms already had 'predvars' attribute, now replaced")
     attr(rval, "predvars") <- attr(nval, "predvars")[1L + c(0L, ix)]
 
     ## subset dataClasses
-    if(!is.null(attr(rval, "dataClasses"))) warning("terms already had 'dataClasses' attribute, now replaced")
+    if(!is.null(attr(rval, "dataClasses"))) 
+      warning("terms already had 'dataClasses' attribute, now replaced")
     attr(rval, "dataClasses") <- attr(nval, "dataClasses")[ix]
   
     return(rval)
@@ -67,11 +70,11 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   mtZ <- .add_predvars_and_dataClasses(mtZ, mf)
 
   ## distribution
-  dist <- match.arg(dist)
+  #if(is.character(dist)) dist <- match.arg(dist)
 
   ## sanity checks
   if(length(Y) < 1) stop("empty model")
-  if(dist == "student") {
+  if(identical(dist, "student")) {
     if(!is.null(df) && df <= 0) stop("'df' must be positive")
     if(!is.null(df) && !is.finite(df)) dist <- "gaussian"
   }
@@ -112,7 +115,8 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   rval$call <- if(length(control$call)) control$call else cl
   rval$formula <- oformula
   rval$terms <- list(location = mtX, scale = mtZ, full = mt)
-  rval$levels <- list(location = .getXlevels(mtX, mf), scale = .getXlevels(mtZ, mf), full = .getXlevels(mt, mf))
+  rval$levels <- list(location = .getXlevels(mtX, mf), 
+    scale = .getXlevels(mtZ, mf), full = .getXlevels(mt, mf))
   rval$contrasts <- list(location = attr(X, "contrasts"), scale = attr(Z, "contrasts"))
   if(model) rval$model <- mf
   if(y) rval$y <- Y
@@ -147,7 +151,7 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   k <- NCOL(x)
   if(is.null(weights)) weights <- rep.int(1, n)
   nobs <- sum(weights > 0)
-  dfest <- dist == "student" & is.null(df)
+  dfest <- identical(dist, "student") & is.null(df)
   if(is.null(offset)) offset <- rep.int(0, n)
   if(!is.list(offset)) offset <- list(location = offset, scale = rep.int(0, n))
   if(is.null(z)) {
@@ -159,30 +163,6 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
     q <- NCOL(z)
     if(q < 1L) stop("scale regression needs to have at least one parameter")
   }
-  
-  dist <- match.arg(dist, c("gaussian", "logistic", "student"))
-  
-  ## distribution functions
-  if(truncated) {
-    ddist2 <- switch(dist, 
-      "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
-    sdist2 <- switch(dist, 
-      "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
-    hdist2 <- switch(dist, 
-      "student"  = htt, "gaussian" = htnorm, "logistic" = htlogis)
-  } else {
-    ddist2 <- switch(dist, 
-      "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
-    sdist2 <- switch(dist, 
-      "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
-    hdist2 <- switch(dist, 
-      "student"  = hct, "gaussian" = hcnorm, "logistic" = hclogis)
-  }
-  if(dist != "student") {
-    ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
-    sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
-    hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
-  }
 
   ## control parameters
   ocontrol <- control
@@ -191,6 +171,40 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
   start <- control$start
   control$method <- control$hessian <- control$start <- NULL
 
+
+  if(is.character(dist)){
+    dist <- match.arg(dist, c("gaussian", "logistic", "student"))
+  
+    ## distribution functions
+    if(truncated) {
+      ddist2 <- switch(dist, 
+        "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
+      sdist2 <- switch(dist, 
+        "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+      hdist2 <- switch(dist, 
+        "student"  = htt, "gaussian" = htnorm, "logistic" = htlogis)
+    } else {
+      ddist2 <- switch(dist, 
+        "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
+      sdist2 <- switch(dist, 
+        "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+      hdist2 <- switch(dist, 
+        "student"  = hct, "gaussian" = hcnorm, "logistic" = hclogis)
+    }
+    ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
+    sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
+    hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
+  } else { 
+    ## for user defined distribution (requires list with ddist, sdist (optional)
+    ## and hdist (optional), ddist, sdist, and hdist must be functions with
+    ## arguments x, mean, sd, df, left, right, and log)
+    ddist <- dist$ddist
+    sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
+    if(is.null(dist$hdist)) hessian <- TRUE else dist$hdist 
+    dist <- "user defined"
+  }
+
+  ## analytic or numeric Hessian
   if(is.null(hessian)) hessian <- if(dfest) TRUE else FALSE
   if(!hessian & dfest) {
     warning("No analytical Hessian can be derived if df is estimated. hessian is set to TRUE")
@@ -236,9 +250,8 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
       ddist(y, mu, sigma, df = df, left = left, right = right, log = TRUE))
     return(-sum(weights * ll))
   }
-
   ## functions to evaluate gradients and hessian
-  if(dfest) {
+  if(dfest | is.null(sdist)) {
     gradfun <- NULL
   } else { 
     gradfun <- function(par, type = "gradient") {
@@ -264,7 +277,6 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL,
       -cbind(rbind(hessmu, hesssigmamu), rbind(hessmusigma, hesssigma))
     }
   }
-
   opt <- suppressWarnings(optim(par = start, fn = loglikfun, gr = gradfun,
     method = method, hessian = hessian, control = control))
   if(opt$convergence > 0) {
