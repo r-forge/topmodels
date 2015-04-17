@@ -1,5 +1,5 @@
 crch <- function(formula, data, subset, na.action, weights, offset,
-  link = c("log", "identity", "sqrt"), 
+  link = c("log", "identity", "quadratic"), 
   dist = c("gaussian", "logistic", "student"), df = NULL,
   left = -Inf, right = Inf, control = crch.control(...),
   model = TRUE, x = FALSE, y = FALSE, truncated = FALSE, ...)
@@ -71,11 +71,11 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   mtZ <- .add_predvars_and_dataClasses(mtZ, mf)
 
   ## link
-#  link <- match.arg(link)
+  link <- match.arg(link)
 
 
   ## distribution
-  #if(is.character(dist)) dist <- match.arg(dist)
+  if(is.character(dist)) dist <- match.arg(dist)
 
   ## sanity checks
   if(length(Y) < 1) stop("empty model")
@@ -176,22 +176,7 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link = 
   start <- control$start
   control$method <- control$hessian <- control$start <- NULL
 
-  ## link
-  if(is.character(link)) link <- match.arg(link, c("log", "identity", "sqrt"))
-  if(is.character(link)) {
-    linkstr <- link
-    linkobj <- make.link(linkstr)
-    linkobj$dmu.deta <- make.dmu.deta(linkstr)
-  } else {
-    linkobj <- link
-    linkstr <- link$name
-    if(is.null(linkobj$dmu.deta)) warning("link needs to provide dmu.deta component")
-  }
-  linkfun <- linkobj$linkfun
-  linkinv <- linkobj$linkinv
-  mu.eta <- linkobj$mu.eta
-  dmu.deta <- linkobj$dmu.deta
-
+  
 
   if(is.character(dist)){
     dist <- match.arg(dist, c("gaussian", "logistic", "student"))
@@ -215,6 +200,9 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link = 
     ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
     sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
     hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
+
+ddist <- function(..., mean, sd, df) dfoo(..., hansi = mean, pepi = sd)
+
   } else { 
     ## for user defined distribution (requires list with ddist, sdist (optional)
     ## and hdist (optional), ddist, sdist, and hdist must be functions with
@@ -233,11 +221,42 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link = 
   }
 
 
+  ## link
+  if(is.character(link)) {
+    link <- match.arg(link, c("log", "identity", "quadratic"))
+    linkstr <- link
+    if(linkstr != "quadratic") {
+      linkobj <- make.link(linkstr)
+      linkobj$dmu.deta <- switch(linkstr, 
+        "identity" = function(eta) rep.int(0, length(eta)), 
+        "log" = function(eta) pmax(exp(eta), .Machine$double.eps))
+    } else {
+      linkobj <- structure(list(
+        linkfun = function(mu) mu^2,
+        linkinv = function(eta) sqrt(eta),
+        mu.eta = function(eta) 1/2/sqrt(eta),
+        dmu.deta = function(eta) -1/4/sqrt(eta^3),
+        valideta = function(eta) TRUE,
+        name = "quadratic"
+      ), class = "link-glm")
+    }
+  } else {
+    linkobj <- link
+    linkstr <- link$name
+    if(is.null(linkobj$dmu.deta) & !hessian) warning("link needs to provide dmu.deta component")
+  }
+  linkfun <- linkobj$linkfun
+  linkinv <- linkobj$linkinv
+  mu.eta <- linkobj$mu.eta
+  dmu.deta <- linkobj$dmu.deta
+
+
+
   ## starting values
   if(is.null(start)) {
     auxreg <- lm.wfit(x, y, w = weights, offset = offset[[1L]])
     beta <- auxreg$coefficients
-    gamma <- c(log(sqrt(sum(weights * auxreg$residuals^2)/auxreg$df.residual)), rep(0, q-1))
+    gamma <- c(linkfun(sqrt(sum(weights * auxreg$residuals^2)/auxreg$df.residual)), rep(0, q-1))
     start <- if(dfest) c(beta, gamma, log(10)) else c(beta, gamma)
   }
   if(is.list(start)) start <- do.call("c", start) 
@@ -299,6 +318,7 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link = 
       -cbind(rbind(hessmu, hesssigmamu), rbind(hessmusigma, hesssigma))
     }
   }
+
   opt <- suppressWarnings(optim(par = start, fn = loglikfun, gr = gradfun,
     method = method, hessian = hessian, control = control))
   if(opt$convergence > 0) {
