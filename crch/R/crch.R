@@ -26,15 +26,13 @@ crch <- function(formula, data, subset, na.action, weights, offset,
     simple_formula <- FALSE
   }
   mf$formula <- formula
-
   ## evaluate model.frame
   mf[[1L]] <- as.name("model.frame")
   mf <- eval(mf, parent.frame())
-
   ## extract terms, model matrix, response
-  mt <- terms(formula, data = data)
-  mtX <- terms(formula, data = data, rhs = 1L)
-  mtZ <- delete.response(terms(formula, data = data, rhs = 2L))
+  mt <- terms(formula, data = data, dot = control$dot)
+  mtX <- terms(formula, data = data, rhs = 1L, dot = control$dot)
+  mtZ <- delete.response(terms(formula, data = data, rhs = 2L, dot = control$dot))
   Y <- model.response(mf, "numeric")
   X <- model.matrix(mtX, mf)
   Z <- model.matrix(mtZ, mf)
@@ -44,7 +42,7 @@ crch <- function(formula, data, subset, na.action, weights, offset,
     ## original terms
     rval <- terms
     ## terms from model.frame
-    nval <- if(inherits(model.frame, "terms")) model.frame else terms(model.frame)
+    nval <- if(inherits(model.frame, "terms")) model.frame else terms(model.frame, dot = control$dot)
 
     ## associated variable labels
     ovar <- sapply(as.list(attr(rval, "variables")), deparse)[-1]
@@ -138,9 +136,10 @@ trch <- function(...) {
   crch(..., truncated = TRUE, call = cl)
 }
 
-crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = FALSE, start = NULL, ...)
+crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = FALSE, start = NULL, dot = "separate", ...)
 {
-  rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, start = start)
+  rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, 
+    start = start, dot = dot)
   rval <- c(rval, list(...))
   if(!is.null(rval$fnscale)) warning("fnscale must not be modified")
   rval$fnscale <- 1
@@ -251,13 +250,12 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
   dmu.deta <- linkobj$dmu.deta
 
 
-
   ## starting values
   if(is.null(start)) {
     auxreg <- lm.wfit(x, y, w = weights, offset = offset[[1L]])
     beta <- auxreg$coefficients
-    auxreg2 <- lm.wfit(z, linkfun(abs(auxreg$residuals)), w = weights, offset = offset[[1L]])
-    gamma <- auxreg2$coefficients
+    #auxreg2 <- lm.wfit(z, linkfun(abs(auxreg$residuals)), w = weights, offset = offset[[2L]])
+    gamma <- c(mean(linkfun(abs(auxreg$residuals))), rep(0, ncol(z) - 1))#auxreg2$coefficients
     start <- if(dfest) c(beta, gamma, log(10)) else c(beta, gamma)
   }
   if(is.list(start)) start <- do.call("c", start) 
@@ -265,7 +263,6 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
     warning(paste("too many entries in start! only first", k + q + dfest, "entries are considered"))
     start <- start[1: (k + q + dfest)]
   }
-
   ## various fitted quantities (parameters, linear predictors, etc.)
   fitfun <- function(par) {
     beta <- par[seq.int(length.out = k)]
@@ -289,8 +286,8 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
   loglikfun <- function(par) {
     fit <- fitfun(par)
     ll <- with(fit,  
-      ddist(y, mu, sigma, df = df, left = left, right = right, log = TRUE))
-    return(-sum(weights * ll))
+        ddist(y, mu, sigma, df = df, left = left, right = right, log = TRUE))
+    if(any(!is.finite(ll))) NaN else -sum(weights * ll)  
   }
   ## functions to evaluate gradients and hessian
   if(dfest | is.null(sdist)) {
@@ -318,7 +315,6 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
       -cbind(rbind(hessmu, hesssigmamu), rbind(hessmusigma, hesssigma))
     }
   }
-
   opt <- suppressWarnings(optim(par = start, fn = loglikfun, gr = gradfun,
     method = method, hessian = hessian, control = control))
   if(opt$convergence > 0) {
