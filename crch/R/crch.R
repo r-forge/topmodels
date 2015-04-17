@@ -1,5 +1,5 @@
 crch <- function(formula, data, subset, na.action, weights, offset,
-  link = c("log", "identity", "quadratic"), 
+  link.scale = c("log", "identity", "quadratic"), 
   dist = c("gaussian", "logistic", "student"), df = NULL,
   left = -Inf, right = Inf, control = crch.control(...),
   model = TRUE, x = FALSE, y = FALSE, truncated = FALSE, ...)
@@ -71,7 +71,7 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   mtZ <- .add_predvars_and_dataClasses(mtZ, mf)
 
   ## link
-  link <- match.arg(link)
+  link.scale <- match.arg(link.scale)
 
 
   ## distribution
@@ -112,8 +112,9 @@ crch <- function(formula, data, subset, na.action, weights, offset,
  
 
   ## call the actual workhorse: crch.fit()
-  rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, link = link, dist = dist, 
-    df = df, weights = weights, offset = offset, control = control, truncated = truncated)
+  rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, 
+    link.scale = link.scale, dist = dist, df = df, weights = weights, 
+    offset = offset, control = control, truncated = truncated)
   
 
   ## further model information
@@ -148,7 +149,7 @@ crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = 
 }
 
 
-crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link = "log",
+crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.scale = "log",
   weights = NULL, offset = NULL, control = crch.control(), truncated = FALSE) 
 {
   ## response and regressor matrix
@@ -201,7 +202,6 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link = 
     sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
     hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
 
-ddist <- function(..., mean, sd, df) dfoo(..., hansi = mean, pepi = sd)
 
   } else { 
     ## for user defined distribution (requires list with ddist, sdist (optional)
@@ -222,9 +222,9 @@ ddist <- function(..., mean, sd, df) dfoo(..., hansi = mean, pepi = sd)
 
 
   ## link
-  if(is.character(link)) {
-    link <- match.arg(link, c("log", "identity", "quadratic"))
-    linkstr <- link
+  if(is.character(link.scale)) {
+    link.scale <- match.arg(link.scale, c("log", "identity", "quadratic"))
+    linkstr <- link.scale
     if(linkstr != "quadratic") {
       linkobj <- make.link(linkstr)
       linkobj$dmu.deta <- switch(linkstr, 
@@ -241,9 +241,9 @@ ddist <- function(..., mean, sd, df) dfoo(..., hansi = mean, pepi = sd)
       ), class = "link-glm")
     }
   } else {
-    linkobj <- link
+    linkobj <- link.scale
     linkstr <- link$name
-    if(is.null(linkobj$dmu.deta) & !hessian) warning("link needs to provide dmu.deta component")
+    if(is.null(linkobj$dmu.deta) & !hessian) warning("link.scale needs to provide dmu.deta component")
   }
   linkfun <- linkobj$linkfun
   linkinv <- linkobj$linkinv
@@ -256,7 +256,8 @@ ddist <- function(..., mean, sd, df) dfoo(..., hansi = mean, pepi = sd)
   if(is.null(start)) {
     auxreg <- lm.wfit(x, y, w = weights, offset = offset[[1L]])
     beta <- auxreg$coefficients
-    gamma <- c(linkfun(sqrt(sum(weights * auxreg$residuals^2)/auxreg$df.residual)), rep(0, q-1))
+    auxreg2 <- lm.wfit(z, linkfun(abs(auxreg$residuals)), w = weights, offset = offset[[1L]])
+    gamma <- auxreg2$coefficients
     start <- if(dfest) c(beta, gamma, log(10)) else c(beta, gamma)
   }
   if(is.list(start)) start <- do.call("c", start) 
@@ -308,7 +309,6 @@ ddist <- function(..., mean, sd, df) dfoo(..., hansi = mean, pepi = sd)
         df = df, which = c("mu", "sigma", "mu.sigma", "sigma.mu")))
       grad <- with(fit, sdist(y, mu, sigma, left = left, right = right, 
         df = df, which = "sigma"))
- ##TODO: implement link function     DONE but test (dmu.deta necessary?)
       hess[, "d2sigma"] <- hess[, "d2sigma"]*mu.eta(fit$zgamma)^2 + grad*dmu.deta(fit$zgamma)
       hess[, "dmu.dsigma"] <- hess[, "dsigma.dmu"] <- hess[, "dmu.dsigma"]*mu.eta(fit$zgamma)
       hessmu <- crossprod(hess[,"d2mu"]*x, x)
@@ -367,6 +367,7 @@ ddist <- function(..., mean, sd, df) dfoo(..., hansi = mean, pepi = sd)
     nobs = nobs,
     loglik = ll,
     vcov = vcov,
+    link = list(scale = linkobj),
     converged = converged,
     iterations = as.vector(tail(na.omit(opt$counts), 1))
   )
@@ -387,7 +388,7 @@ print.crch <- function(x, digits = max(3, getOption("digits") - 3), ...)
        cat("\n")
     } else cat("No coefficients (in location model)\n\n")
     if(length(x$coefficients$scale)) {
-      cat(paste("Coefficients (scale model with log link):\n", sep = ""))
+      cat(paste("Coefficients (scale model with ", x$link$scale$name, " link):\n", sep = ""))
       print.default(format(x$coefficients$scale, digits = digits), print.gap = 2, quote = FALSE)
       cat("\n")
     } else cat("No coefficients (in scale model)\n\n")
@@ -451,9 +452,9 @@ print.summary.crch <- function(x, digits = max(3, getOption("digits") - 3), ...)
     } else cat("\nNo coefficients (in location model)\n")
 
     if(NROW(x$coefficients$scale)) {
-      cat(paste("\nCoefficients (log(scale) model):\n", sep = ""))
+      cat(paste("\nCoefficients (scale model with ", x$link$scale$name, " link):\n", sep = ""))
       printCoefmat(x$coefficients$scale, digits = digits, signif.legend = FALSE)
-    } else cat("\nNo coefficients (in log(scale) model)\n")
+    } else cat("\nNo coefficients ( in scale model)\n")
 
     if(getOption("show.signif.stars") & any(do.call("rbind", x$coefficients)[, 4L] < 0.1))
       cat("---\nSignif. codes: ", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1", "\n")
