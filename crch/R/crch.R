@@ -254,8 +254,8 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
   if(is.null(start)) {
     auxreg <- lm.wfit(x, y, w = weights, offset = offset[[1L]])
     beta <- auxreg$coefficients
-    #auxreg2 <- lm.wfit(z, linkfun(abs(auxreg$residuals)), w = weights, offset = offset[[2L]])
-    gamma <- c(mean(linkfun(abs(auxreg$residuals))), rep(0, ncol(z) - 1))#auxreg2$coefficients
+    gamma <- c(linkfun(sqrt(sum(weights * auxreg$residuals^2)/
+      auxreg$df.residual)), rep(0, ncol(z) - 1))
     start <- if(dfest) c(beta, gamma, log(10)) else c(beta, gamma)
   }
   if(is.list(start)) start <- do.call("c", start) 
@@ -364,6 +364,7 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
     loglik = ll,
     vcov = vcov,
     link = list(scale = linkobj),
+    truncated = truncated,
     converged = converged,
     iterations = as.vector(tail(na.omit(opt$counts), 1))
   )
@@ -471,6 +472,8 @@ terms.crch <- function(x, model = c("location", "scale", "full"), ...) x$terms[[
 
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
+
+## TODO: quantiles for truncated dist
 predict.crch <- function(object, newdata = NULL,
   type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, ...)
 {
@@ -483,7 +486,7 @@ predict.crch <- function(object, newdata = NULL,
   if(type == "quantile") {
     qdist <- switch(object$dist,
     "student"  = function(at, location, scale, df) {
-      rval <- sapply(at, function(p) qt(p, df = df) * scale + location)
+      rval <- sapply(at, function(p) if(object$truncated) qtt(p, location, scale, df, left = left, right = right) else qct(p, location, scale, df))
       if(length(at) > 1L) {
         if(NCOL(rval) == 1L) rval <- matrix(rval, ncol = length(at),
 	  dimnames = list(unique(names(rval)), NULL))
