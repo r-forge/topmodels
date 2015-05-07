@@ -208,7 +208,11 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
     ## arguments x, mean, sd, df, left, right, and log)
     ddist <- dist$ddist
     sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
-    if(is.null(dist$hdist)) hessian <- TRUE else dist$hdist 
+    if(is.null(dist$hdist)) {
+      if(!hessian) warning("no analytic hessian available. Hessian is set to TRUE and numerical Hessian from optim is employed")
+      hessian <- TRUE  
+    
+    } else dist$hdist 
     dist <- "user defined"
   }
 
@@ -473,7 +477,7 @@ terms.crch <- function(x, model = c("location", "scale", "full"), ...) x$terms[[
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
 
-## TODO: quantiles for truncated dist
+## TODO: quantiles for user defined dist
 predict.crch <- function(object, newdata = NULL,
   type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, ...)
 {
@@ -484,40 +488,32 @@ predict.crch <- function(object, newdata = NULL,
   if(type == "quantile" & identical(at, 0.5)) type <- "response"
   
   if(type == "quantile") {
-    qdist <- switch(object$dist,
-    "student"  = function(at, location, scale, df) {
-      rval <- sapply(at, function(p) if(object$truncated) qtt(p, location, scale, df, left = left, right = right) else qct(p, location, scale, df))
+    if(object$truncated) {
+      qdist2 <- switch(object$dist, 
+        "student"  = qtt, 
+        "gaussian" = function(..., df) qtnorm(...), 
+        "logistic" = function(..., df) qtlogis(...))
+    } else {
+      qdist2 <- switch(object$dist, 
+        "student"  = qct, 
+        "gaussian" = function(..., df) qcnorm(...), 
+        "logistic" = function(..., df) qclogis(...))
+    }
+    
+
+
+    qdist <- function(at, location, scale, df) {
+      rval <- sapply(at, function(p) qdist2(p, location, scale, 
+        df = df, left = object$cens$left, right = object$cens$right))
       if(length(at) > 1L) {
         if(NCOL(rval) == 1L) rval <- matrix(rval, ncol = length(at),
-	  dimnames = list(unique(names(rval)), NULL))
-        colnames(rval) <- paste("q_", at, sep = "")
-      } else {
-        rval <- drop(rval)
-      }
-      rval
-    },
-    "gaussian" = function(at, location, scale, df) {
-      rval <- sapply(at, function(p) qnorm(p) * scale + location)
-      if(length(at) > 1L) {
-        if(NCOL(rval) == 1L) rval <- matrix(rval, ncol = length(at),
-	  dimnames = list(unique(names(rval)), NULL))
+	        dimnames = list(unique(names(rval)), NULL))
         colnames(rval) <- paste("q_", at, sep = "")
       } else {
         rval <- drop(rval)
       }
       rval 
-    },
-    "logistic" = function(at, location, scale, df) {
-      rval <- sapply(at, function(p) qlogis(p) * scale + location)
-      if(length(at) > 1L) {
-        if(NCOL(rval) == 1L) rval <- matrix(rval, ncol = length(at),
-	  dimnames = list(unique(names(rval)), NULL))
-        colnames(rval) <- paste("q_", at, sep = "")
-      } else {
-        rval <- drop(rval)
-      }
-      rval
-    })
+    }
   }
   
   if(missing(newdata)) {
