@@ -1,5 +1,5 @@
 ## density
-dclogis <- function(x, mean, sd, left = -Inf, right = Inf, log = FALSE) {
+dclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
   x <- data.frame(x = x, mean, sd)$x
   ifelse(x <= left, plogis((left - mean)/sd, log.p = log), 
   ifelse(x >= right, plogis((right - mean)/sd, log.p = log, lower.tail = FALSE), 
@@ -7,22 +7,30 @@ dclogis <- function(x, mean, sd, left = -Inf, right = Inf, log = FALSE) {
 }
 
 ## distribution function
-pclogis <- function(q, mean, sd, left = -Inf, right = Inf) {
+pclogis <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
+  left = -Inf, right = Inf) {
   q <- data.frame(q = q, mean, sd)$q
-  ifelse(q < left, 0, 
-  ifelse(q >= right, 1, 
-  plogis((q - mean)/sd, log = log)))
+  if(lower.tail){ 
+    ifelse(q < left, 0, 
+    ifelse(q >= right, 1, 
+    plogis((q-mean)/sd, log.p = log.p)))
+  } else {
+    ifelse(q <= left, 1, 
+    ifelse(q > right, 0, 
+    plogis((q-mean)/sd, lower.tail = FALSE, log.p = log.p)))
+  }
 }
 
 ## random numbers
-rclogis <- function(n, mean, sd, left = -Inf, right = Inf) {
+rclogis <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
   rval <- rlogis(n) * sd + mean
   pmax(pmin(rval, right), left)
 }
 
 ## quantiles
-qclogis <- function(p, mean, sd, left = -Inf, right = Inf) {
-  rval <- qlogis(p) * sd + mean
+qclogis <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
+  left = -Inf, right = Inf) {
+  rval <- qlogis(p, lower.tail = lower.tail, log.p = log.p) * sd + mean
   pmax(pmin(rval, right), left)
 }
 
@@ -81,15 +89,19 @@ hclogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), left = -Inf, 
                                 - 2/sd2 * dlogis(dxm/sd)))
     if(w == "sigma")
       hess[[w]] <- 
-        ifelse(x <= left,    (  2 * dlm/sd2 - dlm^2/sd2*scorel)*millsl-millsl^2*dlm^2/sd2,
-          ifelse(x >= right, (- 2 * drm/sd2 + drm^2/sd2*scorer)*millsr-millsr^2*drm^2/sd2,
-                             - score[,"dmu"]*dxm/sd2 - 2 * dxm^2/sd2^2 * dlogis(dxm/sd) - 
-                               score[, "dsigma"]/sd))
+        ifelse(x <= left,    (  2 * dlm/sd2 - dlm^2/sd2*scorel)*millsl-
+          millsl^2*dlm^2/sd2,
+          ifelse(x >= right, (- 2 * drm/sd2 + drm^2/sd2*scorer)*millsr-
+            millsr^2*drm^2/sd2,
+                             - score[,"dmu"]*dxm/sd2 - 2 * dxm^2/sd2^2 * 
+                              dlogis(dxm/sd) - score[, "dsigma"]/sd))
 
     if(w %in% c("mu.sigma", "sigma.mu"))## not correct
       hess[[w]] <- 
-        ifelse(x <= left,    (  1/sd - dlm/sd*scorel) * millsl - dlm/sd * millsl^2,
-          ifelse(x >= right, (- 1/sd + drm/sd*scorer) * millsr - drm/sd * millsr^2,
+        ifelse(x <= left,    (  1/sd - dlm/sd*scorel) * millsl - 
+          dlm/sd * millsl^2,
+          ifelse(x >= right, (- 1/sd + drm/sd*scorer) * millsr - 
+            drm/sd * millsr^2,
                              -score[, "dmu"]/sd - 2*dxm/sd^3*dlogis(dxm/sd)))
   }
 
