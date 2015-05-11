@@ -1,20 +1,25 @@
 \name{crch}
 \alias{crch}
+\alias{trch}
 \alias{crch.fit}
 
 \title{Censored Regression with Conditional Heteroscedasticy}
 
 \description{
-  Fitting censored regression (tobit) models with conditional heteroscedasticy. 
+  Fitting censored (tobit) or truncated regression models with conditional heteroscedasticy. 
 }
 \usage{
 crch(formula, data, subset, na.action, weights, offset, 
-  dist = c("student", "gaussian", "logistic"), df = NULL, 
+  link.scale = c("log", "identity", "quadratic"),
+  dist = c("gaussian", "logistic", "student"), df = NULL, 
   left = -Inf, right = Inf, control = crch.control(\dots), 
-  model = TRUE, x = FALSE, y = FALSE, \dots)
+  model = TRUE, x = FALSE, y = FALSE, truncated = FALSE, \dots)
 
-crch.fit(x, z, y, left, right, dist = "student", df = NULL, 
-  weights = NULL, offset = NULL, control = crch.control()) 
+trch(\dots)
+
+crch.fit(x, z, y, left, right, dist = "gaussian", df = NULL, 
+  link.scale = "log", weights = NULL, offset = NULL, 
+  control = crch.control(), truncated = FALSE) 
 }
 \arguments{
   \item{formula}{a formula expression of the form \code{y ~ x | z} where
@@ -31,6 +36,10 @@ crch.fit(x, z, y, left, right, dist = "student", df = NULL,
   be included in the linear predictor for the location.  For \code{crch.fit}, 
   \code{offset} can also be a list of 2 offsets used for the location and scale
   respectively.}
+  \item{link.scale}{character specification of the link function in
+    the scale model. Currently, \code{"identity"}, \code{"log"}, \code{"sqrt"}
+    are supported. The default is \code{"log"}.
+    Alternatively, an object of class \code{"link-glm"} can be supplied.}
   \item{dist}{assumed distribution for the dependent variable \code{y}.}
   \item{df}{optional degrees of freedom for \code{dist="student"}. If omitted
   the degrees of freedom are estimated.}
@@ -45,18 +54,22 @@ crch.fit(x, z, y, left, right, dist = "student", df = NULL,
   \item{x, y}{for \code{crch}: logical. If \code{TRUE} the model matrix and
   response vector used for fitting are returned as components of the returned
   value.
-
   for \code{crch.fit}: \code{x} is a design matrix with regressors for the
   location and \code{y} is a vector of observations.}
   \item{z}{a design matrix with regressors for the scale.}
+  \item{truncated}{logical. If \code{TRUE} truncated model is fitted
+  with \code{left} and \code{right} interpreted as truncation points,
+  If \code{FALSE} censored model is fitted. Default is \code{FALSE}}
   \item{\dots}{arguments to be used to form the default \code{control} argument
   if it is not supplied directly.}
 }
 
 \details{
-\code{crch} fits censored regression (tobit) models with conditional
+\code{crch} fits censored (tobit) or truncated regression models with conditional
 heteroscedasticy with maximum likelihood estimation. Student-t, Gaussian, and
-logistic distributions can be fitted to left- and/or right-censored responses.
+logistic distributions can be fitted to left- and/or right censored or 
+truncated responses.
+\code{trch} convenience function to fit truncated regression models (\code{crch} with \code{truncated = TRUE})
 Different regressors can be used to model the location and the scale of this
 distribution. \code{crch.fit} is the lower level function where the actual
 fitting takes place.
