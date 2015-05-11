@@ -69,7 +69,7 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   mtZ <- .add_predvars_and_dataClasses(mtZ, mf)
 
   ## link
-  link.scale <- match.arg(link.scale)
+  if(is.character(link.scale)) link.scale <- match.arg(link.scale)
 
 
   ## distribution
@@ -179,8 +179,6 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
   
 
   if(is.character(dist)){
-    dist <- match.arg(dist, c("gaussian", "logistic", "student"))
-  
     ## distribution functions
     if(truncated) {
       ddist2 <- switch(dist, 
@@ -226,7 +224,6 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
 
   ## link
   if(is.character(link.scale)) {
-    link.scale <- match.arg(link.scale, c("log", "identity", "quadratic"))
     linkstr <- link.scale
     if(linkstr != "quadratic") {
       linkobj <- make.link(linkstr)
@@ -245,8 +242,11 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
     }
   } else {
     linkobj <- link.scale
-    linkstr <- link$name
-    if(is.null(linkobj$dmu.deta) & !hessian) warning("link.scale needs to provide dmu.deta component")
+    linkstr <- link.scale$name
+    if(is.null(linkobj$dmu.deta) & !hessian) {
+      warning("link.scale needs to provide dmu.deta component for analytical Hessian. hessian is set to TRUE to employ numerical Hessian.")
+      hessian <- TRUE
+    }
   }
   linkfun <- linkobj$linkfun
   linkinv <- linkobj$linkinv
@@ -634,45 +634,6 @@ logLik.crch <- function(object, ...) structure(object$loglik, df = sum(sapply(ob
 residuals.crch <- function(object, type = c("standardized", "pearson", "response"), ...) {
   if(match.arg(type) == "response") object$residuals else object$residuals/object$fitted.values$scale
 }
-
-if(FALSE) {
-  ## load code and data
-  library("zoo")
-  library("AER")
-  load("Neuhof_24.RData")
-  # load("pottenbrunn_24.RData")
-  source("transform.R")
-  source("crch.R")
-
-  ## transform data
-  d <- as.data.frame(turbine.data)
-  p2w <- make_p2w(pc)
-  w2p <- make_w2p(pc)
-  d$wnow <- p2w(d$pnow)
-  d <- d[order(d$fflin),]
-
-  ## fit models
-  mg <- crch(wnow ~ fflin | 1, data = d, dist = "gaussian", left = 3, right = 17)
-  ml <- crch(wnow ~ fflin | 1, data = d, dist = "logistic", left = 3, right = 17)
-  ms <- crch(wnow ~ fflin | 1, data = d, dist = "student",  left = 3, right = 17)
-
-  ## visualize fitted means (virtually identical)
-  plot(wnow ~ fflin, data = d)
-  abline(coef(mg, "location"))
-  abline(coef(ml, "location"), col = 2)
-  abline(coef(ms, "location"), col = 4)
-
-  ## visualize fitted densities (gaussian differen, student and logistic similar)
-  x <- seq(-6, 6, by = 0.1)
-  plot(x, dt(x/exp(coef(ms, "scale")), df = exp(ms$coefficients$df))/exp(coef(ms, "scale")), type = "l", col = 4)
-  lines(x, dnorm(x/exp(coef(mg, "scale")))/exp(coef(mg, "scale")), col = 1)
-  lines(x, dlogis(x/exp(coef(ml, "scale")))/exp(coef(ml, "scale")), col = 2)
-
-  ## likelihood ratio test between student and gaussian model
-  lrtest(mg, ms)
-}
-
-
 
 update.crch <- function (object, formula., ..., evaluate = TRUE)
 {
