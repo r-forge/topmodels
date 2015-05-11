@@ -9,7 +9,7 @@
 }
 \usage{
 crch.control(method = "BFGS", maxit = 5000, hessian = NULL,
-  trace = FALSE, start = NULL, \dots)}
+  trace = FALSE, start = NULL, dot = "separate", \dots)}
 \arguments{
   \item{method}{optimization method passed to \code{\link{optim}}}
   \item{maxit}{the maximum number of iterations.}
@@ -22,6 +22,11 @@ crch.control(method = "BFGS", maxit = 5000, hessian = NULL,
   \item{trace}{non-negative integer. If positive, tracing information on the
   progress of the optimization is produced.}
   \item{start}{initial values for the parameters to be optimized over.}
+  \item{dot}{character specifying how to process formula parts with a dot
+    (\code{.}) on the right-hand side. This can either be \code{"separate"}
+    so that each formula part is expanded separately or \code{"sequential"}
+    so that the parts are expanded sequentially conditional on all prior parts.
+    Default is \code{"separate"}}
   \item{\dots}{Additional parameters passed to \code{\link{optim}}. }
 }
 
