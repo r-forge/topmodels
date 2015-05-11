@@ -1,28 +1,42 @@
-dcnorm <- function(x, mean, sd, left = -Inf, right = Inf, log = FALSE) {
+## density
+dcnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
   x <- data.frame(x = x, mean, sd)$x
   ifelse(x <= left, pnorm((left-mean)/sd, log.p = log), 
   ifelse(x >= right, pnorm((right-mean)/sd, log.p = log, lower.tail = FALSE), 
   dnorm((x-mean)/sd, log = log)/sd^(1 - log) - log(sd) * log))
 }
 
-pcnorm <- function(q, mean, sd, left = -Inf, right = Inf) {
+## distribution function
+pcnorm <- function(q, mean, sd, lower.tail = TRUE, log.p = FALSE, left = -Inf,
+  right = Inf) {
   q <- data.frame(q = q, mean, sd)$q
-  ifelse(q < left, 0, 
-  ifelse(q >= right, 1, 
-  pnorm((q-mean)/sd, log = log)))
+  if(lower.tail){ 
+    ifelse(q < left, 0, 
+    ifelse(q >= right, 1, 
+    pnorm((q-mean)/sd, log.p = log.p)))
+  } else {
+    ifelse(q <= left, 1, 
+    ifelse(q > right, 0, 
+    pnorm((q-mean)/sd, lower.tail = FALSE, log.p = log.p)))
+  }
 }
 
-rcnorm <- function(n, mean, sd, left = -Inf, right = Inf) {
+## random numbers
+rcnorm <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
   rval <- rnorm(n) * sd + mean
   pmax(pmin(rval, right), left)
 }
 
-qcnorm <- function(p, mean, sd, left = -Inf, right = Inf) {
-  rval <- qnorm(p) * sd + mean
+## quantiles
+qcnorm <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
+  left = -Inf, right = Inf) {
+  rval <- qnorm(p, lower.tail = lower.tail, log.p = log.p) * sd + mean
   pmax(pmin(rval, right), left)
 }
 
-scnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), left = -Inf, right = Inf) {
+## scores
+scnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
+  left = -Inf, right = Inf) {
   if(!is.character(which))
     which <- c("mu", "sigma")[as.integer(which)]
   which <- tolower(which)
@@ -51,8 +65,9 @@ scnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), left = -Inf, r
   score
 }
 
-hcnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), left = -Inf, right = Inf)
-{
+## Hessian
+hcnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
+  left = -Inf, right = Inf) {
   if(!is.character(which))
     which <- c("mu", "sigma", "mu.sigma", "sigma.mu")[as.integer(which)]
   which <- tolower(which)
