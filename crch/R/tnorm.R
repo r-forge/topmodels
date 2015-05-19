@@ -21,7 +21,8 @@ ptnorm <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE,
 }
 
 ## quantiles
-qtnorm <- function(p, mean = 0, sd = 1, left = -Inf, right = Inf, lower.tail = TRUE, log.p = FALSE) {
+qtnorm <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
+  left = -Inf, right = Inf) {
   if(log.p) p <- exp(p) 
   lower <- if(lower.tail) left else right
   upper <- if(lower.tail) right else left

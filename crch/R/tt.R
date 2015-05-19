@@ -21,7 +21,8 @@ ptt <- function(q, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE,
 }
 
 ## quantiles
-qtt <- function(p, mean = 0, sd = 1, df, left = -Inf, right = Inf, lower.tail = TRUE, log.p = FALSE) {
+qtt <- function(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, 
+  left = -Inf, right = Inf) {
   if(log.p) p <- exp(p) 
   lower <- if(lower.tail) left else right
   p <- pt((lower-mean)/sd, df = df) * (1 - p) + p*pt((right - mean)/sd, df = df)
@@ -29,7 +30,7 @@ qtt <- function(p, mean = 0, sd = 1, df, left = -Inf, right = Inf, lower.tail = 
 }
 
 ## random numbers
-rtt <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
+rtt <- function(n, mean = 0, sd = 1, df, left = -Inf, right = Inf) {
   qtt((runif(n) - mean)/sd, df = df, left = left, right = right)
 }
 
