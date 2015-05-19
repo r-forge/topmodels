@@ -2,10 +2,35 @@ import("stats", "Formula")
 
 export(
   "crch",
+  "trch",
   "crch.control",
   "crch.fit",
   "hxlr",
-  "hxlr.control"
+  "hxlr.control",
+  "dcnorm",
+  "pcnorm",
+  "qcnorm",
+  "rcnorm",
+  "dclogis",
+  "pclogis",
+  "qclogis",
+  "rclogis",
+  "dct",
+  "pct",
+  "qct",
+  "rct",
+  "dtnorm",
+  "ptnorm",
+  "qtnorm",
+  "rtnorm",
+  "dtlogis",
+  "ptlogis",
+  "qtlogis",
+  "rtlogis",
+  "dtt",
+  "ptt",
+  "qtt",
+  "rtt"
 )
 
 ## methods for crch
