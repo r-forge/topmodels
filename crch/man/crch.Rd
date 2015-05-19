@@ -68,10 +68,13 @@ crch.fit(x, z, y, left, right, dist = "gaussian", df = NULL,
 \code{crch} fits censored (tobit) or truncated regression models with conditional
 heteroscedasticy with maximum likelihood estimation. Student-t, Gaussian, and
 logistic distributions can be fitted to left- and/or right censored or 
-truncated responses.
-\code{trch} convenience function to fit truncated regression models (\code{crch} with \code{truncated = TRUE})
-Different regressors can be used to model the location and the scale of this
-distribution. \code{crch.fit} is the lower level function where the actual
+truncated responses. Different regressors can be used to model the location 
+and the scale of this distribution.
+
+\code{trch} is a convenience function to fit truncated regression models 
+(\code{crch} with \code{truncated = TRUE}).
+
+\code{crch.fit} is the lower level function where the actual
 fitting takes place.
 }
 
@@ -95,6 +98,9 @@ fitting takes place.
   \item{nobs}{number of observations with non-zero weights.}
   \item{loglik}{log-likelihood.}
   \item{vcov}{covariance matrix.}
+  \item{link}{a list with element \code{"scale"} containing
+          the link objects for the scale model.}
+  \item{truncated}{logical indicating wheter a truncated model has been fitted.}
   \item{converged}{logical variable whether optimization has converged or not.}
   \item{iterations}{number of iterations in optimization.}
   \item{call}{function call.}
