@@ -207,7 +207,7 @@ crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.sc
     ddist <- dist$ddist
     sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
     if(is.null(dist$hdist)) {
-      if(!hessian) warning("no analytic hessian available. Hessian is set to TRUE and numerical Hessian from optim is employed")
+      if(hessian == FALSE) warning("no analytic hessian available. Hessian is set to TRUE and numerical Hessian from optim is employed")
       hessian <- TRUE  
     
     } else dist$hdist 
@@ -477,14 +477,18 @@ terms.crch <- function(x, model = c("location", "scale", "full"), ...) x$terms[[
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
 
-## TODO: quantiles for user defined dist
+
 predict.crch <- function(object, newdata = NULL,
   type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, ...)
 {
   type <- match.arg(type)
   ## response/location are synonymous
   if(type == "location") type <- "response"
-  ## currently all distributions supported are symmetric, hence:
+  
+  ## type quantile not available for user defined distributions
+  if(type == "quantile" & identical(object$dist, "user defined"))
+    stop("type quantile not available for user defined distributions")
+  ## currently all other distributions supported are symmetric, hence:
   if(type == "quantile" & identical(at, 0.5)) type <- "response"
   
   if(type == "quantile") {
