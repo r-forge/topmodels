@@ -7,8 +7,8 @@ dcnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
 }
 
 ## distribution function
-pcnorm <- function(q, mean, sd, lower.tail = TRUE, log.p = FALSE, left = -Inf,
-  right = Inf) {
+pcnorm <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
+  left = -Inf, right = Inf) {
   q <- data.frame(q = q, mean, sd)$q
   if(lower.tail){ 
     ifelse(q < left, 0, 
