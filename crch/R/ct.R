@@ -28,7 +28,7 @@ rct <- function(n, mean = 0, sd = 1, df, left = -Inf, right = Inf) {
 ## quantiles
 qct <- function(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, 
   left = -Inf, right = Inf) {
-  rval <- qnorm(p, df = df, lower.tail = lower.tail, log.p = log.p) * sd + mean
+  rval <- qt(p, df = df, lower.tail = lower.tail, log.p = log.p) * sd + mean
   pmax(pmin(rval, right), left)
 }
 
