@@ -12,8 +12,8 @@
 crch(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"),
   dist = c("gaussian", "logistic", "student"), df = NULL, 
-  left = -Inf, right = Inf, control = crch.control(\dots), 
-  model = TRUE, x = FALSE, y = FALSE, truncated = FALSE, \dots)
+  left = -Inf, right = Inf, truncated = FALSE, control = crch.control(\dots), 
+  model = TRUE, x = FALSE, y = FALSE, \dots)
 
 trch(\dots)
 
@@ -47,6 +47,9 @@ crch.fit(x, z, y, left, right, dist = "gaussian", df = NULL,
   to \code{-Inf}, \code{y} is assumed not to be left-censored.}
   \item{right}{right limit for the censored dependent variable \code{y}.  If
   set to \code{Inf}, \code{y} is assumed not to be right-censored.}
+  \item{truncated}{logical. If \code{TRUE} truncated model is fitted
+  with \code{left} and \code{right} interpreted as truncation points,
+  If \code{FALSE} censored model is fitted. Default is \code{FALSE}}
   \item{control}{a list of control parameters passed to \code{\link{optim}}.
   Default is \code{\link{crch.control}()}}
   \item{model}{logical. If \code{TRUE} \emph{model frame} is
@@ -57,9 +60,6 @@ crch.fit(x, z, y, left, right, dist = "gaussian", df = NULL,
   for \code{crch.fit}: \code{x} is a design matrix with regressors for the
   location and \code{y} is a vector of observations.}
   \item{z}{a design matrix with regressors for the scale.}
-  \item{truncated}{logical. If \code{TRUE} truncated model is fitted
-  with \code{left} and \code{right} interpreted as truncation points,
-  If \code{FALSE} censored model is fitted. Default is \code{FALSE}}
   \item{\dots}{arguments to be used to form the default \code{control} argument
   if it is not supplied directly.}
 }
