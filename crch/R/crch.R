@@ -1,8 +1,8 @@
 crch <- function(formula, data, subset, na.action, weights, offset,
   link.scale = c("log", "identity", "quadratic"), 
   dist = c("gaussian", "logistic", "student"), df = NULL,
-  left = -Inf, right = Inf, control = crch.control(...),
-  model = TRUE, x = FALSE, y = FALSE, truncated = FALSE, ...)
+  left = -Inf, right = Inf, truncated = FALSE , control = crch.control(...),
+  model = TRUE, x = FALSE, y = FALSE, ...)
 {
   ## call
   cl <- match.call()
@@ -148,8 +148,9 @@ crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = 
 }
 
 
-crch.fit <- function(x, z, y, left, right, dist = "gaussian", df = NULL, link.scale = "log",
-  weights = NULL, offset = NULL, control = crch.control(), truncated = FALSE) 
+crch.fit <- function(x, z, y, left, right, truncated = FALSE, 
+  dist = "gaussian", df = NULL, link.scale = "log",
+  weights = NULL, offset = NULL, control = crch.control()) 
 {
   ## response and regressor matrix
   n <- NROW(x)  
