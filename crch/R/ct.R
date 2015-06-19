@@ -8,6 +8,7 @@ dct <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, log = FALSE) 
 ## distribution function
 pct <- function(q, mean = 0, sd = 1,  df, lower.tail = TRUE, log.p = FALSE, 
   left = -Inf, right = Inf) {
+  q <- data.frame(q = q, mean, sd)$q
   if(lower.tail){
     ifelse(q < left, 0, 
     ifelse(q >= right, 1, 
