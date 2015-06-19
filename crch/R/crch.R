@@ -636,9 +636,57 @@ vcov.crch <- function(object, model = c("full", "location", "scale", "df"), ...)
 
 logLik.crch <- function(object, ...) structure(object$loglik, df = sum(sapply(object$coefficients, length)), class = "logLik")
 
-residuals.crch <- function(object, type = c("standardized", "pearson", "response"), ...) {
-  if(match.arg(type) == "response") object$residuals else object$residuals/object$fitted.values$scale
+residuals.crch <- function(object, type = c("standardized", "pearson", "response", "quantile"), ...) {
+  if(match.arg(type) == "response") {
+    object$residuals 
+  } else if (match.arg(type) == "quantile") {
+    if(object$truncated) {
+      pdist <- switch(object$dist, 
+        "student"  = function(q, mean, sd) ptt(q, mean, sd, df = object$df), 
+        "gaussian" = ptnorm, 
+        "logistic" = ptlogis)
+    } else {
+      pdist <- switch(object$dist, 
+        "student"  = function(q, mean, sd) pct(q, mean, sd, df = object$df), 
+        "gaussian" = pcnorm, 
+        "logistic" = pclogis)
+    }
+    qprob <- with(object, ifelse(residuals + fitted.values$location == cens$left,
+      runif(n, 0, pdist(cens$left, fitted.values$location, fitted.values$scale)),
+      ifelse(residuals + fitted.values$location == cens$right,
+        runif(n, pdist(cens$right, fitted.values$location, fitted.values$scale), 1),
+        pdist(residuals, 0, fitted.values$scale))))
+    qnorm(qprob)
+  } else object$residuals/object$fitted.values$scale
 }
+
+
+
+getSummary.crch <- function (obj, alpha = 0.05, ...) 
+{
+  cf <- summary(obj)$coefficients
+  cval <- qnorm(1 - alpha/2)
+  for (i in seq_along(cf)) cf[[i]] <- cbind(cf[[i]], 
+      cf[[i]][, 1] - cval * cf[[i]][, 2],
+      cf[[i]][, 1] + cval * cf[[i]][, 2])
+  nam <- unique(unlist(lapply(cf, rownames)))
+  acf <- array(dim = c(length(nam), 6, length(cf)), 
+    dimnames = list(nam, c("est", "se", "stat", "p", "lwr", "upr"), names(cf)))
+  for (i in seq_along(cf)) acf[rownames(cf[[i]]), , i] <- cf[[i]]
+
+  return(list(
+    coef = acf, 
+    sumstat = c(
+      N = obj$n, 
+      logLik = as.vector(logLik(obj)), 
+      AIC = AIC(obj), 
+      BIC = BIC(obj)
+    ), 
+    contrasts = obj$contrasts, 
+    xlevels = obj$xlevels, 
+    call = obj$call))
+}
+
 
 update.crch <- function (object, formula., ..., evaluate = TRUE)
 {
@@ -657,3 +705,5 @@ update.crch <- function (object, formula., ..., evaluate = TRUE)
   if(evaluate) eval(call, parent.frame())
   else call
 }
+
+
