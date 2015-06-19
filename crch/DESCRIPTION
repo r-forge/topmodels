@@ -1,11 +1,9 @@
 Package: crch
 Title: Censored Regression with Conditional Heteroscedasticity
-Version: 1.0-0
-Date: 2013-10-22
-Authors@R: c(person(given = "Jakob", family = "Messner", role =
-        c("aut", "cre"), email = "Jakob.Messner@uibk.ac.at"),
-        person(given = "Achim", family = "Zeileis", role = "aut", email
-        = "Achim.Zeileis@R-project.org"))
+Version: 0.9-0
+Date: 2015-06-19
+Authors@R: c(person(given = "Jakob", family = "Messner", role = c("aut", "cre"), email = "Jakob.Messner@uibk.ac.at"),
+             person(given = "Achim", family = "Zeileis", role = "aut", email = "Achim.Zeileis@R-project.org"))
 Depends: R (>= 2.10.0)
 Imports: stats, Formula, ordinal
 Suggests: lmtest
@@ -18,6 +16,3 @@ Description: Different approaches to censored or truncated regression with
   heteroscedastic extended logistic regression (HXLR). In the latter type of
   models, the intercepts depend on the thresholds that define the intervals. 
 License: GPL-2 | GPL-3
-Author: Jakob Messner [aut, cre],
-  Achim Zeileis [aut]
-Maintainer: Jakob Messner <Jakob.Messner@uibk.ac.at>
