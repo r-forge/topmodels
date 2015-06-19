@@ -17,9 +17,9 @@ crch(formula, data, subset, na.action, weights, offset,
 
 trch(\dots)
 
-crch.fit(x, z, y, left, right, dist = "gaussian", df = NULL, 
-  link.scale = "log", weights = NULL, offset = NULL, 
-  control = crch.control(), truncated = FALSE) 
+crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
+  df = NULL, link.scale = "log", weights = NULL, offset = NULL, 
+  control = crch.control()) 
 }
 \arguments{
   \item{formula}{a formula expression of the form \code{y ~ x | z} where
