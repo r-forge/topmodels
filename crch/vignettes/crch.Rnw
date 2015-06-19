@@ -16,14 +16,15 @@
 \Plainauthor{Jakob W. Messner, Georg J. Mayr, Achim Zeileis}
 
 \Abstract{
-  This paper presents the crch package to fit censored or truncated regression
-  models with conditional heteroscedasticity. It provides a convenient interface
-  to maximum likelihood and several standard methods for analysis and
-  prediction. Censored or truncated Gaussian, logistic, or student-t
-  distributions are supported and conditional heteroscedasticity can be
-  considered with different regressors for location and scale. This paper
-  describes the models and their R implementation and illustrates them with
-  numerical weather prediction data of precipitation in Innsbruck (Austria).
+  The \CRANpkg{crch} package provides functions for maximum likelihood
+  estimation of censored or truncated regression models with conditional
+  heteroscedasticity along with suitable standard methods to summarize the
+  fitted models and compute predictions, residuals, etc. The supported
+  distributions include left- or right-censored or truncated Gaussian, logistic,
+  or student-t distributions with potentially different sets of regressors for
+  modeling the conditional location and scale. The models and their \proglang{R}
+  implementation is introduced and illustrated by numerical weather prediction
+  tasks using precipitation data for Innsbruck (Austria).
 }
 
 \Keywords{censored regression, truncated regression, tobit model, Cragg model, heteroskedasticity, \proglang{R}}
@@ -68,7 +69,7 @@ the data is truncated.
 The tobit \citep{tobin1958} and truncated regression \citep{cragg1971} models
 are common linear regression models that consider censored and truncated
 responses respectively.  Beside truncated data, truncated regression is also
-used in two part models \citep{cragg1971} for censored type data: A binary
+used in two-part models \citep{cragg1971} for censored type data: A binary
 (e.g., probit) regression model fits the exceedance probability of the lower
 limit and a truncated regression model fits the value given the lower limit is
 exceeded. %Such a model excells a tobit type models if exceedance and value are
@@ -77,10 +78,10 @@ not completely driven by the same process.
 Usually linear models like the tobit or truncated regression models assume
 homoscedasticity which means that the variance does not dependent on covariates.
 However, sometimes this assumption does not hold and models that can consider
-conditional heteroscedasticity should be used. Such models have been proposed
+conditional heteroscedasticity should be used. Such models have been proposed,
 e.g., for generalized linear models \citep{nelder1987, smyth1989}, generalized
 additive models \citep{rigby1996, rigby2005}, or beta regression
-\citep{simas2010}. There also exist several R packages with functions
+\citep{cribarineto2010}. There also exist several \proglang{R} packages with functions
 implementing the above models, e.g., \CRANpkg{dglm}, \CRANpkg{glmx},
 \CRANpkg{gamlss}, \CRANpkg{betareg} amongs others.
 
@@ -93,7 +94,7 @@ distributions.
 
 The outline of the paper is as follows. Section~\ref{sec_models} describes the
 censored and truncated regression models, and Section~\ref{sec_impl} presents
-their R implementation. Section~\ref{sec_examples} illustrates the package
+their \proglang{R} implementation. Section~\ref{sec_examples} illustrates the package
 functions with numerical weather prediction data of precipitation in Innsbruck
 (Austria) and finally Section~\ref{sec_summary} summarizes the paper.
 
@@ -192,7 +193,7 @@ In that case the coefficients $\beta$, $\gamma$, and $\nu$ can be estimated by m
   l(\beta, \gamma, \nu) = \sum_{i=1}^n \log(f_{\mathit{tr}}(y_i, \mu_i, \sigma_i))
 \end{equation}
 
-\section{R implementation}\label{sec_impl}
+\section[R implementation]{\proglang{R} implementation}\label{sec_impl}
 
 The models described in the previous section can both be fitted with the
 \code{crch()} function provided by the \CRANpkg{crch} package.  This function
@@ -210,12 +211,12 @@ usage.
 %
 Here \code{formula}, \code{data}, \code{na.action}, \code{weights}, and
 \code{offset} have their standard model frame meanings
-\citep[e.g.][]{chambers1992}. However, as provided in the \CRANpkg{Formula}
-package \code{formula} can have two parts separated by \samp{|} where the first
+\citep[e.g.,][]{chambers1992}. However, as provided in the \CRANpkg{Formula}
+package \cite{zeileis2010} \code{formula} can have two parts separated by \samp{|} where the first
 part defines the location model and the second part the scale model. E.g., with
-\code{y~\textasciitilde~x1~+~x2~|~z1~+~z2} the location model is specified by
-\code{y~\textasciitilde~x1~+~x2} and the scale model by
-\code{\textasciitilde~z1~+~z2}.
+\code{y ~ x1 + x2 | z1 + z2} the location model is specified by
+\code{y ~ x1 + x2} and the scale model by
+\code{~ z1 + z2}.
 
 The link function $g(\cdot)$ for the scale model can be specified by
 \code{link.scale}. The default is \code{"log"}, also supported are
@@ -237,7 +238,7 @@ censored or truncated model is estimated. Note that also a convenience function
 \code{trch()} exists that is equivalent to \code{crch()} but with default
 \code{truncated = TRUE}.
 
-The maximum likelihood estimation is carried out with the R function
+The maximum likelihood estimation is carried out with the \proglang{R} function
 \code{optim} using control options specified in \code{crch.control}. By default
 the \code{"BFGS"} method is applied. If no starting values are supplied,
 coefficients from \code{lm()} are used as starting values for the location part.
@@ -261,25 +262,23 @@ extractor methods for \code{"crch"} objects that are listed in
 Table~\ref{tab_methods}
 
 \begin{table}[t!]
-\begin{tabular}{|l|p{11cm}|}
+\centering
+\begin{tabular}{lp{12.3cm}}
   \hline
-  \code{print()} & prints function call and estimated coefficients \\
+  Function & Description \\
   \hline
-  \code{summary()} & standard regression output (coefficient estimates, standard errors, partial Wald tests). Returns an object of class \code{"summary.crch"} containing summary statistics which has a \code{print()} method.\\
+  \code{print()} & Print function call and estimated coefficients. \\
+  \code{summary()} & Standard regression output (coefficient estimates, standard errors, partial Wald tests). Returns an object of class \code{"summary.crch"} containing summary statistics which has a \code{print()} method.\\
   \hline
-  \code{coef()} & extract model coefficients. \code{model} specifies whether a single vector containing all coefficients (\code{"full"}) or the coefficients for the location (\code{"location"}), scale (\code{"scale"}) or degrees of freedom (\code{"df"}) model are returned.\\
+  \code{coef()} & Extract model coefficients where \code{model} specifies whether a single vector containing all coefficients (\code{"full"}) or the coefficients for the location (\code{"location"}), scale (\code{"scale"}) or degrees of freedom (\code{"df"}) are returned.\\
+  \code{vcov()} & Variance-covariance matrix of the estimated coefficients.\\
   \hline
-  \code{vcov()} & covariance matrix\\
+  \code{predict()} & Predictions for new data where \code{"type"} controls whether location (\code{"response"}/\code{"location"}), scale (\code{"scale"}) or quantiles (\code{"quantile"}) are predicted. Quantile probabilies are specified by \code{at}. \\
+  \code{fitted()} & Fitted values for observed data where \code{"type"} controls whether location (\code{"location"}) or scale (\code{"scale"}) values are returned. \\
+  \code{residuals()} & Extract various types of residuals where \code{type} can be \code{"standardized"} (default), \code{"pearson"}, \code{"response"}, or \code{"quantile"}.\\
   \hline
-  \code{predict()} & predictions for new data. \code{"type"} controls whether location (\code{"response"}/\code{"location"}), scale (\code{"scale"}) or quantiles (\code{"quantile"}) are predicted. Quantile probabilies are specified by \code{at}. \\
-  \hline
-  \code{fitted()} & fitted values for observed data. \code{"type"} controls whether location (\code{"location"}) or scale (\code{"scale"}) values are returned. \\
-  \hline
-  \code{residuals()} & extract residuals. \code{type} controls whether standardized (\code{"standardized"}; the default), Pearson (\code{"pearson"}) or response (\code{"response"}) residuals are returned.\\
-  \hline
-  \code{terms()} & extract terms of model components.\\
-  \hline
-  \code{logLik()} & extract fitted log-likelihood.\\
+  \code{terms()} & Extract terms of model components.\\
+  \code{logLik()} & Extract fitted log-likelihood.\\
   \hline
 \end{tabular}
 \caption{Functions and methods for objects of class \code{"crch"}.}\label{tab_methods}
@@ -318,7 +317,7 @@ distributions including truncated regression for wind
 
 The following example applies heteroscedastic censored regression with a
 logistic distribution assumption to precipitation data in Innsbruck (Austria).
-Furthermore a two part model tests whether the occurence of precipitation and
+Furthermore a two-part model tests whether the occurence of precipitation and
 its amount are driven by the same process.
 
 First, the \pkg{crch} package is loaded together with a contained precipitation
@@ -426,7 +425,7 @@ legend("topright", lwd = c(2,2,1), lty = c(1,2,1), col = c(1,2,4), c("student-t"
 \caption{Probability density functions of a student-t distribution with \Sexpr{round(exp(tail(coef(CRCHstud), 1)), 2)} degrees of freedom, a logistic, and a normal distribution. The densities of the logistic and normal distribution are scaled to facilitate comparison.}\label{fig_dist}
 \end{figure}
 %
-Next we compare the censored model with a two part model consisting of a
+Next we compare the censored model with a two-part model consisting of a
 heteroscedastic logit model and a truncated regression model with logsitic
 distribution assumption. For the heteroscedastic logit model we use
 \code{hetglm()} from the \CRANpkg{glmx} package and for the truncated model we
@@ -454,10 +453,10 @@ cbind("CRCH" = c(coef(CRCH, "location")/exp(coef(CRCH, "scale"))[1],
 %
 The different (scaled) coefficients indicate that different processes drive the
 occurence of precipitation and its amount.  This is also confirmed by AIC and
-BIC that are clearly superiour for the two part than for the censored model:
+BIC that are clearly superiour for the two-part than for the censored model:
 %
 <<>>=
-loglik <- c("censored" = logLik(CRCH), "Two-Part" = logLik(BIN) + logLik(TRCH))
+loglik <- c("Censored" = logLik(CRCH), "Two-Part" = logLik(BIN) + logLik(TRCH))
 df <- c(4, 7)
 aic <- -2 * loglik + 2 * df
 bic <- -2 * loglik + log(nrow(RainIbk)) * df
@@ -509,15 +508,15 @@ of precipitation. In the two-part model the probability to stay below a
 threshold $q$ is composed of 
 %
 \begin{equation}
-  P(y \le q) = 1-P(y > 0) + P(y>0)*P(y \le q|y>0)
+  P(y \le q) = 1-P(y > 0) + P(y>0) \cdot P(y \le q|y>0)
 \end{equation}
 Thus median precipitation equals the $(P(y > 0) - 0.5)/P(y>0)$-quantile of the truncated distribution.
 <<>>=
 p <- predict(BIN, newdata)
-predict(TRCH, newdata, type = "quantile", at = (p-0.5)/p)^2
+predict(TRCH, newdata, type = "quantile", at = (p - 0.5)/p)^2
 @
 %
-Probabilities to exceed e.g., 5mm can be predicted with cumulative distribution
+Probabilities to exceed, e.g., 5mm can be predicted with cumulative distribution
 functions (e.g., \code{pclogis()}, \code{ptlogis()}) that are also provided in
 the \pkg{crch} package.
 %
@@ -543,7 +542,7 @@ models. These functions extend \code{tobit()} from \CRANpkg{AER} and
 \CRANpkg{crch} is also related to \CRANpkg{dglm}, \CRANpkg{glmx} for
 heteroscedastic generalized linear models, \CRANpkg{betareg} for beta regression
 with a dispersion model, and \CRANpkg{gamlss} to fit generalized additive models
-for location, scale, and shape. Note that with the addon packages
+for location, scale, and shape. Note that with the add-on packages
 \CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr} \CRANpkg{gamlss} provides a very
 powerfull toolbox to also fit crch models -- possibly also with non-linear
 smooth effects. However, \CRANpkg{crch} provides a convenient interface for the
