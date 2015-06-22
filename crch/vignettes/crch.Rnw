@@ -67,30 +67,33 @@ velocities exceeding the speed limit are reported and those below are omitted
 the data is truncated.
 
 The tobit \citep{tobin1958} and truncated regression \citep{cragg1971} models
-are common linear regression models that consider censored and truncated
-responses respectively.  Beside truncated data, truncated regression is also
+are common linear regression models for censored and truncated conditionally
+normally distributed responses respectively.  
+Beside truncated data, truncated regression is also
 used in two-part models \citep{cragg1971} for censored type data: A binary
 (e.g., probit) regression model fits the exceedance probability of the lower
 limit and a truncated regression model fits the value given the lower limit is
 exceeded. %Such a model excells a tobit type models if exceedance and value are
-not completely driven by the same process.
+%not completely driven by the same process.
 
 Usually linear models like the tobit or truncated regression models assume
-homoscedasticity which means that the variance does not dependent on covariates.
+homoscedasticity which means that the variance of an underlying normal
+distribution does not dependent on covariates.
 However, sometimes this assumption does not hold and models that can consider
 conditional heteroscedasticity should be used. Such models have been proposed,
 e.g., for generalized linear models \citep{nelder1987, smyth1989}, generalized
 additive models \citep{rigby1996, rigby2005}, or beta regression
 \citep{cribarineto2010}. There also exist several \proglang{R} packages with functions
-implementing the above models, e.g., \CRANpkg{dglm}, \CRANpkg{glmx},
-\CRANpkg{gamlss}, \CRANpkg{betareg} amongs others.
+implementing the above models, e.g., \CRANpkg{dglm} \citep{dunn2014}, 
+\CRANpkg{glmx} \citep{zeileis2013}, \CRANpkg{gamlss} \citep{rigby2005}, 
+\CRANpkg{betareg} \citep{zeileis2012} amongs others.
 
 The \CRANpkg{crch} package extends censored and truncated regression models to
 consider conditional heteroscedasticity. It has a convenient interface to
 estimate these models with maximum likelihood and provides several methods for
 analysis and prediction. Beside the typical conditional Gaussian distribution
-assumptions it also allows for heavier tail logistic and student-t
-distributions.
+assumptions it also allows for logistic and student-t
+distributions with heavier tails.
 
 The outline of the paper is as follows. Section~\ref{sec_models} describes the
 censored and truncated regression models, and Section~\ref{sec_impl} presents
@@ -121,7 +124,7 @@ where $\beta=(\beta_0, \beta_1, \beta_2, \ldots)^\top$ and $\gamma=(\gamma_0,
 \gamma_1, \gamma_2, \ldots)^\top$ are coefficient vectors. The link function
 $g(\cdot):\mathbb{R}^+ \mapsto \mathbb{R}$ is a strictly increasing and twice
 differentiable function; e.g., the log ($g(\sigma)=\log(\sigma)$) is a well
-suited function. Although they also support negative values, the identity
+suited function. Although they only map to $\mathbb{R}^+$, the identity
 $g(\sigma) = \sigma$ or the quadratic function $g(\sigma)=\sigma^2$ can be
 usefull as well. However, problems in the numerical optimization can occur.
 
@@ -131,7 +134,7 @@ assumed to be a standard logistic or a student-t distribution if heavier tails
 are required. The tail weight of the student-t distribution can be controlled by
 the degrees of freedom $\nu$ which can either be set to a certain value or
 estimated as an additional parameter. To assure positive values $\log(\nu)$ is
-modeled.
+modeled in the latter case.
 %
 \begin{equation}\label{eq_dfest}
   \log(\nu) = \delta
@@ -149,22 +152,22 @@ mapped to the interval limits
     \mathit{right} & y^* \ge \mathit{right} \end{cases}
 \end{equation}
 %
-The coefficients $\beta$, $\gamma$, and $\nu$
+The coefficients $\beta$, $\gamma$, and $\delta$
 (Equations~\ref{eq_mu}--\ref{eq_dfest}) can be estimated by maximizing the
-log-likelihood function  $l(\beta, \gamma, \nu) = \sum_{i = 1}^n \log(L_i(\mu_i,
-\sigma_i))$, where
+sum over the data set of the log-likelihood function 
+$\log(f_{\mathit{cens}}(y, \mu, \sigma))$, where
 %
 \begin{equation}
-  L_i(\mu_i, \sigma_i) =  
-    \begin{cases} F\left(\frac{\mathit{left} - \mu_i}{\sigma_i}\right)
-      & y_i \le \mathit{left} \\
-    f\left(\frac{y_i - \mu_i}{\sigma_i}\right)
-      & \mathit{left} < y_i < \mathit{right} \\
-    \left(1 - F\left(\frac{\mathit{right} - \mu_i}{\sigma_i}\right)\right)
-      & y_i \ge \mathit{right} \end{cases}
+  f_{\mathit{cens}}(y, \mu, \sigma) =  
+    \begin{cases} F\left(\frac{\mathit{left} - \mu}{\sigma}\right)
+      & y \le \mathit{left} \\
+    f\left(\frac{y - \mu}{\sigma}\right)
+      & \mathit{left} < y < \mathit{right} \\
+    \left(1 - F\left(\frac{\mathit{right} - \mu}{\sigma}\right)\right)
+      & y \ge \mathit{right} \end{cases}
 \end{equation}
 %
-where the subscript $i=1,\ldots, n$ denotes the events in the data set and $F()$
+$F()$
 and $f()$ are the cumulative distribution function and the probability density
 function of $D$ respectively. If $D$ is the normal distribution this model is a
 heteroscedastic variant of the tobit model \citep{tobin1958}.
@@ -187,10 +190,10 @@ Then $y$ follows a truncated distribution with probability density function
     F\left(\frac{\mathit{left} - \mu}{\sigma}\right)}
 \end{equation}
 %
-In that case the coefficients $\beta$, $\gamma$, and $\nu$ can be estimated by maximizing the log-likelihood function 
+In that case the coefficients $\beta$, $\gamma$, and $\delta$ can be estimated by maximizing the sum over the data set of the log-likelihood function 
 %
 \begin{equation}
-  l(\beta, \gamma, \nu) = \sum_{i=1}^n \log(f_{\mathit{tr}}(y_i, \mu_i, \sigma_i))
+  \log(f_{\mathit{tr}}(y, \mu, \sigma))
 \end{equation}
 
 \section[R implementation]{\proglang{R} implementation}\label{sec_impl}
@@ -212,7 +215,7 @@ usage.
 Here \code{formula}, \code{data}, \code{na.action}, \code{weights}, and
 \code{offset} have their standard model frame meanings
 \citep[e.g.,][]{chambers1992}. However, as provided in the \CRANpkg{Formula}
-package \cite{zeileis2010} \code{formula} can have two parts separated by \samp{|} where the first
+package \citep{zeileis2010} \code{formula} can have two parts separated by \samp{|} where the first
 part defines the location model and the second part the scale model. E.g., with
 \code{y ~ x1 + x2 | z1 + z2} the location model is specified by
 \code{y ~ x1 + x2} and the scale model by
@@ -518,7 +521,7 @@ predict(TRCH, newdata, type = "quantile", at = (p - 0.5)/p)^2
 %
 Probabilities to exceed, e.g., 5mm can be predicted with cumulative distribution
 functions (e.g., \code{pclogis()}, \code{ptlogis()}) that are also provided in
-the \pkg{crch} package.
+the \pkg{crch} package. 
 %
 <<>>=
 mu <- predict(CRCH, newdata, type = "location")
@@ -529,6 +532,9 @@ mu <- predict(TRCH, newdata, type = "location")
 sigma <- predict(TRCH, newdata, type = "scale")
 p * ptlogis(sqrt(5), mu, sigma, lower.tail = FALSE, left = 0)
 @
+%
+Note, that \code{pclogis()} could be replaced by \code{plogis()} since they
+are equivalent between $\mathit{left}$ and $\mathit{right}$
 
 \section{Summary}\label{sec_summary}
 
