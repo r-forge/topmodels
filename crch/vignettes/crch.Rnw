@@ -220,6 +220,9 @@ part defines the location model and the second part the scale model. E.g., with
 \code{y ~ x1 + x2 | z1 + z2} the location model is specified by
 \code{y ~ x1 + x2} and the scale model by
 \code{~ z1 + z2}.
+Known offsets can be specified for the location model by \code{offset} or
+for both, the location and scale model, inside \code{formula}, i.e., 
+\code{y ~ x1 + x2 + offset(x3) | z1 + z2 + offset(z3)}.
 
 The link function $g(\cdot)$ for the scale model can be specified by
 \code{link.scale}. The default is \code{"log"}, also supported are
@@ -293,6 +296,16 @@ random number, and quantile functions for censored and truncated normal,
 logistic, and student-t distributions. Furthermore it also provides a function
 \code{hxlr} (heteroscedastic extended logistic regression) to fit
 heteroscedastic interval-censored regression models \citep{messner2013a}.
+
+Note that \CRANpkg{gamlss} \citep{rigby2005} with the add-on packages
+\CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr} provides a very
+powerfull toolbox to also fit crch models -- possibly also with non-linear
+smooth effects. However, \CRANpkg{crch} provides a convenient interface for the
+special cases of linear censored and truncated regression models with Gaussian,
+logistic or student-t distribution. Gradients and Hessian matrix are computed
+analytically (except for student-t distribution with estimated degrees of
+freedom) and convenient methods like \code{predict()}, \code{residuals()},
+\code{logLik()}, $\ldots$ are available.
 
 \section{Example}\label{sec_examples}
 
@@ -544,19 +557,18 @@ these models is not fullfilled. This paper presented the \CRANpkg{crch} package
 that provides functions to fit heteroscedastic censored or truncated response
 models. These functions extend \code{tobit()} from \CRANpkg{AER} and
 \code{survreg()} from \CRANpkg{survival} or \code{truncreg()} from
-\CRANpkg{truncreg}. With the possibility to model the dispersion separately,
-\CRANpkg{crch} is also related to \CRANpkg{dglm}, \CRANpkg{glmx} for
-heteroscedastic generalized linear models, \CRANpkg{betareg} for beta regression
-with a dispersion model, and \CRANpkg{gamlss} to fit generalized additive models
-for location, scale, and shape. Note that with the add-on packages
-\CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr} \CRANpkg{gamlss} provides a very
-powerfull toolbox to also fit crch models -- possibly also with non-linear
-smooth effects. However, \CRANpkg{crch} provides a convenient interface for the
-special cases of linear censored and truncated regression models with Gaussian,
-logistic or student-t distribution. Gradients and Hessian matrix are computed
-analytically (except for student-t distribution with estimated degrees of
-freedom) and convenient methods like \code{predict}, \code{residuals},
-\code{logLik}, $\ldots$ are available.
+\CRANpkg{truncreg}. 
+%With the possibility to model the dispersion separately,
+%\CRANpkg{crch} is also related to \CRANpkg{dglm}, \CRANpkg{glmx} for
+%heteroscedastic generalized linear models, \CRANpkg{betareg} for beta regression
+%with a dispersion model, and \CRANpkg{gamlss} to fit generalized additive models
+%for location, scale, and shape. 
+%
+\CRANpkg{crch} provides a convenient interface to maximum likelihood estimation of
+linear censored and truncated regression models. It supports Gaussian,
+logistic or student-t distributed censored or truncated respones 
+and provides convenient methods for analysis and prediction
+like e.g., \code{predict()}, \code{summary()}, \code{residuals()}, \code{logLik()}.
 
 
 \bibliography{crch}
