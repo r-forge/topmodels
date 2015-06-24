@@ -1,0 +1,346 @@
+
+R version 3.2.1 (2015-06-18) -- "World-Famous Astronaut"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "crch"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> library('crch')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("RainIbk")
+> ### * RainIbk
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: RainIbk
+> ### Title: Precipitation Observations and Forecasts for Innsbruck
+> ### Aliases: RainIbk
+> ### Keywords: datasets
+> 
+> ### ** Examples
+> 
+> ## Spread skill relationship ##
+> 
+> ## load and prepare data
+> data(RainIbk)
+> 
+> ## mean and standard deviation of square root transformed ensemble forecasts
+> RainIbk$sqrtensmean <- 
++   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
+> RainIbk$sqrtenssd <- 
++   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]),  1, sd)
+> 
+> ## quintiles of sqrtenssd
+> sdcat <- cut(RainIbk$sqrtenssd, c(-Inf, quantile(RainIbk$sqrtenssd, 
++   seq(0.2,0.8,0.2)), Inf), labels = c(1:5))
+> 
+> ## mean forecast errors for each quintile
+> m <- NULL
+> for(i in levels(sdcat)) {
++   m <- c(m, mean((sqrt(RainIbk$rain)[sdcat == i] -
++   RainIbk$sqrtensmean[sdcat == i])^2, na.rm = TRUE))
++ }
+> 
+> ## plot
+> boxplot((sqrt(rain) - sqrtensmean)^2~sdcat, RainIbk, 
++   xlab = "Quintile of ensemble standard deviation", 
++   ylab = "mean squared error", main = "Spread skill relationship")
+> 
+> 
+> 
+> 
+> cleanEx()
+> nameEx("crch")
+> ### * crch
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: crch
+> ### Title: Censored Regression with Conditional Heteroscedasticy
+> ### Aliases: crch trch crch.fit
+> ### Keywords: regression
+> 
+> ### ** Examples
+> 
+> data("RainIbk")
+> ## mean and standard deviation of square root transformed ensemble forecasts
+> RainIbk$sqrtensmean <- 
++   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
+> RainIbk$sqrtenssd <- 
++   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
+> 
+> ## fit linear regression model with Gaussian distribution 
+> CRCH <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, dist = "gaussian")
+> ## same as lm?
+> all.equal(coef(lm(sqrt(rain) ~ sqrtensmean, data = RainIbk)),
++   head(coef(CRCH), -1))
+[1] TRUE
+> 
+> ## print
+> CRCH
+
+Call:
+crch(formula = sqrt(rain) ~ sqrtensmean, data = RainIbk, dist = "gaussian")
+
+Coefficients (location model):
+(Intercept)  sqrtensmean  
+     0.1468       0.5817  
+
+Coefficients (scale model with log link):
+(Intercept)  
+     0.4945  
+
+Distribution: gaussian
+
+> ## summary
+> summary(CRCH)
+
+Call:
+crch(formula = sqrt(rain) ~ sqrtensmean, data = RainIbk, dist = "gaussian")
+
+Standardized residuals:
+    Min      1Q  Median      3Q     Max 
+-2.4256 -0.7120 -0.1562  0.5786  4.8408 
+
+Coefficients (location model):
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  0.14683    0.05456   2.691  0.00713 ** 
+sqrtensmean  0.58173    0.01540  37.781  < 2e-16 ***
+
+Coefficients (scale model with log link):
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  0.49454    0.01003   49.31   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Distribution: gaussian
+Log-likelihood: -9512 on 3 Df
+Number of iterations in BFGS optimization: 3 
+> 
+> ## left censored regression model with censoring point 0:
+> CRCH2 <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, 
++   dist = "gaussian", left = 0)
+> 
+> ## left censored regression model with censoring point 0 and 
+> ## conditional heteroscedasticy:
+> CRCH3 <- crch(sqrt(rain) ~ sqrtensmean|sqrtenssd, data = RainIbk, 
++   dist = "gaussian",  left = 0)
+> 
+> ## left censored regression model with censoring point 0 and 
+> ## conditional heteroscedasticy with logistic distribution:
+> CRCH4 <- crch(sqrt(rain) ~ sqrtensmean|sqrtenssd, data = RainIbk, 
++   dist = "logistic", left = 0)
+> 
+> ## compare AIC 
+> AIC(CRCH, CRCH2, CRCH3, CRCH4)
+      df      AIC
+CRCH   3 19029.75
+CRCH2  3 17961.76
+CRCH3  4 17914.41
+CRCH4  4 17867.35
+> 
+> 
+> 
+> cleanEx()
+> nameEx("hxlr")
+> ### * hxlr
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: hxlr
+> ### Title: Heteroscedastic Extended Logistic Regression
+> ### Aliases: hxlr
+> ### Keywords: regression
+> 
+> ### ** Examples
+> 
+> data("RainIbk")
+> ## mean and standard deviation of square root transformed ensemble forecasts
+> RainIbk$sqrtensmean <- 
++   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
+> RainIbk$sqrtenssd <- 
++   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
+> 
+> ## climatological deciles
+> q <- unique(quantile(RainIbk$rain, seq(0.1, 0.9, 0.1)))
+> 
+> ## fit ordinary extended logistic regression with ensemble mean as 
+> ## predictor variable
+> XLR <- hxlr(sqrt(rain) ~ sqrtensmean, data = RainIbk, thresholds = sqrt(q))
+Loading required namespace: ordinal
+> ## print
+> XLR
+
+Call:
+hxlr(formula = sqrt(rain) ~ sqrtensmean, data = RainIbk, thresholds = sqrt(q))
+
+Coefficients (location model):
+(Intercept)   thresholds  sqrtensmean  
+     0.8261       0.8303       0.6792  
+
+No coefficients (in scale model)
+
+---
+> ## summary
+> summary(XLR)
+
+Call:
+hxlr(formula = sqrt(rain) ~ sqrtensmean, data = RainIbk, thresholds = sqrt(q))
+
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  0.82607    0.06242   13.23   <2e-16 ***
+thresholds   0.83031    0.01247   66.61   <2e-16 ***
+sqrtensmean  0.67925    0.01889   35.96   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Log-likelihood: -9733 on 3 Df
+Number of iterations in BFGS optimization: 12 
+> 
+> 
+> ## fit ordinary extended logistic regression with ensemble mean 
+> ## and standard deviation as predictor variables
+> XLRS <- hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = RainIbk, 
++   thresholds = sqrt(q))
+> ## fit heteroscedastic extended logistic regression with ensemble 
+> ## standard deviation as predictor for the scale
+> HXLR <- hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = RainIbk, 
++   thresholds = sqrt(q))
+> 
+> ## compare AIC of different models
+> AIC(XLR, XLRS, HXLR)
+     df      AIC
+XLR   3 19471.48
+XLRS  4 19470.93
+HXLR  4 19417.48
+> 
+> ## XLRS and HXLR are nested in XLR -> likelihood-ratio-tests
+> library("lmtest")
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+> lrtest(XLR, XLRS)
+Likelihood ratio test
+
+Model 1: sqrt(rain) ~ sqrtensmean | 1
+Model 2: sqrt(rain) ~ sqrtensmean + sqrtenssd | 1
+  #Df  LogLik Df  Chisq Pr(>Chisq)
+1   3 -9732.7                     
+2   4 -9731.5  1 2.5425     0.1108
+> lrtest(XLR, HXLR)
+Likelihood ratio test
+
+Model 1: sqrt(rain) ~ sqrtensmean | 1
+Model 2: sqrt(rain) ~ sqrtensmean | sqrtenssd
+  #Df  LogLik Df  Chisq Pr(>Chisq)    
+1   3 -9732.7                         
+2   4 -9704.7  1 55.999  7.252e-14 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> ## Not run: 
+> ##D ###################################################################
+> ##D ## Cross-validation and bootstrapping RPS for different models 
+> ##D ## (like in Messner 2013). 
+> ##D N <- NROW(RainIbk)
+> ##D ## function that returns model fits
+> ##D fits <- function(data, weights = rep(1, N)) {
+> ##D   list(
+> ##D     "XLR"    = hxlr(sqrt(rain) ~ sqrtensmean, data = data, 
+> ##D       weights = weights, thresholds = sqrt(q)),
+> ##D     "XLR:S"  = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd, data = data, 
+> ##D       weights = weights, thresholds = sqrt(q)),
+> ##D     "XLR:SM" = hxlr(sqrt(rain) ~ sqrtensmean + I(sqrtensmean*sqrtenssd), 
+> ##D       data = data, weights = weights, thresholds = sqrt(q)),
+> ##D     "HXLR"   = hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = data, 
+> ##D       weights = weights, thresholds = sqrt(q)),
+> ##D     "HXLR:S" = hxlr(sqrt(rain) ~ sqrtensmean + sqrtenssd | sqrtenssd, 
+> ##D       data = data, weights = weights, thresholds = sqrt(q))
+> ##D   )
+> ##D }
+> ##D 
+> ##D 
+> ##D ## cross validation
+> ##D id <- sample(1:10, N, replace = TRUE)
+> ##D obs <- NULL
+> ##D pred <- list(NULL)
+> ##D for(i in 1:10) {
+> ##D   ## splitting into test and training data set
+> ##D   trainIndex <- which(id != i)     
+> ##D   testIndex <- which(id == i)			     
+> ##D   ## weights that are used for fitting the models
+> ##D   weights <- as.numeric(table(factor(trainIndex, levels = c(1:N))))
+> ##D   ## testdata
+> ##D   testdata <- RainIbk[testIndex,]
+> ##D   ## observations    
+> ##D   obs <- c(obs, RainIbk$rain[testIndex])
+> ##D   ## estimation
+> ##D   modelfits <- fits(RainIbk, weights)
+> ##D   ## Prediction
+> ##D   pred2 <- lapply(modelfits, predict, newdata = testdata, type = "cumprob")
+> ##D   pred <- mapply(rbind, pred, pred2, SIMPLIFY = FALSE)
+> ##D }
+> ##D names(pred) <- c(names(modelfits))
+> ##D 
+> ##D ## function to compute RPS
+> ##D rps <- function(pred, obs) {
+> ##D   OBS <- NULL
+> ##D   for(i in 1:N) 
+> ##D     OBS <- rbind(OBS, rep(0:1, c(obs[i] - 1, length(q) - obs[i] + 1)))
+> ##D   apply((OBS-pred)^2, 1, sum)
+> ##D }
+> ##D 
+> ##D ## compute rps
+> ##D RPS <- lapply(pred, rps, obs = as.numeric(cut(obs, c(-Inf, q, Inf))))
+> ##D 
+> ##D ## bootstrapping mean rps 
+> ##D rpsall <- NULL
+> ##D for(i in 1:250) {
+> ##D   index <- sample(length(obs), replace = TRUE)
+> ##D   rpsall <- rbind(rpsall, sapply(RPS, function(x) mean(x[index])))
+> ##D }
+> ##D   
+> ##D rpssall <- 1 - rpsall/rpsall[,1]
+> ##D boxplot(rpssall[,-1], ylab = "RPSS", main = "RPSS relative to XLR")
+> ##D abline(h = 0, lty = 2)
+> ## End(Not run)
+> 
+> 
+> 
+> ### * <FOOTER>
+> ###
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  4.708 0.028 4.746 0 0 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')
