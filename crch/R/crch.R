@@ -1,4 +1,4 @@
-crch <- function(formula, data, subset, na.action, weights, offset,
+crch <- function(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"), 
   dist = c("gaussian", "logistic", "student"), df = NULL,
   left = -Inf, right = Inf, truncated = FALSE , control = crch.control(...),
@@ -131,12 +131,23 @@ crch <- function(formula, data, subset, na.action, weights, offset,
 }
 
 
-trch <- function(...) {
+trch <- function(formula, data, subset, na.action, weights, offset,
+  link.scale = c("log", "identity", "quadratic"), 
+  dist = c("gaussian", "logistic", "student"), df = NULL,
+  left = -Inf, right = Inf, truncated = TRUE , control = crch.control(...),
+  model = TRUE, x = FALSE, y = FALSE, ...) 
+{
   cl <- match.call()
-  crch(..., truncated = TRUE, call = cl)
+  cl2 <- cl
+  cl2[[1]] <- as.name("crch")
+  cl2$truncated <- truncated
+  cl2$call <- as.name("cl")
+  
+  eval(cl2)
 }
 
-crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = FALSE, start = NULL, dot = "separate", ...)
+crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = FALSE, 
+  start = NULL, dot = "separate", ...)
 {
   rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, 
     start = start, dot = dot)
