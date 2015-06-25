@@ -15,7 +15,11 @@ crch(formula, data, subset, na.action, weights, offset,
   left = -Inf, right = Inf, truncated = FALSE, control = crch.control(\dots), 
   model = TRUE, x = FALSE, y = FALSE, \dots)
 
-trch(\dots)
+trch(formula, data, subset, na.action, weights, offset, 
+  link.scale = c("log", "identity", "quadratic"),
+  dist = c("gaussian", "logistic", "student"), df = NULL, 
+  left = -Inf, right = Inf, truncated = TRUE, control = crch.control(\dots), 
+  model = TRUE, x = FALSE, y = FALSE, \dots)
 
 crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   df = NULL, link.scale = "log", weights = NULL, offset = NULL, 
@@ -71,8 +75,8 @@ logistic distributions can be fitted to left- and/or right censored or
 truncated responses. Different regressors can be used to model the location 
 and the scale of this distribution.
 
-\code{trch} is a convenience function to fit truncated regression models 
-(\code{crch} with \code{truncated = TRUE}).
+\code{trch} is a wrapper function for \code{crch} with default 
+\code{truncated = TRUE}.
 
 \code{crch.fit} is the lower level function where the actual
 fitting takes place.
