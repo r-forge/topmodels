@@ -114,9 +114,10 @@ HXLR <- hxlr(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = RainIbk,
 AIC(XLR, XLRS, HXLR)
 
 ## XLRS and HXLR are nested in XLR -> likelihood-ratio-tests
-library("lmtest")
-lrtest(XLR, XLRS)
-lrtest(XLR, HXLR)
+if(require("lmtest")) {
+  lrtest(XLR, XLRS)
+  lrtest(XLR, HXLR)
+}
 
 \dontrun{
 ###################################################################
