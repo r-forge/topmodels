@@ -23,7 +23,7 @@
   distributions include left- or right-censored or truncated Gaussian, logistic,
   or student-t distributions with potentially different sets of regressors for
   modeling the conditional location and scale. The models and their \proglang{R}
-  implementation is introduced and illustrated by numerical weather prediction
+  implementation are introduced and illustrated by numerical weather prediction
   tasks using precipitation data for Innsbruck (Austria).
 }
 
@@ -58,13 +58,16 @@ library("crch")
 
 Censored or truncated response variables occur in a variety of applications.
 Censored data arise if exact values are only reported in a restricted range.
-Data outside this range are also reported but clustered at the range limits. In
+Data may fall outside this range but are reported at the range limits. In
 contrast, if data outside this range are omitted completely we call it
-truncated. E.g., consider that car velocities are measured but the exact values
-are only of interest if they exceed a speed limit. If velocities below that
-limit are reported as $\le$\textit{speed-limit} the data is censored. If only
-velocities exceeding the speed limit are reported and those below are omitted
-the data is truncated.
+truncated. 
+E.g., consider wind measurements with an instrument that needs a certain 
+minimum wind speed to start working. If wind speeds below this minimum are
+recorded as $\le$\textit{minimum} the data is censored. If only wind speeds
+exceeding this limit are reported and those below are omitted the data is 
+truncated.
+Even if the generating process is not as clear, censoring or truncation
+can be useful to consider limited data such as precipitation observations.
 
 The tobit \citep{tobin1958} and truncated regression \citep{cragg1971} models
 are common linear regression models for censored and truncated conditionally
@@ -78,7 +81,7 @@ exceeded. %Such a model excells a tobit type models if exceedance and value are
 
 Usually linear models like the tobit or truncated regression models assume
 homoscedasticity which means that the variance of an underlying normal
-distribution does not dependent on covariates.
+distribution does not depend on covariates.
 However, sometimes this assumption does not hold and models that can consider
 conditional heteroscedasticity should be used. Such models have been proposed,
 e.g., for generalized linear models \citep{nelder1987, smyth1989}, generalized
@@ -86,12 +89,13 @@ additive models \citep{rigby1996, rigby2005}, or beta regression
 \citep{cribarineto2010}. There also exist several \proglang{R} packages with functions
 implementing the above models, e.g., \CRANpkg{dglm} \citep{dunn2014}, 
 \CRANpkg{glmx} \citep{zeileis2013}, \CRANpkg{gamlss} \citep{rigby2005}, 
-\CRANpkg{betareg} \citep{zeileis2012} amongs others.
+\CRANpkg{betareg} \citep{zeileis2012} among others.
 
-The \CRANpkg{crch} package extends censored and truncated regression models to
+The \CRANpkg{crch} package provides functions to fit censored and truncated 
+regression models that
 consider conditional heteroscedasticity. It has a convenient interface to
 estimate these models with maximum likelihood and provides several methods for
-analysis and prediction. Beside the typical conditional Gaussian distribution
+analysis and prediction. In addition to the typical conditional Gaussian distribution
 assumptions it also allows for logistic and student-t
 distributions with heavier tails.
 
@@ -123,7 +127,7 @@ x_2, \ldots)^\top$ and $\mathbf{z} = (1, z_1, z_2, \ldots)^\top$:
 where $\beta=(\beta_0, \beta_1, \beta_2, \ldots)^\top$ and $\gamma=(\gamma_0,
 \gamma_1, \gamma_2, \ldots)^\top$ are coefficient vectors. The link function
 $g(\cdot):\mathbb{R}^+ \mapsto \mathbb{R}$ is a strictly increasing and twice
-differentiable function; e.g., the log ($g(\sigma)=\log(\sigma)$) is a well
+differentiable function; e.g., the log (\mbox{$g(\sigma)=\log(\sigma)$}) is a well
 suited function. Although they only map to $\mathbb{R}^+$, the identity
 $g(\sigma) = \sigma$ or the quadratic function $g(\sigma)=\sigma^2$ can be
 usefull as well. However, problems in the numerical optimization can occur.
@@ -133,7 +137,7 @@ normally distributed with mean $\mu$ and variance $\sigma^2$.  $D$ might also be
 assumed to be a standard logistic or a student-t distribution if heavier tails
 are required. The tail weight of the student-t distribution can be controlled by
 the degrees of freedom $\nu$ which can either be set to a certain value or
-estimated as an additional parameter. To assure positive values $\log(\nu)$ is
+estimated as an additional parameter. To assure positive values, $\log(\nu)$ is
 modeled in the latter case.
 %
 \begin{equation}\label{eq_dfest}
@@ -169,7 +173,7 @@ $\log(f_{\mathit{cens}}(y, \mu, \sigma))$, where
 %
 $F()$
 and $f()$ are the cumulative distribution function and the probability density
-function of $D$ respectively. If $D$ is the normal distribution this model is a
+function of $D$, respectively. If $D$ is the normal distribution this model is a
 heteroscedastic variant of the tobit model \citep{tobin1958}.
 
 \subsection{Truncated regression}
@@ -198,8 +202,18 @@ In that case the coefficients $\beta$, $\gamma$, and $\delta$ can be estimated b
 
 \section[R implementation]{\proglang{R} implementation}\label{sec_impl}
 
-The models described in the previous section can both be fitted with the
-\code{crch()} function provided by the \CRANpkg{crch} package.  This function
+There exist various \proglang{R} packages to fit censored or truncated
+regression models. 
+Especially \CRANpkg{gamlss} \citep{rigby2005} with the add-on packages
+\CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr} provides a
+powerful toolbox to fit heteroscedastic
+models -- possibly also with non-linear smooth effects. 
+
+However, in the following we present the \code{crch()} function
+from the \CRANpkg{crch} package that provides a convenient interface for the
+special cases of linear censored and truncated regression models with Gaussian,
+logistic or student-t distribution. 
+This function
 takes a formula and data, sets up the likelihood function, gradients and Hessian
 matrix and uses \code{optim()} to maximize the likelihood. It returns an
 \proglang{S}3 object for which various standard methods are available. We tried
@@ -297,25 +311,15 @@ logistic, and student-t distributions. Furthermore it also provides a function
 \code{hxlr} (heteroscedastic extended logistic regression) to fit
 heteroscedastic interval-censored regression models \citep{messner2013a}.
 
-Note that \CRANpkg{gamlss} \citep{rigby2005} with the add-on packages
-\CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr} provides a very
-powerfull toolbox to also fit crch models -- possibly also with non-linear
-smooth effects. However, \CRANpkg{crch} provides a convenient interface for the
-special cases of linear censored and truncated regression models with Gaussian,
-logistic or student-t distribution. Gradients and Hessian matrix are computed
-analytically (except for student-t distribution with estimated degrees of
-freedom) and convenient methods like \code{predict()}, \code{residuals()},
-\code{logLik()}, $\ldots$ are available.
-
 \section{Example}\label{sec_examples}
 
-This section shows an example application of censored and truncated regression
+This section shows a weather forecast example application of censored and truncated regression
 models fitted with \code{crch()}. Weather forecasts are usually based on
 numerical weather prediction (NWP) models that take the current state of the
 atmosphere and compute future weather by numerically simulating the most
 important atmospheric processes. However, because of uncertain initial
 conditions and unknown or unresolved processes these numerical predictions are
-always subject to errors.  To estimate these errors many weather centers provide
+always subject to errors.  To estimate these errors, many weather centers provide
 so called ensemble forecasts: several NWP runs that use different initial
 conditions and model formulations. Unfortunately these ensemble forecasts cannot
 consider all error sources so that they are often still biased and uncalibrated.
@@ -333,10 +337,10 @@ distributions including truncated regression for wind
 
 The following example applies heteroscedastic censored regression with a
 logistic distribution assumption to precipitation data in Innsbruck (Austria).
-Furthermore a two-part model tests whether the occurence of precipitation and
-its amount are driven by the same process.
+Furthermore, a two-part model tests whether the occurrence of precipitation and
+the precipitation amount are driven by the same process.
 
-First, the \pkg{crch} package is loaded together with a contained precipitation
+First, the \CRANpkg{crch} package is loaded together with an included precipitation
 data set with forecasts and observations for Innsbruck (Austria)
 %
 <<>>=
@@ -344,8 +348,8 @@ library("crch")
 data("RainIbk", package = "crch")
 @
 %
-The \code{data.frame} \code{RainIbk} contains observed 3 days accumulated
-precipitation amounts (\code{rain}) and corresponding 11 member ensemble
+The \code{data.frame} \code{RainIbk} contains observed 3 day-accumulated
+precipitation amounts (\code{rain}) and the corresponding 11 member ensemble
 forecasts of total accumulated precipitation amount between 5 and 8 days in
 advance (\code{rainfc.1}, \code{rainfc.2}, $\ldots$ \code{rainfc.11}). The
 rownames are the end date of the 3 days over which the precipitation amounts are
@@ -355,12 +359,13 @@ before these dates.
 In previous studies it has been shown that it is of advantage to model the
 square root of precipitation rather than precipitation itself. Thus all
 precipitation amounts are square rooted before ensemble mean and standard
-deviation are derived:
-%
+deviation are derived. Furthermore, events with no variation in the ensemble
+are omitted:
 <<>>=
 RainIbk <- sqrt(RainIbk)
 RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
 RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+RainIbk <- subset(RainIbk, enssd > 0)
 @
 %
 A scatterplot of \code{rain} against \code{ensmean} 
@@ -372,18 +377,19 @@ abline(0,1, col = "red")
 %
 indicates a linear relationship that differs from a 1-to-1 relationship
 (Figure~\ref{fig_scatter}). Precipitation is clearly non-negative with many zero
-observations. Thus censored regression or a two-part model are suitable models
+observations. Thus censored regression or a two-part model are suitable
 to estimate this relationship.
 
 First we fit a logistic censored model for \code{rain} with \code{ensmean} as
-regressor for the location and \code{enssd} as regressor for the scale.
+regressor for the location and \code{log(enssd)} as regressor for the scale.
 %
 <<>>=
-CRCH <- crch(rain ~ ensmean | enssd, data = RainIbk, left = 0, dist = "logistic")
+CRCH <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, 
+  dist = "logistic")
 summary(CRCH)
 @
 %
-Both, \code{ensmean} and \code{enssd} are highly significant according to the
+Both, \code{ensmean} and \code{log(enssd)} are highly significant according to the
 Wald test performed by the \code{summary()} method. The location model is also
 shown in Figure~\ref{fig_scatter}:
 %
@@ -393,7 +399,7 @@ abline(coef(CRCH)[1:2], col = "blue")
 %
 \begin{figure}[t!]
 \centering
-<<fig=TRUE, width=9, height=5>>=
+<<fig=TRUE, width=9, height=5, echo=FALSE>>=
 plot(rain~ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
 abline(0,1, col = "red", lwd = 2)
 abline(coef(CRCH)[1:2], col = "blue", lwd = 2)
@@ -409,13 +415,15 @@ CR <- crch(rain ~ ensmean, data = RainIbk, left = 0, dist = "logistic")
 cbind(AIC(CR, CRCH), BIC = BIC(CR, CRCH)[,2])
 @
 %
-we see that the scale model cleraly improves the fit regarding AIC and BIC.
+we see that the scale model clearly improves the fit regarding AIC and BIC.
 
 A comparison of the logistic model with a Gaussian and a student-t model
 %
 <<>>=
-CRCHgau <- crch(rain ~ ensmean | enssd, data = RainIbk, left = 0, dist = "gaussian")
-CRCHstud <- crch(rain ~ ensmean | enssd, data = RainIbk, left = 0, dist = "student")
+CRCHgau <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, 
+  dist = "gaussian")
+CRCHstud <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, 
+  dist = "student")
 AIC(CRCH, CRCHgau, CRCHstud)
 @
 %
@@ -426,7 +434,7 @@ student-t distribution resembles the (scaled) logistic distribution quite well
 %
 \begin{figure}[t!]
 \centering
-<<fig=TRUE, width=9, height=5>>=
+<<fig=TRUE, width=9, height=5, echo = FALSE>>=
 a <- seq(-5, 5, 0.01)
 df <- exp(tail(coef(CRCHstud), 1))
 #par(mfrow = c(1,2))
@@ -449,14 +457,14 @@ employ the \code{crch()} function with the argument \code{truncated = TRUE}.
 %
 <<>>=
 library("glmx")
-BIN <- hetglm(I(rain > 0) ~ ensmean | enssd, data = RainIbk,
+BIN <- hetglm(I(rain > 0) ~ ensmean | log(enssd), data = RainIbk,
          family = binomial(link = "logit"))
-TRCH <- crch(rain~ensmean | enssd, data = RainIbk, subset = rain > 0, 
+TRCH <- crch(rain~ensmean | log(enssd), data = RainIbk, subset = rain > 0, 
          left = 0, dist = "logistic", truncated = TRUE)
 @
 %
-In the heteroscedastc logit model the intercept of the scale model is not
-identified. Thus, the location coeficients of the censored and truncated
+In the heteroscedastic logit model, the intercept of the scale model is not
+identified. Thus, the location coefficients of the censored and truncated
 regression models have to be scaled to compare them with the logit model.
 %
 <<>>=
@@ -468,8 +476,8 @@ cbind("CRCH" = c(coef(CRCH, "location")/exp(coef(CRCH, "scale"))[1],
 @
 %
 The different (scaled) coefficients indicate that different processes drive the
-occurence of precipitation and its amount.  This is also confirmed by AIC and
-BIC that are clearly superiour for the two-part than for the censored model:
+occurrence of precipitation and its amount.  This is also confirmed by AIC and
+BIC that are clearly better for the two-part model than for the censored model:
 %
 <<>>=
 loglik <- c("Censored" = logLik(CRCH), "Two-Part" = logLik(BIN) + logLik(TRCH))
@@ -534,7 +542,7 @@ predict(TRCH, newdata, type = "quantile", at = (p - 0.5)/p)^2
 %
 Probabilities to exceed, e.g., 5mm can be predicted with cumulative distribution
 functions (e.g., \code{pclogis()}, \code{ptlogis()}) that are also provided in
-the \pkg{crch} package. 
+the \CRANpkg{crch} package. 
 %
 <<>>=
 mu <- predict(CRCH, newdata, type = "location")
@@ -552,8 +560,8 @@ are equivalent between $\mathit{left}$ and $\mathit{right}$
 \section{Summary}\label{sec_summary}
 
 Censored and truncated response models are common in econometrics and other
-statistical applications. However often the homoscedasticity assumtption of
-these models is not fullfilled. This paper presented the \CRANpkg{crch} package
+statistical applications. However often the homoscedasticity assumption of
+these models is not fulfilled. This paper presented the \CRANpkg{crch} package
 that provides functions to fit heteroscedastic censored or truncated response
 models. These functions extend \code{tobit()} from \CRANpkg{AER} and
 \code{survreg()} from \CRANpkg{survival} or \code{truncreg()} from
@@ -568,7 +576,7 @@ models. These functions extend \code{tobit()} from \CRANpkg{AER} and
 linear censored and truncated regression models. It supports Gaussian,
 logistic or student-t distributed censored or truncated respones 
 and provides convenient methods for analysis and prediction
-like e.g., \code{predict()}, \code{summary()}, \code{residuals()}, \code{logLik()}.
+like e.g., \code{predict()}, \code{summary()}, \code{residuals()}, or \code{logLik()}.
 
 
 \bibliography{crch}
