@@ -1,0 +1,16 @@
+\documentclass{article}
+\title{Heteroscedastic censored and truncated regression for weather forecasting}
+\author{Jakob W. Messner, Georg J. Mayr, and Achim Zeileis}
+\begin{document}
+
+
+\maketitle
+
+\textbf{Keywords:} distributional regression, likelihood regression, heteroscedastic tobit, numerical weather prediction, model output statistics.\\
+
+This contribution presents the \textbf{crch} \textsf{R}-package that provides functions to fit censored or truncated regression models with conditional heteroscedasticity. Maximum likelihood estimation is used to fit Gaussian, logistic, or student-t distributions to left and/or right censored or truncated responses. Different regressors can be used to model the location and the log-scale of these distributions. The functions return S3-objects for which standard methods like \texttt{print()}, \texttt{summary()}, \texttt{predict()}, \texttt{coef()}, \texttt{vcov()}, or \texttt{logLik()} are available.
+
+One application of these models is weather forecasting. Weather forecasts are usually based on numerical weather predictions. However, because of uncertain initial conditions and unresolved atmospheric processes these predictions often exhibit errors. To estimate the forecast uncertainty many weather centers provide ensemble predictions: several numerical predictions that use slightly different initial conditions and model formulations. Because these ensemble predictions can not consider all error sources they are often still uncalibrated and can considerably be improved by statistical models like those provided by the \textbf{crch} package. 
+
+With data from the \textbf{crch} package we show that non-negative precipitation can appropriately be modeled with a censored logistic distribution and that the ensemble mean and spread serve as well suited regressors for the location and scale respectively.
+\end{document}
