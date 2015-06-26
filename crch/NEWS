@@ -1,3 +1,32 @@
+Changes in Version 0.9-0
+
+  o Added vignette to introduce the crch() function with some
+    theoretical background and an illustrating example:
+    vignette("crch", package = "crch")
+
+  o The crch() function now also supports truncated responses.
+    Furthermore added a wrapper function trch() to fit truncated
+    regression models.
+
+  o crch(): Analytical gradients and Hessian matrices are provided for most 
+    models to speed up maximum likelihood optimization
+    (not available for student-t distribution with degrees of freedom
+    estimation).  
+
+  o crch(): For the scale model a link function can now be specified
+    (log, identity, or quadratic). In previous version only the log
+    was supported.
+
+  o Added functions for probability density, cumulative distribution, 
+    random numbers, and quantiles for censored and truncated normal, 
+    logistic, and student-t distributions.
+
+  o The residuals() method for crch objects now also provides quantile 
+    residuals (Dunn and Smyth 1996).
+
+  o Added update() method for crch objects.
+
+
 Changes in Version 0.1-0
 
   o First official release of the package on CRAN. See citation("crch")
