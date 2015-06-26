@@ -27,7 +27,7 @@
   tasks using precipitation data for Innsbruck (Austria).
 }
 
-\Keywords{censored regression, truncated regression, tobit model, Cragg model, heteroskedasticity, \proglang{R}}
+\Keywords{censored regression, truncated regression, tobit model, Cragg model, heteroscedasticity, \proglang{R}}
 \Plainkeywords{censored regression, truncated regression, tobit model, Cragg model, heteroskedasticity, R}
 
 \Address{
@@ -201,20 +201,9 @@ In that case the coefficients $\beta$, $\gamma$, and $\delta$ can be estimated b
 \end{equation}
 
 \section[R implementation]{\proglang{R} implementation}\label{sec_impl}
-
-There exist various \proglang{R} packages to fit censored or truncated
-regression models. 
-Especially \CRANpkg{gamlss} \citep{rigby2005} with the add-on packages
-\CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr} provides a
-powerful toolbox to fit heteroscedastic
-models -- possibly also with non-linear smooth effects. 
-
-However, in the following we present the \code{crch()} function
-from the \CRANpkg{crch} package that provides a convenient interface for the
-special cases of linear censored and truncated regression models with Gaussian,
-logistic or student-t distribution. 
-This function
-takes a formula and data, sets up the likelihood function, gradients and Hessian
+The models from the previous section can both be fitted with the \code{crch()} function 
+provided by the \CRANpkg{crch} package.
+This function takes a formula and data, sets up the likelihood function, gradients and Hessian
 matrix and uses \code{optim()} to maximize the likelihood. It returns an
 \proglang{S}3 object for which various standard methods are available. We tried
 to build an interface as similar to \code{glm()} as possible to facilitate the
@@ -293,7 +282,7 @@ Table~\ref{tab_methods}
   \code{coef()} & Extract model coefficients where \code{model} specifies whether a single vector containing all coefficients (\code{"full"}) or the coefficients for the location (\code{"location"}), scale (\code{"scale"}) or degrees of freedom (\code{"df"}) are returned.\\
   \code{vcov()} & Variance-covariance matrix of the estimated coefficients.\\
   \hline
-  \code{predict()} & Predictions for new data where \code{"type"} controls whether location (\code{"response"}/\code{"location"}), scale (\code{"scale"}) or quantiles (\code{"quantile"}) are predicted. Quantile probabilies are specified by \code{at}. \\
+  \code{predict()} & Predictions for new data where \code{"type"} controls whether location (\code{"response"}/\code{"location"}), scale (\code{"scale"}) or quantiles (\code{"quantile"}) are predicted. Quantile probabilities are specified by \code{at}. \\
   \code{fitted()} & Fitted values for observed data where \code{"type"} controls whether location (\code{"location"}) or scale (\code{"scale"}) values are returned. \\
   \code{residuals()} & Extract various types of residuals where \code{type} can be \code{"standardized"} (default), \code{"pearson"}, \code{"response"}, or \code{"quantile"}.\\
   \hline
@@ -310,6 +299,13 @@ random number, and quantile functions for censored and truncated normal,
 logistic, and student-t distributions. Furthermore it also provides a function
 \code{hxlr} (heteroscedastic extended logistic regression) to fit
 heteroscedastic interval-censored regression models \citep{messner2013a}.
+
+Note that alternative to \code{crch()} heteroscedastic censored and truncated models
+could also be fitted by \CRANpkg{gamlss} \citep{rigby2005} with the add-on packages
+\CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr}.
+However, for the special case of linear censored of truncated regression models with
+Gaussian, logistic, or student-t distribution \CRANpkg{crch} provides a
+fast and convenient interface and various useful methods for analysis and prediction.
 
 \section{Example}\label{sec_examples}
 
@@ -555,28 +551,18 @@ p * ptlogis(sqrt(5), mu, sigma, lower.tail = FALSE, left = 0)
 @
 %
 Note, that \code{pclogis()} could be replaced by \code{plogis()} since they
-are equivalent between $\mathit{left}$ and $\mathit{right}$
+are equivalent between $\mathit{left}$ and $\mathit{right}$.
 
 \section{Summary}\label{sec_summary}
-
 Censored and truncated response models are common in econometrics and other
-statistical applications. However often the homoscedasticity assumption of
-these models is not fulfilled. This paper presented the \CRANpkg{crch} package
-that provides functions to fit heteroscedastic censored or truncated response
-models. These functions extend \code{tobit()} from \CRANpkg{AER} and
-\code{survreg()} from \CRANpkg{survival} or \code{truncreg()} from
-\CRANpkg{truncreg}. 
-%With the possibility to model the dispersion separately,
-%\CRANpkg{crch} is also related to \CRANpkg{dglm}, \CRANpkg{glmx} for
-%heteroscedastic generalized linear models, \CRANpkg{betareg} for beta regression
-%with a dispersion model, and \CRANpkg{gamlss} to fit generalized additive models
-%for location, scale, and shape. 
-%
-\CRANpkg{crch} provides a convenient interface to maximum likelihood estimation of
-linear censored and truncated regression models. It supports Gaussian,
-logistic or student-t distributed censored or truncated respones 
-and provides convenient methods for analysis and prediction
-like e.g., \code{predict()}, \code{summary()}, \code{residuals()}, or \code{logLik()}.
+statistical applications. However, often the homoscedasticity assumption of
+these models is not fulfilled. This paper presented the \CRANpkg{crch} package 
+that provides functions to fit censored or truncated regression models
+with conditional heteroscedasticity.
+It supports Gaussian, logistic or student-t distributed censored or truncated 
+responses and provides various convenient methods for analysis and prediction.
+To illustrate the package we applied heteroscedastic censored and truncated models
+to predict precipitation in Innsbruck (Austria).
 
 
 \bibliography{crch}
