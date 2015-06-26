@@ -157,4 +157,4 @@ Two-Part  7 17759.50 17805.08
  *** Run successfully completed ***
 > proc.time()
    user  system elapsed 
-  5.577   0.020   5.590 
+  5.626   0.032   5.649 
