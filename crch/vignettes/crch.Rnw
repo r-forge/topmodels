@@ -243,18 +243,18 @@ estimated by maximum likelihood (Equation~\ref{eq_dfest}).
 
 \code{left} and \code{right} define the lower and upper censoring or truncation
 points respectively. The logical argument \code{truncated} defines whether a
-censored or truncated model is estimated. Note that also a convenience function
+censored or truncated model is estimated. Note that also a wrapper function
 \code{trch()} exists that is equivalent to \code{crch()} but with default
 \code{truncated = TRUE}.
 
 The maximum likelihood estimation is carried out with the \proglang{R} function
-\code{optim} using control options specified in \code{crch.control}. By default
+\code{optim()} using control options specified in \code{crch.control()}. By default
 the \code{"BFGS"} method is applied. If no starting values are supplied,
 coefficients from \code{lm()} are used as starting values for the location part.
 For the scale model the intercept is initialized with the link function of the
-residual standard deviation from \code{lm()}. The remaining coefficients are
-initialized with 0. If the degrees of freedom of a student-t distribution are
-estimated they are initialized by 10. For the student-t distribution with
+residual standard deviation from \code{lm()} and the remaining scale coefficients are
+initialized with 0. If the degrees of freedom of a \mbox{student-t} distribution are
+estimated they are initialized by 10. For the \mbox{student-t} distribution with
 estimated degrees of freedom the covariance matrix estimate is derived from the
 numerical Hessian returned by \code{optim()}. For fixed degrees of freedom and
 Gaussian and logistic distributions the covariance matrix is derived
@@ -294,10 +294,10 @@ Table~\ref{tab_methods}
 \end{table}
 
 Additional to the \code{crch()} function and corresponding methods the
-\pkg{crch} package also provides probability density, cumulative distribution,
+\CRANpkg{crch} package also provides probability density, cumulative distribution,
 random number, and quantile functions for censored and truncated normal,
 logistic, and student-t distributions. Furthermore it also provides a function
-\code{hxlr} (heteroscedastic extended logistic regression) to fit
+\code{hxlr()} (heteroscedastic extended logistic regression) to fit
 heteroscedastic interval-censored regression models \citep{messner2013a}.
 
 Note that alternative to \code{crch()} heteroscedastic censored and truncated models
@@ -472,7 +472,7 @@ cbind("CRCH" = c(coef(CRCH, "location")/exp(coef(CRCH, "scale"))[1],
 @
 %
 The different (scaled) coefficients indicate that different processes drive the
-occurrence of precipitation and its amount.  This is also confirmed by AIC and
+occurrence of precipitation and precipitation amount.  This is also confirmed by AIC and
 BIC that are clearly better for the two-part model than for the censored model:
 %
 <<>>=
@@ -550,7 +550,7 @@ sigma <- predict(TRCH, newdata, type = "scale")
 p * ptlogis(sqrt(5), mu, sigma, lower.tail = FALSE, left = 0)
 @
 %
-Note, that \code{pclogis()} could be replaced by \code{plogis()} since they
+Note, that \code{pclogis()} could also be replaced by \code{plogis()} since they
 are equivalent between $\mathit{left}$ and $\mathit{right}$.
 
 \section{Summary}\label{sec_summary}
@@ -561,8 +561,8 @@ that provides functions to fit censored or truncated regression models
 with conditional heteroscedasticity.
 It supports Gaussian, logistic or student-t distributed censored or truncated 
 responses and provides various convenient methods for analysis and prediction.
-To illustrate the package we applied heteroscedastic censored and truncated models
-to predict precipitation in Innsbruck (Austria).
+To illustrate the package we showed that heteroscedastic censored and truncated models 
+are well suited to improve precipitation forecasts.
 
 
 \bibliography{crch}
