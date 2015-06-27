@@ -121,7 +121,8 @@ fitting takes place.
 \references{
   Messner JW, Zeileis A, Broecker J, Mayr GJ (2014). Probabilistic Wind Power
     Forecasts with an Inverse Power Curve Transformation and Censored Regression.
-    \emph{Wind Energy}, \bold{17}(11), 1753–1766. doi:10.1002/we.1666.
+    \emph{Wind Energy}, \bold{17}(11), 1753–1766. 
+    \url{http://onlinelibrary.wiley.com/doi/10.1002/we.1666/abstract}.
 }
 
 \seealso{\code{\link{predict.crch}}, \code{\link{crch.control}}}
