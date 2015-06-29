@@ -57,27 +57,25 @@
 <<echo=FALSE,fig=TRUE,width=6, height=4.5>>=
 library("zoo")
 library("crch")
-library("lmtest")
 load("RainIbk.rda")
 load("RainAalb.rda")
 
-cols <- c("#780244", "#6069A9", "#2AAD9D", "#BFC48A")
 uibkblue <- rgb(18, 50, 111, maxColorValue = 255)
 uibkorange <- rgb(242, 146, 0, maxColorValue = 255)
+RainIbk <- sqrt(RainIbk)
 RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
 RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
-RainIbk$sqrtensmean <- apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
-RainIbk$sqrtenssd <- apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
+#RainIbk$sqrtensmean <- apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
+#RainIbk$sqrtenssd <- apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, sd)
 Rain <- RainIbk
-Rain$ensmean <- Rain$sqrtensmean
-Rain$enssd <- Rain$sqrtenssd
-Rain$rain <- sqrt(Rain$rain)
 d <- RainIbk[as.POSIXct(rownames(RainIbk)) >= as.POSIXct("2013-10-01") & as.POSIXct(rownames(RainIbk)) < as.POSIXct("2013-11-01"),]
 
+d <- as.data.frame(d^2)
 ylim <- c(0, max(c(d$rain, d$ensmean + 1.5*d$enssd + 32)) )
 
 
 d <- zoo(d, order.by = as.POSIXct(rownames(d)))
+
 
 plot(d$rainfc.1, type = "l", ylim = ylim, col = uibkblue, lwd = 2,
   xlab = "Date", ylab = "precipitation [mm/3 days]", 
@@ -96,7 +94,7 @@ lines(d$rain,col = uibkorange, lwd = 2)
 
 legend("topright", lwd = c(2,2), col = c(uibkblue, uibkorange), 
   bty = "n", legend = c("NWP forecast", "observation"))
-options(SweaveHooks=list(fig=function() par(mar=c(5,4,2,2))))
+#options(SweaveHooks=list(fig=function() par(mar=c(5,4,2,2))))
 @   
 
 \end{overprint}
@@ -105,29 +103,26 @@ options(SweaveHooks=list(fig=function() par(mar=c(5,4,2,2))))
 \frametitle{NWP errors}
 \begin{overprint}
   \onslide<1>
-<<echo=FALSE, results=hide>>=
+<<echo=FALSE, results=hide,fig=TRUE,width=6,height=4.5>>=
 mod1 <- lm(rain ~ ensmean, data = RainIbk)
-png("presentation-scatter1.png", width = 6, height = 4.5, units = "in", res = 300)
-par(mar=c(5,4.5,2,2))
-plot(rain ~ ensmean, RainIbk, pch = 19, col = grey(0.3, alpha = 0.1),
-  xlab = "NWP forecast", ylab = "observations", frame.plot = FALSE)
-abline(0,1, lty = 2, lwd = 0.5)
-dev.off()
+scatter <- function(xlab = "NWP forecast", ylab = "observations") {
+  par(mar=c(5,4.5,2,2))
+  plot(rain ~ ensmean, RainIbk, pch = 19, col = grey(0.3, alpha = 0.1), ylim = c(0,12),
+    xlim = c(0,12), xlab = xlab, ylab = ylab, 
+    frame.plot = FALSE, axes = FALSE)
+  axis(1, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  axis(2, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  abline(0,1, lty = 2, lwd = 0.5)
+}
+scatter()
 @
-    \includegraphics[width=\textwidth]{presentation-scatter1.png}
   \onslide<2>
-<<echo=FALSE,results=hide>>=
-png("presentation-scatter2.png", width = 6, height = 4.5, units = "in", res = 300)
-par(mar=c(5,4.5,2,2))
-plot(rain ~ ensmean, RainIbk, pch = 19, col = grey(0.3, alpha = 0.1),
-  xlab = "NWP forecast", ylab = "observations", frame.plot = FALSE)
-abline(0,1, lty = 2, lwd = 0.5)
+<<echo=FALSE,results=hide,fig=TRUE,width=6,height=4.5>>=
+scatter()
 abline(mod1, col = uibkorange, lwd = 2)
 legend("topleft", col = c(uibkorange), lwd = 2, 
   bty = "n", legend = c("linear regression"))
-dev.off()
 @
-    \includegraphics[width=\textwidth]{presentation-scatter2.png}
 \end{overprint}
 \end{frame}
 
@@ -136,8 +131,7 @@ dev.off()
 %<<echo=FALSE,fig=TRUE, width=6, height=4.5, label = hist>>=
 %hist(RainIbk$rain, breaks = 50, xlab = "precipitation [mm]", main = "", col = uibkblue)
 %@
-
-\end{frame}
+%\end{frame}
 
 \begin{frame}
   \frametitle{Ensemble prediction}
@@ -213,49 +207,92 @@ legend("topright", lwd = c(2,2,2), col = c(uibkorange, adjustcolor(uibkblue, alp
 
 \subsection{Statistical models}
 \begin{frame}
-\frametitle<1>{Heteroscedastic regression}
-\frametitle<2>{Censored regression}
-
-\begin{eqnarray*}
-  y^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
-  \mu &=& \mathbf{x}^\top \beta \\
-  \log(\sigma) &= &\mathbf{z}^\top \gamma
-\end{eqnarray*}
+\frametitle{Heteroscedastic censored regression}
+\begin{overprint}
+  \onslide<1,2>
+  \begin{eqnarray*}
+    \mathit{rain}^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
+    \mu &=& \beta_0 + \beta_1 * \mathit{ensmean} \\
+    \log(\sigma) &= &\gamma_0 + \gamma_1 * \mathit{enssd}
+  \end{eqnarray*}
+%  \onslide<2,3>
+%  \begin{eqnarray*}
+%    \sqrt{\mathit{rain}}^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
+%    \mu &=& \beta_0 + \beta_1 * \sqrt{\mathit{ensmean}} \\
+%    \log(\sigma) &= &\gamma_0 + \gamma_1 * \sqrt{\mathit{enssd}}
+%  \end{eqnarray*}   
+\end{overprint}
 \begin{overprint}
   \onslide<1>
     \vspace{1cm}
     \begin{itemize}
-      \item $y^*$: (Latent) response (e.g., precipitation, perhaps transformed)
-      \item $\mathbf{x}$: Regressors for location 
-        (e.g., ensemble mean forecast)
-      \item $\mathbf{z}$: Regressors for scale 
-        (e.g., ensemble standard deviation)
-      \item $\mathbf{\beta}, \mathbf{\gamma}$: Regression coefficients
+      \item $\mathit{rain}^*$: (latent) precipitation
+      \item $\mathit{ensmean}$: ensemble mean forecast
+      \item $\mathit{enssd}$: ensemble standard deviation
+      \item $\beta_0, \beta_1, \gamma_0, \gamma_1$: regression coefficients
     \end{itemize}
 
   \onslide<2>
     \vspace{1cm}
     \textbf{Consider non-negativity:}  
     \begin{equation*}
-	    y =\begin{cases}
-		    0 & y^{*} \le 0 \\
-		    y^{*} & y^{*} > 0
+	    \mathit{rain} =\begin{cases}
+		    0 & \mathit{rain}^{*} \le 0 \\
+		    \mathit{rain}^{*} & \mathit{rain}^{*} > 0
 	    \end{cases}
     \end{equation*}
 \end{overprint}
 \end{frame}
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression}
+\begin{overprint}
+\onslide<1>
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+mod2 <- crch(rain ~ ensmean, data = RainIbk, dist = "gaussian", left = 0)
+set.seed(1)
+RainIbk2 <- data.frame(rain = rnorm(nrow(RainIbk), fitted(mod2, type = "location"), 
+  fitted(mod2, type = "scale")), ensmean = RainIbk$ensmean)
+scatter2 <- function(data) {
+  par(mar = c(5, 4, 4, 2))
+  plot(rain ~ ensmean, data, pch = 19, col = grey(0.3, alpha = 0.1),
+    xlab = expression("ensmean"), ylim = c(-6,12),
+    ylab = expression("rain*"), frame.plot = FALSE, axes = FALSE)
+  axis(1, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  axis(2, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  abline(0,1, lty = 2, lwd = 0.5)
+}
+scatter2(RainIbk2)
+@
+\onslide<2>
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+scatter2(RainIbk2)
+points(rain~ensmean, RainIbk2[RainIbk2$rain <= 0,], col = adjustcolor(uibkorange, 0.5))
+@
+\onslide<3>
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+RainIbk2$rain[RainIbk2$rain <=0] <- 0
+scatter2(RainIbk2)
+points(rain~ensmean, RainIbk2[RainIbk2$rain <= 0,], col = adjustcolor(uibkorange, 0.5))
+@
+\end{overprint}
+\end{frame}
+
 
 \begin{frame}[fragile]
 \frametitle{Implementation in R}
 \textbf{Model fitting}
 \begin{itemize}
   \item \code{crch()} from package \pkg{crch}
-  \item \code{glm()}-like interface
+  \item \code{glm()}-like interface \pause
+
   \item model specification via \code{formula} plus \code{data}
-  \item two part formula, e.g., \code{y ~ x1 + x2 + x3 | z1 + z2}
+  \item two part formula, e.g., \code{y ~ x1 + x2 + x3 | z1 + z2} \pause
+
   \item log-likelihood maximized numerically via \code{optim()}
   \item distributions: Gaussian, logistic, student-t
-  \item censored and truncated
+  \item censored and truncated \pause
+
   \item methods: \code{summary(), coef(), residuals(), logLik(), predict(), \ldots} 
 \end{itemize} 
 
@@ -347,43 +384,29 @@ summary(CRCH)
 \frametitle{Censored regression}
 \begin{overprint}
   \onslide<1>
-<<echo=FALSE,results=hide>>=
-mod1 <- lm(sqrt(rain) ~ sqrtensmean, data = RainIbk)
-mod2 <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, dist = "gaussian", left = 0)
-png("presentation-scatter3.png", width = 6, height = 4.5, units = "in", res = 300)
-par(mar=c(5,4.5,2,2))
-plot(sqrt(rain) ~ sqrtensmean, RainIbk, pch = 19, col = grey(0.3, alpha = 0.1),
-  xlab = expression(sqrt("NWP forecast")), 
-  ylab = expression(sqrt("observations")), frame.plot = FALSE)
-abline(0,1, lty = 2, lwd = 0.5)
+<<echo=FALSE,results=hide,fig=TRUE,width = 6, height = 4.5>>=
+mod1 <- lm(rain ~ ensmean, data = RainIbk)
+mod2 <- crch(rain ~ ensmean, data = RainIbk, dist = "gaussian", left = 0)
+scatter(xlab = "ensmean", ylab = "rain")
 abline(mod1, col = uibkorange, lwd = 2, lty = 2)
 legend("topleft", col = c(uibkorange), lwd = 2, lty = 2, 
   bty = "n", legend = c("linear regression"))
-dev.off()
 @
-    \includegraphics[width=\textwidth]{presentation-scatter3.png}
   \onslide<2>
-<<echo=FALSE,results=hide>>=
-png("presentation-scatter4.png", width = 6, height = 4.5, units = "in", res = 300)
-par(mar=c(5,4.5,2,2))
-plot(sqrt(rain) ~ sqrtensmean, RainIbk, pch = 19, col = grey(0.3, alpha = 0.1),
-  xlab = expression(sqrt("NWP forecast")), 
-  ylab = expression(sqrt("observations")), frame.plot = FALSE)
-abline(0,1, lty = 2, lwd = 0.5)
+<<echo=FALSE,results=hide,fig=TRUE,width = 6, height = 4.5>>=
+scatter(xlab = "ensmean", ylab = "rain")
 abline(mod1, col = uibkorange, lwd = 2, lty = 2)
 abline(mod2, col = uibkorange, lwd = 3)
 legend("topleft", col = c(uibkorange, uibkorange), lwd = c(2,3), lty = c(2, 1),
   bty = "n", legend = c("linear regression", "censored regression"))
-dev.off()
 @
-    \includegraphics[width=\textwidth]{presentation-scatter4.png}
 \end{overprint}
 
 \end{frame}
 
 
 \begin{frame}
-\frametitle{Censored regression}
+\frametitle{Predictions}
 \begin{overprint}
   \onslide<1>
 %<<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
@@ -408,58 +431,56 @@ dev.off()
 %@
 
 <<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
-censored <- crch(sqrt(rain) ~ sqrtensmean | sqrtenssd, data = RainIbk, dist = "logistic", left = 0)
-date1 <- as.POSIXct("2013-10-16")
-date2 <- as.POSIXct("2013-10-27")
+censored <- crch(rain ~ ensmean | enssd, data = RainIbk, dist = "logistic", left = 0)
+d <- sqrt(d)
+date2 <- as.POSIXct("2013-10-16")
+date1 <- as.POSIXct("2013-10-27")
 location <- predict(censored, 
   newdata = d[index(d) == date1,], type = "location")
 scale <- predict(censored, newdata = d[index(d) == date1,],
   type = "scale")
-plot(as.numeric(sqrt(d[index(d) == date1, 2:12])), 
-  rep(0.003, 11), col = adjustcolor(uibkblue, alpha = 0.2), pch = 19, ylim = c(0, 0.3), 
-  xlim = c(-3, 10),xlab = expression(paste("y* (= ", sqrt("precipitation"), ")")), 
-  ylab = "predictive density", frame.plot = FALSE)
-
-legend("topright", col = c(uibkblue), lwd = 2,
+ensembleplot <- function() {
+  par(mar = c(5, 4, 4, 2))
+  plot(as.numeric((d[index(d) == date1, 2:12])), 
+    rep(-0.003, 11), col = adjustcolor(uibkorange, alpha = 0.5), pch = 19, ylim = c(0, 0.3), 
+    xlim = c(0, 10),xlab = expression("rain*"), 
+    ylab = "predictive density", frame.plot = FALSE, axes = FALSE)
+  axis(2)
+  axis(1, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2) 
+}
+ensembleplot()
+legend("topright", col = c(uibkorange), lwd = 2,
   bty = "n", legend = c(date1))
-
 @
   \onslide<2>
 <<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
 
-plot(as.numeric(sqrt(d[index(d) == date1, 2:12])), 
-  rep(0.003, 11), col = adjustcolor(uibkblue, alpha = 0.2), pch = 19, ylim = c(0, 0.3), 
-  xlim = c(-3, 10),xlab = expression(paste("y* (= ", sqrt("precipitation"), ")")), 
-  ylab = "predictive density", frame.plot = FALSE)
-lines(seq(-3, 10, 0.1), dlogis(seq(-3, 10, 0.1), location, scale), 
-  col = uibkblue, lwd = 2)
-
-legend("topright", col = c(uibkblue), lwd = 2,
+ensembleplot()
+legend("topright", col = c(uibkorange), lwd = 2,
   bty = "n", legend = c(date1))
+lines(seq(-3, 10, 0.1), dlogis(seq(-3, 10, 0.1), location, scale), 
+  col = uibkorange, lwd = 2)
 
 @
 
   \onslide<3>
 <<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
 
-plot(as.numeric(sqrt(d[index(d) == date1, 2:12])), 
-  rep(0.003, 11), col = adjustcolor(uibkblue, alpha = 0.2), pch = 19, ylim = c(0, 0.3), 
-  xlim = c(-3, 10),xlab = expression(paste("y* (= ", sqrt("precipitation"), ")")), 
-  ylab = "predictive density", frame.plot = FALSE)
+ensembleplot()
 lines(seq(-3, 10, 0.1), dlogis(seq(-3, 10, 0.1), location, scale), 
-  col = uibkblue, lwd = 2)
+  col = uibkorange, lwd = 2)
 
 location2 <- predict(censored, newdata = d[index(d) == date2,], 
   type = "location")
 scale2 <- predict(censored, newdata = d[index(d) == date2,], type = "scale")
 lines(seq(-3, 10, 0.1), dlogis(seq(-3, 10, 0.1), location2, scale2), 
-  col = uibkorange, lwd = 2)
+  col = uibkblue, lwd = 2)
 
-points(as.numeric(sqrt(d[index(d) == date2, 2:12])), 
-  rep(-0.003, 11), col = adjustcolor(uibkorange, alpha = 0.5), pch = 19)
+points(as.numeric((d[index(d) == date2, 2:12])), 
+  rep(0.003, 11), col = adjustcolor(uibkblue, alpha = 0.2), pch = 19)
 
 
-legend("topright", col = c(uibkblue, uibkorange), lwd = 2,
+legend("topright", col = c(uibkorange, uibkblue), lwd = 2,
   bty = "n", legend = c(date1, date2))
 
 @
@@ -470,7 +491,7 @@ legend("topright", col = c(uibkblue, uibkorange), lwd = 2,
 
 
 \begin{frame}[fragile]
-\frametitle{Aalborg forecast (Wed-Fri)}
+\frametitle{UseR forecast}
 <<echo=FALSE>>=
 load("RainAalb.rda")
 RainAalb$sqrtensmean <- apply(sqrt(RainAalb[,grep('^rainfc',names(RainAalb))]), 1, mean)
@@ -481,34 +502,48 @@ CRCH <- crch(sqrt(rain)~sqrtensmean|log(sqrtenssd), data = RainAalb, dist = "log
 user <- read.table("~/Dropbox/Transfer&backup/Transfer-RetoJakob/GEFS_gridpoint/GENS_00_aalborg.dat", header = TRUE)
 user <- subset(user, varname=="apcpsfc")
 user <- subset(user, step %in% seq(12, 78, 6))
-user <- user[,4:15]
-Raintoday <- data.frame(sqrtensmean = mean(sqrt(rowSums(user))), 
-  sqrtenssd = sd(sqrt(rowSums(user))))
+user <- user[,4:14]
+Raintoday <- data.frame(sqrtensmean = mean(sqrt(colSums(user))), 
+  sqrtenssd = sd(sqrt(colSums(user))))
 @
-<<>>=
-predict(CRCH, newdata = Raintoday, type = "location")
-predict(CRCH, newdata = Raintoday, type = "scale")
-@
-
-<<echo=FALSE,fig=TRUE, width=6, height=3>>=
-x <- seq(0, 10, 0.1)
+%<<>>=
+%predict(CRCH, newdata = Raintoday, type = "location")
+%predict(CRCH, newdata = Raintoday, type = "scale")
+%@
+\begin{overprint}
+\onslide<1>
+<<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
+x <- seq(-1, 10, 0.1)
+location <- predict(CRCH, newdata = Raintoday, type = "location")
+scale <- predict(CRCH, newdata = Raintoday, type = "scale")
 #d <- dlogis((sqrt(x) - location)/scale)/2/sqrt(x)/scale
 d <- dlogis((x-location)/scale)
-plot(x, d, type = "l",
-  xlim = c(0, 10), lwd = 2,
-  xlab = "precipitation", ylab = "predictive density", 
-  col = uibkblue, frame.plot = FALSE, axes = FALSE)
-axis(2)
-axis(1, at = seq(0, 10, 2), label = seq(0, 10, 2)^2) 
-
+plotpredict <- function() {
+  par(mar = c(5, 4, 4, 2))
+  plot(x, d, type = "l",
+    xlim = c(0, 10), lwd = 2,
+    xlab = "precipitation", ylab = "predictive density", 
+    col = uibkblue, frame.plot = FALSE, axes = FALSE)
+  points(as.numeric(sqrt(colSums(user))), 
+    rep(-0.003, 11), col = adjustcolor(uibkblue, alpha = 0.2), pch = 19)
+  axis(2)
+  axis(1, at = seq(0, 10, 2), label = seq(0, 10, 2)^2) 
+}
+plotpredict()
+legend("topright", col = c(uibkblue), lwd = 2,
+  bty = "n", legend = "2015-07-01")
+@
+\onslide<2>
+<<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
+plotpredict()
 expect <- round(mean(qclogis(seq(0.01, 0.99, 0.01), location, scale, left = 0)^2), digits = 1)
 legend("topright", bty = "n", xjust = 0, cex = 1.5, legend = 
-  c(as.expression(bquote(E(y)~"="~.(expect)~"mm")), "",
-  as.expression(bquote(P(y>0)~"="~.(round(plogis(0, location, scale,
+  c(as.expression(bquote(E(rain)~"="~.(expect)~"mm")), "",
+  as.expression(bquote(P(rain>0)~"="~.(round(plogis(0, location, scale,
   lower.tail = FALSE), digits = 3) * 100)~"%"))))
 @
+\end{overprint}
 \end{frame}
-
 
 
 \subsection{Summary}
@@ -516,23 +551,31 @@ legend("topright", bty = "n", xjust = 0, cex = 1.5, legend =
 \frametitle{Summary}
 \textbf{Censored regression with conditional heteroscedasticity:}
 \begin{itemize}
-  \item various applications, e.g., precipitation forecasts
-  \item R implementation \pkg{crch}, similar to \code{glm()}
-  \item standard methods available
-\end{itemize}
-\pause
+  \item effective usage of ensemble information
+  \item non-negativity of precipitation considered
+  \item model fitting with \code{crch()}
+\end{itemize}\pause
 \vspace{1cm}
-\textbf{nice weather for UseR 2015!}
+\textbf{sunny weather for UseR!}
+\vspace{0.3cm}
+\begin{center}
+  \includegraphics[width=0.3\textwidth]{sun.png}
+\end{center}
 \end{frame}
 
 
-%\subsection{Bibliography}
-%\begin{frame}
-%\frametitle{Bibliography}
-%\nocite{Messner2014, Messner2014a, crch}
-%\bibliographystyle{ametsoc}
-%\bibliography{refs.bib}
-%\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Bibliography}
+\nocite{crch, Messner2014a, Messner2014b}
+\bibliographystyle{ametsoc}
+\bibliography{refs.bib}
+
+\vspace{1.2cm}
+jakob.messner@uibk.ac.at \hspace{3.2cm} \includegraphics[width=0.15\textwidth]{fwf-logo.jpg} \hspace{0.5cm} \includegraphics[width=0.07\textwidth]{uibk-logo.jpg} 
+\end{frame}
 
 %\begin{frame}
 %\frametitle{\"OSG-Statistiktage forecast}
