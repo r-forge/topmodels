@@ -578,11 +578,11 @@ predict.crch <- function(object, newdata = NULL,
         drop(X %*% object$coefficients$location + offset[[1L]])
       },
       "scale" = {
-        exp(drop(Z %*% object$coefficients$scale + offset[[2L]]))
+        object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
       },
       "quantile" = {
         mu <- drop(X %*% object$coefficients$location + offset[[1L]])
-        sigma <- exp(drop(Z %*% object$coefficients$scale + offset[[2L]]))
+        sigma <- object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
         df <- object$df
         qdist(at, mu, sigma, df)       
       }
