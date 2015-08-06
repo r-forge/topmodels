@@ -1,4 +1,5 @@
 import("stats", "Formula")
+importFrom("utils", "tail")
 
 export(
   "crch",
