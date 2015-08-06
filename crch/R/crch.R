@@ -486,9 +486,21 @@ print.summary.crch <- function(x, digits = max(3, getOption("digits") - 3), ...)
 
 terms.crch <- function(x, model = c("location", "scale", "full"), ...) x$terms[[match.arg(model)]]
 
+model.frame.crch <- function(formula, ...) {
+  if(!is.null(formula$model)) return(formula$model)
+  formula$terms <- formula$terms$full
+  formula$call$formula <- formula$formula <- formula(formula$terms)
+  NextMethod()
+} 
+
+model.matrix.crch <- function(object, model = c("location", "scale"), ...) {
+  model <- match.arg(model)
+  rval <- if(!is.null(object$x[[model]])) object$x[[model]]
+    else model.matrix(object$terms[[model]], model.frame(object), contrasts = object$contrasts[[model]])
+  return(rval)
+}
+
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
-
-
 
 predict.crch <- function(object, newdata = NULL,
   type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, ...)
