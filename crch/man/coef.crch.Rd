@@ -6,6 +6,8 @@
 \alias{print.summary.crch}
 \alias{logLik.crch}
 \alias{terms.crch}
+\alias{model.frame.crch}
+\alias{model.matrix.crch}
 \alias{residuals.crch}
 \alias{fitted.crch}
 
