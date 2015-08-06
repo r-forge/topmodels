@@ -1,3 +1,11 @@
+Changes in Version 0.9-1
+
+  o Added model.matrix() and model.frame() methods for crch objects
+
+  o Bug Fix in predict.crch(): In previous versions predictions for 
+    models with other link functions than the log gave wrong results
+
+
 Changes in Version 0.9-0
 
   o Added vignette to introduce the crch() function with some

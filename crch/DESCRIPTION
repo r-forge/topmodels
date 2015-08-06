@@ -1,7 +1,7 @@
 Package: crch
 Title: Censored Regression with Conditional Heteroscedasticity
-Version: 0.9-0
-Date: 2015-06-26
+Version: 0.9-1
+Date: 2015-07-06
 Authors@R: c(person(given = "Jakob", family = "Messner", role = c("aut", "cre"), email = "Jakob.Messner@uibk.ac.at"),
              person(given = "Achim", family = "Zeileis", role = "aut", email = "Achim.Zeileis@R-project.org"))
 Depends: R (>= 2.10.0)

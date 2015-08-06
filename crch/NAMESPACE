@@ -45,6 +45,8 @@ S3method("summary", "crch")
 S3method("terms", "crch")
 S3method("vcov", "crch")
 S3method("update", "crch")
+S3method("model.frame", "crch")
+S3method("model.matrix", "crch")
 
 ## methods for hxlr
 S3method("logLik", "hxlr")
