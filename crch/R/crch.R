@@ -231,12 +231,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     returnvcov <- TRUE  # vcov is not computed when hessian == FALSE
   } else {
     returnvcov <- hessian
-  }  
-  if(!hessian & dfest) {
-    warning("No analytical Hessian can be derived if df is estimated. Numerical Hessian from optim is employed")
-    hessian <- TRUE
-  }
-
+  } 
 
   ## link
   if(is.character(link.scale)) {
@@ -353,7 +348,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
   vcov <- if(returnvcov) {
     if (hessian) solve(as.matrix(opt$hessian)) 
     else solve(hessfun(par))
-  } else NA
+  } else matrix(NA, k+q+dfest, n+k+dfest)
   ll <- -opt$value
   df <- if(dfest) exp(delta) else df
 
@@ -475,7 +470,7 @@ print.summary.crch <- function(x, digits = max(3, getOption("digits") - 3), ...)
       printCoefmat(x$coefficients$scale, digits = digits, signif.legend = FALSE)
     } else cat("\nNo coefficients ( in scale model)\n")
 
-    if(getOption("show.signif.stars") & any(do.call("rbind", x$coefficients)[, 4L] < 0.1))
+    if(getOption("show.signif.stars") & any(do.call("rbind", x$coefficients)[, 4L] < 0.1, na.rm = TRUE))
       cat("---\nSignif. codes: ", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1", "\n")
 
     cat(paste("\nDistribution: ", x$dist, "\n", sep = ""))
