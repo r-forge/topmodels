@@ -1,3 +1,5 @@
+  o Added option to avoid computation of covariance matrix
+
 Changes in Version 0.9-1
 
   o Added model.matrix() and model.frame() methods for crch objects
