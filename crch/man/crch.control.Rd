@@ -13,10 +13,12 @@ crch.control(method = "BFGS", maxit = 5000, hessian = NULL,
 \arguments{
   \item{method}{optimization method passed to \code{\link{optim}}}
   \item{maxit}{the maximum number of iterations.}
-  \item{hessian}{logical. Should the numerical Hessian matrix from the 
-    \code{\link{optim}} output be used for estimation of the covariance matrix? 
-    For \code{dist="gaussian"}, \code{dist="logistic"}, and \code{dist="student"}
-    with predefined \code{df} analytical solution is employed by default. 
+  \item{hessian}{logical or NULL. If TRUE the numerical Hessian matrix from the 
+    \code{\link{optim}} output is used for estimation of the covariance matrix.
+    If FALSE no covariance matrix is computed.
+    If NULL (the default) the Hessian matrix is computed analytically for 
+    \code{dist="gaussian"}, \code{dist="logistic"}, and \code{dist="student"}
+    with predefined \code{df}. 
     For \code{dist="student"} without prespecified \code{df}, no analytical 
     solution is available and a numerical Hessian matrix is forced.}
   \item{trace}{non-negative integer. If positive, tracing information on the

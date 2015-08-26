@@ -220,16 +220,20 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
     if(is.null(dist$hdist)) {
       if(hessian == FALSE) warning("no analytic hessian available. Hessian is set to TRUE and numerical Hessian from optim is employed")
-      hessian <- TRUE  
-    
-    } else dist$hdist 
+      hessian <- TRUE     
+    } else hdist <- dist$hdist 
     dist <- "user defined"
   }
 
   ## analytic or numeric Hessian
-  if(is.null(hessian)) hessian <- if(dfest) TRUE else FALSE
+  if(is.null(hessian)) {
+    hessian <- dfest
+    returnvcov <- TRUE  # vcov is not computed when hessian == FALSE
+  } else {
+    returnvcov <- hessian
+  }  
   if(!hessian & dfest) {
-    warning("No analytical Hessian can be derived if df is estimated. hessian is set to TRUE")
+    warning("No analytical Hessian can be derived if df is estimated. Numerical Hessian from optim is employed")
     hessian <- TRUE
   }
 
@@ -256,7 +260,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     linkobj <- link.scale
     linkstr <- link.scale$name
     if(is.null(linkobj$dmu.deta) & !hessian) {
-      warning("link.scale needs to provide dmu.deta component for analytical Hessian. hessian is set to TRUE to employ numerical Hessian.")
+      warning("link.scale needs to provide dmu.deta component for analytical Hessian. Numerical Hessian is employed.")
       hessian <- TRUE
     }
   }
@@ -346,14 +350,16 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
   delta <- fit$delta
   mu <- fit$mu
   sigma <- fit$sigma
-  vcov <- if (hessian) solve(as.matrix(opt$hessian)) 
+  vcov <- if(returnvcov) {
+    if (hessian) solve(as.matrix(opt$hessian)) 
     else solve(hessfun(par))
+  } else NA
   ll <- -opt$value
   df <- if(dfest) exp(delta) else df
 
   names(beta) <- colnames(x)
   names(gamma) <- colnames(z)
-  if (hessian) {
+  if (returnvcov) {
     colnames(vcov) <- rownames(vcov) <- c(
       colnames(x),
       paste("(scale)", colnames(z), sep = "_"),
