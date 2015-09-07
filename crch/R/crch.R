@@ -109,10 +109,12 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   offset <- list(location = offsetX, scale = offsetZ)
  
 
-  ## call the actual workhorse: crch.fit()
-  rval <- crch.fit(x = X, y = Y, z = Z, left = left, right = right, 
-    link.scale = link.scale, dist = dist, df = df, weights = weights, 
-    offset = offset, control = control, truncated = truncated)
+  ## call the actual workhorse: crch.fit() or crch.boost()
+  fit <- control$fit
+  control$fit <- NULL
+  rval <- do.call(fit, list(x = X, y = Y, z = Z, left = left, right = right, 
+      link.scale = link.scale, dist = dist, df = df, weights = weights, 
+      offset = offset, control = control, truncated = truncated))
   
 
   ## further model information
@@ -126,7 +128,6 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   if(y) rval$y <- Y
   if(x) rval$x <- list(location = X, scale = Z)
 
-  class(rval) <- "crch"
   return(rval)
 }
 
@@ -149,12 +150,16 @@ trch <- function(formula, data, subset, na.action, weights, offset,
 crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = FALSE, 
   start = NULL, dot = "separate", ...)
 {
-  rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, 
-    start = start, dot = dot)
-  rval <- c(rval, list(...))
-  if(!is.null(rval$fnscale)) warning("fnscale must not be modified")
-  rval$fnscale <- 1
-  if(is.null(rval$reltol)) rval$reltol <- .Machine$double.eps^(1/1.2)
+  if(method %in% c("boosting", "cvboosting")) {
+    rval <- crch.boost(method = method, dot = dot, ...)
+  } else {
+    rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, 
+      start = start, dot = dot, fit = "crch.fit")
+    rval <- c(rval, list(...))
+    if(!is.null(rval$fnscale)) warning("fnscale must not be modified")
+    rval$fnscale <- 1
+    if(is.null(rval$reltol)) rval$reltol <- .Machine$double.eps^(1/1.2)
+  }
   rval
 }
 
