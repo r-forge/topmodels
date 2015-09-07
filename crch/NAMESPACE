@@ -1,3 +1,4 @@
+useDynLib(crch)
 import("stats", "Formula")
 importFrom("utils", "tail")
 
@@ -31,7 +32,9 @@ export(
   "dtt",
   "ptt",
   "qtt",
-  "rtt"
+  "rtt",
+  "crch.boost",
+  "crch.boost.fit"
 )
 
 ## methods for crch
