@@ -625,10 +625,10 @@ coef.crch <- function(object, model = c("full", "location", "scale", "df"), ...)
       cf$df
     },
     "full" = {
-      nam1 <- names(cf$location)
-      nam2 <- names(cf$scale)
+      nam <- c(names(cf$location), paste("(scale)", names(cf$scale), sep = "_"))
+      if(length(cf$df)) nam <- c(nam, "(Log(df))")
       cf <- c(cf$location, cf$scale, cf$df)
-      names(cf) <- colnames(object$vcov)
+      names(cf) <- nam
       cf
     }
   )
