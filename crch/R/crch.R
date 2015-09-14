@@ -151,7 +151,7 @@ crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = 
   start = NULL, dot = "separate", ...)
 {
   if(method %in% c("boosting", "cvboosting")) {
-    rval <- crch.boost(method = method, dot = dot, ...)
+    rval <- crch.boost(method = method, dot = dot, start = start,...)
   } else {
     rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, 
       start = start, dot = dot, fit = "crch.fit")
