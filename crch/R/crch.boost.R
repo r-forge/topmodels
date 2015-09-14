@@ -1,9 +1,9 @@
 ## function to set some control parameters for boosting (replaces crch.control() for boosting)
-crch.boost <- function(method = "boosting", mstop = 100, nu = 0.1, standardize = TRUE, 
-  nfolds = 10, foldid = NULL, dot = "separate",  ...)
+crch.boost <- function(method = "boosting", mstop = 100, nu = 0.1, scale = TRUE, 
+  nfolds = 10, foldid = NULL, start = NULL, dot = "separate",  ...)
 {
-  rval <- list(method = method, mstop = mstop, nu = nu, standardize = standardize, 
-    nfolds = nfolds, foldid = foldid, dot = dot, fit = "crch.boost.fit")
+  rval <- list(method = method, mstop = mstop, nu = nu, scale = scale, 
+    nfolds = nfolds, foldid = foldid, start = start, dot = dot, fit = "crch.boost.fit")
   rval <- c(rval, list(...))
   rval
 }
@@ -13,25 +13,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   dist = "gaussian", df = NULL, link.scale = "log",
   weights = NULL, offset = NULL, control = crch.boost()) 
 {
-  ## standardize response and regressors
-  standardize <- control$standardize
-  if(standardize) {
-    centerx <- matrix(rep(c(0, colMeans(x)[-1]), nrow(x)), nrow(x), ncol(x), byrow = TRUE)
-    scalex <- matrix(rep(c(1, apply(x, 2, sd)[-1]), nrow(x)), nrow(x), ncol(x), byrow = TRUE)
-    x <- (x - centerx)/scalex
-    
-    if(!is.null(z)) {
-      centerz <- matrix(rep(c(0, colMeans(z)[-1]), nrow(z)), nrow(z), ncol(z), byrow = TRUE)
-      scalez <- matrix(rep(c(1, apply(z, 2, sd)[-1]), nrow(z)), nrow(z), ncol(z), byrow = TRUE)
-      z <- (z - centerz)/scalez
-    }
-
-    centery <- mean(y)
-    scaley <- sd(y)
-    y <- (y - centery)/scaley
-    left <- (left - centery)/scaley
-    right <- (right - centery)/scaley
-  }
+  
   ## response and regressor matrix
   n <- NROW(x)  
   k <- NCOL(x)
@@ -55,6 +37,36 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   method <- control$method
   mstop <- control$mstop
   nu <- control$nu
+  start <- control$start
+
+
+  ## scale response and regressors
+  scale <- control$scale
+  if(scale) {
+    x <- scale.matrix(x)
+    z <- scale.matrix(z)
+    y <- scale.matrix(y)
+    
+    scale <- list(
+      x = list(center = attr(x, "scale:center"), scale = attr(x, "scale:scale")),
+      z = list(center = attr(z, "scale:center"), scale = attr(z, "scale:scale")),
+      y = list(center = attr(y, "scale:center"), scale = attr(y, "scale:scale")))
+
+    left <- (left - scale$y$center)/scale$y$scale
+    right <- (right - scale$y$center)/scale$y$scale
+    
+    ## rescale coefpath if start is supplied
+    if(!is.null(start)) {
+      beta <- start$coefpath[,seq.int(length.out = k)]
+      beta <- t(apply(beta, 1, scale.coefficients, center = scale$x$center, scale = scale$x$scale))
+      beta[, grep("(Intercept)", colnames(beta))] <- beta[, grep("(Intercept)", colnames(beta))] - scale$y$center 
+      beta <- beta/scale$y$scale  
+      gamma <- start$coefpath[,seq.int(length.out = q) + k]
+      gamma <- t(apply(gamma, 1, scale.coefficients, center = scale$z$center, scale = scale$z$scale))
+      gamma[, grep("(Intercept)", colnames(gamma))] <- gamma[, grep("(Intercept)", colnames(gamma))] - start$link$scale$linkfun(scale$y$scale)  
+      start$coefpath <- cbind(beta, gamma)
+    } 
+  }
 
   if(is.character(dist)){
     ## distribution functions
@@ -110,8 +122,8 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   fitfun <- function(par, subset = 1:n) {
     beta <- par[seq.int(length.out = k)]
     gamma <- par[seq.int(length.out = q) + k]
-    mu <- drop(x[subset,] %*% beta) + offset[[1L]][subset]
-    zgamma <- drop(z[subset,] %*% gamma) + offset[[2L]][subset]
+    mu <- (drop(x %*% beta) + offset[[1L]])[subset]
+    zgamma <- (drop(z %*% gamma) + offset[[2L]])[subset]
     sigma <- linkinv(zgamma)
     list(
       beta = beta,
@@ -144,16 +156,25 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     }
   }
 
-
+  
   ## initialize intercepts
-  par <- rep(0, k+q)
-  par[1] <- mean(y)
-  par[k+1] <- log(sd(y))
+  if(is.null(start)) {
+    par <- rep(0, k+q)
+    par[1] <- mean(y)
+    par[k+1] <- log(sd(y))
+    coefpath <- NULL
+    startit <- 1
+  } else {
+    par <- tail(start$coefpath, 1)
+    coefpath <- start$coefpath
+    startit <- start$iterations + 1 
+  }
+  
+
   ## actual boosting
-  coefpath <- NULL
   xtx <- apply(x, 2, function(x) sum(x^2))
   ztz <- apply(z, 2, function(x) sum(x^2))
-  for(i in 1:mstop) {
+  for(i in startit:mstop) {
     ## gradient of negative likelihood
     grad <- gradfun(par)
 
@@ -181,8 +202,9 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   if(method == "cvboosting") {
     nfolds <- control$nfolds
     foldid <- control$foldid
-    control$standardize <- FALSE
+    control$scale <- FALSE
     control$method <- "boosting"
+    control$start <- NULL
     if(is.null(foldid)) foldid <- (sample(1:nfolds, size = length(y), replace = TRUE))
   
     lltestall <- matrix(0, length(y), mstop)
@@ -203,37 +225,51 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
       bootll <- rbind(bootll, colMeans(lltestall[bootindex,]))
     }
   
-    mstopopt <- which.max(colMeans(bootll))
+    mstopopt <- which.max(colMeans(lltestall))
 
     opt1sd <- max(colMeans(bootll)) - sd(bootll[,mstopopt])
     mstopopt1se <- which(colMeans(bootll)>opt1sd)[1]
     cv <- list(bootll = bootll, mstopopt = mstopopt, mstopopt1se = mstopopt1se)
   }
 
+  colnames(coefpath) <- c(colnames(x), paste("scale_", colnames(z), sep = ""))
+  ## rescale
+  if(control$scale) {
+    beta <- coefpath[,seq.int(length.out = k), drop = FALSE]
+    gamma <- coefpath[,seq.int(length.out = q) + k, drop = FALSE]
+    beta[,] <- t(apply(beta, 1, scale.coefficients, 
+      center = scale$x$center, scale = scale$x$scale, rescale = TRUE))*scale$y$scale
+    beta[, grep("(Intercept)", colnames(beta))] <- 
+      beta[, grep("(Intercept)", colnames(beta)), drop = FALSE] + scale$y$center
 
-  ## destandardize
-  if(standardize) {
-    beta <- coefpath[,seq.int(length.out = k)]
-    gamma <- coefpath[,seq.int(length.out = q) + k]
-    centerpathx <- matrix(rep(centerx[1,], mstop), mstop, k, byrow = TRUE)
-    centerpathz <- matrix(rep(centerz[1,], mstop), mstop, q, byrow = TRUE)
-    scalepathx  <- matrix(rep( scalex[1,], mstop), mstop, k, byrow = TRUE)
-    scalepathz  <- matrix(rep( scalez[1,], mstop), mstop, q, byrow = TRUE)
-    beta  <- cbind( beta[,1]*scaley - rowSums(as.matrix(beta[,-1]*centerpathx[,-1]/scalepathx[,-1]))*
-      scaley + centery, beta[,-1]*scaley/scalepathx[,-1])
-    if(NCOL(z) > 1) {
-      gamma <- cbind(gamma[,1] - rowSums(as.matrix(gamma[,-1]*centerpathz[,-1]/scalepathz[,-1])) 
-        + linkfun(scaley),  gamma[,-1]/scalepathz[,-1])
-    } else {
-      gamma <- gamma + linkfun(scaley)
-    }
+    gamma[,] <- t(apply(gamma, 1, scale.coefficients, 
+      center = scale$z$center, scale = scale$z$scale, rescale = TRUE))
+    gamma[, grep("(Intercept)", colnames(gamma))] <- 
+      gamma[, grep("(Intercept)", colnames(gamma)), drop = FALSE] + linkfun(scale$y$scale)
     coefpath <- cbind(beta, gamma)
+
+
+
+
+#    centerpathx <- matrix(rep(centerx[1,], mstop), mstop, k, byrow = TRUE)
+#    centerpathz <- matrix(rep(centerz[1,], mstop), mstop, q, byrow = TRUE)
+#    scalepathx  <- matrix(rep( scalex[1,], mstop), mstop, k, byrow = TRUE)
+#    scalepathz  <- matrix(rep( scalez[1,], mstop), mstop, q, byrow = TRUE)
+#    beta  <- cbind( beta[,1]*scaley - rowSums(as.matrix(beta[,-1]*centerpathx[,-1]/scalepathx[,-1]))*
+#      scaley + centery, beta[,-1]*scaley/scalepathx[,-1])
+#    if(NCOL(z) > 1) {
+#      gamma <- cbind(gamma[,1] - rowSums(as.matrix(gamma[,-1]*centerpathz[,-1]/scalepathz[,-1])) 
+#        + linkfun(scaley),  gamma[,-1]/scalepathz[,-1])
+#    } else {
+#      gamma <- gamma + linkfun(scaley)
+#    }
+#    coefpath <- cbind(beta, gamma)
     par <- if(method == "cvboosting") coefpath[mstopopt,] else tail(coefpath, 1)
-    y <- y*scaley + centery
-    x <- x*scalex + centerx
-    z <- z*scalez + centerz
-    left <- left*scaley + centery
-    right <- right*scaley + centery
+    y <- scale.matrix(y, rescale = TRUE)
+    x <- scale.matrix(x, rescale = TRUE)
+    z <- scale.matrix(z, rescale = TRUE)
+    left  <-  left*scale$y$scale + scale$y$center
+    right <- right*scale$y$scale + scale$y$center
   }
   fit <- fitfun(par)
   beta <- fit$beta
@@ -244,7 +280,6 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
 
   names(beta) <- colnames(x)
   names(gamma) <- colnames(z)
-  colnames(coefpath) <- c(colnames(x), paste("scale_", colnames(z), sep = ""))
   rownames(coefpath) <- c(1:mstop)
 
   rval <- list(
@@ -277,4 +312,117 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   class(rval) <- c("crch.boost", "crch")
   return(rval)
 }
+
+continue <- function(object, ...) UseMethod("continue")
+continue.crch.boost<- function(object, mstop) {
+  call <- object$call
+  if(is.null(call$control)) {
+    call$mstop <- mstop 
+    call$start <- object
+  } else {
+    call$control$mstop <- mstop
+    call$control$start <- object
+  }
+  rval <- eval(call, parent.frame())
+  rval$call <- call
+  rval
+}
+
+scale.matrix <- function(x, rescale = FALSE, center = NULL, scale = NULL) {
+  center <- attr(x, "scale:center")
+  scale <- attr(x, "scale:scale")
+  x <- as.matrix(x)
+  if(is.null(center))
+    center <- colMeans(x)
+  if(is.null(scale))
+    scale <- apply(x, 2, sd)
+
+  
+  center[grep("(Intercept)", colnames(x))] <- 0
+  scale[grep("(Intercept)", colnames(x))] <- 1
+
+  
+  mcenter <- matrix(rep(center, nrow(x)), nrow(x), ncol(x), byrow = TRUE)
+  mscale  <- matrix(rep(scale , nrow(x)), nrow(x), ncol(x), byrow = TRUE)
+  
+
+  if(!rescale) { 
+    x <- (x - mcenter)/mscale
+  } else {
+    x <- x*mscale + mcenter
+  }
+  attr(x, "scale:center") <- center
+  attr(x, "scale:scale") <- scale
+  x  
+}
+
+scale.coefficients <- function(coef, rescale = FALSE, center, scale) {
+  interceptind <- grep("(Intercept)", names(coef))
+  if(length(interceptind > 0)) {
+    intercept <- coef[interceptind]
+    center <- center[-interceptind]
+    scale <- scale[-interceptind]
+    coef <- coef[-interceptind]
+  } else {
+    intercept <- 0
+    names(intercept) <- "(Intercept)"
+  }
+  if(rescale) {
+    intercept <- intercept - sum(coef*center/scale)
+    coef <- coef/scale
+  } else {
+    coef <- coef*scale
+    intercept <- intercept + sum(coef*center/scale)
+  }
+  c(intercept, coef)  
+}
+  
+
+
+plot.crch.boost <- function(object, quantity = c("coefficient", "likelihood"), scale = TRUE) {
+  quantity <- match.arg(quantity)
+  par(mar = c(5.1, 4.1, 2.1, 10.1))
+
+  if(quantity == "coefficient") {
+    if(scale) {
+      mstopprev <- object$iterations
+      beta <- object$coefpath[,seq.int(length.out = k)]
+      gamma <- object$coefpath[,seq.int(length.out = q) + k]
+      centerpathx <- matrix(rep(centerx[1,], mstopprev), mstopprev, k, byrow = TRUE)
+      centerpathz <- matrix(rep(centerz[1,], mstopprev), mstopprev, q, byrow = TRUE)
+      scalepathx  <- matrix(rep( scalex[1,], mstopprev), mstopprev, k, byrow = TRUE)
+      scalepathz  <- matrix(rep( scalez[1,], mstopprev), mstopprev, q, byrow = TRUE)
+                     
+      beta  <- cbind(beta[,1]/scaley + 
+        rowSums(as.matrix(beta[,-1]/scaley*scalepathx[,-1]*centerpathx[,-1]/scalepathx[,-1]))
+        - centery/scaley, beta[,-1]/scaley*scalepathx[,-1])
+      if(NCOL(z) > 1) {
+        gamma <- cbind(gamma[,1] + rowSums(as.matrix(gamma[,-1]*centerpathz[,-1])) 
+          - start$link$scale$linkfun(scaley),  gamma[,-1]*scalepathz[,-1])
+      } else {
+        gamma <- gamma - linkfun(scaley)
+      }
+      start$coefpath <- cbind(beta, gamma)
+    } 
+
+    plot.ts(object$coefpath, plot.type = "single", xlab = "boosting iteration", ylab = "coefficients", type = "s")
+    axis(4, at = tail(object$coefpath, 1), labels = colnames(object$coefpath), las = 1)
+  } else {
+    coefupdate <- as.data.frame(apply(object$coefpath, 2, diff)!=0)
+    coefupdate[["(Intercept)"]][rowSums(coefupdate) == 2] <- coefupdate[["scale_(Intercept)"]][rowSums(coefupdate) == 2] <- FALSE
+    loglikpath <- object$loglikpath
+    llcontrib <- diff(loglikpath)*coefupdate
+    llcontrib <- apply(llcontrib, 2, cumsum)
+    plot.ts(llcontrib, plot.type = "single", xlab = "boosting iteration", ylab = "likelihood contribution", type = "s", col = rep(c(1,2), c(k, q))
+    axis(4, at = tail(llcontrib, 1), labels = colnames(llcontrib), las = 1)
+  }
+
+  if(!is.null(object$cv)) {
+    abline(v = object$cv$mstopopt, col = 2)
+    axis(1, at = object$cv$mstopopt, labels = "mstopopt")
+  }
+}
+
+
+logLik.crch.boost <- function(object, ...) structure(object$loglik, df = NA, class = "logLik")
 
