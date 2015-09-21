@@ -127,7 +127,7 @@ x_2, \ldots)^\top$ and $\mathbf{z} = (1, z_1, z_2, \ldots)^\top$:
 where $\beta=(\beta_0, \beta_1, \beta_2, \ldots)^\top$ and $\gamma=(\gamma_0,
 \gamma_1, \gamma_2, \ldots)^\top$ are coefficient vectors. The link function
 $g(\cdot):\mathbb{R}^+ \mapsto \mathbb{R}$ is a strictly increasing and twice
-differentiable function; e.g., the log (\mbox{$g(\sigma)=\log(\sigma)$}) is a well
+differentiable function; e.g., the logarithm (i.e., \mbox{$g(\sigma)=\log(\sigma)$}) is a well
 suited function. Although they only map to $\mathbb{R}^+$, the identity
 $g(\sigma) = \sigma$ or the quadratic function $g(\sigma)=\sigma^2$ can be
 usefull as well. However, problems in the numerical optimization can occur.
@@ -268,7 +268,7 @@ The returned model fit of class \code{"crch"} is a list similar to \code{"glm"}
 objects. Some components like \code{coefficients} are lists with elements for
 location, scale, and degrees of freedom. The package also provides a set of
 extractor methods for \code{"crch"} objects that are listed in
-Table~\ref{tab_methods}
+Table~\ref{tab_methods}.
 
 \begin{table}[t!]
 \centering
@@ -301,7 +301,7 @@ logistic, and student-t distributions. Furthermore it also provides a function
 heteroscedastic interval-censored regression models \citep{messner2013a}.
 
 Note that alternative to \code{crch()} heteroscedastic censored and truncated models
-could also be fitted by \CRANpkg{gamlss} \citep{rigby2005} with the add-on packages
+could also be fitted by the R package \CRANpkg{gamlss} \citep{rigby2005} with the add-on packages
 \CRANpkg{gamlss.cens} and \CRANpkg{gamlss.tr}.
 However, for the special case of linear censored of truncated regression models with
 Gaussian, logistic, or student-t distribution \CRANpkg{crch} provides a
@@ -367,7 +367,7 @@ RainIbk <- subset(RainIbk, enssd > 0)
 A scatterplot of \code{rain} against \code{ensmean} 
 %
 <<>>=
-plot(rain~ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
 abline(0,1, col = "red")
 @
 %
