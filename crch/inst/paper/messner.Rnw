@@ -413,8 +413,11 @@ legend("topright", lwd = c(2,2,1), lty = c(1,2,1), col = c(1,2,4), c("student-t"
 \caption{Probability density functions of a student-t distribution with \Sexpr{round(exp(tail(coef(CRCHstud), 1)), 2)} degrees of freedom, a logistic, and a normal distribution. The densities of the logistic and normal distribution are scaled to facilitate comparison.}\label{fig_dist}
 \end{figure}
 %
-Next we compare the censored model with a two-part model consisting of a
-heteroscedastic logit model and a truncated regression model with logsitic
+
+In the censored model the occurrence of precipitation and precipitation amount
+are assumed to be driven by the same process. To test this assumption
+we compare the censored model with a two-part model consisting of a
+heteroscedastic logit model and a truncated regression model with logistic
 distribution assumption. For the heteroscedastic logit model we use
 \code{hetglm()} from the \CRANpkg{glmx} package and for the truncated model we
 employ the \code{crch()} function with the argument \code{truncated = TRUE}.
@@ -450,7 +453,7 @@ aic <- -2 * loglik + 2 * df
 bic <- -2 * loglik + log(nrow(RainIbk)) * df
 cbind(df, AIC = aic, BIC = bic)
 @
-
+%
 Finally, we can use the fitted models to predict future precipitation. Therefore
 assume that the current NWP forecast of square rooted precipitation has an
 ensemble mean of 1.8 and an ensemble standard deviation of 0.9. A median
