@@ -1,15 +1,27 @@
 \documentclass[12pt,a4paper]{article}
+
+\setlength{\parskip}{0.5ex plus0.1ex minus0.1ex}
+\setlength{\parindent}{0em}
+
 \begin{document}
+
 \title{Rejoinder to: "Heteroscedastic Censored and Truncated Regression with crch"}
 \maketitle
-We thank the reviewer for his valuable suggestions and comments. The comments
+
+We thank the reviewer for the valuable suggestions and comments. The comments
 and our corresponding replies can be found below:
-%\textit{I enjoyed very much reading the manuscript, because it is well written
-%and describes an interesting and relevant R package: “crch” for
-%heteroscedastic censored and truncated regression. The package is also well
-%prepared (e.g. the source code is well written and commented so that it is
-%quite easy to read for humans) and well documented. In the following, I will
-%give a few minor recommendations for improvement:}
+
+\textit{I enjoyed very much reading the manuscript, because it is well written
+and describes an interesting and relevant R package: ``crch'' for
+heteroscedastic censored and truncated regression. The package is also well
+prepared (e.g. the source code is well written and commented so that it is
+quite easy to read for humans) and well documented.}
+
+Thank you very much for the positive feedback, much appreciated.
+
+\medskip
+
+\textit{In the following, I will give a few minor recommendations for improvement:}
 \begin{enumerate}
   \item \textit{On page 1, last line, the term "log ($g(\sigma) =
   \log(\sigma)$)" is easily misunderstood as "$\log(g(\sigma) =
@@ -25,7 +37,10 @@ and our corresponding replies can be found below:
   software environment (R), for which the packages gamlss, gamlss.cens, and
   gamlss.tr are written for.}
 \end{enumerate}
-We have implemented these modifications as suggested by the reviewer.
+
+Thanks for spotting these. We have implemented all of these modifications.
+
+\medskip
 
 \begin{enumerate}
   \setcounter{enumi}{4}
@@ -35,32 +50,48 @@ We have implemented these modifications as suggested by the reviewer.
   and the error term of the truncated (outcome) model, although it is quite
   likely that these two error terms are correlated. In order to allow for
   different processes that drive the occurrence of precipitation and the
-  precipitation amount, a heteroscedastic(Heckman-type) sample selection model
+  precipitation amount, a heteroscedastic (Heckman-type) sample selection model
   is probably more appropriate.}
 \end{enumerate}
 
-This is an interesting comment and it is indeed possible that correlations
-between the error terms exist.  However, we think a (heteroscedastic) Heckman
-sample selection model is not appropriate for our data since the non-zero
-subset cannot be assumed to be normally distributed. A log-transformation which
-is often applied in such cases, is also problematic since we then should also
-transform the regressor (ensemble mean) that frequently takes on 0 values.
+This is an interesting comment and it is indeed conceivable that such correlations
+between the error terms exist.
 
-Alternatively, we tried to consider correlations in the error terms in a double
-hurdle model (R-package mhurdle).  However, we did not find a significant
-improvement with this model. 
+However, the usual approach of the Heckman selection
+model is not directly feasible (even when adding support for heteroskedasticity).
+The reason is that the distribution of the dependent variable in the outcome
+equation is an uncensored/untruncated normal distribution in the Heckman case. For example,
+in the classic wage equation model the response in the outcome equation is the
+log-wage for which a normal distribution is a useful model and a semi-logarithmic
+or log-log-specification of the regression (rather than linear in levels) is
+of economic interest. In contrast, for precipitation it does not make sense
+to model log-precipitation if the main regressor is the mean ensemble precipitation.
+And considering the log on the right hand side for the mean ensemble precipitation
+as well would introduce the problem that the ensemble mean may well have been zero
+although the actual observed precipitation was positive.
 
-We believe that comparing the tobit with a two-part model is a valid way to
-test whether precipitation occurrence and amount can be assumed to be driven by
-the same process. In our example the improved information criteria indicate
-deficiencies in the tobit model specifications. Furthermore they also indicate
-improved predictions by the two part model. Since in our weather forecast
-example we are mainly interested in predictions, possibly incomplete model
-assumptions (e.g., independence of error terms) might not be so relevant as
-long as the predictions are fine.
+As an alternative we considered a double hurdle model (using the R package
+mhurdle) to account for the zero truncation of the ``selected'' outcomes.
+However, this yielded only a very small and non-significant correlation.
+Therefore, we did not pursue this idea further.
 
-We added a sentence: "In the censored model the occurrence of precipitation and
-precipitation amount are assumed to be driven by the same process. To test this
-assumption we compare the censored ..." to indicate that we are mainly
-interested in testing the tobit model assumptions.
+Moreover, even if there were some correlations, we feel that a clean disentanglement
+of the processes is less important in our application compared to, say, wage
+equations in labor market econometrics. Typically, there are no interventions
+that try to change the selection probabilities or outcome expections in
+precipitation in a certain area (in contrast to labor market programs etc.),
+so the goal is ``just'' to obtain good/better forecasts than standard models.
+As this is the case for the two-part model compared to the censored model,
+it is worth considering.
+
+Nevertheless, we will keep your idea in mind. Even if it did not improve the
+forecasts in this application, it may be useful for another area or another
+atmospheric quantity (e.g., wind speed).
+
+But as all of this is somewhat beyond the scope of the R package crch and the
+accompanying manuscript, we just added a short sentence to indicate that
+we are mainly interested in testing the tobit model assumptions:
+``In the censored model the occurrence of precipitation and precipitation amount
+are assumed to be driven by the same process. To test this assumption we compare
+the censored ..." 
 \end{document}
