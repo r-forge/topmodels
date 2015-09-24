@@ -1,0 +1,66 @@
+\documentclass[12pt,a4paper]{article}
+\begin{document}
+\title{Rejoinder to: "Heteroscedastic Censored and Truncated Regression with crch"}
+\maketitle
+We thank the reviewer for his valuable suggestions and comments. The comments
+and our corresponding replies can be found below:
+%\textit{I enjoyed very much reading the manuscript, because it is well written
+%and describes an interesting and relevant R package: “crch” for
+%heteroscedastic censored and truncated regression. The package is also well
+%prepared (e.g. the source code is well written and commented so that it is
+%quite easy to read for humans) and well documented. In the following, I will
+%give a few minor recommendations for improvement:}
+\begin{enumerate}
+  \item \textit{On page 1, last line, the term "log ($g(\sigma) =
+  \log(\sigma)$)" is easily misunderstood as "$\log(g(\sigma) =
+  \log(\sigma))$," which does not really make sense.  I suggest to write
+  instead something like "logarithm, i.e. $g(\sigma) = \log(\sigma)$."} 
+  \item \textit{In the last line of page 2 and in the following lines on page
+  3, several tilde symbols (\textasciitilde) are missing. They can be obtained,
+  e.g., by the \LaTeX command \textbackslash textasciitilde.} 
+  \item \textit{On
+  page 3, in the third from last paragraph, the last sentence should be
+  terminated with a full stop (.).} 
+  \item \textit{On page 3, in the last paragraph, I suggest to mention the
+  software environment (R), for which the packages gamlss, gamlss.cens, and
+  gamlss.tr are written for.}
+\end{enumerate}
+We have implemented these modifications as suggested by the reviewer.
+
+\begin{enumerate}
+  \setcounter{enumi}{4}
+  \item \textit{I have some concern regarding the example with the two-part
+  model: as far as I can see, this model does not take a into account a
+  possible correlation between the error term of the logit (selection) model
+  and the error term of the truncated (outcome) model, although it is quite
+  likely that these two error terms are correlated. In order to allow for
+  different processes that drive the occurrence of precipitation and the
+  precipitation amount, a heteroscedastic(Heckman-type) sample selection model
+  is probably more appropriate.}
+\end{enumerate}
+
+This is an interesting comment and it is indeed possible that correlations
+between the error terms exist.  However, we think a (heteroscedastic) Heckman
+sample selection model is not appropriate for our data since the non-zero
+subset cannot be assumed to be normally distributed. A log-transformation which
+is often applied in such cases, is also problematic since we then should also
+transform the regressor (ensemble mean) that frequently takes on 0 values.
+
+Alternatively, we tried to consider correlations in the error terms in a double
+hurdle model (R-package mhurdle).  However, we did not find a significant
+improvement with this model. 
+
+We believe that comparing the tobit with a two-part model is a valid way to
+test whether precipitation occurrence and amount can be assumed to be driven by
+the same process. In our example the improved information criteria indicate
+deficiencies in the tobit model specifications. Furthermore they also indicate
+improved predictions by the two part model. Since in our weather forecast
+example we are mainly interested in predictions, possibly incomplete model
+assumptions (e.g., independence of error terms) might not be so relevant as
+long as the predictions are fine.
+
+We added a sentence: "In the censored model the occurrence of precipitation and
+precipitation amount are assumed to be driven by the same process. To test this
+assumption we compare the censored ..." to indicate that we are mainly
+interested in testing the tobit model assumptions.
+\end{document}
