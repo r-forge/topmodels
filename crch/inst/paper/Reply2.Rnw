@@ -1,0 +1,260 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{a4wide}
+
+\setlength{\parskip}{0.5ex plus0.1ex minus0.1ex}
+\setlength{\parindent}{0em}
+
+\begin{document}
+
+\title{Rejoinder to: ``Heteroscedastic Censored and Truncated Regression with crch''}
+\maketitle
+
+\section*{Associate Editor}
+
+\bigskip
+
+\textit{I believe that this motivates the reviewer's concerns more clearly, and 
+would encourage you to accommodate the possibility that may be present 
+because of the ``clash of cultures'' factor. The most satisfying 
+intervention would be to follow: ``derive the likelihood function for the 
+joint estimation of the two equations of the two-part model assuming a 
+bivariate normal distribution of the two disturbance terms'', but if you 
+choose not to do so, please make it at least as plain as the suggested 
+form of words.}
+
+\textit{I think that the reviewer is right that a social scientist reading your 
+submission could well be misled, so attending to this properly will extend 
+the readership of your submission substantially. I would encourage you to 
+work with your co-authors to go for the more demanding revision.}
+
+\medskip
+
+First, we would like to clarify that all of us did work together
+-- both on the original submission and the first revision. Second,
+we did consider the ``clash of cultures'' factor and tried to convey this
+in our initial reply. Third, we think that the selection idea is interesting and
+spent some effort on exploring it. However, for our application this did not yield
+any improvement. As the reviewer does not appear to believe that we
+did try to follow the suggestions, we do include the full R results that we
+just mentioned briefly in our previous reply.
+
+Moreover, we would like to point out that fully implementing the suggestion
+might not be as trivial as conveyed in the reviewer comments. It would
+require an extension to logistic response variables which are preferred
+over Gaussian responses in our application. This could certainly be implemented
+in some way -- e.g., using copulas -- but would require some additional
+work, thought, and care. Of course, one can argue now that we shy away
+from the ``more demanding revision'' -- however, we think that this would
+not be fair as establishing a heteroscedastic logistic two-part selection
+model would be well beyond the scope of our original submission.
+
+Finally, it is good to be concerned about potential misspecification
+in a model. This was one of the reasons why we considered the two-part
+model in addition to the censored model. But we see no reason why for any
+application of the two-part model we should be most concerned about
+correlations in the selection. For example, in our case it seems to be more
+important to address the heavy tails in the response by adopting a logistic
+distribution -- something that is commonly ignored in econometric
+applications of these kinds of models. And additionally one could worry
+about misspecifications in the scale link functions, nonlinearities,
+missing regressors, etc. But given that the model we discuss improves upon
+other techniques frequently used in weather forecasting, we think that
+the possibility of a better model should not keep us from discussing
+a useful model.
+
+Therefore, we provide two things in this revision: (1) A detailed report
+of the analyses we had carried out before our previous reply (in this
+rejoinder only). (2) We added some clarification that further improvements
+of the model may be possible.
+
+
+
+\section*{Reviewer}
+
+\textit{It seems to me that there is a `clash of cultures' between natural 
+scientists and social scientists\dots  If I correctly understand the 
+authors' response, they claim that they do not care about the consistency 
+of the parameters (and marginal effects of the explanatory variables), but 
+they are only interested in improving the precision of the forecasting 
+model.}
+
+\medskip
+
+Not quite. We did take your suggestion seriously and tried it on our
+data where there does not seem to be any correlation as you suspected.
+See our analysis below.
+
+And then we went on that \emph{even if there would have been a correlation},
+the two-part model would have still constituted an improvement in
+forecasting accuracy which is typically the only thing that most researchers
+in weather forecasting care about.
+
+\bigskip
+
+\textit{This is probably a valid argument for their empirical application. 
+I am afraid that readers of the manuscript (e.g., social scientists) use 
+the ``crch'' package for other applications. They may follow the example in 
+the manuscript and use the two-part model but they do not (only) use it 
+for forecasting but for (also) for assessing the (marginal) effects of the 
+explanatory variables on the dependent variable, which are likely 
+inconsistent.}
+
+\medskip
+
+Clearly, whether inconsistency is \emph{likely} or not depends on the
+specific question/data investigated. We have also seen enough applications
+in economics or the social sciences where the selection effects are
+small/non-significant. But, of course, you are right that are also a lot
+of applications where selection effects matter.
+
+Now we do include a comment that encourages readers to consider
+other extensions of the model as well.
+
+\bigskip
+
+\textit{Although it should not be difficult to derive the likelihood function for 
+the joint estimation of the two equations of the two-part model assuming a 
+bivariate normal distribution of the two disturbance terms, I understand 
+the authors that they are not willing to implement this model, because 
+they (think they) don't need this model for their empirical work on 
+weather data.}
+
+\medskip
+
+As pointed out in our reply to the associate editor: Even in the bivariate
+Gaussian case, the implementation is not as trivial as it may seem because
+one has to take care that in the presence of heteroscedasticity the
+computations remain numerically stable and no identifiability problems
+occur. Moreover, the extension to a bivariate logistic or $t$ approach
+(preferred for our data with heavier tails) would not be trivial.
+
+\bigskip
+
+\textit{Therefore, if the authors still want to use the two-part model as an 
+example in their manuscript, I suggest that the authors clearly and 
+unmistakably warn the readers that the two-part model likely gives 
+inconsistent parameters, marginal effects, and statistical inference (but 
+may be better for forecasting than the censored regression model).}
+
+Given that there is no evidence whatsoever for this \emph{``likely inconsistency''}
+in our data (see below), we see no reason to propagate such preconceptions.
+However, we do include some remarks that selection effects are one possible
+misspecification and encourage readers to critically assess this
+possibility in their applications.
+
+
+\section*{Selection models under normality and homoscedasticity}
+
+First, we explore selection models under normality and homoscedasticity
+because there is easy-to-use software that implements these models in R.
+With respect to the correlation/selection issue these do give very similar
+insights as the heteroscedastic models shown later on.
+
+First, we load the data and transform it as we did in the manuscript:
+
+<<data>>=
+data("RainIbk", package = "crch")
+RainIbk <- sqrt(RainIbk)
+RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
+RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+@
+
+Then, we estimate a standard tobit model and extract the corresponding
+coefficients and standard errors. The implied coefficients for the
+selection equation are also derived but standard errors are given only
+for the parameters that are freely estimated:
+
+<<tobit>>=
+library("crch")
+m_cens <- crch(rain ~ ensmean | 1, data = RainIbk, left = 0,
+  dist = "gaussian", link.scale = "identity")
+cf_cens <- coef(m_cens)
+cf_cens <- c(cf_cens[1:2]/cf_cens[3], cf_cens, NA)
+se_cens <- c(NA, NA, sqrt(diag(vcov(m_cens))), NA)
+@
+
+Then we estimate the two parts of the Cragg model and combine their
+coefficients:
+
+<<cragg>>=
+m_bin <- glm(I(rain > 0) ~ ensmean, data = RainIbk,
+  family = binomial(link = "probit"))
+m_trunc <- trch(rain ~ ensmean | 1, data = RainIbk, subset = rain > 0,
+  left = 0, dist = "gaussian", link.scale = "identity")
+cf_cragg <- c(coef(m_bin), coef(m_trunc), 0)
+se_cragg <- c(sqrt(diag(vcov(m_bin))), sqrt(diag(vcov(m_trunc))), NA)
+@
+
+Having estimated the two parts of the Cragg model ``by hand'' with
+\texttt{glm} and our package, we re-estimate the model using the
+\texttt{mhurdle} package. Furthermore, by switching from
+\texttt{i}ndependence to \texttt{d}ependence, we can also estimate
+a correlation for a selection effect:
+
+<<dhurdle>>=
+library("mhurdle")
+m_mhi <- mhurdle(rain ~ ensmean | ensmean, data = RainIbk,
+  corr = "i", dist = "tn")
+m_mhd <- mhurdle(rain ~ ensmean | ensmean, data = RainIbk,
+  corr = "d", dist = "tn")
+cf_mhi <- c(coef(m_mhi), 0)
+se_mhi <- c(sqrt(diag(vcov(m_mhi))), NA)
+cf_mhd <- coef(m_mhd)
+se_mhd <- sqrt(diag(vcov(m_mhd)))
+@
+
+Now we can easily collect all estimated coefficients and standard errors:
+
+<<comparison>>=
+cf <- cbind(cf_cens, cf_cragg, cf_mhi, cf_mhd)
+se <- cbind(se_cens, se_cragg, se_mhi, se_mhd)
+dimnames(cf) <- dimnames(se) <- list(
+  c("S:(Intercept)", "S:ensmean", "O:(Intercept)", "O:ensmean", "sigma", "rho"),
+  c("Tobit", "Cragg (by hand)", "Cragg (mhurdle)", "Cragg (mhurdle corr)")
+)
+round(cf, 3)
+@
+
+This shows that the coefficients do change from the one-part tobit to the
+two-part Cragg model. However, if a correlation is allowed this is very
+modest and non-significant while the other coefficients do not change much.
+Introducing the additional parameter appears to inflate some of the standard errors, though:
+
+<<comparison-se>>=
+round(se, 3)
+@
+
+As an alternative to the Cragg two-part model with selection effect, one
+could also try to employ a standard Heckman model as initially suggested
+by the reviewer. For the untransformed rain response, this leads to a
+degenerated fit with many numerical problems. The reason is clearly the zero
+truncation in the outcome equation:
+
+<<heckit>>=
+library("sampleSelection")
+m_heck <- selection(I(rain > 0) ~ ensmean, rain ~ ensmean, data = RainIbk)
+summary(m_heck)
+@
+
+The common solution to this (e.g., in the standard labor market application)
+is to log-transform the outcome equation which is easily interpretable in
+wage equations. However, here in this application a semi-logarithmic
+relationship between precipitation and the mean ensemble precipitation
+is not very natural.
+
+Nevertheless, fitting such a model would not indicate a significant
+selection effect:
+
+<<heckit2>>=
+m_heck2 <- selection(I(rain > 0) ~ ensmean, log(rain) ~ ensmean,
+  data = RainIbk)
+summary(m_heck2)
+@
+
+\section*{Selection models under normality and heteroscedasticity}
+
+JWM\dots
+
+\end{document}
+
+
