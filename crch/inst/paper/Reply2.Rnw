@@ -253,7 +253,57 @@ summary(m_heck2)
 
 \section*{Selection models under normality and heteroscedasticity}
 
-JWM\dots
+<<heteroscedastic double hurdle>>=
+m_cens <- crch(rain~ensmean | enssd, data = RainIbk, subset = rain > 0, 
+         left = 0)
+cf_cens <- coef(m_cens)
+cf_cens <- c(cf_cens[1:2]/cf_cens[3], cf_cens, NA)  ##exp(cf_cens)? see also above!
+se_cens <- c(NA, NA, sqrt(diag(vcov(m_cens))), NA)
+
+
+m_bin <- hetglm(I(rain > 0) ~ ensmean | enssd, data = RainIbk,
+         family = binomial(link = "probit"))
+m_trunc <- crch(rain~ensmean | enssd, data = RainIbk, subset = rain > 0, 
+         left = 0, truncated = TRUE)
+cf_cragg <- c(coef(m_bin), coef(m_trunc), 0)
+se_cragg <- c(sqrt(diag(vcov(m_bin))), sqrt(diag(vcov(m_trunc))), NA)
+
+
+
+X1 <- X2 <- cbind(1, RainIbk$ensmean)
+X3 <- X4 <- cbind(1, RainIbk$enssd)
+X3 <- X3[, -1, drop = FALSE]
+y <- RainIbk$rain
+
+nloglik <- function(param)
+{
+    K1 <- ncol(X1)
+    K2 <- ncol(X2)
+    K3 <- ncol(X3)
+    K4 <- ncol(X4)
+
+    mu1 <- as.numeric(X1 %*% param[1:K1])
+    mu2 <- as.numeric(X2 %*% param[(K1 + 1):(K1 + K2)])
+    sigma1 <- as.numeric(exp(X3 %*% param[(K1 + K2 + 1):(K1 + K2 + K3)]))
+    sigma2 <- as.numeric(exp(X4 %*% param[(K1 + K2 + K3 + 1):(K1 + K2 + K3 + K4)]))
+    rho <- param[K1 + K2 + K3 + K4 + 1]
+    if(abs(rho) >= 1) rho <- sign(rho) * 0.99
+
+    Phi12 <- pbivnorm::pbivnorm(mu1/sigma1, mu2/sigma2, rho)
+    resid <- y - mu2    
+
+    ll.null <- log(1 - Phi12 / pnorm(mu2/sigma2))
+    ll.pos <- -log(sigma2) + dnorm(resid/sigma2, log = TRUE) +
+        pnorm((mu1/sigma1 + rho / sigma2 * resid) / sqrt(1 - rho^2) , log.p = TRUE) - pnorm(mu2/sigma2, log.p = TRUE)
+    
+    -sum(ll.null * (y <= 0) + ll.pos * (y > 0))
+}
+
+p <- coef(m_mhd)
+p <- c(p[1:4], 0, log(p[5]), 0, p[6])
+opt <- optim(p, nloglik, method = "BFGS", hessian = TRUE)
+cbind(p, opt$par, sqrt(diag(solve(opt$hessian))))
+@
 
 \end{document}
 
