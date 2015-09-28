@@ -43,19 +43,24 @@ might not be as trivial as conveyed in the reviewer comments. It would
 require an extension to logistic response variables which are preferred
 over Gaussian responses in our application. This could certainly be implemented
 in some way -- e.g., using copulas -- but would require some additional
-work, thought, and care. Of course, one can argue now that we shy away
-from the ``more demanding revision'' -- however, we think that this would
-not be fair as establishing a heteroscedastic logistic two-part selection
-model would be well beyond the scope of our original submission.
+work, thought, and care and would certainly be well beyond
+the scope of our original submission. 
+%Of course, one can argue now that we shy away
+%from the ``more demanding revision'' -- however, we think that this would
+%not be fair as establishing a heteroscedastic logistic two-part selection
+%model would be well beyond the scope of our original submission.
 
 Finally, it is good to be concerned about potential misspecification
 in a model. This was one of the reasons why we considered the two-part
-model in addition to the censored model. But we see no reason why for any
-application of the two-part model we should be most concerned about
+model in addition to the censored model. But we see no reason why 
+%for any application of the two-part model 
+we should be most concerned about
 correlations in the selection. For example, in our case it seems to be more
 important to address the heavy tails in the response by adopting a logistic
-distribution -- something that is commonly ignored in econometric
-applications of these kinds of models. And additionally one could worry
+distribution.
+% -- something that is commonly ignored in econometric
+%applications of these kinds of models. 
+And additionally one could worry
 about misspecifications in the scale link functions, nonlinearities,
 missing regressors, etc. But given that the model we discuss improves upon
 other techniques frequently used in weather forecasting, we think that
@@ -64,8 +69,9 @@ a useful model.
 
 Therefore, we provide two things in this revision: (1) A detailed report
 of the analyses we had carried out before our previous reply (in this
-rejoinder only). (2) We added some clarification that further improvements
-of the model may be possible.
+rejoinder only). (2) We added a paragraph at the end of the example section
+to remind the reader to carefully check the model specifications, e.g., 
+sample selection effects.
 
 
 
@@ -80,7 +86,7 @@ model.}
 
 \medskip
 
-Not quite. We did take your suggestion seriously and tried it on our
+We want to clarify that we did take your suggestion seriously and tried it on our
 data where there does not seem to be any correlation as you suspected.
 See our analysis below.
 
@@ -104,10 +110,11 @@ inconsistent.}
 Clearly, whether inconsistency is \emph{likely} or not depends on the
 specific question/data investigated. We have also seen enough applications
 in economics or the social sciences where the selection effects are
-small/non-significant. But, of course, you are right that are also a lot
+small/non-significant. But, of course, you are right that there are also a lot
 of applications where selection effects matter.
 
-Now we do include a comment that encourages readers to consider
+Now we do include a comment at the end of the example section 
+that encourages readers to consider
 other extensions of the model as well.
 
 \bigskip
@@ -136,7 +143,7 @@ unmistakably warn the readers that the two-part model likely gives
 inconsistent parameters, marginal effects, and statistical inference (but 
 may be better for forecasting than the censored regression model).}
 
-Given that there is no evidence whatsoever for this \emph{``likely inconsistency''}
+Given that there is no evidence for this \emph{``likely inconsistency''}
 in our data (see below), we see no reason to propagate such preconceptions.
 However, we do include some remarks that selection effects are one possible
 misspecification and encourage readers to critically assess this
@@ -304,8 +311,8 @@ nloglik <- function(param)
     -sum(ll.null * (y <= 0) + ll.pos * (y > 0))
 }
 @
-We use the coefficients of the homoscedastic Cragg model as starting values
-and optimize via optim():
+We use the coefficients of the homoscedastic Cragg model as starting values,
+optimize via optim(), and extract the coefficients and standard errors:
 <<hetcragg2>>=
 p <- coef(m_mhd)
 p <- c(p[1:4], 0, log(p[5]), 0, p[6])
@@ -328,9 +335,10 @@ dimnames(cf) <- dimnames(se) <- list(
 round(cf, 3)
 round(se, 3)
 @
-It can be seen that also in the heteroscedastic Cragg model the 
-error correlation is irrelevant and the coefficients are almost the same as in
-the Cragg model that ignors sample selection effects.
+It can be seen that, like in the homoscedastic case,
+the error correlation seems irrelevant. The coefficients in the Cragg model
+do not change significantly if considering error correlations but the
+standard errors seem to be slightly inflated.
 \end{document}
 
 
