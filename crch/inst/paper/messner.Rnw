@@ -494,6 +494,16 @@ p * ptlogis(sqrt(5), mu, sigma, lower.tail = FALSE, left = 0)
 Note, that \code{pclogis()} could also be replaced by \code{plogis()} since they
 are equivalent between $\mathit{left}$ and $\mathit{right}$.
 
+Altough the above model is apparently well suited for our application
+the model specifications should always be carefully considered by
+the package user (distribution, scale link functions, regressors, 
+non-linearities, etc.).
+The two-part model also does not consider sample selection effects
+since we found them not to be important for our data.
+However, if such effects exist they could e.g., be considered for the 
+homoscedastic and normally distributed case 
+with the R-packages \CRANpkg{sampleSelection} or \CRANpkg{mhurdle}. 
+
 \section{Summary}\label{sec_summary}
 Censored and truncated response models are common in econometrics and other
 statistical applications. However, often the homoscedasticity assumption of
