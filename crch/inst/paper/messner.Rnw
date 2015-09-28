@@ -500,7 +500,7 @@ the package user (distribution, scale link functions, regressors,
 non-linearities, etc.).
 The two-part model also does not consider sample selection effects
 since we found them not to be important for our data.
-However, if such effects exist they could e.g., be considered for the 
+However, if such effects exist they could be considered, e.g., for the 
 homoscedastic and normally distributed case 
 with the R-packages \CRANpkg{sampleSelection} or \CRANpkg{mhurdle}. 
 
