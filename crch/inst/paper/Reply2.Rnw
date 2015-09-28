@@ -157,6 +157,7 @@ data("RainIbk", package = "crch")
 RainIbk <- sqrt(RainIbk)
 RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
 RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+RainIbk <- subset(RainIbk, enssd > 0)
 @
 
 Then, we estimate a standard tobit model and extract the corresponding
@@ -169,7 +170,7 @@ library("crch")
 m_cens <- crch(rain ~ ensmean | 1, data = RainIbk, left = 0,
   dist = "gaussian", link.scale = "identity")
 cf_cens <- coef(m_cens)
-cf_cens <- c(cf_cens[1:2]/cf_cens[3], cf_cens, NA)
+cf_cens <- c(cf_cens[1:2]/exp(cf_cens[3]), cf_cens, NA)
 se_cens <- c(NA, NA, sqrt(diag(vcov(m_cens))), NA)
 @
 
@@ -252,26 +253,30 @@ summary(m_heck2)
 @
 
 \section*{Selection models under normality and heteroscedasticity}
+Finally, we extend the previous analysis to heteroscedasticity.
+Therefore we first estimate the heteroscedastic tobit and cragg
+models like we did in the manuscript (except assuming normality) 
+and extract their coefficients and standard errors like above.  
+<<heteroscedastictobitcragg>>=
+m_cens_h <- crch(rain~ensmean | log(enssd), data = RainIbk, left = 0,
+  dist = "gaussian")
+cf_cens_h <- coef(m_cens_h)
+cf_cens_h <- c(cf_cens_h[1:2]/exp(cf_cens_h[3]), cf_cens_h[4], cf_cens_h, NA) 
+se_cens_h <- c(NA, NA, NA, sqrt(diag(vcov(m_cens_h))), NA)
 
-<<heteroscedastic double hurdle>>=
-m_cens <- crch(rain~ensmean | enssd, data = RainIbk, subset = rain > 0, 
-         left = 0)
-cf_cens <- coef(m_cens)
-cf_cens <- c(cf_cens[1:2]/cf_cens[3], cf_cens, NA)  ##exp(cf_cens)? see also above!
-se_cens <- c(NA, NA, sqrt(diag(vcov(m_cens))), NA)
-
-
-m_bin <- hetglm(I(rain > 0) ~ ensmean | enssd, data = RainIbk,
+library("glmx")
+m_bin_h <- hetglm(I(rain > 0) ~ ensmean | log(enssd), data = RainIbk,
          family = binomial(link = "probit"))
-m_trunc <- crch(rain~ensmean | enssd, data = RainIbk, subset = rain > 0, 
-         left = 0, truncated = TRUE)
-cf_cragg <- c(coef(m_bin), coef(m_trunc), 0)
-se_cragg <- c(sqrt(diag(vcov(m_bin))), sqrt(diag(vcov(m_trunc))), NA)
-
-
-
+m_trunc_h <- crch(rain~ensmean | log(enssd), data = RainIbk, subset = rain > 0, 
+         left = 0, truncated = TRUE, dist = "gaussian")
+cf_cragg_h <- c(coef(m_bin_h), coef(m_trunc_h), 0)
+se_cragg_h <- c(sqrt(diag(vcov(m_bin_h))), sqrt(diag(vcov(m_trunc_h))), NA)
+@
+Next we build a function for the negative log-likelihood of a heteroscedastic
+Cragg model with binomial normal distributed errors:
+<<hetcragg>>=
 X1 <- X2 <- cbind(1, RainIbk$ensmean)
-X3 <- X4 <- cbind(1, RainIbk$enssd)
+X3 <- X4 <- cbind(1, log(RainIbk$enssd))
 X3 <- X3[, -1, drop = FALSE]
 y <- RainIbk$rain
 
@@ -298,13 +303,34 @@ nloglik <- function(param)
     
     -sum(ll.null * (y <= 0) + ll.pos * (y > 0))
 }
-
+@
+We use the coefficients of the homoscedastic Cragg model as starting values
+and optimize via optim():
+<<hetcragg2>>=
 p <- coef(m_mhd)
 p <- c(p[1:4], 0, log(p[5]), 0, p[6])
 opt <- optim(p, nloglik, method = "BFGS", hessian = TRUE)
-cbind(p, opt$par, sqrt(diag(solve(opt$hessian))))
-@
 
+cf_mhd_h <- c(opt$par[1:2], opt$par[5], opt$par[3:4], opt$par[6:8])
+se_mhd_h <- sqrt(diag(solve(opt$hessian)))
+se_mhd_h <- c(se_mhd_h[1:2], se_mhd_h[5], se_mhd_h[3:4], se_mhd_h[6:8])
+@
+Now we can compare the estimated coefficients and standard errors
+of the 3 different heteroscedastic models:
+<<comparison>>=
+cf <- cbind(cf_cens_h, cf_cragg_h, cf_mhd_h)
+se <- cbind(se_cens_h, se_cragg_h, se_mhd_h)
+dimnames(cf) <- dimnames(se) <- list(
+  c("S:(Intercept)", "S:ensmean", "S:(scale)_log(enssd)", "O:(Intercept)", 
+    "O:ensmean", "O:(scale)_(Intercept)", "O:(scale)_log(enssd)", "rho"),
+  c("Tobit", "Cragg", "Cragg (corr)")
+)
+round(cf, 3)
+round(se, 3)
+@
+It can be seen that also in the heteroscedastic Cragg model the 
+error correlation is irrelevant and the coefficients are almost the same as in
+the Cragg model that ignors sample selection effects.
 \end{document}
 
 
