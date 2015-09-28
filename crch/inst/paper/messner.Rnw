@@ -502,7 +502,8 @@ The two-part model also does not consider sample selection effects
 since we found them not to be important for our data.
 However, if such effects exist they could be considered, e.g., for the 
 homoscedastic and normally distributed case 
-with the R-packages \CRANpkg{sampleSelection} or \CRANpkg{mhurdle}. 
+with the R-packages \CRANpkg{sampleSelection} \citep{toomet2008} or
+\CRANpkg{mhurdle} \citep{croissant2013}. 
 
 \section{Summary}\label{sec_summary}
 Censored and truncated response models are common in econometrics and other
