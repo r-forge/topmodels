@@ -89,7 +89,7 @@ additive models \citep{rigby1996, rigby2005}, or beta regression
 \citep{cribarineto2010}. There also exist several \proglang{R} packages with functions
 implementing the above models, e.g., \CRANpkg{dglm} \citep{dunn2014}, 
 \CRANpkg{glmx} \citep{zeileis2013}, \CRANpkg{gamlss} \citep{rigby2005}, 
-\CRANpkg{betareg} \citep{zeileis2012} among others.
+\CRANpkg{betareg} \citep{zeileis2012} amongst others.
 
 The \CRANpkg{crch} package provides functions to fit censored and truncated 
 regression models that
@@ -525,6 +525,18 @@ p * ptlogis(sqrt(5), mu, sigma, lower.tail = FALSE, left = 0)
 %
 Note, that \code{pclogis()} could also be replaced by \code{plogis()} since they
 are equivalent between $\mathit{left}$ and $\mathit{right}$.
+
+Clearly, other types of model misspecification or model generalization
+(depending on the point of view) for the classical tobit model are possible. In
+addition to heteroscedasticity, the type of response distribution, and the
+presence of hurdle effects as explored in the application here, further aspects
+might have to be addressed by the model.  Especially in economics and the
+social sciences sample selection effects might be present in the two-part model
+which can be addressed (in the homoscedastic normal case) using the R packages
+\CRANpkg{sampleSelection} \citep{toomet2008} or \CRANpkg{mhurdle}
+\citep{croissant2013}. Furthermore, the scale link function or potential
+nonlinearities in the regression functions could be assessed, e.g., using the
+\CRANpkg{gamlss} suite of packages \citep{stasinopoulos2007}. 
 
 \section{Summary}\label{sec_summary}
 Censored and truncated response models are common in econometrics and other
