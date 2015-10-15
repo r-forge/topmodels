@@ -52,6 +52,14 @@ S3method("update", "crch")
 S3method("model.frame", "crch")
 S3method("model.matrix", "crch")
 
+S3method("plot", "crch.boost")
+S3method("coef", "crch.boost")
+S3method("logLik", "crch.boost")
+S3method("predict", "crch.boost")
+S3method("print", "crch.boost")
+S3method("summary", "crch.boost")
+S3method("print", "summary.crch.boost")
+
 ## methods for hxlr
 S3method("logLik", "hxlr")
 S3method("predict", "hxlr")
