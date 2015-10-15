@@ -147,11 +147,11 @@ trch <- function(formula, data, subset, na.action, weights, offset,
   eval(cl2)
 }
 
-crch.control <- function(method = "BFGS", maxit = 5000, hessian = NULL, trace = FALSE, 
-  start = NULL, dot = "separate", ...)
+crch.control <- function(method = "BFGS", maxit = if(method=="boosting") 100 else 5000, 
+  hessian = NULL, trace = FALSE, start = NULL, dot = "separate", ...)
 {
   if(method == "boosting") {
-    rval <- crch.boost(method = method, dot = dot, start = start,...)
+    rval <- crch.boost(dot = dot, start = start, maxit = maxit, ...)
   } else {
     rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, 
       start = start, dot = dot, fit = "crch.fit")
