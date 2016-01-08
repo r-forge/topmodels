@@ -234,14 +234,13 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   for(i in startit:maxit) {
     ## gradient of negative likelihood
     grad <- gradfun(par)
-
     ## location
-    basefits <- apply(x, 2, function(x) t(x) %*% -grad[,1])/n
+    basefits <- .Call("mycov", -grad[,1],x)
     par2 <- par
     minind <- which.max(abs(basefits))
     par2[minind] <- par2[minind] + nu*basefits[minind]
     ## scale
-    basefits <- apply(z, 2, function(z) t(z) %*% -grad[,2])/n
+    basefits <- .Call("mycov", -grad[,2],z)
     par3 <- par
     minind <- which.max(abs(basefits))
     par3[k + minind] <- par3[k + minind] + nu*basefits[minind]
@@ -580,20 +579,25 @@ plot.crch.boost <- function(object, loglik = FALSE,
   if(which == "location") {path <- path[,1:k]; q <- 0}
   if(which == "scale") {path <- path[,(k+1):(k+q)]; k <- 0}
   
+  if(is.logical(coef.label)) {
+    coef.label <- if(coef.label) {
+        list(location = colnames(path)[1:k], scale = colnames(path)[(k+1):(q+k)])
+    } else NULL
+  }
   ## adjust figure margins
-  rmar <- if(label) max(strwidth(colnames(object$coefpath), units = "in"))+0.5 else 0.42
+  rmar <- if(length(coef.label)) max(strwidth(colnames(object$coefpath), units = "in"))+0.5 else 0.42
   umar <- if(is.null(mstop)) 0.82 else 1.02
   par(mai = c(1.02, 0.82, umar, rmar))
 
-  plot.ts(path, plot.type = "single", ylab = ylab, xlab = "boosting iteration", 
+  plot(ts(path, start = 0), plot.type = "single", ylab = ylab, xlab = "boosting iteration", 
     type = "s", col = rep(col, c(k,q)), ...)
 
   ## label paths
-  if(coef.label) {
-    if(k!=0) axis(4, at = tail(path, 1)[1:k], labels = colnames(path)[1:k], 
-      las = 1, col.axis = col[1])
-    if(q!=0) axis(4, at = tail(path, 1)[(k+1):(q+k)], 
-      labels = colnames(path)[(k+1):(q+k)], las = 1, col.axis = tail(col, 1))
+  if(length(coef.label)) {
+    if(k!=0) axis(4, at = as.data.frame(tail(path, 1))[1:k][coef.label$location], 
+      labels = coef.label$location, las = 1, col.axis = col[1], col.ticks = col[1])
+    if(q!=0) axis(4, at = as.data.frame(tail(path, 1))[(k+1):(q+k)][coef.label$scale], 
+      labels = coef.label$scale, las = 1, col.axis = tail(col, 1), col.ticks = tail(col,1))
   }
 
   ## vertical line at mstop
