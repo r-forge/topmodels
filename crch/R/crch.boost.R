@@ -15,19 +15,21 @@ crch.boost <- function(maxit = 100, nu = 0.1, start = NULL,
 
 
 ## Function to (re)standardize vectors and model matrices:
-standardize.matrix <- function(x, restandardize = FALSE, center = NULL, scale = NULL) {
-  center <- attr(x, "standardize:center")
-  scale <- attr(x, "standardize:scale")
+standardize.matrix <- function(x, restandardize = FALSE, center = NULL, scale = NULL,
+  weights = rep(1, NROW(x))) {
+  if(is.null(center)) center <- attr(x, "standardize:center")
+  if(is.null(scale)) scale <- attr(x, "standardize:scale")
   x <- as.matrix(x)
   if(is.null(center))
-    center <- colMeans(x)
-  if(is.null(scale))
-    scale <- apply(x, 2, sd)
+    center <- colSums(x*weights)/sum(weights)
 
   center[grep("(Intercept)", colnames(x))] <- 0
-  scale[grep("(Intercept)", colnames(x))] <- 1
-
   mcenter <- matrix(rep(center, nrow(x)), nrow(x), ncol(x), byrow = TRUE)
+
+  if(is.null(scale))
+    scale <- sqrt(colSums(weights*(x-mcenter)^2)/(sum(weights)-1))
+
+  scale[grep("(Intercept)", colnames(x))] <- 1
   mscale  <- matrix(rep(scale , nrow(x)), nrow(x), ncol(x), byrow = TRUE)
  
   if(!restandardize) { 
@@ -94,8 +96,8 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   reltol <- control$reltol
 
   ## scale response and regressors
-  x <- standardize.matrix(x)
-  z <- standardize.matrix(z)
+  x <- standardize.matrix(x, weights = weights)
+  z <- standardize.matrix(z, weights = weights)
   basefit <- crch.fit(x[,1, drop = FALSE], z[,1, drop = FALSE], y, left, right, 
       truncated, dist, df, link.scale, weights, offset)
   y <- standardize.matrix(y, center = basefit$coefficients$location, scale = basefit$coefficients$scale)
@@ -226,7 +228,6 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     loglikpath <- start$loglikpath
     startit <- start$iterations + 1 
   }
-  
 
   ## actual boosting
   llold <- -Inf
@@ -235,12 +236,12 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     ## gradient of negative likelihood
     grad <- gradfun(par)
     ## location
-    basefits <- .Call("mycov", -grad[,1],x)
+    basefits <- .Call("mycov", -grad[,1],x)*n/sum(weights)
     par2 <- par
     minind <- which.max(abs(basefits))
     par2[minind] <- par2[minind] + nu*basefits[minind]
     ## scale
-    basefits <- .Call("mycov", -grad[,2],z)
+    basefits <- .Call("mycov", -grad[,2],z)*n/sum(weights)
     par3 <- par
     minind <- which.max(abs(basefits))
     par3[k + minind] <- par3[k + minind] + nu*basefits[minind]
