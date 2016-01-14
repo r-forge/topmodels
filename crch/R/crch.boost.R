@@ -100,7 +100,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   z <- standardize.matrix(z, weights = weights)
   basefit <- crch.fit(x[,1, drop = FALSE], z[,1, drop = FALSE], y, left, right, 
       truncated, dist, df, link.scale, weights, offset)
-  y <- standardize.matrix(y, center = basefit$coefficients$location, scale = basefit$coefficients$scale)
+  y <- standardize.matrix(y, center = basefit$coefficients$location, scale = exp(basefit$coefficients$scale))
     
   standardize <- list(
     x = list(center = attr(x, "standardize:center"), scale = attr(x, "standardize:scale")),
@@ -330,7 +330,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   gamma <- fit$gamma
   mu <- fit$mu
   sigma <- fit$sigma
-  ll <- loglikpath[mstopopt[[mstop]] + 1]
+  ll <- loglikfun(par)
 
   names(beta) <- colnames(x)
   names(gamma) <- colnames(z)
