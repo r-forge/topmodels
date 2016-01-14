@@ -9,8 +9,7 @@
 }
 \usage{
 crch.boost(maxit = 100, nu = 0.1, start = NULL, dot = "separate", 
-  mstopopt = c("max", "aic", "bic", "cv"),  nfolds = 10, foldid = NULL, 
-  reltol = sqrt(.Machine$double.eps)
+  mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, foldid = NULL)
 
 crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   df = NULL, link.scale = "log", weights = NULL, offset = NULL, 
@@ -37,10 +36,6 @@ crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   \item{foldid}{if \code{mstopopt = "cv"}, an optional vector of values between 1 
     and \code{nfold} identifying what fold each observation is in. If supplied,
     \code{nfold} can be missing.}
-  \item{reltol}{Relative convergence tolerance. The boosting stops if
-    it is unable to reduce the negative log-likelihood by a factor of 
-    \code{reltol * (- loglik + reltol)} at a step.  Default is 
-    \code{sqrt(.Machine$double.eps)}. }
   \item{x, z, y, left, right, truncated, dist, df, link.scale, weights, offset, control}{see \code{\link{crch.fit}} for details.}
 }
 
@@ -76,7 +71,6 @@ function.
           the link objects for the scale model.}
   \item{truncated}{logical indicating wheter a truncated model has been 
   fitted.}
-  \item{converged}{logical variable whether boosting has converged or not.}
   \item{iterations}{number of boosting iterations.}
   \item{stepsize}{boosting stepsize \code{nu}.}
   \item{mstop}{criterion used to find optimum stopping iteration.}
@@ -88,15 +82,27 @@ function.
 \seealso{\code{\link{crch}}, \code{\link{crch.control}}}
 
 \examples{
-data("RainIbk")
-RainIbk <- sqrt(RainIbk)
-RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
-RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
-RainIbk <- subset(RainIbk, enssd > 0)
-boost <- crch(rain ~ ensmean + enssd | ensmean + enssd, RainIbk,
-  left = 0, dist = "logistic", method = "boosting", mstop = "aic", maxit = 1000)
+# generate data
+set.seed(5)
+x <- matrix(rnorm(1000*20),1000,20)
+y <- rnorm(1000, x[,1] - 1.5 * x[,2], exp(-1 + 0.3*x[,3]))
+data <- data.frame(cbind(y, x))
+
+# fit model with maximum likelihood
+CRCH <- crch(y ~ .|., data = data, dist = "gaussian")
+
+# fit model with boosting
+boost <- crch(y ~ .|.,  data = data, dist = "gaussian", 
+  method = "boosting", mstop = "aic")
+
+# AIC comparison
+AIC(CRCH, boost)
+
+# summary
 summary(boost)
+
+# plot
 plot(boost)
 }
 
-\keyword{regression}
+\keyword{regression, boosting}
