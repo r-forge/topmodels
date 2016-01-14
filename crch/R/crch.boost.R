@@ -1,15 +1,14 @@
 ## function to set some control parameters for boosting (replaces crch.control() for boosting)
 crch.boost <- function(maxit = 100, nu = 0.1, start = NULL, 
   dot = "separate", mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, 
-  foldid = NULL, reltol = sqrt(.Machine$double.eps))
+  foldid = NULL)
 {
   if(is.numeric(mstop)) {
     maxit <- mstop
     mstop <- "max"
   }
   rval <- list(maxit = maxit, nu = nu, nfolds = nfolds, foldid = foldid, 
-    start = start, dot = dot, mstop = match.arg(mstop),
-    reltol = reltol, fit = "crch.boost.fit")
+    start = start, dot = dot, mstop = match.arg(mstop), fit = "crch.boost.fit")
   rval
 }
 
@@ -93,7 +92,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   nu <- control$nu
   start <- control$start
   mstop <- control$mstop
-  reltol <- control$reltol
+#  reltol <- control$reltol
 
   ## scale response and regressors
   x <- standardize.matrix(x, weights = weights)
@@ -230,8 +229,8 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   }
 
   ## actual boosting
-  llold <- -Inf
-  converged <- FALSE
+#  llold <- -Inf
+#  converged <- FALSE
   for(i in startit:maxit) {
     ## gradient of negative likelihood
     grad <- gradfun(par)
@@ -254,11 +253,11 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     coefpath <- rbind(coefpath, par)
     llnew <- max(ll3, ll2)
     loglikpath <- rbind(loglikpath, llnew)
-    if(llnew - llold <  reltol * (abs(llold) + reltol)) {
-      break
-      converged <- TRUE
-    }
-    llold <- llnew
+#    if(llnew - llold <  reltol * (abs(llold) + reltol)) {
+#      break
+#      converged <- TRUE
+#    }
+#    llold <- llnew
   }
 
   ## cross validation to find optimum mstop
@@ -330,7 +329,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   gamma <- fit$gamma
   mu <- fit$mu
   sigma <- fit$sigma
-  ll <- loglikfun(par)
+  ll <- - loglikfun(par)
 
   names(beta) <- colnames(x)
   names(gamma) <- colnames(z)
@@ -353,7 +352,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     loglik = ll,
     link = list(scale = linkobj),
     truncated = truncated,
-    converged = converged,
+#    converged = converged,
     coefpath = coefpath,
     loglikpath = loglikpath,
     iterations = NROW(coefpath) - 1,
