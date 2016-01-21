@@ -1,5 +1,10 @@
   o Added option to avoid computation of covariance matrix
 
+  o Added left and right arguments to predict.crch and 
+    predict.crch.boost to allow quantile predictions for non-constant 
+    censoring or truncation points.
+
+
 Changes in Version 0.9-1
 
   o Added model.matrix() and model.frame() methods for crch objects
