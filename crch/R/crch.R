@@ -509,7 +509,7 @@ model.matrix.crch <- function(object, model = c("location", "scale"), ...) {
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
 predict.crch <- function(object, newdata = NULL,
-  type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, ...)
+  type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, left = NULL, right = NULL, ...)
 {
   type <- match.arg(type)
   ## response/location are synonymous
@@ -518,8 +518,17 @@ predict.crch <- function(object, newdata = NULL,
   ## type quantile not available for user defined distributions
   if(type == "quantile" & identical(object$dist, "user defined"))
     stop("type quantile not available for user defined distributions")
-  ## currently all other distributions supported are symmetric, hence:
-  if(type == "quantile" & identical(at, 0.5)) type <- "response"
+
+  if(type == "quantile" & !is.null(newdata)){
+      if(length(object$cens$left) > 1) {
+        if(is.null(left)) stop("left has to be specified for non-constant left censoring")
+        if(length(left) > 1 & length(left) != NROW(newdata)) stop("left must have length 1 or length of newdata")
+      }
+      if(length(object$cens$right) > 1) {
+        if(is.null(right)) stop("right has to be specified for non-constant right censoring")
+        if(length(right) > 1 & length(right) != NROW(newdata)) stop("right  must have length 1 or length of newdata")
+      }
+    }
   
   if(type == "quantile") {
     if(object$truncated) {
@@ -534,11 +543,12 @@ predict.crch <- function(object, newdata = NULL,
         "logistic" = function(..., df) qclogis(...))
     }
     
-
+    if(is.null(left)) left <- object$cens$left
+    if(is.null(right)) right <- object$cens$right
 
     qdist <- function(at, location, scale, df) {
       rval <- sapply(at, function(p) qdist2(p, location, scale, 
-        df = df, left = object$cens$left, right = object$cens$right))
+        df = df, left = left, right = right))
       if(length(at) > 1L) {
         if(NCOL(rval) == 1L) rval <- matrix(rval, ncol = length(at),
 	        dimnames = list(unique(names(rval)), NULL))
@@ -566,7 +576,6 @@ predict.crch <- function(object, newdata = NULL,
     return(rval)
 
   } else {
-
     tnam <- switch(type,
       "response" = "location",
       "scale" = "scale",

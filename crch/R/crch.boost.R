@@ -608,14 +608,16 @@ plot.crch.boost <- function(object, loglik = FALSE,
 }
 
 predict.crch.boost <- function(object, newdata = NULL, mstop = NULL, 
-  type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, ...)
+  type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, 
+  left = NULL, right = NULL, ...)
 {
   object <- mstop.crch.boost(object, mstop = mstop)
   if(missing(newdata)) {
     if(!is.null(mstop)) stop("newdata has to be supplied for user defined mstop")
-    predict.crch(object, type = type, na.action = na.action, at = at, ...)
+    predict.crch(object, type = type, na.action = na.action, at = at, left = left, right = right, ...)
   } else {
-    predict.crch(object, newdata = newdata, type = type, na.action = na.action, at = at, ...)
+    predict.crch(object, newdata = newdata, type = type, na.action = na.action, 
+      at = at, left = left, right = right, ...)
   }
 }
 
