@@ -28,6 +28,10 @@ Obtains various types of predictions for \code{crch.boost} models.
   contain \code{NA}s. Default is na.pass}
   \item{at}{vector of quantile probabilities used for \code{type =
   "quantile"}.}
+  \item{left}{left censoring or truncation point. Only used for \code{type = "quantile"}.
+  If NULL, censoring or truncation point is obtained from \code{object}.}
+  \item{left}{right censoring or truncation point. Only used for \code{type = "quantile"}.
+  If NULL, censoring or truncation point is obtained from \code{object}.}
   \item{\dots}{further arguments passed to or from other methods.}
 }
 
