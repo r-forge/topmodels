@@ -235,12 +235,12 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     ## gradient of negative likelihood
     grad <- gradfun(par)
     ## location
-    basefits <- .Call("mycov", -grad[,1],x)*n/sum(weights)
+    basefits <- .Call("mycov", -grad[,1],x, PACKAGE="crch")*n/sum(weights)
     par2 <- par
     minind <- which.max(abs(basefits))
     par2[minind] <- par2[minind] + nu*basefits[minind]
     ## scale
-    basefits <- .Call("mycov", -grad[,2],z)*n/sum(weights)
+    basefits <- .Call("mycov", -grad[,2],z, PACKAGE="crch")*n/sum(weights)
     par3 <- par
     minind <- which.max(abs(basefits))
     par3[k + minind] <- par3[k + minind] + nu*basefits[minind]
