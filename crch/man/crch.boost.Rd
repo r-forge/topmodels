@@ -27,15 +27,14 @@ crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
     so that the parts are expanded sequentially conditional on all prior parts.
     Default is \code{"separate"}}
   \item{mstop}{method to find optimum stopping iteration. Default is \code{"max"}
-    which is \code{maxit} or the boosting iteration at which the algorithm
-    converges. Alternatives are \code{"aic"} and \code{"bic"} for AIC and BIC
+    which is \code{maxit}. Alternatives are \code{"aic"} and \code{"bic"} for AIC and BIC
     optimization and \code{"cv"} for cross validation.
-    \code{mstop} can also be an integer to set the number of boosting
+    \code{mstop} can also be a positive integer to set the number of boosting
     iterations. Then \code{maxit} is set to \code{mstop} and \code{mstop="max"}.}
   \item{nfolds}{if \code{mstopopt = "cv"}, number of folds in cross validation.}
   \item{foldid}{if \code{mstopopt = "cv"}, an optional vector of values between 1 
-    and \code{nfold} identifying what fold each observation is in. If supplied,
-    \code{nfold} can be missing.}
+    and \code{nfold} identifying the fold each observation is in. If supplied,
+    \code{nfolds} can be missing.}
   \item{x, z, y, left, right, truncated, dist, df, link.scale, weights, offset, control}{see \code{\link{crch.fit}} for details.}
 }
 
@@ -44,7 +43,10 @@ crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
 truncated regression models with conditional heteroscedasticy with
 boosting. If \code{crch.boost} is supplied as \code{control} in 
 \code{crch} then \code{crch.boost.fit} is used as lower level fitting
-function.
+function. Note that if \code{method=boosting} is used in 
+\code{\link{crch.control}()} also \code{crch.boost} is called.
+Thus, boosting can more conveniently be called with 
+\code{crch(\ldots, method = "boosting")}.
 }
 
 \value{
@@ -85,15 +87,20 @@ function.
 # generate data
 set.seed(5)
 x <- matrix(rnorm(1000*20),1000,20)
-y <- rnorm(1000, x[,1] - 1.5 * x[,2], exp(-1 + 0.3*x[,3]))
+y <- rnorm(1000, 1 + x[,1] - 1.5 * x[,2], exp(-1 + 0.3*x[,3]))
+y <- pmax(0, y)
 data <- data.frame(cbind(y, x))
 
 # fit model with maximum likelihood
-CRCH <- crch(y ~ .|., data = data, dist = "gaussian")
+CRCH <- crch(y ~ .|., data = data, dist = "gaussian", left = 0)
 
 # fit model with boosting
-boost <- crch(y ~ .|.,  data = data, dist = "gaussian", 
-  method = "boosting", mstop = "aic")
+boost <- crch(y ~ .|.,  data = data, dist = "gaussian", left = 0,
+  control = crch.boost(mstop = "aic"))
+
+# more conveniently, the same model can also be fit through
+# boost <- crch(y ~ .|.,  data = data, dist = "gaussian", left = 0,
+#   method = "boosting", mstop = "aic")
 
 # AIC comparison
 AIC(CRCH, boost)
