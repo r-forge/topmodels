@@ -60,10 +60,14 @@ SEXP pct(SEXP q, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right, SEXP lower
   if(*lower_tailptr == 1) {
     for(i = 0; i < n; i++) {
       if(qptr[i] < leftptr[i]) {
-        rvalptr[i] = 0;
+        if(*log_pptr == 1) {
+          rvalptr[i] = log(0);
+        } else {
+          rvalptr[i] = 0;
+        }
       } else {
         if(qptr[i] >= rightptr[i]){
-          rvalptr[i] = 1;
+          rvalptr[i] = 1 * (1 - *log_pptr);
         } else {
           rvalptr[i] = pt((qptr[i] - muptr[i]) / sigmaptr[i], *dfptr, 1, *log_pptr); 
         }
@@ -72,10 +76,14 @@ SEXP pct(SEXP q, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right, SEXP lower
   } else {
     for(i = 0; i < n; i++) {
       if(qptr[i] <= leftptr[i]) {
-        rvalptr[i] = 1;
+        rvalptr[i] = 1 * (1 - *log_pptr);
       } else {
         if(qptr[i] > rightptr[i]){
-          rvalptr[i] = 0;
+          if(*log_pptr == 1) {
+            rvalptr[i] = log(0);
+          } else {
+            rvalptr[i] = 0;
+          }
         } else {
           rvalptr[i] = pt((qptr[i] - muptr[i]) / sigmaptr[i], *dfptr, 0, *log_pptr); 
         }
