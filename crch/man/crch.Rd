@@ -55,7 +55,8 @@ crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   with \code{left} and \code{right} interpreted as truncation points,
   If \code{FALSE} censored model is fitted. Default is \code{FALSE}}
   \item{control}{a list of control parameters passed to \code{\link{optim}}.
-  Default is \code{\link{crch.control}()}}
+  Default is \code{\link{crch.control}()}. If set to \code{\link{crch.boost}()}
+  optimization is performed with boosting.}
   \item{model}{logical. If \code{TRUE} \emph{model frame} is
   included as a component of the returned value.}
   \item{x, y}{for \code{crch}: logical. If \code{TRUE} the model matrix and
@@ -124,7 +125,7 @@ fitting takes place.
     \emph{Wind Energy}, \bold{17}(11), 1753--1766. doi:10.1002/we.1666.
 }
 
-\seealso{\code{\link{predict.crch}}, \code{\link{crch.control}}}
+\seealso{\code{\link{predict.crch}}, \code{\link{crch.control}}, \code{\link{crch.boost}}}
 
 \examples{
 data("RainIbk")
