@@ -1,23 +1,17 @@
 ## density
-dtlogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
-  x <- data.frame(x = x, mean, sd)$x
-  denom <- plogis((right - mean)/sd) - plogis((left-mean)/sd) 
-  ifelse(x < left, dlogis(-Inf, log = log), 
-  ifelse(x > right, dlogis(Inf, log = log), 
-  dlogis((x - mean)/sd, log = log)/(sd*denom)^(1 - log) - log(sd*denom)*log))
+dtlogis2 <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
+  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
+  with(input, .Call("dtlogis", x, mean, sd, left, right, log))
 }
 
+
 ## distribution function
-ptlogis <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
+ptlogis2 <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
   left = -Inf, right = Inf) {
-  q <- data.frame(q = q, mean, sd)$q
-  denom <- plogis((right - mean)/sd) - plogis((left - mean)/sd)
-  lower <- if(lower.tail) left else right
-  qtmp <- (plogis((lower - mean)/sd) - plogis((q - mean)/sd)) *
-    (-1)^lower.tail
-  ifelse(q < left, plogis(-Inf, lower.tail = lower.tail, log.p = log.p),
-  ifelse(q > right, plogis(Inf, lower.tail = lower.tail, log.p = log.p),
-  if(log.p) log(qtmp) - log(denom) else qtmp/denom ))
+  input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
+  with(input, .Call("ptlogis", q, mean, sd, left, right, lower.tail, log.p))
 }
 
 ## quantiles
@@ -39,33 +33,18 @@ rtlogis <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
 ## scores
 stlogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
   left = -Inf, right = Inf) {
+  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
     which <- c("mu", "sigma")[as.integer(which)]
   which <- tolower(which)
   score <- NULL
-  x <- data.frame(x = x, mean, sd)$x
-  dxm <- x - mean
-  dlm <- left - mean
-  drm <- right - mean
-  dlm2 <- if(is.finite(left)) dlm else 0
-  drm2 <- if(is.finite(right)) drm else 0
-  sd2 <- sd^2
-  
-  sc <- sclogis(x, mean, sd, left = -Inf, right = Inf)
-
-  denom <-  (plogis(drm/sd) - plogis(dlm/sd))
-  enum1 <- (dlogis(drm/sd) - dlogis(dlm/sd))/sd
-  enum2 <- (drm2*dlogis(drm/sd) - dlm2*dlogis(dlm/sd))/sd2
   
   for(w in which) {
     if(w == "mu")
-      score2 <- ifelse(x < left, 0,
-        ifelse(x > right, 0,
-        sc[,"dmu"] + enum1/denom))
+      score2 <- with(input, .Call("stlogis_mu", x, mean, sd, left, right))
     if(w == "sigma")
-      score2 <- ifelse(x < left, 0,
-        ifelse(x > right, 0,
-        sc[,"dsigma"] + enum2/denom))
+      score2 <- with(input, .Call("stlogis_sigma", x, mean, sd, left, right))
     score <- cbind(score, score2)
   }
   if(is.null(dim(score)))
@@ -77,54 +56,19 @@ stlogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"),
 ## Hessian
 htlogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
   left = -Inf, right = Inf) {
+  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
     which <- c("mu", "sigma", "mu.sigma", "sigma.mu")[as.integer(which)]
   which <- tolower(which)
   hess <- list()
-  x <- data.frame(x = x, mean, sd)$x
-  sd2 <- sd^2
-  dlm <- left - mean
-  drm <- right - mean
-  dxm <- x - mean
-  
-  scorel <- if(is.finite(left)) sclogis(left, mean, sd, left = -Inf, right = Inf) else 
-    data.frame(dmu = 0, dsigma = 0)
-  scorer <- if(is.finite(right)) sclogis(right, mean, sd, left = -Inf, right = Inf) else 
-    data.frame(dmu = 0, dsigma = 0)
-  
-  hc <- hclogis(x, mean, sd, which = c("mu", "sigma", "mu.sigma", "sigma.mu"), 
-    left = -Inf, right = Inf)
-
-  denom <-  (plogis(drm/sd) - plogis(dlm/sd))
-  enum1 <- (dlogis(drm/sd) - dlogis(dlm/sd))/sd
-  drm2 <- if(is.finite(right)) drm else 0
-  dlm2 <- if(is.finite(left)) dlm else 0
-  enum2 <- (drm2*dlogis(drm/sd) - dlm2*dlogis(dlm/sd))/sd2
-  enum3 <- (scorer[,"dmu"]*dlogis(drm/sd)/sd - scorel[,"dmu"]*dlogis(dlm/sd)/sd)
-  enum4 <- drm2/sd2*dlogis(drm/sd)*(scorer[,"dsigma"] - 1/sd) - 
-             dlm2/sd2*dlogis(dlm/sd)*(scorel[,"dsigma"] - 1/sd)
-  enum5 <- (scorer[,"dsigma"]*dlogis(drm/sd)/sd - scorel[,"dsigma"]*dlogis(dlm/sd)/sd)
-  
-  
-
   for(w in which) {       
     if(w == "mu")         
-      hess[[w]] <- 
-        ifelse(  x < left,  0,
-          ifelse(x > right, 0,
-                            hc[,"d2mu"] + enum1^2/denom^2 + enum3/denom))
-
+      hess[[w]] <- with(input, .Call("htlogis_mu", x, mean, sd, left, right))  
     if(w == "sigma")
-      hess[[w]] <-           
-        ifelse(x < left,    0, 
-          ifelse(x > right, 0,
-                            hc[,"d2sigma"] + enum2^2/denom^2 + enum4/denom)) 
-
+      hess[[w]] <- with(input, .Call("htlogis_sigma", x, mean, sd, left, right))  
     if(w %in% c("mu.sigma", "sigma.mu"))
-      hess[[w]] <- 
-        ifelse(x < left,    0,
-          ifelse(x > right, 0,
-                            hc[,"dmu.dsigma"] +  enum5/denom + enum1*enum2/denom^2))
+      hess[[w]] <- with(input, .Call("htlogis_musigma", x, mean, sd, left, right))  
   }
 
   hess <- do.call("cbind", hess)
