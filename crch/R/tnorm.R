@@ -1,23 +1,17 @@
 ## density
 dtnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
-  x <- data.frame(x = x, mean, sd)$x
-  denom <- pnorm((right - mean)/sd) - pnorm((left - mean)/sd) 
-  ifelse(x < left, dnorm(-Inf, log = log), 
-  ifelse(x > right, dnorm(Inf, log = log), 
-  dnorm((x - mean)/sd, log = log)/(sd*denom)^(1 - log) - log(sd*denom)*log))
+  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
+  with(input, .Call("dtnorm", x, mean, sd, left, right, log))
 }
+
 
 ## distribution function
 ptnorm <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
   left = -Inf, right = Inf) {
-  q <- data.frame(q = q, mean, sd)$q
-  denom <- pnorm((right - mean)/sd) - pnorm((left - mean)/sd)
-  lower <- if(lower.tail) left else right
-  qtmp <- (pnorm((lower - mean)/sd) - pnorm((q - mean)/sd)) *
-    (-1)^lower.tail
-  ifelse(q < left, pnorm(-Inf, lower.tail = lower.tail, log.p = log.p),
-  ifelse(q > right, pnorm(Inf, lower.tail = lower.tail, log.p = log.p),
-  if(log.p) log(qtmp) - log(denom) else qtmp/denom ))
+  input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
+  with(input, .Call("ptnorm", q, mean, sd, left, right, lower.tail, log.p))
 }
 
 ## quantiles
@@ -36,36 +30,23 @@ rtnorm <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
   qtnorm(runif(n), mean, sd, left = left, right = right)
 }
 
+
+
 ## scores
 stnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
   left = -Inf, right = Inf) {
+  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
     which <- c("mu", "sigma")[as.integer(which)]
   which <- tolower(which)
   score <- NULL
-  x <- data.frame(x = x, mean, sd)$x
-  dxm <- x - mean
-  dlm <- left - mean
-  drm <- right - mean
-  dlm2 <- if(is.finite(left)) dlm else 0
-  drm2 <- if(is.finite(right)) drm else 0
-  sd2 <- sd^2
-  
-  sc <- scnorm(x, mean, sd, left = -Inf, right = Inf)
-
-  denom <-  (pnorm(drm/sd) - pnorm(dlm/sd))
-  enum1 <- (dnorm(drm/sd) - dnorm(dlm/sd))/sd
-  enum2 <- (drm2*dnorm(drm/sd) - dlm2*dnorm(dlm/sd))/sd2
   
   for(w in which) {
     if(w == "mu")
-      score2 <- ifelse(x < left, 0,
-        ifelse(x > right, 0,
-        sc[,"dmu"] + enum1/denom))
+      score2 <- with(input, .Call("stnorm_mu", x, mean, sd, left, right))
     if(w == "sigma")
-      score2 <- ifelse(x < left, 0,
-        ifelse(x > right, 0,
-        sc[,"dsigma"] + enum2/denom))
+      score2 <- with(input, .Call("stnorm_sigma", x, mean, sd, left, right))
     score <- cbind(score, score2)
   }
   if(is.null(dim(score)))
@@ -75,56 +56,21 @@ stnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"),
 }
 
 ## Hessian
-htnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"),
+htnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
   left = -Inf, right = Inf) {
+  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+    left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
     which <- c("mu", "sigma", "mu.sigma", "sigma.mu")[as.integer(which)]
   which <- tolower(which)
   hess <- list()
-  x <- data.frame(x = x, mean, sd)$x
-  sd2 <- sd^2
-  dlm <- left - mean
-  drm <- right - mean
-  dxm <- x - mean
-  
-  scorel <- if(is.finite(left)) scnorm(left, mean, sd, left = -Inf, right = Inf) else 
-    data.frame(dmu = 0, dsigma = 0)
-  scorer <- if(is.finite(right)) scnorm(right, mean, sd, left = -Inf, right = Inf) else 
-    data.frame(dmu = 0, dsigma = 0)
-  
-  hc <- hcnorm(x, mean, sd, which = c("mu", "sigma", "mu.sigma", "sigma.mu"), 
-    left = -Inf, right = Inf)
-
-  denom <-  (pnorm(drm/sd) - pnorm(dlm/sd))
-  enum1 <- (dnorm(drm/sd) - dnorm(dlm/sd))/sd
-  drm2 <- if(is.finite(right)) drm else 0
-  dlm2 <- if(is.finite(left)) dlm else 0
-  enum2 <- (drm2*dnorm(drm/sd) - dlm2*dnorm(dlm/sd))/sd2
-  enum3 <- (scorer[,"dmu"]*dnorm(drm/sd)/sd - scorel[,"dmu"]*dnorm(dlm/sd)/sd)
-  enum4 <- drm2/sd2*dnorm(drm/sd)*(scorer[,"dsigma"] - 1/sd) - 
-             dlm2/sd2*dnorm(dlm/sd)*(scorel[,"dsigma"] - 1/sd)
-  enum5 <- (scorer[,"dsigma"]*dnorm(drm/sd)/sd - scorel[,"dsigma"]*dnorm(dlm/sd)/sd)
-  
-  
-
   for(w in which) {       
     if(w == "mu")         
-      hess[[w]] <- 
-          ifelse(  x < left,  0,
-            ifelse(x > right, 0,
-                               hc[,"d2mu"] + enum1^2/denom^2 + enum3/denom))
-
+      hess[[w]] <- with(input, .Call("htnorm_mu", x, mean, sd, left, right))  
     if(w == "sigma")
-      hess[[w]] <-           
-        ifelse(x < left,    0, 
-          ifelse(x > right, 0,
-                             hc[,"d2sigma"] + enum2^2/denom^2 + enum4/denom)) 
-
+      hess[[w]] <- with(input, .Call("htnorm_sigma", x, mean, sd, left, right))  
     if(w %in% c("mu.sigma", "sigma.mu"))
-      hess[[w]] <- 
-        ifelse(x < left,    0,
-          ifelse(x > right, 0,
-                             hc[,"dmu.dsigma"] +  enum5/denom + enum1*enum2/denom^2))
+      hess[[w]] <- with(input, .Call("htnorm_musigma", x, mean, sd, left, right))  
   }
 
   hess <- do.call("cbind", hess)
