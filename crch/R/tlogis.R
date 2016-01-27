@@ -1,5 +1,5 @@
 ## density
-dtlogis2 <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
+dtlogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   with(input, .Call("dtlogis", x, mean, sd, left, right, log))
@@ -7,7 +7,7 @@ dtlogis2 <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE)
 
 
 ## distribution function
-ptlogis2 <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
+ptlogis <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
   left = -Inf, right = Inf) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))

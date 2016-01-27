@@ -2,7 +2,6 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 #include <Rinternals.h>
-#include "cnorm.c"
 
 SEXP dtnorm(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
 {
