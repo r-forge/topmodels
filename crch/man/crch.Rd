@@ -41,8 +41,8 @@ crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   \code{offset} can also be a list of 2 offsets used for the location and scale
   respectively.}
   \item{link.scale}{character specification of the link function in
-    the scale model. Currently, \code{"identity"}, \code{"log"}, \code{"sqrt"}
-    are supported. The default is \code{"log"}.
+    the scale model. Currently, \code{"identity"}, \code{"log"}, 
+    \code{"quadratic"} are supported. The default is \code{"log"}.
     Alternatively, an object of class \code{"link-glm"} can be supplied.}
   \item{dist}{assumed distribution for the dependent variable \code{y}.}
   \item{df}{optional degrees of freedom for \code{dist="student"}. If omitted
