@@ -328,6 +328,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
         df = df, which = "sigma"))
       hess[, "d2sigma"] <- hess[, "d2sigma"]*mu.eta(fit$zgamma)^2 + grad*dmu.deta(fit$zgamma)
       hess[, "dmu.dsigma"] <- hess[, "dsigma.dmu"] <- hess[, "dmu.dsigma"]*mu.eta(fit$zgamma)
+      hess <- weights*hess
       hessmu <- crossprod(hess[,"d2mu"]*x, x)
       hessmusigma <- crossprod(hess[,"dmu.dsigma"]*x, z)
       hesssigmamu <- crossprod(hess[,"dsigma.dmu"]*z, x)
