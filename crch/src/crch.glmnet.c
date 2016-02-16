@@ -3,13 +3,15 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 
+
+
 void wobsmu(double *x, double *z, double *y, double *par, double *left, double *right, int p, int q, int n, double *wobs, double *hess) 
 {
   int i, j;
 
 
 
-  double ddist, sdist, pdist, mills, mu, sigma, score;
+  double ddist, a, pdist, mills, mu, sigma;
 
   for(i = 0; i < n; i++) {
     mu = 0;
@@ -20,32 +22,38 @@ void wobsmu(double *x, double *z, double *y, double *par, double *left, double *
     for(j = 0; j < q; j++) {
       sigma = sigma + z[n*j+i]*par[p+j];
     }
-/*    printf("%f %f,", mu, sigma);*/
+
     sigma = exp(sigma);
     if(y[i] <= left[i]) {
+
       ddist = dnorm((left[i] - mu) / sigma, 0.0, 1.0, 0) / sigma;
       pdist = pnorm5((left[i] - mu) / sigma, 0.0, 1.0, 1, 0);
       mills = ddist / pdist;
-      sdist = (left[i] - mu) / pow(sigma, 2.0);
-      score = -1 * mills;
-      hess[i] =  sdist * mills + pow(mills, 2.0);
+      a = (left[i] - mu)/ pow(sigma, 2.0) + mills;
+      hess[i] =  a * mills;
+      wobs[i] = mu - 1/a;
+
+
     } else {
       if(y[i] >= right[i]){
-        ddist = dnorm((right[i] - mu) / sigma, 0.0, 1.0, 0) / sigma;
+        ddist = dnorm((right[i] - mu) / sigma, 0.0, 1.0, 0);
         pdist = pnorm5((right[i] - mu) / sigma, 0.0, 1.0, 0, 0);
         mills = ddist / pdist;
-        sdist = (right[i] - mu) / pow(sigma, 2.0);
-        score = mills;
-        hess[i] = -sdist * mills + pow(mills, 2.0);
+        a = (-right[i] + mu)/ pow(sigma, 2.0) + mills;
+        hess[i] = a*mills;
+        wobs[i] = mu + 1/a;
       } else {
-        score = (y[i] - mu) / pow(sigma, 2.0);
         hess[i] = 1 / pow(sigma, 2.0);
+        wobs[i] = y[i];
       }
     }
-    wobs[i] = mu + 1/hess[i]*score;
+
     
   }
 }
+
+
+
 
 void wobssigma(double *x, double *z, double *y, double *par, double *left, double *right, int p, int q, int n, double *wobs, double *hess) 
 {
@@ -53,7 +61,7 @@ void wobssigma(double *x, double *z, double *y, double *par, double *left, doubl
 
 
 
-  double ddist, sdist, pdist, mills, mu, sigma, score, dcm, dcm2, sd2;
+  double ddist, pdist, mills, mu, sigma, score, dcm, dcm2, sd2;
 
   for(i = 0; i < n; i++) {
     mu = 0;
@@ -64,7 +72,6 @@ void wobssigma(double *x, double *z, double *y, double *par, double *left, doubl
     for(j = 0; j < q; j++) {
       sigma = sigma + z[n*j+i]*par[p+j];
     }
-/*    printf("%f %f,", mu, sigma);*/
     sigma = exp(sigma);
     if(y[i] <= left[i]) {
       ddist = dnorm((left[i] - mu) / sigma, 0.0, 1.0, 0) / sigma;
@@ -73,9 +80,9 @@ void wobssigma(double *x, double *z, double *y, double *par, double *left, doubl
       sd2 = pow(sigma, 2.0);
       dcm = left[i] - mu;
       dcm2 = pow(dcm, 2.0);
-      sdist = dcm / sd2;
-      score = -1 * mills * (left[i] - mu) / sigma;
-      hess[i] =  (2 * dcm/sd2 - dcm2/sd2*sdist)*mills - pow(mills, 2.0)*dcm2/sd2;
+      score = -1 * mills * (left[i] - mu);
+      hess[i] =  (-2 * dcm + dcm2*dcm/sd2)*mills + pow(mills, 2.0)*dcm2 - score*sigma;
+      wobs[i] = log(sigma) + 1/hess[i]*score;
     } else {
       if(y[i] >= right[i]){
         ddist = dnorm((right[i] - mu) / sigma, 0.0, 1.0, 0) / sigma;
@@ -84,22 +91,21 @@ void wobssigma(double *x, double *z, double *y, double *par, double *left, doubl
         sd2 = pow(sigma, 2.0);
         dcm = left[i] - mu;
         dcm2 = pow(dcm, 2.0);
-        sdist = dcm / sd2;
-        score = mills * (right[i] - mu) / sigma;
-        hess[i] = (- 2 * dcm/sd2 + dcm2/sd2*sdist)*mills - pow(mills, 2.0)*dcm2/sd2;
+        score = mills * (right[i] - mu);
+        hess[i] = ( 2 * dcm - dcm2*dcm/sd2)*mills + pow(mills, 2.0)*dcm2- score*sigma;
+        wobs[i] = log(sigma) + 1/hess[i]*score;
       } else {
         sd2 = pow(sigma, 2.0);
         dcm2 = pow((y[i] - mu), 2.0);
-        score = (dcm2 - sd2) / pow(sigma, 3.0);
-        hess[i] = (sd2 - 3 * dcm2)/pow(sd2, 2.0);
+        score = (dcm2 - sd2) / pow(sigma, 2.0);
+        hess[i] = -(sd2 - 3 * dcm2)/sd2- score*sigma;
+        wobs[i] = log(sigma) + 1/hess[i]*score;
       }
     }
-    score = score*sigma;
-    hess[i] = - hess[i] * pow(sigma, 2.0) - score*sigma;
-    wobs[i] = log(sigma) + 1/hess[i]*score;
+    
     
   }
-/*printf("%f, ", score[1]);*/
+
 }
 
 
@@ -175,7 +181,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
 
 /*  */
   int activex[p], activez[q];
-  double a, xbeta, zgamma, wxsum, w[n], wobs[n], dev, devold, ll, llold;
+  double a, xbeta, coefold, zgamma, wxsum[p], wzsum[q], resid[n], w[n], wobs[n], dev, devold, ll, llold;
 /*  double coefold, coefdiff;*/
 
 
@@ -193,27 +199,35 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
       for(i = 0; i < p; i++) {
         activex[i] = 1;
       }
+      for(colind = 0; colind < p; colind++) {
+        wxsum[colind] = 0;
+        for(rowind = 0; rowind < n; rowind++) {
+          xbeta = 0;
+          for(colind2 = 0; colind2 < p; colind2++) { 
+            xbeta = xbeta + xptr[rowind+colind2*n]*coef[colind2];
+          }
+          resid[rowind] = w[rowind]*(wobs[rowind] - xbeta);
+          wxsum[colind] = wxsum[colind] + w[rowind]*pow(xptr[rowind+colind*n], 2);
+        }
+      }
       for(it2 = 0; it2 < *maxitptr; it2++) {
         for(colind = 0; colind < p; colind++) {
           if(activex[colind] == 1) {
             a = 0;
-            wxsum = 0;
             for(rowind = 0; rowind < n; rowind++) {
-              xbeta = 0;
-              for(colind2 = 0; colind2 < p; colind2++) { 
-                if(colind2!=colind & activex[colind2] == 1) {
-                  xbeta = xbeta + xptr[rowind+colind2*n]*coef[colind2];
-                }
-              } 
-              a = a + w[rowind]*xptr[rowind+colind*n]*(wobs[rowind] - xbeta); 
-              wxsum = wxsum + w[rowind]*pow(xptr[rowind+colind*n], 2); 
+              a = a + xptr[rowind + colind*n] * resid[rowind];
             }
-            a=a/wxsum;
+            a=(a + wxsum[colind]*coef[colind])/wxsum[colind];
             if(lambda < fabs(a)){
+              coefold = coef[colind];
               if(a>0) { 
                 coef[colind] = (a - lambda);
               } else {
                 coef[colind] = (a + lambda);
+              }
+        
+              for(rowind = 0; rowind < n; rowind++) {
+                resid[rowind] = resid[rowind] - w[rowind]*xptr[rowind+colind*n]*(coef[colind]-coefold);
               }
             } else {
               coef[colind] = 0; 
@@ -224,11 +238,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
         } 
         dev = 0;
         for(rowind = 0; rowind < n; rowind++) {
-          xbeta = 0;
-          for(colind2 = 0; colind2 < p; colind2++) { 
-            xbeta = xbeta + xptr[rowind+colind2*n]*coef[colind2];
-          }
-          dev = dev + pow(wobs[rowind] - xbeta, 2.0);
+          dev = dev + pow(resid[rowind], 2.0);
         }
 
         if(fabs((dev-devold)/devold) < *reltolptr) {
@@ -247,61 +257,53 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
       }
       llold = ll;
     }
+ printf("%i, ", it1); 
+
     for(it1 = 0; it1 < *maxitptr; it1++) {
-      /* scale*/
+
       wobssigma(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n, wobs, w);
-/*      coef[p] = 0;*/
-/*      wsum = 0;*/
-/*      for(i = 0; i < n; i++) {*/
-/*        coef[p] = coef[p] + w[i]*wobs[i];*/
-/*        wsum = wsum + w[i];*/
-/*      }*/
-/*      coef[p] = coef[p]/wsum;*/
-/*printf("%f,", coef[p]);*/
-      activez[0] = 1;
-      for(i = 1; i < q; i++) {
+
+      for(i = 0; i < q; i++) {
         activez[i] = 1;
       }
-      for(it2 = 0; it2 < *maxitptr; it2++) {
-        for(colind = 0; colind < q; colind++) {
-          if(activez[colind] != 0) {
-            a = 0;
-            wxsum = 0;
-            for(rowind = 0; rowind < n; rowind++) {
-              xbeta = 0;
-              for(colind2 = 0; colind2 < q; colind2++) { 
-                if(colind2!=colind & activez[colind2] == 1) {
-                  xbeta = xbeta + zptr[rowind+colind2*n]*coef[colind2 + p];
-                }
-              } 
-              a = a + w[rowind]*zptr[rowind+colind*n]*(wobs[rowind] - xbeta); 
-              wxsum = wxsum + w[rowind]*pow(zptr[rowind+colind*n], 2); 
-            }
-            a=a/wxsum;
-            if(activez[colind] == 2) {
-              coef[colind + p] = a;
-            } else {
-              if(lambda < fabs(a)){
-
-                if(a>0) { 
-                  coef[colind + p] = (a - lambda);
-                } else {
-                  coef[colind + p] = (a + lambda);
-                }
-              } else {
-                coef[colind + p] = 0;
-                activez[colind] = 0; 
-              }
-            }
-          }
-        } 
-        dev = 0;
+      for(colind = 0; colind < q; colind++) {
+        wzsum[colind] = 0;
         for(rowind = 0; rowind < n; rowind++) {
           xbeta = 0;
           for(colind2 = 0; colind2 < q; colind2++) { 
             xbeta = xbeta + zptr[rowind+colind2*n]*coef[colind2+p];
           }
-          dev = dev + pow(wobs[rowind] - xbeta, 2.0);
+          resid[rowind] = w[rowind]*(wobs[rowind] - xbeta);
+          wzsum[colind] = wzsum[colind] + w[rowind]*pow(zptr[rowind+colind*n], 2); 
+        }
+      }
+      for(it2 = 0; it2 < *maxitptr; it2++) {
+        for(colind = 0; colind < q; colind++) {
+          if(activez[colind] == 1) {
+            a = 0;
+            for(rowind = 0; rowind < n; rowind++) {
+              a = a + zptr[rowind + colind*n] * resid[rowind];
+            }
+            a=(a + wzsum[colind]*coef[colind+p])/wzsum[colind];
+            if(lambda < fabs(a)){
+              coefold = coef[colind+p];
+              if(a>0) { 
+                coef[colind + p] = (a - lambda);
+              } else {
+                coef[colind + p] = (a + lambda);
+              }
+              for(rowind = 0; rowind < n; rowind++) {
+                resid[rowind] = resid[rowind] - w[rowind]*zptr[rowind+colind*n]*(coef[colind + p]-coefold);
+              }
+            } else {
+              coef[colind + p] = 0;
+              activez[colind] = 0; 
+            }
+          }
+        } 
+        dev = 0;
+        for(rowind = 0; rowind < n; rowind++) {
+          dev = dev + pow(resid[rowind], 2.0);
         }
 
         if(fabs((dev-devold)/devold) < *reltolptr) {
@@ -313,7 +315,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
         }
         devold = dev;
       }
-        /* log-lik */
+
       ll = dcnorm2(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n);
       if(fabs((ll-llold)/llold) < *reltolptr) {
         break;
