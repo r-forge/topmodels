@@ -1,15 +1,16 @@
 ## function to set some control parameters for boosting (replaces crch.control() for boosting)
-crch.glmnet <- function(maxit = 100, nu = 0.1, start = NULL, 
+crch.glmnet <- function(maxit = 100000, nlambda = 100, 
+  lambda.min.ratio = 0.0001, lambda= NULL,
   dot = "separate", mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, 
-  foldid = NULL, ...)
+  foldid = NULL, reltol = 1E-7, ...)
 {
   if(is.numeric(mstop)) {
     maxit <- mstop
     mstop <- "max"
   }
-  rval <- list(maxit = maxit, nu = nu, nfolds = nfolds, foldid = foldid, 
+  rval <- list(maxit = maxit, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+    lambda = lambda, nfolds = nfolds, foldid = foldid, reltol = reltol,
     start = start, dot = dot, mstop = match.arg(mstop), fit = "crch.glmnet.fit", ...)
-  if(is.null(rval$reltol)) rval$reltol <- .Machine$double.eps^(1/1.2)
   rval
 }
 
@@ -27,7 +28,7 @@ standardize.matrix <- function(x, restandardize = FALSE, center = NULL, scale = 
   mcenter <- matrix(rep(center, nrow(x)), nrow(x), ncol(x), byrow = TRUE)
 
   if(is.null(scale))
-    scale <- sqrt(colSums(weights*(x-mcenter)^2)/(sum(weights)-1))
+    scale <- sqrt(colSums(weights*(x-mcenter)^2)/(sum(weights)))
 
   scale[grep("(Intercept)", colnames(x))] <- 1
   mscale  <- matrix(rep(scale , nrow(x)), nrow(x), ncol(x), byrow = TRUE)
@@ -90,7 +91,9 @@ crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE,
 
   ## control parameters
   maxit <- control$maxit
-  nu <- control$nu
+  nlambda <- control$nlambda
+  lambda.min.ratio <- control$lambda.min.ratio
+  lambda <- control$lambda
   start <- control$start
   mstop <- control$mstop
   reltol <- control$reltol
@@ -251,66 +254,17 @@ crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE,
   w <- wobs2$weights  #weights
   wo <- wobs2$wo
 #  lambdamax <- max(c(lambdamax, max(apply(z, 2, function(z) abs(sum(w*z*wo))))))
-  lambdaseq <- exp(seq(log(lambdamax), log(lambdamax*0.001), length.out = 100))
+  lambdaseq <- exp(seq(log(lambdamax), log(lambdamax*0.0001), length.out = 100))
 iter <- 0
 
-#browser()
+
 if(length(left) == 1) left <- rep(left, n)
 if(length(right) == 1) right <- rep(right, n)
-a <- .Call("crchglmnet", x, z, y, par, left, right, lambdaseq, as.integer(maxit), reltol)
+#browser()
+a <- .Call("crchglmnet", x, z, y, left, right, lambdaseq, as.integer(maxit), reltol)
 coefpath <- a[[1]]
 loglikpath <- a[[2]]
 
-#for(lambda in lambdaseq) {
-##  if(lambda == lambdaseq[60]) browser()
-#  llold <- -loglikfun(par)
-#  for(it in 1:maxit) {
-#  iter <- iter + 1
-#    wobs2 <- wobs(par, which = "mu")
-
-#    wmu <- wobs2$weights  #weights
-#    womu <- wobs2$wo
-#    activex <- 1:k
-#    devold <-  sum((womu - x%*% par[1:k])^2)
-#    for(it2 in 1:maxit) {
-#      for(j in activex) {
-#        resid <- womu - x[,-j] %*% par[1:k][-j]
-#        a <- sum(wmu*x[,j]*resid)
-#        par[1:k][j] <- sign(a)*max(0, abs(a) - lambda)/sum(wmu*x[,j]^2)
-#      }
-#      dev <- sum((womu - x%*% par[1:k])^2)
-#      if(abs(dev-devold)/devold < reltol) {break}
-#      devold <- dev
-#      activex <- which(par[1:k]!=0)
-#    }
-##print(it2)
-#    wobs2 <- wobs(par, which = "sigma")
-##print(wobs2$wo[0])
-#    wsigma <- wobs2$weights  #weights
-#    wosigma <- wobs2$wo
-#    activez <- 1:q
-#    devold <-  sum((wosigma - z%*% par[1:q+k])^2)
-#    for(it2 in 1:maxit) {
-#      for(j in activez) {
-#        resid <- wosigma - z[,-j] %*% par[1:q+k][-j]
-#        a <- sum(wsigma*z[,j]*resid)
-#        par[1:q+k][j] <- sign(a)*max(0, abs(a) - lambda)/sum(wsigma*z[,j]^2)
-#      }
-#      dev <- sum((womu - z%*% par[1:q+k])^2)
-#      if(abs(dev-devold)/devold < reltol) {break}
-#      devold <- dev
-#      activez <- which(par[1:q+k]!=0)
-#    }
-#    ll <- -loglikfun(par)
-#    if(abs((ll-llold)/llold) < reltol) {break}
-#    llold <- ll
-
-#  }
-#  coefpath <- rbind(coefpath, par)
-#  loglikpath <- c(loglikpath, -loglikfun(par))
-#}
-#  rownames(coefpath) <- names(loglikpath) <- NULL
-#print(iter)
 
   ## cross validation to find optimum mstop
   if(mstop == "cv") {
@@ -335,15 +289,6 @@ loglikpath <- a[[2]]
     }
 
     mstopopt<- which.max(colMeans(lltestall))
-#    bootll <- NULL
-#    for(i in 1:100) {
-#      bootindex <- sample(1:length(y), replace = TRUE)
-#      bootll <- rbind(bootll, colMeans(lltestall[bootindex,]))
-#    }
-
-#    opt1sd <- max(colMeans(bootll)) - sd(bootll[,mstopopt.ind])
-#    mstopopt.cv1se <- which(colMeans(bootll)>opt1sd)[1]
-#    cv <- list(bootll = bootll, mstopopt = mstopopt.ind, mstopopt1se = mstopopt.cv1se)
   } else {
     mstopopt <- NULL
   }
@@ -408,176 +353,21 @@ loglikpath <- a[[2]]
     coefpath = coefpath,
     loglikpath = loglikpath,
     iterations = NROW(coefpath) - 1,
-    stepsize = nu,
+    lambda = lambdaseq,
     mstop = mstop,
     mstopopt = mstopopt,
     standardize = standardize
   )
   
-  class(rval) <- c("crch.boost", "crch")
+  class(rval) <- c("crch.glmnet", "crch.boost", "crch")
   return(rval)
 }
 
 
-## Function to adjust stopping iteration of crch.boost objects
-mstop.crch.boost <- function(object, mstop = NULL) {
-  if(!is.null(mstop)) {
-    ## adjust coefficients
-    object$mstop <- mstop
-    if(is.character(mstop)) {
-      mstop <- match.arg(mstop, c("max", "aic", "bic", "cv"))
-      mstop <- if(mstop == "max") object$iterations else object$mstopopt[mstop] 
-    }
-    k <- length(object$coefficient$location)
-    q <- length(object$coefficient$scale)
-    beta <- object$coefpath[mstop + 1,seq.int(length.out = k)]
-    gamma <- object$coefpath[mstop + 1,seq.int(length.out = q) + k]
-    names(gamma) <- names(object$coefficients$scale)
-    object$coefficients <- list(location = beta, scale = gamma)
-    ## remove or adjust some values
-    object$residuals <- object$fitted.values$location <- object$fitted.values$scale <- NA
-    object$loglik <- object$loglikpath[mstop + 1]
-  }
-  return(object)
-}
-
-coef.crch.boost <- function(object, model = c("full", "location", "scale", "df"), 
-  mstop = NULL, zero.coefficients = FALSE, standardize = FALSE, ...) 
-{
-  model <- match.arg(model)
-  object <- mstop.crch.boost(object, mstop = mstop)
-  cf <- object$coefficients
-
-  if(standardize){
-    beta <- cf$location
-    gamma <- cf$scale
-    standardize <- object$standardize
-    beta <- standardize.coefficients(beta, center = standardize$x$center, scale = standardize$x$scale)
-    beta[grep("(Intercept)", colnames(beta))] <- beta[grep("(Intercept)", colnames(beta))] - standardize$y$center 
-    beta <- beta/standardize$y$scale  
-    gamma <- standardize.coefficients(gamma, center = standardize$z$center, scale = standardize$z$scale)
-    gamma[grep("(Intercept)", colnames(gamma))] <- 
-      gamma[grep("(Intercept)", colnames(gamma))] - object$link$scale$linkfun(standardize$y$scale)  
-    cf <- list(location = beta, scale = gamma)
-  }
-  if(!zero.coefficients) {
-    cf$location <- cf$location[cf$location != 0]
-    cf$scale <- cf$scale[cf$scale != 0]
-  }
-  switch(model,
-    "location" = {
-      cf$location
-    },
-    "scale" = {
-      cf$scale
-    },
-    "full" = {
-      nam <- c(names(cf$location), paste("(scale)", names(cf$scale), sep = "_"))
-      cf <- c(cf$location, cf$scale)
-      names(cf) <- nam
-      cf
-    }
-  )
-}
-
-print.crch.boost <- function(x, digits = max(3, getOption("digits") - 3), 
-  zero.coefficients = FALSE, mstop = NULL, ...)
-{
-  x <- mstop.crch.boost(x, mstop = mstop)
-  beta <- x$coefficients$location
-  gamma <- x$coefficients$scale
-  if(!zero.coefficients) {
-    beta <- beta[beta != 0]
-    gamma <- gamma[gamma != 0]
-    prefix <- "Non-zero c"
-  } else {
-    prefix <- "C"
-  }
-
-  cat("\nCall:", deparse(x$call, width.cutoff = floor(getOption("width") * 0.85)), "", sep = "\n")
-  cat(paste(prefix, "oefficients (location model):\n", sep = ""))
-    print.default(format(beta, digits = digits), print.gap = 2, quote = FALSE)
-    cat("\n")
-  cat(paste(prefix, "oefficients (scale model with ", x$link$scale$name, " link):\n", sep = ""))
-    print.default(format(gamma, digits = digits), print.gap = 2, quote = FALSE)
-    cat("\n")
-
-  cat(paste("Distribution: ", x$dist, "\n", sep = ""))
-  if(length(x$df)) {
-    cat(paste("Df: ", format(x$df, digits = digits), "\n", sep = ""))
-  }
-  cat("\n")
-
-  invisible(x)
-}
-
-logLik.crch.boost <- function(object, mstop = NULL, ...) {
-  object <- mstop.crch.boost(object)
-  structure(object$loglik, df = sum(sapply(object$coefficients, function(x) sum(x != 0))), class = "logLik")
-}
 
 
-summary.crch.boost <- function(object, zero.coefficients = FALSE, mstop = NULL, ...)
-{
-  # mstop
-  object <- mstop.crch.boost(object, mstop = mstop)
-  mstop <- object$mstop   
-  object$mstop <- if(mstop == "max") object$iterations else object$mstopopt[mstop] 
-  # coefficients
-  beta <- object$coefficients$location
-  gamma <- object$coefficients$scale
-  ## residuals
-  object$residuals <- object$residuals/object$fitted.values$scale
 
-
-  if(!zero.coefficients) {
-    beta <- beta[beta != 0]
-    gamma <- gamma[gamma != 0]
-  }
-  object$zero.coefficients <- zero.coefficients
-  object$coefficients <- list(location = beta, scale = gamma)
-
-  ## delete some slots
-  object$fitted.values <- object$terms <- object$levels <- object$contrasts <- NULL
-
-  ## return
-  class(object) <- "summary.crch.boost"
-  object
-}
-
-print.summary.crch.boost <- function(x, digits = max(3, getOption("digits") - 3),...) 
-{
-  cat("\nCall:", deparse(x$call, width.cutoff = floor(getOption("width") * 0.85)), sep = "\n")
-
-  if(!all(is.na(x$residuals))) {
-    cat(paste("\nStandardized residuals:\n", sep = ""))
-    print(structure(round(as.vector(quantile(x$residuals)), digits = digits),
-        .Names = c("Min", "1Q", "Median", "3Q", "Max")))
-  }
-  cat(paste("\nmaximum stopping iteration:", x$iterations, "\n"))
-  cat(paste("\noptimum stopping iterations:\n", sep = ""))
-  print(x$mstopopt)  
-  cat("\n")
-  prefix <- if(x$zero.coefficients) "C" else "Non-zero c"
-  cat(paste(prefix, "oefficients after ", x$mstop, " boosting iterations:\n", sep = ""))
-  cat(paste("Location model:\n", sep = ""))
-  print.default(format(x$coefficients$location, digits = digits), print.gap = 2, quote = FALSE)
-  cat("\n")
-   
-  cat(paste("Scale model with", x$link$scale$name, "link:\n"))
-  print.default(format(x$coefficients$scale, digits = digits), print.gap = 2, quote = FALSE)
-  cat("\n")
-    
-  cat(paste("Distribution: ", x$dist, "\n", sep = ""))
-  if(length(x$df)) {
-    cat(paste("Df: ", format(x$df, digits = digits), "\n", sep = ""))
-  }
-  cat("Log-likelihood:", formatC(x$loglik, digits = digits),
-      "on", sum(sapply(x$coefficients, function(x) sum(x != 0))), "Df\n")
-  cat("\n")
-}
-
-plot.crch.boost <- function(object, loglik = FALSE, 
+plot.crch.glmnet <- function(object, 
   standardize = TRUE, which = c("both", "location", "scale"), mstop = NULL,
   coef.label = TRUE, col = NULL, ...) 
 {
@@ -598,36 +388,27 @@ plot.crch.boost <- function(object, loglik = FALSE,
     mstop <- object$mstopopt[mstop] 
   }
 
-  if(loglik) {
-    coefupdate <- as.data.frame(apply(object$coefpath, 2, diff)!=0)
-    coefupdate[["(Intercept)"]][rowSums(coefupdate) == 2] <- FALSE
-    coefupdate[["scale_(Intercept)"]][rowSums(coefupdate) == 2] <- FALSE
-    loglikpath <- object$loglikpath
-    path <- rbind(0, diff(loglikpath)*coefupdate)
-    path <- apply(path, 2, cumsum)
-    colnames(path) <- c(names(object$coefficients$location), names(object$coefficients$scale))
-    ylab <- "log-likelihood contribution"
-  } else {
-    beta <- object$coefpath[,seq.int(length.out = k), drop = FALSE]
-    gamma <- object$coefpath[,seq.int(length.out = q) + k, drop = FALSE]
-    if(standardize) {
-      beta[,] <- t(apply(beta, 1, standardize.coefficients, 
-        center = object$standardize$x$center, scale = object$standardize$x$scale))
-      beta[, grep("(Intercept)", colnames(beta))] <- 
-        beta[, grep("(Intercept)", colnames(beta))] - 
-        object$standardize$y$center 
-      beta <- beta/object$standardize$y$scale  
-      gamma[,] <- t(apply(gamma, 1, standardize.coefficients, 
-        center = object$standardize$z$center, scale = object$standardize$z$scale))
-      gamma[, grep("(Intercept)", colnames(gamma))] <- 
-        gamma[, grep("(Intercept)", colnames(gamma))] - 
-        object$link$scale$linkfun(object$standardize$y$scale)  
-      colnames(gamma) <- names(object$coefficients$scale)
-    } 
-    path <- cbind(beta, gamma)
-    ylab <- if(standardize) "standardized coefficients" else "coefficients"
-  }
   
+  beta <- object$coefpath[,seq.int(length.out = k), drop = FALSE]
+  gamma <- object$coefpath[,seq.int(length.out = q) + k, drop = FALSE]
+  if(standardize) {
+    beta[,] <- t(apply(beta, 1, standardize.coefficients, 
+      center = object$standardize$x$center, scale = object$standardize$x$scale))
+    beta[, grep("(Intercept)", colnames(beta))] <- 
+      beta[, grep("(Intercept)", colnames(beta))] - 
+      object$standardize$y$center 
+    beta <- beta/object$standardize$y$scale  
+    gamma[,] <- t(apply(gamma, 1, standardize.coefficients, 
+      center = object$standardize$z$center, scale = object$standardize$z$scale))
+    gamma[, grep("(Intercept)", colnames(gamma))] <- 
+      gamma[, grep("(Intercept)", colnames(gamma))] - 
+      object$link$scale$linkfun(object$standardize$y$scale)  
+    colnames(gamma) <- names(object$coefficients$scale)
+  } 
+  path <- cbind(beta, gamma)
+  ylab <- if(standardize) "standardized coefficients" else "coefficients"
+ 
+
   if(which == "location") {path <- path[,1:k]; q <- 0}
   if(which == "scale") {path <- path[,(k+1):(k+q)]; k <- 0}
   
@@ -640,10 +421,11 @@ plot.crch.boost <- function(object, loglik = FALSE,
   rmar <- if(length(coef.label)) max(strwidth(colnames(object$coefpath), units = "in"))+0.5 else 0.42
   umar <- if(is.null(mstop)) 0.82 else 1.02
   par(mai = c(1.02, 0.82, umar, rmar))
-
-  plot(ts(path, start = 0), plot.type = "single", ylab = ylab, xlab = "boosting iteration", 
-    type = "s", col = rep(col, c(k,q)), ...)
-
+  plot(-log(object$lambda), path[,1], ylab = ylab, xlab = "log-lambda", col = col[1], 
+    type = "l", xaxt = "n", ...)
+  for(i in 1:k) lines(-log(object$lambda), path[,i], col = col[1])
+  for(i in 1:q+k) lines(-log(object$lambda), path[,i], col = col[2])
+  axis(1, axTicks(1), -axTicks(1))
   ## label paths
   if(length(coef.label)) {
     if(k!=0) axis(4, at = as.data.frame(tail(path, 1))[1:k][coef.label$location], 
@@ -658,44 +440,3 @@ plot.crch.boost <- function(object, loglik = FALSE,
     axis(3, at = mstop, labels = names(mstop))
   }
 }
-
-predict.crch.boost <- function(object, newdata = NULL, mstop = NULL, 
-  type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, 
-  left = NULL, right = NULL, ...)
-{
-  object <- mstop.crch.boost(object, mstop = mstop)
-  if(missing(newdata)) {
-    if(!is.null(mstop)) stop("newdata has to be supplied for user defined mstop")
-    predict.crch(object, type = type, na.action = na.action, at = at, left = left, right = right, ...)
-  } else {
-    predict.crch(object, newdata = newdata, type = type, na.action = na.action, 
-      at = at, left = left, right = right, ...)
-  }
-}
-
-
-
-#continue <- function(object, ...) UseMethod("continue")
-#continue.crch.boost<- function(object, maxit) {
-#  call <- object$call
-#  if(is.null(call$control)) {
-#    call$maxit <- maxit 
-#    call$start <- object
-#  } else {
-#    call$control$maxit <- maxit
-#    call$control$start <- object
-#  }
-#  rval <- eval(call, parent.frame())
-#  rval$call <- call
-#  rval
-#}
-
-
-  
-
-
-
-
-
-
-

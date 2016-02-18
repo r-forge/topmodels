@@ -142,19 +142,15 @@ double dcnorm2(double *x, double *z, double *y, double *par, double *left, doubl
 }
 
 
-SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP lambdaseq, SEXP maxit, SEXP reltol)
+SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdaseq, SEXP maxit, SEXP reltol)
 {
-  int i, j, k, l, lambdaind, it1, it2, colind, rowind, colind2;
   int n = INTEGER(GET_DIM(x))[0];
   int p = INTEGER(GET_DIM(x))[1];
   int q = INTEGER(GET_DIM(z))[1];
   int nlambda = length(lambdaseq);
-  double lambda, coef[p+q], wsum;
 
   SEXP coefpath = PROTECT(allocMatrix(REALSXP, nlambda, p+q));
-
   SEXP llpath = PROTECT(allocVector(REALSXP, nlambda));
-
   SEXP rval = PROTECT(allocVector(VECSXP, 2));
   SET_VECTOR_ELT(rval, 0, coefpath);
   SET_VECTOR_ELT(rval, 1, llpath);
@@ -162,35 +158,25 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
   double *coefpathptr = REAL(coefpath);
   double *llpathptr = REAL(llpath);
 
-
-
   double *yptr = REAL(y);
   double *xptr = REAL(x);
   double *zptr = REAL(z);
   double *leftptr = REAL(left);
   double *rightptr = REAL(right);
-  double *parptr = REAL(par);
   double *lambdaseqptr = REAL(lambdaseq);
   int *maxitptr = INTEGER(maxit);
   double *reltolptr = REAL(reltol);
 
-
-
-
-
-
-/*  */
+  int i, lambdaind, it1, it2, colind, rowind, colind2;
   int activex[p], activez[q];
-  double a, xbeta, coefold, zgamma, wxsum[p], wzsum[q], resid[n], w[n], wobs[n], dev, devold, ll, llold;
-/*  double coefold, coefdiff;*/
+  double a, xbeta, coefold, zgamma, dev, devold, ll, llold, lambda, coef[p+q];
+  double wxsum[p], wzsum[q], resid[n], w[n], wobs[n];
 
 
-  for(i = 0; i < p; i++) {
-    coef[i] = parptr[i];
+  for(i = 0; i < p+q; i++) {
+    coef[i] = 0;
   }
-  for(i = 0; i < q; i++) {
-    coef[i+p] = parptr[i+p];
-  }
+
   for(lambdaind = 0; lambdaind < nlambda; lambdaind++) {
     lambda = lambdaseqptr[lambdaind];
     for(it1 = 0; it1 < *maxitptr; it1++) {
@@ -218,22 +204,24 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
               a = a + xptr[rowind + colind*n] * resid[rowind];
             }
             a=(a + wxsum[colind]*coef[colind])/wxsum[colind];
+            coefold = coef[colind];
             if(lambda < fabs(a)){
-              coefold = coef[colind];
               if(a>0) { 
                 coef[colind] = (a - lambda);
               } else {
                 coef[colind] = (a + lambda);
               }
-        
-              for(rowind = 0; rowind < n; rowind++) {
-                resid[rowind] = resid[rowind] - w[rowind]*xptr[rowind+colind*n]*(coef[colind]-coefold);
-              }
+
             } else {
+
               coef[colind] = 0; 
               activex[colind] = 0;
             }
-            
+            if(coef[colind] != coefold) {
+              for(rowind = 0; rowind < n; rowind++) {
+                resid[rowind] = resid[rowind] + w[rowind] * xptr[rowind + colind*n]*(coefold - coef[colind]);
+              }
+            }
           }
         } 
         dev = 0;
@@ -250,6 +238,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
         }
         devold = dev;
       }
+ 
       /* log-lik */
       ll = dcnorm2(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n);
       if(fabs((ll-llold)/llold) < *reltolptr) {
@@ -257,15 +246,16 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
       }
       llold = ll;
     }
- printf("%i, ", it1); 
 
+    /* scale */
     for(it1 = 0; it1 < *maxitptr; it1++) {
 
       wobssigma(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n, wobs, w);
-
-      for(i = 0; i < q; i++) {
+      activez[0] = 2;   /* exclude intercept from regularization TODO: what to do if no intercept */
+      for(i = 1; i < q; i++) {
         activez[i] = 1;
       }
+      
       for(colind = 0; colind < q; colind++) {
         wzsum[colind] = 0;
         for(rowind = 0; rowind < n; rowind++) {
@@ -279,25 +269,31 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
       }
       for(it2 = 0; it2 < *maxitptr; it2++) {
         for(colind = 0; colind < q; colind++) {
-          if(activez[colind] == 1) {
+          if(activez[colind] != 0) {
             a = 0;
             for(rowind = 0; rowind < n; rowind++) {
               a = a + zptr[rowind + colind*n] * resid[rowind];
             }
             a=(a + wzsum[colind]*coef[colind+p])/wzsum[colind];
-            if(lambda < fabs(a)){
-              coefold = coef[colind+p];
-              if(a>0) { 
-                coef[colind + p] = (a - lambda);
-              } else {
-                coef[colind + p] = (a + lambda);
-              }
-              for(rowind = 0; rowind < n; rowind++) {
-                resid[rowind] = resid[rowind] - w[rowind]*zptr[rowind+colind*n]*(coef[colind + p]-coefold);
-              }
+            coefold = coef[colind+p];
+            if(activez[colind] == 2) {
+              coef[colind + p] = a;
             } else {
-              coef[colind + p] = 0;
-              activez[colind] = 0; 
+              if(lambda < fabs(a)){
+                if(a>0) { 
+                  coef[colind + p] = (a - lambda);
+                } else {
+                  coef[colind + p] = (a + lambda);
+                }
+              } else {
+                coef[colind + p] = 0;
+                activez[colind] = 0; 
+              }
+            }
+            if(coef[colind] != coefold) {
+              for(rowind = 0; rowind < n; rowind++) {
+                resid[rowind] = resid[rowind] + w[rowind] * zptr[rowind + colind*n]*(coefold - coef[colind+p]);
+              }
             }
           }
         } 
@@ -323,61 +319,9 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP par, SEXP left, SEXP right, SEXP la
       llold = ll;
     }
     llpathptr[lambdaind] = ll;
-
   }
 
  UNPROTECT(3);
  return rval;
 }
-/*  for(i = 0; i < p; i++) {*/
-/*    activex[i] = 1;*/
-/*    coefptr[i] = parptr[i];*/
-/*  }*/
-/*  for(i = 0; i < q; i++) {*/
-/*    activez[i] = 1;*/
-/*    coefptr[i+p] = parptr[i+p];*/
-/*  }*/
-/*  a = sum(coefptr);*/
-/*  for(j = 0; j < *maxitptr; j++) {*/
-/*    coefdiff = 0;*/
-/*    for(i = 0; i < p; i++) {*/
-/*      coefold = coefptr[i];*/
-/*      if(activex[i] == 1) {*/
-/*        a = 0;*/
-/*        wxsum = 0;*/
-/*        for(k = 0; k < n; k++) {*/
-/*          /*  x[,-i]%*%beta[,-i]  */
-/*          xbeta = 0;*/
-/*          for(l = 0; l < p; l++) { */
-/*            if(activex[i] == 1 & l!=i) {*/
-/*              xbeta = xbeta + xptr[k+l*n]*coefptr[l];*/
-/*            }*/
-/*          }   */
-/*          resid = woptr[k] - xbeta;*/
-/*          /*sum(w[,1]*x[,j]*resid)*/
-/*          a = a + wptr[k]*xptr[k+i*n]*resid;*/
-/*          /*sum(w[,1]*x[,j]^2)*/
-/*          wxsum = wxsum + wptr[k]*pow(xptr[k+i*n], 2);*/
-/*        }*/
-/*        /*sign(a)*max(0, abs(a) - lambda)/sum(w[,1]*x[,j]^2)*/
-/*        if(*lambdaptr < sqrt(pow(a, 2))){*/
-/*          if(a>0) { */
-/*            coefptr[i] = (a - *lambdaptr)/wxsum;*/
-/*          } else {*/
-/*            coefptr[i] = (a + *lambdaptr)/wxsum;*/
-/*          }*/
-/*        } else {*/
-/*          coefptr[i] = 0; */
-/*          activex[i] = 0;*/
-/*        }*/
-/*      coefdiff = coefdiff + sqrt(pow(coefptr[i] - coefold, 2.0));*/
-/*      }*/
-/*    }*/
-
-
-/*  UNPROTECT(1);*/
-/*  return coef;*/
-/*}*/
-
-
 
