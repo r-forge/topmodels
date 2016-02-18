@@ -1,9 +1,16 @@
 ## function to set some control parameters for boosting (replaces crch.control() for boosting)
-crch.glmnet <- function(maxit = 100000, nlambda = 100, 
+crch.glmnet <- function(maxit = 100000, nlambda = NULL, 
   lambda.min.ratio = 0.0001, lambda= NULL,
   dot = "separate", mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, 
   foldid = NULL, reltol = 1E-7, ...)
-{
+{ 
+  if(is.null(nlambda)) {
+    if(!is.null(lambda)) {
+      nlambda <- length(lambda)
+      warning("nlambda is ignored if lambda is supplied")
+    } else nlambda <- 100
+  }
+  lambda <- if(is.null(lambda)) -1
   if(is.numeric(mstop)) {
     maxit <- mstop
     mstop <- "max"
@@ -98,12 +105,46 @@ crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE,
   mstop <- control$mstop
   reltol <- control$reltol
 
+  ## link
+linkfun2 <- switch(link.scale, "log" = 1L, "identity" = 2L, "quadratic" = 3L) 
+  if(is.character(link.scale)) {
+    linkstr <- link.scale
+    if(linkstr != "quadratic") {
+      linkobj <- make.link(linkstr)
+      linkobj$dmu.deta <- switch(linkstr, 
+        "identity" = function(eta) rep.int(0, length(eta)), 
+        "log" = function(eta) pmax(exp(eta), .Machine$double.eps))
+    } else {
+      linkobj <- structure(list(
+        linkfun = function(mu) mu^2,
+        linkinv = function(eta) sqrt(eta),
+        mu.eta = function(eta) 1/2/sqrt(eta),
+        dmu.deta = function(eta) -1/4/sqrt(eta^3),
+        valideta = function(eta) TRUE,
+        name = "quadratic"
+      ), class = "link-glm")
+    }
+  } else {
+    linkobj <- link.scale
+    linkstr <- link.scale$name
+    if(is.null(linkobj$dmu.deta) & !hessian) {
+      warning("link.scale needs to provide dmu.deta component for analytical Hessian. Numerical Hessian is employed.")
+      hessian <- TRUE
+    }
+  }
+  linkfun <- linkobj$linkfun
+  linkinv <- linkobj$linkinv
+  mu.eta <- linkobj$mu.eta
+  dmu.deta <- linkobj$dmu.deta
+
+
+
   ## scale response and regressors
   x <- standardize.matrix(x, weights = weights)
   z <- standardize.matrix(z, weights = weights)
   basefit <- crch.fit(x[,1, drop = FALSE], z[,1, drop = FALSE], y, left, right, 
       truncated, dist, df, link.scale, weights, offset)
-  y <- standardize.matrix(y, center = basefit$coefficients$location, scale = exp(basefit$coefficients$scale))
+  y <- standardize.matrix(y, center = basefit$coefficients$location, scale = linkinv(basefit$coefficients$scale))
     
   standardize <- list(
     x = list(center = attr(x, "standardize:center"), scale = attr(x, "standardize:scale")),
@@ -115,7 +156,6 @@ crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE,
   right <- (right - standardize$y$center)/standardize$y$scale
   offset[[1L]]  <- offset[[1L]]/standardize$y$scale
   
-
  if(is.character(dist)){
     ## distribution functions
     if(truncated) {
@@ -153,36 +193,6 @@ crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE,
 
 
 
-  ## link
-  if(is.character(link.scale)) {
-    linkstr <- link.scale
-    if(linkstr != "quadratic") {
-      linkobj <- make.link(linkstr)
-      linkobj$dmu.deta <- switch(linkstr, 
-        "identity" = function(eta) rep.int(0, length(eta)), 
-        "log" = function(eta) pmax(exp(eta), .Machine$double.eps))
-    } else {
-      linkobj <- structure(list(
-        linkfun = function(mu) mu^2,
-        linkinv = function(eta) sqrt(eta),
-        mu.eta = function(eta) 1/2/sqrt(eta),
-        dmu.deta = function(eta) -1/4/sqrt(eta^3),
-        valideta = function(eta) TRUE,
-        name = "quadratic"
-      ), class = "link-glm")
-    }
-  } else {
-    linkobj <- link.scale
-    linkstr <- link.scale$name
-    if(is.null(linkobj$dmu.deta) & !hessian) {
-      warning("link.scale needs to provide dmu.deta component for analytical Hessian. Numerical Hessian is employed.")
-      hessian <- TRUE
-    }
-  }
-  linkfun <- linkobj$linkfun
-  linkinv <- linkobj$linkinv
-  mu.eta <- linkobj$mu.eta
-  dmu.deta <- linkobj$dmu.deta
 
  
   ## various fitted quantities (parameters, linear predictors, etc.)
@@ -239,6 +249,7 @@ crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE,
   
   ## initialize intercepts
   par <- rep(0, k+q)
+  if(link.scale %in% c("identity", "quadratic")) par[k+1] <- 1 
   coefpath <- par
   loglikpath <- -loglikfun(par)
 
@@ -260,8 +271,8 @@ iter <- 0
 
 if(length(left) == 1) left <- rep(left, n)
 if(length(right) == 1) right <- rep(right, n)
-#browser()
-a <- .Call("crchglmnet", x, z, y, left, right, lambdaseq, as.integer(maxit), reltol)
+browser()
+a <- .Call("crchglmnet", x, z, y, left, right, lambdaseq, as.integer(nlambda), lambda.min.ratio, as.integer(maxit), reltol, linkfun2)
 coefpath <- a[[1]]
 loglikpath <- a[[2]]
 
@@ -421,8 +432,10 @@ plot.crch.glmnet <- function(object,
   rmar <- if(length(coef.label)) max(strwidth(colnames(object$coefpath), units = "in"))+0.5 else 0.42
   umar <- if(is.null(mstop)) 0.82 else 1.02
   par(mai = c(1.02, 0.82, umar, rmar))
+  ylim <- c(min(path), max(path))
+
   plot(-log(object$lambda), path[,1], ylab = ylab, xlab = "log-lambda", col = col[1], 
-    type = "l", xaxt = "n", ...)
+    type = "l", xaxt = "n", ylim = ylim, ...)
   for(i in 1:k) lines(-log(object$lambda), path[,i], col = col[1])
   for(i in 1:q+k) lines(-log(object$lambda), path[,i], col = col[2])
   axis(1, axTicks(1), -axTicks(1))
