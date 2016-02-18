@@ -26,7 +26,7 @@ standardize.matrix <- function(x, restandardize = FALSE, center = NULL, scale = 
   mcenter <- matrix(rep(center, nrow(x)), nrow(x), ncol(x), byrow = TRUE)
 
   if(is.null(scale))
-    scale <- sqrt(colSums(weights*(x-mcenter)^2)/(sum(weights)-1))
+    scale <- sqrt(colSums(weights*(x-mcenter)^2)/(sum(weights)))
 
   scale[grep("(Intercept)", colnames(x))] <- 1
   mscale  <- matrix(rep(scale , nrow(x)), nrow(x), ncol(x), byrow = TRUE)
@@ -94,12 +94,35 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   mstop <- control$mstop
 #  reltol <- control$reltol
 
+  ## link
+  if(is.character(link.scale)) {
+    linkstr <- link.scale
+    if(linkstr != "quadratic") {
+      linkobj <- make.link(linkstr)
+    } else {
+      linkobj <- structure(list(
+        linkfun = function(mu) mu^2,
+        linkinv = function(eta) sqrt(eta),
+        mu.eta = function(eta) 1/2/sqrt(eta),
+        valideta = function(eta) TRUE,
+        name = "quadratic"
+      ), class = "link-glm")
+    }
+  } else {
+    linkobj <- link.scale
+    linkstr <- link.scale$name
+  }
+  linkfun <- linkobj$linkfun
+  linkinv <- linkobj$linkinv
+  mu.eta <- linkobj$mu.eta
+
+
   ## scale response and regressors
   x <- standardize.matrix(x, weights = weights)
   z <- standardize.matrix(z, weights = weights)
   basefit <- crch.fit(x[,1, drop = FALSE], z[,1, drop = FALSE], y, left, right, 
       truncated, dist, df, link.scale, weights, offset)
-  y <- standardize.matrix(y, center = basefit$coefficients$location, scale = exp(basefit$coefficients$scale))
+  y <- standardize.matrix(y, center = basefit$coefficients$location, scale = linkinv(basefit$coefficients$scale))
     
   standardize <- list(
     x = list(center = attr(x, "standardize:center"), scale = attr(x, "standardize:scale")),
@@ -153,27 +176,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   }
 
 
-  ## link
-  if(is.character(link.scale)) {
-    linkstr <- link.scale
-    if(linkstr != "quadratic") {
-      linkobj <- make.link(linkstr)
-    } else {
-      linkobj <- structure(list(
-        linkfun = function(mu) mu^2,
-        linkinv = function(eta) sqrt(eta),
-        mu.eta = function(eta) 1/2/sqrt(eta),
-        valideta = function(eta) TRUE,
-        name = "quadratic"
-      ), class = "link-glm")
-    }
-  } else {
-    linkobj <- link.scale
-    linkstr <- link.scale$name
-  }
-  linkfun <- linkobj$linkfun
-  linkinv <- linkobj$linkinv
-  mu.eta <- linkobj$mu.eta
+
 
  
   ## various fitted quantities (parameters, linear predictors, etc.)
