@@ -1,42 +1,85 @@
+citHeader("To cite crch in publications use:")
+
 citEntry(entry = "Article",
-  title        = "Probabilistic Wind Power Forecasts with an Inverse Power Curve Transformation and Censored Regression",
+  title        = "Heteroscedastic Censored and Truncated Regression with crch",
   author       = personList(as.person("Jakob W. Messner"),
-                   as.person("Achim Zeileis"),
-		   as.person("Jochen Broecker"),
-		   as.person("Georg J. Mayr")),
+		              as.person("Georg J. Mayr")),
+                  as.person("Achim Zeileis"),
+  journal      = "The R-Journal",
+  year         = "2016",
+  pages        = "in press",
+  volume       = "17",
+  number       = "11",
+  url          = "https://journal.r-project.org/archive/accepted/messner-mayr-zeileis.pdf",
+
+  textVersion  =
+  paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2016).",
+        "Heteroscedastic Censored and Truncated Regression with crch.",
+        "The R-Journal, in press.",
+        "URL https://journal.r-project.org/archive/accepted/messner-mayr-zeileis.pdf"),
+)
+
+citEntry(entry = "Techreport",
+  title        = "Non-Homogeneous Boosting for Predictor Selection in Ensemble Post-Processing.",
+  author       = personList(as.person("Jakob W. Messner"),
+		              as.person("Georg J. Mayr")),
+                  as.person("Achim Zeileis"),
+  type         = "Working Papers",
+  year         = "2016",
+  institution  = "Faculty of Economics and Statistics, University of Innsbruck",
+  url          = "http://EconPapers.repec.org/RePEc:inn:wpaper:2016-04",
+
+  textVersion  =
+  paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2016).",
+        "Non-Homogeneous Boosting for Predictor Selection in Ensemble Post-Processing.",
+        "Working Papers, Faculty of Economics and Statistics, University of Innsbruck.",
+        "URL http://EconPapers.repec.org/RePEc:inn:wpaper:2016-04"),
+	
+  header       = "If you use crch.boost() please cite:"
+)
+
+citEntry(entry = "Article",
+  title        = "Probabilistic Wind Power Forecasts with an Inverse Power 
+                  Curve Transformation and Censored Regression",
+  author       = personList(as.person("Jakob W. Messner"),
+                  as.person("Achim Zeileis"),
+		              as.person("Jochen Broecker"),
+		              as.person("Georg J. Mayr")),
   journal      = "Wind Energy",
   year         = "2014",
-  pages        = "448--456",
-  volume       = "142",
-  doi          = "http://dx.doi.org/10.1175/MWR-D-13-00271.1",
+  pages        = "1753--1766",
+  volume       = "17",
+  number       = "11",
+  doi          = "10.1002/we.1666",
 
   textVersion  =
   paste("Jakob W. Messner, Achim Zeileis, Jochen Broecker, Georg J. Mayr (2013).",
-        "Probabilistic Wind Power Forecasts with an Inverse Power Curve Transformation and Censored Regression.",
-        "Wind Energy, in press.",
-        "Preprint available at URL http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-01."),
+        "Probabilistic Wind Power Forecasts with an Inverse Power Curve 
+          Transformation and Censored Regression.",
+        "Wind Energy, 17(11) 1753--1766.",
+        "DOI 10.1002/we.1666"),
 	
   header       = "If you use crch() please cite:"
 )
 
 citEntry(entry = "Article",
-  title        = "Extending Extended Logistic Regression to Effectively Utilize the Ensemble Spread",
+  title        = "Heteroscedastic Extended Logistic Regression for Postprocessing of Ensemble Guidance",
   author       = personList(as.person("Jakob W. Messner"),
                    as.person("Georg J. Mayr"),
                    as.person("Achim Zeileis"),
-		   as.person("Daniel S. Wilks")),
+		               as.person("Daniel S. Wilks")),
   journal      = "Monthly Weather Review",
   year         = "2014",
-  number       = "11",
-  pages        = "1753--1766",
-  volume       = "17",
-  doi          = "10.1002/we.1666",
+  number       = "1",
+  pages        = "448--456",
+  volume       = "142",
+  doi          = "10.1175/MWR-D-13-00271.1",
 
   textVersion  =
-  paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis, Daniel S. Wilks (2013).",
-        "Extending Extended Logistic Regression to Effectively Utilize the Ensemble Spread.",
-        "Monthly Weather Review, in press.",
-        "Preprint available at URL http://EconPapers.RePEc.org/RePEc:inn:wpaper:2013-21."),
+  paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis, Daniel S. Wilks (2014).",
+        "Heteroscedastic Extended Logistic Regression for Postprocessing of Ensemble Guidance.",
+        "Monthly Weather Review, 142(1), 448--456.",
+        "DOI 10.1175/MWR-D-13-00271.1"),
 	
   header       = "If you use hxlr() please cite:"
 )
