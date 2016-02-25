@@ -39,14 +39,13 @@ crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
 }
 
 \details{
-\code{crch.boost.fit} extends \code{crch} to fit censored (tobit) or 
-truncated regression models with conditional heteroscedasticy with
-boosting. If \code{crch.boost} is supplied as \code{control} in 
+\code{crch.boost} extends \code{crch} to fit censored (tobit) or 
+truncated regression models with conditional heteroscedasticy by
+boosting. If \code{crch.boost()} is supplied as \code{control} in 
 \code{crch} then \code{crch.boost.fit} is used as lower level fitting
-function. Note that if \code{method=boosting} is used in 
-\code{\link{crch.control}()} also \code{crch.boost} is called.
-Thus, boosting can more conveniently be called with 
-\code{crch(\ldots, method = "boosting")}.
+function. Note that \code{\link{crch.control}()} with \code{method=boosting}
+is equivalent to \code{crch.boost()}. Thus, boosting can more 
+conveniently be called with \code{crch(\ldots, method = "boosting")}.
 }
 
 \value{
@@ -79,6 +78,12 @@ Thus, boosting can more conveniently be called with
   \item{mstopopt}{optimum stopping iterations for different criteria.}
   \item{standardize}{list of center and scale values used to standardize 
   response and regressors.}
+}
+
+\references{
+  Messner JW, Mayr GJ, Zeileis A (2016). Non-Homogeneous Boosting for Predictor 
+    Selection in Ensemble Post-Processing. \emph{Working Papers}, Faculty of 
+    Economics and Statistics, University of Innsbruck, url:http://econpapers.repec.org/paper/innwpaper/2016-04.htm.
 }
 
 \seealso{\code{\link{crch}}, \code{\link{crch.control}}}
