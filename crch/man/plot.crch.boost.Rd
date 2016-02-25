@@ -8,13 +8,13 @@ Plot paths of coefficients or log-likelihood contributions for \code{crch.boost}
 }
 
 \usage{
-\method{plot}{crch.boost}(object, loglik = FALSE, 
+\method{plot}{crch.boost}(x, loglik = FALSE, 
   standardize = TRUE, which = c("both", "location", "scale"), 
   mstop = NULL, coef.label = TRUE, col = NULL, \dots)
 }
 
 \arguments{
-  \item{object}{an object of class \code{"crch.boost"}.}
+  \item{x}{an object of class \code{"crch.boost"}.}
   \item{loglik}{logical whether log-likelihood contribution shall be plotted
   instead of coefficient value.}
   \item{standardize}{logical whether coefficients shall be standardized.

@@ -8,8 +8,9 @@ Obtains various types of predictions for \code{crch.boost} models.
 }
 
 \usage{
-\method{predict}{crch}(object, newdata = NULL, mstop = NULL, type = c("response", 
-  "location", "scale", "quantile"), na.action = na.pass, at = 0.5, \dots)
+\method{predict}{crch.boost}(object, newdata = NULL, mstop = NULL, type = c("response", 
+  "location", "scale", "quantile"), na.action = na.pass, at = 0.5, left = NULL, 
+  right = NULL, \dots)
 }
 
 \arguments{
@@ -29,7 +30,7 @@ Obtains various types of predictions for \code{crch.boost} models.
   \item{at}{vector of quantile probabilities used for \code{type = "quantile"}.}
   \item{left}{left censoring or truncation point. Only used for \code{type = "quantile"}.
   If NULL, censoring or truncation point is obtained from \code{object}.}
-  \item{left}{right censoring or truncation point. Only used for \code{type = "quantile"}.
+  \item{right}{right censoring or truncation point. Only used for \code{type = "quantile"}.
   If NULL, censoring or truncation point is obtained from \code{object}.}
   \item{\dots}{further arguments passed to or from other methods.}
 }

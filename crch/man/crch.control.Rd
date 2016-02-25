@@ -8,11 +8,12 @@
   to \code{\link{optim}}.
 }
 \usage{
-crch.control(method = "BFGS", maxit = 5000, hessian = NULL,
+crch.control(method = "BFGS", maxit = NULL, hessian = NULL,
   trace = FALSE, start = NULL, dot = "separate", \dots)}
 \arguments{
   \item{method}{optimization method passed to \code{\link{optim}}}
-  \item{maxit}{the maximum number of iterations.}
+  \item{maxit}{the maximum number of iterations. Default is 5000 except for 
+    \code{method="boosting"} where the default is 100.}
   \item{hessian}{logical or NULL. If TRUE the numerical Hessian matrix from the 
     \code{\link{optim}} output is used for estimation of the covariance matrix.
     If FALSE no covariance matrix is computed.

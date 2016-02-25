@@ -26,8 +26,9 @@ Methods for extracting information from fitted \code{crch.boost} objects.
   \item{mstop}{stopping iteration for which coefficients shall be returned.
   Can be either a character (\code{"max"}, \code{"aic"}, \code{"bic"}, \code{"cv"}) 
   or a numeric value.}
-  \item{mstop}{logical whether zero coefficients are returned.}
+  \item{zero.coefficients}{logical whether zero coefficients are returned.}
   \item{standardize}{logical whether coefficients shall be standardized.}
+  \item{digits}{the number of significant digits to use when printing.}
   \item{\dots}{further arguments passed to or from other methods.}
 }
 
