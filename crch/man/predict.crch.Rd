@@ -27,7 +27,7 @@ Obtains various types of predictions for \code{crch} models.
   "quantile"}.}
   \item{left}{left censoring or truncation point. Only used for \code{type = "quantile"}.
   If NULL, censoring or truncation point is obtained from \code{object}.}
-  \item{left}{right censoring or truncation point. Only used for \code{type = "quantile"}.
+  \item{right}{right censoring or truncation point. Only used for \code{type = "quantile"}.
   If NULL, censoring or truncation point is obtained from \code{object}.}
   \item{\dots}{further arguments passed to or from other methods.}
 }
