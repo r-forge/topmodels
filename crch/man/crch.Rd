@@ -12,14 +12,16 @@
 crch(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"),
   dist = c("gaussian", "logistic", "student"), df = NULL, 
-  left = -Inf, right = Inf, truncated = FALSE, control = crch.control(\dots), 
-  model = TRUE, x = FALSE, y = FALSE, \dots)
+  left = -Inf, right = Inf, truncated = FALSE, 
+  control = crch.control(\dots), model = TRUE, x = FALSE, 
+  y = FALSE, \dots)
 
 trch(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"),
   dist = c("gaussian", "logistic", "student"), df = NULL, 
-  left = -Inf, right = Inf, truncated = TRUE, control = crch.control(\dots), 
-  model = TRUE, x = FALSE, y = FALSE, \dots)
+  left = -Inf, right = Inf, truncated = TRUE,
+  control = crch.control(\dots), model = TRUE, x = FALSE,
+  y = FALSE, \dots)
 
 crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   df = NULL, link.scale = "log", weights = NULL, offset = NULL, 
@@ -54,11 +56,11 @@ crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   \item{truncated}{logical. If \code{TRUE} truncated model is fitted
   with \code{left} and \code{right} interpreted as truncation points,
   If \code{FALSE} censored model is fitted. Default is \code{FALSE}}
-  \item{control}{a list of control parameters passed to \code{\link{optim}}.
-  Default is \code{\link{crch.control}()}. If set to \code{\link{crch.boost}()}
-  optimization is performed with boosting.}
+  \item{control}{a list of control parameters passed to \code{\link{optim}} 
+    or to the internal boosting algorithm if \code{control=\link{crch.boost}()}. 
+    Default is \code{\link{crch.control}()}.}
   \item{model}{logical. If \code{TRUE} \emph{model frame} is
-  included as a component of the returned value.}
+    included as a component of the returned value.}
   \item{x, y}{for \code{crch}: logical. If \code{TRUE} the model matrix and
   response vector used for fitting are returned as components of the returned
   value.
@@ -74,7 +76,8 @@ crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
 heteroscedasticy with maximum likelihood estimation. Student-t, Gaussian, and
 logistic distributions can be fitted to left- and/or right censored or 
 truncated responses. Different regressors can be used to model the location 
-and the scale of this distribution.
+and the scale of this distribution. If \code{control=\link{crch.boost}()}
+optimization is performed by boosting.
 
 \code{trch} is a wrapper function for \code{crch} with default 
 \code{truncated = TRUE}.
@@ -84,7 +87,8 @@ fitting takes place.
 }
 
 \value{
-  An object of class \code{"crch"}, i.e., a list with the following elements.
+  An object of class \code{"crch"} or \code{"crch.boost"}, i.e., a list with the 
+    following elements.
   \item{coefficients}{list of coefficients for location, scale, and df. Scale
   and df coefficients are in log-scale.}
   \item{df}{if \code{dist = "student"}: degrees of freedom of student-t
@@ -117,6 +121,8 @@ fitting takes place.
   \item{y}{if requested, the response used.}
   \item{x}{if requested, the model matrix used.}
   \item{model}{if requested, the model frame used.}
+  \item{stepsize, mstop, mstopopt, standardize}{return values of boosting 
+    optimization. See \code{\link{crch.boost}} for details.}
 }
 
 \references{
