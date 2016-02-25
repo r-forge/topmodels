@@ -159,6 +159,77 @@ CRCH4  4 17867.35
 > 
 > 
 > cleanEx()
+> nameEx("crch.boost")
+> ### * crch.boost
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: crch.boost
+> ### Title: Auxiliary functions to fit 'crch' models via boosting.
+> ### Aliases: crch.boost crch.boost.fit
+> ### Keywords: regression, boosting
+> 
+> ### ** Examples
+> 
+> # generate data
+> set.seed(5)
+> x <- matrix(rnorm(1000*20),1000,20)
+> y <- rnorm(1000, 1 + x[,1] - 1.5 * x[,2], exp(-1 + 0.3*x[,3]))
+> y <- pmax(0, y)
+> data <- data.frame(cbind(y, x))
+> 
+> # fit model with maximum likelihood
+> CRCH <- crch(y ~ .|., data = data, dist = "gaussian", left = 0)
+> 
+> # fit model with boosting
+> boost <- crch(y ~ .|.,  data = data, dist = "gaussian", left = 0,
++   control = crch.boost(mstop = "aic"))
+> 
+> # more conveniently, the same model can also be fit through
+> # boost <- crch(y ~ .|.,  data = data, dist = "gaussian", left = 0,
+> #   method = "boosting", mstop = "aic")
+> 
+> # AIC comparison
+> AIC(CRCH, boost)
+      df      AIC
+CRCH  42 819.2673
+boost  7 782.1219
+> 
+> # summary
+> summary(boost)
+
+Call:
+crch(formula = y ~ . | ., data = data, dist = "gaussian", left = 0, control = crch.boost(mstop = "aic"))
+
+Standardized residuals:
+    Min      1Q  Median      3Q     Max 
+-2.9273 -0.2963  0.5462  1.4357 22.6650 
+
+maximum stopping iteration: 100 
+
+optimum stopping iterations:
+max aic bic 
+100  90  90 
+
+Non-zero coefficients after 90 boosting iterations:
+Location model:
+(Intercept)           V2           V3          V13          V21  
+    0.99111      1.01795     -1.49731      0.04483      0.03668  
+
+Scale model with log link:
+(Intercept)           V4  
+    -0.9183       0.2226  
+
+Distribution: gaussian
+Log-likelihood: -384.1 on 7 Df
+
+> 
+> # plot
+> plot(boost)
+> 
+> 
+> 
+> cleanEx()
 > nameEx("hxlr")
 > ### * hxlr
 > 
@@ -329,7 +400,7 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 > ###
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  4.553 0.02 4.578 0 0 
+Time elapsed:  4.56 0.048 4.605 0 0 
 > grDevices::dev.off()
 null device 
           1 
