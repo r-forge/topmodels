@@ -425,7 +425,7 @@ coef.crch.boost <- function(object, model = c("full", "location", "scale", "df")
 }
 
 print.crch.boost <- function(x, digits = max(3, getOption("digits") - 3), 
-  zero.coefficients = FALSE, mstop = NULL, ...)
+  mstop = NULL, zero.coefficients = FALSE, ...)
 {
   x <- mstop.crch.boost(x, mstop = mstop)
   beta <- x$coefficients$location
@@ -461,7 +461,7 @@ logLik.crch.boost <- function(object, mstop = NULL, ...) {
 }
 
 
-summary.crch.boost <- function(object, zero.coefficients = FALSE, mstop = NULL, ...)
+summary.crch.boost <- function(object, mstop = NULL, zero.coefficients = FALSE, ...)
 {
   # mstop
   object <- mstop.crch.boost(object, mstop = mstop)
@@ -521,17 +521,17 @@ print.summary.crch.boost <- function(x, digits = max(3, getOption("digits") - 3)
   cat("\n")
 }
 
-plot.crch.boost <- function(object, loglik = FALSE, 
+plot.crch.boost <- function(x, loglik = FALSE, 
   standardize = TRUE, which = c("both", "location", "scale"), mstop = NULL,
   coef.label = TRUE, col = NULL, ...) 
 {
   which <- match.arg(which)
-  k <- length(object$coefficient$location)
-  q <- length(object$coefficient$scale)
+  k <- length(x$coefficient$location)
+  q <- length(x$coefficient$scale)
   if(is.null(col)) col <- if(which == "both") c(1,2) else c(1,1)
 
   if(is.null(mstop)) {
-    mstop <- object$mstop
+    mstop <- x$mstop
   } else {
     mstop <- match.arg(mstop, c("max", "aic", "bic", "cv", "all", "no"))
   }
@@ -539,34 +539,34 @@ plot.crch.boost <- function(object, loglik = FALSE,
     mstop <- NULL 
   } else {
     if(mstop == "all") mstop <- c("aic", "bic", "cv")
-    mstop <- object$mstopopt[mstop] 
+    mstop <- x$mstopopt[mstop] 
   }
 
   if(loglik) {
-    coefupdate <- as.data.frame(apply(object$coefpath, 2, diff)!=0)
+    coefupdate <- as.data.frame(apply(x$coefpath, 2, diff)!=0)
     coefupdate[["(Intercept)"]][rowSums(coefupdate) == 2] <- FALSE
     coefupdate[["scale_(Intercept)"]][rowSums(coefupdate) == 2] <- FALSE
-    loglikpath <- object$loglikpath
+    loglikpath <- x$loglikpath
     path <- rbind(0, diff(loglikpath)*coefupdate)
     path <- apply(path, 2, cumsum)
-    colnames(path) <- c(names(object$coefficients$location), names(object$coefficients$scale))
+    colnames(path) <- c(names(x$coefficients$location), names(x$coefficients$scale))
     ylab <- "log-likelihood contribution"
   } else {
-    beta <- object$coefpath[,seq.int(length.out = k), drop = FALSE]
-    gamma <- object$coefpath[,seq.int(length.out = q) + k, drop = FALSE]
+    beta <- x$coefpath[,seq.int(length.out = k), drop = FALSE]
+    gamma <- x$coefpath[,seq.int(length.out = q) + k, drop = FALSE]
     if(standardize) {
       beta[,] <- t(apply(beta, 1, standardize.coefficients, 
-        center = object$standardize$x$center, scale = object$standardize$x$scale))
+        center = x$standardize$x$center, scale = x$standardize$x$scale))
       beta[, grep("(Intercept)", colnames(beta))] <- 
         beta[, grep("(Intercept)", colnames(beta))] - 
-        object$standardize$y$center 
-      beta <- beta/object$standardize$y$scale  
+        x$standardize$y$center 
+      beta <- beta/x$standardize$y$scale  
       gamma[,] <- t(apply(gamma, 1, standardize.coefficients, 
-        center = object$standardize$z$center, scale = object$standardize$z$scale))
+        center = x$standardize$z$center, scale = x$standardize$z$scale))
       gamma[, grep("(Intercept)", colnames(gamma))] <- 
         gamma[, grep("(Intercept)", colnames(gamma))] - 
-        object$link$scale$linkfun(object$standardize$y$scale)  
-      colnames(gamma) <- names(object$coefficients$scale)
+        x$link$scale$linkfun(x$standardize$y$scale)  
+      colnames(gamma) <- names(x$coefficients$scale)
     } 
     path <- cbind(beta, gamma)
     ylab <- if(standardize) "standardized coefficients" else "coefficients"
@@ -581,7 +581,7 @@ plot.crch.boost <- function(object, loglik = FALSE,
     } else NULL
   }
   ## adjust figure margins
-  rmar <- if(length(coef.label)) max(strwidth(colnames(object$coefpath), units = "in"))+0.5 else 0.42
+  rmar <- if(length(coef.label)) max(strwidth(colnames(x$coefpath), units = "in"))+0.5 else 0.42
   umar <- if(is.null(mstop)) 0.82 else 1.02
   par(mai = c(1.02, 0.82, umar, rmar))
 
