@@ -92,7 +92,10 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   nu <- control$nu
   start <- control$start
   mstop <- control$mstop
-#  reltol <- control$reltol
+
+  ## extend left and right to vectors of length n
+  if(length(left) == 1) left <- rep(left, n)
+  if(length(right) == 1) right <- rep(right, n)
 
   ## link
   if(is.character(link.scale)) {
@@ -199,7 +202,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   loglikfun <- function(par, subset = 1:n, sum = TRUE) {
     fit <- fitfun(par, subset)
     ll <- with(fit,  
-        ddist(y[subset], mu, sigma, df = df, left = left, right = right, log = TRUE))
+        ddist(y[subset], mu, sigma, df = df, left = left[subset], right = right[subset], log = TRUE))
     if(sum) if(any(!is.finite(ll))) NaN else -sum(weights[subset] * ll)  
     else weights[subset] * ll
   }
@@ -231,9 +234,8 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     startit <- start$iterations + 1 
   }
 
+
   ## actual boosting
-#  llold <- -Inf
-#  converged <- FALSE
   for(i in startit:maxit) {
     ## gradient of negative likelihood
     grad <- gradfun(par)
@@ -256,45 +258,36 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     coefpath <- rbind(coefpath, par)
     llnew <- max(ll3, ll2)
     loglikpath <- rbind(loglikpath, llnew)
-#    if(llnew - llold <  reltol * (abs(llold) + reltol)) {
-#      break
-#      converged <- TRUE
-#    }
-#    llold <- llnew
   }
 
   ## cross validation to find optimum mstop
   if(mstop == "cv") {
-    nfolds <- control$nfolds
     foldid <- control$foldid
+    nfolds <- control$nfolds
     control$standardize <- FALSE
     control$mstop <- "max"
     control$start <- NULL
-    if(is.null(foldid)) foldid <- (sample(1:nfolds, size = length(y), replace = TRUE))
+    if(is.null(foldid)) {
+      foldid <- (sample(1:nfolds, size = length(y), replace = TRUE))
+    } else {
+      nfolds <- length(unique(foldid))
+    }
   
     lltestall <- matrix(0, length(y), maxit + 1)
     for(i in 1:nfolds) {
-      train <- foldid != i
-      test <- foldid == i
-      boost <- crch.boost.fit(x = x[train, , drop = FALSE], y = y[train], z = z[train, , drop = FALSE], left = left, 
-          right = right, link.scale = link.scale, dist = dist, df = df, weights = weights[train], 
-          offset = list(offset[[1L]][train], offset[[2L]][train]), 
-          control = control, truncated = truncated)
+      train <- foldid != unique(foldid)[i]
+      test <- foldid == unique(foldid)[i]
+      boost <- crch.boost.fit(x = x[train, , drop = FALSE], y = y[train], 
+        z = z[train, , drop = FALSE], left = left[train], right = right[train], 
+        link.scale = link.scale, dist = dist, df = df, weights = weights[train], 
+        offset = list(offset[[1L]][train], offset[[2L]][train]), 
+        control = control, truncated = truncated)
       lltest <- apply(boost$coefpath, 1, loglikfun, subset = test, sum = FALSE)
       lltest <- cbind(lltest, matrix(rep(lltest[,NCOL(lltest)], maxit + 1 - NCOL(lltest)), nrow = NROW(lltest)))
       lltestall[test,] <- lltest
     }
 
     mstopopt<- which.max(colMeans(lltestall))
-#    bootll <- NULL
-#    for(i in 1:100) {
-#      bootindex <- sample(1:length(y), replace = TRUE)
-#      bootll <- rbind(bootll, colMeans(lltestall[bootindex,]))
-#    }
-
-#    opt1sd <- max(colMeans(bootll)) - sd(bootll[,mstopopt.ind])
-#    mstopopt.cv1se <- which(colMeans(bootll)>opt1sd)[1]
-#    cv <- list(bootll = bootll, mstopopt = mstopopt.ind, mstopopt1se = mstopopt.cv1se)
   } else {
     mstopopt <- NULL
   }
@@ -625,21 +618,6 @@ predict.crch.boost <- function(object, newdata = NULL, mstop = NULL,
 }
 
 
-
-#continue <- function(object, ...) UseMethod("continue")
-#continue.crch.boost<- function(object, maxit) {
-#  call <- object$call
-#  if(is.null(call$control)) {
-#    call$maxit <- maxit 
-#    call$start <- object
-#  } else {
-#    call$control$maxit <- maxit
-#    call$control$start <- object
-#  }
-#  rval <- eval(call, parent.frame())
-#  rval$call <- call
-#  rval
-#}
 
 
   
