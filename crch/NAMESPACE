@@ -1,6 +1,7 @@
 useDynLib(crch)
 import("stats", "Formula")
 importFrom("utils", "tail")
+importFrom("graphics", "abline", "axis", "par", "plot", "strwidth")
 
 export(
   "crch",
