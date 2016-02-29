@@ -273,7 +273,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
       nfolds <- length(unique(foldid))
     }
   
-    lltestall <- matrix(0, length(y), maxit + 1)
+    lltestall <- matrix(0, length(y), maxit + 1L)
     for(i in 1:nfolds) {
       train <- foldid != unique(foldid)[i]
       test <- foldid == unique(foldid)[i]
@@ -282,8 +282,8 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
         link.scale = link.scale, dist = dist, df = df, weights = weights[train], 
         offset = list(offset[[1L]][train], offset[[2L]][train]), 
         control = control, truncated = truncated)
-      lltest <- apply(boost$coefpath, 1, loglikfun, subset = test, sum = FALSE)
-      lltest <- cbind(lltest, matrix(rep(lltest[,NCOL(lltest)], maxit + 1 - NCOL(lltest)), nrow = NROW(lltest)))
+      lltest <- apply(boost$coefpath, 1L, loglikfun, subset = test, sum = FALSE)
+      lltest <- cbind(lltest, matrix(rep(lltest[,NCOL(lltest)], maxit + 1L - NCOL(lltest)), nrow = NROW(lltest)))
       lltestall[test,] <- lltest
     }
 
@@ -300,7 +300,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   offset[[1L]] <- offset[[1L]]*standardize$y$scale
   beta <- coefpath[,seq.int(length.out = k), drop = FALSE]
   gamma <- coefpath[,seq.int(length.out = q) + k, drop = FALSE]
-  beta[,] <- t(apply(beta, 1, standardize.coefficients, 
+  beta[,] <- t(apply(beta, 1L, standardize.coefficients, 
     center = standardize$x$center, scale = standardize$x$scale, restandardize = TRUE))*standardize$y$scale
   beta[, grep("(Intercept)", colnames(beta))] <- 
     beta[, grep("(Intercept)", colnames(beta)), drop = FALSE] + standardize$y$center
@@ -319,7 +319,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
       "bic" = which.min(log(nobs)*rowSums(coefpath!=0) - 2* loglikpath)) - 1
 
   ## coefficients, fitted values and likelihood for optimum stopping iteration
-  par <- coefpath[mstopopt[[mstop]] + 1,]
+  par <- coefpath[mstopopt[[mstop]] + 1L,]
   fit <- fitfun(par)
   beta <- fit$beta
   gamma <- fit$gamma
@@ -329,7 +329,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
 
   names(beta) <- colnames(x)
   names(gamma) <- colnames(z)
-  rownames(coefpath) <- c(0:(NROW(coefpath) - 1))
+  rownames(coefpath) <- c(0:(NROW(coefpath) - 1L))
 
   rval <- list(
     coefficients = list(location = beta, scale = gamma),
@@ -351,7 +351,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
 #    converged = converged,
     coefpath = coefpath,
     loglikpath = loglikpath,
-    iterations = NROW(coefpath) - 1,
+    iterations = NROW(coefpath) - 1L,
     stepsize = nu,
     mstop = mstop,
     mstopopt = mstopopt,
