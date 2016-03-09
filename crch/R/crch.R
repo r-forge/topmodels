@@ -148,7 +148,7 @@ trch <- function(formula, data, subset, na.action, weights, offset,
 }
 
 crch.control <- function(method = "BFGS", maxit = NULL, 
-  hessian = NULL, trace = FALSE, start = NULL, dot = "separate", ...)
+  hessian = NULL, trace = FALSE, start = NULL, dot = "separate",lower=-Inf,upper=Inf, ...)
 {
   if(method == "boosting") {
     if(is.null(maxit)) maxit <- 100
@@ -156,7 +156,7 @@ crch.control <- function(method = "BFGS", maxit = NULL,
   } else {
     if(is.null(maxit)) maxit <- 5000
     rval <- list(method = method, maxit = maxit, hessian = hessian, trace = trace, 
-      start = start, dot = dot, fit = "crch.fit")
+      start = start, dot = dot,lower=lower,upper=upper, fit = "crch.fit")
     rval <- c(rval, list(...))
     if(!is.null(rval$fnscale)) warning("fnscale must not be modified")
     rval$fnscale <- 1
@@ -190,10 +190,12 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
 
   ## control parameters
   ocontrol <- control
-  method <- control$method
-  hessian <- control$hessian
-  start <- control$start
-  control$method <- control$hessian <- control$start <- NULL
+  method   <- control$method
+  hessian  <- control$hessian
+  start    <- control$start
+  lower    <- control$lower
+  upper    <- control$upper
+  control$method <- control$hessian <- control$start <- control$lower <- control$upper <- NULL
 
   
 
@@ -339,7 +341,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     }
   }
   opt <- suppressWarnings(optim(par = start, fn = loglikfun, gr = gradfun,
-    method = method, hessian = hessian, control = control))
+    method = method, hessian = hessian, control = control,lower=lower,upper=upper))
   if(opt$convergence > 0) {
     converged <- FALSE
     warning("optimization failed to converge")

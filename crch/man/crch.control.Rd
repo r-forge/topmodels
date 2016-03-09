@@ -30,6 +30,7 @@ crch.control(method = "BFGS", maxit = NULL, hessian = NULL,
     so that each formula part is expanded separately or \code{"sequential"}
     so that the parts are expanded sequentially conditional on all prior parts.
     Default is \code{"separate"}}
+  \item{lower,upper}{Bounds on the variables for the ‘"L-BFGS-B"’ method, or bounds in which to _search_ for method ‘"Brent"’.}
   \item{\dots}{Additional parameters passed to \code{\link{optim}}. }
 }
 
