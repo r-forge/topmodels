@@ -1,0 +1,584 @@
+\documentclass[11pt,compress,t]{beamer}
+\usetheme{eeecon}
+\usepackage{color}
+\usepackage{natbib}
+\usepackage{Sweave}
+\usepackage{array}
+%% pick one of the logos
+%% default logo: generic uibk banner
+\Logo{eeecon-title}
+%% alternatives: eeecon research center logos
+% \Logo[5mm]{eeecon-empec}
+% \Logo[5mm]{eeecon-expec}
+% \Logo[0mm]{eeecon-environec}
+\setbeamertemplate{footline}[frame number]
+\begin{document}
+
+%% information for the title page
+\title{Regularized censored regression with conditional heteroscedasticity}
+\author{\textit{Jakob W. Messner}, Achim Zeileis}
+\URL{}
+
+%% this sets the first PDF bookmark and triggers generation
+%% of the title page
+\section{Bookmark Title}
+
+
+\subsection{Introduction}
+
+\begin{frame}
+  \frametitle{Weather forecasts}
+  \textbf{Numerical Weather Prediction (NWP)}
+  \begin{itemize}
+    \item Observations $\rightarrow$ estimate current atmospheric state.
+    \item Simulate atmospheric processes with numerical models.
+  \end{itemize}
+  \vspace{0.1cm}
+  $\Rightarrow$ Compute future weather\pause
+  \vspace{1cm}
+
+  \textbf{Problems:}
+  \begin{itemize}
+    \item Few observations
+    \item Observation errors
+    \item Not perfectly known atmospheric processes
+    \item Unresolved processes
+  \end{itemize}
+  \vspace{0.1cm}
+  $\Rightarrow$ NWP errors
+
+\end{frame}
+
+
+\setkeys{Gin}{width=\textwidth}
+<<preliminaries, echo=FALSE, results=hide>>=
+library("zoo")
+library("crch")
+load("RainIbk.rda")
+
+uibkblue <- rgb(18, 50, 111, maxColorValue = 255)
+uibkorange <- rgb(242, 146, 0, maxColorValue = 255)
+Rain <- sqrt(RainIbk)
+Rain$ensmean <- apply(Rain[,grep('^rainfc',names(Rain))], 1, mean)
+Rain$enssd <- apply(Rain[,grep('^rainfc',names(Rain))], 1, sd)
+Rain <- Rain
+@
+
+\begin{frame}
+\frametitle{NWP errors}
+\begin{overprint}
+\onslide<1>
+<<echo=FALSE,fig=TRUE,width=6, height=4.5>>=
+d <- Rain[as.POSIXct(rownames(Rain)) >= as.POSIXct("2013-10-01") & as.POSIXct(rownames(Rain)) < as.POSIXct("2013-11-01"),]
+d <- as.data.frame(d^2)
+ylim <- c(0, max(c(d$rain, d$ensmean + 1.5*d$enssd + 32)) )
+d <- zoo(d, order.by = as.POSIXct(rownames(d)))
+
+
+plot(d$rainfc.1, type = "l", ylim = ylim, col = uibkblue, lwd = 2,
+  xlab = "Date", ylab = "precipitation [mm/3 days]", 
+  main = "3 days accumulated precipitation")
+
+legend("topright", lwd = 2, col = c(uibkblue), 
+  bty = "n", legend = c("NWP forecast"))
+@   
+
+\onslide<2>
+<<echo=FALSE,fig=TRUE,width=6, height=4.5>>=
+plot(d$rainfc.1, type = "l", ylim = ylim, col = uibkblue, lwd = 2,
+  xlab = "Date", ylab = "precipitation [mm/3 days]", 
+  main = "3 days accumulated precipitation")
+lines(d$rain,col = uibkorange, lwd = 2)
+
+legend("topright", lwd = c(2,2), col = c(uibkblue, uibkorange), 
+  bty = "n", legend = c("NWP forecast", "observation"))
+@   
+
+\end{overprint}
+\end{frame}
+\begin{frame}
+\frametitle{NWP errors}
+\begin{overprint}
+  \onslide<1>
+<<echo=FALSE, results=hide,fig=TRUE,width=6,height=4.5>>=
+mod1 <- lm(rain ~ ensmean, data = Rain)
+scatter <- function(xlab = "NWP forecast", ylab = "observations") {
+  par(mar=c(5,4.5,2,2))
+  plot(rain ~ ensmean, Rain, pch = 19, col = grey(0.3, alpha = 0.1), ylim = c(0,12),
+    xlim = c(0,12), xlab = xlab, ylab = ylab, 
+    frame.plot = FALSE, axes = FALSE)
+  axis(1, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  axis(2, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  abline(0,1, lty = 2, lwd = 0.5)
+}
+scatter()
+@
+  \onslide<2>
+<<echo=FALSE,results=hide,fig=TRUE,width=6,height=4.5>>=
+scatter()
+abline(mod1, col = uibkorange, lwd = 2)
+legend("topleft", col = c(uibkorange), lwd = 2, 
+  bty = "n", legend = c("linear regression"))
+@
+\end{overprint}
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Distribution of precipitation}
+%<<echo=FALSE,fig=TRUE, width=6, height=4.5, label = hist>>=
+%hist(Rain$rain, breaks = 50, xlab = "precipitation [mm]", main = "", col = uibkblue)
+%@
+%\end{frame}
+
+\begin{frame}
+  \frametitle{Ensemble prediction}
+  \textbf{NWP error sources:}
+    \begin{itemize} 
+      \item Initial conditions
+      \item Model formulations\pause
+    \end{itemize}
+    \vspace{0.5cm}
+    
+    \textbf{Idea:}
+    \begin{itemize}
+      \item Perturbed initial conditions
+      \item Different model formulations 
+    \end{itemize}
+
+    $\Rightarrow$ Compute different weather scenarios
+
+\end{frame}
+
+
+
+
+\begin{frame}
+\frametitle{NWP errors}
+\begin{overprint}
+  \onslide<1>
+<<echo=FALSE,fig=TRUE,width=6, height=4.5>>=
+par(mar = c(5, 4, 4, 2))
+plot(d$rain, type = "l", ylim = ylim, col = uibkorange, lwd = 2,
+  xlab = "Date", ylab = "precipitation [mm/3 days]", 
+  main = "3 days accumulated precipitation")
+lines(d$rainfc.1, col = adjustcolor(uibkblue, alpha = 0.2), lwd = 2)
+lines(d$rain, ylim = ylim, col = uibkorange, lwd = 2)
+
+legend("topright", lwd = c(2,2), lty = c(1,1), 
+  col = c(uibkorange, adjustcolor(uibkblue, alpha = 0.2)), 
+  bty = "n", legend = c("observation",  "NWP forecast"))
+@   
+  \onslide<2>
+<<echo=FALSE,fig=TRUE,width=6, height=4.5>>=
+par(mar = c(5, 4, 4, 2))
+plot(d$rain, type = "l", ylim = ylim, col = uibkorange, lwd = 2,
+  xlab = "Date", ylab = "precipitation [mm/3 days]", 
+  main = "3 days accumulated precipitation")
+
+for(i in 2:12) lines(d[,i], lwd = 2, col = adjustcolor(uibkblue, alpha = 0.2))
+lines(d$ensmean,col = uibkblue, lwd = 2)
+lines(d$rain, ylim = ylim, col = uibkorange, lwd = 2)
+
+legend("topright", lwd = c(2,2,2), col = c(uibkorange, adjustcolor(uibkblue, alpha = 0.2), uibkblue), bty = "n", legend = c("observation",  "ensemble forecasts", "ensemble mean"))
+@   
+\end{overprint}
+\end{frame}
+
+
+%\begin{frame}
+%\frametitle{Statistical models}
+%\textbf{Challenges:}
+%\begin{itemize}
+%   \item utilize uncertainty information from ensemble forecasts
+%  \item limited (non-negative) response
+%\end{itemize}
+%\end{frame}
+
+\subsection{Statistical models}
+\begin{frame}
+\frametitle{Heteroscedastic censored regression}
+\begin{overprint}
+\onslide<1,3,7>
+\begin{overprint}
+  \onslide<1,3,7>
+  \begin{eqnarray*}
+    \mathit{rain}^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
+    \mu &=& \beta_0 + \beta_1 * \mathit{ensmean} \\
+    \log(\sigma) &= &\gamma_0 + \gamma_1 * \mathit{enssd}
+  \end{eqnarray*}
+
+\end{overprint}
+\begin{overprint}
+  \onslide<1>
+    \vspace{1cm}
+    \begin{itemize}
+      \item $\mathit{rain}^*$: (latent) precipitation
+      \item $\mathit{ensmean}$: ensemble mean forecast
+      \item $\mathit{enssd}$: ensemble standard deviation
+      \item $\beta_0, \beta_1, \gamma_0, \gamma_1$: regression coefficients
+    \end{itemize}
+
+  \onslide<3,7>
+    \vspace{2cm}
+    \textbf{Consider non-negativity:} 
+    \vspace{0.5cm} 
+    \begin{equation*}
+	    \mathit{rain} =\begin{cases}
+		    0 & \mathit{rain}^{*} \le 0 \\
+		    \mathit{rain}^{*} & \mathit{rain}^{*} > 0
+	    \end{cases}
+    \end{equation*}
+\end{overprint}
+
+\onslide<2>
+<<echo=FALSE,results=hide,fig=TRUE,width=6,height=4.5>>=
+mod2 <- crch(rain~ensmean, data = Rain, left = 0)
+addpdf <- function(point, scalefactor = 1, legend = TRUE, ...) {
+  loc <- predict(mod2, newdata = data.frame(ensmean = point))
+  scale <- predict(mod2, newdata = data.frame(ensmean = point), type = "scale") * scalefactor
+  lines(rep(point, 2), c(loc - 11, loc + 11), lty = 2)
+  lines(c(point, point + 5), c(loc, loc), lty = 2)
+  lines(dlogis(seq(loc-10, loc+10, 0.1), loc, scale)*20 + point, seq(loc-10, loc+10, 0.1), col = uibkblue, lwd = 2, ...)
+  if(legend) legend("bottomright", lwd = 2, col = uibkorange, legend = expression(mu *" = "* beta[0] + beta[1] * bar(ens)), bty = "n")
+}
+
+scatter()
+abline(mod2, col = uibkorange, lwd = 2)
+addpdf(6, scalefactor = 0.8, legend = FALSE)
+addpdf(6, scalefactor = 1.4, legend = FALSE, lty = 2)
+legend("topleft", col = uibkblue, lty = c(1,2), 
+  legend = c("small ens. std.", "large ens. std"), bty = 
+"n")
+@
+
+
+
+
+\onslide<4>
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+mod2 <- crch(rain ~ ensmean, data = Rain, dist = "gaussian", left = 0)
+set.seed(1)
+Rain2 <- data.frame(rain = rnorm(nrow(Rain), fitted(mod2, type = "location"), 
+  fitted(mod2, type = "scale")), ensmean = Rain$ensmean)
+scatter2 <- function(data) {
+  par(mar = c(5, 4, 4, 2))
+  plot(rain ~ ensmean, data, pch = 19, col = grey(0.3, alpha = 0.1),
+    xlab = expression("ensmean"), ylim = c(-6,12),
+    ylab = expression("rain*"), frame.plot = FALSE, axes = FALSE)
+  axis(1, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  axis(2, at = seq(0, 12, 2), labels = seq(0, 12, 2)^2)
+  abline(0,1, lty = 2, lwd = 0.5)
+}
+scatter2(Rain2)
+@
+\onslide<5>
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+scatter2(Rain2)
+points(rain~ensmean, Rain2[Rain2$rain <= 0,], col = adjustcolor(uibkorange, 0.5))
+@
+\onslide<6>
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+Rain2$rain[Rain2$rain <=0] <- 0
+scatter2(Rain2)
+points(rain~ensmean, Rain2[Rain2$rain <= 0,], col = adjustcolor(uibkorange, 0.5))
+@
+\end{overprint}
+\end{frame}
+
+\begin{frame}
+\frametitle{Input variables}
+\textbf{So far:} only ensemble mean and ensemble standard deviation of precipitation
+
+\vspace{1cm}
+\textbf{Further potentially useful variables:}
+\begin{itemize}
+  \item ensemble predictions of other variables (e.g., temperature, wind)
+  \item numerical predictions from other centers
+  \item current observations
+  \item transformations and interactions
+  \item $\ldots$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression}
+\begin{eqnarray*}
+  \mathit{rain}^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
+  \mu &=& \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \ldots = \mathbf{x}^\top \beta\\
+  \log(\sigma) &= &\gamma_0 + \gamma_1 z_1 + \gamma_2 z_2 + \ldots = \mathbf{z}^\top \gamma
+\end{eqnarray*}
+\vspace{1cm}
+\begin{itemize}
+  \item $\mathit{rain}^*$: (latent) precipitation
+  \item $\mathbf{x}$: inputs for location
+  \item $\mathbf{z}$: inputs for scale
+  \item $\beta, \gamma$: regression coefficients
+\end{itemize}
+\pause
+\textbf{Problem:} How to select variables in $\mathbf{x}$ and $\mathbf{z}$?
+\end{frame}
+
+\begin{frame}
+\frametitle{Linear boosting (\texttt{gamboostLSS})}
+\vspace{-0.5cm}
+\begin{eqnarray*}
+  \mathit{rain}^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
+  \mu &=& \mathbf{x}^\top \beta\\
+  \log(\sigma) &= & \mathbf{z}^\top \gamma
+\end{eqnarray*}
+\begin{overprint}
+\onslide<1>
+\begin{enumerate}
+  \item standardize response and regressors (mean 0, variance 1)
+  \item initialize all coefficients $=0$ and $m=0$ 
+  \item if $m \le \mathit{mstop}_{\mu}$
+  \begin{enumerate} 
+    \item compute negative partial derivative of log-likelihood $\partial L/ \partial \mu$
+    \item find regressor $x_j$ most correlated to $\partial L/ \partial \mu$ 
+    \item update $\beta_j \leftarrow \beta_j +  \nu \rho
+        (x_j, \partial L/ \partial \mu)$
+  \end{enumerate}
+\end{enumerate}
+\vspace{0.5cm}
+\begin{itemize}
+  \item $\nu$: stepsize $0<\nu\le1$
+  \item $\rho(x_j, \partial L/ \partial \mu)$: mean $x_j * \partial L/ \partial \mu$ over data
+\end{itemize}
+\onslide<2>
+\begin{enumerate}
+  \item standardize response and regressors (mean 0, variance 1)
+  \item initialize all coefficients $=0$ and $m=0$ 
+  \item if $m \le \mathit{mstop}_{\mu}$
+  \begin{enumerate} 
+    \item compute negative partial derivative of log-likelihood $\partial L/ \partial \mu$
+    \item find regressor $x_j$ most correlated to $\partial L/ \partial \mu$ 
+    \item update $\beta_j \leftarrow \beta_j +  \nu \rho
+        (x_j, \partial L/ \partial \mu)$
+  \end{enumerate}
+  \item if $m \le \mathit{mstop}_{\sigma}$
+  \begin{enumerate}
+    \item compute negative partial derivative of log-likelihood $\partial L/ \partial \sigma$
+    \item find regressor $z_k$ most correlated to $\partial L/ \partial \sigma$
+    \item update $\gamma_k \leftarrow \gamma_k +  \nu \rho
+        (z_k, \partial L/ \partial \sigma)$
+  \end{enumerate}
+  \item if $m < \max(\mathit{mstop}_{\mu}, \mathit{mstop}_{\sigma})$ update $m \leftarrow m+1$
+    and repeat 3 and 4
+\end{enumerate}
+\onslide<3,4>
+\begin{enumerate}
+  \item standardize response and regressors (mean 0, variance 1)
+  \item initialize all coefficients $=0$ and $m=0$ 
+  \item if $m \le \mathit{mstop}_{\mu}$
+  \begin{itemize} 
+    \item[] update $\beta$
+  \end{itemize}
+  \item if $m \le \mathit{mstop}_{\sigma}$
+  \begin{itemize}
+    \item[] update $\gamma$
+  \end{itemize}
+  \item if $m < \max(\mathit{mstop}_{\mu}, \mathit{mstop}_{\sigma})$ update $m \leftarrow m+1$
+    and repeat 3 and 4
+\end{enumerate}
+\end{overprint}
+
+
+\onslide<4>
+\vspace{-1cm}
+\textbf{Problem:} complex cross validation to optimize $\mathit{mstop}_{\mu}$ and $\mathit{mstop}_{\sigma}$
+\end{frame}
+
+\begin{frame}
+\frametitle{Linear boosting (\texttt{crch})}
+\vspace{-0.5cm}
+\begin{eqnarray*}
+  \mathit{rain}^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
+  \mu &=& \mathbf{x}^\top \beta\\
+  \log(\sigma) &= & \mathbf{z}^\top \gamma
+\end{eqnarray*}
+\begin{enumerate}
+  \item standardize response and regressors (mean 0, variance 1)
+  \item initialize all coefficients $=0$ and $m=0$ 
+  \item tentatively update $\beta$
+  \item tentatively update $\gamma$
+  \item really update the coefficient that improves likelihood most
+  \item if $m < \mathit{mstop}$ update $m \leftarrow m+1$
+    and repeat 3 and 4
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{LASSO penalization}
+\vspace{-0.5cm}
+\begin{eqnarray*}
+  \mathit{rain}^{*} &\sim &\mathcal{N}(\mu, \sigma^2)\\
+  \mu &=& \mathbf{x}^\top \beta\\
+  \log(\sigma) &= & \mathbf{z}^\top \gamma
+\end{eqnarray*}
+\textbf{Penalized negative log-likelihood:}
+\begin{equation*}
+  -\log\left(\phi_c \left(\frac{rain - \mathbf{x}^\top\beta}{\mathbf{z}^\top\gamma}\right)\right) + \lambda (\sum_{j=1}^P|\beta_j| + \sum_{k=1}^Q|\gamma_k|)
+\end{equation*}
+\begin{overprint}
+\onslide<1>
+\begin{itemize}
+  \item $\phi_c$: density of censored normal distribution
+  \item $\lambda$: penalization parameter
+  \item $P,Q$: lengths of $\beta$ and $\gamma$
+\end{itemize}
+\onslide<2>
+\textbf{Coordinate descent algorithm for regularization paths:}\\
+\cite{Friedman2010}: efficient algorithm for LASSO solutions for different $\lambda$
+\begin{itemize}
+  \item start with large $\lambda$: all coefficients zero
+  \item decrease $\lambda$ and optimize penalized log-likelihood
+  \item efficient optimization by starting with previous solution 
+\end{itemize}
+\end{overprint}
+\end{frame}
+
+\begin{frame}
+\frametitle{Boosting vs.\ LASSO}
+% path figures
+\vspace{-0.5cm}
+\setkeys{Gin}{width=1.03\textwidth}
+<<echo=FALSE,results=hide,fig=TRUE,width=8, height=5>>=
+load("fitted.rda")
+source("~/Dropbox/meteoR/crch/R/crch.glmnet.R")
+par(mfrow = c(1,2))
+#label <- list(location = c("(Intercept)", "tp_mean", "tptp_mean", "tpv700_mean"), 
+#  scale=c("tpv700_sd", "tpu700_sd", "(Intercept)"))
+label <- NULL
+plot(boost, ylim = c(-1.2, 0.5), coef.label = label, col = c(uibkblue, uibkorange), main = "boosting")
+plot(lasso, ylim = c(-1.2, 0.5), coef.label = label, col = c(uibkblue, uibkorange), main = "lasso")
+legend(5.5, -0.7, legend = c("location", "scale"), lty =c(1,1), col = c(uibkblue, uibkorange), bty = "n")
+@\\
+\setkeys{Gin}{width=1\textwidth}
+
+\textbf{Approx. computation time:} \\
+
+\begin{tabular}{>{\centering\arraybackslash}p{0.5\textwidth} >{\centering\arraybackslash}p{0.5\textwidth}}
+80 sec & 1.2 sec \\
+\end{tabular}
+\end{frame}
+
+\begin{frame}
+\frametitle{Boosting vs.\ LASSO}
+% out of sample likelihood comparison
+
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+load("bootresults.rda")
+names(boot) <- c("mod", "boosting", "lasso")
+boxplot(boot[,2:3]-boot[,1], main = "out-of-bag log-likelihood differences",
+  ylab = "log-likelihood differences", xlim = c(0.5,2.8), xaxt = "n")
+abline(h = 0)
+axis(1, at = c(1,2), labels = c("boosting", "lasso"))
+text(2.7, 10, "better")
+text(2.7, -10, "worse")
+
+@
+\end{frame}
+
+\begin{frame}
+\frametitle{Summary}
+\begin{itemize}
+  \item both approaches select meteorologically reasonable variables and prevent overfitting
+  \item LASSO 
+    \begin{itemize}
+      \item slightly better predictive performance
+      \item easier to interpret
+      \item computationally more efficient
+    \end{itemize}
+  \item boosting
+    \begin{itemize}
+      \item more flexible: apart from linear effects, baselearners can be any kind of functions
+    \end{itemize}
+  \item CRAN package \texttt{crch}
+    \begin{itemize}
+      \item boosting already available
+      \item LASSO paths coming soon
+    \end{itemize}
+\end{itemize}
+\vspace{0.2cm}
+\textbf{sunny weather for DAGStat 2016!}
+\vspace{0.3cm}
+\begin{center}
+  \includegraphics[width=0.2\textwidth]{sun.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{DAGSTAT prediction}
+\setkeys{Gin}{width=\textwidth}
+<<echo=FALSE,results=hide,fig=TRUE,width=6, height=4.5>>=
+load("latest.rda")
+load("models_10444.rda")
+fc_mu <- fc_sigma <- NULL
+for(lt in seq(30, 138,12)) {
+  newnwp <- NULL
+  for(lt2 in seq(-9,0,3)) {
+    newnwp <- rbind(newnwp, nwp[nwp$step == lt2 + lt, ])
+  } 
+  ## get date and same date of previous year
+  date <- as.POSIXct(newnwp$rundate[1]) + lt*60*60
+  date2 <- date - 366*24*60*60
+
+  ## set tp of -0.1 to 0 and remove descriptive columns
+  newnwp$tp[newnwp$tp<0] <- 0
+  newnwp <- newnwp[,-c(1:4)]
+
+  ## compute interaction variables and daily sums
+  for(i in 1:ncol(newnwp)) {
+    newnwp <- cbind(newnwp, newnwp$tp * newnwp[,i])
+    names(newnwp)[ncol(newnwp)] <- paste0("tp", names(newnwp)[i])
+  }
+  newnwp <- (colSums(newnwp))
+  
+  ## get climatological location and scale of previos years date
+  muclim <- with(anom2[[(lt-30)/12+1]], mall[rownames(mall) == date2,])
+  names(muclim) <- names(anom2[[(lt-30)/12+1]]$data)
+  sigmaclim <- with(anom2[[(lt-30)/12+1]], sall[rownames(mall) == date2])
+  names(sigmaclim) <- names(anom2[[(lt-30)/12+1]]$data)
+
+  ## create newdata
+  left <- -muclim[1]/sigmaclim[1]
+  newdata <- (newnwp - muclim[names(newnwp)])/sigmaclim[names(newnwp)]
+  newdata <- as.data.frame(t(newdata))
+  
+  ## predict location and scale
+  fc_mu <- rbind(fc_mu, predict(boost[[(lt-30)/12+1]], newdata = newdata)*sigmaclim[1] + muclim[1])
+  fc_sigma <- rbind(fc_sigma, predict(boost[[(lt-30)/12+1]], newdata = newdata, type = "scale")*sigmaclim[1])
+}
+
+## plotting
+par(mar=c(5.1,4.1,4.1,4.1))
+fc_mu <- zoo(fc_mu, order.by = as.POSIXct(nwp$rundate[1]) + seq(30, 138,12)*60*60)
+fc_sigma <- zoo(fc_sigma, order.by = as.POSIXct(nwp$rundate[1]) + seq(30, 138,12)*60*60)
+plot(pnorm(0, fc_mu, fc_sigma, lower.tail = FALSE)*100, ylim = c(0,100), ylab = "", lwd = 2, col = uibkblue, yaxt = "n", main = "12 hour accumulated precipitation")
+axis(2, col = uibkblue, col.axis = uibkblue)
+expect <- NULL
+for(i in 1:length(fc_mu)) expect <- c(expect, mean(pmax(0, rnorm(10000, fc_mu[i], fc_sigma[i]))))
+expect <- zoo(expect, order.by = index(fc_mu))
+lines(expect*100, col = uibkorange, lwd = 2)
+axis(4, at = seq(0, 100, 10), labels = seq(0, 1, 1/10), col = uibkorange, col.axis = uibkorange)
+mtext("expected precipitation[mm]",side=4,line=3, col = uibkorange)
+mtext("probability of precipitation [%]",side=2,line=3, col = uibkblue)
+@
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Thank you!}
+\nocite{Messner2016, Messner2016a}%, Messner2014a, Messner2014b}
+\bibliographystyle{ametsoc}
+\bibliography{refs.bib}
+
+\vspace{0.5cm}
+jakob.messner@uibk.ac.at \hspace{3.2cm} \includegraphics[width=0.15\textwidth]{fwf-logo.jpg} \hspace{0.5cm} \includegraphics[width=0.07\textwidth]{uibk-logo.jpg} 
+\end{frame}
+
+\end{document}
+
+
