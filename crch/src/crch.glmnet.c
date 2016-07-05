@@ -8,6 +8,9 @@
 void wobsmu(double *x, double *z, double *y, double *par, double *left, double *right, int p, int q, int n, double *wobs, double *hess, int linkfun) 
 {
   int i, j;
+
+
+
   double ddist, a, pdist, mills, mu, sigma;
 
   for(i = 0; i < n; i++) {
@@ -19,13 +22,8 @@ void wobsmu(double *x, double *z, double *y, double *par, double *left, double *
     for(j = 0; j < q; j++) {
       sigma = sigma + z[n*j+i]*par[p+j];
     }
-    if(linkfun == 1) {
-      sigma = exp(sigma);
-    } else if(linkfun == 2) {
-      sigma = sigma;
-    } else if(linkfun == 3) {
-      sigma = sqrt(sigma);
-    }
+
+    sigma = exp(sigma);
     if(y[i] <= left[i]) {
 
       ddist = dnorm((left[i] - mu) / sigma, 0.0, 1.0, 0) / sigma;
@@ -48,7 +46,9 @@ void wobsmu(double *x, double *z, double *y, double *par, double *left, double *
         hess[i] = 1 / pow(sigma, 2.0);
         wobs[i] = y[i];
       }
-    }  
+    }
+
+    
   }
 }
 
@@ -72,13 +72,7 @@ void wobssigma(double *x, double *z, double *y, double *par, double *left, doubl
     for(j = 0; j < q; j++) {
       sigma = sigma + z[n*j+i]*par[p+j];
     }
-    if(linkfun == 1) {
-      sigma = exp(sigma);
-    } else if(linkfun == 2) {
-      sigma = sigma;
-    } else if(linkfun == 3) {
-      sigma = sqrt(sigma);
-    }
+    sigma = exp(sigma);
     if(y[i] <= left[i]) {
       ddist = dnorm((left[i] - mu) / sigma, 0.0, 1.0, 0) / sigma;
       pdist = pnorm5((left[i] - mu) / sigma, 0.0, 1.0, 1, 0);
@@ -87,37 +81,29 @@ void wobssigma(double *x, double *z, double *y, double *par, double *left, doubl
       dcm = left[i] - mu;
       dcm2 = pow(dcm, 2.0);
       score = -1 * mills * (left[i] - mu);
-      hess[i] =  ((-2 * dcm + dcm2*dcm/sd2)*mills + pow(mills, 2.0)*dcm2)/sd2;
+      hess[i] =  (-2 * dcm + dcm2*dcm/sd2)*mills + pow(mills, 2.0)*dcm2 - score*sigma;
+      wobs[i] = log(sigma) + 1/hess[i]*score;
     } else {
       if(y[i] >= right[i]){
         ddist = dnorm((right[i] - mu) / sigma, 0.0, 1.0, 0) / sigma;
         pdist = pnorm5((right[i] - mu) / sigma, 0.0, 1.0, 0, 0);
         mills = ddist / pdist;
         sd2 = pow(sigma, 2.0);
-        dcm = right[i] - mu;
+        dcm = left[i] - mu;
         dcm2 = pow(dcm, 2.0);
-        score = mills * dcm/sigma;
-        hess[i] = (( 2 * dcm - dcm2*dcm/sd2)*mills + pow(mills, 2.0)*dcm2)/sd2;
+        score = mills * (right[i] - mu);
+        hess[i] = ( 2 * dcm - dcm2*dcm/sd2)*mills + pow(mills, 2.0)*dcm2- score*sigma;
+        wobs[i] = log(sigma) + 1/hess[i]*score;
       } else {
         sd2 = pow(sigma, 2.0);
         dcm2 = pow((y[i] - mu), 2.0);
-        score = (dcm2 - sd2) / pow(sigma, 3.0);
-        hess[i] = -(sd2 - 3 * dcm2)/ pow(sd2, 2.0);
-        
+        score = (dcm2 - sd2) / pow(sigma, 2.0);
+        hess[i] = -(sd2 - 3 * dcm2)/sd2- score*sigma;
+        wobs[i] = log(sigma) + 1/hess[i]*score;
       }
     }
-    if(linkfun == 1) {
-      score = score*sigma;
-      hess[i] = hess[i]*pow(sigma, 2.0)- score*sigma;
-      wobs[i] = log(sigma) + 1/hess[i]*score;
-    } else if(linkfun == 2) {
-      hess[i] = hess[i]- score;
-      wobs[i] = sigma + 1/hess[i]*score;
-    } else if(linkfun == 3) {
-      score = score/(2*sigma);
-      hess[i] = hess[i]/(4*pow(sigma, 2.0)) + score/(4*pow(sigma,2.0));
-      wobs[i] = pow(sigma, 2.0) + 1/hess[i]*score;
-    }
+    
+    
   }
 
 }
@@ -139,13 +125,7 @@ double dcnorm2(double *x, double *z, double *y, double *par, double *left, doubl
     for(j = 0; j < q; j++) {
       sigma = sigma + z[n*j+i]*par[p+j];
     }
-    if(linkfun == 1) {
-      sigma = exp(sigma);
-    } else if(linkfun == 2) {
-      sigma = sigma;
-    } else if(linkfun == 3) {
-      sigma = sqrt(sigma);
-    }
+    sigma = exp(sigma);
     if(y[i] <= left[i]) {
       dens = pnorm5((left[i] - mu) / sigma, 0.0, 1.0, 1, 1);
     } else {
@@ -160,6 +140,7 @@ double dcnorm2(double *x, double *z, double *y, double *par, double *left, doubl
 
   return rval;
 }
+
 
 
 SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, SEXP nlambdau, SEXP lambdaminratio, SEXP maxit, SEXP reltol, SEXP linkfun)
@@ -186,21 +167,24 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
   SEXP coefpath = PROTECT(allocMatrix(REALSXP, *nlambdauptr, p+q));
   SEXP llpath = PROTECT(allocVector(REALSXP, *nlambdauptr));
   SEXP lambdaseq = PROTECT(allocVector(REALSXP, *nlambdauptr));
-  SEXP rval = PROTECT(allocVector(VECSXP, 3));
+  SEXP err = PROTECT(allocVector(INTSXP, 1));
+  SEXP rval = PROTECT(allocVector(VECSXP, 4));
   SET_VECTOR_ELT(rval, 0, coefpath);
   SET_VECTOR_ELT(rval, 1, llpath);
   SET_VECTOR_ELT(rval, 2, lambdaseq);
+  SET_VECTOR_ELT(rval, 3, err);
 
   double *coefpathptr = REAL(coefpath);
   double *llpathptr = REAL(llpath);
   double *lambdaseqptr = REAL(lambdaseq);
+  int *errptr = INTEGER(err);
 
   int i, lambdaind, it1, it2, colind, rowind, colind2;
   int activex[p], activez[q];
   double a, xbeta, coefold, zgamma, dev, devold, ll, llold, lambda, lambdamax, xysum;
   double wxsum[p], wzsum[q], resid[n], w[n], wobs[n], coef[p+q];
 
-
+  errptr[0] = 0;
 
   for(i = 0; i < p+q; i++) {
     coef[i] = 0;
@@ -305,17 +289,29 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
         }
         devold = dev;
       }
- 
-      /* log-lik */
-      ll = dcnorm2(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n, *linkfunptr);
-      if(fabs((ll-llold)/llold) < *reltolptr) {
-        break;
+
+      if(it2 == *maxitptr) {
+        errptr[0] = 1;
+        UNPROTECT(5);
+        return rval;
       }
-      llold = ll;
-    }
+      /* log-lik */
+/*      ll = dcnorm2(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n, *linkfunptr);*/
+/*      if(fabs((ll-llold)/llold) < *reltolptr) {*/
+/*        break;*/
+/*      }*/
+/*      llold = ll;*/
+/*    }*/
+
+/*    if(it1 == *maxitptr) {*/
+/*      errptr[0] = 1;*/
+/*      UNPROTECT(5);*/
+/*      return rval;*/
+/*    }*/
+
 
     /* scale */
-    for(it1 = 0; it1 < *maxitptr; it1++) {
+/*    for(it1 = 0; it1 < *maxitptr; it1++) {*/
 
       wobssigma(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n, wobs, w, *linkfunptr);
       activez[0] = 2;   /* exclude intercept from regularization TODO: what to do if no intercept */
@@ -368,7 +364,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
         for(rowind = 0; rowind < n; rowind++) {
           dev = dev + pow(resid[rowind], 2.0);
         }
-
+/*printf("%i: %f, %f;; ", lambdaind, dev, devold);*/
         if(fabs((dev-devold)/devold) < *reltolptr) {
           for(colind2 = 0; colind2 < q; colind2++) { 
             coefpathptr[(colind2 + p)*nlambda + lambdaind] = coef[colind2 + p];
@@ -378,17 +374,29 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
         }
         devold = dev;
       }
-
+/*printf("lambdaind:%i, it1:%i, it2:%i;;;;", lambdaind, it1, it2);*/
+      if(it2 == *maxitptr) {
+        errptr[0] = 1;
+        UNPROTECT(5);
+        return rval;
+      }
       ll = dcnorm2(xptr, zptr, yptr, coef, leftptr, rightptr, p, q, n, *linkfunptr);
+
       if(fabs((ll-llold)/llold) < *reltolptr) {
         break;
       }
       llold = ll;
     }
+
+    if(it1 == *maxitptr) {
+      errptr[0] = 1;
+      UNPROTECT(5);
+      return rval;
+    }
     llpathptr[lambdaind] = ll;
   }
-
- UNPROTECT(4);
+  
+ UNPROTECT(5);
  return rval;
 }
 
