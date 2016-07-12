@@ -109,7 +109,7 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   offset <- list(location = offsetX, scale = offsetZ)
  
 
-  ## call the actual workhorse: crch.fit() or crch.boost()
+  ## call the actual workhorse: crch.fit() or crch.boost.fit()
   fit <- control$fit
   control$fit <- NULL
   rval <- do.call(fit, list(x = X, y = Y, z = Z, left = left, right = right, 
