@@ -1,0 +1,1012 @@
+\documentclass[11pt,compress,t]{beamer}
+\usetheme{Z}
+
+\usepackage{amsfonts,amstext,amsmath,booktabs,dcolumn}
+%% need no \usepackage{Sweave}
+\definecolor{InputColor}{rgb}{0,0,0.3}
+\definecolor{OutputColor}{rgb}{0.2,0.2,0.2}
+\let\pkg=\emph
+
+\SweaveOpts{engine=R, eps=FALSE, echo=TRUE, keep.source=TRUE}
+
+<<echo=FALSE, results=hide>>=
+options(digits = 3, show.signif.stars = FALSE, width = 60)
+@
+
+
+\begin{document}
+
+\title{Statistical Computing in R: Strategies for Turning Ideas into Software}
+\author{Achim Zeileis}
+\URL{http://eeecon.uibk.ac.at/~zeileis/}
+\lecture{Statistical Computing in R: Strategies for Turning Ideas into Software}
+
+\subsection{Overview}
+
+\begin{frame}
+\frametitle{Overview}
+
+\textbf{Computational statistics:} Methods requiring substantial computation.
+
+\bigskip
+
+\textbf{Statistical computing:} Translating statistical ideas into software.
+
+\bigskip
+
+\begin{itemize}
+  \item Why:
+  \begin{itemize}
+    \item Why should we write software (\textit{and make it available})?
+    \item Why should it be open-source software?
+    \item Why R?\\[0.5cm]
+  \end{itemize}
+  \item How:
+  \begin{itemize}
+    \item What should be the guiding principles for implementation?
+    \item Linear regression in base R.
+    \item Heteroscedastic censored and truncated regression models in package \pkg{crch}.
+  \end{itemize}
+\end{itemize}
+
+
+\end{frame}
+
+\subsection{Why}
+
+\begin{frame}
+\frametitle{Why software?}
+
+Authors of statistical methodology usually have an implementation
+for own applications and running simulations and benchmarks,
+\textit{but not necessarily in production quality}.
+
+\bigskip
+
+Why should they be interested in taking the extra effort to adapt them to more general
+situations, document it and make it available to others?
+
+\bigskip
+
+Supplying software that is sufficiently easy to use is an excellent
+way of \emph{communicating ideas and concepts} to researchers and practitioners.
+
+\bigskip
+
+Given the description of an excellent method and code for a
+good one, you choose \ldots?
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Why open source?}
+
+\textbf{Claerbout's principle}
+
+\bigskip
+
+\begin{quote}
+  An article about computational science in a scientific publication
+  is \emph{not} the scholarship itself, it is merely \emph{advertising} of the
+  scholarship. The actual scholarship is the complete software development
+  environment and the complete set of instructions which
+  generated the figures.
+\end{quote}
+
+\bigskip
+
+To evaluate the correctness of all the results in such an article,
+the source code must also be available for inspection. Only this way
+gradual refinement of computational (and conceptual) tools is possible.
+
+\end{frame}
+
+
+\subsection{How}
+
+\begin{frame}
+\frametitle{Implementation principles}
+
+\textbf{Task:} Turn conceptual tools into computational tools
+
+\bigskip
+
+\textbf{Goals:} Desirable features.
+
+\begin{itemize}
+  \item Easy to use.
+  \item Numerically reliable.
+  \item Computationally efficient.
+  \item Flexible and extensible.
+  \item Reusable components.
+  \item Object-oriented.
+  \item Reflect features of the conceptual method.
+\end{itemize}
+
+\bigskip
+
+\textbf{Problem:} Often antagonistic, e.g., computational
+efficiency vs.\ extensibility.
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Implementation principles}
+
+\textbf{Guiding principle:} The implementation should be guided by the
+properties of the underlying methods while trying to ensure as
+much efficiency and accuracy as possible.
+
+\bigskip
+
+\emph{The resulting functions should do what we think a method
+does conceptually.}
+
+\bigskip
+
+\textbf{In practice:} Many implementations are still guided
+by the limitations that programming languages used to have
+(and some still have) where everything has to be represented
+by numeric vectors and matrices.
+
+\bigskip
+
+What language features are helpful for improving this?
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Implementation principles}
+
+\textbf{Object orientation:} Create (potentially complex) 
+objects that represent an abstraction of a procedure or type
+of data. Methods performing typical tasks can be implemented.
+
+\bigskip
+
+\textbf{Functions as first-class objects:} Functions are a
+basic data type that can be passed to and returned by another
+function.
+
+\bigskip
+
+\textbf{Lexical scope:} More precisely \textit{nested lexically
+scoped functions}. Returned functions
+can have free variables stored in function closure.
+
+\bigskip
+
+\textbf{Compiled code:} Combine convenience of interpreted code
+and efficiency of compiled code by (byte) compilation or dynamic 
+linking.
+
+\bigskip
+
+\textbf{Reusable components:} Programming environment should
+provide tools that implementations can build on. Likewise,
+implementations should create objects that can be reused in other
+programs.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Why R?}
+
+R offers all these features and more:
+
+\begin{itemize}
+  \item R is a full-featured interactive computational environment for
+	data analysis, inference and visualization.
+  \item R is an open-source project, released under GPL.
+  \item Developed for the Unix, Windows and Macintosh families of
+	operating systems by the R Core Team.
+  \item Several object orientation systems, including S3 and S4 classes.
+  \item Everything in R is an object, including functions and
+	function calls.
+  \item Nested functions are lexically scoped.
+  \item Allows for dynamic linking of code in C, C++, Fortran, \dots
+  \item Highly extensible with a fast-growing list of add-on packages. 
+\end{itemize}  
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Why R?}
+
+Software delivery is particularly easy:
+
+\smallskip
+
+R itself and $\sim$9000 packages are available (most of them under
+the GPL) from the Comprehensive R Archive Network (CRAN):
+
+\begin{center}
+\url{http://CRAN.R-project.org/}
+\end{center}
+
+and can easily be installed from within R via, e.g.
+
+\smallskip
+
+\code{R> install.packages("crch")}
+
+%% \end{frame}
+%% 
+%% \begin{frame}
+%% \frametitle{Why R?}
+
+\bigskip
+
+CRAN Task Views:
+
+%% \begin{itemize}
+%%   \item \textbf{linear models:} OLS estimation, diagnostic tests, robust regression, simultaneous
+%%	   equations.
+%%   \item \textbf{microeconometrics:} binary data (GLMs, logit, probit), count data models (poisson, negbin,
+%%	   zero-inflated, hurdle), censored data (tobit).
+%%   \item \textbf{time series models:} ARIMA, structural time series models, unit root,
+%%	   cointegration, structural change.
+%%   \item \textbf{basic infrastructure:} matrix manipulations, optimization, time/date and time series classes.
+%% \end{itemize}
+
+\begin{itemize}
+  \item \url{http://CRAN.R-project.org/view=Econometrics},
+  \item \url{http://CRAN.R-project.org/view=SocialSciences},
+  \item and 31 others.
+\end{itemize}
+
+\end{frame}
+
+\subsection{Illustration}
+
+\begin{frame}[fragile]
+\frametitle{How can this be used in practice?}
+
+\textbf{Examples:}
+\begin{itemize}
+  \item Linear regression in base R.
+  \item Heteroscedastic censored and truncated regression models in package \pkg{crch}.
+\end{itemize}
+
+\bigskip
+
+\textbf{Illustration:}
+\begin{itemize}
+  \item Precipitation forecasts for Innsbruck, Austria (\code{RainIbk}).
+  \item Observed 3 day-accumulated precipitation amounts (\code{rain})
+    from SYNOP station Innsbruck Airport from 2000-01-01 to 2013-09-17.
+  \item Corresponding GEFS 11-member ensemble reforecasts of total accumulated
+    precipitation between 5 and 8 days in advance (\code{rainfc.1}, \code{rainfc.2}, \dots, \code{rainfc.11}).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Illustration: Precipitation EMOS}
+
+\textbf{Data preprocessing:} Load data, transform to square-root scale,
+compute ensemble statistics, and omit `perfect' ensemble predictions.
+
+<<data>>=
+data("RainIbk", package = "crch")
+RainIbk <- sqrt(RainIbk)
+RainIbk$ensmean <- apply(RainIbk[, 2:12], 1, mean)
+RainIbk$enssd <- apply(RainIbk[, 2:12], 1, sd)
+RainIbk <- subset(RainIbk, enssd > 0)
+@
+
+\medskip
+
+\textbf{Distribution:} Histogram on original and square-root scale.
+
+<<hist, eval=FALSE>>=
+hist(RainIbk$rain^2, breaks = 4 * 0:29 - 2)
+hist(RainIbk$rain, breaks = 0:22/2 - 0.25)
+@
+
+\medskip
+
+\textbf{Regression:} Dependence of observations on ensemble mean.
+
+<<scatter, eval=FALSE>>=
+plot(rain ~ ensmean, data = RainIbk,
+  pch = 19, col = gray(0, alpha = 0.2))
+abline(0, 1, col = "green3")
+@
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Illustration: Precipitation EMOS}
+
+\setkeys{Gin}{width=1.06\textwidth}
+<<hist2, fig=TRUE, height=5, width=10, echo=FALSE>>=
+par(mfrow = c(1, 2))
+hist(RainIbk$rain^2, breaks = 4 * 0:29 - 2,
+  col = "lightgray", xlab = "Rain", main = "")
+hist(RainIbk$rain, breaks = 0:22/2 - 0.25,
+  col = "lightgray", xlab = expression(sqrt(Rain)), main = "")
+@
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Illustration: Precipitation EMOS}
+
+\vspace*{-0.5cm}
+
+\setkeys{Gin}{width=1.03\textwidth}
+<<scatter2, fig=TRUE, png=TRUE, pdf=FALSE, height=6, width=8, echo=FALSE>>=
+plot(rain ~ ensmean, data = RainIbk,
+  xlab = expression(sqrt(Ensemble)~mean), ylab = expression(sqrt(Rain)),
+  pch = 19, col = gray(0, alpha = 0.2))
+@
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Illustration: Precipitation EMOS}
+
+\vspace*{-0.5cm}
+
+\setkeys{Gin}{width=1.03\textwidth}
+<<scatter3, fig=TRUE, png=TRUE, pdf=FALSE, height=6, width=8, echo=FALSE>>=
+<<scatter2>>
+abline(0, 1, lwd = 2, col = "green3")
+legend("topleft", "1-to-1", lty = 1, lwd = 2, col = "green3", bty = "n")
+@
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Illustration: Precipitation EMOS}
+
+\vspace*{-0.5cm}
+
+\setkeys{Gin}{width=1.03\textwidth}
+<<scatter4, fig=TRUE, png=TRUE, pdf=FALSE, height=6, width=8, echo=FALSE>>=
+<<scatter2>>
+abline(0, 1, lwd = 2, col = "green3")
+abline(lm(rain ~ ensmean, data = RainIbk), lwd = 2, col = "red")
+legend("topleft", c("1-to-1", "OLS"), lty = 1, lwd = 2, col = c("green3", "red"), bty = "n")
+@
+
+\end{frame}
+
+\subsection{Linear regression in R}
+
+\begin{frame}[fragile]
+\frametitle{How can this be used in practice?}
+
+\textbf{Example:} Linear regression in R.
+
+\smallskip
+
+\begin{itemize}
+  \item \textbf{Object orientation:} \fct{lm} returns an \class{lm} object
+        with suitable methods and extractor functions.
+  \item \textbf{Reusable components:} Underlying workhorse \fct{lm.fit}
+        without pre- and postprocessing is also provided.
+  \item \textbf{Compiled code:} At its core \fct{lm.fit} has a
+        \code{.Fortran("dqrls", ...)} call.
+\end{itemize}
+
+\bigskip
+
+\textbf{Application:}
+
+\smallskip
+
+<<>>=
+m <- lm(rain ~ ensmean, data = RainIbk)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Object orientation}
+
+<<>>=
+coef(m)
+vcov(m)
+logLik(m)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Object orientation}
+
+\begin{tabular}{lp{7.5cm}}
+\hline
+\fct{print} & Simple printed display with coefficients\\
+\fct{summary} & Standard regression summary;
+                returns ``\code{summary.}\textit{class}'' object
+                (with \fct{print} method) \\ 	
+\fct{plot} & Diagnostic plots \\ \hline
+\fct{coef} & Extract coefficients \\
+\fct{vcov} & Associated covariance matrix \\
+\fct{predict} & (Different types of) predictions for new data \\
+\fct{fitted} & Fitted values for observed data \\
+\fct{residuals} & Extract (different types of) residuals \\ \hline
+\fct{terms} & Extract terms \\
+\fct{model.matrix} & Extract model matrix (or matrices) \\
+\fct{nobs} & Extract number of observations \\
+\fct{df.residual} & Extract residual degrees of freedom \\
+\fct{logLik} & Extract fitted log-likelihood \\ \hline
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Reusable components}
+
+\textbf{Provide:} Important building blocks, e.g., \fct{lm.fit}
+  (so that users \emph{never call}: \code{solve(t(X) \%*\% X) \%*\% t(X) \%*\% y}).
+
+\bigskip
+
+\textbf{Reuse:} Exploit available tools, e.g., \dquote{smart} generics
+  can rely on suitable methods such as \fct{coef}, \fct{vcov}, \fct{logLik}, etc.
+
+\bigskip
+
+\begin{tabular}{lp{6.475cm}}
+\hline
+\fct{confint} & Confidence intervals \\
+\fct{AIC} & Information criteria (AIC, BIC, \dots) \\ \hline
+\fct{coeftest} & Partial Wald tests of coefficients (\pkg{lmtest}) \\
+\fct{waldtest} & Wald tests of nested models (\pkg{lmtest}) \\
+\fct{linearHypothesis} & Wald tests of linear hypotheses (\pkg{car}) \\
+\fct{lrtest} & Likelihood ratio tests of nested models (\pkg{lmtest}) \\ \hline
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Reusable components}
+
+<<>>=
+BIC(m)
+@
+
+\medskip
+
+<<>>=
+confint(m)
+@
+
+\medskip
+
+<<>>=
+library("lmtest")
+coeftest(m)
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Lexical scope}
+
+Return nested lexically scoped function for $f(x) = \hat \alpha ~+~ \hat \beta \cdot x$:
+
+\smallskip
+
+<<>>=
+predict_fun <- function(x, y) {
+  cf <- lm.fit(cbind(1, x), y)$coefficients
+  return(function(x) cf[1] + cf[2] * x)
+}
+@
+
+\bigskip
+
+Set up and evaluate prediction function:
+
+\smallskip
+
+<<>>=
+predict_rain <- predict_fun(RainIbk$ensmean, RainIbk$rain)
+predict_rain
+predict_rain(2)
+predict_rain(sqrt(4))^2
+@
+
+\end{frame}
+
+\subsection{Heteroscedastic censored regression}
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression: Ideas}
+
+\textbf{Extension of OLS:}
+\begin{itemize}
+  \item Employ censoring to some interval $[\mathit{left}, \mathit{right}]$ to accomodate point mass
+    at the limit(s). Here, $\mathit{left} = 0$.
+  \item Allow for conditional heteroscedasticity depending on regressors.
+  \item In addition to Gaussian responses support distributions with fatter tails (logistic, $t_\nu$).
+\end{itemize}
+
+\bigskip
+
+\textbf{Latent response:} Latent response $y^*$ with location and scale parameters
+$\mu$ and $\sigma$ follows distribution $\mathcal{D}$.
+%
+\begin{equation}
+  \frac{y^*-\mu}{\sigma} ~\sim~ \mathcal{D}
+\end{equation}
+%
+with cumulative distribution function $F^*(\cdot)$ and probability density function $f^*(\cdot)$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression: Ideas}
+
+\textbf{Regression:} For observations $i = 1, \dots, n$ and regressor vectors
+$\mathbf{x}_i$, $\mathbf{z}_i$
+%
+\begin{eqnarray*}
+  \mu_i       & = & \mathbf{x}_i^{\top}\beta,\\ 
+  g(\sigma_i) & = & \mathbf{z}_i^{\top}\gamma
+\end{eqnarray*}
+with monotonic link function $g(\cdot)$. Here, $g(\sigma) = \log(\sigma)$ to
+assure positivity.
+
+\bigskip
+
+\textbf{Distributions:}
+\begin{itemize}
+  \item Standard normal.
+  \item Standard logistic.
+  \item Student-$t$ with $\nu = \exp(\delta)$ degrees of freedom.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression: Ideas}
+
+\textbf{Observation rule:} Observations outside $[\mathit{left}, \mathit{right}]$ are
+mapped to the interval limits.
+%
+\begin{equation*}
+  y =
+  \begin{cases}
+    \mathit{left}  & y^* \le \mathit{left} \\
+    y^*            & \mathit{left} < y^* < \mathit{right}\\
+    \mathit{right} & y^* \ge \mathit{right}
+  \end{cases}
+\end{equation*}
+
+\bigskip
+
+\textbf{Estimation:} By maximum likelihood. Maximize the sum of
+log-likelihood contributions $\log(f(y_i, \mu_i, \sigma_i))$, where
+%
+\begin{equation*}
+  f(y, \mu, \sigma) =
+  \begin{cases}
+    F^*\left(\frac{\mathit{left} - \mu}{\sigma}\right)                   & y \le \mathit{left} \\
+    f^*\left(\frac{y - \mu}{\sigma}\right) / \sigma                      & \mathit{left} < y < \mathit{right} \\
+    \left(1 - F^*\left(\frac{\mathit{right} - \mu}{\sigma}\right)\right) & y \ge \mathit{right}
+  \end{cases}
+\end{equation*}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Heteroscedastic censored regression: Software}
+
+\textbf{Translation to R:} \fct{crch} for censored regression with conditional heteroscedasticity
+provides an interface similar to \fct{lm}.
+
+\begin{Scode}
+crch(formula, data, subset, na.action, weights, offset,
+  link.scale = "log", dist = "gaussian", df = NULL,
+  left = -Inf, right = Inf, truncated = FALSE,
+  control = crch.control(...), ...)
+\end{Scode}
+
+\medskip
+
+\textbf{Implementation:}
+\begin{itemize}
+  \item Data is preprocessed internally.
+  \item Workhorse function \fct{crch.fit} sets up log-likelihood and
+    corresponding gradient (or score) and Hessian function.
+  \item Quasi-Newton optimization (BFGS) with base R's \fct{optim}.
+  \item Returns an object of class \class{crch}.
+  \item Methods for all standard generics and extractor functions.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Heteroscedastic censored regression: Illustration}
+
+\textbf{Application:} Capture heteroscedasticity and/or censoring and/or heavy-tailed distribution.
+
+<<crch>>=
+library("crch")
+m1 <- crch(rain ~ ensmean | 1,          data = RainIbk)
+m2 <- crch(rain ~ ensmean | log(enssd), data = RainIbk)
+m3 <- crch(rain ~ ensmean | 1,          data = RainIbk, left = 0)
+m4 <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0)
+m5 <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
+  dist = "logistic")
+@
+
+\medskip
+
+\textbf{Model selection:} All additions lead to model improvements.
+
+<<bic>>=
+BIC(m, m1, m2, m3, m4, m5)
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Heteroscedastic censored regression: Illustration}
+
+<<bic-barplot, eval=FALSE>>=
+barplot(BIC(m) - BIC(m1, m2, m3, m4, m5)[, 2])
+@
+
+\setkeys{Gin}{width=0.9\textwidth}
+<<bic-barplot, echo=FALSE, fig=TRUE, height=6, width=8>>=
+barplot(BIC(m) - BIC(m1, m2, m3, m4, m5)[, 2],
+  names.arg = paste0("m", 1:5), ylab = "BIC improvements (compared to OLS)")
+@
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Illustration: Precipitation EMOS}
+
+\vspace*{-0.5cm}
+
+\setkeys{Gin}{width=1.03\textwidth}
+<<scatter5, fig=TRUE, png=TRUE, pdf=FALSE, height=6, width=8, echo=FALSE>>=
+<<scatter2>>
+abline(0, 1, lwd = 2, col = "green3")
+abline(m, lwd = 2, col = "red")
+abline(coef(m4)[1:2], lwd = 2, col = "blue")
+legend("topleft", c("1-to-1", "OLS", "Het. cens. Gaussian"), lty = 1, lwd = 2, col = c("green3", "red", "blue"), bty = "n")
+@
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression: Illustration}
+
+{\small
+<<mtable, echo=FALSE, results=tex>>=
+library("memisc")
+toLatex(mtable("Gaussian (m1)" = m1, "Het. cens. Gaussian (m4)" = m4)) 
+@
+}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression: Software}
+
+This implementation uses
+
+\medskip
+
+\begin{itemize}
+  \item \textbf{Object orientation}: Fitted model object with standard
+    interface and methods.
+  \item \textbf{Functions as first-class objects}: Several model components
+    can be supplied as functions, e.g.,
+    the log-likelihood (and its gradient and Hessian) or the
+    link function (and its inverse and derivative).
+  \item \textbf{Lexical scope}: Log-likelihood (and gradient and Hessian)
+    are set up internally as functions of parameters with data accessed
+    via lexical scoping.
+  \item \textbf{Compiled code:} Density/score/Hessian functions for
+    censored distributions are implemented in C.
+  \item \textbf{Reusable components}: Building blocks like \fct{crch.fit}
+    and \fct{dcnorm} may be useful in other applications.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Object orientation}
+
+<<>>=
+coef(m4)
+vcov(m4)
+logLik(m4)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Reusable components}
+
+<<>>=
+confint(m4)
+@
+
+\medskip
+
+<<>>=
+coeftest(m4)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Lexical scope}
+
+\textbf{Internally:} Log-likelihood is defined similar to this standalone example.
+
+<<m4-opt1>>=
+make_censnorm_loglik <- function(x, z, y) {
+  loglik <- function(par) {
+    k <- length(par)
+    beta <- par[1:ncol(x)]
+    gamma <- par[-(1:ncol(x))]
+    mu <- x %*% beta
+    sigma <- exp(z %*% gamma)
+    ll <- ifelse(y <= 0,
+      pnorm(0, mean = mu, sd = sigma, log.p = TRUE),
+      dnorm(y, mean = mu, sd = sigma, log = TRUE)
+    )
+    -sum(ll)
+  }
+}
+nll <- make_censnorm_loglik(
+  x = cbind(1, RainIbk$ensmean),
+  z = cbind(1, log(RainIbk$enssd)),
+  y = RainIbk$rain
+)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Lexical scope}
+
+<<m4-opt2>>=
+nll
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Lexical scope}
+
+\textbf{Optimization:} Minimize negative log-likelihood as a function
+of the parameters only (using numerical gradients).
+
+<<m4-opt3>>=
+t4_opt <- system.time(
+m4_opt <- optim(par = rep(0, 4), fn = nll, method = "BFGS")
+)
+m4_opt[1:4]
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Functions as first-class objects}
+
+\textbf{Link function:} Is stored (and can be supplied)
+as an actual function, e.g., for computing predictions on new data.
+
+<<>>=
+m4$link$scale$linkfun
+m4$link$scale$linkinv
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Functions as first-class objects}
+
+\textbf{Similarly:} Distribution can be specified by a probability density \emph{function}
+rather than a string.
+
+<<>>=
+dcensnorm <- function(y, location = 1, scale = 1, df = NULL,
+  left = -Inf, right = Inf, log = FALSE)
+{
+  ifelse(y <= left,
+    pnorm(left, mean = location, sd = scale, log.p = log),
+  ifelse(y >= right,
+    pnorm(right, mean = location, sd = scale, log.p = log,
+      lower.tail = FALSE),
+    dnorm(y, mean = location, sd = scale, log = log)
+  ))
+}
+@
+
+\medskip
+
+\textbf{Optimization:} Using numerical gradients and Hessian.
+
+<<>>=
+t4_d <- system.time(
+m4_d <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
+  dist = list(ddist = dcensnorm), hessian = TRUE)
+)
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Compiled code}
+
+<<echo=FALSE, results=hide>>=
+t4 <- system.time(
+m4 <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0)
+)
+@
+
+\textbf{Comparison:} Estimated parameters are (almost) the same but
+computation times are different.
+
+<<>>=
+cbind(coef(m4), m4_opt$par, coef(m4_d))
+cbind(t4, t4_opt, t4_d)[1,]
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Compiled code}
+
+\textbf{Main reason:} C implementation of the distribution
+(plus analytical rather than numeric gradients/Hessian, also in C).
+
+<<>>=
+dcnorm
+@
+
+\end{frame}
+
+\subsection{Extensions}
+
+\begin{frame}[fragile]
+\frametitle{Heteroscedastic censored regression: Extensions}
+
+\textbf{Further features:} Supported by \pkg{crch} package.
+\begin{itemize}
+  \item Truncated instead of censored response distributions,
+    e.g., for two-part hurdle models or limited distributions
+    without point mass (such as wind).
+  \item Boosting instead of maximum likelihood estimation
+    for variable selection and regularization/shrinkage of parameters.
+  \item Other estimation techniques (such as CRPS) can be
+    performed by using the specification of \code{dist} as a function.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Heteroscedastic censored regression: Extensions}
+
+\textbf{CRPS:} Continuous ranked probability score implemented
+in \pkg{scoringRules} package (Jordan, Kr\"uger, Lerch 2016).
+
+<<>>=
+library("scoringRules")
+dcrps <- function(y, location = 1, scale = 1, df = NULL,
+  left = 0, right = Inf, log = FALSE)
+{
+  -crps(y, family = "normal", location = location, scale = scale,
+    lower = left, upper = right, lmass = "cens", umass = "cens")
+}
+m4_crps <- crch(rain ~ ensmean | log(enssd), data = RainIbk,
+  left = 0, dist = list(ddist = dcrps), hessian = TRUE)
+@
+
+\bigskip
+
+\textbf{Comparison:} ML and CRPS lead very similar results
+with comparable parameters and (in-sample) scores.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Heteroscedastic censored regression: Extensions}
+
+\vspace*{-0.5cm}
+
+\setkeys{Gin}{width=1.03\textwidth}
+<<scatter6, fig=TRUE, png=TRUE, pdf=FALSE, height=6, width=8, echo=FALSE>>=
+<<scatter2>>
+abline(0, 1, lwd = 2, col = "green3")
+abline(coef(m4_crps)[1:2], lwd = 2, col = "red")
+abline(coef(m4)[1:2], lwd = 2, col = "blue")
+legend("topleft", c("1-to-1", "CRPS", "ML"), lty = 1, lwd = 2, col = c("green3", "red", "blue"), bty = "n")
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Heteroscedastic censored regression: Extensions}
+
+<<>>=
+logLik(m4)
+sum(dcnorm(RainIbk$rain,
+  mean = predict(m4, type = "location"),
+  sd = predict(m4, type = "scale"),
+  left = 0, log = TRUE))
+sum(dcnorm(RainIbk$rain,
+  mean = predict(m4_crps, type = "location"),
+  sd = predict(m4_crps, type = "scale"),
+  left = 0, log = TRUE))
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Heteroscedastic censored regression: Extensions}
+
+<<>>=
+logLik(m4_crps)/nobs(m4_crps)
+mean(crps(RainIbk$rain, family = "normal",
+  mean = predict(m4_crps, type = "location"),
+  sd = predict(m4_crps, type = "scale"),
+  lower = 0, lmass = "cens"))
+mean(crps(RainIbk$rain, family = "normal",
+  mean = predict(m4, type = "location"),
+  sd = predict(m4, type = "scale"),
+  lower = 0, lmass = "cens"))
+@
+
+\end{frame}
+
+\begin{frame}
+\frametitle{References}
+
+\footnotesize
+
+Messner JW, Mayr GJ, Zeileis A (2016).
+ \dquote{Heteroscedastic Censored and Truncated Regression with crch.}
+ \textit{The R Journal}, Forthcoming.
+  \url{https://journal.R-project.org/archive/accepted/messner-mayr-zeileis.pdf}
+
+\bigskip
+
+Messner JW, Mayr GJ, Zeileis A (2016).
+  \dquote{Non-Homogeneous Boosting for Predictor Selection in Ensemble Post-Processing.}
+  \textit{Working Paper 2016-04}, Working Papers in Economics and Statistics,
+  Research Platform Empirical and Experimental Economics, Universit\"at Innsbruck.
+  URL~\url{http://EconPapers.RePEc.org/RePEc:inn:wpaper:2016-04}.
+
+
+\bigskip
+
+Koenker R, Zeileis A (2009).
+ \dquote{On Reproducible Econometric Research.}
+ \textit{Journal of Applied Econometrics}, \textbf{24}(5), 833--847.
+  \doi{10.1002/jae.1083}
+
+\bigskip
+
+Zeileis A (2005).
+  \dquote{Implementing a Class of Structural Change Tests: An Econometric Computing Approach.}
+  \textit{Computational Statistics \& Data Analysis}, \textbf{50}(11), 2987--3008.
+  \doi{10.1016/j.csda.2005.07.001}
+
+
+\end{frame}
+
+\end{document}

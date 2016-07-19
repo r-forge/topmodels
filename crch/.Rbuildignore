@@ -1,4 +1,6 @@
-inst/UseR2015
+inst/useR-2015
+inst/DAGStat-2016
+inst/KIT-2016
 inst/paper
 R/crch.glmnet.R
 src/crch.glmnet.c
