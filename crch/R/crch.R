@@ -148,7 +148,8 @@ trch <- function(formula, data, subset, na.action, weights, offset,
 }
 
 crch.control <- function(method = "BFGS", maxit = NULL, 
-  hessian = NULL, trace = FALSE, start = NULL, dot = "separate",lower=-Inf,upper=Inf, ...)
+  hessian = NULL, trace = FALSE, start = NULL, dot = "separate",
+  lower = -Inf, upper = Inf, ...)
 {
   if(method == "boosting") {
     if(is.null(maxit)) maxit <- 100

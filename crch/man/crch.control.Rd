@@ -9,7 +9,8 @@
 }
 \usage{
 crch.control(method = "BFGS", maxit = NULL, hessian = NULL,
-  trace = FALSE, start = NULL, dot = "separate", \dots)}
+  trace = FALSE, start = NULL, dot = "separate",
+  lower = -Inf, upper = Inf, \dots)}
 \arguments{
   \item{method}{optimization method passed to \code{\link{optim}}}
   \item{maxit}{the maximum number of iterations. Default is 5000 except for 
