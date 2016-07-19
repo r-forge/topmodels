@@ -10,6 +10,7 @@
 \alias{model.matrix.crch}
 \alias{residuals.crch}
 \alias{fitted.crch}
+\alias{getSummary.crch}
 
 \title{Methods for CRCH Objects}
 
