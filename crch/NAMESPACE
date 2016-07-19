@@ -35,7 +35,8 @@ export(
   "qtt",
   "rtt",
   "crch.boost",
-  "crch.boost.fit"
+  "crch.boost.fit",
+  "getSummary.crch"
 )
 
 ## methods for crch
