@@ -143,7 +143,7 @@ double dcnorm2(double *x, double *z, double *y, double *par, double *left, doubl
 
 
 
-SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, SEXP nlambdau, SEXP lambdaminratio, SEXP maxit, SEXP reltol, SEXP linkfun)
+SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, SEXP nlambdau, SEXP lambdaminratio, SEXP maxit, SEXP reltol, SEXP linkfun, SEXP weights)
 {
   int n = INTEGER(GET_DIM(x))[0];
   int p = INTEGER(GET_DIM(x))[1];
@@ -163,6 +163,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
   double *reltolptr = REAL(reltol);
   int *linkfunptr = INTEGER(linkfun);
   double *lambdaminratioptr = REAL(lambdaminratio);
+  double *weightsptr = REAL(weights);
 
   SEXP coefpath = PROTECT(allocMatrix(REALSXP, *nlambdauptr, p+q));
   SEXP llpath = PROTECT(allocVector(REALSXP, *nlambdauptr));
@@ -200,8 +201,8 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
       xysum = 0;
       wxsum[colind] = 0;
       for(rowind = 0; rowind < n; rowind++) {
-        xysum = xysum + w[rowind]*xptr[rowind+colind*n]*wobs[rowind];
-        wxsum[colind] = wxsum[colind] + w[rowind]*pow(xptr[rowind+colind*n], 2);
+        xysum = xysum + weightsptr[rowind]*w[rowind]*xptr[rowind+colind*n]*wobs[rowind];
+        wxsum[colind] = wxsum[colind] + weightsptr[rowind]*w[rowind]*pow(xptr[rowind+colind*n], 2);
       }
       lambdamax = fmax(fabs(xysum/wxsum[colind]), lambdamax);
     }
@@ -210,8 +211,8 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
       xysum = 0;
       wzsum[colind] = 0;
       for(rowind = 0; rowind < n; rowind++) {
-        xysum = xysum + w[rowind]*zptr[rowind+colind*n]*wobs[rowind];
-        wzsum[colind] = wzsum[colind] + w[rowind]*pow(zptr[rowind+colind*n], 2);
+        xysum = xysum + weightsptr[rowind]*w[rowind]*zptr[rowind+colind*n]*wobs[rowind];
+        wzsum[colind] = wzsum[colind] + weightsptr[rowind]*w[rowind]*pow(zptr[rowind+colind*n], 2);
       }
       lambdamax = fmax(fabs(xysum/wzsum[colind]), lambdamax);
     }
@@ -243,8 +244,8 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
           for(colind2 = 0; colind2 < p; colind2++) { 
             xbeta = xbeta + xptr[rowind+colind2*n]*coef[colind2];
           }
-          resid[rowind] = w[rowind]*(wobs[rowind] - xbeta);
-          wxsum[colind] = wxsum[colind] + w[rowind]*pow(xptr[rowind+colind*n], 2);
+          resid[rowind] = weightsptr[rowind]*w[rowind]*(wobs[rowind] - xbeta);
+          wxsum[colind] = wxsum[colind] + weightsptr[rowind]*w[rowind]*pow(xptr[rowind+colind*n], 2);
         }
       }
       for(it2 = 0; it2 < *maxitptr; it2++) {
@@ -270,7 +271,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
             }
             if(coef[colind] != coefold) {
               for(rowind = 0; rowind < n; rowind++) {
-                resid[rowind] = resid[rowind] + w[rowind] * xptr[rowind + colind*n]*(coefold - coef[colind]);
+                resid[rowind] = resid[rowind] + weightsptr[rowind]*w[rowind] * xptr[rowind + colind*n]*(coefold - coef[colind]);
               }
             }
           }
@@ -326,8 +327,8 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
           for(colind2 = 0; colind2 < q; colind2++) { 
             xbeta = xbeta + zptr[rowind+colind2*n]*coef[colind2+p];
           }
-          resid[rowind] = w[rowind]*(wobs[rowind] - xbeta);
-          wzsum[colind] = wzsum[colind] + w[rowind]*pow(zptr[rowind+colind*n], 2); 
+          resid[rowind] = weightsptr[rowind]*w[rowind]*(wobs[rowind] - xbeta);
+          wzsum[colind] = wzsum[colind] + weightsptr[rowind]*w[rowind]*pow(zptr[rowind+colind*n], 2); 
         }
       }
       for(it2 = 0; it2 < *maxitptr; it2++) {
@@ -355,7 +356,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
             }
             if(coef[colind] != coefold) {
               for(rowind = 0; rowind < n; rowind++) {
-                resid[rowind] = resid[rowind] + w[rowind] * zptr[rowind + colind*n]*(coefold - coef[colind+p]);
+                resid[rowind] = resid[rowind] + weightsptr[rowind]*w[rowind] * zptr[rowind + colind*n]*(coefold - coef[colind+p]);
               }
             }
           }
