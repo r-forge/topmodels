@@ -143,7 +143,7 @@ double dcnorm2(double *x, double *z, double *y, double *par, double *left, doubl
 
 
 
-SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, SEXP nlambdau, SEXP lambdaminratio, SEXP maxit, SEXP reltol, SEXP linkfun, SEXP weights)
+SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, SEXP nlambdau, SEXP lambdaminratio, SEXP maxit, SEXP reltol, SEXP linkfun, SEXP weights, SEXP start)
 {
   int n = INTEGER(GET_DIM(x))[0];
   int p = INTEGER(GET_DIM(x))[1];
@@ -164,6 +164,7 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
   int *linkfunptr = INTEGER(linkfun);
   double *lambdaminratioptr = REAL(lambdaminratio);
   double *weightsptr = REAL(weights);
+  double *startptr = REAL(start);
 
   SEXP coefpath = PROTECT(allocMatrix(REALSXP, *nlambdauptr, p+q));
   SEXP llpath = PROTECT(allocVector(REALSXP, *nlambdauptr));
@@ -186,13 +187,12 @@ SEXP crchglmnet(SEXP x, SEXP z, SEXP y, SEXP left, SEXP right, SEXP lambdasequ, 
   double wxsum[p], wzsum[q], resid[n], w[n], wobs[n], coef[p+q];
 
   errptr[0] = 0;
-
   for(i = 0; i < p+q; i++) {
-    coef[i] = 0;
+    coef[i] = startptr[i];
   }
-  if(*linkfunptr == 2 || *linkfunptr ==3) {
-    coef[p] = 1;
-  }
+/*  if(*linkfunptr == 2 || *linkfunptr ==3) {*/
+/*    coef[p] = 1;*/
+/*  }*/
 
   if(nlambda == 1 & lambdasequptr[0] < 0) {
     nlambda = *nlambdauptr;
