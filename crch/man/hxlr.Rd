@@ -71,11 +71,11 @@ predict the scale of the latent logistic distribution.
 \references{
   Messner JW, Mayr GJ, Zeileis A, Wilks DS (2014). Extending Extended Logistic
     Regression to Effectively Utilize the Ensemble Spread. \emph{Monthly Weather
-    Review}, \bold{142}, 448--456. doi:http://dx.doi.org/10.1175/MWR-D-13-00271.1.
+    Review}, \bold{142}, 448--456. \doi{10.1175/MWR-D-13-00271.1}.
 
   Wilks DS (2009).  Extending Logistic Regression to Provide
-    Full-Probability-Distribution MOS Forecasts.  \emph{Meteorological
-    Applications}, \bold{368}, 361--368.
+    Full-Probability-Distribution MOS Forecasts.
+    \emph{Meteorological Applications}, \bold{368}, 361--368.
 }
 
 \seealso{\code{\link{predict.hxlr}}, \code{\link[ordinal]{clm}}}
