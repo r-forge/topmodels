@@ -16,7 +16,7 @@ citEntry(entry = "Article",
   paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2016).",
         "Heteroscedastic Censored and Truncated Regression with crch.",
         "The R-Journal, 8(1), 173--181.",
-        "https://journal.r-project.org/archive/2016-1/messner-mayr-zeileis.pdf"),
+        "URL https://journal.r-project.org/archive/2016-1/messner-mayr-zeileis.pdf"),
 )
 
 citEntry(entry = "Article",
