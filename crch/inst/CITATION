@@ -7,33 +7,33 @@ citEntry(entry = "Article",
                   as.person("Achim Zeileis")),
   journal      = "The R Journal",
   year         = "2016",
+  pages        = "173--181",
   volume       = "8",
   number       = "1",
-  pages        = "173--181",
-  url          = "https://journal.R-project.org/archive/2016-1/messner-mayr-zeileis.pdf",
+  url          = "https://journal.r-project.org/archive/2016-1/messner-mayr-zeileis.pdf",
 
   textVersion  =
   paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2016).",
         "Heteroscedastic Censored and Truncated Regression with crch.",
-        "The R Journal, 8(1), 173-181.",
-        "URL https://journal.R-project.org/archive/2016-1/messner-mayr-zeileis.pdf"),
+        "The R-Journal, 8(1), 173--181.",
+        "https://journal.r-project.org/archive/2016-1/messner-mayr-zeileis.pdf"),
 )
 
-citEntry(entry = "Techreport",
+citEntry(entry = "Article",
   title        = "Non-Homogeneous Boosting for Predictor Selection in Ensemble Post-Processing.",
   author       = personList(as.person("Jakob W. Messner"),
 		              as.person("Georg J. Mayr"),
                   as.person("Achim Zeileis")),
-  type         = "Working Papers",
+  journal      = "Monthly Weather Review",
   year         = "2016",
-  institution  = "Faculty of Economics and Statistics, University of Innsbruck",
-  url          = "http://EconPapers.repec.org/RePEc:inn:wpaper:2016-04",
+  pages        = "in press",
+  doi          = "10.1175/MWR-D-16-0088.1",
 
   textVersion  =
   paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2016).",
         "Non-Homogeneous Boosting for Predictor Selection in Ensemble Post-Processing.",
-        "Working Papers, Faculty of Economics and Statistics, University of Innsbruck.",
-        "URL http://EconPapers.repec.org/RePEc:inn:wpaper:2016-04"),
+        "Monthly Weather Review, in press.",
+        "DOI 10.1175/MWR-D-16-0088.1"),
 	
   header       = "If you use crch.boost() please cite:"
 )
@@ -56,7 +56,7 @@ citEntry(entry = "Article",
   paste("Jakob W. Messner, Achim Zeileis, Jochen Broecker, Georg J. Mayr (2013).",
         "Probabilistic Wind Power Forecasts with an Inverse Power Curve 
           Transformation and Censored Regression.",
-        "Wind Energy, 17(11) 1753-1766.",
+        "Wind Energy, 17(11), 1753--1766.",
         "DOI 10.1002/we.1666"),
 	
   header       = "If you use crch() please cite:"
