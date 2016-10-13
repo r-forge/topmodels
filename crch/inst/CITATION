@@ -15,7 +15,7 @@ citEntry(entry = "Article",
   textVersion  =
   paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2016).",
         "Heteroscedastic Censored and Truncated Regression with crch.",
-        "The R-Journal, 8(1), 173--181.",
+        "The R-Journal, 8(1), 173-181.",
         "URL https://journal.r-project.org/archive/2016-1/messner-mayr-zeileis.pdf"),
 )
 
@@ -56,7 +56,7 @@ citEntry(entry = "Article",
   paste("Jakob W. Messner, Achim Zeileis, Jochen Broecker, Georg J. Mayr (2013).",
         "Probabilistic Wind Power Forecasts with an Inverse Power Curve 
           Transformation and Censored Regression.",
-        "Wind Energy, 17(11), 1753--1766.",
+        "Wind Energy, 17(11), 1753-1766.",
         "DOI 10.1002/we.1666"),
 	
   header       = "If you use crch() please cite:"
