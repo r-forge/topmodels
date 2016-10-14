@@ -751,3 +751,58 @@ update.crch <- function (object, formula., ..., evaluate = TRUE)
 }
 
 
+estfun.crch <- function(x, ...) {
+  ## extract response y and regressors X and Z
+  y <- if(is.null(x$y)) model.response(model.frame(x)) else x$y
+  xmat <- if(is.null(x$x)) model.matrix(x, model = "location") else x$x$location
+  zmat <- if(is.null(x$x)) model.matrix(x, model = "scale") else x$x$scale
+  offset <- x$offset
+  if(is.null(offset[[1L]])) offset[[1L]] <- rep.int(0, NROW(xmat))
+  if(is.null(offset[[2L]])) offset[[2L]] <- rep.int(0, NROW(zmat))
+  wts <- weights(x)
+  if(is.null(wts)) wts <- 1
+
+  df <- x$df
+  if(!is.null(x$coefficients$df)) stop("score function not available for 
+    student-t distribution with estimated degrees of freedom")
+  left <- x$cens$left
+  right <- x$cens$right
+  link.scale <- x$link$scale
+  
+
+  ## extract coefficients
+  beta <- x$coefficients$location
+  gamma <- x$coefficients$scale
+
+  ## compute mu, z%*%gamma, and sigma
+  mu <- drop(xmat %*% beta) + offset[[1L]]
+  zgamma <- drop(zmat %*% gamma) + offset[[2L]]
+  sigma <- link.scale$linkinv(zgamma)
+
+  ## extract sdist function
+  if(is.character(x$dist)){
+    ## distribution functions
+    if(x$truncated) {
+      sdist2 <- switch(x$dist, 
+        "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+    } else {
+      sdist2 <- switch(x$dist, 
+        "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+    }
+    sdist <- if(x$dist == "student") sdist2 else function(..., df) sdist2(...)
+  } else { 
+    sdist <- if(is.null(x$dist$sdist)) stop("score function not available")
+      else  x$dist$sdist
+  }
+
+
+  ## compute scores of beta
+  rval <- sdist(y, mu, sigma, df = df, left = left, right = right)
+  rval <- cbind(rval[,1]*xmat, rval[,2] * link.scale$mu.eta(zgamma) * zmat)
+
+  
+  return(rval)
+}
+
+
+
