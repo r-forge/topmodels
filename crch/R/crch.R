@@ -232,7 +232,6 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
       if(hessian == FALSE) warning("no analytic hessian available. Hessian is set to TRUE and numerical Hessian from optim is employed")
       hessian <- TRUE     
     } else hdist <- dist$hdist 
-    dist <- "user defined"
   }
 
   ## analytic or numeric Hessian
@@ -417,7 +416,8 @@ print.crch <- function(x, digits = max(3, getOption("digits") - 3), ...)
       print.default(format(x$coefficients$scale, digits = digits), print.gap = 2, quote = FALSE)
       cat("\n")
     } else cat("No coefficients (in scale model)\n\n")
-    cat(paste("Distribution: ", x$dist, "\n", sep = ""))
+    dist <- if(is.character(x$dist)) x$dist else "user defined"
+    cat(paste("Distribution: ", dist, "\n", sep = ""))
     if(length(x$df)) {
       cat(paste("Df: ", format(x$df, digits = digits), "\n", sep = ""))
     }
@@ -483,8 +483,8 @@ print.summary.crch <- function(x, digits = max(3, getOption("digits") - 3), ...)
 
     if(getOption("show.signif.stars") & any(do.call("rbind", x$coefficients)[, 4L] < 0.1, na.rm = TRUE))
       cat("---\nSignif. codes: ", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1", "\n")
-
-    cat(paste("\nDistribution: ", x$dist, "\n", sep = ""))
+    dist <- if(is.character(x$dist)) x$dist else "user defined"
+    cat(paste("\nDistribution: ", dist, "\n", sep = ""))
     if(length(x$df)) {
       cat(paste("Df: ", format(x$df, digits = digits), "\n", sep = ""))
     }
@@ -522,7 +522,7 @@ predict.crch <- function(object, newdata = NULL,
   if(type == "location") type <- "response"
   
   ## type quantile not available for user defined distributions
-  if(type == "quantile" & identical(object$dist, "user defined"))
+  if(type == "quantile" & !is.character(object$dist))
     stop("type quantile not available for user defined distributions")
 
   if(type == "quantile" & !is.null(newdata)){
@@ -684,6 +684,8 @@ residuals.crch <- function(object, type = c("standardized", "pearson", "response
   if(match.arg(type) == "response") {
     object$residuals 
   } else if (match.arg(type) == "quantile") {
+    if(!is.character(object$dist)) stop("quantile residuals not available for
+      user defined distributions")
     if(object$truncated) {
       pdist <- switch(object$dist, 
         "student"  = function(q, mean, sd) ptt(q, mean, sd, df = object$df), 

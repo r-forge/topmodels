@@ -175,7 +175,6 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     ## arguments x, mean, sd, df, left, right, and log)
     ddist <- dist$ddist
     sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
-    dist <- "user defined"
   }
 
 
@@ -445,8 +444,8 @@ print.crch.boost <- function(x, digits = max(3, getOption("digits") - 3),
   cat(paste(prefix, "oefficients (scale model with ", x$link$scale$name, " link):\n", sep = ""))
     print.default(format(gamma, digits = digits), print.gap = 2, quote = FALSE)
     cat("\n")
-
-  cat(paste("Distribution: ", x$dist, "\n", sep = ""))
+  dist <- if(is.character(x$dist)) x$dist else "user defined"
+  cat(paste("Distribution: ", dist, "\n", sep = ""))
   if(length(x$df)) {
     cat(paste("Df: ", format(x$df, digits = digits), "\n", sep = ""))
   }
@@ -511,8 +510,8 @@ print.summary.crch.boost <- function(x, digits = max(3, getOption("digits") - 3)
   cat(paste("Scale model with", x$link$scale$name, "link:\n"))
   print.default(format(x$coefficients$scale, digits = digits), print.gap = 2, quote = FALSE)
   cat("\n")
-    
-  cat(paste("Distribution: ", x$dist, "\n", sep = ""))
+  dist <- if(is.character(x$dist)) x$dist else "user defined"
+  cat(paste("Distribution: ", dist, "\n", sep = ""))
   if(length(x$df)) {
     cat(paste("Df: ", format(x$df, digits = digits), "\n", sep = ""))
   }
