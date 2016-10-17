@@ -21,7 +21,7 @@ SEXP dtlogis(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
   double denom;
 
   for(i = 0; i < n; i++) {
-    if(yptr[i] < leftptr[i] | yptr[i] > rightptr[i]) {
+    if((yptr[i] < leftptr[i]) | (yptr[i] > rightptr[i])) {
       if(*give_logptr == 0) {
         rvalptr[i] = 0.0;
       } else {
@@ -191,7 +191,7 @@ SEXP stlogis_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
   double sdist, sd2, drm, dlm, enum1, enum2, denom;
 
   for(i = 0; i < n; i++) {
-    if(xptr[i] < leftptr[i] | xptr[i] > rightptr[i]) {
+    if((xptr[i] < leftptr[i]) | (xptr[i] > rightptr[i])) {
       rvalptr[i] = 0;
     } else {
       sd2 = pow(sigmaptr[i], 2.0);
@@ -236,7 +236,7 @@ SEXP htlogis_mu(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
   double sdistl, sdistr, denom, enum1, enum3, hdist, dlm, drm, sd2;
 
   for(i = 0; i < n; i++) {
-    if(xptr[i] < leftptr[i] | xptr[i] > rightptr[i]) {
+    if((xptr[i] < leftptr[i]) | (xptr[i] > rightptr[i])) {
       rvalptr[i] = 0;
     } else {
       sd2 = pow(sigmaptr[i], 2.0);
@@ -282,7 +282,7 @@ SEXP htlogis_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
   double sdist, sdist2, dcm, sdistl, sdistr, denom, enum2, enum4, hdist, dlm, drm, dlm2, drm2, sd2;
 
   for(i = 0; i < n; i++) {
-    if(xptr[i] < leftptr[i] | xptr[i] > rightptr[i]) {
+    if((xptr[i] < leftptr[i]) | (xptr[i] > rightptr[i])) {
       rvalptr[i] = 0;
     } else {
       sd2 = pow(sigmaptr[i], 2.0);
@@ -336,7 +336,7 @@ SEXP htlogis_musigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
   double sdistl, sdistr, sdist, dcm, denom, enum1, enum2, enum5, hdist, dlm, drm, dlm2, drm2, sd2;
 
   for(i = 0; i < n; i++) {
-    if(xptr[i] < leftptr[i] | xptr[i] > rightptr[i]) {
+    if((xptr[i] < leftptr[i]) | (xptr[i] > rightptr[i])) {
       rvalptr[i] = 0;
     } else {
       sd2 = pow(sigmaptr[i], 2.0);

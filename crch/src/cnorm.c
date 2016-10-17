@@ -274,14 +274,13 @@ SEXP hcnorm_musigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
   double *leftptr = REAL(left);
   double *rightptr = REAL(right);
 
-  double ddist, pdist, sdist, mills, sd2, dcm, dcm2;
+  double ddist, pdist, sdist, mills, dcm;
 
   for(i = 0; i < n; i++) {
     if(xptr[i] <= leftptr[i]) {
       ddist = dnorm((leftptr[i] - muptr[i]) / sigmaptr[i], 0.0, 1.0, 0) / sigmaptr[i];
       pdist = pnorm5((leftptr[i] - muptr[i]) / sigmaptr[i], 0.0, 1.0, 1, 0);
       dcm = leftptr[i] - muptr[i];
-      dcm2 = pow(dcm, 2.0);
       sdist = dcm / pow(sigmaptr[i], 2.0);
       mills = ddist / pdist;
       rvalptr[i] = (1/sigmaptr[i] - dcm/sigmaptr[i]*sdist) * mills - dcm/sigmaptr[i] * pow(mills, 2.0);
@@ -290,7 +289,6 @@ SEXP hcnorm_musigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
         ddist = dnorm((rightptr[i] - muptr[i]) / sigmaptr[i], 0.0, 1.0, 0) / sigmaptr[i];
         pdist = pnorm5((rightptr[i] - muptr[i]) / sigmaptr[i], 0.0, 1.0, 0, 0);
         dcm = rightptr[i] - muptr[i];
-        dcm2 = pow(dcm, 2.0);
         sdist = dcm / pow(sigmaptr[i], 2.0);
         mills = ddist / pdist;
         rvalptr[i] = (- 1/sigmaptr[i] + dcm/sigmaptr[i]*sdist) * mills - dcm/sigmaptr[i] * pow(mills, 2.0);
