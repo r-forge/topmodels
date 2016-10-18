@@ -12,19 +12,19 @@
 crch(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"),
   dist = c("gaussian", "logistic", "student"), df = NULL, 
-  left = -Inf, right = Inf, truncated = FALSE, 
+  left = -Inf, right = Inf, truncated = FALSE, type = "ml", 
   control = crch.control(\dots), model = TRUE, x = FALSE, 
   y = FALSE, \dots)
 
 trch(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"),
   dist = c("gaussian", "logistic", "student"), df = NULL, 
-  left = -Inf, right = Inf, truncated = TRUE,
+  left = -Inf, right = Inf, truncated = TRUE, type = "ml",
   control = crch.control(\dots), model = TRUE, x = FALSE,
   y = FALSE, \dots)
 
 crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
-  df = NULL, link.scale = "log", weights = NULL, offset = NULL, 
+  df = NULL, link.scale = "log", type = "ml", weights = NULL, offset = NULL, 
   control = crch.control()) 
 }
 \arguments{
@@ -56,6 +56,9 @@ crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   \item{truncated}{logical. If \code{TRUE} truncated model is fitted
   with \code{left} and \code{right} interpreted as truncation points,
   If \code{FALSE} censored model is fitted. Default is \code{FALSE}}
+  \item{type}{loss function to be optimized. Can be either \code{"ml"} for
+  maximum likelihood (default) or \code{"crps"} for minimum continuous ranked
+  probability score (CRPS).}
   \item{control}{a list of control parameters passed to \code{\link{optim}} 
     or to the internal boosting algorithm if \code{control=\link{crch.boost}()}. 
     Default is \code{\link{crch.control}()}.}

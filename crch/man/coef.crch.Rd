@@ -11,6 +11,8 @@
 \alias{residuals.crch}
 \alias{fitted.crch}
 \alias{getSummary.crch}
+\alias{estfun.crch}
+\alias{crps.crch}
 
 \title{Methods for CRCH Objects}
 
