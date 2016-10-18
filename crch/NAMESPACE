@@ -2,6 +2,8 @@ useDynLib(crch)
 import("stats", "Formula")
 importFrom("utils", "tail")
 importFrom("graphics", "abline", "axis", "par", "plot", "strwidth")
+importFrom("sandwich", "estfun")
+importFrom("memisc", "getSummary")
 
 export(
   "crch",
@@ -35,7 +37,7 @@ export(
   "qtt",
   "rtt",
   "crch.boost",
-  "crch.boost.fit"
+  "crch.boost.fit",
 )
 
 ## methods for crch
