@@ -1,12 +1,12 @@
 Package: crch
 Title: Censored Regression with Conditional Heteroscedasticity
-Version: 1.0-0
+Version: 1.0-1
 Date: 2016-10-17
 Authors@R: c(person(given = "Jakob", family = "Messner", role = c("aut", "cre"), email = "jwmm@elektro.dtu.dk"),
              person(given = "Achim", family = "Zeileis", role = "aut", email = "Achim.Zeileis@R-project.org"))
 Depends: R (>= 2.10.0)
-Imports: stats, Formula, ordinal
-Suggests: glmx, lmtest, memisc
+Imports: stats, Formula, ordinal, scoringRules
+Suggests: glmx, lmtest, memisc, sandwich
 Description: Different approaches to censored or truncated regression with 
   conditional heteroscedasticity are provided. First, continuous 
   distributions can be used for the (right and/or left censored or truncated)

@@ -1,8 +1,8 @@
 crch <- function(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"), 
   dist = c("gaussian", "logistic", "student"), df = NULL,
-  left = -Inf, right = Inf, truncated = FALSE , control = crch.control(...),
-  model = TRUE, x = FALSE, y = FALSE, ...)
+  left = -Inf, right = Inf, truncated = FALSE, type = c("ml", "crps"), 
+  control = crch.control(...), model = TRUE, x = FALSE, y = FALSE, ...)
 {
   ## call
   cl <- match.call()
@@ -75,6 +75,9 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   ## distribution
   if(is.character(dist)) dist <- match.arg(dist)
 
+  ## type
+  if(is.character(type)) type <- match.arg(type)
+
   ## sanity checks
   if(length(Y) < 1) stop("empty model")
   if(identical(dist, "student")) {
@@ -114,7 +117,7 @@ crch <- function(formula, data, subset, na.action, weights, offset,
   control$fit <- NULL
   rval <- do.call(fit, list(x = X, y = Y, z = Z, left = left, right = right, 
       link.scale = link.scale, dist = dist, df = df, weights = weights, 
-      offset = offset, control = control, truncated = truncated))
+      offset = offset, control = control, truncated = truncated, type = type))
   
 
   ## further model information
@@ -135,8 +138,8 @@ crch <- function(formula, data, subset, na.action, weights, offset,
 trch <- function(formula, data, subset, na.action, weights, offset,
   link.scale = c("log", "identity", "quadratic"), 
   dist = c("gaussian", "logistic", "student"), df = NULL,
-  left = -Inf, right = Inf, truncated = TRUE , control = crch.control(...),
-  model = TRUE, x = FALSE, y = FALSE, ...) 
+  left = -Inf, right = Inf, truncated = TRUE, type = c("ml", "crps"), 
+  control = crch.control(...), model = TRUE, x = FALSE, y = FALSE, ...) 
 {
   cl <- match.call()
   cl2 <- cl
@@ -168,7 +171,7 @@ crch.control <- function(method = "BFGS", maxit = NULL,
 
 
 crch.fit <- function(x, z, y, left, right, truncated = FALSE, 
-  dist = "gaussian", df = NULL, link.scale = "log",
+  dist = "gaussian", df = NULL, link.scale = "log", type = "ml",
   weights = NULL, offset = NULL, control = crch.control()) 
 {
   ## response and regressor matrix
@@ -201,27 +204,50 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
   
 
   if(is.character(dist)){
-    ## distribution functions
-    if(truncated) {
-      ddist2 <- switch(dist, 
-        "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
-      sdist2 <- switch(dist, 
-        "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
-      hdist2 <- switch(dist, 
-        "student"  = htt, "gaussian" = htnorm, "logistic" = htlogis)
+    if(type == "ml") {
+      ## distribution functions for maximum likelihood
+      if(truncated) {
+        ddist2 <- switch(dist, 
+          "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
+        sdist2 <- switch(dist, 
+          "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+        hdist2 <- switch(dist, 
+          "student"  = htt, "gaussian" = htnorm, "logistic" = htlogis)
+      } else {
+        ddist2 <- switch(dist, 
+          "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
+        sdist2 <- switch(dist, 
+          "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+        hdist2 <- switch(dist, 
+          "student"  = hct, "gaussian" = hcnorm, "logistic" = hclogis)
+      }
+      ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
+      sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
+      hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
     } else {
-      ddist2 <- switch(dist, 
-        "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
-      sdist2 <- switch(dist, 
-        "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
-      hdist2 <- switch(dist, 
-        "student"  = hct, "gaussian" = hcnorm, "logistic" = hclogis)
+      stopifnot(requireNamespace("scoringRules"))
+      ## loss function for CRPS minimization
+      family <- switch(dist, 
+        "student"  =  "t", "gaussian" = "normal", "logistic" = "logistic")
+      mass <- if(truncated) "trunc" else "cens"
+
+      ddist <- function(x, mean, sd, df, left = -Inf, right = Inf, log = TRUE) 
+        - scoringRules::crps(x, family = family, location = mean, scale = sd, 
+        lower = left, upper = right, lmass = mass, umass = mass)
+      sdist <- NULL
+      hdist <- NULL
+      hessian <- TRUE
+
+      ## density function required for log-likelihood
+      if(truncated) {
+        ddist2 <- switch(dist, 
+          "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
+      } else {
+        ddist2 <- switch(dist, 
+          "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
+      }
+      lldist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
     }
-    ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
-    sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
-    hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
-
-
   } else { 
     ## for user defined distribution (requires list with ddist, sdist (optional)
     ## and hdist (optional), ddist, sdist, and hdist must be functions with
@@ -229,7 +255,8 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     ddist <- dist$ddist
     sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
     if(is.null(dist$hdist)) {
-      if(hessian == FALSE) warning("no analytic hessian available. Hessian is set to TRUE and numerical Hessian from optim is employed")
+      if(!is.null(hessian))
+        if(hessian == FALSE) warning("no analytic hessian available. Hessian is set to TRUE and numerical Hessian from optim is employed")
       hessian <- TRUE     
     } else hdist <- dist$hdist 
   }
@@ -359,7 +386,13 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     if (hessian) solve(as.matrix(opt$hessian)) 
     else solve(hessfun(par))
   } else matrix(NA, k+q+dfest, n+k+dfest)
-  ll <- -opt$value
+  if(type == "crps") {
+    ll <- sum(lldist(y, mu, sigma, left, right, log = TRUE, df = df))
+    crps <- opt$value/n
+  } else {
+    ll <- -opt$value
+    crps <- NULL
+  } 
   df <- if(dfest) exp(delta) else df
 
   names(beta) <- colnames(x)
@@ -380,6 +413,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     cens = list(left = left, right = right),
     optim = opt,  
     method = method,
+    type = type,
     control = ocontrol,
     start = start,  
     weights = if(identical(as.vector(weights), rep.int(1, n))) NULL else weights,
@@ -389,6 +423,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     n = n,
     nobs = nobs,
     loglik = ll,
+    crps = crps,
     vcov = vcov,
     link = list(scale = linkobj),
     truncated = truncated,
@@ -487,6 +522,9 @@ print.summary.crch <- function(x, digits = max(3, getOption("digits") - 3), ...)
     cat(paste("\nDistribution: ", dist, "\n", sep = ""))
     if(length(x$df)) {
       cat(paste("Df: ", format(x$df, digits = digits), "\n", sep = ""))
+    }
+    if(length(x$crps)) {
+      cat("CRPS:", formatC(x$crps, digits = digits), "\n")
     }
     cat("Log-likelihood:", formatC(x$loglik, digits = digits),
       "on", sum(sapply(x$coefficients, NROW)), "Df\n")
@@ -680,6 +718,29 @@ vcov.crch <- function(object, model = c("full", "location", "scale", "df"), ...)
 
 logLik.crch <- function(object, ...) structure(object$loglik, df = sum(sapply(object$coefficients, length)), class = "logLik")
 
+crps.crch <- function(object, mean = TRUE) {
+  if(length(object$crps)) {
+    object$crps
+  } else {
+    stopifnot(requireNamespace("scoringRules"))
+    family <- switch(object$dist, 
+          "student"  =  "t", "gaussian" = "normal", "logistic" = "logistic")
+    mass <- if(object$truncated) "trunc" else "cens"
+    y <- object$residuals + object$fitted.values$location
+    location <- object$fitted.values$location
+    scale <- object$fitted.values$scale 
+    left <- object$cens$left
+    right <- object$cens$right
+    rval <- scoringRules::crps(y, family = family, location = location, 
+      scale = scale, lower = left, upper = right, lmass = mass, umass = mass)
+    if(mean) rval <- mean(rval)
+    rval
+  }
+}
+  
+
+
+
 residuals.crch <- function(object, type = c("standardized", "pearson", "response", "quantile"), ...) {
   if(match.arg(type) == "response") {
     object$residuals 
@@ -783,6 +844,7 @@ estfun.crch <- function(x, ...) {
 
   ## extract sdist function
   if(is.character(x$dist)){
+    if(x$type == "crps") stop("estfun currently not supported for type = 'crps'") 
     ## distribution functions
     if(x$truncated) {
       sdist2 <- switch(x$dist, 
