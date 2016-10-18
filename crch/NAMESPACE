@@ -35,8 +35,7 @@ export(
   "qtt",
   "rtt",
   "crch.boost",
-  "crch.boost.fit",
-  "getSummary.crch"
+  "crch.boost.fit"
 )
 
 ## methods for crch
@@ -53,6 +52,8 @@ S3method("vcov", "crch")
 S3method("update", "crch")
 S3method("model.frame", "crch")
 S3method("model.matrix", "crch")
+S3method("getSummary", "crch")
+S3method("estfun", "crch")
 
 S3method("plot", "crch.boost")
 S3method("coef", "crch.boost")
