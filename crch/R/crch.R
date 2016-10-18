@@ -233,7 +233,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
 
       ddist <- function(x, mean, sd, df, left = -Inf, right = Inf, log = TRUE) 
         - scoringRules::crps(x, family = family, location = mean, scale = sd, 
-        lower = left, upper = right, lmass = mass, umass = mass)
+        lower = left, upper = right, lmass = mass, umass = mass, df = df)
       sdist <- NULL
       hdist <- NULL
       hessian <- TRUE
