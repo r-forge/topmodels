@@ -66,7 +66,7 @@ standardize.coefficients <- function(coef, restandardize = FALSE, center, scale)
 
 ## actual fitting function
 crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE, 
-  dist = "gaussian", df = NULL, link.scale = "log", type = "ml"
+  dist = "gaussian", df = NULL, link.scale = "log", type = "ml",
   weights = NULL, offset = NULL, control = crch.boost()) 
 {
   ## type = "crps" currently not supported
@@ -126,7 +126,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   x <- standardize.matrix(x, weights = weights)
   z <- standardize.matrix(z, weights = weights)
   basefit <- crch.fit(x[,1, drop = FALSE], z[,1, drop = FALSE], y, left, right, 
-      truncated, dist, df, link.scale, weights, offset)
+      truncated, dist, df, link.scale, type, weights, offset)
   y <- standardize.matrix(y, center = basefit$coefficients$location, scale = linkinv(basefit$coefficients$scale))
     
   standardize <- list(
