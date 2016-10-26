@@ -66,9 +66,11 @@ standardize.coefficients <- function(coef, restandardize = FALSE, center, scale)
 
 ## actual fitting function
 crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE, 
-  dist = "gaussian", df = NULL, link.scale = "log",
+  dist = "gaussian", df = NULL, link.scale = "log", type = "ml"
   weights = NULL, offset = NULL, control = crch.boost()) 
 {
+  ## type = "crps" currently not supported
+  if(type == "crps") stop("type = 'crps' currently not supported for boosting")
   ## response and regressor matrix
   n <- NROW(x)  
   k <- NCOL(x)
