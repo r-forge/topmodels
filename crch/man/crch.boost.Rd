@@ -12,7 +12,7 @@ crch.boost(maxit = 100, nu = 0.1, start = NULL, dot = "separate",
   mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, foldid = NULL)
 
 crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
-  df = NULL, link.scale = "log", weights = NULL, offset = NULL, 
+  df = NULL, link.scale = "log", type = "ml", weights = NULL, offset = NULL, 
   control = crch.boost())
 }
 
@@ -35,7 +35,7 @@ crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   \item{foldid}{if \code{mstopopt = "cv"}, an optional vector of values between 1 
     and \code{nfold} identifying the fold each observation is in. If supplied,
     \code{nfolds} can be missing.}
-  \item{x, z, y, left, right, truncated, dist, df, link.scale, weights, offset, control}{see \code{\link{crch.fit}} for details.}
+  \item{x, z, y, left, right, truncated, dist, df, link.scale, type, weights, offset, control}{see \code{\link{crch.fit}} for details.}
 }
 
 \details{
