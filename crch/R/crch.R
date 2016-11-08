@@ -230,10 +230,16 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
       family <- switch(dist, 
         "student"  =  "t", "gaussian" = "normal", "logistic" = "logistic")
       mass <- if(truncated) "trunc" else "cens"
-
-      ddist <- function(x, mean, sd, df, left = -Inf, right = Inf, log = TRUE) 
-        - scoringRules::crps(x, family = family, location = mean, scale = sd, 
-        lower = left, upper = right, lmass = mass, umass = mass, df = df)
+        
+      ddist <- function(x, mean, sd, df, left = -Inf, right = Inf, log = TRUE) {  
+        ## crps() returns error for scale = 0, infinite scale or df <= 1.
+        ## we suppress the error message and return NA instead      
+        rval <- try(- scoringRules::crps(x, family = family, location = mean, 
+          scale = sd, lower = left, upper = right, lmass = mass, 
+          umass = mass, df = df), silent = TRUE)
+        if(inherits(rval, "try-error")) rval <- NA
+        rval
+      }
       sdist <- NULL
       hdist <- NULL
       hessian <- TRUE
@@ -386,6 +392,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     if (hessian) solve(as.matrix(opt$hessian)) 
     else solve(hessfun(par))
   } else matrix(NA, k+q+dfest, n+k+dfest)
+  df <- if(dfest) exp(delta) else df
   if(type == "crps") {
     ll <- sum(lldist(y, mu, sigma, left, right, log = TRUE, df = df))
     crps <- opt$value/n
@@ -393,7 +400,6 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
     ll <- -opt$value
     crps <- NULL
   } 
-  df <- if(dfest) exp(delta) else df
 
   names(beta) <- colnames(x)
   names(gamma) <- colnames(z)
@@ -729,9 +735,10 @@ crps.crch <- function(object, mean = TRUE) {
     y <- object$residuals + object$fitted.values$location
     location <- object$fitted.values$location
     scale <- object$fitted.values$scale 
+    df <- object$df
     left <- object$cens$left
     right <- object$cens$right
-    rval <- scoringRules::crps(y, family = family, location = location, 
+    rval <- scoringRules::crps(y, family = family, location = location, df = df,
       scale = scale, lower = left, upper = right, lmass = mass, umass = mass)
     if(mean) rval <- mean(rval)
     rval
