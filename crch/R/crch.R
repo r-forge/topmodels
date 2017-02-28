@@ -240,7 +240,25 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
         if(inherits(rval, "try-error")) rval <- NA
         rval
       }
-      sdist <- NULL
+      if(truncated) {      
+        sdist2 <-  switch(dist, 
+          "student"  = scoringRules:::gradtt, 
+          "gaussian" = scoringRules:::gradtnorm, 
+          "logistic" = scoringRules:::gradtlogis) 
+      } else {
+        sdist2 <- switch(dist, 
+          "student"  = scoringRules:::gradct, 
+          "gaussian" = scoringRules:::gradcnorm, 
+          "logistic" = scoringRules:::gradclogis)
+      }
+      sdist3 <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
+      sdist <- function(x, mean, sd, df, left = -Inf, right = Inf) {
+        rval <- try(- sdist3(x, df = df, location = mean, scale = sd, 
+          lower = left, upper = right), silent = TRUE)
+        if(inherits(rval, "try-error")) rval <- NA
+        rval
+      }
+#      sdist <- NULL
       hdist <- NULL
       hessian <- TRUE
 
