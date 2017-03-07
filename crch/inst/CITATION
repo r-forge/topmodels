@@ -26,13 +26,15 @@ citEntry(entry = "Article",
                             as.person("Achim Zeileis")),
   journal      = "Monthly Weather Review",
   year         = "2017",
-  pages        = "in press",
+  pages        = "137--147",
+  volume       = "145",
+  number       = "1",
   doi          = "10.1175/MWR-D-16-0088.1",
 
   textVersion  =
-  paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2016).",
+  paste("Jakob W. Messner, Georg J. Mayr, Achim Zeileis (2017).",
         "Non-Homogeneous Boosting for Predictor Selection in Ensemble Post-Processing.",
-        "Monthly Weather Review, in press.",
+        "Monthly Weather Review, 145(1), 137-147.",
         "DOI 10.1175/MWR-D-16-0088.1"),
 	
   header       = "If you use crch.boost() please also cite:"
