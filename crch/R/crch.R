@@ -577,17 +577,27 @@ model.matrix.crch <- function(object, model = c("location", "scale"), ...) {
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
 predict.crch <- function(object, newdata = NULL,
-  type = c("response", "location", "scale", "quantile"), na.action = na.pass, at = 0.5, left = NULL, right = NULL, ...)
+  type = c("response", "location", "scale", "parameter", "density", 
+  "probability", "quantile"), na.action = na.pass, at = 0.5, left = NULL, 
+  right = NULL, ...)
 {
+  ## types of prediction
   type <- match.arg(type)
+  
+
   ## response/location are synonymous
   if(type == "location") type <- "response"
   
-  ## type quantile not available for user defined distributions
-  if(type == "quantile" & !is.character(object$dist))
-    stop("type quantile not available for user defined distributions")
+  dist <- object$dist  
+  df <- object$df
 
-  if(type == "quantile" & !is.null(newdata)){
+  if(type %in% c("density", "probability", "quantile")) {
+    ## types density, probability, and quantile not available for user defined distributions
+    if(!is.character(dist))
+      stop("type quantile not available for user defined distributions")
+
+    ## for non-constant censoring or truncation points, left and right have to be specified
+    if(!is.null(newdata)){
       if(length(object$cens$left) > 1) {
         if(is.null(left)) stop("left has to be specified for non-constant left censoring")
         if(length(left) > 1 & length(left) != NROW(newdata)) stop("left must have length 1 or length of newdata")
@@ -597,94 +607,96 @@ predict.crch <- function(object, newdata = NULL,
         if(length(right) > 1 & length(right) != NROW(newdata)) stop("right  must have length 1 or length of newdata")
       }
     }
-  
-  if(type == "quantile") {
+    ## distribution function
     if(object$truncated) {
-      qdist2 <- switch(object$dist, 
-        "student"  = qtt, 
-        "gaussian" = function(..., df) qtnorm(...), 
-        "logistic" = function(..., df) qtlogis(...))
+      distfun2 <- switch(type, 
+        "density" = switch(dist, 
+            "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis),
+        "probability" = switch(dist, 
+            "student"  = ptt, "gaussian" = ptnorm, "logistic" = ptlogis),
+        "quantile" = switch(dist, 
+            "student"  = qtt, "gaussian" = qtnorm, "logistic" = qtlogis))
     } else {
-      qdist2 <- switch(object$dist, 
-        "student"  = qct, 
-        "gaussian" = function(..., df) qcnorm(...), 
-        "logistic" = function(..., df) qclogis(...))
+      distfun2 <- switch(type, 
+        "density" = switch(dist, 
+            "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis),
+        "probability" = switch(dist, 
+            "student"  = pct, "gaussian" = pcnorm, "logistic" = pclogis),
+        "quantile" = switch(dist, 
+            "student"  = qct, "gaussian" = qcnorm, "logistic" = qclogis))
     }
-    
+    distfun <- if(dist == "student") distfun2 else function(..., df) distfun2(...)
+
+
     if(is.null(left)) left <- object$cens$left
     if(is.null(right)) right <- object$cens$right
-
-    qdist <- function(at, location, scale, df) {
-      rval <- sapply(at, function(p) qdist2(p, location, scale, 
-        df = df, left = left, right = right))
-      if(length(at) > 1L) {
-        if(NCOL(rval) == 1L) rval <- matrix(rval, ncol = length(at),
-	        dimnames = list(unique(names(rval)), NULL))
-        colnames(rval) <- paste("q_", at, sep = "")
-      } else {
-        rval <- drop(rval)
+    
+    
+    ## distribution function for different formats of at
+    fun <- function(at, location, scale, df) {
+      n <- length(location)
+      if(length(left) == 1L) left <- rep.int(left, n)
+      if(length(right) == 1L) right <- rep.int(right, n)
+      attype <- if(is.character(at)) match.arg(at, c("function", "list")) else "numeric"
+      if(attype == "list") {
+        fun <- lapply(1L:length(location), function(i) {
+            distfun(at, location[i], scale[i], df = df, left = left[i], right = right[i])})
+      } else {  
+#        if(attype != "function") at <- rbind(at)
+        n <- length(location)
+        if(length(at) == 1L) at <- rep.int(as.vector(at), n)
+        if(length(at) != n) at <- rbind(at)
+        if(is.matrix(at) && NROW(at) == 1L) {
+          at <- matrix(rep(at, each = n), nrow = n)
+          rv <- distfun(as.vector(at), rep.int(location, ncol(at)), 
+                        rep.int(scale, ncol(at)), df = df,
+                        left = rep.int(left, ncol(at)), right = rep.int(right, ncol(at)))
+          rv <- matrix(rv, nrow = n)
+          rownames(rv) <- names(location)
+          colnames(rv) <- paste(substr(type, 1L, 1L),
+                                round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)), sep = "_")
+        } else {
+          rv <- distfun(at, location, scale, df = df, left = left, right = right)
+          names(rv) <- names(location)
+        }
       }
-      rval 
+      return(rv)
     }
   }
-  
+
   if(missing(newdata)) {
-
-    rval <- switch(type,
-      "response" = {
-        object$fitted.values$location
-      },
-      "scale" = {
-        object$fitted.values$scale
-      },
-      "quantile" = {
-        qdist(at, object$fitted.values$location, object$fitted.values$scale, object$df)
-      },
-    )
-    return(rval)
-
+    location <- object$fitted.values$location
+    scale <- object$fitted.values$scale
   } else {
-    tnam <- switch(type,
-      "response" = "location",
-      "scale" = "scale",
-      "quantile" = "full"
-    )
-
+    tnam <- if(type == "response") "location" else if(type == "scale") "scale" else "full"
     mf <- model.frame(delete.response(object$terms[[tnam]]), newdata, na.action = na.action, xlev = object$levels[[tnam]])
     newdata <- newdata[rownames(mf), , drop = FALSE]
     offset <- list(location = rep.int(0, nrow(mf)), scale = rep.int(0, nrow(mf)))
 
-    if(type %in% c("response", "quantile")) {
+    if(type != "scale") {
       X <- model.matrix(delete.response(object$terms$location), mf, contrasts = object$contrasts$location)
       if(!is.null(object$call$offset)) offset[[1L]] <- offset[[1L]] + eval(object$call$offset, newdata)
       if(!is.null(off.num <- attr(object$terms$location, "offset"))) {
         for(j in off.num) offset[[1L]] <- offset[[1L]] + eval(attr(object$terms$location, "variables")[[j + 1L]], newdata)
       }
+      location <- drop(X %*% object$coefficients$location + offset[[1L]])
     }
-    if(type %in% c("scale", "quantile")) {
+    if(type != "response") {
       Z <- model.matrix(object$terms$scale, mf, contrasts = object$contrasts$scale)
       if(!is.null(off.num <- attr(object$terms$scale, "offset"))) {
         for(j in off.num) offset[[2L]] <- offset[[2L]] + eval(attr(object$terms$scale, "variables")[[j + 1L]], newdata)
       }
+      scale <- object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
     }
-   
-    rval <- switch(type,
-      "response" = {
-        drop(X %*% object$coefficients$location + offset[[1L]])
-      },
-      "scale" = {
-        object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
-      },
-      "quantile" = {
-        mu <- drop(X %*% object$coefficients$location + offset[[1L]])
-        sigma <- object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
-        df <- object$df
-        qdist(at, mu, sigma, df)       
-      }
-    )
-    return(rval)
-
   }
+  rval <- switch(type,
+    "response" = location,
+    "scale" = scale,
+    "parameter" = data.frame(location, scale),
+    "density" = fun(at, location, scale, df),
+    "probability" = fun(at, location, scale, df),
+    "quantile" = fun(at, location, scale, df))
+  return(rval)
 }
 
 
@@ -892,6 +904,17 @@ estfun.crch <- function(x, ...) {
   
   return(rval)
 }
+
+pit.crch <- function(object, ...)
+{
+    ## observed response
+    y <- if(is.null(object$y)) model.response(model.frame(object)) else object$y
+
+    ## cdf
+    p <- predict(object, type = "probability", at = y)
+    return(p)
+}
+
 
 
 
