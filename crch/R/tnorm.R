@@ -2,7 +2,13 @@
 dtnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
-  with(input, .Call("dtnorm", x, mean, sd, left, right, log))
+  rval <- with(input, .Call("dtnorm", x, mean, sd, left, right, log))
+  if(is.matrix(x)) {
+    rval <- matrix(rval, ncol = ncol(x), nrow = nrow(x))
+    colnames(rval) <- colnames(x)
+    rownames(rval) <- rownames(x)
+  }
+  return(rval)
 }
 
 
@@ -11,7 +17,13 @@ ptnorm <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE,
   left = -Inf, right = Inf) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
-  with(input, .Call("ptnorm", q, mean, sd, left, right, lower.tail, log.p))
+  rval <- with(input, .Call("ptnorm", q, mean, sd, left, right, lower.tail, log.p))
+  if(is.matrix(q)) {
+    rval <- matrix(rval, ncol = ncol(q), nrow = nrow(q))
+    colnames(rval) <- colnames(q)
+    rownames(rval) <- rownames(q)
+  }
+  return(rval)
 }
 
 ## quantiles
@@ -22,7 +34,13 @@ qtnorm <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE,
   upper <- if(lower.tail) right else left
   p <- pnorm((lower-mean)/sd, lower.tail = lower.tail) * (1 - p) + 
     p*pnorm((upper - mean)/sd, lower.tail = lower.tail)
-  qnorm(p, lower.tail = lower.tail)*sd + mean
+  rval <- qnorm(p, lower.tail = lower.tail)*sd + mean
+  if(is.matrix(p)) {
+    rval <- matrix(rval, ncol = ncol(p), nrow = nrow(p))
+    colnames(rval) <- colnames(p)
+    rownames(rval) <- rownames(p)
+  }
+  return(rval)
 }
 
 ## random numbers
