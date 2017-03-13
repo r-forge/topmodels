@@ -38,7 +38,8 @@ export(
   "rtt",
   "crch.boost",
   "crch.boost.fit",
-  "crps.crch"
+  "crps.crch",
+  "pit.crch"
 )
 
 ## methods for crch
