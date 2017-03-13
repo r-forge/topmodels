@@ -2,7 +2,13 @@
 dtt <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, log = FALSE) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
-  with(input, .Call("dtt", x, mean, sd, df, left, right, log))
+  rval <- with(input, .Call("dtt", x, mean, sd, df, left, right, log))
+  if(is.matrix(x)) {
+    rval <- matrix(rval, ncol = ncol(x), nrow = nrow(x))
+    colnames(rval) <- colnames(x)
+    rownames(rval) <- rownames(x)
+  }
+  return(rval)
 }
 
 
@@ -11,7 +17,13 @@ ptt <- function(q, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE,
   left = -Inf, right = Inf) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
-  with(input, .Call("ptt", q, mean, sd, df, left, right, lower.tail, log.p))
+  rval <- with(input, .Call("ptt", q, mean, sd, df, left, right, lower.tail, log.p))
+  if(is.matrix(q)) {
+    rval <- matrix(rval, ncol = ncol(q), nrow = nrow(q))
+    colnames(rval) <- colnames(q)
+    rownames(rval) <- rownames(q)
+  }
+  return(rval)
 }
 
 ## quantiles
@@ -20,7 +32,13 @@ qtt <- function(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE,
   if(log.p) p <- exp(p) 
   lower <- if(lower.tail) left else right
   p <- pt((lower-mean)/sd, df = df) * (1 - p) + p*pt((right - mean)/sd, df = df)
-  qt((p - mean)/sd, df = df, lower.tail = lower.tail)
+  rval <- qt((p - mean)/sd, df = df, lower.tail = lower.tail)
+  if(is.matrix(p)) {
+    rval <- matrix(rval, ncol = ncol(p), nrow = nrow(p))
+    colnames(rval) <- colnames(p)
+    rownames(rval) <- rownames(p)
+  }
+  return(rval)
 }
 
 ## random numbers
