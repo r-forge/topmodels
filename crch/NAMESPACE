@@ -3,13 +3,13 @@ import("stats", "Formula")
 importFrom("utils", "tail")
 importFrom("graphics", "abline", "axis", "par", "plot", "strwidth")
 importFrom("sandwich", "estfun")
-importFrom("memisc", "getSummary")
 
 export(
   "crch",
   "trch",
   "crch.control",
   "crch.fit",
+  "getSummary.crch",
   "hxlr",
   "hxlr.control",
   "dcnorm",
@@ -56,7 +56,6 @@ S3method("vcov", "crch")
 S3method("update", "crch")
 S3method("model.frame", "crch")
 S3method("model.matrix", "crch")
-S3method("getSummary", "crch")
 S3method("estfun", "crch")
 
 S3method("plot", "crch.boost")
