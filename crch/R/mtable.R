@@ -21,6 +21,11 @@ getSummary.crch <- function(obj, alpha = 0.05, ...)
   acf <- array(dim = c(length(nam), 6, length(cf)),
     dimnames = list(nam, c("est", "se", "stat", "p", "lwr", "upr"), names(cf)))
   for(i in seq_along(cf)) acf[rownames(cf[[i]]), , i] <- cf[[i]]
+
+  ## contrasts (omitting duplicates between location and scale part) and factor levels
+  ctr <- c(obj$contrasts$location, obj$contrasts$scale)
+  ctr <- ctr[!duplicated(names(ctr))]
+  xlev <- obj$levels$full
   
   ## return everything
   return(list(
@@ -31,8 +36,8 @@ getSummary.crch <- function(obj, alpha = 0.05, ...)
       "AIC" = AIC(obj),
       "BIC" = BIC(obj)
     ),
-    contrasts = obj$contrasts,
-    xlevels = obj$xlevels,
+    contrasts = ctr,
+    xlevels = xlev,
     call = obj$call
   ))
 }
