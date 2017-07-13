@@ -806,32 +806,6 @@ residuals.crch <- function(object, type = c("standardized", "pearson", "response
 
 
 
-getSummary.crch <- function (obj, alpha = 0.05, ...) 
-{
-  cf <- summary(obj)$coefficients
-  cval <- qnorm(1 - alpha/2)
-  for (i in seq_along(cf)) cf[[i]] <- cbind(cf[[i]], 
-      cf[[i]][, 1] - cval * cf[[i]][, 2],
-      cf[[i]][, 1] + cval * cf[[i]][, 2])
-  nam <- unique(unlist(lapply(cf, rownames)))
-  acf <- array(dim = c(length(nam), 6, length(cf)), 
-    dimnames = list(nam, c("est", "se", "stat", "p", "lwr", "upr"), names(cf)))
-  for (i in seq_along(cf)) acf[rownames(cf[[i]]), , i] <- cf[[i]]
-
-  return(list(
-    coef = acf, 
-    sumstat = c(
-      N = obj$n, 
-      logLik = as.vector(logLik(obj)), 
-      AIC = AIC(obj), 
-      BIC = BIC(obj)
-    ), 
-    contrasts = obj$contrasts, 
-    xlevels = obj$xlevels, 
-    call = obj$call))
-}
-
-
 update.crch <- function (object, formula., ..., evaluate = TRUE)
 {
   call <- object$call
