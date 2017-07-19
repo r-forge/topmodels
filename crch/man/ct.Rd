@@ -14,13 +14,13 @@
 \usage{
 dct(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, log = FALSE)
 
-pct(q, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, left = -Inf,
-  right = Inf)
+pct(q, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE)
 
 rct(n, mean = 0, sd = 1, df, left = -Inf, right = Inf)
 
-qct(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, left = -Inf, 
-  right = Inf)
+qct(p, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE)
 }
 \arguments{
   \item{x, q}{vector of quantiles.}
@@ -31,11 +31,11 @@ qct(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, left = -Inf,
   \item{sd}{scale parameter.}
   \item{df}{degrees of freedom (> 0, maybe non-integer).  \code{df = Inf} is
   allowed.}
+  \item{left}{left censoring point.}
+  \item{right}{right censoring point.}
   \item{log, log.p}{logical; if TRUE, probabilities p are given as log(p).}
   \item{lower.tail}{logical; if TRUE (default), probabilities are P[X <= x]
   otherwise, P[X > x].}
-  \item{left}{left censoring point.}
-  \item{right}{right censoring point.}
 }
 
 \details{
