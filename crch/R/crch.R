@@ -226,51 +226,63 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
       hdist <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
     } else {
       stopifnot(requireNamespace("scoringRules"))
-      ## loss function for CRPS minimization
-      family <- switch(dist, 
-        "student"  =  "t", "gaussian" = "normal", "logistic" = "logistic")
-      mass <- if(truncated) "trunc" else "cens"
-        
-      ddist <- function(x, mean, sd, df, left = -Inf, right = Inf, log = TRUE) {  
-        ## crps() returns error for scale = 0, infinite scale or df <= 1.
-        ## we suppress the error message and return NA instead      
-        rval <- try(- scoringRules::crps(x, family = family, location = mean, 
-          scale = sd, lower = left, upper = right, lmass = mass, 
-          umass = mass, df = df), silent = TRUE)
-        if(inherits(rval, "try-error")) rval <- NA
-        rval
-      }
-      if(truncated) {      
+      ## loss function for CRPS minimization  
+      if(truncated) {   
+        ddist2 <-  switch(dist, 
+          "student"  = crps_tt, 
+          "gaussian" = crps_tnorm, 
+          "logistic" = crps_tlogis)    
         sdist2 <-  switch(dist, 
-          "student"  = scoringRules:::gradtt, 
-          "gaussian" = scoringRules:::gradtnorm, 
-          "logistic" = scoringRules:::gradtlogis) 
+          "student"  = gradcrps_tt, 
+          "gaussian" = gradcrps_tnorm, 
+          "logistic" = gradcrps_tlogis) 
+        hdist2 <-  switch(dist, 
+          "student"  = hesscrps_tt, 
+          "gaussian" = hesscrps_tnorm, 
+          "logistic" = hesscrps_tlogis) 
       } else {
+        ddist2 <- switch(dist, 
+          "student"  = crps_ct, 
+          "gaussian" = crps_cnorm, 
+          "logistic" = crps_clogis)
         sdist2 <- switch(dist, 
-          "student"  = scoringRules:::gradct, 
-          "gaussian" = scoringRules:::gradcnorm, 
-          "logistic" = scoringRules:::gradclogis)
+          "student"  = gradcrps_ct, 
+          "gaussian" = gradcrps_cnorm, 
+          "logistic" = gradcrps_clogis)
+        hdist2 <- switch(dist, 
+          "student"  = hesscrps_ct, 
+          "gaussian" = hesscrps_cnorm, 
+          "logistic" = hesscrps_clogis)
       }
+      ddist3 <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
       sdist3 <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
+      hdist3 <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
+      ddist <- function(x, mean, sd, df, left = -Inf, right = Inf, log = TRUE) {    
+        - ddist3(x, location = mean, scale = sd, lower = left, 
+          upper = right, df = df)
+      }
       sdist <- function(x, mean, sd, df, left = -Inf, right = Inf) {
-        rval <- try(- sdist3(x, df = df, location = mean, scale = sd, 
-          lower = left, upper = right), silent = TRUE)
-        if(inherits(rval, "try-error")) rval <- NA
+        rval <- - sdist3(x, df = df, location = mean, scale = sd, 
+          lower = left, upper = right)
+#        colnames(rval) <- c("dmu", "dsigma")
         rval
       }
-#      sdist <- NULL
-      hdist <- NULL
-      hessian <- TRUE
+      hdist <- function(x, mean, sd, df, left = -Inf, right = Inf, which) {
+        rval <- - hdist3(x, df = df, location = mean, scale = sd, 
+          lower = left, upper = right)
+        colnames(rval) <- c("d2mu", "d2sigma", "dmu.dsigma", "dsigma.dmu")
+        rval
+      }
 
       ## density function required for log-likelihood
       if(truncated) {
-        ddist2 <- switch(dist, 
+        ddist4 <- switch(dist, 
           "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
       } else {
-        ddist2 <- switch(dist, 
+        ddist4 <- switch(dist, 
           "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
       }
-      lldist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
+      lldist <- if(dist == "student") ddist4 else function(..., df) ddist4(...)
     }
   } else { 
     ## for user defined distribution (requires list with ddist, sdist (optional)
@@ -380,7 +392,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
       hess <- with(fit, hdist(y, mu, sigma, left = left, right = right,
         df = df, which = c("mu", "sigma", "mu.sigma", "sigma.mu")))
       grad <- with(fit, sdist(y, mu, sigma, left = left, right = right, 
-        df = df, which = "sigma"))
+        df = df))[,"dsigma"]
       hess[, "d2sigma"] <- hess[, "d2sigma"]*mu.eta(fit$zgamma)^2 + grad*dmu.deta(fit$zgamma)
       hess[, "dmu.dsigma"] <- hess[, "dsigma.dmu"] <- hess[, "dmu.dsigma"]*mu.eta(fit$zgamma)
       hess <- weights*hess
@@ -578,7 +590,7 @@ fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitte
 
 predict.crch <- function(object, newdata = NULL,
   type = c("response", "location", "scale", "parameter", "density", 
-  "probability", "quantile"), na.action = na.pass, at = 0.5, left = NULL, 
+  "probability", "quantile", "crps"), na.action = na.pass, at = 0.5, left = NULL, 
   right = NULL, ...)
 {
   ## types of prediction
@@ -587,14 +599,52 @@ predict.crch <- function(object, newdata = NULL,
 
   ## response/location are synonymous
   if(type == "location") type <- "response"
-  
+
+  attype <- if(is.character(at)) match.arg(at, c("function", "list", "response")) else "numeric"
+
+
+
   dist <- object$dist  
   df <- object$df
 
-  if(type %in% c("density", "probability", "quantile")) {
+  if(missing(newdata) || is.null(newdata)) {
+    mu <- object$fitted.values$location
+    sigma <- object$fitted.values$scale
+    if(attype == "response") {
+      at <- if(is.null(object$y)) model.response(model.frame(object)) else object$y
+      attype <- "numeric"
+    } 
+  } else {
+    tnam <- if(type == "response") "location" else if(type == "scale") "scale" else "full"
+    mf <- model.frame(object$terms[[tnam]], newdata, na.action = na.action, xlev = object$levels[[tnam]])
+    newdata <- newdata[rownames(mf), , drop = FALSE]
+    offset <- list(location = rep.int(0, nrow(mf)), scale = rep.int(0, nrow(mf)))
+
+    if(type != "scale") {
+      X <- model.matrix(delete.response(object$terms$location), mf, contrasts = object$contrasts$location)
+      if(!is.null(object$call$offset)) offset[[1L]] <- offset[[1L]] + eval(object$call$offset, newdata)
+      if(!is.null(off.num <- attr(object$terms$location, "offset"))) {
+        for(j in off.num) offset[[1L]] <- offset[[1L]] + eval(attr(object$terms$location, "variables")[[j + 1L]], newdata)
+      }
+      mu <- drop(X %*% object$coefficients$location + offset[[1L]])
+    }
+    if(type != "response") {
+      Z <- model.matrix(object$terms$scale, mf, contrasts = object$contrasts$scale)
+      if(!is.null(off.num <- attr(object$terms$scale, "offset"))) {
+        for(j in off.num) offset[[2L]] <- offset[[2L]] + eval(attr(object$terms$scale, "variables")[[j + 1L]], newdata)
+      }
+      sigma <- object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
+    }
+    if(attype == "response") {
+      at <- model.response(mf)
+      attype <- "numeric"
+    } 
+  }
+
+  if(type %in% c("density", "probability", "quantile", "crps")) {
     ## types density, probability, and quantile not available for user defined distributions
     if(!is.character(dist))
-      stop("type quantile not available for user defined distributions")
+      stop("type density, probability, quantile, or crps not available for user defined distributions")
 
     ## for non-constant censoring or truncation points, left and right have to be specified
     if(!is.null(newdata)){
@@ -615,7 +665,9 @@ predict.crch <- function(object, newdata = NULL,
         "probability" = switch(dist, 
             "student"  = ptt, "gaussian" = ptnorm, "logistic" = ptlogis),
         "quantile" = switch(dist, 
-            "student"  = qtt, "gaussian" = qtnorm, "logistic" = qtlogis))
+            "student"  = qtt, "gaussian" = qtnorm, "logistic" = qtlogis),
+        "crps" = switch(dist, 
+            "student"  = crps_tt, "gaussian" = crps_tnorm, "logistic" = crps_tlogis))
     } else {
       distfun2 <- switch(type, 
         "density" = switch(dist, 
@@ -623,7 +675,9 @@ predict.crch <- function(object, newdata = NULL,
         "probability" = switch(dist, 
             "student"  = pct, "gaussian" = pcnorm, "logistic" = pclogis),
         "quantile" = switch(dist, 
-            "student"  = qct, "gaussian" = qcnorm, "logistic" = qclogis))
+            "student"  = qct, "gaussian" = qcnorm, "logistic" = qclogis),
+        "crps" = switch(dist, 
+            "student"  = crps_ct, "gaussian" = crps_cnorm, "logistic" = crps_clogis))
     }
     distfun <- if(dist == "student") distfun2 else function(..., df) distfun2(...)
 
@@ -631,18 +685,16 @@ predict.crch <- function(object, newdata = NULL,
     if(is.null(left)) left <- object$cens$left
     if(is.null(right)) right <- object$cens$right
     
-    
+
     ## distribution function for different formats of at
-    fun <- function(at, location, scale, df) {
+    fun <- function(at, location = mu, scale = sigma, df = df, ...) {
       n <- length(location)
       if(length(left) == 1L) left <- rep.int(left, n)
       if(length(right) == 1L) right <- rep.int(right, n)
-      attype <- if(is.character(at)) match.arg(at, c("function", "list")) else "numeric"
       if(attype == "list") {
         fun <- lapply(1L:length(location), function(i) {
-            distfun(at, location[i], scale[i], df = df, left = left[i], right = right[i])})
+            distfun(at, location[i], scale[i], df = df, left[i], right[i])}, ...)
       } else {  
-#        if(attype != "function") at <- rbind(at)
         n <- length(location)
         if(length(at) == 1L) at <- rep.int(as.vector(at), n)
         if(length(at) != n) at <- rbind(at)
@@ -650,13 +702,13 @@ predict.crch <- function(object, newdata = NULL,
           at <- matrix(rep(at, each = n), nrow = n)
           rv <- distfun(as.vector(at), rep.int(location, ncol(at)), 
                         rep.int(scale, ncol(at)), df = df,
-                        left = rep.int(left, ncol(at)), right = rep.int(right, ncol(at)))
+                        rep.int(left, ncol(at)), rep.int(right, ncol(at)), ...)
           rv <- matrix(rv, nrow = n)
           rownames(rv) <- names(location)
           colnames(rv) <- paste(substr(type, 1L, 1L),
                                 round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)), sep = "_")
         } else {
-          rv <- distfun(at, location, scale, df = df, left = left, right = right)
+          rv <- distfun(at, location, scale, df = df, left, right, ...)
           names(rv) <- names(location)
         }
       }
@@ -664,38 +716,15 @@ predict.crch <- function(object, newdata = NULL,
     }
   }
 
-  if(missing(newdata)) {
-    location <- object$fitted.values$location
-    scale <- object$fitted.values$scale
-  } else {
-    tnam <- if(type == "response") "location" else if(type == "scale") "scale" else "full"
-    mf <- model.frame(delete.response(object$terms[[tnam]]), newdata, na.action = na.action, xlev = object$levels[[tnam]])
-    newdata <- newdata[rownames(mf), , drop = FALSE]
-    offset <- list(location = rep.int(0, nrow(mf)), scale = rep.int(0, nrow(mf)))
 
-    if(type != "scale") {
-      X <- model.matrix(delete.response(object$terms$location), mf, contrasts = object$contrasts$location)
-      if(!is.null(object$call$offset)) offset[[1L]] <- offset[[1L]] + eval(object$call$offset, newdata)
-      if(!is.null(off.num <- attr(object$terms$location, "offset"))) {
-        for(j in off.num) offset[[1L]] <- offset[[1L]] + eval(attr(object$terms$location, "variables")[[j + 1L]], newdata)
-      }
-      location <- drop(X %*% object$coefficients$location + offset[[1L]])
-    }
-    if(type != "response") {
-      Z <- model.matrix(object$terms$scale, mf, contrasts = object$contrasts$scale)
-      if(!is.null(off.num <- attr(object$terms$scale, "offset"))) {
-        for(j in off.num) offset[[2L]] <- offset[[2L]] + eval(attr(object$terms$scale, "variables")[[j + 1L]], newdata)
-      }
-      scale <- object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
-    }
-  }
   rval <- switch(type,
-    "response" = location,
-    "scale" = scale,
+    "response" = mu,
+    "scale" = sigma,
     "parameter" = data.frame(location, scale),
-    "density" = fun(at, location, scale, df),
-    "probability" = fun(at, location, scale, df),
-    "quantile" = fun(at, location, scale, df))
+    "density" = if(attype == "function") fun else fun(at, ...),
+    "probability" = if(attype == "function") fun else fun(at, ...),
+    "quantile" = if(attype == "function") fun else fun(at, ...),
+    "crps" = if(attype == "function") fun else fun(at, ...))
   return(rval)
 }
 
@@ -754,22 +783,23 @@ vcov.crch <- function(object, model = c("full", "location", "scale", "df"), ...)
 
 logLik.crch <- function(object, ...) structure(object$loglik, df = sum(sapply(object$coefficients, length)), class = "logLik")
 
-crps.crch <- function(object, mean = TRUE) {
+crps.crch <- function(object, newdata = NULL, mean = TRUE, ...) {
   if(length(object$crps)) {
     object$crps
   } else {
-    stopifnot(requireNamespace("scoringRules"))
-    family <- switch(object$dist, 
-          "student"  =  "t", "gaussian" = "normal", "logistic" = "logistic")
-    mass <- if(object$truncated) "trunc" else "cens"
-    y <- object$residuals + object$fitted.values$location
-    location <- object$fitted.values$location
-    scale <- object$fitted.values$scale 
-    df <- object$df
-    left <- object$cens$left
-    right <- object$cens$right
-    rval <- scoringRules::crps(y, family = family, location = location, df = df,
-      scale = scale, lower = left, upper = right, lmass = mass, umass = mass)
+#    stopifnot(requireNamespace("scoringRules"))
+#    family <- switch(object$dist, 
+#          "student"  =  "t", "gaussian" = "normal", "logistic" = "logistic")
+#    mass <- if(object$truncated) "trunc" else "cens"
+#    y <- object$residuals + object$fitted.values$location
+#    location <- object$fitted.values$location
+#    scale <- object$fitted.values$scale 
+#    df <- object$df
+#    left <- object$cens$left
+#    right <- object$cens$right
+#    rval <- scoringRules::crps(y, family = family, location = location, df = df,
+#      scale = scale, lower = left, upper = right, lmass = mass, umass = mass)
+    rval <- predict(object, newdata = newdata, type = "crps", at = "response")
     if(mean) rval <- mean(rval)
     rval
   }
@@ -879,16 +909,100 @@ estfun.crch <- function(x, ...) {
   return(rval)
 }
 
-pit.crch <- function(object, ...)
-{
-    ## observed response
-    y <- if(is.null(object$y)) model.response(model.frame(object)) else object$y
+#pit.crch <- function(object, ...)
+#{
+#    ## observed response
+#    y <- if(is.null(object$y)) model.response(model.frame(object)) else object$y
 
-    ## cdf
-    p <- predict(object, type = "probability", at = y)
-    return(p)
+#    ## cdf
+#    p <- predict(object, type = "probability", at = y)
+#    return(p)
+#}
+
+
+
+pit.crch <- function(object, newdata = NULL, ...)
+{
+  ## observed response
+  mt <- terms(object)
+  mf <- if(is.null(newdata)) model.frame(object) else model.frame(mt, newdata, na.action = na.omit)
+  y <- model.response(mf)
+
+  ## cdf
+  pfun <- predict(object, newdata = newdata, type = "probability", at = "function", ...)
+  p <- pfun(y)
+
+  ## in case of censoring provide interval
+  if(y01 <- any(y <= object$cens$left | y >= object$cens$right)) {
+    p <- cbind(p, p)
+    p[y01, 1L] <- pfun(y - .Machine$double.eps^0.9)[y01]
+  }
+  return(p)
 }
 
+utils::globalVariables("rootogram.default")
+
+rootogram.crch <- function(object, newdata = NULL, breaks = NULL,
+                              max = NULL, xlab = NULL, main = NULL, width = NULL, ...)
+{
+    ## observed response and weights
+    mt <- terms(object)
+    mf <- if(is.null(newdata)) model.frame(object) else model.frame(mt, newdata, na.action = na.omit)
+    y <- model.response(mf)
+    w <- model.weights(mf)
+    if(is.null(w)) w <- rep.int(1, NROW(y))
+
+    ## breaks
+    if(is.null(breaks)) breaks <- "Sturges"
+    breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
+    obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
+
+    ## expected frequencies
+    p <- predict(object, newdata, type = "probability", at = breaks)
+    p <- p[, -1L, drop = FALSE] - p[, -ncol(p), drop = FALSE]
+    expctd <- colSums(p * w)
+
+    ## call default method
+    if(is.null(xlab)) xlab <- as.character(attr(mt, "variables"))[2L]
+    if(is.null(main)) main <- deparse(substitute(object))
+    rootogram.default(obsrvd, expctd, breaks = breaks,
+                      xlab = xlab, main = main, width = 1, ...)
+}
+
+
+simulate.crch <- function(object, nsim = 1, seed = NULL, ...) {
+    ## Does not support cbeta4 and cbetax yet
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+        runif(1)
+    if (is.null(seed))
+        RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    else {
+        R.seed <- get(".Random.seed", envir = .GlobalEnv)
+        set.seed(seed)
+        RNGstate <- structure(seed, kind = as.list(RNGkind()))
+        on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    }
+    Xmean <- model.matrix(object, model = "mean")
+    n <- nrow(Xmean)
+    nm <- rownames(Xmean)
+    Xprecision <- model.matrix(object, model = "precision")
+    cMean <- coef(object, model = "mean")
+    cPrecision <- coef(object, model = "precision")
+    link_mean <- object$link$mean$linkinv
+    link_precision <- object$link$precision$linkinv
+    mus <- link_mean(c(Xmean %*% cMean))
+    phis <- link_precision(c(Xprecision %*% cPrecision))
+    ps <- mus * phis
+    qs <- (1 - mus) * phis
+    val <- matrix(1 - rbeta(n * nsim, qs, ps),  n, nsim)
+    val <- as.data.frame(val)
+    names(val) <- paste("sim", seq_len(nsim), sep = "_")
+    if (!is.null(nm)) {
+        row.names(val) <- nm
+    }
+    attr(val, "seed") <- RNGstate
+    val
+}
 
 
 
