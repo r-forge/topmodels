@@ -13,13 +13,13 @@
 \usage{
 dcnorm(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE)
 
-pcnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, left = -Inf, 
-  right = Inf)
+pcnorm(q, mean = 0, sd = 1, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE)
 
 rcnorm(n, mean = 0, sd = 1, left = -Inf, right = Inf)
 
-qcnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, left = -Inf, 
-  right = Inf)
+qcnorm(p, mean = 0, sd = 1, left = -Inf, right = Inf,
+  lower.tail = TRUE, log.p = FALSE)
 }
 \arguments{
   \item{x, q}{vector of quantiles.}
@@ -28,11 +28,11 @@ qcnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, left = -Inf,
   taken to be the number required.}
   \item{mean}{vector of means.}
   \item{sd}{vector of standard deviations.}
+  \item{left}{left censoring point.}
+  \item{right}{right censoring point.}
   \item{log, log.p}{logical; if TRUE, probabilities p are given as log(p).}
   \item{lower.tail}{logical; if TRUE (default), probabilities are P[X <= x]
   otherwise, P[X > x].}
-  \item{left}{left censoring point.}
-  \item{right}{right censoring point.}
 }
 
 \details{
