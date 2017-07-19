@@ -12,8 +12,8 @@ dclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) 
 }
 
 ## distribution function
-pclogis <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+pclogis <- function(q, mean = 0, sd = 1, left = -Inf, right = Inf,
+  lower.tail = TRUE, log.p = FALSE) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   rval <- with(input, .Call("pclogis", q, mean, sd, left, right, lower.tail, log.p))
@@ -32,8 +32,8 @@ rclogis <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
 }
 
 ## quantiles
-qclogis <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+qclogis <- function(p, mean = 0, sd = 1, left = -Inf, right = Inf,
+  lower.tail = TRUE, log.p = FALSE) {
   rval <- qlogis(p, lower.tail = lower.tail, log.p = log.p) * sd + mean
   rval <- pmax(pmin(rval, right), left)
   if(is.matrix(p)) {
@@ -45,8 +45,8 @@ qclogis <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE,
 }
 
 ## scores
-sclogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+sclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
@@ -68,8 +68,8 @@ sclogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"),
 }
 
 # Hessian
-hclogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+hclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, 
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))

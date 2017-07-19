@@ -12,8 +12,8 @@ dct <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, log = FALSE) 
 }
 
 ## distribution function
-pct <- function(q, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+pct <- function(q, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   rval <- with(input, .Call("pct", q, mean, sd, df, left, right, lower.tail, log.p))
@@ -32,8 +32,8 @@ rct <- function(n, mean = 0, sd = 1, df, left = -Inf, right = Inf) {
 }
 
 ## quantiles
-qct <- function(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+qct <- function(p, mean = 0, sd = 1, df, left = -Inf, right = Inf,
+  lower.tail = TRUE, log.p = FALSE) {
   rval <- qt(p, df = df, lower.tail = lower.tail, log.p = log.p) * sd + mean
   rval <- pmax(pmin(rval, right), left)
   if(is.matrix(p)) {
@@ -46,8 +46,8 @@ qct <- function(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE,
 
 
 ## scores
-sct <- function(x, mean = 0, sd = 1, df, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+sct <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
@@ -70,8 +70,8 @@ sct <- function(x, mean = 0, sd = 1, df, which = c("mu", "sigma"),
 
 
 ## Hessian
-hct <- function(x, mean = 0, sd = 1, df, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+hct <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))

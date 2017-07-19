@@ -13,8 +13,8 @@ dtt <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, log = FALSE) 
 
 
 ## distribution function
-ptt <- function(q, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+ptt <- function(q, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
   rval <- with(input, .Call("ptt", q, mean, sd, df, left, right, lower.tail, log.p))
@@ -27,8 +27,8 @@ ptt <- function(q, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE,
 }
 
 ## quantiles
-qtt <- function(p, mean = 0, sd = 1, df, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+qtt <- function(p, mean = 0, sd = 1, df,  left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE) {
   if(log.p) p <- exp(p) 
   lower <- if(lower.tail) left else right
   p <- pt((lower-mean)/sd, df = df) * (1 - p) + p*pt((right - mean)/sd, df = df)
@@ -47,8 +47,8 @@ rtt <- function(n, mean = 0, sd = 1, df, left = -Inf, right = Inf) {
 }
 
 ## scores
-stt <- function(x, mean = 0, sd = 1, df, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+stt <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
@@ -70,8 +70,8 @@ stt <- function(x, mean = 0, sd = 1, df, which = c("mu", "sigma"),
 }
 
 ## Hessian
-htt <- function(x, mean = 0, sd = 1, df, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+htt <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
