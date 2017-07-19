@@ -13,8 +13,8 @@ dtlogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) 
 
 
 ## distribution function
-ptlogis <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+ptlogis <- function(q, mean = 0, sd = 1, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   rval <- with(input, .Call("ptlogis", q, mean, sd, left, right, lower.tail, log.p))
@@ -27,8 +27,8 @@ ptlogis <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE,
 }
 
 ## quantiles
-qtlogis <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+qtlogis <- function(p, mean = 0, sd = 1, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE) {
   if(log.p) p <- exp(p) 
   lower <- if(lower.tail) left else right
   upper <- if(lower.tail) right else left
@@ -49,8 +49,8 @@ rtlogis <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
 }
 
 ## scores
-stlogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+stlogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, 
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
@@ -72,8 +72,8 @@ stlogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"),
 }
 
 ## Hessian
-htlogis <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+htlogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, 
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))

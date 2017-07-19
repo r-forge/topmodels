@@ -13,8 +13,8 @@ dtnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
 
 
 ## distribution function
-ptnorm <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+ptnorm <- function(q, mean = 0, sd = 1, left = -Inf, right = Inf, 
+  lower.tail = TRUE, log.p = FALSE) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   rval <- with(input, .Call("ptnorm", q, mean, sd, left, right, lower.tail, log.p))
@@ -27,8 +27,8 @@ ptnorm <- function(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE,
 }
 
 ## quantiles
-qtnorm <- function(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE, 
-  left = -Inf, right = Inf) {
+qtnorm <- function(p, mean = 0, sd = 1, left = -Inf, right = Inf,
+  lower.tail = TRUE, log.p = FALSE) {
   if(log.p) p <- exp(p) 
   lower <- if(lower.tail) left else right
   upper <- if(lower.tail) right else left
@@ -51,8 +51,8 @@ rtnorm <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
 
 
 ## scores
-stnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+stnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
@@ -74,8 +74,8 @@ stnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"),
 }
 
 ## Hessian
-htnorm <- function(x, mean = 0, sd = 1, which = c("mu", "sigma"), 
-  left = -Inf, right = Inf) {
+htnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
+  which = c("mu", "sigma")) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
