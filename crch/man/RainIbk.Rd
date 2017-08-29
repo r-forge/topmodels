@@ -28,7 +28,7 @@ Reforecasts: http://www.esrl.noaa.gov/psd/forecasts/reforecast2/
   Hamill TM, Bates GT, Whitaker JS, Murray DR, Fiorino M, Galarneau Jr TJ,
     Zhu Y, Lapenta W (2013). NOAA's Second-Generation Global Medium-Range
     Ensemble Reforecast Data Set. \emph{Bulletin of the American Meteorological
-    Society}, in press.
+    Society}, 94(10), 1553-1565.
 }
 
 \examples{
