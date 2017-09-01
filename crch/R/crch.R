@@ -588,70 +588,91 @@ model.matrix.crch <- function(object, model = c("location", "scale"), ...) {
 
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
-predict.crch <- function(object, newdata = NULL,
-  type = c("location", "scale", "response", "parameter", "density", 
-  "probability", "quantile", "crps"), na.action = na.pass, at = 0.5, left = NULL, 
-  right = NULL, ...)
+predict.crch <- function(object, newdata = NULL, type = c("location", "scale", 
+  "response", "parameter", "density", "probability", "quantile", "crps"),
+  na.action = na.pass, at = 0.5, left = NULL, right = NULL, ...)
 {
   ## types of prediction
   type <- match.arg(type)
-  
-
-  attype <- if(is.character(at)) match.arg(at, c("function", "list", "response")) else "numeric"
-
+  attype <- if(is.character(at)) 
+    match.arg(at, c("function", "list", "response")) else "numeric"
 
 
+  ## extract some values from fitted object
   dist <- object$dist  
   df <- object$df
 
+
+  ## get mu and sigma
   if(missing(newdata) || is.null(newdata)) {
     mu <- object$fitted.values$location
     sigma <- object$fitted.values$scale
     if(attype == "response") {
-      at <- if(is.null(object$y)) model.response(model.frame(object)) else object$y
+      at <- if(is.null(object$y)) 
+        model.response(model.frame(object)) else object$y
       attype <- "numeric"
     } 
   } else {
-    tnam <- if(type == "location") "location" else if(type == "scale") "scale" else "full"
-    mf <- model.frame(object$terms[[tnam]], newdata, na.action = na.action, xlev = object$levels[[tnam]])
+    tnam <- switch(type, "location" = "location", "scale" = "scale",  "full")
+    if(attype == "response") {
+      mf <- model.frame(object$terms[[tnam]], newdata,
+        na.action = na.action, xlev = object$levels[[tnam]])
+      at <- model.response(mf)
+      attype <- "numeric"
+    } else {
+      mf <- model.frame(delete.response(object$terms[[tnam]]), newdata,
+        na.action = na.action, xlev = object$levels[[tnam]])
+    }
     newdata <- newdata[rownames(mf), , drop = FALSE]
-    offset <- list(location = rep.int(0, nrow(mf)), scale = rep.int(0, nrow(mf)))
+    offset <- list(location = rep.int(0, nrow(mf)), 
+      scale = rep.int(0, nrow(mf)))
 
     if(type != "scale") {
-      X <- model.matrix(delete.response(object$terms$location), mf, contrasts = object$contrasts$location)
-      if(!is.null(object$call$offset)) offset[[1L]] <- offset[[1L]] + eval(object$call$offset, newdata)
+      X <- model.matrix(delete.response(object$terms$location), mf, 
+        contrasts = object$contrasts$location)
+      if(!is.null(object$call$offset)) offset[[1L]] <- offset[[1L]] + 
+        eval(object$call$offset, newdata)
       if(!is.null(off.num <- attr(object$terms$location, "offset"))) {
-        for(j in off.num) offset[[1L]] <- offset[[1L]] + eval(attr(object$terms$location, "variables")[[j + 1L]], newdata)
+        for(j in off.num) offset[[1L]] <- offset[[1L]] + 
+          eval(attr(object$terms$location, "variables")[[j + 1L]], newdata)
       }
       mu <- drop(X %*% object$coefficients$location + offset[[1L]])
     }
     if(type != "location") {
-      Z <- model.matrix(object$terms$scale, mf, contrasts = object$contrasts$scale)
+      Z <- model.matrix(object$terms$scale, mf, 
+        contrasts = object$contrasts$scale)
       if(!is.null(off.num <- attr(object$terms$scale, "offset"))) {
-        for(j in off.num) offset[[2L]] <- offset[[2L]] + eval(attr(object$terms$scale, "variables")[[j + 1L]], newdata)
+        for(j in off.num) offset[[2L]] <- offset[[2L]] + 
+          eval(attr(object$terms$scale, "variables")[[j + 1L]], newdata)
       }
-      sigma <- object$link$scale$linkinv(drop(Z %*% object$coefficients$scale + offset[[2L]]))
+      sigma <- object$link$scale$linkinv(drop(Z %*% object$coefficients$scale +
+        offset[[2L]]))
     }
-    if(attype == "response") {
-      at <- model.response(mf)
-      attype <- "numeric"
-    } 
+
   }
 
-  if(type %in% c("response", "density", "probability", "quantile", "crps")) {
-    ## types response, density, probability, and quantile not available for user defined distributions
+
+  ## functions for various prediction types that use full distributions
+  if(!type %in% c("location", "scale")) {
+    ## these prediction types are not yet implemented for user defined 
+    ## distributions
     if(!is.character(dist))
       stop("type response density, probability, quantile, or crps not available for user defined distributions")
 
-    ## for non-constant censoring or truncation points, left and right have to be specified
+    ## for non-constant censoring or truncation points, left and right have to
+    ## be specified
     if(!is.null(newdata)){
       if(length(object$cens$left) > 1) {
-        if(is.null(left)) stop("left has to be specified for non-constant left censoring")
-        if(length(left) > 1 & length(left) != NROW(newdata)) stop("left must have length 1 or length of newdata")
+        if(is.null(left)) 
+          stop("left has to be specified for non-constant left censoring")
+        if(length(left) > 1 & length(left) != NROW(newdata)) 
+          stop("left must have length 1 or length of newdata")
       }
       if(length(object$cens$right) > 1) {
-        if(is.null(right)) stop("right has to be specified for non-constant right censoring")
-        if(length(right) > 1 & length(right) != NROW(newdata)) stop("right  must have length 1 or length of newdata")
+        if(is.null(right)) 
+          stop("right has to be specified for non-constant right censoring")
+        if(length(right) > 1 & length(right) != NROW(newdata)) 
+          stop("right  must have length 1 or length of newdata")
       }
     }
     ## distribution function
@@ -888,14 +909,27 @@ estfun.crch <- function(x, ...) {
 
   ## extract sdist function
   if(is.character(x$dist)){
-    if(x$type == "crps") stop("estfun currently not supported for type = 'crps'") 
     ## distribution functions
     if(x$truncated) {
-      sdist2 <- switch(x$dist, 
-        "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+      sdist2 <-  if(x$type == "crps") {
+          switch(x$dist, 
+            "student"  = gradcrps_tt, 
+            "gaussian" = gradcrps_tnorm, 
+            "logistic" = gradcrps_tlogis) 
+        } else {
+          switch(x$dist, 
+            "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+        }
     } else {
-      sdist2 <- switch(x$dist, 
-        "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+      sdist2 <- sdist2 <-  if(x$type == "crps") { 
+          switch(x$dist, 
+            "student"  = gradcrps_tt, 
+            "gaussian" = gradcrps_tnorm, 
+            "logistic" = gradcrps_tlogis) 
+        } else {
+          switch(x$dist, 
+            "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+        }
     }
     sdist <- if(x$dist == "student") sdist2 else function(..., df) sdist2(...)
   } else { 
@@ -912,17 +946,6 @@ estfun.crch <- function(x, ...) {
   return(rval)
 }
 
-#pit.crch <- function(object, ...)
-#{
-#    ## observed response
-#    y <- if(is.null(object$y)) model.response(model.frame(object)) else object$y
-
-#    ## cdf
-#    p <- predict(object, type = "probability", at = y)
-#    return(p)
-#}
-
-
 
 pit.crch <- function(object, newdata = NULL, ...)
 {
@@ -932,7 +955,8 @@ pit.crch <- function(object, newdata = NULL, ...)
   y <- model.response(mf)
 
   ## cdf
-  pfun <- predict(object, newdata = newdata, type = "probability", at = "function", ...)
+  pfun <- predict(object, newdata = newdata, type = "probability", 
+    at = "function", ...)
   p <- pfun(y)
 
   ## in case of censoring provide interval
