@@ -98,3 +98,13 @@ htnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
   colnames(hess)[colnames(hess) == "dsigma"] <- "d2sigma"
   hess
 }
+
+
+## Expectation
+etnorm <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
+  rmm <- (right-mu)/sigma
+  lmm <- (left-mu)/sigma
+  pncens <- pnorm(rmm)-pnorm(lmm)
+  rval <- mu + sigma*(dnorm(lmm) - dnorm(rmm))/pncens
+  rval
+}

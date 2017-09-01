@@ -96,3 +96,13 @@ htlogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
   colnames(hess)[colnames(hess) == "dsigma"] <- "d2sigma"
   hess
 }
+
+## Expectation
+etlogis <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
+  rmm <- (right-mu)/sigma
+  lmm <- (left-mu)/sigma
+  pncens <- plogis(rmm)-plogis(lmm)
+  rval <- mu + sigma*(rmm*plogis(rmm) - log(1+exp(rmm)) - 
+    lmm*plogis(lmm) + log(1+exp(lmm))) /pncens
+  rval
+}

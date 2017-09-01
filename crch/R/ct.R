@@ -94,3 +94,14 @@ hct <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf,
   colnames(hess)[colnames(hess) == "dsigma"] <- "d2sigma"
   hess
 }
+
+
+## Expectation
+ect <- function(mean = 0, sd = 1, df, left = -Inf, right = Inf) {
+  rmm <- (right-mu)/sigma
+  lmm <- (left-mu)/sigma
+  pncens <- pt(rmm, df = df)-pt(lmm, df = df)
+  pncens*ett(mean = mean, sd = sd, df = df, left = left, right = right) + 
+    pt(lmm, df = df)*left^(is.finite(left)) + 
+    pt(rmm, df = df, lower.tail = FALSE)*right^(is.finite(right))
+}
