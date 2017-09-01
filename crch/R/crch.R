@@ -589,16 +589,13 @@ model.matrix.crch <- function(object, model = c("location", "scale"), ...) {
 fitted.crch <- function(object, type = c("location", "scale"), ...) object$fitted.values[[match.arg(type)]]
 
 predict.crch <- function(object, newdata = NULL,
-  type = c("response", "location", "scale", "parameter", "density", 
+  type = c("location", "scale", "response", "parameter", "density", 
   "probability", "quantile", "crps"), na.action = na.pass, at = 0.5, left = NULL, 
   right = NULL, ...)
 {
   ## types of prediction
   type <- match.arg(type)
   
-
-  ## response/location are synonymous
-  if(type == "location") type <- "response"
 
   attype <- if(is.character(at)) match.arg(at, c("function", "list", "response")) else "numeric"
 
@@ -615,7 +612,7 @@ predict.crch <- function(object, newdata = NULL,
       attype <- "numeric"
     } 
   } else {
-    tnam <- if(type == "response") "location" else if(type == "scale") "scale" else "full"
+    tnam <- if(type == "location") "location" else if(type == "scale") "scale" else "full"
     mf <- model.frame(object$terms[[tnam]], newdata, na.action = na.action, xlev = object$levels[[tnam]])
     newdata <- newdata[rownames(mf), , drop = FALSE]
     offset <- list(location = rep.int(0, nrow(mf)), scale = rep.int(0, nrow(mf)))
@@ -628,7 +625,7 @@ predict.crch <- function(object, newdata = NULL,
       }
       mu <- drop(X %*% object$coefficients$location + offset[[1L]])
     }
-    if(type != "response") {
+    if(type != "location") {
       Z <- model.matrix(object$terms$scale, mf, contrasts = object$contrasts$scale)
       if(!is.null(off.num <- attr(object$terms$scale, "offset"))) {
         for(j in off.num) offset[[2L]] <- offset[[2L]] + eval(attr(object$terms$scale, "variables")[[j + 1L]], newdata)
@@ -641,10 +638,10 @@ predict.crch <- function(object, newdata = NULL,
     } 
   }
 
-  if(type %in% c("density", "probability", "quantile", "crps")) {
-    ## types density, probability, and quantile not available for user defined distributions
+  if(type %in% c("response", "density", "probability", "quantile", "crps")) {
+    ## types response, density, probability, and quantile not available for user defined distributions
     if(!is.character(dist))
-      stop("type density, probability, quantile, or crps not available for user defined distributions")
+      stop("type response density, probability, quantile, or crps not available for user defined distributions")
 
     ## for non-constant censoring or truncation points, left and right have to be specified
     if(!is.null(newdata)){
@@ -667,7 +664,9 @@ predict.crch <- function(object, newdata = NULL,
         "quantile" = switch(dist, 
             "student"  = qtt, "gaussian" = qtnorm, "logistic" = qtlogis),
         "crps" = switch(dist, 
-            "student"  = crps_tt, "gaussian" = crps_tnorm, "logistic" = crps_tlogis))
+            "student"  = crps_tt, "gaussian" = crps_tnorm, "logistic" = crps_tlogis),
+        "response" = switch(dist, 
+            "student"  = ett, "gaussian" = etnorm, "logistic" = etlogis))
     } else {
       distfun2 <- switch(type, 
         "density" = switch(dist, 
@@ -677,7 +676,9 @@ predict.crch <- function(object, newdata = NULL,
         "quantile" = switch(dist, 
             "student"  = qct, "gaussian" = qcnorm, "logistic" = qclogis),
         "crps" = switch(dist, 
-            "student"  = crps_ct, "gaussian" = crps_cnorm, "logistic" = crps_clogis))
+            "student"  = crps_ct, "gaussian" = crps_cnorm, "logistic" = crps_clogis),
+        "response" = switch(dist, 
+            "student"  = ect, "gaussian" = ecnorm, "logistic" = eclogis))
     }
     distfun <- if(dist == "student") distfun2 else function(..., df) distfun2(...)
 
@@ -718,9 +719,10 @@ predict.crch <- function(object, newdata = NULL,
 
 
   rval <- switch(type,
-    "response" = mu,
+    "location" = mu,
     "scale" = sigma,
-    "parameter" = data.frame(location, scale),
+    "response" = distfun(mu, sigma, df = df, left, right),
+    "parameter" = data.frame(mu, sigma),
     "density" = if(attype == "function") fun else fun(at, ...),
     "probability" = if(attype == "function") fun else fun(at, ...),
     "quantile" = if(attype == "function") fun else fun(at, ...),

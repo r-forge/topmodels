@@ -95,8 +95,8 @@ hclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
 
 ## Expectation
 eclogis <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
-  rmm <- (right-mu)/sigma
-  lmm <- (left-mu)/sigma
+  rmm <- (right-mean)/sd
+  lmm <- (left-mean)/sd
   pncens <- plogis(rmm)-plogis(lmm)
   pncens*etlogis(mean = mean, sd = sd, left = left, right = right) + 
     plogis(lmm)*left^(is.finite(left)) + 

@@ -102,9 +102,9 @@ htnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
 
 ## Expectation
 etnorm <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
-  rmm <- (right-mu)/sigma
-  lmm <- (left-mu)/sigma
+  rmm <- (right-mean)/sd
+  lmm <- (left-mean)/sd
   pncens <- pnorm(rmm)-pnorm(lmm)
-  rval <- mu + sigma*(dnorm(lmm) - dnorm(rmm))/pncens
+  rval <- mean + sd*(dnorm(lmm) - dnorm(rmm))/pncens
   rval
 }
