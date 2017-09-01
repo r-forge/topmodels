@@ -75,9 +75,11 @@ standardize.coefficients <- function(coef, restandardize = FALSE, center, scale)
 
 ## actual fitting function
 crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE, 
-  dist = "gaussian", df = NULL, link.scale = "log",
+  dist = "gaussian", df = NULL, link.scale = "log", type = "ml",
   weights = NULL, offset = NULL, control = crch.glmnet()) 
 {
+  ## type = "crps" currently not supported
+  if(type == "crps") stop("type = 'crps' currently not supported for boosting")
   ## response and regressor matrix
   n <- NROW(x)  
   k <- NCOL(x)
@@ -143,7 +145,7 @@ linkfun2 <- switch(link.scale, "log" = 1L, "identity" = 2L, "quadratic" = 3L)
   x <- standardize.matrix(x, weights = weights)
   z <- standardize.matrix(z, weights = weights)
   basefit <- crch.fit(x[,1, drop = FALSE], z[,1, drop = FALSE], y, left, right, 
-      truncated, dist, df, link.scale, weights, offset)
+      truncated, dist, df, link.scale, type, weights, offset)
   y <- standardize.matrix(y, center = basefit$coefficients$location, scale = linkinv(basefit$coefficients$scale))
     
   standardize <- list(
@@ -215,7 +217,7 @@ linkfun2 <- switch(link.scale, "log" = 1L, "identity" = 2L, "quadratic" = 3L)
   loglikfun <- function(par, subset = 1:n, sum = TRUE) {
     fit <- fitfun(par, subset)
     ll <- with(fit,  
-        ddist(y[subset], mu, sigma, df = df, left = left, right = right, log = TRUE))
+        ddist(y[subset], mu, sigma, df = df, left = left[subset], right = right[subset], log = TRUE))
     if(sum) if(any(!is.finite(ll))) NaN else -sum(weights[subset] * ll)  
     else weights[subset] * ll
   }
@@ -265,14 +267,14 @@ linkfun2 <- switch(link.scale, "log" = 1L, "identity" = 2L, "quadratic" = 3L)
   w <- wobs2$weights  #weights
   wo <- wobs2$wo
 #  lambdamax <- max(c(lambdamax, max(apply(z, 2, function(z) abs(sum(w*z*wo))))))
-  lambdaseq <- exp(seq(log(lambdamax), log(lambdamax*0.0001), length.out = 100))
+  lambdaseq <- exp(seq(log(lambdamax), log(lambdamax*lambda.min.ratio), length.out = nlambda))
 iter <- 0
 
 
 if(length(left) == 1) left <- rep(left, n)
 if(length(right) == 1) right <- rep(right, n)
-browser()
-a <- .Call("crchglmnet", x, z, y, left, right, lambdaseq, as.integer(nlambda), lambda.min.ratio, as.integer(maxit), reltol, linkfun2)
+#browser()
+a <- .Call("crchglmnet", x, z, y, left, right, lambdaseq, as.integer(maxit), reltol)
 coefpath <- a[[1]]
 loglikpath <- a[[2]]
 
@@ -286,16 +288,16 @@ loglikpath <- a[[2]]
     control$start <- NULL
     if(is.null(foldid)) foldid <- (sample(1:nfolds, size = length(y), replace = TRUE))
   
-    lltestall <- matrix(0, length(y), maxit + 1)
+    lltestall <- matrix(0, length(y), nlambda)
     for(i in 1:nfolds) {
       train <- foldid != i
       test <- foldid == i
-      glmnet <- crch.glmnet.fit(x = x[train, , drop = FALSE], y = y[train], z = z[train, , drop = FALSE], left = left, 
-          right = right, link.scale = link.scale, dist = dist, df = df, weights = weights[train], 
+      glmnet <- crch.glmnet.fit(x = x[train, , drop = FALSE], y = y[train], z = z[train, , drop = FALSE], left = left[train], 
+          right = right[train], link.scale = link.scale, dist = dist, df = df, weights = weights[train], 
           offset = list(offset[[1L]][train], offset[[2L]][train]), 
           control = control, truncated = truncated)
       lltest <- apply(glmnet$coefpath, 1, loglikfun, subset = test, sum = FALSE)
-      lltest <- cbind(lltest, matrix(rep(lltest[,NCOL(lltest)], maxit + 1 - NCOL(lltest)), nrow = NROW(lltest)))
+#      lltest <- cbind(lltest, matrix(rep(lltest[,NCOL(lltest)], maxit + 1 - NCOL(lltest)), nrow = NROW(lltest)))
       lltestall[test,] <- lltest
     }
 
@@ -304,7 +306,7 @@ loglikpath <- a[[2]]
     mstopopt <- NULL
   }
 
-      
+#browser()     
   colnames(coefpath) <- c(colnames(x), paste("scale_", colnames(z), sep = ""))
   ## restandardize
   left  <-  left*standardize$y$scale + standardize$y$center
@@ -449,7 +451,7 @@ plot.crch.glmnet <- function(object,
 
   ## vertical line at mstop
   if(!is.null(mstop)) {
-    abline(v = mstop, lty = 2)
-    axis(3, at = mstop, labels = names(mstop))
+    abline(v = -log(object$lambda[mstop]), lty = 2)
+    axis(3, at = -log(object$lambda[mstop]), labels = names(mstop))
   }
 }

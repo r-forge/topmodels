@@ -92,3 +92,14 @@ hcnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
   colnames(hess)[colnames(hess) == "dsigma"] <- "d2sigma"
   hess
 }
+
+
+## Expectation
+ecnorm <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
+  rmm <- (right-mu)/sigma
+  lmm <- (left-mu)/sigma
+  pncens <- pnorm(rmm)-pnorm(lmm)
+  pncens*etnorm(mean = mean, sd = sd, left = left, right = right) + 
+    pnorm(lmm)*left^(is.finite(left)) + 
+    pnorm(rmm, lower.tail = FALSE)*right^(is.finite(right))
+}

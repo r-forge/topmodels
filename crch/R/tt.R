@@ -31,8 +31,9 @@ qtt <- function(p, mean = 0, sd = 1, df,  left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE) {
   if(log.p) p <- exp(p) 
   lower <- if(lower.tail) left else right
-  p <- pt((lower-mean)/sd, df = df) * (1 - p) + p*pt((right - mean)/sd, df = df)
-  rval <- qt((p - mean)/sd, df = df, lower.tail = lower.tail)
+  upper <- if(lower.tail) right else left
+  p <- pt((lower-mean)/sd, df = df) * (1 - p) + p*pt((upper - mean)/sd, df = df)
+  rval <- qt(p, df = df, lower.tail = lower.tail)*sd + mean
   if(is.matrix(p)) {
     rval <- matrix(rval, ncol = ncol(p), nrow = nrow(p))
     colnames(rval) <- colnames(p)
@@ -43,7 +44,7 @@ qtt <- function(p, mean = 0, sd = 1, df,  left = -Inf, right = Inf,
 
 ## random numbers
 rtt <- function(n, mean = 0, sd = 1, df, left = -Inf, right = Inf) {
-  qtt((runif(n) - mean)/sd, df = df, left = left, right = right)
+  qtt(runif(n), mean = mean, sd = sd, df = df, left = left, right = right)
 }
 
 ## scores
@@ -94,3 +95,14 @@ htt <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf,
   colnames(hess)[colnames(hess) == "dsigma"] <- "d2sigma"
   hess
 }
+
+## Expectation
+ett <- function(mean = 0, sd = 1, df, left = -Inf, right = Inf) {
+  rmm <- (right-mu)/sigma
+  lmm <- (left-mu)/sigma
+  pncens <- pt(rmm, df = df)-pt(lmm, df = df)
+  rval <- mu + sigma*df*((dt(rmm, df = df) * (1+rmm^2/df)^(is.finite(rmm))-
+    dt(lmm, df = df)*(1+lmm^2/df)^(is.finite(lmm)))/(1-df)) /pncens
+  rval
+}
+
