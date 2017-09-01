@@ -98,8 +98,8 @@ hct <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf,
 
 ## Expectation
 ect <- function(mean = 0, sd = 1, df, left = -Inf, right = Inf) {
-  rmm <- (right-mu)/sigma
-  lmm <- (left-mu)/sigma
+  rmm <- (right-mean)/sd
+  lmm <- (left-mean)/sd
   pncens <- pt(rmm, df = df)-pt(lmm, df = df)
   pncens*ett(mean = mean, sd = sd, df = df, left = left, right = right) + 
     pt(lmm, df = df)*left^(is.finite(left)) + 

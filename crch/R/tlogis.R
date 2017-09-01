@@ -99,10 +99,10 @@ htlogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
 
 ## Expectation
 etlogis <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
-  rmm <- (right-mu)/sigma
-  lmm <- (left-mu)/sigma
+  rmm <- (right-mean)/sd
+  lmm <- (left-mean)/sd
   pncens <- plogis(rmm)-plogis(lmm)
-  rval <- mu + sigma*(rmm*plogis(rmm) - log(1+exp(rmm)) - 
+  rval <- mean + sd*(rmm*plogis(rmm) - log(1+exp(rmm)) - 
     lmm*plogis(lmm) + log(1+exp(lmm))) /pncens
   rval
 }

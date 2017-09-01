@@ -96,8 +96,8 @@ hcnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
 
 ## Expectation
 ecnorm <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
-  rmm <- (right-mu)/sigma
-  lmm <- (left-mu)/sigma
+  rmm <- (right-mean)/sd
+  lmm <- (left-mean)/sd
   pncens <- pnorm(rmm)-pnorm(lmm)
   pncens*etnorm(mean = mean, sd = sd, left = left, right = right) + 
     pnorm(lmm)*left^(is.finite(left)) + 

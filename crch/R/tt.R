@@ -98,10 +98,10 @@ htt <- function(x, mean = 0, sd = 1, df, left = -Inf, right = Inf,
 
 ## Expectation
 ett <- function(mean = 0, sd = 1, df, left = -Inf, right = Inf) {
-  rmm <- (right-mu)/sigma
-  lmm <- (left-mu)/sigma
+  rmm <- (right-mean)/sd
+  lmm <- (left-mean)/sd
   pncens <- pt(rmm, df = df)-pt(lmm, df = df)
-  rval <- mu + sigma*df*((dt(rmm, df = df) * (1+rmm^2/df)^(is.finite(rmm))-
+  rval <- mean + sd*df*((dt(rmm, df = df) * (1+rmm^2/df)^(is.finite(rmm))-
     dt(lmm, df = df)*(1+lmm^2/df)^(is.finite(lmm)))/(1-df)) /pncens
   rval
 }
