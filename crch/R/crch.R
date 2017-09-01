@@ -718,6 +718,7 @@ predict.crch <- function(object, newdata = NULL,
   }
 
 
+
   rval <- switch(type,
     "location" = mu,
     "scale" = sigma,
