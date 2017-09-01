@@ -8,17 +8,20 @@ Obtains various types of predictions for \code{crch} models.
 }
 
 \usage{
-\method{predict}{crch}(object, newdata = NULL, type = c("response", "location",
-  "scale", "quantile"), na.action = na.pass, at = 0.5, left = NULL, right = NULL, \dots)
+\method{predict}{crch}(object, newdata = NULL, type = c("location", "scale", 
+  "response, "quantile"), na.action = na.pass, at = 0.5, left = NULL, 
+  right = NULL, \dots)
 }
 
 \arguments{
   \item{object}{an object of class \code{"crch"}.}
   \item{newdata}{an optional data frame in which to look for variables with
   which to predict.}
-  \item{type}{type of prediction: \code{"response"} is equivalent to
-  \code{"location"} and returns the location of the predicted distribution.
-  \code{"scale"} returns the scale of the predicted distribution and
+  \item{type}{type of prediction: \code{"location"} returns the location of 
+  the predicted distribution.
+  \code{"scale"} returns the scale of the predicted distribution.
+  \code{"response"} returns the expected value of the predicted distribution
+  (not equal to location for censored and truncated distributions).
   \code{"quantile"} returns a matrix of predicted quantiles with quantile
   probabilities \code{at}.}
   \item{na.action}{a function which indicates what should happen when the data
