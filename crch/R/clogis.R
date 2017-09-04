@@ -1,8 +1,8 @@
 ## density
-dclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
-  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+dclogis <- function(x, location = 0, scale = 1, left = -Inf, right = Inf, log = FALSE) {
+  input <- data.frame(x = as.numeric(x), location = as.numeric(location), scale = as.numeric(scale), 
     left = as.numeric(left), right = as.numeric(right))
-  rval <- with(input, .Call("dclogis", x, mean, sd, left, right, log))
+  rval <- with(input, .Call("dclogis", x, location, scale, left, right, log))
   if(is.matrix(x)) {
     rval <- matrix(rval, ncol = ncol(x), nrow = nrow(x))
     colnames(rval) <- colnames(x)
@@ -12,11 +12,11 @@ dclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) 
 }
 
 ## distribution function
-pclogis <- function(q, mean = 0, sd = 1, left = -Inf, right = Inf,
+pclogis <- function(q, location = 0, scale = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE) {
-  input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
+  input <- data.frame(q = as.numeric(q), location = as.numeric(location), scale = as.numeric(scale), 
     left = as.numeric(left), right = as.numeric(right))
-  rval <- with(input, .Call("pclogis", q, mean, sd, left, right, lower.tail, log.p))
+  rval <- with(input, .Call("pclogis", q, location, scale, left, right, lower.tail, log.p))
   if(is.matrix(q)) {
     rval <- matrix(rval, ncol = ncol(q), nrow = nrow(q))
     colnames(rval) <- colnames(q)
@@ -26,15 +26,15 @@ pclogis <- function(q, mean = 0, sd = 1, left = -Inf, right = Inf,
 }
 
 ## random numbers
-rclogis <- function(n, mean = 0, sd = 1, left = -Inf, right = Inf) {
-  rval <- rlogis(n) * sd + mean
+rclogis <- function(n, location = 0, scale = 1, left = -Inf, right = Inf) {
+  rval <- rlogis(n) * scale + location
   pmax(pmin(rval, right), left)
 }
 
 ## quantiles
-qclogis <- function(p, mean = 0, sd = 1, left = -Inf, right = Inf,
+qclogis <- function(p, location = 0, scale = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE) {
-  rval <- qlogis(p, lower.tail = lower.tail, log.p = log.p) * sd + mean
+  rval <- qlogis(p, lower.tail = lower.tail, log.p = log.p) * scale + location
   rval <- pmax(pmin(rval, right), left)
   if(is.matrix(p)) {
     rval <- matrix(rval, ncol = ncol(p), nrow = nrow(p))
@@ -45,9 +45,9 @@ qclogis <- function(p, mean = 0, sd = 1, left = -Inf, right = Inf,
 }
 
 ## scores
-sclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
+sclogis <- function(x, location = 0, scale = 1, left = -Inf, right = Inf,
   which = c("mu", "sigma")) {
-  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+  input <- data.frame(x = as.numeric(x), location = as.numeric(location), scale = as.numeric(scale), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
     which <- c("mu", "sigma")[as.integer(which)]
@@ -56,9 +56,9 @@ sclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
   
   for(w in which) {
     if(w == "mu")
-      score2 <- with(input, .Call("sclogis_mu", x, mean, sd, left, right))
+      score2 <- with(input, .Call("sclogis_mu", x, location, scale, left, right))
     if(w == "sigma")
-      score2 <- with(input, .Call("sclogis_sigma", x, mean, sd, left, right))
+      score2 <- with(input, .Call("sclogis_sigma", x, location, scale, left, right))
     score <- cbind(score, score2)
   }
   if(is.null(dim(score)))
@@ -68,9 +68,9 @@ sclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
 }
 
 # Hessian
-hclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, 
+hclogis <- function(x, location = 0, scale = 1, left = -Inf, right = Inf, 
   which = c("mu", "sigma")) {
-  input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
+  input <- data.frame(x = as.numeric(x), location = as.numeric(location), scale = as.numeric(scale), 
     left = as.numeric(left), right = as.numeric(right))
   if(!is.character(which))
     which <- c("mu", "sigma", "mu.sigma", "sigma.mu")[as.integer(which)]
@@ -78,11 +78,11 @@ hclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
   hess <- list()
   for(w in which) {       
     if(w == "mu")         
-      hess[[w]] <- with(input, .Call("hclogis_mu", x, mean, sd, left, right))  
+      hess[[w]] <- with(input, .Call("hclogis_mu", x, location, scale, left, right))  
     if(w == "sigma")
-      hess[[w]] <- with(input, .Call("hclogis_sigma", x, mean, sd, left, right))  
+      hess[[w]] <- with(input, .Call("hclogis_sigma", x, location, scale, left, right))  
     if(w %in% c("mu.sigma", "sigma.mu"))
-      hess[[w]] <- with(input, .Call("hclogis_musigma", x, mean, sd, left, right))  
+      hess[[w]] <- with(input, .Call("hclogis_musigma", x, location, scale, left, right))  
   }
 
   hess <- do.call("cbind", hess)
@@ -94,11 +94,11 @@ hclogis <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
 }
 
 ## Expectation
-eclogis <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
-  rmm <- (right-mean)/sd
-  lmm <- (left-mean)/sd
+eclogis <- function(location = 0, scale = 1, left = -Inf, right = Inf) {
+  rmm <- (right-location)/scale
+  lmm <- (left-location)/scale
   pncens <- plogis(rmm)-plogis(lmm)
-  pncens*etlogis(mean = mean, sd = sd, left = left, right = right) + 
+  pncens*etlogis(location = location, scale = scale, left = left, right = right) + 
     plogis(lmm)*left^(is.finite(left)) + 
     plogis(rmm, lower.tail = FALSE)*right^(is.finite(right))
 }
