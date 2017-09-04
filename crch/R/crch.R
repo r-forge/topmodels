@@ -257,18 +257,18 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
       ddist3 <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
       sdist3 <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
       hdist3 <- if(dist == "student") hdist2 else function(..., df) hdist2(...)
-      ddist <- function(x, mean, sd, df, left = -Inf, right = Inf, log = TRUE) {    
-        - ddist3(x, location = mean, scale = sd, lower = left, 
+      ddist <- function(x, location, scale, df, left = -Inf, right = Inf, log = TRUE) {    
+        - ddist3(x, location = location, scale = scale, lower = left, 
           upper = right, df = df)
       }
-      sdist <- function(x, mean, sd, df, left = -Inf, right = Inf) {
-        rval <- - sdist3(x, df = df, location = mean, scale = sd, 
+      sdist <- function(x, location, scale, df, left = -Inf, right = Inf) {
+        rval <- - sdist3(x, df = df, location = location, scale = scale, 
           lower = left, upper = right)
 #        colnames(rval) <- c("dmu", "dsigma")
         rval
       }
-      hdist <- function(x, mean, sd, df, left = -Inf, right = Inf, which) {
-        rval <- - hdist3(x, df = df, location = mean, scale = sd, 
+      hdist <- function(x, location, scale, df, left = -Inf, right = Inf, which) {
+        rval <- - hdist3(x, df = df, location = location, scale = scale, 
           lower = left, upper = right)
         colnames(rval) <- c("d2mu", "d2sigma", "dmu.dsigma", "dsigma.dmu")
         rval
@@ -287,7 +287,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
   } else { 
     ## for user defined distribution (requires list with ddist, sdist (optional)
     ## and hdist (optional), ddist, sdist, and hdist must be functions with
-    ## arguments x, mean, sd, df, left, right, and log)
+    ## arguments x, location, sd, df, left, right, and log)
     ddist <- dist$ddist
     sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
     if(is.null(dist$hdist)) {
@@ -675,6 +675,10 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
           stop("right  must have length 1 or length of newdata")
       }
     }
+
+    if(is.null(left)) left <- object$cens$left
+    if(is.null(right)) right <- object$cens$right
+
     ## distribution function
     if(object$truncated) {
       distfun2 <- switch(type, 
@@ -704,8 +708,7 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
     distfun <- if(dist == "student") distfun2 else function(..., df) distfun2(...)
 
 
-    if(is.null(left)) left <- object$cens$left
-    if(is.null(right)) right <- object$cens$right
+
     
 
     ## distribution function for different formats of at
@@ -744,7 +747,7 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
     "location" = mu,
     "scale" = sigma,
     "response" = distfun(mu, sigma, df = df, left, right),
-    "parameter" = data.frame(mu, sigma),
+    "parameter" = data.frame(location = mu, scale = sigma),
     "density" = if(attype == "function") fun else fun(at, ...),
     "probability" = if(attype == "function") fun else fun(at, ...),
     "quantile" = if(attype == "function") fun else fun(at, ...),
@@ -840,12 +843,12 @@ residuals.crch <- function(object, type = c("standardized", "pearson", "response
       user defined distributions")
     if(object$truncated) {
       pdist <- switch(object$dist, 
-        "student"  = function(q, mean, sd) ptt(q, mean, sd, df = object$df), 
+        "student"  = function(q, location, scale) ptt(q, location, scale, df = object$df), 
         "gaussian" = ptnorm, 
         "logistic" = ptlogis)
     } else {
       pdist <- switch(object$dist, 
-        "student"  = function(q, mean, sd) pct(q, mean, sd, df = object$df), 
+        "student"  = function(q, location, scale) pct(q, location, scale, df = object$df), 
         "gaussian" = pcnorm, 
         "logistic" = pclogis)
     }
@@ -947,20 +950,41 @@ estfun.crch <- function(x, ...) {
 }
 
 
-pit.crch <- function(object, newdata = NULL, ...)
+pit.crch <- function(object, newdata = NULL, left = NULL, right = NULL, ...)
 {
   ## observed response
   mt <- terms(object)
   mf <- if(is.null(newdata)) model.frame(object) else model.frame(mt, newdata, na.action = na.omit)
   y <- model.response(mf)
 
+  ## for non-constant censoring or truncation points, left and right have to
+  ## be specified
+  if(!is.null(newdata)){
+    if(length(object$cens$left) > 1) {
+      if(is.null(left)) 
+        stop("left has to be specified for non-constant left censoring")
+      if(length(left) > 1 & length(left) != NROW(newdata)) 
+        stop("left must have length 1 or length of newdata")
+    }
+    if(length(object$cens$right) > 1) {
+      if(is.null(right)) 
+        stop("right has to be specified for non-constant right censoring")
+      if(length(right) > 1 & length(right) != NROW(newdata)) 
+        stop("right  must have length 1 or length of newdata")
+    }
+  }
+  if(is.null(left)) left <- object$cens$left
+  if(is.null(right)) right <- object$cens$right
+  y[y<left] <- left
+  y[y>right] <- right
+
   ## cdf
   pfun <- predict(object, newdata = newdata, type = "probability", 
-    at = "function", ...)
+    at = "function", left = left, right = right, ...)
   p <- pfun(y)
 
   ## in case of censoring provide interval
-  if(y01 <- any(y <= object$cens$left | y >= object$cens$right)) {
+  if(y01 <- any(y <= left | y >= right)) {
     p <- cbind(p, p)
     p[y01, 1L] <- pfun(y - .Machine$double.eps^0.9)[y01]
   }
@@ -970,7 +994,8 @@ pit.crch <- function(object, newdata = NULL, ...)
 utils::globalVariables("rootogram.default")
 
 rootogram.crch <- function(object, newdata = NULL, breaks = NULL,
-                              max = NULL, xlab = NULL, main = NULL, width = NULL, ...)
+  max = NULL, xlab = NULL, main = NULL, width = NULL, left = NULL,  
+  right = NULL, ...)
 {
     ## observed response and weights
     mt <- terms(object)
@@ -979,13 +1004,38 @@ rootogram.crch <- function(object, newdata = NULL, breaks = NULL,
     w <- model.weights(mf)
     if(is.null(w)) w <- rep.int(1, NROW(y))
 
+
+    ## for non-constant censoring or truncation points, left and right have to
+    ## be specified
+    if(!is.null(newdata)){
+      if(length(object$cens$left) > 1) {
+        if(is.null(left)) 
+          stop("left has to be specified for non-constant left censoring")
+        if(length(left) > 1 & length(left) != NROW(newdata)) 
+          stop("left must have length 1 or length of newdata")
+      }
+      if(length(object$cens$right) > 1) {
+        if(is.null(right)) 
+          stop("right has to be specified for non-constant right censoring")
+        if(length(right) > 1 & length(right) != NROW(newdata)) 
+          stop("right  must have length 1 or length of newdata")
+      }
+    }
+    if(is.null(left)) left <- object$cens$left
+    if(is.null(right)) right <- object$cens$right
+    y[y<left] <- left
+    y[y>right] <- right
+
     ## breaks
     if(is.null(breaks)) breaks <- "Sturges"
     breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
-    obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
+    if(min(breaks) == left) breaks <- c(left - .Machine$double.eps^0.9, breaks)
+    if(max(breaks) == right) breaks <- c(right - .Machine$double.eps^0.9, breaks)
 
+    obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
     ## expected frequencies
-    p <- predict(object, newdata, type = "probability", at = breaks)
+    p <- predict(object, newdata, type = "probability", at = breaks, 
+      left = left, right = right)
     p <- p[, -1L, drop = FALSE] - p[, -ncol(p), drop = FALSE]
     expctd <- colSums(p * w)
 
@@ -997,8 +1047,8 @@ rootogram.crch <- function(object, newdata = NULL, breaks = NULL,
 }
 
 
-simulate.crch <- function(object, nsim = 1, seed = NULL, ...) {
-    ## Does not support cbeta4 and cbetax yet
+simulate.crch <- function(object, newdata = NULL, nsim = 1, seed = NULL, 
+  left = NULL, right = NULL, ...) {
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
         runif(1)
     if (is.null(seed))
@@ -1009,19 +1059,44 @@ simulate.crch <- function(object, nsim = 1, seed = NULL, ...) {
         RNGstate <- structure(seed, kind = as.list(RNGkind()))
         on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     }
-    Xmean <- model.matrix(object, model = "mean")
-    n <- nrow(Xmean)
-    nm <- rownames(Xmean)
-    Xprecision <- model.matrix(object, model = "precision")
-    cMean <- coef(object, model = "mean")
-    cPrecision <- coef(object, model = "precision")
-    link_mean <- object$link$mean$linkinv
-    link_precision <- object$link$precision$linkinv
-    mus <- link_mean(c(Xmean %*% cMean))
-    phis <- link_precision(c(Xprecision %*% cPrecision))
-    ps <- mus * phis
-    qs <- (1 - mus) * phis
-    val <- matrix(1 - rbeta(n * nsim, qs, ps),  n, nsim)
+    
+
+    ## distribution function
+    if(object$truncated) {
+      rdist2 <- switch(object$dist, 
+            "student"  = rtt, "gaussian" = rtnorm, "logistic" = rtlogis)
+    } else {
+      rdist2 <- switch(object$dist, 
+            "student"  = rct, "gaussian" = rcnorm, "logistic" = rclogis)
+    }
+    rdist <- if(object$dist == "student") rdist2 else function(..., df) rdist2(...)
+
+    ## for non-constant censoring or truncation points, left and right have to
+    ## be specified
+    if(!is.null(newdata)){
+      if(length(object$cens$left) > 1) {
+        if(is.null(left)) 
+          stop("left has to be specified for non-constant left censoring")
+        if(length(left) > 1 & length(left) != NROW(newdata)) 
+          stop("left must have length 1 or length of newdata")
+      }
+      if(length(object$cens$right) > 1) {
+        if(is.null(right)) 
+          stop("right has to be specified for non-constant right censoring")
+        if(length(right) > 1 & length(right) != NROW(newdata)) 
+          stop("right  must have length 1 or length of newdata")
+      }
+    }
+    if(is.null(left)) left <- object$cens$left
+    if(is.null(right)) right <- object$cens$right
+
+
+    par <- predict(object, newdata, type = "parameter", 
+      left = left, right = right)
+    n <- nrow(par)
+    nm <- rownames(par)
+    val <- matrix(rdist(n * nsim, par$location, par$scale, df = object$df,
+      left = left, right = right),  n, nsim)
     val <- as.data.frame(val)
     names(val) <- paste("sim", seq_len(nsim), sep = "_")
     if (!is.null(nm)) {
