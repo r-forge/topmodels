@@ -101,7 +101,8 @@ fitting takes place.
   \item{dist}{assumed distribution for the dependent variable \code{y}.}
   \item{cens}{list of censoring points.}
   \item{optim}{output from optimization from \code{\link{optim}}.}
-  \item{method}{optimization method used for \code{\link{optim}}}
+  \item{method}{optimization method used for \code{\link{optim}}.}
+  \item{type}{used loss function (maximum likelihood or minimum CRPS).}
   \item{control}{list of control parameters passed to \code{\link{optim}}}
   \item{start}{starting values of coefficients used in the optimization.}
   \item{weights}{case weights used for fitting.}
