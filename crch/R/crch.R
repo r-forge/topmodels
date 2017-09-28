@@ -264,7 +264,7 @@ crch.fit <- function(x, z, y, left, right, truncated = FALSE,
       sdist <- function(x, location, scale, df, left = -Inf, right = Inf) {
         rval <- - sdist3(x, df = df, location = location, scale = scale, 
           lower = left, upper = right)
-#        colnames(rval) <- c("dmu", "dsigma")
+        colnames(rval) <- c("dmu", "dsigma")
         rval
       }
       hdist <- function(x, location, scale, df, left = -Inf, right = Inf, which) {
@@ -810,7 +810,7 @@ vcov.crch <- function(object, model = c("full", "location", "scale", "df"), ...)
 
 logLik.crch <- function(object, ...) structure(object$loglik, df = sum(sapply(object$coefficients, length)), class = "logLik")
 
-crps.crch <- function(object, newdata = NULL, mean = TRUE, ...) {
+crps.crch <- function(object, newdata = NULL, average = TRUE, ...) {
   if(length(object$crps)) {
     object$crps
   } else {
@@ -827,7 +827,7 @@ crps.crch <- function(object, newdata = NULL, mean = TRUE, ...) {
 #    rval <- scoringRules::crps(y, family = family, location = location, df = df,
 #      scale = scale, lower = left, upper = right, lmass = mass, umass = mass)
     rval <- predict(object, newdata = newdata, type = "crps", at = "response")
-    if(mean) rval <- mean(rval)
+    if(average) rval <- mean(rval)
     rval
   }
 }
