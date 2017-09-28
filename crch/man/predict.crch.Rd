@@ -9,7 +9,7 @@ Obtains various types of predictions for \code{crch} models.
 
 \usage{
 \method{predict}{crch}(object, newdata = NULL, type = c("location", "scale", 
-  "response, "quantile"), na.action = na.pass, at = 0.5, left = NULL, 
+  "response", "quantile"), na.action = na.pass, at = 0.5, left = NULL, 
   right = NULL, \dots)
 }
 
