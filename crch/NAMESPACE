@@ -1,5 +1,5 @@
 useDynLib(crch)
-import("stats", "Formula")
+import("stats", "Formula", "countreg", "scoringRules")
 importFrom("utils", "tail")
 importFrom("graphics", "abline", "axis", "par", "plot", "strwidth")
 importFrom("sandwich", "estfun")
@@ -37,9 +37,7 @@ export(
   "qtt",
   "rtt",
   "crch.boost",
-  "crch.boost.fit",
-  "crps.crch",
-  "pit.crch"
+  "crch.boost.fit"
 )
 
 ## methods for crch
@@ -57,7 +55,10 @@ S3method("update", "crch")
 S3method("model.frame", "crch")
 S3method("model.matrix", "crch")
 S3method("estfun", "crch")
-
+S3method("pit", "crch")
+S3method("rootogram", "crch")
+S3method("simulate", "crch")
+S3method("crps", "crch")
 S3method("plot", "crch.boost")
 S3method("coef", "crch.boost")
 S3method("logLik", "crch.boost")
