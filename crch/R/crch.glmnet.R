@@ -382,7 +382,7 @@ loglikpath <- a[[2]]
 
 plot.crch.glmnet <- function(object, 
   standardize = TRUE, which = c("both", "location", "scale"), mstop = NULL,
-  coef.label = TRUE, col = NULL, ...) 
+  coef.label = TRUE, col = NULL, ylim = NULL, ...) 
 {
   which <- match.arg(which)
   k <- length(object$coefficient$location)
@@ -434,7 +434,7 @@ plot.crch.glmnet <- function(object,
   rmar <- if(length(coef.label)) max(strwidth(colnames(object$coefpath), units = "in"))+0.5 else 0.42
   umar <- if(is.null(mstop)) 0.82 else 1.02
   par(mai = c(1.02, 0.82, umar, rmar))
-  ylim <- c(min(path), max(path))
+  if(is.null(ylim)) ylim <- c(min(path), max(path))
 
   plot(-log(object$lambda), path[,1], ylab = ylab, xlab = "log-lambda", col = col[1], 
     type = "l", xaxt = "n", ylim = ylim, ...)
