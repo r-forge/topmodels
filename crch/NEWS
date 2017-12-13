@@ -1,3 +1,8 @@
+Changes in Version 1.0-2
+
+  o Added new function "crch.stabsel" and a small S3 "stabsel.crch"
+    for stability selection based on "crch.boost.fit" (Reto)
+
 Changes in Version 1.0-1
   
   o Added argument 'type' to crch() which can be set to "crps" for parameter
