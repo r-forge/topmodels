@@ -1,14 +1,15 @@
 ## function to set some control parameters for boosting (replaces crch.control() for boosting)
 crch.boost <- function(maxit = 100, nu = 0.1, start = NULL, 
   dot = "separate", mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, 
-  foldid = NULL)
+  foldid = NULL, q = NULL )
 {
   if(is.numeric(mstop)) {
     maxit <- mstop
     mstop <- "max"
   }
   rval <- list(maxit = maxit, nu = nu, nfolds = nfolds, foldid = foldid, 
-    start = start, dot = dot, mstop = match.arg(mstop), fit = "crch.boost.fit")
+    start = start, dot = dot, mstop = match.arg(mstop), q = q,
+    fit = "crch.boost.fit")
   rval
 }
 
@@ -91,7 +92,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
 
   ## control parameters
   maxit <- control$maxit
-  nu <- control$nu
+  nu    <- control$nu
   start <- control$start
   mstop <- control$mstop
 
@@ -135,7 +136,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     y = list(center = attr(y, "standardize:center"), scale = attr(y, "standardize:scale")))
 
   ## standardize left, right, and offset
-  left <- (left - standardize$y$center)/standardize$y$scale
+  left  <- (left - standardize$y$center) /standardize$y$scale
   right <- (right - standardize$y$center)/standardize$y$scale
   offset[[1L]]  <- offset[[1L]]/standardize$y$scale
 
@@ -236,7 +237,11 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   }
 
 
-  ## actual boosting
+  ## Indicator for stability selection
+  ## Only perform stability selection iff qmax is given, numeric, and larger than 0
+  stabsel <- all( ! c( ! is.numeric(control$q),
+                       control$q < 1, ! "q" %in% names(control) ) )
+
   for(i in startit:maxit) {
     ## gradient of negative likelihood
     grad <- gradfun(par)
@@ -250,8 +255,8 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     par3 <- par
     minind <- which.max(abs(basefits))
     par3[k + minind] <- par3[k + minind] + nu*basefits[minind]
-
-
+  
+  
     ## to compare mu and sigma improvements loglik must be used instead of rss
     ll3 <- -loglikfun(par3)
     ll2 <- -loglikfun(par2)
@@ -259,10 +264,22 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     coefpath <- rbind(coefpath, par)
     llnew <- max(ll3, ll2)
     loglikpath <- rbind(loglikpath, llnew)
+  
+    ## If stability selection (q selected) stop as soon
+    ## as q parameters have been choosen.
+    if ( stabsel ) {
+       ## Count number of selected parameters, ignore intercepts
+       parsel <- c(colnames(x),colnames(z))[which(par!=0)]
+       parsel <- length(grep("[^(Intercept)]",parsel))
+       cat(sprintf("Iteration %d/%d parameters added %d/%d\r",i,maxit,parsel,length(par)))
+       if ( parsel >= control$q ) break
+    }
+  
   }
+  if ( stabsel ) cat("\n") # end output
 
   ## cross validation to find optimum mstop
-  if(mstop == "cv") {
+  if( mstop == "cv" ) {
     foldid <- control$foldid
     nfolds <- control$nfolds
     control$standardize <- FALSE

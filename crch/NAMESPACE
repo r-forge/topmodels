@@ -9,6 +9,7 @@ export(
   "trch",
   "crch.control",
   "crch.fit",
+  "crch.stabsel",
   "getSummary.crch",
   "hxlr",
   "hxlr.control",
@@ -66,6 +67,8 @@ S3method("predict", "crch.boost")
 S3method("print", "crch.boost")
 S3method("summary", "crch.boost")
 S3method("print", "summary.crch.boost")
+S3method("print", "stabsel.crch")
+S3method("plot",  "stabsel.crch")
 
 ## methods for hxlr
 S3method("logLik", "hxlr")
