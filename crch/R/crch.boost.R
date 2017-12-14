@@ -97,12 +97,12 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   mstop <- control$mstop
 
   ## extend left and right to vectors of length n
+  left2 <- left
+  right2 <- right
   if(length(left) == 1) {
-    left2 <- left
     left <- rep(left, n)
   }
   if(length(right) == 1) {
-    right2 <- right
     right <- rep(right, n)
   }
 
