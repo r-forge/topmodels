@@ -97,8 +97,14 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   mstop <- control$mstop
 
   ## extend left and right to vectors of length n
-  if(length(left) == 1) left <- rep(left, n)
-  if(length(right) == 1) right <- rep(right, n)
+  if(length(left) == 1) {
+    left2 <- left
+    left <- rep(left, n)
+  }
+  if(length(right) == 1) {
+    right2 <- right
+    right <- rep(right, n)
+  }
 
   ## link
   if(is.character(link.scale)) {
@@ -313,8 +319,6 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
       
   colnames(coefpath) <- c(colnames(x), paste("scale_", colnames(z), sep = ""))
   ## restandardize
-  left  <-  left*standardize$y$scale + standardize$y$center
-  right <- right*standardize$y$scale + standardize$y$center
   offset[[1L]] <- offset[[1L]]*standardize$y$scale
   beta <- coefpath[,seq.int(length.out = k), drop = FALSE]
   gamma <- coefpath[,seq.int(length.out = q) + k, drop = FALSE]
@@ -355,7 +359,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     residuals = y - mu,
     fitted.values = list(location = mu, scale = sigma),
     dist = dist,
-    cens = list(left = left, right = right), 
+    cens = list(left = left2, right = right2), 
     control = control,
     weights = if(identical(as.vector(weights), rep.int(1, n))) NULL else weights,
     offset = list(location = if(identical(offset[[1L]], rep.int(0, n))) NULL else 
