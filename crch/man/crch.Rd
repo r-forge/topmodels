@@ -12,16 +12,16 @@
 crch(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"),
   dist = c("gaussian", "logistic", "student"), df = NULL, 
-  left = -Inf, right = Inf, truncated = FALSE, type = "ml", 
-  control = crch.control(\dots), model = TRUE, x = FALSE, 
-  y = FALSE, \dots)
+  left = -Inf, right = Inf, truncated = FALSE, 
+  type = c("ml", "crps"), control = crch.control(\dots), 
+  model = TRUE, x = FALSE, y = FALSE, \dots)
 
 trch(formula, data, subset, na.action, weights, offset, 
   link.scale = c("log", "identity", "quadratic"),
   dist = c("gaussian", "logistic", "student"), df = NULL, 
-  left = -Inf, right = Inf, truncated = TRUE, type = "ml",
-  control = crch.control(\dots), model = TRUE, x = FALSE,
-  y = FALSE, \dots)
+  left = -Inf, right = Inf, truncated = TRUE, 
+  type = c("ml", "crps"), control = crch.control(\dots), 
+  model = TRUE, x = FALSE, y = FALSE, \dots)
 
 crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   df = NULL, link.scale = "log", type = "ml", weights = NULL, offset = NULL, 

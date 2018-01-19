@@ -9,7 +9,8 @@
 }
 \usage{
 crch.boost(maxit = 100, nu = 0.1, start = NULL, dot = "separate", 
-  mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, foldid = NULL)
+  mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, foldid = NULL, 
+  maxvar = NULL)
 
 crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   df = NULL, link.scale = "log", type = "ml", weights = NULL, offset = NULL, 
@@ -27,7 +28,8 @@ crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
     so that the parts are expanded sequentially conditional on all prior parts.
     Default is \code{"separate"}}
   \item{mstop}{method to find optimum stopping iteration. Default is \code{"max"}
-    which is \code{maxit}. Alternatives are \code{"aic"} and \code{"bic"} for AIC and BIC
+    which is \code{maxit}. Alternatives are \code{"aic"} and \code{"bic"} for 
+    AIC and BIC
     optimization and \code{"cv"} for cross validation.
     \code{mstop} can also be a positive integer to set the number of boosting
     iterations. Then \code{maxit} is set to \code{mstop} and \code{mstop="max"}.}
@@ -35,6 +37,8 @@ crch.boost.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   \item{foldid}{if \code{mstopopt = "cv"}, an optional vector of values between 1 
     and \code{nfold} identifying the fold each observation is in. If supplied,
     \code{nfolds} can be missing.}
+  \item{maxvar}{Positive \code{numeric}. Maximum number of parameters to be selected
+    during each iteration (not including intercepts). Used for stability selection.}
   \item{x, z, y, left, right, truncated, dist, df, link.scale, type, weights, offset, control}{see \code{\link{crch.fit}} for details.}
 }
 
