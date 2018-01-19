@@ -8,7 +8,8 @@
    \code{\link{crch}} models based on \code{\link{crch.boost}}.
 }
 \usage{
-crch.stabsel(formula, data, ..., nu = 0.1, q = 10, B = 100, thr = 0.9, maxit = 2000 )
+crch.stabsel(formula, data, ..., nu = 0.1, q, B = 100, thr = 0.9, 
+  maxit = 2000, data_percentage = 0.5)
 }
 \arguments{
   \item{formula}{a formula expression of the form \code{y ~ x | z} where
