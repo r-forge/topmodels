@@ -12,14 +12,14 @@
   degrees of freedom.  
 }
 \usage{
-dct(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, log = FALSE)
+dct(x, location = 0, scale = 1, df, left = -Inf, right = Inf, log = FALSE)
 
-pct(q, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+pct(q, location = 0, scale = 1, df, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 
-rct(n, mean = 0, sd = 1, df, left = -Inf, right = Inf)
+rct(n, location = 0, scale = 1, df, left = -Inf, right = Inf)
 
-qct(p, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+qct(p, location = 0, scale = 1, df, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 }
 \arguments{
@@ -27,8 +27,8 @@ qct(p, mean = 0, sd = 1, df, left = -Inf, right = Inf,
   \item{p}{vector of probabilities.}
   \item{n}{number of observations. If \code{length(n) > 1}, the length is
   taken to be the number required.}
-  \item{mean}{location parameter.}
-  \item{sd}{scale parameter.}
+  \item{location}{location parameter.}
+  \item{scale}{scale parameter.}
   \item{df}{degrees of freedom (> 0, maybe non-integer).  \code{df = Inf} is
   allowed.}
   \item{left}{left censoring point.}
@@ -39,7 +39,7 @@ qct(p, mean = 0, sd = 1, df, left = -Inf, right = Inf,
 }
 
 \details{
-If \code{mean} or \code{sd} are not specified they assume the default values
+If \code{location} or \code{scale} are not specified they assume the default values
 of \code{0} and \code{1}, respectively. \code{left} and \code{right} have the defaults \code{-Inf} and \code{Inf} respectively.
 
 The censored student-t distribution has density \eqn{f(x)}:

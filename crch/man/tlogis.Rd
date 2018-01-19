@@ -11,14 +11,14 @@
   for the left and/or right truncated logistic distribution.  
 }
 \usage{
-dtlogis(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE)
+dtlogis(x, location = 0, scale = 1, left = -Inf, right = Inf, log = FALSE)
 
-ptlogis(q, mean = 0, sd = 1, left = -Inf, right = Inf,
+ptlogis(q, location = 0, scale = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE)
 
-rtlogis(n, mean = 0, sd = 1, left = -Inf, right = Inf)
+rtlogis(n, location = 0, scale = 1, left = -Inf, right = Inf)
 
-qtlogis(p, mean = 0, sd = 1, left = -Inf, right = Inf, 
+qtlogis(p, location = 0, scale = 1, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 }
 \arguments{
@@ -26,8 +26,8 @@ qtlogis(p, mean = 0, sd = 1, left = -Inf, right = Inf,
   \item{p}{vector of probabilities.}
   \item{n}{number of observations. If \code{length(n) > 1}, the length is
   taken to be the number required.}
-  \item{mean}{location parameter.}
-  \item{sd}{scale parameter.}
+  \item{location}{location parameter.}
+  \item{scale}{scale parameter.}
   \item{left}{left truncation point.}
   \item{right}{right truncation point.}
   \item{log, log.p}{logical; if TRUE, probabilities p are given as log(p).}
@@ -36,7 +36,7 @@ qtlogis(p, mean = 0, sd = 1, left = -Inf, right = Inf,
 }
 
 \details{
-If \code{mean} or \code{sd} are not specified they assume the default values
+If \code{location} or \code{scale} are not specified they assume the default values
 of \code{0} and \code{1}, respectively. \code{left} and \code{right} have the defaults \code{-Inf} and \code{Inf} respectively.
 
 The truncated logistic distribution has density 
