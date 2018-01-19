@@ -4,7 +4,7 @@ crch.stabsel <- function( formula, data, ..., nu = 0.1, q, B = 100, thr = .9, ma
   ## Checking threshold. Thresholds have to be >0.5 and <1.0
   if ( thr <= 0.5 | thr >=1 )
     stop("Parameter \"thr\" for crch.stabsel has to be > 0.5 and < 1.0!")
-  control = crch::crch.boost( q = q, maxit = maxit, nu = nu )
+  control = crch::crch.boost( maxvar = q, maxit = maxit, nu = nu )
 
   ## Check if user has set left/right. Left/right can only be numeric
   ## not vectors in the case of stability selection at the moment.
