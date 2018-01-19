@@ -600,7 +600,6 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
 
   ## extract some values from fitted object
   dist <- object$dist  
-  df <- object$df
 
 
   ## get mu and sigma
@@ -712,7 +711,7 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
     
 
     ## distribution function for different formats of at
-    fun <- function(at, location = mu, scale = sigma, df = df, ...) {
+    fun <- function(at, location = mu, scale = sigma, df = object$df, ...) {
       n <- length(location)
       if(length(left) == 1L) left <- rep.int(left, n)
       if(length(right) == 1L) right <- rep.int(right, n)
@@ -746,7 +745,7 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
   rval <- switch(type,
     "location" = mu,
     "scale" = sigma,
-    "response" = distfun(mu, sigma, df = df, left, right),
+    "response" = distfun(mu, sigma, df = object$df, left, right),
     "parameter" = data.frame(location = mu, scale = sigma),
     "density" = if(attype == "function") fun else fun(at, ...),
     "probability" = if(attype == "function") fun else fun(at, ...),
