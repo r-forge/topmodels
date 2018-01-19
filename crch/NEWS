@@ -1,14 +1,9 @@
-Changes in Version 1.0-2
-
-  o Added new function "crch.stabsel" and a small S3 "stabsel.crch"
-    for stability selection based on "crch.boost.fit" (Reto)
-
 Changes in Version 1.0-1
   
   o Added argument 'type' to crch() which can be set to "crps" for parameter
     estimation with minimum CRPS instead of maximum likelihood. 
 
-  o Added crps() method for "crch" objects.
+  o Added S3 method of crps() from scoringRules for "crch" objects.
 
   o Improvements for the predict() method:
     - new types "parameter", "density", "probability", and "crps"
@@ -21,9 +16,11 @@ Changes in Version 1.0-1
 
   o Changed argument names mean and sd to location and scale in logistic and
     student-t distribution functions 
-  
-  
 
+  o Added new function "crch.stabsel" for stability selection based on    
+    "crch.boost.fit". Small S3 methods for the returned class "stabsel.crch"
+    are also provided.
+  
 
 Changes in Version 1.0-0
   
