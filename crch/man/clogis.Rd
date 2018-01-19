@@ -11,14 +11,14 @@
   for the left and/or right censored logistic distribution.  
 }
 \usage{
-dclogis(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE)
+dclogis(x, location = 0, scale = 1, left = -Inf, right = Inf, log = FALSE)
 
-pclogis(q, mean = 0, sd = 1, left = -Inf, right = Inf, 
+pclogis(q, location = 0, scale = 1, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 
-rclogis(n, mean = 0, sd = 1, left = -Inf, right = Inf)
+rclogis(n, location = 0, scale = 1, left = -Inf, right = Inf)
 
-qclogis(p, mean = 0, sd = 1, left = -Inf, right = Inf,
+qclogis(p, location = 0, scale = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE)
 }
 \arguments{
@@ -26,8 +26,8 @@ qclogis(p, mean = 0, sd = 1, left = -Inf, right = Inf,
   \item{p}{vector of probabilities.}
   \item{n}{number of observations. If \code{length(n) > 1}, the length is
   taken to be the number required.}
-  \item{mean}{location parameter.}
-  \item{sd}{scale parameter.}
+  \item{location}{location parameter.}
+  \item{scale}{scale parameter.}
   \item{left}{left censoring point.}
   \item{right}{right censoring point.}
   \item{log, log.p}{logical; if TRUE, probabilities p are given as log(p).}
@@ -36,7 +36,7 @@ qclogis(p, mean = 0, sd = 1, left = -Inf, right = Inf,
 }
 
 \details{
-If \code{mean} or \code{sd} are not specified they assume the default values
+If \code{location} or \code{scale} are not specified they assume the default values
 of \code{0} and \code{1}, respectively. \code{left} and \code{right} have the defaults \code{-Inf} and \code{Inf} respectively.
 
 The censored logistic distribution has density \eqn{f(x)}:

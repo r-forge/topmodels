@@ -12,14 +12,14 @@
   degrees of freedom.  
 }
 \usage{
-dtt(x, mean = 0, sd = 1, df, left = -Inf, right = Inf, log = FALSE)
+dtt(x, location = 0, scale = 1, df, left = -Inf, right = Inf, log = FALSE)
 
-ptt(q, mean = 0, sd = 1, df, left = -Inf, right = Inf, 
+ptt(q, location = 0, scale = 1, df, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 
-rtt(n, mean = 0, sd = 1, df, left = -Inf, right = Inf)
+rtt(n, location = 0, scale = 1, df, left = -Inf, right = Inf)
 
-qtt(p, mean = 0, sd = 1, df, left = -Inf, right = Inf,
+qtt(p, location = 0, scale = 1, df, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE)
 }
 \arguments{
@@ -27,8 +27,8 @@ qtt(p, mean = 0, sd = 1, df, left = -Inf, right = Inf,
   \item{p}{vector of probabilities.}
   \item{n}{number of observations. If \code{length(n) > 1}, the length is
   taken to be the number required.}
-  \item{mean}{location parameter.}
-  \item{sd}{scale parameter.}
+  \item{location}{location parameter.}
+  \item{scale}{scale parameter.}
   \item{df}{degrees of freedom (> 0, maybe non-integer).  \code{df = Inf} is
   allowed.}
   \item{left}{left censoring point.}
@@ -39,7 +39,7 @@ qtt(p, mean = 0, sd = 1, df, left = -Inf, right = Inf,
 }
 
 \details{
-If \code{mean} or \code{sd} are not specified they assume the default values
+If \code{location} or \code{scale} are not specified they assume the default values
 of \code{0} and \code{1}, respectively. \code{left} and \code{right} have the defaults \code{-Inf} and \code{Inf} respectively.
 
 The truncated student-t distribution has density 

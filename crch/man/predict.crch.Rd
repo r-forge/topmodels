@@ -9,8 +9,8 @@ Obtains various types of predictions for \code{crch} models.
 
 \usage{
 \method{predict}{crch}(object, newdata = NULL, type = c("location", "scale", 
-  "response", "quantile"), na.action = na.pass, at = 0.5, left = NULL, 
-  right = NULL, \dots)
+  "response", "parameter", "density", "probability", "quantile", "crps"), 
+  na.action = na.pass, at = 0.5, left = NULL, right = NULL, \dots)
 }
 
 \arguments{
@@ -22,12 +22,21 @@ Obtains various types of predictions for \code{crch} models.
   \code{"scale"} returns the scale of the predicted distribution.
   \code{"response"} returns the expected value of the predicted distribution
   (not equal to location for censored and truncated distributions).
+  \code{"parameter"} returns a data frame with predicted location and scale 
+  parameters.
+  \code{"density"} evaluates the predictive density at \code{at}.
+  \code{"probability"} evaluates the predictive CDF at \code{at}.
   \code{"quantile"} returns a matrix of predicted quantiles with quantile
-  probabilities \code{at}.}
+  probabilities \code{at}.
+  \code{"crps"} returns the CRPS of the predictive distributions at \code{at}.}
   \item{na.action}{a function which indicates what should happen when the data
   contain \code{NA}s. Default is na.pass}
-  \item{at}{vector of quantile probabilities used for \code{type =
-  "quantile"}.}
+  \item{at}{a vector of values to evaluate the predictive density (\code{type =
+  "density"}), probability (\code{type = "probability"}), or CRPS (\code{type =
+  "crps"}) or a vector of quantile probabilities used for \code{type =
+  "quantile"}.
+  Alternatively, with \code{at = "function"} a function is returned that 
+  takes \code{at} as an argument.}
   \item{left}{left censoring or truncation point. Only used for \code{type = "quantile"}.
   If NULL, censoring or truncation point is obtained from \code{object}.}
   \item{right}{right censoring or truncation point. Only used for \code{type = "quantile"}.
