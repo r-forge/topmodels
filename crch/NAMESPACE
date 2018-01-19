@@ -1,8 +1,10 @@
 useDynLib(crch)
 import("stats", "Formula", "countreg", "scoringRules")
 importFrom("utils", "tail")
-importFrom("graphics", "abline", "axis", "par", "plot", "strwidth")
+importFrom("graphics", "abline", "axis", "par", "plot", "strwidth", "barplot", 
+  "hist", "legend", "title")
 importFrom("sandwich", "estfun")
+importFrom("grDevices", "gray.colors")
 
 export(
   "crch",
