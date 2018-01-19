@@ -1,14 +1,14 @@
 ## function to set some control parameters for boosting (replaces crch.control() for boosting)
 crch.boost <- function(maxit = 100, nu = 0.1, start = NULL, 
   dot = "separate", mstop = c("max", "aic", "bic", "cv"),  nfolds = 10, 
-  foldid = NULL, q = NULL )
+  foldid = NULL, maxvar = NULL )
 {
   if(is.numeric(mstop)) {
     maxit <- mstop
     mstop <- "max"
   }
   rval <- list(maxit = maxit, nu = nu, nfolds = nfolds, foldid = foldid, 
-    start = start, dot = dot, mstop = match.arg(mstop), q = q,
+    start = start, dot = dot, mstop = match.arg(mstop), maxvar = maxvar,
     fit = "crch.boost.fit")
   rval
 }
@@ -244,9 +244,9 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
 
 
   ## Indicator for stability selection
-  ## Only perform stability selection iff qmax is given, numeric, and larger than 0
-  stabsel <- all( ! c( ! is.numeric(control$q),
-                       control$q < 1, ! "q" %in% names(control) ) )
+  ## Only perform stability selection if maxvar is given, numeric, and larger than 0
+  stabsel <- all( ! c( ! is.numeric(control$maxvar),
+                       control$maxvar < 1, ! "maxvar" %in% names(control) ) )
 
   for(i in startit:maxit) {
     ## gradient of negative likelihood
@@ -271,14 +271,14 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
     llnew <- max(ll3, ll2)
     loglikpath <- rbind(loglikpath, llnew)
   
-    ## If stability selection (q selected) stop as soon
-    ## as q parameters have been choosen.
+    ## If stability selection (maxvar selected) stop as soon
+    ## as maxvar parameters have been choosen.
     if ( stabsel ) {
        ## Count number of selected parameters, ignore intercepts
        parsel <- c(colnames(x),colnames(z))[which(par!=0)]
        parsel <- length(grep("[^(Intercept)]",parsel))
        cat(sprintf("Iteration %d/%d parameters added %d/%d\r",i,maxit,parsel,length(par)))
-       if ( parsel >= control$q ) break
+       if ( parsel >= control$maxvar ) break
     }
   
   }
@@ -347,6 +347,9 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   gamma <- fit$gamma
   mu <- fit$mu
   sigma <- fit$sigma
+  ll <- -sum(weights*ddist(round(y, digits = 6), mu, sigma, df = df, left = left2, right = right2, log = TRUE))
+    if(sum) if(any(!is.finite(ll))) NaN else -sum(weights[subset] * ll)  
+    else weights[subset] * ll
   ll <- - loglikfun(par)
 
   names(beta) <- colnames(x)
@@ -625,16 +628,14 @@ plot.crch.boost <- function(x, loglik = FALSE,
   }
 }
 
-predict.crch.boost <- function(object, newdata = NULL, mstop = NULL, 
-  na.action = na.pass, at = 0.5, left = NULL, right = NULL, ...)
+predict.crch.boost <- function(object, newdata = NULL, mstop = NULL, ...)
 {
   object <- mstop.crch.boost(object, mstop = mstop)
   if(missing(newdata)) {
     if(!is.null(mstop)) stop("newdata has to be supplied for user defined mstop")
-    predict.crch(object, na.action = na.action, at = at, left = left, right = right, ...)
+    predict.crch(object, ...)
   } else {
-    predict.crch(object, newdata = newdata, na.action = na.action, 
-      at = at, left = left, right = right, ...)
+    predict.crch(object, newdata = newdata, ...)
   }
 }
 
