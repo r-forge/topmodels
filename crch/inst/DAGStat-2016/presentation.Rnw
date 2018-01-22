@@ -444,7 +444,7 @@ Efficient algorithm for different $\lambda$ \citep{Friedman2010}
 \setkeys{Gin}{width=1.03\textwidth}
 <<echo=FALSE,results=hide,fig=TRUE,width=8, height=5>>=
 load("fitted.rda")
-source("~/Dropbox/meteoR/crch/R/crch.glmnet.R")
+source("~/Documents/meteoR/crch/R/crch.glmnet.R")
 par(mfrow = c(1,2))
 #label <- list(location = c("(Intercept)", "tp_mean", "tptp_mean", "tpv700_mean"), 
 #  scale=c("tpv700_sd", "tpu700_sd", "(Intercept)"))
