@@ -1046,7 +1046,7 @@ rootogram.crch <- function(object, newdata = NULL, breaks = NULL,
 }
 
 
-simulate.crch <- function(object, newdata = NULL, nsim = 1, seed = NULL, 
+simulate.crch <- function(object, nsim = 1, seed = NULL, newdata = NULL, 
   left = NULL, right = NULL, ...) {
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
         runif(1)
