@@ -5,9 +5,6 @@ inst/EGU2017
 inst/wien20170427
 inst/KIT-2016
 inst/paper
-R/crch.glmnet.R
-src/crch.glmnet.c
-src/crch.glmnetnew.c
-src/crch.glmnetnet.c
+inst/glmnetsource
 R/test.R
 
