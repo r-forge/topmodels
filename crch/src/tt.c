@@ -3,7 +3,7 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 
-SEXP dtt(SEXP y, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right, SEXP give_log)
+SEXP cdtt(SEXP y, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right, SEXP give_log)
 {
   int i, n = length(y);
 
@@ -44,7 +44,7 @@ SEXP dtt(SEXP y, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right, SEXP give_
 }
 
 
-SEXP ptt(SEXP q, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right, SEXP lower_tail, SEXP log_p)
+SEXP cptt(SEXP q, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right, SEXP lower_tail, SEXP log_p)
 {
   int i, n = length(q);
 
