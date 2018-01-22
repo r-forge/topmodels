@@ -1,0 +1,6 @@
+Regularized censored regression with conditional heteroskedasticity
+
+Censored regression models such as the classic tobit model are often used to model limited responses, typically non-negative variables censored at zero. While originally employed for economic applications, e.g., the expenditures for durable goods, such models recently gained popularity in the atmospheric sciences for modeling precipitation or wind power. In this context it is important not only to link the mean to the regressors but also include a submodel for the scale of the response distribution. 
+When applying this heteroskedastic censored regression to high-dimensional data, over-fitting can occur and decrease the predictive performance.
+To avoid this problem we present two methods: a gradient boosting approach and a coordinate descent algorithm to derive lasso paths. Both methods regularize the coefficients and can be used to automatically select the most relevant input variables.
+We test and compare these algorithms on weather data to derive probabilistic precipitation forecasts on the basis of various outputs of numerical weather prediction models.
