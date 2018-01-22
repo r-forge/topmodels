@@ -1,0 +1,437 @@
+\documentclass[11pt,compress,t]{beamer}
+\usetheme{eeecon}
+\usepackage{color}
+\usepackage{natbib}
+\usepackage{Sweave}
+\usepackage{array}
+%% pick one of the logos
+%% default logo: generic uibk banner
+\Logo{DTU-title}
+%% alternatives: eeecon research center logos
+% \Logo[5mm]{eeecon-empec}
+% \Logo[5mm]{eeecon-expec}
+% \Logo[0mm]{eeecon-environec}
+\setbeamertemplate{footline}[frame number]
+
+
+
+%\usepackage{Sweave}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{multicol}
+\usepackage{natbib}
+
+\title[Nonhomogeneous Boosting]{Nonhomogeneous Boosting for Predictor Selection in Ensemble Postprocessing}
+\author{Jakob W. Messner, Georg J. Mayr, and Achim Zeileis}
+\URL{Electrical Engineering, Technical University of Denmark (DTU)}
+\date{26.04.2017}
+	
+\newcommand{\tabitem}{{\color{dtured}$\bullet$} }
+
+\begin{document}
+\section{Bookmark Title}
+
+\begin{frame}
+  \frametitle{Weather forecasts}
+  \textbf{Numerical Weather Prediction (NWP)}
+  \begin{itemize}
+    \item Observations $\rightarrow$ estimate current atmospheric state.
+    \item Simulate atmospheric processes with numerical models.
+  \end{itemize}
+  \vspace{0.1cm}
+  $\Rightarrow$ Compute future weather\pause
+  \vspace{1cm}
+
+  \textbf{Problems:}
+  \begin{itemize}
+    \item Few observations
+    \item Observation errors
+    \item Not perfectly known atmospheric processes
+    \item Unresolved processes
+  \end{itemize}
+  \vspace{0.1cm}
+  $\Rightarrow$ NWP errors
+
+\end{frame}
+
+\setkeys{Gin}{width=\textwidth}
+<<preliminaries, echo=FALSE, results=hide>>=
+library("zoo")
+library("crch")
+load("~/Documents/meteoR/varselect/data/Tmax11036_66.rda")
+
+uibkblue <- rgb(18, 50, 111, maxColorValue = 255)
+uibkorange <- rgb(242, 146, 0, maxColorValue = 255)
+@
+
+\begin{frame}
+\frametitle{NWP errors}
+\begin{overprint}
+\onslide<1>
+<<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
+source("fun.R")
+ylim <- c(0,35)
+plot(data$tmax2m[1:20], type = "l", ylim = ylim, col = uibkblue, lwd = 2,
+  xlab = "Date", ylab = "maximum temperature [degree C]", 
+  main = "54-66 hours maximum temperature")
+
+legend("topleft", lwd = 2, col = c(uibkblue), 
+  bty = "n", legend = c("NWP forecast"))
+@
+
+\onslide<2>
+<<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
+plot(data$tmax2m[1:20], type = "l", ylim = ylim, col = uibkblue, lwd = 2,
+  xlab = "Date", ylab = "maximum temperature [degree C]", 
+  main = "Innsbruck JJA maximum temperature (+30h to +42h)")
+
+lines(data$Tmax[1:20], col = uibkorange, lwd = 2)
+
+legend("topleft", lwd = c(2,2), col = c(uibkblue, uibkorange), 
+  bty = "n", legend = c("NWP forecast", "observation"))
+
+@
+
+
+\end{overprint}
+\end{frame}
+\begin{frame}
+\frametitle{NWP errors}
+\begin{overprint}
+  \onslide<1>
+<<echo=FALSE, results=hide,fig=TRUE,width=6,height=4.5>>=
+mod1 <- crch(Tmax ~ tmax2m, data)
+scatter()
+abline(0,1, lty=3)
+@
+  \onslide<2>
+<<echo=FALSE,results=hide,fig=TRUE,width=6,height=4.5>>=
+scatter()
+abline(0,1, lty=3)
+abline(mod1, col = uibkorange, lwd = 2)
+legend("topleft", col = c(uibkorange), lwd = 2, 
+  bty = "n", legend = c("linear regression"))
+@
+\end{overprint}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Ensemble prediction}
+  \textbf{NWP error sources:}
+    \begin{itemize} 
+      \item Initial conditions
+      \item Model formulations\pause
+    \end{itemize}
+    \vspace{0.5cm}
+    
+    \textbf{Idea:}
+    \begin{itemize}
+      \item Perturbed initial conditions
+      \item Different model formulations 
+    \end{itemize}
+
+    $\Rightarrow$ Compute different weather scenarios
+
+\end{frame}
+
+
+
+
+\begin{frame}
+\frametitle{NWP errors}
+\begin{overprint}
+  \onslide<1>
+<<echo=FALSE,fig=TRUE,width=6, height=4.5>>=
+plot(data$tmax2m[1:20], type = "l", ylim = ylim, col = uibkblue, lwd = 2,
+  xlab = "Date", ylab = "maximum temperature [degree C]", 
+  main = "Innsbruck JJA maximum temperature (+30h to +42h)")
+
+lines(data$Tmax[1:20], col = uibkorange, lwd = 2)
+
+legend("topleft", lwd = c(2,2), col = c(uibkblue, uibkorange), 
+  bty = "n", legend = c("NWP forecast", "observation"))
+
+@   
+  \onslide<2>
+<<echo=FALSE,fig=TRUE,width=6, height=4.5>>=
+plot(data$tmax2m[1:20], type = "l", ylim = ylim, col = adjustcolor(uibkblue, alpha = 0.2), lwd = 2,
+  xlab = "Date", ylab = "maximum temperature [degree C]", 
+  main = "Innsbruck JJA maximum temperature (+30h to +42h)")
+
+lines(data$Tmax[1:20], col = uibkorange, lwd = 2)
+
+for(i in 2:12) lines(data$tmax2m[1:20] + rnorm(20, sd = 1), lwd = 2, col = adjustcolor(uibkblue, alpha = 0.2))
+lines(data$tmax2m,col = uibkblue, lwd = 2)
+
+legend("topleft", lwd = c(2,2,2), col = c(uibkorange, adjustcolor(uibkblue, alpha = 0.2), uibkblue), bty = "n", legend = c("observation",  "ensemble forecasts", "ensemble mean"))
+@   
+\end{overprint}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Nonhomogeneous Gaussian regression (NGR)}
+\begin{overprint}
+\onslide<1>
+\begin{eqnarray*}  
+  y &\sim& \mathsf{N}(\mu, \sigma)\\
+  \mu &=& \beta_0 + \beta_1 x\\
+  \log(\sigma) &=& \gamma_0 + \gamma_1 z 
+\end{eqnarray*}
+\begin{tabular}{ll}
+  $y$ & response (e.g., temperature)\\
+  $x$ & ensemble mean (e.g., of temperature ensemble)\\
+  $z$ & ensemble standard deviation\\
+  $\beta_0, \beta_1, \gamma_0, \gamma_1$ & regression coefficients
+\end{tabular}
+
+\onslide<2>
+<<echo=FALSE,fig=TRUE, width=6, height=4.5>>=
+source("fun.R")
+scatter()
+abline(0, 1, lty = 2)
+abline(linear, col = uibkorange, lwd = 2)
+addpdf(15, scalefactor = 0.8, legend = FALSE)
+addpdf(15, scalefactor = 1.4, legend = FALSE, lty = 2)
+legend("bottomright", col = uibkblue, lty = c(1,2), 
+  legend = c("small ens. std.", "large ens. std"))
+@
+
+\end{overprint}
+\end{frame}
+
+\begin{frame}
+\frametitle{Nonhomogeneous Gaussian regression (NGR)}
+
+\textbf{Inputs:}
+\begin{itemize}
+  \item deterministic MOS: common to use multiple input variables
+  \item NGR: usually only ensemble forecasts of forecast variable (e.g. maximum temperature)
+  \item other potential variables:
+  \begin{itemize}
+    \item ensemble forecasts of other variables (pressure, cloud cover, ...)
+    \item current observations
+    \item ensemble or deterministic forecasts from other centers
+    \item transformations or interactions 
+    \item $\ldots$
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Nonhomogeneous Gaussian regression (NGR)}
+
+\begin{eqnarray*}
+  y &\sim& \mathsf{N}(\mu, \sigma)\\
+  \mu &=& \beta_0 + \beta_1 x_1 + \beta_1 x_2 + \ldots + \epsilon = \mathbf{x}^\top \beta \\
+  \log(\sigma) &=& \gamma_0 + \gamma_1 z_1 +  \gamma_2 z_2 + \ldots= \mathbf{z}^\top \gamma
+\end{eqnarray*}
+\begin{tabular}{ll}
+  $y$ & response (e.g., temperature)\\
+  $\mathbf{x}$ & inputs for location (e.g., different ensemble means and \\      
+    & standard deviations, current observations, etc.)\\
+  $\mathbf{z}$ & inputs for scale (e.g., different ensemble means and \\
+    &standard deviations, current observations, etc.)\\
+  $\beta, \gamma$ & regression coefficients
+\end{tabular}
+
+
+\vspace{0.5cm}
+\textbf{Problem:} How to select variables in $\mathbf{x}$ and $\mathbf{z}$.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Nonhomogeneous boosting}
+\begin{eqnarray*}
+  y &\sim& \mathsf{N}(\mu, \sigma)\\
+  \mu &=& \mathbf{x}^\top \beta\\
+  \sigma &=& \mathbf{z}^\top \gamma
+\end{eqnarray*}
+
+\textbf{Maximum likelihood estimation:}
+\begin{equation*}\label{eq_ll}
+  L = \sum \log\left[\frac{1}{\sigma} \Phi\left(\frac{y-\mu}{\sigma} \right) \right]
+\end{equation*}\pause
+
+\textbf{Gradient boosting:}
+\begin{itemize}
+  \item initialize all coefficients with zero
+  \item in each iteration slightly \textbf{update only the one coefficient that improves the current fit most}
+  \item[$\rightarrow$] if not run until convergence, \textbf{only important inputs have non-zero coefficients}
+   \item select optimum stopping iteration by cross validation
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Nonhomogeneous boosting}
+
+\begin{enumerate}
+  \item initialize $\beta=\mathbf{0}$, $\gamma=\mathbf{0}$  
+  \item $\mu = \mathbf{x}^\top \beta$, $\sigma = \mathbf{z}^\top \gamma$
+  \item find predictor $x_j$ most correlated with 
+    $-\partial L/ \partial \mu$ and \\
+    \hspace{2.1cm} $z_k$ most correlated with $-\partial L/ \partial \sigma$
+  \item update $\beta_j^* \leftarrow \beta_j +  \nu \mathsf{cor}
+      (x_j, \partial L/ \partial \mu))$ and \\ \hspace{1.1cm} 
+    $\gamma_k^* \leftarrow \gamma_k +  \nu \mathsf{cor}
+      (z_k, \partial L/ \partial \sigma))$ with $0<\nu<1$ 
+  \item use only update with best likelihood: \\if $L(\mu^*, \sigma)
+    > L(\mu, \sigma^*)$ set $\beta = \beta^*$ else $\gamma = \gamma^*$ 
+  \item repeat step 3. to 6. until predefined stopping iteration is reached
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Wien 66 hours maximum temperatures}
+<<echo=FALSE,fig=TRUE,width=10, height=7.5>>=
+library("crch")
+load("~/Documents/meteoR/varselect/boostmodel.rda")
+label <- list(location = names(boost$coefficients$location)
+    [order(abs(boost$coefficients$location),decreasing = TRUE)[c(1:2)]], 
+  scale=names(boost$coefficients$scale)
+    [order(abs(boost$coefficients$scale),decreasing = TRUE)[1:4]])
+plot(boost, coef.label = label, lwd = 2, col = c(1,"#A2454A"))
+@
+\end{frame}
+
+\begin{frame}
+\frametitle{Wien maximum temperature coefficients}
+<<echo=FALSE,fig=TRUE,width=9.5, height=7>>=
+load("~/Documents/meteoR/varselect/results_coefs_11036_Tmax.rda")
+library("colorspace")
+library("zoo")
+plot.coefs <- function(path = coefs$location, ngr = coefsngr$location, number = 6, ...) {
+  cols <- rainbow_hcl(number + 1)
+  a <- path
+  b <- apply(a, 2, sum, na.rm = TRUE)
+  a <- a[,b!=0] 
+  b <- apply(abs(a), 2, max, na.rm = TRUE)
+  ylim <- c(min(min(a), min(ngr[,2])), max(max(a), max(ngr[,2]))) 
+  par(mar=c(5.1, 4.1, 4.1, 12.1), xpd=TRUE)
+  plot(as.ts(a), plot.type = "single", xaxt = "no", col = gray(0.5, 0.2), 
+    ylab = "standardized coefficients",  
+    xlab = "Lead time", ylim = ylim, ...)
+  axis(1, labels = index(a), at = index(a))
+  for(i in 1:number) {
+    lines(a[,order(abs(b), decreasing = TRUE)[i]], col = cols[i],lwd = 2)
+  }
+  colngr <- if(names(ngr)[2] %in% names(a[,order(abs(b), decreasing = TRUE)[1:number]])) 
+    cols[names(ngr)[2] == names(a[,order(abs(b), decreasing = TRUE)[1:6]])]
+  else
+    cols[number + 1]
+  
+  lines(ngr[,2], col = colngr, lwd = 2, lty = 2)
+  legend("topright", inset=c(-0.4,0), col = c(cols[1:number], colngr), lwd = 2, 
+    legend = c(names(a)[order(b, decreasing = TRUE)[1:number]], names(ngr)[2]), 
+    bty = "n", lty = c(rep(1, number), 2))
+}
+par(mfrow = c(2,1))
+plot.coefs(main = "mean", number = 4)
+plot.coefs(coefs$scale, coefsngr$scale, number = 4, 
+  main = "log-standard deviation")
+@
+
+\end{frame}
+\begin{frame}
+\frametitle{Wien minimum temperature coefficients}
+<<echo=FALSE,fig=TRUE,width=9.5, height=7>>=
+load("~/Documents/meteoR/varselect/results_coefs_11036_Tmin.rda")
+par(mfrow = c(2,1))
+plot.coefs(main = "mean", number = 3)
+plot.coefs(coefs$scale, coefsngr$scale, main = "log-standard deviation", number = 4)
+@
+\end{frame}
+\begin{frame}[fragile]
+\frametitle{+42 to +54 hours minimum Temperature RMSE}
+<<echo=FALSE,fig=TRUE,width=8, height=5>>=
+library("lattice")
+load("~/Documents/meteoR/varselect/results_bootdiag.rda")
+
+trellis.par.set(theme = canonical.theme(color = FALSE))
+panel_bw_line <- function(...) {
+  panel.bwplot(...)
+  panel.abline(h =  0)
+}
+bootdiag$station <- factor(bootdiag$station, 
+  levels = c(11120, 11036, 10382, 6670, 10469), 
+  labels = c("Innsbruck", "Wien", "Berlin", "Zuerich", "Leibzig"))
+bwplot(rmse ~ model | lt + station, data = bootdiag, 
+  subset = !model %in% c("clim", "subset") & station %in% c("Innsbruck", "Wien") &
+  lt == 54, 
+  panel = panel_bw_line, scales = list(rot = 60), ylab = "RMSE", 
+  layout = c(2,1))
+
+bootdiag$lt <- factor(bootdiag$lt, 
+  levels = c(seq(30,126, 24), seq(42, 138, 24)), 
+  labels = c(paste0("Tmin: ", seq(30,126, 24), " hours"), 
+  paste0("Tmax: ", seq(42,138, 24), " hours")))
+
+
+
+@
+
+\end{frame}
+\begin{frame}[fragile]
+\frametitle{CRPS skill score}
+<<echo=FALSE,fig=TRUE,width=8, height=5>>=
+bwplot(crpss ~ model | lt, data = bootdiag, 
+  subset = !model %in% c("NGR", "clim", "subset"), panel = panel_bw_line, 
+  scales = list(rot = 60), ylab = "CRPSS", layout = c(5,2))
+@
+\end{frame}
+
+%\begin{frame}[fragile]
+%\frametitle{training data length}
+%<<echo=FALSE,fig=TRUE,width=8, height=5>>=
+%load("~/Documents/meteoR/varselect/results_bootdiag_trainlength.rda")
+%levels(bootdiag$model)[levels(bootdiag$model) == "boost"] <- "NGB"
+%levels(bootdiag$trainlength) <- paste(levels(bootdiag$trainlength), "days")
+%nvar2 <- round(aggregate(nvar[,5], by = list(nvar[,3]), FUN = median)$x)
+%panel_bw_line <- function(...) {
+%  panel.bwplot(...)
+%  panel.abline(h =  0)
+%  panel.text(2, 0.37, nvar2[panel.number()])
+%}
+%
+%bwplot(crpss ~ model | trainlength, data = bootdiag, 
+%  subset = !model %in% c("NGR", "clim"), 
+%  panel = panel_bw_line, scales = list(rot = 60), 
+%  ylab = "ISS", layout = c(6,1), ylim = c(-0.68, 0.47))
+%@
+%\end{frame}
+%
+
+\begin{frame}[fragile]
+\frametitle{PIT histogram}
+<<echo=FALSE,fig=TRUE,width=8, height=5>>=
+load("~/Documents/meteoR/varselect/results_bootdiag.rda")
+pit <- as.data.frame(pit)
+par(mfrow = c(1,2))
+hist(pit$boost, main = "boost", xlab = "PIT")
+hist(pit$NGR, main = "NGR", xlab = "PIT")
+@
+\end{frame}
+
+\begin{frame}
+\frametitle{Summary}
+\textbf{Nonhomogeneous boosting:}
+\begin{itemize}
+  \item efficient variable selection
+  \item clearly improved forecast performance compared to common NGR
+\end{itemize}
+\nocite{Messner2017}
+%\nocite{Messner2017}
+
+\vspace{2cm}
+\textbf{References:}
+
+\bibliographystyle{ametsoc}
+\bibliography{refs}
+\end{frame}
+
+
+\end{document}
