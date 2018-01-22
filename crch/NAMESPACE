@@ -1,4 +1,4 @@
-useDynLib(crch)
+useDynLib(crch, .registration = TRUE)
 import("stats", "Formula", "countreg", "scoringRules")
 importFrom("utils", "tail")
 importFrom("graphics", "abline", "axis", "par", "plot", "strwidth", "barplot", 
