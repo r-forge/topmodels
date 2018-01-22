@@ -347,10 +347,8 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   gamma <- fit$gamma
   mu <- fit$mu
   sigma <- fit$sigma
-  ll <- -sum(weights*ddist(round(y, digits = 6), mu, sigma, df = df, left = left2, right = right2, log = TRUE))
-    if(sum) if(any(!is.finite(ll))) NaN else -sum(weights[subset] * ll)  
-    else weights[subset] * ll
-  ll <- - loglikfun(par)
+  ll <- sum(weights*ddist(round(y, digits = 6), mu, sigma, df = df, left = left2, right = right2, log = TRUE))
+  
 
   names(beta) <- colnames(x)
   names(gamma) <- colnames(z)
