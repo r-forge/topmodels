@@ -1,8 +1,13 @@
 inst/useR-2015
 inst/DAGStat-2016
+inst/CMStatistics2017
+inst/EGU2017
+inst/wien20170427
 inst/KIT-2016
 inst/paper
 R/crch.glmnet.R
 src/crch.glmnet.c
+src/crch.glmnetnew.c
+src/crch.glmnetnet.c
 R/test.R
 
