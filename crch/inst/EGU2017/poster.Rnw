@@ -1,0 +1,388 @@
+\documentclass[final]{beamer} 
+%\usepackage[orientation=portrait,size=a0,scale=1.32]{beamerposter}
+\usepackage[orientation=landscape,size=a0, scale=1.22]{beamerposter}
+\usetheme[ncols=3,cmar=0.015\paperwidth,lmar=0.03\paperwidth,rmar=0.03\paperwidth]{eeeconposter}
+%\usepackage{Sweave}
+
+
+%% multiple reference lists
+\usepackage[authoryear,round]{natbib}
+
+\setbeamertemplate{caption}[numbered]
+%% pick one of the logos (plus sep skip between logo and title)
+%% generic uibk logo or eeecon research center logos
+\Logo[0mm]{DTU-title-extrawide}
+%\Logo[20mm]{eeecon-empec}
+% \Logo[20mm]{eeecon-expec}
+% \Logo[5mm]{eeecon-environec}
+\setkeys{Gin}{width=0.8\textwidth}
+
+
+\definecolor{uibkorange}{RGB}{192,32,51}
+\definecolor{uibkblue}{RGB}{0,0,0}
+\definecolor{uibkgray}{RGB}{192,32,51}
+\definecolor{NGR}{RGB}{2,63,142}
+\definecolor{boost}{RGB}{0,90,0}
+\definecolor{lasso}{RGB}{142,6,59}
+
+
+%% title %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Title and author information
+\title{Regularized Nonhomogeneous Regression for Predictor Selection in
+Ensemble Post-Processing}
+\author{Jakob W. Messner (jwmm@elektro.dtu.dk), Georg J. Mayr, and Achim Zeileis}
+
+\begin{document}
+\begin{frame}[fragile]
+\begin{columns}[t]
+
+
+%% left column %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{leftcolumn}
+
+%% first block
+\begin{boxblock}{Introduction}
+
+\textbf{Ensemble Forecasts:}
+\begin{itemize}
+\item often biased and uncalibrated 
+\item[$\rightarrow$] statistical post-processing
+\end{itemize}
+\vspace{0.5cm}
+
+\textbf{\color{NGR} Nonhomogeneous Gaussian Regression} \citep[NGR;][]{Gneiting2005}\textbf{:}
+\begin{itemize}
+  \item predictive Gaussian distribution (temperature $T$)
+  \item mean is a function of the ensemble mean ($m$)
+  \item variance is a function of the ensemble variance ($s^2$)
+\begin{eqnarray*}
+	T &\sim& N(\mu,\sigma^{2})\label{messner:eq-cens1}\\
+  \mu &=& \beta_0 + \beta_1 m\\
+	\log(\sigma) &=&  \gamma_0 + \gamma_1 \log(s) \label{messner:eq-cens3}
+\end{eqnarray*}
+  \item coefficients $\beta_0$, $\beta_1$, $\gamma_0$, $\gamma_1$ are estimated by maximizing the log-likelihood:
+\end{itemize}
+\begin{equation}\label{eq_ll}
+  \sum \log\left[\frac{1}{\sigma} \Phi\left(\frac{T-\mu}{\sigma} \right) \right]
+\end{equation}
+\vspace{0.5cm}
+
+
+\textbf{Predictor variables:}
+\begin{itemize}
+  \item usually only temperature ensemble forecasts ($m$, $s$)
+  \item further potential predictor variables:
+  \begin{itemize}
+    \item ensemble predictions of other variables (e.g., pressure, cloud cover, $\ldots$)
+    \item predictions from other numerical models or weather centers
+    \item current observations
+    \item transformations and interactions,
+    \item $\cdots$
+  \end{itemize}
+  \item extend NGR for multiple inputs $x_1$, $x_2$, $\ldots$, $x_J$, $z_1$, $z_2$, $\ldots$, $z_K$:
+\end{itemize}
+\begin{eqnarray*}
+  \mu & = &\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \ldots + \beta_J x_J\\
+	\log(\sigma) &= & \gamma_0 + \gamma_1 z_1 + \gamma_2 z_2 + \ldots + \gamma_K z_K 
+\end{eqnarray*}
+\vspace{0.5cm}
+
+
+\textbf{Problem:}
+\begin{itemize}
+  \item too many inputs can lead to overfitting and decreased forecast performance
+  \item how to select best set of predictor variables?
+\end{itemize}
+
+$\boldsymbol{\rightarrow}$ \textbf{automatic predictor selection}
+
+\end{boxblock}
+
+
+
+%% second block
+\begin{boxblock}{Data}
+<<echo=FALSE>>=
+#load("~/Documents/meteoR/varselect/data/Tmin11036_30.rda")
+#data <- data[, - grep("sd_", names(data))]
+#anom <- anomalies(data)
+#train <- anom$data[index(anom$data) < "2015-01-01",]
+#test <- anom$data[index(anom$data) >= "2015-01-01",]
+#save(anom, train, test, file = "anom.rda")
+load("~/Documents/meteoR/crch/inst/EGU2017/anom.rda")
+@
+
+\begin{itemize}
+  \item 18UTC -- 06UTC 2 meter minimum temperatures in Vienna
+  \item ECMWF +18--30 hours ensemble forecasts 2011 -- 2015
+  \item removed seasonality of forecasts and observations with standardized anomalies (see also poster X4.204)
+  \item means, maxima, and mimima of forecasts over regarded time window
+  \item last available observation
+  \item[$\rightarrow$] \Sexpr{ncol(train)-1} potential input variables
+  \item training: 2011--2014, testing: 2015
+\end{itemize}
+\end{boxblock}
+
+
+\end{leftcolumn}
+
+
+
+\begin{centercolumn}
+\begin{boxblock}{Regularized Regression}
+%\textbf{Idea:} Penalize large coefficients to prevent overfitting.
+%\vspace{1cm}
+%
+\textbf{Two different approaches to prevent overfitting:}
+
+\vspace{1cm}
+
+\textbf{\color{boost} Gradient boosting} \citep{Messner2017}:
+
+\begin{itemize}
+  \item alternative iterative optimization algorithm to maximize \eqref{eq_ll}
+  \item initialize all coefficients with zero
+  \item in each iteration slightly \textbf{update only the one coefficient that improves the current fit most}
+  \item[$\rightarrow$] if not run until convergence, \textbf{only important inputs have non-zero coefficients}
+   \item select optimum stopping iteration by cross validation
+\end{itemize}
+
+
+\vspace{-1cm}
+
+\begin{figure}
+\begin{center}
+<<echo=FALSE,fig=TRUE, width=10, height=5.3, label = boostpath>>=
+library("zoo")
+source("~/Documents/meteoR/varselect/results.R")
+
+
+
+
+
+if(file.exists("boostresult.rda")) {
+  load("boostresult.rda")
+} else {
+  boost <- crch(obs ~ . | ., train, method = "boosting", maxit = 120, mstop = "cv")
+  save(boost, file = "boostresult.rda")
+}
+
+source("~/Documents/meteoR/crch/R/crch.glmnet.R")
+source("~/Documents/meteoR/crch/R/cnorm.R")
+dyn.load("~/Documents/meteoR/crch/src/crch.glmnetold.so")
+
+
+
+#load("~/Documents/meteoR/varselect/data/Tmax11036_66.rda")
+#data <- data[, - grep("sd_", names(data))]
+#anom <- anomalies(data)
+
+if(file.exists("lassoresult.rda")) {
+  load("lassoresult.rda")
+} else {
+  lasso <- crch(obs~.|., train, control = crch.glmnet(reltol = 1E-3, maxit = 100, lambda.min.ratio = 0.01))
+ save(lasso, file = "lassoresult.rda")
+}
+
+label <- list(location = names(boost$coefficients$location)
+    [order(abs(boost$coefficients$location),decreasing = TRUE)[c(1:2)]], 
+  scale=names(boost$coefficients$scale)
+    [order(abs(boost$coefficients$scale),decreasing = TRUE)[c(1,2)]])
+plot(boost, coef.label = label, col = c(1, rgb(192,32,51,maxColorValue=255 )))
+@
+\end{center}
+\caption{Boosting coefficients for different stopping iterations. Coefficients for $\mu$ are shown as black lines and for $\log(\sigma)$ as red lines. The optimum stopping iteration from cross validation is shown as dashed vertical line. The most important coefficients are labeled.}\label{fig_boostpath}
+\end{figure}
+
+\vspace{1cm}
+
+\textbf{\color{lasso} LASSO regularization:}
+\begin{itemize}
+  \item maximize penalized likelihood:
+\end{itemize}
+\begin{equation*}\label{eq_ll2}
+  \sum \log\left[\frac{1}{\sigma} \Phi\left(\frac{T-\mu}{\sigma} \right) \right] + \lambda (\sum_{j=1}^J |\beta_j| + \sum_{k=1}^K |\gamma_k|)
+\end{equation*}
+\begin{itemize}
+  \item \textbf{penalizes absolute} \textbf{coefficient} values
+  \item[$\rightarrow$] \textbf{coefficients} of \textbf{unimportant} variables are shrunk to zero
+  \item select optimum penalization parameter $\lambda$ by cross validation
+\end{itemize}
+
+\vspace{-1cm}
+
+\begin{figure}
+\begin{center}
+<<echo=FALSE,fig=TRUE, width=10, height=5.3, label = lassopath>>=
+label <- list(location = names(lasso$coefficients$location)
+    [order(abs(lasso$coefficients$location),decreasing = TRUE)[c(1:2)]], 
+  scale=names(lasso$coefficients$scale)
+    [order(abs(lasso$coefficients$scale),decreasing = TRUE)[c(1,2,3)]])
+plot(lasso, coef.label=label, col = c(1, rgb(192,32,51,maxColorValue=255)), mstop = "cv")
+
+@
+\end{center}
+\caption{Same as Figure \ref{fig_boostpath} but for LASSO with different values of $\lambda$.}
+\end{figure}
+
+
+%\textbf{Number of non-zero coefficients:}
+%\begin{itemize}
+%  \item controlled by stopping iteration and $\lambda$ respectively
+%  \item select optimum by cross validation
+%\end{itemize}
+\end{boxblock}
+
+\end{centercolumn}
+
+
+%% right column %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{rightcolumn}
+
+
+%% 3rd block
+\begin{boxblock}{Results}
+\textbf{Selected predictor variables:}
+
+%<<echo=FALSE,results=tex>>=
+%select <- cbind(head(names(sort(-abs(coef(boost, model = "location")))), 5),
+%head(names(sort(-abs(coef(boost, model = "scale")))), 6)[-1],
+%head(names(sort(-abs(coef(lasso, model = "location")))), 5),
+%head(names(sort(-abs(coef(lasso, model = "scale")))), 6)[-1])
+%colnames(select) <- c("$\\mu$", 1,1,1)
+%rownames(select) <- NULL
+%
+%library("xtable")
+%xtable(select)
+%@
+\begin{small}
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|l|l|l|}
+  \hline
+  \multicolumn{2}{|c|}{\color{boost} \textbf{boosting}}& \multicolumn{2}{c|}{\color{lasso} \textbf{LASSO}}\\
+  \hline
+  $\mu$ & $\log(\sigma)$ &  $\mu$ & $\log(\sigma)$ \\ 
+  \hline
+  tmin2m\_dmin\_mean & d2m\_dmax\_mean & tmin2m\_dmin\_mean & r700\_dmean\_mean \\ 
+  cape\_dmean\_sd & r700\_dmax\_mean & stl1\_dmean\_sd & tmin2m\_dmin\_sd \\ 
+  stl1\_dmin\_mean & d700\_dmin\_sd & r850\_dmax\_sd & w500\_dmin\_sd \\ 
+  q1000\_dmax\_mean & fg10m\_dmean\_sd & d2m\_dmax\_mean & w850\_dmean\_sd \\ 
+%  tmax2m\_dmin\_sd & t1000\_dmin\_sd & u850\_dmin\_mean & z700\_dmean\_sd \\ 
+  $\cdots$ & $\cdots$ & $\cdots$ & $\cdots$  \\ 
+  total \#: \Sexpr{length(coef(boost, model = "location"))} & total \#:  \Sexpr{length(coef(boost, model = "scale"))} &total \#:  \Sexpr{length(coef(lasso, model = "location", mstop = "cv"))} &total \#:  \Sexpr{length(coef(lasso, model = "scale", mstop = "cv"))}  \\
+  
+   \hline
+\end{tabular}
+\vspace{0.5cm}
+
+\caption{Selected input variables by boosting and LASSO. Variable names have syntax \textit{name\_aggregation\_statistic}. \textit{dmin, dmin}, and \textit{dmean} denote the minimum, maximum, and mean of the forecasts between +18 and +30 respectively. \textit{mean} and \textit{sd} are the ensemble mean and log-standard deviation respectively.}
+\end{table}
+\end{small}
+
+\begin{figure}
+\begin{center}
+<<echo=FALSE,fig=TRUE, width=9, height=3.7, label = scatter>>=
+ngr <- crch(obs~t2m_dmin_mean|t2m_dmin_sd, train)
+
+
+predboost <- predict(boost, newdata = test, type = "response")
+predlasso <- predict(lasso, newdata = test, type = "response", mstop = 95)
+predngr <- predict(ngr, newdata = test)
+
+testm <- anom$mall[index(anom$mall) >= "2015-01-01",]
+tests <- anom$sall[index(anom$sall) >= "2015-01-01",]
+
+
+
+obs <-  as.numeric(test$obs)
+
+
+
+library("scoringRules")
+err <- as.data.frame(cbind(
+NGR = crps(y=obs, mean=predngr, sd=predict(ngr, newdata = test, type = "scale"), family = "normal"),
+boosting = crps(y=obs, mean=predboost, sd=predict(boost, newdata = test, type = "scale"), family = "normal"),
+LASSO = crps(y=obs, mean=predlasso, sd=predict(lasso, newdata = test, type = "scale"), family = "normal")))
+
+
+
+
+
+
+booterr <- NULL
+for(b in 1:250) {
+  bootind <- sample(nrow(err), replace = TRUE)
+  booterr <- rbind(booterr, sqrt(colMeans(err[bootind,])))
+}
+par(mar = c(3.1, 4.1, 2.1, 2.1))
+boxplot(booterr, ylab = "CRPS", col = c("#023FA599", "#005A0099", "#8E063B99"),
+  xlim = c(0.5,3.7))
+text(3.7, 0.485, "better", srt = 90)
+arrows(3.7, 0.472, 3.7, 0.457, length = 0.1)
+@
+\end{center}
+\caption{Continuous ranked probability score (CRPS) of NGR (only minimum temperature ensemble as input), gradient boosting, and LASSO regularization}
+\end{figure}
+\vspace{-0.5cm}
+\end{boxblock}
+
+%% 4th block
+\begin{boxblock}{Summary}
+\textbf{Regularized nonhomogeneous regression:}
+\begin{itemize}
+  \item automatically selects best set of variables
+  \item[$\rightarrow$] clearly improved forecast performance
+  \item boosting and LASSO select different variable sets
+  \item highly correlated inputs $\rightarrow$ similar performance 
+  \item LASSO: computationally more efficient
+  \item boosting: more flexible
+\end{itemize}
+
+\vspace{1cm}
+
+\textbf{CRAN R-package crch:}
+\begin{itemize}
+  \item gradient boosting already implemented
+  \item coordinate descent algorithm for LASSO paths coming soon
+\end{itemize}
+
+\end{boxblock}
+\vspace{0.5cm}
+%% References
+  \begin{columns}
+    \column{.8\textwidth}
+    \begin{footnotesize}
+      \textbf{References:}
+      \bibliographystyle{ametsoc}
+      \bibliography{IWSM}
+    \end{footnotesize}
+    \column{0.1\textwidth}
+    \column{0.2\textwidth}
+      \includegraphics[width=0.6\textwidth]{qrcode.eps}\\
+      \includegraphics[width=0.6\textwidth]{License.pdf}
+      \end{columns}
+
+%  \begin{column}{width=0.5\textwidth}
+%    \begin{footnotesize}
+%      \textbf{References:}
+%
+%
+%      \bibliographystyle{ametsoc}
+%      \bibliography{IWSM}
+%    \end{footnotesize}
+%  \end{column}
+%  \begin{column}
+%    gyhj
+%  \end{column}
+%\end{columns}
+
+\end{rightcolumn}
+
+\end{columns}
+\end{frame}
+
+\end{document}
