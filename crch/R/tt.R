@@ -2,7 +2,7 @@
 dtt <- function(x, location = 0, scale = 1, df, left = -Inf, right = Inf, log = FALSE) {
   input <- data.frame(x = as.numeric(x), location = as.numeric(location), scale = as.numeric(scale), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
-  rval <- with(input, .Call("dtt", x, location, scale, df, left, right, log))
+  rval <- with(input, .Call("cdtt", x, location, scale, df, left, right, log))
   if(is.matrix(x)) {
     rval <- matrix(rval, ncol = ncol(x), nrow = nrow(x))
     colnames(rval) <- colnames(x)
@@ -17,7 +17,7 @@ ptt <- function(q, location = 0, scale = 1, df, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE) {
   input <- data.frame(q = as.numeric(q), location = as.numeric(location), scale = as.numeric(scale), 
     df = as.numeric(df), left = as.numeric(left), right = as.numeric(right))
-  rval <- with(input, .Call("ptt", q, location, scale, df, left, right, lower.tail, log.p))
+  rval <- with(input, .Call("cptt", q, location, scale, df, left, right, lower.tail, log.p))
   if(is.matrix(q)) {
     rval <- matrix(rval, ncol = ncol(q), nrow = nrow(q))
     colnames(rval) <- colnames(q)

@@ -2,7 +2,7 @@
 dtnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE) {
   input <- data.frame(x = as.numeric(x), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
-  rval <- with(input, .Call("dtnorm", x, mean, sd, left, right, log))
+  rval <- with(input, .Call("cdtnorm", x, mean, sd, left, right, log))
   if(is.matrix(x)) {
     rval <- matrix(rval, ncol = ncol(x), nrow = nrow(x))
     colnames(rval) <- colnames(x)
@@ -17,7 +17,7 @@ ptnorm <- function(q, mean = 0, sd = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE) {
   input <- data.frame(q = as.numeric(q), mean = as.numeric(mean), sd = as.numeric(sd), 
     left = as.numeric(left), right = as.numeric(right))
-  rval <- with(input, .Call("ptnorm", q, mean, sd, left, right, lower.tail, log.p))
+  rval <- with(input, .Call("cptnorm", q, mean, sd, left, right, lower.tail, log.p))
   if(is.matrix(q)) {
     rval <- matrix(rval, ncol = ncol(q), nrow = nrow(q))
     colnames(rval) <- colnames(q)
