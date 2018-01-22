@@ -107,6 +107,16 @@ crch.glmnet.fit <- function(x, z, y, left, right, truncated = FALSE,
   mstop <- control$mstop
   reltol <- control$reltol
 
+  ## extend left and right to vectors of length n
+  left2 <- left
+  right2 <- right
+  if(length(left) == 1) {
+    left <- rep(left, n)
+  }
+  if(length(right) == 1) {
+    right <- rep(right, n)
+  }
+
   ## link
 linkfun2 <- switch(link.scale, "log" = 1L, "identity" = 2L, "quadratic" = 3L) 
   if(is.character(link.scale)) {
@@ -271,9 +281,7 @@ linkfun2 <- switch(link.scale, "log" = 1L, "identity" = 2L, "quadratic" = 3L)
 iter <- 0
 
 
-if(length(left) == 1) left <- rep(left, n)
-if(length(right) == 1) right <- rep(right, n)
-#browser()
+browser()
 a <- .Call("crchglmnet", x, z, y, left, right, lambdaseq, as.integer(maxit), reltol)
 coefpath <- a[[1]]
 loglikpath <- a[[2]]
@@ -351,7 +359,7 @@ loglikpath <- a[[2]]
     residuals = y - mu,
     fitted.values = list(location = mu, scale = sigma),
     dist = dist,
-    cens = list(left = left, right = right), 
+    cens = list(left = left2, right = right2), 
     control = control,
     weights = if(identical(as.vector(weights), rep.int(1, n))) NULL else weights,
     offset = list(location = if(identical(offset[[1L]], rep.int(0, n))) NULL else 
