@@ -3,7 +3,7 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 
-SEXP dcnorm(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
+SEXP cdcnorm(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
 {
   int i, n = length(y);
 
@@ -39,7 +39,7 @@ SEXP dcnorm(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
 }
 
 
-SEXP pcnorm(SEXP q, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP lower_tail, SEXP log_p)
+SEXP cpcnorm(SEXP q, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP lower_tail, SEXP log_p)
 {
   int i, n = length(q);
 

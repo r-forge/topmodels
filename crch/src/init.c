@@ -8,13 +8,18 @@
 */
 
 /* .Call calls */
-extern SEXP crchglmnet(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP dclogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP dcnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP dct(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP dtlogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP dtnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP dtt(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cdclogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cdcnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cdct(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cdtlogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cdtnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cdtt(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cpclogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cpcnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cpct(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cptlogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cptnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cptt(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP hclogis_mu(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP hclogis_musigma(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP hclogis_sigma(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -34,12 +39,6 @@ extern SEXP htt_mu(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP htt_musigma(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP htt_sigma(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP mycov(SEXP, SEXP);
-extern SEXP pclogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP pcnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP pct(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP ptlogis(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP ptnorm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP ptt(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP sclogis_mu(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP sclogis_sigma(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP scnorm_mu(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -54,13 +53,18 @@ extern SEXP stt_mu(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP stt_sigma(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"crchglmnet",      (DL_FUNC) &crchglmnet,      8},
-    {"dclogis",         (DL_FUNC) &dclogis,         6},
-    {"dcnorm",          (DL_FUNC) &dcnorm,          6},
-    {"dct",             (DL_FUNC) &dct,             7},
-    {"dtlogis",         (DL_FUNC) &dtlogis,         6},
-    {"dtnorm",          (DL_FUNC) &dtnorm,          6},
-    {"dtt",             (DL_FUNC) &dtt,             7},
+    {"cdclogis",        (DL_FUNC) &cdclogis,        6},
+    {"cdcnorm",         (DL_FUNC) &cdcnorm,         6},
+    {"cdct",            (DL_FUNC) &cdct,            7},
+    {"cdtlogis",        (DL_FUNC) &cdtlogis,        6},
+    {"cdtnorm",         (DL_FUNC) &cdtnorm,         6},
+    {"cdtt",            (DL_FUNC) &cdtt,            7},
+    {"cpclogis",        (DL_FUNC) &cpclogis,        7},
+    {"cpcnorm",         (DL_FUNC) &cpcnorm,         7},
+    {"cpct",            (DL_FUNC) &cpct,            8},
+    {"cptlogis",        (DL_FUNC) &cptlogis,        7},
+    {"cptnorm",         (DL_FUNC) &cptnorm,         7},
+    {"cptt",            (DL_FUNC) &cptt,            8},
     {"hclogis_mu",      (DL_FUNC) &hclogis_mu,      5},
     {"hclogis_musigma", (DL_FUNC) &hclogis_musigma, 5},
     {"hclogis_sigma",   (DL_FUNC) &hclogis_sigma,   5},
@@ -80,12 +84,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"htt_musigma",     (DL_FUNC) &htt_musigma,     6},
     {"htt_sigma",       (DL_FUNC) &htt_sigma,       6},
     {"mycov",           (DL_FUNC) &mycov,           2},
-    {"pclogis",         (DL_FUNC) &pclogis,         7},
-    {"pcnorm",          (DL_FUNC) &pcnorm,          7},
-    {"pct",             (DL_FUNC) &pct,             8},
-    {"ptlogis",         (DL_FUNC) &ptlogis,         7},
-    {"ptnorm",          (DL_FUNC) &ptnorm,          7},
-    {"ptt",             (DL_FUNC) &ptt,             8},
     {"sclogis_mu",      (DL_FUNC) &sclogis_mu,      5},
     {"sclogis_sigma",   (DL_FUNC) &sclogis_sigma,   5},
     {"scnorm_mu",       (DL_FUNC) &scnorm_mu,       5},

@@ -3,7 +3,7 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 
-SEXP dtlogis(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
+SEXP cdtlogis(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
 {
   int i, n = length(y);
 
@@ -43,7 +43,7 @@ SEXP dtlogis(SEXP y, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP give_log)
 }
 
 
-SEXP ptlogis(SEXP q, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP lower_tail, SEXP log_p)
+SEXP cptlogis(SEXP q, SEXP mu, SEXP sigma, SEXP left, SEXP right, SEXP lower_tail, SEXP log_p)
 {
   int i, n = length(q);
 
