@@ -82,14 +82,14 @@ CRCH1 <- crch(y ~ .|., data = data, dist = "gaussian", left = 0)
 
 # Perform stability selection
 stabsel <- crch.stabsel(y ~ .|.,  data = data, dist = "gaussian", left = 0,
-           q = 8, B = 20)
+           q = 8, B = 5)
 
 # Show stability selection summary
 print(stabsel); plot(stabsel)
 
 CRCH2 <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0 )
 BOOST <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0,
-              control = crch.boost( maxit = 2000, nu = 0.05 ) )
+              control = crch.boost() )
 
 ### AIC comparison
 sapply( list(CRCH1,CRCH2,BOOST), logLik )
