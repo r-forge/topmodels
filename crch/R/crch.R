@@ -949,161 +949,161 @@ estfun.crch <- function(x, ...) {
 }
 
 
-#pit.crch <- function(object, newdata = NULL, left = NULL, right = NULL, ...)
-#{
-#  ## observed response
-#  mt <- terms(object)
-#  mf <- if(is.null(newdata)) model.frame(object) else model.frame(mt, newdata, na.action = na.omit)
-#  y <- model.response(mf)
+pit.crch <- function(object, newdata = NULL, left = NULL, right = NULL, ...)
+{
+  ## observed response
+  mt <- terms(object)
+  mf <- if(is.null(newdata)) model.frame(object) else model.frame(mt, newdata, na.action = na.omit)
+  y <- model.response(mf)
 
-#  ## for non-constant censoring or truncation points, left and right have to
-#  ## be specified
-#  if(!is.null(newdata)){
-#    if(length(object$cens$left) > 1) {
-#      if(is.null(left)) 
-#        stop("left has to be specified for non-constant left censoring")
-#      if(length(left) > 1 & length(left) != NROW(newdata)) 
-#        stop("left must have length 1 or length of newdata")
-#    }
-#    if(length(object$cens$right) > 1) {
-#      if(is.null(right)) 
-#        stop("right has to be specified for non-constant right censoring")
-#      if(length(right) > 1 & length(right) != NROW(newdata)) 
-#        stop("right  must have length 1 or length of newdata")
-#    }
-#  }
-#  if(is.null(left)) left <- object$cens$left
-#  if(is.null(right)) right <- object$cens$right
-#  y[y<left] <- left
-#  y[y>right] <- right
+  ## for non-constant censoring or truncation points, left and right have to
+  ## be specified
+  if(!is.null(newdata)){
+    if(length(object$cens$left) > 1) {
+      if(is.null(left)) 
+        stop("left has to be specified for non-constant left censoring")
+      if(length(left) > 1 & length(left) != NROW(newdata)) 
+        stop("left must have length 1 or length of newdata")
+    }
+    if(length(object$cens$right) > 1) {
+      if(is.null(right)) 
+        stop("right has to be specified for non-constant right censoring")
+      if(length(right) > 1 & length(right) != NROW(newdata)) 
+        stop("right  must have length 1 or length of newdata")
+    }
+  }
+  if(is.null(left)) left <- object$cens$left
+  if(is.null(right)) right <- object$cens$right
+  y[y<left] <- left
+  y[y>right] <- right
 
-#  ## cdf
-#  pfun <- predict(object, newdata = newdata, type = "probability", 
-#    at = "function", left = left, right = right, ...)
-#  p <- pfun(y)
+  ## cdf
+  pfun <- predict(object, newdata = newdata, type = "probability", 
+    at = "function", left = left, right = right, ...)
+  p <- pfun(y)
 
-#  ## in case of censoring provide interval
-#  if(y01 <- any(y <= left | y >= right)) {
-#    p <- cbind(p, p)
-#    p[y01, 1L] <- pfun(y - .Machine$double.eps^0.9)[y01]
-#  }
-#  return(p)
-#}
+  ## in case of censoring provide interval
+  if(y01 <- any(y <= left | y >= right)) {
+    p <- cbind(p, p)
+    p[y01, 1L] <- pfun(y - .Machine$double.eps^0.9)[y01]
+  }
+  return(p)
+}
 
-#utils::globalVariables("rootogram.default")
+utils::globalVariables("rootogram.default")
 
-#rootogram.crch <- function(object, newdata = NULL, breaks = NULL,
-#  max = NULL, xlab = NULL, main = NULL, width = NULL, left = NULL,  
-#  right = NULL, ...)
-#{
-#    ## observed response and weights
-#    mt <- terms(object)
-#    mf <- if(is.null(newdata)) model.frame(object) else model.frame(mt, newdata, na.action = na.omit)
-#    y <- model.response(mf)
-#    w <- model.weights(mf)
-#    if(is.null(w)) w <- rep.int(1, NROW(y))
-
-
-#    ## for non-constant censoring or truncation points, left and right have to
-#    ## be specified
-#    if(!is.null(newdata)){
-#      if(length(object$cens$left) > 1) {
-#        if(is.null(left)) 
-#          stop("left has to be specified for non-constant left censoring")
-#        if(length(left) > 1 & length(left) != NROW(newdata)) 
-#          stop("left must have length 1 or length of newdata")
-#      }
-#      if(length(object$cens$right) > 1) {
-#        if(is.null(right)) 
-#          stop("right has to be specified for non-constant right censoring")
-#        if(length(right) > 1 & length(right) != NROW(newdata)) 
-#          stop("right  must have length 1 or length of newdata")
-#      }
-#    }
-#    if(is.null(left)) left <- object$cens$left
-#    if(is.null(right)) right <- object$cens$right
-#    y[y<left] <- left
-#    y[y>right] <- right
-
-#    ## breaks
-#    if(is.null(breaks)) breaks <- "Sturges"
-#    breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
-#    if(min(breaks) == left) breaks <- c(left - .Machine$double.eps^0.9, breaks)
-#    if(max(breaks) == right) breaks <- c(right - .Machine$double.eps^0.9, breaks)
-
-#    obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
-#    ## expected frequencies
-#    p <- predict(object, newdata, type = "probability", at = breaks, 
-#      left = left, right = right)
-#    p <- p[, -1L, drop = FALSE] - p[, -ncol(p), drop = FALSE]
-#    expctd <- colSums(p * w)
-
-#    ## call default method
-#    if(is.null(xlab)) xlab <- as.character(attr(mt, "variables"))[2L]
-#    if(is.null(main)) main <- deparse(substitute(object))
-#    rootogram.default(obsrvd, expctd, breaks = breaks,
-#                      xlab = xlab, main = main, width = 1, ...)
-#}
+rootogram.crch <- function(object, newdata = NULL, breaks = NULL,
+  max = NULL, xlab = NULL, main = NULL, width = NULL, left = NULL,  
+  right = NULL, ...)
+{
+    ## observed response and weights
+    mt <- terms(object)
+    mf <- if(is.null(newdata)) model.frame(object) else model.frame(mt, newdata, na.action = na.omit)
+    y <- model.response(mf)
+    w <- model.weights(mf)
+    if(is.null(w)) w <- rep.int(1, NROW(y))
 
 
-#simulate.crch <- function(object, nsim = 1, seed = NULL, newdata = NULL, 
-#  left = NULL, right = NULL, ...) {
-#    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-#        runif(1)
-#    if (is.null(seed))
-#        RNGstate <- get(".Random.seed", envir = .GlobalEnv)
-#    else {
-#        R.seed <- get(".Random.seed", envir = .GlobalEnv)
-#        set.seed(seed)
-#        RNGstate <- structure(seed, kind = as.list(RNGkind()))
-#        on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
-#    }
-#    
+    ## for non-constant censoring or truncation points, left and right have to
+    ## be specified
+    if(!is.null(newdata)){
+      if(length(object$cens$left) > 1) {
+        if(is.null(left)) 
+          stop("left has to be specified for non-constant left censoring")
+        if(length(left) > 1 & length(left) != NROW(newdata)) 
+          stop("left must have length 1 or length of newdata")
+      }
+      if(length(object$cens$right) > 1) {
+        if(is.null(right)) 
+          stop("right has to be specified for non-constant right censoring")
+        if(length(right) > 1 & length(right) != NROW(newdata)) 
+          stop("right  must have length 1 or length of newdata")
+      }
+    }
+    if(is.null(left)) left <- object$cens$left
+    if(is.null(right)) right <- object$cens$right
+    y[y<left] <- left
+    y[y>right] <- right
 
-#    ## distribution function
-#    if(object$truncated) {
-#      rdist2 <- switch(object$dist, 
-#            "student"  = rtt, "gaussian" = rtnorm, "logistic" = rtlogis)
-#    } else {
-#      rdist2 <- switch(object$dist, 
-#            "student"  = rct, "gaussian" = rcnorm, "logistic" = rclogis)
-#    }
-#    rdist <- if(object$dist == "student") rdist2 else function(..., df) rdist2(...)
+    ## breaks
+    if(is.null(breaks)) breaks <- "Sturges"
+    breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
+    if(min(breaks) == left) breaks <- c(left - .Machine$double.eps^0.9, breaks)
+    if(max(breaks) == right) breaks <- c(right - .Machine$double.eps^0.9, breaks)
 
-#    ## for non-constant censoring or truncation points, left and right have to
-#    ## be specified
-#    if(!is.null(newdata)){
-#      if(length(object$cens$left) > 1) {
-#        if(is.null(left)) 
-#          stop("left has to be specified for non-constant left censoring")
-#        if(length(left) > 1 & length(left) != NROW(newdata)) 
-#          stop("left must have length 1 or length of newdata")
-#      }
-#      if(length(object$cens$right) > 1) {
-#        if(is.null(right)) 
-#          stop("right has to be specified for non-constant right censoring")
-#        if(length(right) > 1 & length(right) != NROW(newdata)) 
-#          stop("right  must have length 1 or length of newdata")
-#      }
-#    }
-#    if(is.null(left)) left <- object$cens$left
-#    if(is.null(right)) right <- object$cens$right
+    obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
+    ## expected frequencies
+    p <- predict(object, newdata, type = "probability", at = breaks, 
+      left = left, right = right)
+    p <- p[, -1L, drop = FALSE] - p[, -ncol(p), drop = FALSE]
+    expctd <- colSums(p * w)
+
+    ## call default method
+    if(is.null(xlab)) xlab <- as.character(attr(mt, "variables"))[2L]
+    if(is.null(main)) main <- deparse(substitute(object))
+    rootogram.default(obsrvd, expctd, breaks = breaks,
+                      xlab = xlab, main = main, width = 1, ...)
+}
 
 
-#    par <- predict(object, newdata, type = "parameter", 
-#      left = left, right = right)
-#    n <- nrow(par)
-#    nm <- rownames(par)
-#    val <- matrix(rdist(n * nsim, par$location, par$scale, df = object$df,
-#      left = left, right = right),  n, nsim)
-#    val <- as.data.frame(val)
-#    names(val) <- paste("sim", seq_len(nsim), sep = "_")
-#    if (!is.null(nm)) {
-#        row.names(val) <- nm
-#    }
-#    attr(val, "seed") <- RNGstate
-#    val
-#}
+simulate.crch <- function(object, nsim = 1, seed = NULL, newdata = NULL, 
+  left = NULL, right = NULL, ...) {
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+        runif(1)
+    if (is.null(seed))
+        RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    else {
+        R.seed <- get(".Random.seed", envir = .GlobalEnv)
+        set.seed(seed)
+        RNGstate <- structure(seed, kind = as.list(RNGkind()))
+        on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    }
+    
+
+    ## distribution function
+    if(object$truncated) {
+      rdist2 <- switch(object$dist, 
+            "student"  = rtt, "gaussian" = rtnorm, "logistic" = rtlogis)
+    } else {
+      rdist2 <- switch(object$dist, 
+            "student"  = rct, "gaussian" = rcnorm, "logistic" = rclogis)
+    }
+    rdist <- if(object$dist == "student") rdist2 else function(..., df) rdist2(...)
+
+    ## for non-constant censoring or truncation points, left and right have to
+    ## be specified
+    if(!is.null(newdata)){
+      if(length(object$cens$left) > 1) {
+        if(is.null(left)) 
+          stop("left has to be specified for non-constant left censoring")
+        if(length(left) > 1 & length(left) != NROW(newdata)) 
+          stop("left must have length 1 or length of newdata")
+      }
+      if(length(object$cens$right) > 1) {
+        if(is.null(right)) 
+          stop("right has to be specified for non-constant right censoring")
+        if(length(right) > 1 & length(right) != NROW(newdata)) 
+          stop("right  must have length 1 or length of newdata")
+      }
+    }
+    if(is.null(left)) left <- object$cens$left
+    if(is.null(right)) right <- object$cens$right
+
+
+    par <- predict(object, newdata, type = "parameter", 
+      left = left, right = right)
+    n <- nrow(par)
+    nm <- rownames(par)
+    val <- matrix(rdist(n * nsim, par$location, par$scale, df = object$df,
+      left = left, right = right),  n, nsim)
+    val <- as.data.frame(val)
+    names(val) <- paste("sim", seq_len(nsim), sep = "_")
+    if (!is.null(nm)) {
+        row.names(val) <- nm
+    }
+    attr(val, "seed") <- RNGstate
+    val
+}
 
 
 
