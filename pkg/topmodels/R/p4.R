@@ -18,8 +18,8 @@ p4.lm <- function(object, newdata = NULL, na.action = na.pass,
   }
   pars <- data.frame(mu = pars)
 
-  ## add least-squares estimator of constant varians
-  pars$sigma <- summary(object)$sigma
+  ## add maximum likelihood estimator of constant varians
+  pars$sigma <- summary(object)$sigma * sqrt(df.residual(object)/nobs(object))
 
   ## types of predictions
   type <- match.arg(type, c("quantile", "mean", "variance", "parameter", "density", "probability", "score"))
@@ -134,33 +134,4 @@ p4_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "p4", ...)
   }
 
   return(rval)
-}
-
-
-## illustrations with 'lm' method
-if(FALSE) {
-
-m <- lm(dist ~ speed, data = cars)
-nd <- head(cars, 3)
-
-## default predictions (quantile, at = 0.5) on learning data
-p4(m)
-
-## on new data
-p4(m, newdata = nd)
-p4(m, newdata = nd, drop = TRUE)
-
-## recycle if desired
-p4(m, newdata = nd, at = c(0.25, 0.5, 0.75))
-p4(m, newdata = nd, at = rbind(c(0.25, 0.5, 0.75)))
-
-## PIT
-p4(m, newdata = nd, at = nd$dist, type = "probability")
-## in logs
-p4(m, newdata = nd, at = nd$dist, type = "probability", log.p = TRUE)
-
-## special: list and function
-p4(m, newdata = nd, type = "density", at = "list")
-p4(m, newdata = nd, type = "density", at = "function")
-
 }

@@ -88,6 +88,7 @@ m <- lm(dist ~ speed, data = cars)
 
 ## medians on observed data
 p4(m)
+p4(m, drop = TRUE)
 
 ## probability integral transform (PIT) on observed data
 p4(m, type = "probability", at = cars$dist)
@@ -119,8 +120,10 @@ qnt1(rbind(c(0.25, 0.5, 0.75)))
 
 ## list of functions
 qnt2 <- p4(m, newdata = nd, at = "list")
+qnt2[[1]]
 qnt2[[1]](0.5)
 qnt2[[1]](c(0.25, 0.5, 0.75))
+
 }
 
 \keyword{regression}
