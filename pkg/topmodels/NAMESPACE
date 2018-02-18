@@ -1,0 +1,74 @@
+import("stats")
+importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect")
+importFrom("grDevices", "n2mfrow")
+importFrom("utils", "head", "tail")
+
+export(  
+  "p4",
+  "p4_setup",
+
+  "newresponse",
+  "newresponse.default",
+
+  "pithist",
+  "pithist.default",
+  "autoplot.pithist",
+
+  "qqrplot",
+  "autoplot.qqrplot",
+
+  "reliagram",
+  "reliagram.default",
+  "autoplot.reliagram",
+
+  "rootogram",
+  "rootogram.default",
+  "autoplot.rootogram",
+
+  "qresiduals",
+  "qresiduals.default"
+)
+
+
+## methods for newresponse
+S3method("newresponse", "default")
+
+## methods for p4
+S3method("p4", "lm")
+
+## methods for qresiduals
+S3method("qresiduals", "default")
+
+
+
+## methods for class qqrplot
+S3method("plot", "qqrplot")
+
+
+## methods for pithist
+S3method("pithist", "default")
+
+## methods for class pithist
+S3method("plot", "pithist")
+S3method("lines", "pithist")
+
+
+## methods for reliagram
+S3method("reliagram", "default")
+S3method("reliagram", "crch")
+
+## methods for class reliagram
+S3method("plot", "reliagram")
+S3method("lines", "reliagram")
+
+
+## methods for rootogram
+S3method("rootogram", "default")
+S3method("rootogram", "glm")
+
+## methods for class rootogram
+S3method("plot", "rootogram")
+S3method("c", "rootogram")
+S3method("rbind", "rootogram")
+S3method("+", "rootogram")
+
