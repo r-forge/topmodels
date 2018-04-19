@@ -1,12 +1,12 @@
-## probabilistic 4-casting method: p4
+## probabilistic forecasting method: procast
 
 
-p4 <- function(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, ...)
+procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, ...)
 {
-  UseMethod("p4")
+  UseMethod("procast")
 }
 
-p4.lm <- function(object, newdata = NULL, na.action = na.pass,
+procast.lm <- function(object, newdata = NULL, na.action = na.pass,
                   type = c("quantile", "mean", "variance", "parameter", "density", "probability", "score"),
                   at = 0.5, drop = FALSE, ...)
 {
@@ -37,10 +37,10 @@ p4.lm <- function(object, newdata = NULL, na.action = na.pass,
 
   ## NOTE: for scores we need at = data.frame(y = response, x = model.matrix)
 
-  p4_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
+  procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
 }
 
-p4_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "p4", ...)
+procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
 {
   ## - is 'at' some kind of 'data'
   ## - or the special type 'list' or 'function'

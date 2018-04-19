@@ -25,7 +25,7 @@ pithist(object, \dots)
 
 \arguments{
   \item{object}{an object from which probability integral transforms can be
-    extracted with \code{\link{p4}}.}
+    extracted with \code{\link{procast}}.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
   \item{type}{character. In case of discrete distributions should
@@ -45,7 +45,7 @@ pithist(object, \dots)
 \details{
 PIT histograms graphically the probability integral transform (PIT),
 i.e., observed probabilities from fitted probability models, with
-a uniform distribution. It leverages the \code{\link{p4}} generic
+a uniform distribution. It leverages the \code{\link{procast}} generic
 and then essentially draws a \code{\link[graphics]{hist}}.
 
 In case of discrete distributions the PIT is either drawn randomly
@@ -58,7 +58,7 @@ histogram (FIXME: not yet implemented).
   \emph{Biometrics}, \bold{65}(4), 1254--1261.
 }
 
-\seealso{\code{\link{p4}}, \code{\link[graphics]{hist}}}
+\seealso{\code{\link{procast}}, \code{\link[graphics]{hist}}}
 
 \examples{
 ## linear regression models (homoscedastic Gaussian response)

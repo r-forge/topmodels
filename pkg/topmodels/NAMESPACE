@@ -4,8 +4,8 @@ importFrom("grDevices", "n2mfrow")
 importFrom("utils", "head", "tail")
 
 export(  
-  "p4",
-  "p4_setup",
+  "procast",
+  "procast_setup",
 
   "newresponse",
   "newresponse.default",
@@ -33,8 +33,8 @@ export(
 ## methods for newresponse
 S3method("newresponse", "default")
 
-## methods for p4
-S3method("p4", "lm")
+## methods for procast
+S3method("procast", "lm")
 
 ## methods for qresiduals
 S3method("qresiduals", "default")

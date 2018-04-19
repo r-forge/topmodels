@@ -17,7 +17,7 @@
 ## TODO: The code below is simply copied from countreg.
 ## - No adaptations yet.
 ## - No 'newdata' argument yet.
-## - Needs to be rewritten using p4().
+## - Needs to be rewritten using procast().
 ## - Better defaults for breaks:
 ##   if(is.null(breaks)) breaks <- "Sturges"
 ##   if(length(breaks) == 1L) breaks <- hist(y, breaks = breaks)$breaks

@@ -27,7 +27,7 @@ reliagram.default <- function(object, newdata = NULL,
   thresholds <- if(is.null(thresholds)) median(y, na.rm = TRUE) else as.numeric(thresholds)
 
   ## predicted probabilities
-  prob <- p4(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L))
+  prob <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L))
 
   ## compute quantities to be plotted
   rval <- data.frame("<cut prob>", "<aggregate y by prob and thresh>")

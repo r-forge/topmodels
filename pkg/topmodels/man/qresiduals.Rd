@@ -19,7 +19,7 @@ qresiduals(object, \dots)
   \item{object}{an object. For the \code{default} method this needs to
     be either a specification of probabilities (vector or 2-dimensional matrix of
     probabilities) or an object from which the these can be obtained with
-    \code{\link{p4}}.}
+    \code{\link{procast}}.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
   \item{trafo}{function for tranforming residuals from probability scale to
