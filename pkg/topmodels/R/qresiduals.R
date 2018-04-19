@@ -7,10 +7,10 @@ qresiduals.default <- function(object, newdata = NULL, trafo = qnorm, type = c("
   ## type of residual for discrete distribution (if any)
   type <- match.arg(type)
 
-  ## if 'object' is not a vector/matrix, apply p4(..., type = "probability") method
+  ## if 'object' is not a vector/matrix, apply procast(..., type = "probability") method
   if(is.object(object) | !is.numeric(object)) {
     y <- newresponse(object, newdata = newdata)
-    object <- p4(object, newdata = newdata, at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
+    object <- procast(object, newdata = newdata, at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
     if(inherits(object, "try-error")) stop("could not obtain probability integral transform from 'object'")
   }
 

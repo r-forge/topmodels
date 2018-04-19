@@ -29,7 +29,7 @@ newresponse(object, \dots)
 }
 
 \details{
-This is a convenience function to accompany \code{\link{p4}}, e.g.,
+This is a convenience function to accompany \code{\link{procast}}, e.g.,
 for computing predicted probabilities at the observed responses
 (also known as the probability integral transform, PIT).
 }

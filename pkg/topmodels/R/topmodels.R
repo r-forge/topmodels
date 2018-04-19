@@ -2,12 +2,12 @@
 ## - Z: create R-Forge repos "topmodels" [done]
 ## - Z: svndump "crch" -> import to "topmodels" on R-Forge [done]
 ## - Z: package skeleton "topmodels" on R-Forge [done]
-## - Z: p4() generic plus flexible p4_setup() [done]
-## - JM: p4.crch() with new p4_setup() infrastructure.
+## - Z: procast() generic plus flexible procast_setup() [done]
+## - JM: procast.crch() with new procast_setup() infrastructure.
 ## - JM: reliagram() prototype
 ## - JM: port pithist() from "countreg" + add type = "proportional" + Manu style
 ## - Z: port qqrplot() and rootogram() from "countreg" plus adaptations
-## - JM/Z/.../CK/IK/.../SW/MS/GS/???: p4 methods for betareg, countreg, glm, gamlss, mgcv::gam, ...
+## - JM/Z/.../CK/IK/.../SW/MS/GS/???: procast methods for betareg, countreg, glm, gamlss, mgcv::gam, ...
 
 ## TODO:
 ## - scoring rules for fitted model objects:
