@@ -71,7 +71,7 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   weights = NULL, offset = NULL, control = crch.boost()) 
 {
   ## type = "crps" currently not supported
-  if(type == "crps") stop("type = 'crps' currently not supported for boosting")
+  #if(type == "crps") stop("type = 'crps' currently not supported for boosting")
   ## response and regressor matrix
   n <- NROW(x)  
   k <- NCOL(x)
@@ -161,32 +161,76 @@ crch.boost.fit <- function(x, z, y, left, right, truncated = FALSE,
   } 
   
 
+
+
   if(is.character(dist)){
-    ## distribution functions
-    if(truncated) {
-      ddist2 <- switch(dist, 
-        "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
-      sdist2 <- switch(dist, 
-        "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+    if(type == "ml") {
+      ## distribution functions for maximum likelihood
+      if(truncated) {
+        ddist2 <- switch(dist, 
+          "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
+        sdist2 <- switch(dist, 
+          "student"  = stt, "gaussian" = stnorm, "logistic" = stlogis)
+      } else {
+        ddist2 <- switch(dist, 
+          "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
+        sdist2 <- switch(dist, 
+          "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+      }
+      ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
+      sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
     } else {
-      ddist2 <- switch(dist, 
-        "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
-      sdist2 <- switch(dist, 
-        "student"  = sct, "gaussian" = scnorm, "logistic" = sclogis)
+      stopifnot(requireNamespace("scoringRules"))
+      ## loss function for CRPS minimization  
+      if(truncated) {   
+        ddist2 <-  switch(dist, 
+          "student"  = crps_tt, 
+          "gaussian" = crps_tnorm, 
+          "logistic" = crps_tlogis)    
+        sdist2 <-  switch(dist, 
+          "student"  = gradcrps_tt, 
+          "gaussian" = gradcrps_tnorm, 
+          "logistic" = gradcrps_tlogis) 
+      } else {
+        ddist2 <- switch(dist, 
+          "student"  = crps_ct, 
+          "gaussian" = crps_cnorm, 
+          "logistic" = crps_clogis)
+        sdist2 <- switch(dist, 
+          "student"  = gradcrps_ct, 
+          "gaussian" = gradcrps_cnorm, 
+          "logistic" = gradcrps_clogis)
+      }
+      ddist3 <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
+      sdist3 <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
+      ddist <- function(x, location, scale, df, left = -Inf, right = Inf, log = TRUE) {    
+        - ddist3(x, location = location, scale = scale, lower = left, 
+          upper = right, df = df)
+      }
+      sdist <- function(x, location, scale, df, left = -Inf, right = Inf) {
+        rval <- - sdist3(x, df = df, location = location, scale = scale, 
+          lower = left, upper = right)
+        colnames(rval) <- c("dmu", "dsigma")
+        rval
+      }
+
+      ## density function required for log-likelihood
+      if(truncated) {
+        ddist4 <- switch(dist, 
+          "student"  = dtt, "gaussian" = dtnorm, "logistic" = dtlogis)
+      } else {
+        ddist4 <- switch(dist, 
+          "student"  = dct, "gaussian" = dcnorm, "logistic" = dclogis)
+      }
+      lldist <- if(dist == "student") ddist4 else function(..., df) ddist4(...)
     }
-    ddist <- if(dist == "student") ddist2 else function(..., df) ddist2(...)
-    sdist <- if(dist == "student") sdist2 else function(..., df) sdist2(...)
-
-
   } else { 
     ## for user defined distribution (requires list with ddist, sdist (optional)
     ## and hdist (optional), ddist, sdist, and hdist must be functions with
-    ## arguments x, mean, sd, df, left, right, and log)
+    ## arguments x, location, sd, df, left, right, and log)
     ddist <- dist$ddist
     sdist <- if(is.null(dist$sdist)) NULL else  dist$sdist
   }
-
-
 
 
  
