@@ -71,6 +71,7 @@ Intercepts are not counted.
 
 \examples{
 # generate data
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(5)
 x <- matrix(rnorm(1000*20),1000,20)
 y <- rnorm(1000, 1 + x[,1] - 1.5 * x[,2], exp(-1 + 0.3*x[,3]))
