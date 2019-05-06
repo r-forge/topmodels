@@ -1,3 +1,8 @@
+Changes in Version 1.0-2
+  
+  o updated contact information
+
+
 Changes in Version 1.0-1
   
   o Added argument 'type' to crch() which can be set to "crps" for parameter
