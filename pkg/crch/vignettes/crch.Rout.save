@@ -137,7 +137,7 @@ Two-Part  7 17744.82 17790.39
 
 > predict(TRCH, newdata, type = "quantile", at = (p - 
 +     0.5)/p)^2
-      1.1 
+      1 
 0.4156972 
 
 > mu <- predict(CRCH, newdata, type = "location")
