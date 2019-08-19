@@ -1,7 +1,7 @@
 Package: crch
 Title: Censored Regression with Conditional Heteroscedasticity
-Version: 1.0-2
-Date: 2019-05-05
+Version: 1.0-4
+Date: 2019-08-19
 Authors@R: c(person(given = "Jakob", family = "Messner", role = c("aut", "cre"), email = "jakob.messner@posteo.net",
                     comment = c(ORCID = "0000-0002-1027-3673")),
              person(given = "Achim", family = "Zeileis", role = "aut", email = "Achim.Zeileis@R-project.org",
@@ -9,7 +9,7 @@ Authors@R: c(person(given = "Jakob", family = "Messner", role = c("aut", "cre"),
              person(given = "Reto", family = "Stauffer", role = "aut", email = "reto.stauffer@uibk.ac.at",
                     comment = c(ORCID = "0000-0002-3798-5507")))
 Depends: R (>= 2.10.0)
-Imports: stats, Formula, ordinal, sandwich, scoringRules, countreg
+Imports: stats, Formula, ordinal, sandwich, scoringRules
 Suggests: glmx, lmtest, memisc
 Description: Different approaches to censored or truncated regression with 
   conditional heteroscedasticity are provided. First, continuous 
@@ -20,3 +20,5 @@ Description: Different approaches to censored or truncated regression with
   heteroscedastic extended logistic regression (HXLR). In the latter type of
   models, the intercepts depend on the thresholds that define the intervals. 
 License: GPL-2 | GPL-3
+
+gOU4WJ3uGutygvgBpIk8
