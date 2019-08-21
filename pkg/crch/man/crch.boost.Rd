@@ -122,4 +122,5 @@ summary(boost)
 plot(boost)
 }
 
-\keyword{regression, boosting}
+\keyword{regression}
+\concept{boosting}
