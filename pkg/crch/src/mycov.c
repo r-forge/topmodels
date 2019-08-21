@@ -3,7 +3,7 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 
-SEXP mycov(SEXP y, SEXP x, SEXP nrow, SEXP ncol)
+SEXP mycov(SEXP y, SEXP x)
 {
   int i, j, n = length(y);
   int k;
