@@ -1,6 +1,6 @@
 ## PIT histogram
 ##
-## - Oabserved y in-sample or out-of-sample (n x 1)
+## - Observed y in-sample or out-of-sample (n x 1)
 ## - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2)
 ## - Two columns can be essentially equal -> continuous
 ##   or different -> (partially) discrete
