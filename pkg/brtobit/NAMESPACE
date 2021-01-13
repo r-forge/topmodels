@@ -1,0 +1,27 @@
+importFrom("crch", "dcnorm")
+importFrom("sandwich", "bread", "estfun")
+importFrom("stats",
+  "dnorm", "pnorm", "qnorm",
+  "lm.fit", ".getXlevels", "printCoefmat",
+  "AIC", "BIC", "coef", "predict", "vcov",
+  "delete.response", "model.frame", "model.matrix", "model.response", "na.pass", "terms")
+
+export(
+  "brtobit",
+  "brtobit_control",
+  "brtobit_fit"
+)
+
+## methods for brtobit
+S3method("bread", "brtobit")
+S3method("coef", "brtobit")
+S3method("fitted", "brtobit")
+S3method("logLik", "brtobit")
+S3method("model.frame", "brtobit")
+S3method("model.matrix", "brtobit")
+S3method("predict", "brtobit")
+S3method("print", "brtobit")
+S3method("summary", "brtobit")
+S3method("print", "summary.brtobit")
+S3method("vcov", "brtobit")
+S3method(memisc::getSummary, "brtobit")
