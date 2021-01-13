@@ -1,0 +1,14 @@
+bibentry(bibtype = "TechReport",
+         title = "Bias Reduction as a Remedy to the Consequences of Infinite Estimates in {P}oisson and {T}obit Regression",
+         author = c(person(given = "Susanne", family = "K{\\\"oll}", email = "susanne.berger114@gmail.com"),
+                    person(given = "Ioannis", family = "Kosmidis", email = "ioannis.kosmidis@warwick.ac.uk"),
+		    person(given = "Christian", family = "Kleiber", email = "Christian.Kleiber@unibas.ch"),
+                    person(given = "Achim", family = "Zeileis", email = "Achim.Zeileis@R-project.org")),
+         year = "2021",
+         institution = "arXiv.org E-Print Archive",
+         type = "arXiv",
+         number = "2101.12345",
+         month = "January",
+         url = "https://arxiv.org/abs/2101.12345",
+         header = "To cite brtobit in publications use:"
+)

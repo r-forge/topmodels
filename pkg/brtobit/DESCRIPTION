@@ -1,0 +1,17 @@
+Package: brtobit
+Title: Bias-Reduced Tobit Regression Models
+Version: 0.1-1
+Date: 2021-01-14
+Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org", comment = c(ORCID = "0000-0003-0918-3766")),
+             person(given = "Ioannis", family = "Kosmidis", role = "aut", email = "ioannis.kosmidis@warwick.ac.uk", comment = c(ORCID = "0000-0003-1556-0302")),
+             person(given = "Susanne", family = "Koell", role = "aut", email = "susanne.berger114@gmail.com"),
+	     person(given = "Christian", family = "Kleiber", role = "ctb", email = "Christian.Kleiber@unibas.ch", comment = c(ORCID = "0000-0002-6781-4733")))
+Depends: R (>= 3.6.0)
+Imports: stats, crch, sandwich
+Suggests: memisc
+Description: Bias-reducted tobit regression models are provided.
+  These are Gaussian regression models with a response variable left-censored at zero,
+  constant latent variance, and a latent mean that depends on covariates
+  through a linear predictor. Instead of estimating the parameters by plain maximum
+  likelihood a bias-reduced estimator is employed.
+License: GPL-2 | GPL-3
