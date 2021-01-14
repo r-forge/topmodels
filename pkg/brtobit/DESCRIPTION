@@ -9,9 +9,7 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
 Depends: R (>= 3.6.0)
 Imports: stats, crch, sandwich
 Suggests: memisc
-Description: Bias-reducted tobit regression models are provided.
-  These are Gaussian regression models with a response variable left-censored at zero,
-  constant latent variance, and a latent mean that depends on covariates
-  through a linear predictor. Instead of estimating the parameters by plain maximum
-  likelihood a bias-reduced estimator is employed.
+Description: Bias-reducted tobit regression models are Gaussian regression models with a response variable
+  left-censored at zero, constant latent variance, and a latent mean that depends on covariates through a linear predictor.
+  Instead of estimating the parameters by plain maximum likelihood a bias-reduced estimator is employed.
 License: GPL-2 | GPL-3
