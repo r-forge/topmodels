@@ -113,7 +113,7 @@ brtobit_control(fsmaxit = 100, start = NULL, epsilon = 1e-08, type = "BR", ...)
 \references{
   Köll S, Kosmidis I, Kleiber C, Zeileis A (2021).
     \dQuote{Bias Reduction as a Remedy to the Consequences of Infinite Estimates in Poisson and Tobit Regression.}
-    arXiv:2101.12345, arXiv.org E-Print Archive. \url{https://arxiv.org/abs/2101.12345}
+    arXiv:2101.07141, arXiv.org E-Print Archive. \url{https://arxiv.org/abs/2101.07141}
 
   Messner JW, Mayr GJ, Zeileis A (2016). Heteroscedastic Censored and
     Truncated Regression with crch.

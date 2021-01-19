@@ -7,8 +7,8 @@ bibentry(bibtype = "TechReport",
          year = "2021",
          institution = "arXiv.org E-Print Archive",
          type = "arXiv",
-         number = "2101.12345",
+         number = "2101.07141",
          month = "January",
-         url = "https://arxiv.org/abs/2101.12345",
+         url = "https://arxiv.org/abs/2101.07141",
          header = "To cite brtobit in publications use:"
 )
