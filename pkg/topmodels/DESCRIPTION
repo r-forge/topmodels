@@ -13,7 +13,7 @@ Authors@R: c(person(given = "Christian", family = "Kleiber", role = "aut", email
                     comment = c(ORCID = "0000-0003-0918-3766")))
 Depends: R (>= 3.0.0)
 Imports: graphics, grDevices, stats, utils
-Suggests: betareg, countreg, crch, ggplot2, lmtest, MASS
+Suggests: betareg, countreg, crch, ggplot2, lmtest, MASS, tinytest
 Description: Unified infrastructure for probabilistic models and distributional regressions:
              Computations of probabilities, densities, scores, and Hessians.
 	     Probabilistic forecasting. Diagnostic graphics like rootograms, PIT histograms,
