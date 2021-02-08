@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = type
+# Test procast.lm argument = `type'
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
 
@@ -48,11 +48,11 @@ expect_equal(
   ),
 )
 
-## TODO: (ML) Implement type = score
+## TODO: (ML) Implement type = `score'
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = newdata
+# Test procast.lm argument = `newdata'
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
 nd <- data.frame(speed = c(10, 15, 20))
@@ -67,10 +67,9 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = at
+# Test procast.lm argument = `at'
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
-nd <- data.frame(speed = c(10, 15, 20))
 
 expect_equal(
   procast(m, at = rbind(c(0.25, 0.5, 0.75))),
@@ -81,3 +80,24 @@ expect_equal(
   ),
 )
 
+# --------------------------------------------------------------------
+# Test procast.lm argument = `na.action'
+# --------------------------------------------------------------------
+m <- lm(dist ~ speed, data = cars)
+nd <- data.frame(speed = c(10, NA, 20))
+
+expect_equal(
+  procast(m, type = "parameter", newdata = nd),
+  data.frame(
+    mu = predict(m, newdata = nd), 
+    sigma = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+  ),
+)
+
+expect_equal(
+  procast(m, type = "parameter", newdata = nd, na.action = na.omit),
+  data.frame(
+    mu = predict(m, newdata = nd, na.action = na.omit), 
+    sigma = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+  ),
+)

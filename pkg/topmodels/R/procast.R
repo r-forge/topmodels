@@ -14,12 +14,13 @@ procast.lm <- function(object, newdata = NULL, na.action = na.pass,
   pars <- if(missing(newdata) || is.null(newdata)) {
     object$fitted.values
   } else {
-    predict(object, newdata = newdata)
+    predict(object, newdata = newdata, na.action = na.action)
   }
   pars <- data.frame(mu = pars)
 
   ## add maximum likelihood estimator of constant varians
   pars$sigma <- summary(object)$sigma * sqrt(df.residual(object)/nobs(object))
+  ## NOTE: (ML) check if constant sigma in case of `na.action' is what we want
 
   ## types of predictions
   type <- match.arg(type, c("quantile", "mean", "variance", "parameter", "density", "probability", "score"))
