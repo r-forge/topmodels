@@ -15,14 +15,14 @@
 procast(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, \dots)
 
 \method{procast}{lm}(object, newdata = NULL, na.action = na.pass,
-  type = c("quantile", "mean", "variance", "parameter", "density", "probability", "score"),
-  at = 0.5, drop = FALSE, \dots)
+  type = c("quantile", "mean", "variance", "parameter", "density", 
+  "probability", "score"), at = 0.5, drop = FALSE, \dots)
 
 procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", \dots)
 }
 
 \arguments{
-  \item{object}{a fitted model object. For the \code{default} method this needs to
+  \item{object}{a fitted model object. For the \code{default} method this 
     needs to be \code{formula}-based so that \code{\link[stats]{model.frame}}
     can be used to extract the response from the original data the model
     was fitted to or \code{\link[stats]{terms}} can be used to set up
@@ -51,7 +51,7 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", \dots)
 The function \code{procast} provides a unified framework for probabilistic
 4-casting based on probabilistic (regression) models, also known
 as distributional regression approaches. Typical types of predictions
-include quanitles, probabilities, (conditional) expectations, variances,
+include quantiles, probabilities, (conditional) expectations, variances,
 (log-)densities, or scores. Internally, \code{procast} methods typically
 compute the predicted parameters for each observation and then transform
 these to the desired outcome. Some quantities (e.g., expectations or

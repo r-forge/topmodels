@@ -85,23 +85,23 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
     ## or sets up a user interface with predicted parameters as default ('function')
     } else {
       FUN2a <- function(at, pars, ...) {
-    	n <- NROW(pars)
-	if(!is.data.frame(at)) {
+    	  n <- NROW(pars)
+	      if(!is.data.frame(at)) {
           if(length(at) == 1L) at <- rep.int(as.vector(at), n)
           if(length(at) != n) at <- rbind(at)
-	}
-    	if(is.matrix(at) && NROW(at) == 1L) {
-    	  at <- matrix(rep(at, each = n), nrow = n)
-    	  rv <- FUN(as.vector(at), pars = pars[rep(1L:n, ncol(at)), ], ...)
-    	  rv <- matrix(rv, nrow = n)
-    	  rownames(rv) <- rownames(pars)
-    	  colnames(rv) <- paste(substr(type, 1L, 1L),
-    	    			round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)), sep = "_")
-    	} else {
-    	  rv <- FUN(at, pars = pars, ...)
-    	  names(rv) <- rownames(pars)
-    	}
-    	return(rv)
+	      }
+    	  if(is.matrix(at) && NROW(at) == 1L) {
+    	    at <- matrix(rep(at, each = n), nrow = n)
+    	    rv <- FUN(as.vector(at), pars = pars[rep(1L:n, ncol(at)), ], ...)
+    	    rv <- matrix(rv, nrow = n)
+    	    rownames(rv) <- rownames(pars)
+    	    colnames(rv) <- paste(substr(type, 1L, 1L),
+    	      round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)), sep = "_")
+    	  } else {
+    	    rv <- FUN(at, pars = pars, ...)
+    	    names(rv) <- rownames(pars)
+    	  }
+    	  return(rv)
       }
       
       if(attype == "function") {
@@ -113,7 +113,7 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
         ff <- formals(FUN2a)
         formals(rval) <- as.pairlist(c(ff[1L], as.pairlist(structure(
           lapply(names(pars), function(n) call("$", as.name("pars"), n)),
-	  .Names = names(pars))), ff[3L]))
+	        .Names = names(pars))), ff[3L]))
         return(rval)
       } else {
         rval <- FUN2a(at, pars = pars, ...)
