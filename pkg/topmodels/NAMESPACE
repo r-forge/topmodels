@@ -35,6 +35,7 @@ S3method("newresponse", "default")
 
 ## methods for procast
 S3method("procast", "lm")
+S3method("procast", "crch")
 
 ## methods for qresiduals
 S3method("qresiduals", "default")
