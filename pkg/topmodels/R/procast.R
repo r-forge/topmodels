@@ -139,3 +139,77 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
 
   return(rval)
 }
+
+
+procast.crch <- function(object, 
+                         newdata = NULL, 
+                         na.action = na.pass,
+                         type = c("quantile", "mean", "variance", "parameter", 
+                           "density", "probability", "score"),
+                         at = 0.5, 
+                         drop = FALSE, 
+                         ...) {
+
+  # Call
+  cl <- match.call()
+  cl[[1]] <- as.name("predict")
+  cl$drop <- NULL
+
+  # Check possible types of predictions
+  type <- match.arg(type, c("quantile", "mean", "variance", "parameter", 
+    "density", "probability", "score"))
+
+  # * is 'at' some kind of 'data'
+  # * or the special type 'list' or 'function'
+  # * or missing altogether ('none')
+  attype <- if (is.null(at) || type %in% c("mean", "variance", "parameter")) {
+    "none"
+  } else if (is.character(at)) {
+    match.arg(at, c("function", "list"))
+  } else {
+    "data"
+  }
+
+  # Set up internal function that computes prediction
+  # NOTE: (ML) Do we want to support more? Should mean be the response? Should score be the crps?
+  cl$type <- switch(type,
+    "quantile" = "quantile",
+    "mean" = "location",
+    "variance" = "scale",
+    "parameter" = "parameter",
+    "density" = "density",
+    "probability" = "probability",
+    "score" = "crps"
+  )
+
+  # NOTE: (AZ) For scores we need at = data.frame(y = response, x = model.matrix)
+
+  if (attype == "function") {
+    rval <- eval(cl, parent.frame())
+    return(rval)
+
+  } else if (attype == "list") {
+    stop("Argument `type' == `list' is not yet supported for crch model classes.") 
+    # NOTE: (ML) Argument `type' == `list' is not yet fully supported in predict.crch()
+
+  } else {
+    rval <- eval(cl, parent.frame())
+
+    # Default: return a data.frame (drop=FALSE) but optionally this can
+    # be dropped to a vector if possible (drop=TRUE)
+    if (drop) {
+      if (!is.null(dim(rval)) && NCOL(rval) == 1L) {
+        # NOTE: (ML) How can condition be fulfilled? Compare code coverage.
+        rval <- drop(rval)
+      }
+    } else {
+      if (is.null(dim(rval))) {
+        rval <- as.matrix(rval)
+        if (ncol(rval) == 1L) colnames(rval) <- type
+      }
+      if (!inherits(rval, "data.frame")) rval <- as.data.frame(rval)
+    }
+
+    return(rval)
+  }
+}
