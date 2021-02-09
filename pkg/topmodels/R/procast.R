@@ -125,7 +125,10 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
   ## default: return a data.frame (drop=FALSE) but optionally this can
   ## be dropped to a vector if possible (drop=TRUE)
   if(drop) {
-    if(!is.null(dim(rval)) && NCOL(rval) == 1L) rval <- drop(rval)
+    if (!is.null(dim(rval)) && NCOL(rval) == 1L) {
+      # NOTE: (ML) How can condition be fulfilled? Compare code coverage.
+      rval <- drop(rval)
+    }
   } else {
     if(is.null(dim(rval))) {
       rval <- as.matrix(rval)
