@@ -18,7 +18,7 @@ pithist(object, \dots)
 
 \method{pithist}{default}(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
   mass_redist = c("quantile", "random", "none"),
-  breaks = NULL, xlim = c(0, 1), ylim = NULL,
+  breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
   xlab = "PIT", ylab = "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
   lwd = 2, lty = 1, freq = FALSE, ...)
@@ -38,6 +38,8 @@ pithist(object, \dots)
     should the (point) masses be redistributed equally, randomly or
     not at all?} 
   \item{breaks}{numeric. Breaks for the histogram intervals.}
+  \item{plot}{logical. Should the \code{plot} method be called to
+    draw the computed PIT histogram?}
   \item{xlab, ylab, main}{graphical parameters.}
   \item{xlim, ylim, border, fill, col, lwd, lty}{graphical
     parameters. These may pertain either to the whole plot or just the
