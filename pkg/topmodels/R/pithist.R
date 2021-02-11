@@ -27,11 +27,16 @@ pithist <- function(object, ...) {
 
 
 pithist.default <- function(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
+  mass_redist = c("quantile", "random", "none"),
   breaks = NULL, xlim = c(0, 1), ylim = NULL,
   xlab = "PIT", ylab = "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
   lwd = 2, lty = 1, freq = FALSE, ...)
 {
+
+  ## point mass redistribution
+  mass_redist <- match.arg(mass_redist, c("quantile", "random", "none"))
+
   ## either compute proportion exactly (to do...) or approximate by simulation
   type <- match.arg(type, c("random", "proportional"))
   if(type == "proportional") {
@@ -39,7 +44,8 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
   } else {
     #p <- qresiduals.default(object, newdata = newdata, trafo = NULL, nsim = nsim)
     # TODO: (ML) What is the default fun for? Compare comment for `qresiduals.crch()'.
-    p <- qresiduals(object, newdata = newdata, trafo = NULL, nsim = nsim, distribute_cens = "quantile")
+    p <- qresiduals(object, newdata = newdata, trafo = NULL, nsim = nsim, 
+      mass_redist = mass_redist)
   }
 
   ## breaks
