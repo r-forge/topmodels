@@ -46,10 +46,10 @@ qresiduals.crch <- function(object,
                             type = c("random", "quantile"), 
                             nsim = 1L, 
                             prob = 0.5, 
-                            distribute_cens = c("random", "quantile", "no"),
+                            mass_redist = c("quantile", "random", "none"),
                             ...) {
 # TODO: (ML) 
-# * Better argument name for `distribute_cens'. 
+# * Better argument name for `mass_redist' and for its types. 
 # * Is really an own S3 method necessary or would be an extension of the default method 
 #   be more appropriate? 
 # * Or even adapt in procast(), but here problem with missing y. 
@@ -58,14 +58,14 @@ qresiduals.crch <- function(object,
 
   ## type of residual for discrete distribution (if any)
   type <- match.arg(type)
-  distribute_cens <- match.arg(distribute_cens)
+  mass_redist <- match.arg(mass_redist)
 
   ## if 'object' is not a vector/matrix, apply procast(..., type = "probability") method
   if(is.object(object) | !is.numeric(object)) {
     y <- newresponse(object, newdata = newdata)
 
     # If `object' is censored, point mass must be randomly or evenly redistributed
-    if ((distribute_cens != "no") & any(sapply(object$cens, is.finite))) {
+    if ((mass_redist != "none") & any(sapply(object$cens, is.finite))) {
       left <- object$cens$left 
       right <- object$cens$right
 
@@ -77,14 +77,22 @@ qresiduals.crch <- function(object,
       }
       
       idx <- which(y <= left | y >= right)
-      if (distribute_cens == "random") {
-        object[idx, ] <- runif(length(idx))
-      } else {
-        p <- seq(length.out = length(idx)) / (length(idx) + 1)  # TODO: (ML) Check if correct
+      if (mass_redist == "quantile") {
+        # TODO: (ML) Check which approach is correct
+
+        # Get quantiles equally distributed between 0 and 1
+        #p <- seq(length.out = length(idx)) / (length(idx) + 1)  
+
+        # Get quantiles equally distributed within potential bins
+        p <- seq(0, 1, length.out = length(idx) + 1L)
+        p <- filter(p, rep(1 / 2, 2), sides = 2)[-length(p)]
         object[idx, ] <- sample(qunif(p))
+      } else {
+        object[idx, ] <- runif(length(idx))
       }
 
     } else {
+
       object <- procast(object, newdata = newdata, 
         at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
 
