@@ -28,7 +28,7 @@ pithist <- function(object, ...) {
 
 pithist.default <- function(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
   mass_redist = c("quantile", "random", "none"),
-  breaks = NULL, xlim = c(0, 1), ylim = NULL,
+  breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
   xlab = "PIT", ylab = "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
   lwd = 2, lty = 1, freq = FALSE, ...)
@@ -55,16 +55,75 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
   ## labels
   if(is.null(main)) main <- deparse(substitute(object))
 
-  ## histogram
-  rval <- hist(p, breaks = breaks, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main,
-    col = fill, border = border, freq = freq, ...)
-  abline(h = 1, col = col, lty = lty, lwd = lwd)
+  ## collect everything as list $ TODO: (ML) Should it be prepared as `data.frame' to be consistent?
+  rval <- hist(p, breaks = breaks, plot = FALSE, ...)
+  class(rval) <- c("pithist", "list")
+
+  ## also plot by default
+  if (plot) {
+    plot(rval, freq = freq, fill = fill, col = col, lwd = lwd, border = border, main = main, 
+      xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+  }
+
+  ## return invisibly
   invisible(rval)
 }
 
 ## actual drawing
-plot.pithist <- function(x, ...) {
-  NULL
+# TODO: (ML) currently copy of `graphics:::plot.histogram()'
+plot.pithist <- function(x,  
+  xlab = "PIT", ylab = "Density", main = NULL,
+  border = "black", fill = "lightgray", col = "#B61A51",
+  lwd = 2, lty = 1, freq = FALSE, 
+  
+  density = NULL, angle = 45, 
+  sub = NULL, xlim = range(x$breaks), 
+  ylim = NULL, axes = TRUE, labels = FALSE, 
+  add = FALSE, ann = TRUE, ...) {
+
+  equidist <- if (is.logical(x$equidist)) 
+      x$equidist
+  else {
+      h <- diff(x$breaks)
+      diff(range(h)) < 1e-07 * mean(h)
+  }
+  if (freq && !equidist) 
+      warning("the AREAS in the plot are wrong -- rather use 'freq = FALSE'")
+  y <- if (freq) 
+      x$counts
+  else x$density
+  nB <- length(x$breaks)
+  if (is.null(y) || 0L == nB) 
+      stop("'x' is wrongly structured")
+  dev.hold()
+  on.exit(dev.flush())
+  if (!add) {
+      if (is.null(ylim)) 
+          ylim <- range(y, 0)
+      if (missing(ylab)) 
+          ylab <- if (!freq) 
+              "Density"
+          else "Frequency"
+      plot.new()
+      plot.window(xlim, ylim, "", ...)
+      if (ann) 
+          title(main = main, sub = sub, xlab = xlab, ylab = ylab, 
+              ...)
+      if (axes) {
+          axis(1, ...)
+          axis(2, ...)
+      }
+  }
+  rect(x$breaks[-nB], 0, x$breaks[-1L], y, col = fill, border = border, 
+      angle = angle, density = density, lty = lty)
+  if ((logl <- is.logical(labels) && labels) || is.character(labels)) 
+      text(x$mids, y, labels = if (logl) {
+          if (freq) 
+              x$counts
+          else round(x$density, 3)
+      }
+      else labels, adj = c(0.5, -0.5))
+  abline(h = 1, col = col, lty = lty, lwd = lwd)
 }
 
 lines.pithist <- function(x, ...) {
@@ -75,4 +134,3 @@ lines.pithist <- function(x, ...) {
 autoplot.pithist <- function(object, ...) {
   NULL
 }
-
