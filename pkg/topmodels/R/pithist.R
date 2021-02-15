@@ -166,6 +166,34 @@ lines.pithist <- function(x, ...) {
 
 
 ## ggplot2 interface
-autoplot.pithist <- function(object, ...) {
-  NULL
+autoplot.pithist <- function(object,
+  colour = c("black", "#B61A51"), fill = "darkgray", size = 1.2, ...)
+{
+  ## determine grouping
+  class(object) <- "data.frame"
+  if(is.null(object$group)) object$group <- 1L
+  n <- max(object$group)
+  object$group <- factor(object$group, levels = 1L:n, labels = attr(object, "main"))
+  
+  ## FIXME: unneeded copies just to avoid warnings in R CMD check
+  x <- object$x
+  xleft <- object$xleft
+  xright <- object$xright
+  y <- object$y
+
+  ## rectangles and fitted lines
+  rval <- ggplot2::ggplot(object, ggplot2::aes(xmin = xleft, xmax = xright, ymin = 0, ymax = y, x = x, y = y)) + 
+    ggplot2::geom_rect(colour = colour[1L], fill = fill) + 
+    ggplot2::geom_hline(yintercept = 1, colour = colour[2L], size = size)
+  
+  ## grouping (if any)
+  if(n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
+
+  ## annotation
+  rval <- rval + ggplot2::xlab(paste(unique(attr(object, "xlab")), collapse = "/")) +
+    ggplot2::ylab(paste(unique(attr(object, "ylab")), collapse = "/"))
+
+  ## return with annotation
+  rval
 }
+
