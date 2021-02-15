@@ -155,55 +155,63 @@ m2 <- crch(dist ~ speed | speed, data = cars)
 
 expect_equal(
   procast(m2, drop = TRUE), 
-  predict(m2, type = "quantile")
+  predict(m2, type = "quantile"),
+  check.attributes = FALSE
 )
 
 expect_equal(
   procast(m2, type = "mean", drop = TRUE), 
-  predict(m2, type = "location") 
+  predict(m2, type = "location"),
+  check.attributes = FALSE
 )
 
 expect_equal(
   procast(m2, type = "variance", drop = TRUE),
-  predict(m2, type = "scale")
+  predict(m2, type = "scale"),
+  check.attributes = FALSE
 )
 
 expect_equal(
   procast(m2, type = "parameter"),
   predict(m2, type = "parameter"),
+  check.attributes = FALSE
 )
 
 expect_equal(
   procast(m2, type = "density", drop = TRUE),
-  predict(m2, type = "density")
+  predict(m2, type = "density"),
+  check.attributes = FALSE
 )
 
 expect_equal(
   procast(m2, type = "probability", drop = TRUE),
-  predict(m2, type = "probability")
+  predict(m2, type = "probability"),
+  check.attributes = FALSE
 )
 
 expect_equal(
   procast(m2, type = "score", drop = TRUE),
-  predict(m2, type = "crps")
+  predict(m2, type = "crps"),
+  check.attributes = FALSE
 )
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = `drop'
+# Test procast.crch argument = `drop'
 # --------------------------------------------------------------------
 expect_equal(
   procast(m2, type = "quantile", drop = FALSE),
   data.frame(
     quantile = predict(m2, type = "quantile")
-  )
+  ),
+  check.attributes = FALSE
 )
 
 ## TODO: (ML) Implement test for condition (!is.null(dim(rval)) && NCOL(rval) == 1L)
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = `at'
+# Test procast.crch argument = `at'
 # --------------------------------------------------------------------
 m2 <- crch(dist ~ speed | speed, data = cars)
 nd <- data.frame(speed = c(10, 15, 20))
@@ -214,12 +222,14 @@ expect_equal(
     q_0.25 = predict(m2, type = "quantile", at = c(0.25)),
     q_0.5  = predict(m2, type = "quantile", at = c(0.5)),
     q_0.75 = predict(m2, type = "quantile", at = c(0.75))
-  )
+  ), 
+  check.attributes = FALSE
 )
 
 expect_equal(
   procast(m2, at = rbind(c(0.25, 0.5, 0.75)), drop = TRUE),
-  predict(m2, type = "quantile", at = c(0.25, 0.5, 0.75))
+  predict(m2, type = "quantile", at = c(0.25, 0.5, 0.75)),
+  check.attributes = FALSE
 )
 
 qnt1 <- procast(m2, type = "quantile", newdata = nd, at = "function")

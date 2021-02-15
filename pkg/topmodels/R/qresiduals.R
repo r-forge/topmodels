@@ -64,17 +64,17 @@ qresiduals.crch <- function(object,
   if(is.object(object) | !is.numeric(object)) {
     y <- newresponse(object, newdata = newdata)
 
+    object <- procast(object, newdata = newdata, 
+      at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
+
+    if (inherits(object, "try-error")) {
+      stop("could not obtain probability integral transform from 'object'")
+    }
+
     # If `object' is censored, point mass must be randomly or evenly redistributed
-    if ((mass_redist != "none") & any(sapply(object$cens, is.finite))) {
-      left <- object$cens$left 
-      right <- object$cens$right
-
-      object <- procast(object, newdata = newdata, 
-        at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
-
-      if (inherits(object, "try-error")) {
-        stop("could not obtain probability integral transform from 'object'")
-      }
+    if ((mass_redist != "none") & any(sapply(attr(object, "cens"), is.finite))) {
+      left <- attr(object, "cens")$left 
+      right <- attr(object, "cens")$right
       
       idx <- which(y <= left | y >= right)
       if (mass_redist == "quantile") {
@@ -90,16 +90,7 @@ qresiduals.crch <- function(object,
       } else {
         object[idx, ] <- runif(length(idx))
       }
-
-    } else {
-
-      object <- procast(object, newdata = newdata, 
-        at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
-
-      if (inherits(object, "try-error")) {
-         stop("could not obtain probability integral transform from 'object'")
-      }
-    }
+    } 
   }
 
   ## preprocess supplied probabilities
