@@ -43,8 +43,8 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
     stop("not yet implemented")
   } else {
     #p <- qresiduals.default(object, newdata = newdata, trafo = NULL, nsim = nsim)
-    # TODO: (ML) What is the default fun for? Compare comment for `qresiduals.crch()'.
-    p <- qresiduals(object, newdata = newdata, trafo = NULL, nsim = nsim, 
+    # TODO: (ML) What is the default fun for? 
+    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, nsim = nsim, 
       mass_redist = mass_redist)
   }
 
