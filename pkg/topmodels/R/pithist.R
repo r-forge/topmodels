@@ -173,16 +173,11 @@ autoplot.pithist <- function(object,
   class(object) <- "data.frame"
   if(is.null(object$group)) object$group <- 1L
   n <- max(object$group)
-  object$group <- factor(object$group, levels = 1L:n, labels = attr(object, "main"))
+  object$group <- factor(object$group, levels = 1L:n, 
+    labels = make.names(attr(object, "main"), unique = TRUE))
   
-  ## FIXME: unneeded copies just to avoid warnings in R CMD check
-  x <- object$x
-  xleft <- object$xleft
-  xright <- object$xright
-  y <- object$y
-
   ## rectangles and fitted lines
-  rval <- ggplot2::ggplot(object, ggplot2::aes(xmin = xleft, xmax = xright, ymin = 0, ymax = y, x = x, y = y)) + 
+  rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "xleft", xmax = "xright", ymin = 0, ymax = "y")) + 
     ggplot2::geom_rect(colour = colour[1L], fill = fill) + 
     ggplot2::geom_hline(yintercept = 1, colour = colour[2L], size = size)
   
