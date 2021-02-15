@@ -186,7 +186,6 @@ procast.crch <- function(object,
 
   if (attype == "function") {
     rval <- eval(cl, parent.frame())
-    return(rval)
 
   } else if (attype == "list") {
     stop("Argument `type' == `list' is not yet supported for crch model classes.") 
@@ -209,7 +208,9 @@ procast.crch <- function(object,
       }
       if (!inherits(rval, "data.frame")) rval <- as.data.frame(rval)
     }
-
-    return(rval)
   }
+
+  attr(rval, "cens") <- list(left = object$cens$left, right = object$cens$right)
+
+  return(rval)
 }
