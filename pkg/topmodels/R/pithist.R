@@ -55,80 +55,115 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
   ## labels
   if(is.null(main)) main <- deparse(substitute(object))
 
-  ## collect everything as list $ TODO: (ML) Should it be prepared as `data.frame' to be consistent?
-  rval <- hist(p, breaks = breaks, plot = FALSE, ...)
-  class(rval) <- c("pithist", "list")
+  ## collect everything as data.frame
+  ## TODO: (ML) Should it really be prepared as a `data.frame` and 
+  ## return name of hist() should be renamed
+  ## TODO: (ML) Maybe get rid of `hist()`
+  tmp_hist <- hist(p, breaks = breaks, plot = FALSE, ...)
+  rval <- data.frame(x = tmp_hist$mids, xleft = tmp_hist$breaks[-length(tmp_hist$breaks)], 
+                     xright = tmp_hist$breaks[-1L], y = tmp_hist$density) 
+  attr(rval, "xlab") <- xlab
+  attr(rval, "ylab") <- ylab
+  attr(rval, "main") <- main
+  class(rval) <- c("pithist", "data.frame")
 
   ## also plot by default
   if (plot) {
-    plot(rval, freq = freq, fill = fill, col = col, lwd = lwd, border = border, main = main, 
-      xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    plot(rval, ...)
   }
 
   ## return invisibly
   invisible(rval)
 }
 
-## actual drawing
-# TODO: (ML) currently copy of `graphics:::plot.histogram()'
-plot.pithist <- function(x,  
-  xlab = "PIT", ylab = "Density", main = NULL,
-  border = "black", fill = "lightgray", col = "#B61A51",
-  lwd = 2, lty = 1, freq = FALSE, 
-  
-  density = NULL, angle = 45, 
-  sub = NULL, xlim = range(x$breaks), 
-  ylim = NULL, axes = TRUE, labels = FALSE, 
-  add = FALSE, ann = TRUE, ...) {
 
-  equidist <- if (is.logical(x$equidist)) 
-      x$equidist
-  else {
-      h <- diff(x$breaks)
-      diff(range(h)) < 1e-07 * mean(h)
-  }
-  if (freq && !equidist) 
-      warning("the AREAS in the plot are wrong -- rather use 'freq = FALSE'")
-  y <- if (freq) 
-      x$counts
-  else x$density
-  nB <- length(x$breaks)
-  if (is.null(y) || 0L == nB) 
-      stop("'x' is wrongly structured")
-  dev.hold()
-  on.exit(dev.flush())
-  if (!add) {
-      if (is.null(ylim)) 
-          ylim <- range(y, 0)
-      if (missing(ylab)) 
-          ylab <- if (!freq) 
-              "Density"
-          else "Frequency"
-      plot.new()
-      plot.window(xlim, ylim, "", ...)
-      if (ann) 
-          title(main = main, sub = sub, xlab = xlab, ylab = ylab, 
-              ...)
-      if (axes) {
-          axis(1, ...)
-          axis(2, ...)
-      }
-  }
-  rect(x$breaks[-nB], 0, x$breaks[-1L], y, col = fill, border = border, 
-      angle = angle, density = density, lty = lty)
-  if ((logl <- is.logical(labels) && labels) || is.character(labels)) 
-      text(x$mids, y, labels = if (logl) {
-          if (freq) 
-              x$counts
-          else round(x$density, 3)
-      }
-      else labels, adj = c(0.5, -0.5))
-  abline(h = 1, col = col, lty = lty, lwd = lwd)
+c.pithist <- rbind.pithist <- function(...)
+{
+  ## list of pithists
+  rval <- list(...)
+
+  ## group sizes
+  for(i in seq_along(rval)) {
+    if(is.null(rval[[i]]$group)) rval[[i]]$group <- 1L
+  } 
+  n <- lapply(rval, function(r) table(r$group))
+
+  ## labels
+  xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
+  ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  nam <- names(rval)
+  main <- if(is.null(nam)) {
+    as.vector(sapply(rval, function(r) attr(r, "main")))
+  } else {
+    make.unique(rep.int(nam, sapply(n, length)))
+  } 
+  n <- unlist(n)
+
+  ## combine and return
+  rval <- do.call("rbind.data.frame", rval)
+  rval$group <- if(length(n) < 2L) NULL else rep.int(seq_along(n), n)
+  attr(rval, "xlab") <- xlab
+  attr(rval, "ylab") <- ylab
+  attr(rval, "main") <- main
+  class(rval) <- c("pithist", "data.frame")
+  return(rval)
 }
+
+
+plot.pithist <- function(x,
+  xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, main = NULL,
+  border = "black", fill = "lightgray", col = "#B61A51",
+  lwd = 2, pch = 19, lty = 1, axes = TRUE, ...)
+{
+
+  ## handling of groups
+  if(is.null(x$group)) x$group <- 1L
+  n <- max(x$group) 
+  
+  ## annotation
+  if(is.null(xlab)) xlab <- TRUE
+  if(is.null(ylab)) ylab <- TRUE
+  if(is.null(main)) main <- TRUE 
+  xlab <- rep(xlab, length.out = n)
+  ylab <- rep(ylab, length.out = n)
+  main <- rep(main, length.out = n)
+  if(is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
+  if(is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
+  if(is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
+
+  ## plotting function
+  pithist1 <- function(d, ...) {
+    ## rect elements
+    xleft <- d$xleft
+    xright <- d$xright
+    y <- d$y 
+    j <- unique(d$group)
+
+    ## defaults
+    if(is.null(xlim)) xlim <- range(c(xleft, xright))
+    if(is.null(ylim)) ylim <- range(c(0, y))
+
+    ## draw pithist 
+    plot(0, 0, type = "n", xlim = xlim, ylim = ylim,
+      xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...)
+    if(axes) {
+      axis(1)
+      axis(2)
+    }
+    rect(xleft, 0, xright, y, border = border, col = fill)
+    abline(h = 1, col = col, lty = lty, lwd = lwd)
+   }
+
+   ## draw plots
+   if(n > 1L) par(mfrow = n2mfrow(n))
+   for(i in 1L:n) pithist1(x[x$group == i, ], ...)
+}
+
 
 lines.pithist <- function(x, ...) {
   NULL
 }
+
 
 ## ggplot2 interface
 autoplot.pithist <- function(object, ...) {
