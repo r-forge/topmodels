@@ -272,17 +272,14 @@ autoplot.rootogram <- function(object,
   class(object) <- "data.frame"
   if(is.null(object$group)) object$group <- 1L
   n <- max(object$group)
-  object$group <- factor(object$group, levels = 1L:n, labels = attr(object, "main"))
+  object$group <- factor(object$group, levels = 1L:n, 
+    labels = make.names(attr(object, "main"), unique = TRUE))
 
-  ## FIXME: unneeded copies just to avoid warnings in R CMD check
-  x <- object$x
-  y <- object$y
-  width <- object$width
-  height <- object$height
-  
   ## rectangles and fitted lines
-  rval <- ggplot2::ggplot(object, ggplot2::aes(xmin = x - width/2, xmax = x + width/2, ymin = y, ymax = y + height, x = x, y = line)) +
-    ggplot2::geom_rect(colour = colour[1L], fill = fill) + ggplot2::geom_line(colour = colour[2L], size = size[1L]) +
+  rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "x - width/2", xmax = "x + width/2", 
+      ymin = "y", ymax = "y + height", x = "x", y = "line")) +
+    ggplot2::geom_rect(colour = colour[1L], fill = fill) + 
+    ggplot2::geom_line(colour = colour[2L], size = size[1L]) +
     ggplot2::geom_hline(yintercept = 0)
   if(all(table(object$group) <= 20L)) rval <- rval + ggplot2::geom_point(colour = colour[2L], size = size[2L])
 
