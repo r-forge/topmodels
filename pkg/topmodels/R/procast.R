@@ -5,6 +5,7 @@ procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantil
 {
   UseMethod("procast")
 }
+# NOTE: (ML) Do we need/want support of weights, etc.
 
 procast.lm <- function(object, newdata = NULL, na.action = na.pass,
                   type = c("quantile", "mean", "variance", "parameter", "density", "probability", "score"),

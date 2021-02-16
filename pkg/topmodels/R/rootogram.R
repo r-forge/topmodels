@@ -341,8 +341,8 @@ rootogram_procast <- function(object, newdata = NULL, breaks = NULL,
       procast(object, newdata = newdata, na.action = na.omit, type = "probability", at = breaks[i], drop = TRUE) 
   }
   expctd <- colSums(p * w)
-
-  #if(is.null(xlab)) xlab <- as.character(attr(mt, "variables"))[2L]
+  if(is.null(xlab)) xlab <- as.character(attr(terms(object), "variables"))[2L]  
+  # TODO: (ML) Do we need terms here? No info in `newresponse()` or `procast()` output?
   if(is.null(main)) main <- deparse(substitute(object))
   rootogram.default(obsrvd, expctd, breaks = breaks,
     xlab = xlab, main = main,
