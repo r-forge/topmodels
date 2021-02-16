@@ -319,3 +319,33 @@ autoplot.rootogram <- function(object,
     style = style, scale = scale,
     main = main, xlab = xlab, ylab = ylab, plot = FALSE)
 }
+
+
+# FIXME: Really just a first draft!
+rootogram_procast <- function(object, newdata = NULL, breaks = NULL,
+  max = NULL, xlab = NULL, main = NULL, width = NULL, ...) 
+{
+  y <- newresponse(object, newdata = newdata) # TODO: What about na.action
+  w <- attr(y, "weights")
+
+  ## breaks
+  if(is.null(breaks)) breaks <- "Sturges"
+  breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
+  obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
+
+  ## expected frequencies
+  p <- matrix(NA, nrow = length(y), ncol = length(breaks) - 1L)
+  for (i in 1L:ncol(p)) {
+    p[, i] <- 
+      procast(object, newdata = newdata, na.action = na.omit, type = "probability", at = breaks[i + 1L], drop = TRUE) -
+      procast(object, newdata = newdata, na.action = na.omit, type = "probability", at = breaks[i], drop = TRUE) 
+  }
+  expctd <- colSums(p * w)
+
+  #if(is.null(xlab)) xlab <- as.character(attr(mt, "variables"))[2L]
+  if(is.null(main)) main <- deparse(substitute(object))
+  rootogram.default(obsrvd, expctd, breaks = breaks,
+    xlab = xlab, main = main,
+  #  width = if(family == "gaussian") 1 else 0.9, ...)  
+    width = 1, ...)  
+}

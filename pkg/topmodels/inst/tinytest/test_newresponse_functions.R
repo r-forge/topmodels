@@ -1,9 +1,9 @@
 # --------------------------------------------------------------------
-# TESTS FOR FUNCTIONS WITHIN `newresponse.R'
+# TESTS FOR FUNCTIONS WITHIN `newresponse.R`
 # --------------------------------------------------------------------
 
 # --------------------------------------------------------------------
-# Test for newresponse.default()
+# Test for `newresponse.default()`
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
 expect_equal(
