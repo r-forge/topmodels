@@ -1,9 +1,9 @@
 # --------------------------------------------------------------------
-# TESTS FOR FUNCTIONS WITHIN `procast.R'
+# TESTS FOR FUNCTIONS WITHIN `procast.R`
 # --------------------------------------------------------------------
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = `type'
+# Test procast.lm argument = `type`
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
 
@@ -48,11 +48,11 @@ expect_equal(
   )
 )
 
-## TODO: (ML) Implement type = `score'
+## TODO: (ML) Implement type = `score`
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = `drop'
+# Test procast.lm argument = `drop`
 # --------------------------------------------------------------------
 expect_equal(
   procast(m, drop = FALSE),
@@ -65,7 +65,7 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = `newdata'
+# Test procast.lm argument = `newdata`
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
 nd <- data.frame(speed = c(10, 15, 20))
@@ -80,7 +80,7 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = `at'
+# Test procast.lm argument = `at`
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
 nd <- data.frame(speed = c(10, 15, 20))
@@ -125,7 +125,7 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test procast.lm argument = `na.action'
+# Test procast.lm argument = `na.action`
 # --------------------------------------------------------------------
 m <- lm(dist ~ speed, data = cars)
 nd <- data.frame(speed = c(10, NA, 20))
@@ -148,7 +148,7 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test procast.crch argument = `type'
+# Test procast.crch argument = `type`
 # --------------------------------------------------------------------
 library("crch")
 m2 <- crch(dist ~ speed | speed, data = cars)
@@ -197,7 +197,7 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test procast.crch argument = `drop'
+# Test procast.crch argument = `drop`
 # --------------------------------------------------------------------
 expect_equal(
   procast(m2, type = "quantile", drop = FALSE),
@@ -211,7 +211,7 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test procast.crch argument = `at'
+# Test procast.crch argument = `at`
 # --------------------------------------------------------------------
 m2 <- crch(dist ~ speed | speed, data = cars)
 nd <- data.frame(speed = c(10, 15, 20))
