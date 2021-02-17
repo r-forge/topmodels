@@ -26,11 +26,33 @@ rootogram <- function(object, ...) {
   UseMethod("rootogram")
 }
 
+## TODO: (ML) * Cannot write S3 method, as object are *not yet* of class `procast`
+##            * This is a workaround in order not to change `rootogram.default()` of `countreg`
 rootogram.default <- function(object, fitted, breaks = NULL,
   style = c("hanging", "standing", "suspended"),
   scale = c("sqrt", "raw"), plot = TRUE,
   width = NULL, xlab = NULL, ylab = NULL, main = NULL, ...)
 {
+
+  if (missing(fitted)) {
+
+    if ("glm" %in% class(object) && substr(family(object)$family, 1L, 17L) %in% 
+      c("negbin", "Negative Binomial", "poisson", "binomial", "gaussian")) {
+      ## TODO: (ML) Long term: get these actually be running by `procast()`
+          
+      cl <- match.call()
+      cl[[1]] <- quote(topmodels:::rootogram_glm)  # FIXME: (ML) Resolve note
+      rval <- eval(cl, parent.frame())
+      invisible(rval)
+
+    } else { 
+      cl <- match.call()
+      cl[[1]] <- quote(topmodels:::rootogram_procast)  # FIXME: (ML) Resolve note
+      rval <- eval(cl, parent.frame())
+      invisible(rval)
+    }
+  } else { 
+
   ## rectangle style
   scale <- match.arg(scale)
   style <- match.arg(style)
@@ -90,7 +112,7 @@ rootogram.default <- function(object, fitted, breaks = NULL,
   
   ## return invisibly
   invisible(rval)
-}
+}}
 
 c.rootogram <- rbind.rootogram <- function(...)
 {
@@ -180,7 +202,7 @@ plot.rootogram <- function(x,
    for(i in 1L:n) rootogram1(x[x$group == i, ], ...)
 }
 
-rootogram.glm <- function(object, newdata = NULL, breaks = NULL,
+rootogram_glm <- function(object, newdata = NULL, breaks = NULL,
   max = NULL, xlab = NULL, main = NULL, width = NULL, ...) 
 {
   family <- substr(family(object)$family, 1L, 17L)
