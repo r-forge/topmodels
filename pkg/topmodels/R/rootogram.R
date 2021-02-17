@@ -53,66 +53,67 @@ rootogram.default <- function(object, fitted, breaks = NULL,
     }
   } else { 
 
-  ## rectangle style
-  scale <- match.arg(scale)
-  style <- match.arg(style)
+    ## rectangle style
+    scale <- match.arg(scale)
+    style <- match.arg(style)
 
-  ## default annotation
-  if(is.null(xlab)) {
-    xlab <- if(is.null(names(dimnames(object)))) {
-      deparse(substitute(object))
-    } else {
-      names(dimnames(object))[1L]
+    ## default annotation
+    if(is.null(xlab)) {
+      xlab <- if(is.null(names(dimnames(object)))) {
+        deparse(substitute(object))
+      } else {
+        names(dimnames(object))[1L]
+      }
     }
-  }
-  if(is.null(ylab)) {
-    ylab <- if(scale == "raw") "Frequency" else "sqrt(Frequency)" 
-  }
-  if(is.null(main)) main <- deparse(substitute(fitted))
-  
-  ## breaks, midpoints, widths
-  if(is.null(breaks)) {
-    x <- as.numeric(names(object))
-    if(length(x) < 1L) x <- 0L:(length(object) - 1L)
-    breaks <- (head(x, -1L) + tail(x, -1L))/2
-    breaks <- c(2 * head(x, 1L) - head(breaks, 1L), breaks,
-      2 * tail(x, 1L) - tail(breaks, 1L))
-    if(is.null(width)) width <- 0.9
-  } else {
-    x <- (head(breaks, -1L) + tail(breaks, -1L))/2
-    if(is.null(width)) width <- 1
-  }
+    if(is.null(ylab)) {
+      ylab <- if(scale == "raw") "Frequency" else "sqrt(Frequency)" 
+    }
+    if(is.null(main)) main <- deparse(substitute(fitted))
+    
+    ## breaks, midpoints, widths
+    if(is.null(breaks)) {
+      x <- as.numeric(names(object))
+      if(length(x) < 1L) x <- 0L:(length(object) - 1L)
+      breaks <- (head(x, -1L) + tail(x, -1L))/2
+      breaks <- c(2 * head(x, 1L) - head(breaks, 1L), breaks,
+        2 * tail(x, 1L) - tail(breaks, 1L))
+      if(is.null(width)) width <- 0.9
+    } else {
+      x <- (head(breaks, -1L) + tail(breaks, -1L))/2
+      if(is.null(width)) width <- 1
+    }
 
-  ## raw vs. sqrt scale
-  if(scale == "sqrt") {
-    obsrvd <- sqrt(as.vector(object))
-    expctd <- sqrt(as.vector(fitted))
-  } else {
-    obsrvd <- as.vector(object)
-    expctd <- as.vector(fitted)
+    ## raw vs. sqrt scale
+    if(scale == "sqrt") {
+      obsrvd <- sqrt(as.vector(object))
+      expctd <- sqrt(as.vector(fitted))
+    } else {
+      obsrvd <- as.vector(object)
+      expctd <- as.vector(fitted)
+    }
+
+    ## height/position of rectangles
+    y <- if(style == "hanging") expctd - obsrvd else 0
+    height <- if(style == "suspended") expctd - obsrvd else obsrvd
+
+    ## collect everything as data.frame
+    rval <- data.frame(observed = as.vector(object), expected = as.vector(fitted),
+      x = x, y = y, width = diff(breaks) * width, height = height,
+      line = expctd)
+    attr(rval, "style") <- style
+    attr(rval, "scale") <- scale
+    attr(rval, "xlab") <- xlab
+    attr(rval, "ylab") <- ylab
+    attr(rval, "main") <- main
+    class(rval) <- c("rootogram", "data.frame")
+    
+    ## also plot by default
+    if(plot) plot(rval, ...)
+    
+    ## return invisibly
+    invisible(rval)
   }
-
-  ## height/position of rectangles
-  y <- if(style == "hanging") expctd - obsrvd else 0
-  height <- if(style == "suspended") expctd - obsrvd else obsrvd
-
-  ## collect everything as data.frame
-  rval <- data.frame(observed = as.vector(object), expected = as.vector(fitted),
-    x = x, y = y, width = diff(breaks) * width, height = height,
-    line = expctd)
-  attr(rval, "style") <- style
-  attr(rval, "scale") <- scale
-  attr(rval, "xlab") <- xlab
-  attr(rval, "ylab") <- ylab
-  attr(rval, "main") <- main
-  class(rval) <- c("rootogram", "data.frame")
-  
-  ## also plot by default
-  if(plot) plot(rval, ...)
-  
-  ## return invisibly
-  invisible(rval)
-}}
+}
 
 c.rootogram <- rbind.rootogram <- function(...)
 {
