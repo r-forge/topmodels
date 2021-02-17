@@ -9,7 +9,8 @@
 \alias{rbind.rootogram}
 
 \alias{rootogram.default}
-\alias{rootogram.glm}
+\alias{rootogram_glm}
+\alias{rootogram_procast}
 
 \title{Rootograms for Assessing Goodness of Fit of Probability Models}
 

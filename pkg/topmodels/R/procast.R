@@ -153,7 +153,7 @@ procast.crch <- function(object,
 
   # Call
   cl <- match.call()
-  cl[[1]] <- as.name("predict")
+  cl[[1]] <- quote(predict)
   cl$drop <- NULL
 
   # Check possible types of predictions
