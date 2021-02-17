@@ -346,7 +346,6 @@ autoplot.rootogram <- function(object,
 }
 
 
-# FIXME: Really just a first draft!
 rootogram_procast <- function(object, newdata = NULL, breaks = NULL,
   max = NULL, xlab = NULL, main = NULL, width = NULL, ...) 
 {
@@ -371,6 +370,6 @@ rootogram_procast <- function(object, newdata = NULL, breaks = NULL,
   if(is.null(main)) main <- deparse(substitute(object))
   rootogram.default(obsrvd, expctd, breaks = breaks,
     xlab = xlab, main = main,
-  #  width = if(family == "gaussian") 1 else 0.9, ...)  
+  #  width = if(family == "gaussian") 1 else 0.9, ...)  # TODO: (ML) Change to 0.9 for discrete distrubtions
     width = 1, ...)  
 }
