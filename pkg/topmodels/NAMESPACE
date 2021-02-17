@@ -65,7 +65,6 @@ S3method("lines", "reliagram")
 
 ## methods for rootogram
 S3method("rootogram", "default")
-S3method("rootogram", "glm")
 
 ## methods for class rootogram
 S3method("plot", "rootogram")

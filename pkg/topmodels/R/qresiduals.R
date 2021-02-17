@@ -28,6 +28,7 @@ qresiduals.default <- function(object,
     object <- procast(object, newdata = newdata, 
       at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
 
+    # TODO: (ML) There is no `try()` environment, which errors can be caught
     if (inherits(object, "try-error")) {
       stop("could not obtain probability integral transform from 'object'")
     }
