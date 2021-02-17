@@ -41,13 +41,15 @@ rootogram.default <- function(object, fitted, breaks = NULL,
       ## TODO: (ML) Long term: get these actually be running by `procast()`
           
       cl <- match.call()
-      cl[[1]] <- quote(topmodels:::rootogram_glm)  # FIXME: (ML) Resolve note
-      rval <- eval(cl, parent.frame())
+      cl[[1]] <- quote(rootogram_glm)  
+      rval <- eval(cl, parent.frame())  
+        # FIXME: (ML) Compare NAMESPACE, in order to work `rootogram_glm()` must be exported
       invisible(rval)
 
     } else { 
       cl <- match.call()
-      cl[[1]] <- quote(topmodels:::rootogram_procast)  # FIXME: (ML) Resolve note
+      cl[[1]] <- quote(rootogram_procast)
+        # FIXME: (ML) Compare NAMESPACE, in order to work `rootogram_procast()` must be exported
       rval <- eval(cl, parent.frame())
       invisible(rval)
     }
