@@ -29,10 +29,48 @@ pithist <- function(object, ...) {
 pithist.default <- function(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
   mass_redist = c("quantile", "random", "none"),
   breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
-  xlab = "PIT", ylab = "Density", main = NULL,
+  xlab = "PIT", ylab = if(freq) "Frequency" else "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
-  lwd = 2, lty = 1, freq = FALSE, ...)
+  lwd = 2, lty = c(1, 2), freq = FALSE, 
+  confint = TRUE, confint_level = 0.95, confint_type = c("default", "agresti"), ...)
 {
+
+  ## helper function to calculate CI employing `qbinom()`
+  get_confint <- function(n, bins, level, freq) {
+    a <- (1 - level) / 2
+    a <- c(a, 1 - a)
+    rval <- qbinom(a, size = n, prob = 1 / bins)
+    if(!freq) rval <- rval / (n / bins) 
+    rval
+  }
+
+  ## helper function to calculate corrected CI according to according to Agresti & Coull (1998)
+  get_confint_agresti <- function(x, n, level, bins, freq) {
+    rval <- add4ci(x, n, level)$conf.int * n
+    if(!freq) rval <- rval / (n / bins) 
+    rval
+  }
+
+  ## copy of `add4ci` package from package `PropCIs` by Ralph Scherer (licensed under GPL-2/GPL-3)
+  add4ci <- function (x, n, conf.level) {
+    ptilde = (x + 2)/(n + 4)
+    z = abs(qnorm((1 - conf.level)/2))
+    stderr = sqrt(ptilde * (1 - ptilde)/(n + 4))
+    ul = ptilde + z * stderr
+    ll = ptilde - z * stderr
+    if (ll < 0) 
+        ll = 0
+    if (ul > 1) 
+        ul = 1
+    cint <- c(ll, ul)
+    attr(cint, "conf.level") <- conf.level
+    rval <- list(conf.int = cint, estimate = ptilde)
+    class(rval) <- "htest"
+    return(rval)
+  }
+
+  ## confint type
+  confint_type <- match.arg(confint_type, c("default", "agresti"))
 
   ## point mass redistribution
   mass_redist <- match.arg(mass_redist, c("quantile", "random", "none"))
@@ -52,6 +90,21 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
   if(is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(NROW(p), c(0, 50, 5000, 1000000, Inf))]
   if(length(breaks) == 1L) breaks <- seq(xlim[1L], xlim[2L], length.out = breaks + 1L)
 
+  ## ci interval
+  if (confint_type == "default") {
+    ci <- get_confint(NROW(p), length(breaks) - 1, confint_level, freq)
+  } else {
+    ci <- get_confint_agresti(
+      NROW(p) / (length(breaks) - 1), 
+      NROW(p), 
+      confint_level, 
+      length(breaks) - 1, 
+      freq)
+  }
+
+  ## perfect prediction
+  pp <- ifelse(freq, NROW(p) / (length(breaks) - 1), 1)
+
   ## labels
   if(is.null(main)) main <- deparse(substitute(object))
 
@@ -61,7 +114,9 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
   ## TODO: (ML) Maybe get rid of `hist()`
   tmp_hist <- hist(p, breaks = breaks, plot = FALSE, ...)
   rval <- data.frame(x = tmp_hist$mids, xleft = tmp_hist$breaks[-length(tmp_hist$breaks)], 
-                     xright = tmp_hist$breaks[-1L], y = tmp_hist$density) 
+                     xright = tmp_hist$breaks[-1L], 
+                     counts = tmp_hist$counts, density = tmp_hist$density, 
+                     ci_lower = ci[1], ci_upper = ci[2], pp = pp) 
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
@@ -69,7 +124,8 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
 
   ## also plot by default
   if (plot) {
-    plot(rval, ...)
+    plot(rval, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, border = border, fill = fill,
+      col = col, lwd = lwd, lty = lty, freq = freq, confint = confint, ...)
   }
 
   ## return invisibly
@@ -111,9 +167,10 @@ c.pithist <- rbind.pithist <- function(...)
 
 
 plot.pithist <- function(x,
+  freq = FALSE, confint = TRUE,  
   xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
-  lwd = 2, pch = 19, lty = 1, axes = TRUE, ...)
+  lwd = 2, pch = 19, lty = c(1, 2), axes = TRUE, ...)
 {
 
   ## handling of groups
@@ -136,12 +193,15 @@ plot.pithist <- function(x,
     ## rect elements
     xleft <- d$xleft
     xright <- d$xright
-    y <- d$y 
+    y <- if(freq) d$counts else d$density 
     j <- unique(d$group)
+    ci_lower <- ifelse(confint, unique(d$ci_lower), NULL)
+    ci_upper <- ifelse(confint, unique(d$ci_upper), NULL)
+    pp <-  unique(d$pp)
 
     ## defaults
     if(is.null(xlim)) xlim <- range(c(xleft, xright))
-    if(is.null(ylim)) ylim <- range(c(0, y))
+    if(is.null(ylim)) ylim <- range(c(0, y, ci_lower, ci_upper))
 
     ## draw pithist 
     plot(0, 0, type = "n", xlim = xlim, ylim = ylim,
@@ -151,7 +211,9 @@ plot.pithist <- function(x,
       axis(2)
     }
     rect(xleft, 0, xright, y, border = border, col = fill)
-    abline(h = 1, col = col, lty = lty, lwd = lwd)
+    abline(h = pp, col = col, lty = lty[1], lwd = lwd)
+    if(confint) abline(h = d$ci_lower, col = col, lty = lty[2], lwd = lwd)
+    if(confint) abline(h = d$ci_upper, col = col, lty = lty[2], lwd = lwd)
    }
 
    ## draw plots

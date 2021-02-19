@@ -8,11 +8,11 @@ procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantil
 # NOTE: (ML) Do we need/want support of weights, etc.
 
 procast.lm <- function(object, newdata = NULL, na.action = na.pass,
-                  type = c("quantile", "mean", "variance", "parameter", "density", "probability", "score"),
-                  at = 0.5, drop = FALSE, ...)
+  type = c("quantile", "mean", "variance", "parameter", "density", "probability", "score"),
+  at = 0.5, drop = FALSE, ...)
 {
   ## predicted means
-  pars <- if(missing(newdata) || is.null(newdata)) {
+  pars <- if (missing(newdata) || is.null(newdata)) {
     object$fitted.values
   } else {
     predict(object, newdata = newdata, na.action = na.action)

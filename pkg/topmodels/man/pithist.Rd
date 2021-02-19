@@ -19,9 +19,10 @@ pithist(object, \dots)
 \method{pithist}{default}(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
   mass_redist = c("quantile", "random", "none"),
   breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
-  xlab = "PIT", ylab = "Density", main = NULL,
+  xlab = "PIT", ylab = if(freq) "Frequency" else "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
-  lwd = 2, lty = 1, freq = FALSE, ...)
+  lwd = 2, lty = c(1, 2), freq = FALSE,
+  confint = TRUE, confint_level = 0.95, confint_type = c("default", "agresti"), ...)
 }
 
 \arguments{
@@ -44,6 +45,9 @@ pithist(object, \dots)
   \item{xlim, ylim, border, fill, col, lwd, lty}{graphical
     parameters. These may pertain either to the whole plot or just the
     histogram or just the fitted line.}
+  \item{confint}{logical. Should confident intervals be drawn?}
+  \item{confint_level}{numeric. The confidence level required.}
+  \item{confint_type}{character. Which type of confidence interval.}  #FIXME: (ML) Improve documentation.
   \item{freq, \dots}{further arguments passed to
     \code{\link[graphics]{hist}}.}
 }
