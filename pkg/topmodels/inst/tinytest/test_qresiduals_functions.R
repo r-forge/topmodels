@@ -18,27 +18,17 @@ expect_equal(
 
 
 # --------------------------------------------------------------------
-# Test `qresiduals.default()` argument `mass_redist` 
+# Test `qresiduals.default()` with censor point
 # --------------------------------------------------------------------
 library("crch")
 m2 <- crch(dist ~ speed | speed, left = 30, data = cars)
 idx <- which(cars$dist <= 30)
 
 expect_equal(
-  qresiduals(m2, mass_redist = "none"),  # TODO: (ML) Should it really be a named vector?
-  qnorm(predict(m2, type = "probability", at = cars$dist))
-)
-
-# TODO: (ML) Improve test for `mass_redist = quantile` (default)
-expect_equal(
   qresiduals(m2)[-idx],  # TODO: (ML) Should it really be a named vector?
   qnorm(predict(m2, type = "probability", at = cars$dist))[-idx]
 )
 
-# TODO: (ML) Improve test for `mass_redist = random`
-expect_equal(
-  qresiduals(m2, mass_redist = "random")[-idx],  # TODO: (ML) Should it really be a named vector?
-  qnorm(predict(m2, type = "probability", at = cars$dist))[-idx]
-)
+# TODO: Improve/extent tests for censoring/truncation
 
 
