@@ -17,8 +17,6 @@ qresiduals.default <- function(object,
   if(is.object(object) | !is.numeric(object)) {
     y <- newresponse(object, newdata = newdata)
 
-    # TODO: (ML) Are response values below/above censoring point handled correctly 
-    # (should actually not occur)
     object <- procast(object, newdata = newdata, 
       at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
 

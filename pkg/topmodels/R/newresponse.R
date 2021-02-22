@@ -15,8 +15,15 @@ newresponse.default <- function(object, newdata, na.action = na.pass, ...)
   w <- model.weights(mf)
   if(is.null(w)) w <- rep(1, NROW(mf))
 
-  rval <- model.response(mf)
-  attr(rval, "weights") <- w
-  return(rval)
+  y <- model.response(mf)
 
+  ## TODO: (ML) Should we really catch response values above/below censor points
+  tmp <- procast(object)  ## TODO: Quick workaround
+  left <- attr(tmp, "cens")$left
+  right <- attr(tmp, "cens")$right
+  if(!is.null(left)) y[y < left] <- left
+  if(!is.null(right)) y[y > right] <- right
+
+  attr(y, "weights") <- w
+  return(y)
 }
