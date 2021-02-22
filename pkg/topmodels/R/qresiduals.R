@@ -8,7 +8,6 @@ qresiduals.default <- function(object,
                                type = c("random", "quantile"), 
                                nsim = 1L, 
                                prob = 0.5, 
-                               mass_redist = c("quantile", "random", "none"),
                                ...) {
 # TODO: (ML) 
 # * Better argument name for `mass_redist' and for its types. 
@@ -19,7 +18,6 @@ qresiduals.default <- function(object,
 
   ## type of residual for discrete distribution (if any)
   type <- match.arg(type)
-  mass_redist <- match.arg(mass_redist)
 
   ## if 'object' is not a vector/matrix, apply procast(..., type = "probability") method
   if(is.object(object) | !is.numeric(object)) {
@@ -33,26 +31,16 @@ qresiduals.default <- function(object,
       stop("could not obtain probability integral transform from 'object'")
     }
 
-    # If `object' is censored, point mass must be randomly or evenly redistributed
-    if ((mass_redist != "none") & any(sapply(attr(object, "cens"), is.finite))) {
-      left <- attr(object, "cens")$left 
-      right <- attr(object, "cens")$right
-      
-      idx <- which(y <= left | y >= right)
-      if (mass_redist == "quantile") {
-        # TODO: (ML) Check which approach is correct
-
-        # Get quantiles equally distributed between 0 and 1
-        #p <- seq(length.out = length(idx)) / (length(idx) + 1)  
-
-        # Get quantiles equally distributed within potential bins
-        p <- seq(0, 1, length.out = length(idx) + 1L)
-        p <- filter(p, rep(1 / 2, 2), sides = 2)[-length(p)]
-        object[idx, ] <- sample(qunif(p))
-      } else {
-        object[idx, ] <- runif(length(idx))
-      }
-    } 
+    # TODO: (ML) This is actually not needed, but must we make sure that not values
+    # below/above censoring point are within y?!
+    ## If `object' is censored, point mass must be randomly or evenly redistributed
+    #if (mass_redist & any(sapply(attr(object, "cens"), is.finite))) {
+    #  left <- attr(object, "cens")$left 
+    #  right <- attr(object, "cens")$right
+    # 
+    #  idx <- which(y <= left | y >= right)
+    #  object[idx, ] <- object[idx, ] * runif(length(idx))
+    #} 
   }
 
   ## preprocess supplied probabilities

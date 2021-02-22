@@ -12,8 +12,7 @@
 qresiduals(object, \dots)
 
 \method{qresiduals}{default}(object, newdata = NULL, trafo = qnorm,
-  type = c("random", "quantile"), nsim = 1L, prob = 0.5,  
-  mass_redist = c("quantile", "random", "none"), \dots)
+  type = c("random", "quantile"), nsim = 1L, prob = 0.5, \dots)
 }
 
 \arguments{
@@ -31,9 +30,6 @@ qresiduals(object, \dots)
     per observation (for \code{type = "numeric"}).}
   \item{prob}{numeric. The probabilities at which quantile residuals should be
     computed (for \code{type = "quantile"}), defaulting to the median.}
-  \item{mass_redist}{character. In case of censorship or truncation
-    should the (point) masses be redistributed equally, randomly or
-    not at all?} 
   \item{\dots}{further parameters passed to methods.}
 }
 

@@ -27,7 +27,6 @@ pithist <- function(object, ...) {
 
 
 pithist.default <- function(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
-  mass_redist = c("quantile", "random", "none"),
   breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
   xlab = "PIT", ylab = if(freq) "Frequency" else "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
@@ -72,18 +71,13 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
   ## confint type
   confint_type <- match.arg(confint_type, c("default", "agresti"))
 
-  ## point mass redistribution
-  mass_redist <- match.arg(mass_redist, c("quantile", "random", "none"))
-
   ## either compute proportion exactly (to do...) or approximate by simulation
   type <- match.arg(type, c("random", "proportional"))
   if(type == "proportional") {
     stop("not yet implemented")
   } else {
-    #p <- qresiduals.default(object, newdata = newdata, trafo = NULL, nsim = nsim)
     # TODO: (ML) What is the default fun for? 
-    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, nsim = nsim, 
-      mass_redist = mass_redist)
+    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, nsim = nsim)
   }
 
   ## breaks
