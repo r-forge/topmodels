@@ -211,7 +211,5 @@ procast.crch <- function(object,
     }
   }
 
-  attr(rval, "cens") <- list(left = object$cens$left, right = object$cens$right)
-
   return(rval)
 }

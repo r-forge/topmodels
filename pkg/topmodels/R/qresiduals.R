@@ -9,12 +9,6 @@ qresiduals.default <- function(object,
                                nsim = 1L, 
                                prob = 0.5, 
                                ...) {
-# TODO: (ML) 
-# * Better argument name for `mass_redist' and for its types. 
-# * Or is an own S3 method necessary be more appropriate (previous version)?
-# * Or even adapt in procast(), but here problem with missing y. 
-# * Now save truncation (e.g., crch, gamlss) as attribute in return value of `procast()' 
-#   and check in `qresiduals.default()' for censor point?!
 
   ## type of residual for discrete distribution (if any)
   type <- match.arg(type)
@@ -23,6 +17,8 @@ qresiduals.default <- function(object,
   if(is.object(object) | !is.numeric(object)) {
     y <- newresponse(object, newdata = newdata)
 
+    # TODO: (ML) Are response values below/above censoring point handled correctly 
+    # (should actually not occur)
     object <- procast(object, newdata = newdata, 
       at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
 
@@ -30,17 +26,6 @@ qresiduals.default <- function(object,
     if (inherits(object, "try-error")) {
       stop("could not obtain probability integral transform from 'object'")
     }
-
-    # TODO: (ML) This is actually not needed, but must we make sure that not values
-    # below/above censoring point are within y?!
-    ## If `object' is censored, point mass must be randomly or evenly redistributed
-    #if (mass_redist & any(sapply(attr(object, "cens"), is.finite))) {
-    #  left <- attr(object, "cens")$left 
-    #  right <- attr(object, "cens")$right
-    # 
-    #  idx <- which(y <= left | y >= right)
-    #  object[idx, ] <- object[idx, ] * runif(length(idx))
-    #} 
   }
 
   ## preprocess supplied probabilities
