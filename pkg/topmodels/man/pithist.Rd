@@ -17,7 +17,6 @@
 pithist(object, \dots)
 
 \method{pithist}{default}(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
-  mass_redist = c("quantile", "random", "none"),
   breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
   xlab = "PIT", ylab = if(freq) "Frequency" else "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
@@ -35,9 +34,6 @@ pithist(object, \dots)
     or distributed proportionally?}
   \item{nsim}{integer. If \code{type} is \code{"random"} how
     many simulated PITs should be drawn?}
-  \item{mass_redist}{character. In case of censorship or truncation
-    should the (point) masses be redistributed equally, randomly or
-    not at all?} 
   \item{breaks}{numeric. Breaks for the histogram intervals.}
   \item{plot}{logical. Should the \code{plot} method be called to
     draw the computed PIT histogram?}
