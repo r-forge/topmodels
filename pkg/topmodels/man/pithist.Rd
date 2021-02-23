@@ -16,12 +16,13 @@
 \usage{
 pithist(object, \dots)
 
-\method{pithist}{default}(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
+\method{pithist}{default}(object, newdata = NULL, style = c("histogram", "lines"), 
+  type = c("random", "proportional"), nsim = 1L,
   breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
   xlab = "PIT", ylab = if(freq) "Frequency" else "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
   lwd = 2, lty = c(1, 2), freq = FALSE,
-  confint = TRUE, confint_level = 0.95, confint_type = c("default", "agresti"), ...)
+  confint = TRUE, confint_level = 0.95, confint_type = c("exact", "approximation"), ...)
 }
 
 \arguments{
@@ -29,6 +30,7 @@ pithist(object, \dots)
     extracted with \code{\link{procast}}.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
+  \item{style}{character specifying the syle of rootogram (see below). FIXME: Description}
   \item{type}{character. In case of discrete distributions should
     the PITs be drawn randomly from the corresponding interval
     or distributed proportionally?}
@@ -43,7 +45,9 @@ pithist(object, \dots)
     histogram or just the fitted line.}
   \item{confint}{logical. Should confident intervals be drawn?}
   \item{confint_level}{numeric. The confidence level required.}
-  \item{confint_type}{character. Which type of confidence interval.}  #FIXME: (ML) Improve documentation.
+  \item{confint_type}{character. Which type of confidence interval. 
+    According to Agresti and Coull (1998) for interval estimation of binomial 
+    proportions an approximation can be better than exact.}
   \item{freq, \dots}{further arguments passed to
     \code{\link[graphics]{hist}}.}
 }
@@ -62,6 +66,9 @@ histogram (FIXME: not yet implemented).
 \references{
   Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model Assessment for Count Data.}
   \emph{Biometrics}, \bold{65}(4), 1254--1261.
+
+  Agresti A, Coull A B (1998). \dQuote{Approximate is Better than ``Exact'' for Interval 
+  Estimation of Binomial Proportions.} \emph{The American Statistician}, \bold{52}(2), 119--126.
 }
 
 \seealso{\code{\link{procast}}, \code{\link[graphics]{hist}}}
