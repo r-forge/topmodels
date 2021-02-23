@@ -8,7 +8,7 @@
 ##
 ## - Cut probabilities at breaks -> (m-1) groups and draw histogram
 ## - TODO: In case of point masses either use a random draw
-##   or distribute evenly across relevant intervalst
+##   or distribute evenly across relevant intervalst TODO: (ML) hot to do the latter?
 ## - TODO: Random draws could be drawn by hist() (current solution)
 ##   but proportional distribution requires drawing rectangles by hand
 ## - TODO: add confidence interval as well.
@@ -26,50 +26,18 @@ pithist <- function(object, ...) {
 }
 
 
-pithist.default <- function(object, newdata = NULL, type = c("random", "proportional"), nsim = 1L,
+pithist.default <- function(object, newdata = NULL, style = c("histogram", "lines"),
+  type = c("random", "proportional"), nsim = 1L,
   breaks = NULL, plot = TRUE, xlim = c(0, 1), ylim = NULL,
   xlab = "PIT", ylab = if(freq) "Frequency" else "Density", main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
   lwd = 2, lty = c(1, 2), freq = FALSE, 
-  confint = TRUE, confint_level = 0.95, confint_type = c("default", "agresti"), ...)
+  confint = TRUE, confint_level = 0.95, confint_type = c("exact", "approximation"), ...)
 {
 
-  ## helper function to calculate CI employing `qbinom()`
-  get_confint <- function(n, bins, level, freq) {
-    a <- (1 - level) / 2
-    a <- c(a, 1 - a)
-    rval <- qbinom(a, size = n, prob = 1 / bins)
-    if(!freq) rval <- rval / (n / bins) 
-    rval
-  }
-
-  ## helper function to calculate corrected CI according to according to Agresti & Coull (1998)
-  get_confint_agresti <- function(x, n, level, bins, freq) {
-    rval <- add4ci(x, n, level)$conf.int * n
-    if(!freq) rval <- rval / (n / bins) 
-    rval
-  }
-
-  ## copy of `add4ci` package from package `PropCIs` by Ralph Scherer (licensed under GPL-2/GPL-3)
-  add4ci <- function (x, n, conf.level) {
-    ptilde = (x + 2)/(n + 4)
-    z = abs(qnorm((1 - conf.level)/2))
-    stderr = sqrt(ptilde * (1 - ptilde)/(n + 4))
-    ul = ptilde + z * stderr
-    ll = ptilde - z * stderr
-    if (ll < 0) 
-        ll = 0
-    if (ul > 1) 
-        ul = 1
-    cint <- c(ll, ul)
-    attr(cint, "conf.level") <- conf.level
-    rval <- list(conf.int = cint, estimate = ptilde)
-    class(rval) <- "htest"
-    return(rval)
-  }
-
-  ## confint type
-  confint_type <- match.arg(confint_type, c("default", "agresti"))
+  ## match arguments
+  style <- match.arg(style, c("histogram", "lines"))
+  confint_type <- match.arg(confint_type, c("exact", "approximation"))
 
   ## either compute proportion exactly (to do...) or approximate by simulation
   type <- match.arg(type, c("random", "proportional"))
@@ -77,7 +45,7 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
     stop("not yet implemented")
   } else {
     # TODO: (ML) What is the default fun for? 
-    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, nsim = nsim)
+    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, type = "random", nsim = nsim)
   }
 
   ## breaks
@@ -118,7 +86,7 @@ pithist.default <- function(object, newdata = NULL, type = c("random", "proporti
 
   ## also plot by default
   if (plot) {
-    plot(rval, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, border = border, fill = fill,
+    plot(rval, style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, border = border, fill = fill,
       col = col, lwd = lwd, lty = lty, freq = freq, confint = confint, ...)
   }
 
@@ -161,11 +129,13 @@ c.pithist <- rbind.pithist <- function(...)
 
 
 plot.pithist <- function(x,
-  freq = FALSE, confint = TRUE,  
+  style = c("histogram", "lines"), freq = FALSE, confint = TRUE,  
   xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, main = NULL,
   border = "black", fill = "lightgray", col = "#B61A51",
   lwd = 2, pch = 19, lty = c(1, 2), axes = TRUE, ...)
 {
+
+  style <- match.arg(style, c("histogram", "lines"))
 
   ## handling of groups
   if(is.null(x$group)) x$group <- 1L
@@ -246,5 +216,43 @@ autoplot.pithist <- function(object,
 
   ## return with annotation
   rval
+}
+
+
+## helper function to calculate CI employing `qbinom()`
+get_confint <- function(n, bins, level, freq) {
+  a <- (1 - level) / 2
+  a <- c(a, 1 - a)
+  rval <- qbinom(a, size = n, prob = 1 / bins)
+  if(!freq) rval <- rval / (n / bins) 
+  rval
+}
+
+
+## helper function to calculate an approximated CI according to Agresti & Coull (1998)
+## doi=10.1080/00031305.1998.10480550
+get_confint_agresti <- function(x, n, level, bins, freq) {
+  rval <- add4ci(x, n, level)$conf.int * n
+  if(!freq) rval <- rval / (n / bins) 
+  rval
+}
+
+
+## copy of `add4ci` package from package `PropCIs` by Ralph Scherer (licensed under GPL-2/GPL-3)
+add4ci <- function (x, n, conf.level) {
+  ptilde = (x + 2)/(n + 4)
+  z = abs(qnorm((1 - conf.level)/2))
+  stderr = sqrt(ptilde * (1 - ptilde)/(n + 4))
+  ul = ptilde + z * stderr
+  ll = ptilde - z * stderr
+  if (ll < 0) 
+      ll = 0
+  if (ul > 1) 
+      ul = 1
+  cint <- c(ll, ul)
+  attr(cint, "conf.level") <- conf.level
+  rval <- list(conf.int = cint, estimate = ptilde)
+  class(rval) <- "htest"
+  return(rval)
 }
 
