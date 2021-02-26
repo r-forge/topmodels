@@ -19,3 +19,4 @@ Description: Unified infrastructure for probabilistic models and distributional 
 	     Probabilistic forecasting. Diagnostic graphics like rootograms, PIT histograms,
 	     reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots.
 License: GPL-2 | GPL-3
+RoxygenNote: 7.1.1

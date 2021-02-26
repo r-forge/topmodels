@@ -36,13 +36,14 @@ export(
 ## methods for newresponse
 S3method("newresponse", "default")
 
+
 ## methods for procast
 S3method("procast", "lm")
 S3method("procast", "crch")
 
+
 ## methods for qresiduals
 S3method("qresiduals", "default")
-
 
 
 ## methods for class qqrplot
@@ -55,6 +56,8 @@ S3method("pithist", "default")
 ## methods for class pithist
 S3method("plot", "pithist")
 S3method("lines", "pithist")
+S3method("c", "pithist")
+S3method("rbind", "pithist")
 
 
 ## methods for reliagram

@@ -165,9 +165,9 @@ plot.pithist <- function(x,
                          xlab = NULL,
                          ylab = NULL,
                          main = NULL,
-                         border = "black",
-                         fill = adjustcolor(1, alpha.f = 0.2),
                          col = c(1, 1),
+                         fill = adjustcolor(1, alpha.f = 0.2),
+                         border = "black",
                          lwd = 2,
                          lty = c(1, 2),
                          axes = TRUE,
@@ -199,9 +199,13 @@ plot.pithist <- function(x,
     xright <- d$xright
     y <- if (!is.null(d$density)) d$density else d$counts
     j <- unique(d$group)
-    ci_lower <- ifelse(confint, unique(d$ci_lower), NULL)
-    ci_upper <- ifelse(confint, unique(d$ci_upper), NULL)
+    ci_lower <- if (confint) unique(d$ci_lower) else NULL
+    ci_upper <- if (confint) unique(d$ci_upper) else NULL
     pp <- unique(d$pp)
+    stopifnot(
+      length(pp) == 1, 
+      ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
+    )
 
     ## defaults
     if (is.null(xlim)) xlim <- range(c(xleft, xright))
@@ -232,6 +236,10 @@ plot.pithist <- function(x,
     ci_lower <- if (confint) unique(d$ci_lower) else NULL
     ci_upper <- if (confint) unique(d$ci_upper) else NULL
     pp <- unique(d$pp)
+    stopifnot(
+      length(pp) == 1, 
+      ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
+    )
 
     ## defaults
     if (is.null(xlim)) xlim <- range(x)
@@ -295,6 +303,7 @@ lines.pithist <- function(x,
 
     ci_lower <- if (confint) unique(d$ci_lower) else NULL
     ci_upper <- if (confint) unique(d$ci_upper) else NULL
+    stopifnot(ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0))
 
     ## draw pithist
     if (confint) {
@@ -314,10 +323,19 @@ lines.pithist <- function(x,
 
 ## ggplot2 interface
 autoplot.pithist <- function(object,
-                             colour = c("black", "#B61A51"),
+                             style = c("histogram", "lines"),
+                             confint = TRUE,
+                             colour = c("black", "black"),
                              fill = "darkgray",
-                             size = 1.2,
+                             border = "black",
+                             linetype = c(1, 2),
+                             size = 1.0,
+                             ylim = c(0, NA),
+                             xlim = c(0, 1),
                              ...) {
+
+  ## match arguments
+  style <- match.arg(style, c("histogram", "lines"))
 
   ## determine grouping
   class(object) <- "data.frame"
@@ -327,11 +345,46 @@ autoplot.pithist <- function(object,
     levels = 1L:n,
     labels = make.names(attr(object, "main"), unique = TRUE)
   )
+  
+  ## get y  
+  ## TODO: (ML) probably not the way `ggplot` is meant to be used (modifying the object)
+  object$y <- if (!is.null(object$density)) object$density else object$counts
 
-  ## rectangles and fitted lines
-  rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "xleft", xmax = "xright", ymin = 0, ymax = "y")) +
-    ggplot2::geom_rect(colour = colour[1L], fill = fill) +
-    ggplot2::geom_hline(yintercept = 1, colour = colour[2L], size = size)
+  if (style == "lines") {
+    newobject <- data.frame(
+      "x" = c(object$xleft, object$xright[length(object$xright)]),
+      "y" = c(object$y, object$y[length(object$y)])
+    )
+  }
+
+  ## get CI and perfect prediction
+  ci_lower <- if (confint) unique(object$ci_lower) else NULL
+  ci_upper <- if (confint) unique(object$ci_upper) else NULL
+  pp <- unique(object$pp)
+  stopifnot(
+    length(pp) == 1, 
+    ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
+  )
+
+  if (style == "histogram") {
+    rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "xleft", xmax = "xright", ymin = 0, ymax = "y")) +
+      ggplot2::geom_rect(colour = border, fill = fill) +
+      ggplot2::geom_hline(yintercept = pp, colour = colour[1L], linetype = linetype[1L], size = size) +
+      ggplot2::geom_hline(yintercept = ci_lower, colour = colour[2L], linetype = linetype[1L], size = size) + 
+      ggplot2::geom_hline(yintercept = ci_upper, colour = colour[2L], linetype = linetype[1L], size = size)
+
+  } else {
+    rval <- ggplot2::ggplot(newobject, ggplot2::aes_string(x = "x", y = "y")) +
+      ggplot2::geom_rect(xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper, 
+        fill = fill, alpha = 0.5) +
+      ggplot2::geom_step(colour = colour[1], linetype = linetype[1], size = size)
+
+      if (!all(is.na(ylim)))
+      rval <- rval + ggplot2::ylim(ylim)
+
+      if (!all(is.na(xlim)))
+      rval <- rval + ggplot2::xlim(xlim)
+  }
 
   ## grouping (if any)
   if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)

@@ -74,9 +74,22 @@ histogram (FIXME: not yet implemented).
 \seealso{\code{\link{procast}}, \code{\link[graphics]{hist}}}
 
 \examples{
+require("crch")
 ## linear regression models (homoscedastic Gaussian response)
-m <- lm(dist ~ speed, data = cars)
-plot(m)
+m1 <- lm(dist ~ speed, data = cars)
+pit1 <- pithist(m1)
+
+## linear regression models (heteroscedastic Gaussian response)
+m2 <- crch(dist ~ speed | speed, data = cars)
+
+## censored linear regression models (heteroscedastic Gaussian response)
+m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+
+pit2 <- pithist(m2, plot = FALSE)
+pit3 <- pithist(m3, plot = FALSE)
+
+plot(pit1, style = "lines")
+lines(c(pit2, pit3), col = c(2, 3))
 }
 
 \keyword{hplot}
