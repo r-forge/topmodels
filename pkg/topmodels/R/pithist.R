@@ -88,9 +88,8 @@ pithist.default <- function(object,
   if (freq) {
     rval <- data.frame(
       x = tmp_hist$mids,
-      xleft = tmp_hist$breaks[-length(tmp_hist$breaks)],
-      xright = tmp_hist$breaks[-1L],
-      counts = tmp_hist$counts,
+      y = tmp_hist$counts,
+      width = diff(tmp_hist$breaks),
       ci_lower = ci[1],
       ci_upper = ci[2],
       pp = pp
@@ -98,14 +97,14 @@ pithist.default <- function(object,
   } else {
     rval <- data.frame(
       x = tmp_hist$mids,
-      xleft = tmp_hist$breaks[-length(tmp_hist$breaks)],
-      xright = tmp_hist$breaks[-1L],
-      density = tmp_hist$density,
+      y = tmp_hist$density,
+      width = diff(tmp_hist$breaks),
       ci_lower = ci[1],
       ci_upper = ci[2],
       pp = pp
     )
   }
+  attr(rval, "freq") <- freq
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
@@ -135,6 +134,10 @@ c.pithist <- rbind.pithist <- function(...) {
   }
   n <- lapply(rval, function(r) table(r$group))
 
+  ## check if all of same `freq`
+  freq <- unlist(lapply(rval, function(r) attr(r, "freq")))
+  stopifnot(length(unique(freq)) == 1)
+
   ## labels
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
@@ -152,6 +155,7 @@ c.pithist <- rbind.pithist <- function(...) {
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
+  attr(rval, "freq") <- freq
   class(rval) <- c("pithist", "data.frame")
   return(rval)
 }
@@ -195,15 +199,16 @@ plot.pithist <- function(x,
     if (length(lty) < 2) lty <- rep(lty[1], 2)
 
     ## rect elements
-    xleft <- d$xleft
-    xright <- d$xright
-    y <- if (!is.null(d$density)) d$density else d$counts
+    xleft <- d$x - d$width / 2
+    xright <- d$x + d$width / 2
+    y <- d$y
+
     j <- unique(d$group)
     ci_lower <- if (confint) unique(d$ci_lower) else NULL
     ci_upper <- if (confint) unique(d$ci_upper) else NULL
     pp <- unique(d$pp)
     stopifnot(
-      length(pp) == 1, 
+      length(pp) == 1,
       ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
     )
 
@@ -228,16 +233,16 @@ plot.pithist <- function(x,
 
   ## plotting function
   pithist2 <- function(d, ...) {
-    ## rect elements
-    x <- c(d$xleft, d$xright[length(d$xright)])
-    y <- if (!is.null(d$density)) d$density else d$counts
-    y <- c(y, y[length(y)])
+    ## step elements
+    x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+    y <- c(d$y, d$y[NROW(d)])
+
     j <- unique(d$group)
     ci_lower <- if (confint) unique(d$ci_lower) else NULL
     ci_upper <- if (confint) unique(d$ci_upper) else NULL
     pp <- unique(d$pp)
     stopifnot(
-      length(pp) == 1, 
+      length(pp) == 1,
       ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
     )
 
@@ -296,11 +301,10 @@ lines.pithist <- function(x,
   ## plotting function
   pithist2 <- function(d, col, lty, lwd, fill, ...) {
     ## rect elements
-    x <- c(d$xleft, d$xright[length(d$xright)])
-    y <- if (!is.null(d$density)) d$density else d$counts
-    y <- c(y, y[length(y)])
-    j <- unique(d$group)
+    x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+    y <- c(d$y, d$y[NROW(d)])
 
+    j <- unique(d$group)
     ci_lower <- if (confint) unique(d$ci_lower) else NULL
     ci_upper <- if (confint) unique(d$ci_upper) else NULL
     stopifnot(ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0))
@@ -345,45 +349,55 @@ autoplot.pithist <- function(object,
     levels = 1L:n,
     labels = make.names(attr(object, "main"), unique = TRUE)
   )
-  
-  ## get y  
-  ## TODO: (ML) probably not the way `ggplot` is meant to be used (modifying the object)
-  object$y <- if (!is.null(object$density)) object$density else object$counts
-
-  if (style == "lines") {
-    newobject <- data.frame(
-      "x" = c(object$xleft, object$xright[length(object$xright)]),
-      "y" = c(object$y, object$y[length(object$y)])
-    )
-  }
 
   ## get CI and perfect prediction
   ci_lower <- if (confint) unique(object$ci_lower) else NULL
   ci_upper <- if (confint) unique(object$ci_upper) else NULL
   pp <- unique(object$pp)
   stopifnot(
-    length(pp) == 1, 
+    length(pp) == 1,
     ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
   )
 
   if (style == "histogram") {
-    rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "xleft", xmax = "xright", ymin = 0, ymax = "y")) +
-      ggplot2::geom_rect(colour = border, fill = fill) +
+    rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y / 2", width = "width", height = "y")) +
+      ggplot2::geom_tile(colour = border, fill = fill) +
       ggplot2::geom_hline(yintercept = pp, colour = colour[1L], linetype = linetype[1L], size = size) +
-      ggplot2::geom_hline(yintercept = ci_lower, colour = colour[2L], linetype = linetype[1L], size = size) + 
+      ggplot2::geom_hline(yintercept = ci_lower, colour = colour[2L], linetype = linetype[1L], size = size) +
       ggplot2::geom_hline(yintercept = ci_upper, colour = colour[2L], linetype = linetype[1L], size = size)
-
   } else {
-    rval <- ggplot2::ggplot(newobject, ggplot2::aes_string(x = "x", y = "y")) +
-      ggplot2::geom_rect(xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper, 
-        fill = fill, alpha = 0.5) +
-      ggplot2::geom_step(colour = colour[1], linetype = linetype[1], size = size)
 
-      if (!all(is.na(ylim)))
+    ## stat helper function to get left/right points from respective mid points
+    calc_pit_points <- ggplot2::ggproto("calc_pit_points", ggplot2::Stat,
+
+      # Required as we operate on groups (facetting)
+      compute_group = function(data, scales) {
+        ## Manipulate object  #TODO: Proably not "very nice" code
+        nd <- data.frame(
+          x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+          y = c(data$y, data$y[NROW(data)])
+        )
+        nd
+      },
+
+      # Tells us what we need
+      required_aes = c("x", "y")
+    )
+
+    rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
+      ggplot2::geom_rect(
+        xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+        fill = fill, alpha = 0.5
+      ) +
+      ggplot2::geom_step(stat = calc_pit_points, colour = colour[1], linetype = linetype[1], size = size)
+
+    if (!all(is.na(ylim))) {
       rval <- rval + ggplot2::ylim(ylim)
+    }
 
-      if (!all(is.na(xlim)))
+    if (!all(is.na(xlim))) {
       rval <- rval + ggplot2::xlim(xlim)
+    }
   }
 
   ## grouping (if any)
