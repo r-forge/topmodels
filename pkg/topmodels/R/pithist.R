@@ -328,11 +328,12 @@ lines.pithist <- function(x,
 ## ggplot2 interface
 autoplot.pithist <- function(object,
                              style = c("histogram", "lines"),
+                             grid = TRUE,
                              confint = TRUE,
-                             colour = c("black", "black"),
+                             colour = "black",
                              fill = "darkgray",
                              border = "black",
-                             linetype = c(1, 2),
+                             linetype = 1,
                              size = 1.0,
                              ylim = c(0, NA),
                              xlim = c(0, 1),
@@ -360,12 +361,47 @@ autoplot.pithist <- function(object,
   )
 
   if (style == "histogram") {
+
+    if (length(colour) == 1L) {
+      colour <- rep(colour[1], 3L)
+    } else if (length(colour) == 2L) {
+      colour <- c(colour[1], rep(colour[2], 2L))
+    } else {
+      colour <- colour[1:3]
+    }
+
+    if (length(linetype) == 1L) {
+      linetype <- rep(linetype[1], 3L)
+    } else if (length(linetype) == 2L) {
+      linetype <- c(linetype[1], rep(linetype[2], 2L))
+    } else {
+      linetype <- linetype[1:3]
+    }
+
     rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y / 2", width = "width", height = "y")) +
       ggplot2::geom_tile(colour = border, fill = fill) +
-      ggplot2::geom_hline(yintercept = pp, colour = colour[1L], linetype = linetype[1L], size = size) +
-      ggplot2::geom_hline(yintercept = ci_lower, colour = colour[2L], linetype = linetype[1L], size = size) +
-      ggplot2::geom_hline(yintercept = ci_upper, colour = colour[2L], linetype = linetype[1L], size = size)
+      ggplot2::geom_hline(yintercept = pp, colour = colour[1], linetype = linetype[1], size = size) +
+      ggplot2::geom_hline(yintercept = ci_lower, colour = colour[2], linetype = linetype[2], size = size) +
+      ggplot2::geom_hline(yintercept = ci_upper, colour = colour[3], linetype = linetype[3], size = size)
+
+    ## grouping (if any)
+    if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model")
+
   } else {
+
+    if (length(colour) < n) {
+      group_colours <- rep(colour[1], n)
+    } else {
+      group_colours <- colour
+    }
+    names(group_colours) <- levels(object$group)
+
+    if (length(linetype) < n) {
+      group_linetypes <- rep(linetype[1], n)
+    } else {
+      group_linetypes <- linetype
+    }
+    names(group_linetypes) <- levels(object$group)
 
     ## stat helper function to get left/right points from respective mid points
     calc_pit_points <- ggplot2::ggproto("calc_pit_points", ggplot2::Stat,
@@ -384,24 +420,90 @@ autoplot.pithist <- function(object,
       required_aes = c("x", "y")
     )
 
-    rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
-      ggplot2::geom_rect(
-        xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
-        fill = fill, alpha = 0.5
-      ) +
-      ggplot2::geom_step(stat = calc_pit_points, colour = colour[1], linetype = linetype[1], size = size)
+    if (grid == TRUE & length(unique(colour)) == 1L & length(unique(linetype)) == 1L) {
+      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
+        ggplot2::geom_rect(
+          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          fill = fill, alpha = 0.5, colour = NA
+        ) +
+        ggplot2::geom_step(stat = calc_pit_points, linetype = linetype, size = size, colour = colour)
 
-    if (!all(is.na(ylim))) {
-      rval <- rval + ggplot2::ylim(ylim)
-    }
+      if (!all(is.na(ylim))) {
+        rval <- rval + ggplot2::ylim(ylim)
+      }
 
-    if (!all(is.na(xlim))) {
-      rval <- rval + ggplot2::xlim(xlim)
+      if (!all(is.na(xlim))) {
+        rval <- rval + ggplot2::xlim(xlim)
+      }
+
+      ## grouping (if any)
+      if (n > 1L) {
+        rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model") + ggplot2::labs(linetype = "Model")
+      }
+  
+    } else if (grid == TRUE & (length(unique(colour)) > 1L | length(unique(linetype)) > 1L)) {
+      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", linetype = "group", colour = "group")) +
+        ggplot2::geom_rect(
+          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          fill = fill, alpha = 0.5, colour = NA
+        ) +
+        ggplot2::geom_step(stat = calc_pit_points, size = size) +
+        ggplot2::scale_colour_manual(values = group_colours) +
+        ggplot2::scale_linetype_manual(values = group_linetypes)
+
+      if (!all(is.na(ylim))) {
+        rval <- rval + ggplot2::ylim(ylim)
+      }
+
+      if (!all(is.na(xlim))) {
+        rval <- rval + ggplot2::xlim(xlim)
+      }
+
+      ## grouping (if any)
+      if (n > 1L) {
+        rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model") + ggplot2::labs(linetype = "Model")
+      }
+  
+    } else if (grid == FALSE & length(unique(colour)) == 1L & length(unique(linetype)) == 1L) {
+      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", colour = "group")) +
+        ggplot2::geom_rect(
+          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          fill = fill, alpha = 0.5, colour = NA
+        ) +
+        ggplot2::geom_step(stat = calc_pit_points, linetype = linetype[1], size = size) + 
+        ggplot2::scale_colour_manual(values = group_colours) + 
+        ggplot2::scale_linetype_manual(values = group_linetypes) + 
+        ggplot2::labs(colour = "Model") + 
+        theme(legend.position = "none")
+
+      if (!all(is.na(ylim))) {
+        rval <- rval + ggplot2::ylim(ylim)
+      }
+
+      if (!all(is.na(xlim))) {
+        rval <- rval + ggplot2::xlim(xlim)
+      }
+    } else {  # grid == FALSE  & (length(unique(colour)) > 1L | length(unique(linetype)) > 1L)
+      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", linetype = "group", colour = "group")) +
+        ggplot2::geom_rect(
+          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          fill = fill, alpha = 0.5, colour = NA
+        ) +
+        ggplot2::geom_step(stat = calc_pit_points, size = size) + 
+        ggplot2::scale_colour_manual(values = group_colours) + 
+        ggplot2::scale_linetype_manual(values = group_linetypes) + 
+        ggplot2::labs(colour = "Model") + 
+        ggplot2::labs(linetype = "Model")
+
+      if (!all(is.na(ylim))) {
+        rval <- rval + ggplot2::ylim(ylim)
+      }
+
+      if (!all(is.na(xlim))) {
+        rval <- rval + ggplot2::xlim(xlim)
+      }
     }
   }
-
-  ## grouping (if any)
-  if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
 
   ## annotation
   rval <- rval + ggplot2::xlab(paste(unique(attr(object, "xlab")), collapse = "/")) +
