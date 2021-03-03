@@ -38,6 +38,7 @@ qresiduals.default <- function(object,
       )
     } else {
       ## FIXME: probably needs to be done on the transformed rather than the uniform scale...
+      ## TODO: (ML) Otherwise akward features for heavily skewed distributions: observational vs. probability scale
       nam <- rownames(object)
       object <- object[, 1L]  %*% t(1 - prob) + object[, 2L] %*% t(prob)
       dimnames(object) <- list(nam, paste("q", prob, sep = "_"))
@@ -47,6 +48,6 @@ qresiduals.default <- function(object,
   if(!is.null(dim(object)) & nc == 1L) object <- drop(object)
 
   ## compute quantile residuals  
-  if(!is.null(trafo)) object <- trafo(object)
+  if(!is.null(trafo)) object <- trafo(object)  # TODO: Why on the normal scale? Common behaviour compared to traditional diagnostics.
   return(object)
 }

@@ -13,20 +13,20 @@ export(
 
   "pithist",
   "pithist.default",
-  "autoplot.pithist",
+  "autoplot.pithist",  # Must be exported?
 
   "qqrplot",
-  "autoplot.qqrplot",
+  "autoplot.qqrplot",  # Must be exported?
 
   "reliagram",
   "reliagram.default",
-  "autoplot.reliagram",
+  "autoplot.reliagram",  # Must be exported?
 
   "rootogram",
   "rootogram_glm",  # FIXME: (ML) Must be exported for `eval(cl, parent.frame())`, find workaround
   "rootogram_procast",  # FIXME: (ML) Must be exported for `eval(cl, parent.frame())`, find workaround
   "rootogram.default",
-  "autoplot.rootogram",
+  "autoplot.rootogram",  # Must be exported?
 
   "qresiduals",
   "qresiduals.default"
@@ -40,6 +40,7 @@ S3method("newresponse", "default")
 ## methods for procast
 S3method("procast", "lm")
 S3method("procast", "crch")
+S3method("procast", "disttree")
 
 
 ## methods for qresiduals
@@ -48,6 +49,7 @@ S3method("qresiduals", "default")
 
 ## methods for class qqrplot
 S3method("plot", "qqrplot")
+S3method(ggplot2::autoplot, "qqrplot")
 
 
 ## methods for pithist
@@ -58,11 +60,13 @@ S3method("plot", "pithist")
 S3method("lines", "pithist")
 S3method("c", "pithist")
 S3method("rbind", "pithist")
+S3method(ggplot2::autoplot, "pithist")
 
 
 ## methods for reliagram
 S3method("reliagram", "default")
 S3method("reliagram", "crch")
+S3method(ggplot2::autoplot, "reliagram")
 
 ## methods for class reliagram
 S3method("plot", "reliagram")
@@ -77,4 +81,6 @@ S3method("plot", "rootogram")
 S3method("c", "rootogram")
 S3method("rbind", "rootogram")
 S3method("+", "rootogram")
+S3method(ggplot2::autoplot, "rootogram")
+
 

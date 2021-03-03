@@ -8,7 +8,7 @@
 ##
 ## - Cut probabilities at breaks -> (m-1) groups and draw histogram
 ## - TODO: In case of point masses either use a random draw
-##   or distribute evenly across relevant intervalst TODO: (ML) hot to do the latter?
+##   or distribute evenly across relevant intervals 
 ## - TODO: Random draws could be drawn by hist() (current solution)
 ##   but proportional distribution requires drawing rectangles by hand
 ## - TODO: add confidence interval as well.
@@ -51,7 +51,7 @@ pithist.default <- function(object,
   ## either compute proportion exactly (to do...) or approximate by simulation
   type <- match.arg(type, c("random", "proportional"))
   if (type == "proportional") {
-    stop("not yet implemented")
+    stop("not yet implemented")  # TODO: (ML) Implement proportional over the inteverals (e.g., below censoring piont)
   } else {
     # TODO: (ML) What is the default fun for?
     p <- qresiduals.default(object, newdata = newdata, trafo = NULL, type = "random", nsim = nsim)

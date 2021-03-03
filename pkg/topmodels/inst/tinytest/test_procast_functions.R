@@ -150,7 +150,7 @@ expect_equal(
 # --------------------------------------------------------------------
 # Test procast.crch argument = `type`
 # --------------------------------------------------------------------
-library("crch")
+require("crch")
 m2 <- crch(dist ~ speed | speed, data = cars)
 
 expect_equal(
