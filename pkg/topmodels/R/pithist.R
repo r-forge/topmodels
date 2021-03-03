@@ -474,7 +474,7 @@ autoplot.pithist <- function(object,
         ggplot2::scale_colour_manual(values = group_colours) + 
         ggplot2::scale_linetype_manual(values = group_linetypes) + 
         ggplot2::labs(colour = "Model") + 
-        theme(legend.position = "none")
+        ggplot2::theme(legend.position = "none")
 
       if (!all(is.na(ylim))) {
         rval <- rval + ggplot2::ylim(ylim)
