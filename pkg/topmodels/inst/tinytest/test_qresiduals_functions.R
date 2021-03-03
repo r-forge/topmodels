@@ -20,7 +20,7 @@ expect_equal(
 # --------------------------------------------------------------------
 # Test `qresiduals.default()` with censor point
 # --------------------------------------------------------------------
-library("crch")
+require("crch")
 m2 <- crch(dist ~ speed | speed, left = 30, data = cars)
 idx <- which(cars$dist <= 30)
 
@@ -30,5 +30,3 @@ expect_equal(
 )
 
 # TODO: Improve/extent tests for censoring/truncation
-
-

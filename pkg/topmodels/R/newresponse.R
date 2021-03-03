@@ -18,7 +18,9 @@ newresponse.default <- function(object, newdata, na.action = na.pass, ...)
   y <- model.response(mf)
 
   ## TODO: (ML) Should we really catch response values above/below censor points
-  tmp <- procast(object)  ## TODO: Quick workaround
+  ## FIXME: (ML) Solve quick workaround, must work with with vector of new censor points
+  ##   might work employing `procast()` which uses `predict()`
+  tmp <- procast(object)  
   left <- attr(tmp, "cens")$left
   right <- attr(tmp, "cens")$right
   if(!is.null(left)) y[y < left] <- left
