@@ -221,15 +221,17 @@ procast.crch <- function(object,
 }
 
 
-procast.disttree <- function(object, 
-                             newdata = NULL, 
+procast.disttree <- function(object,
+                             newdata = NULL,
                              na.action = na.pass,
-                             type = c("quantile", "mean", "variance", "parameter", 
-                               "density", "probability", "score"),
-                             at = 0.5, 
-                             drop = FALSE, 
-                             use_internals = TRUE,  #FIXME: (ML) Just for development
-                             ...) {  #FIXME: (ML) Additional parameters currently not always used
+                             type = c(
+                               "quantile", "mean", "variance", "parameter",
+                               "density", "probability", "score"
+                             ),
+                             at = 0.5,
+                             drop = FALSE,
+                             use_internals = TRUE, # FIXME: (ML) Just for development
+                             ...) { # FIXME: (ML) Additional parameters currently not always used
 
   ## First if working for `NO()`
   if (object$info$family$family.name != "Normal Distribution") {
@@ -251,7 +253,7 @@ procast.disttree <- function(object,
   }
 
   ## set up function that computes prediction from model parameters
-  if (use_internals == FALSE){
+  if (use_internals == FALSE) {
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
       "mean" = function(pars) pars$mu,
@@ -261,26 +263,51 @@ procast.disttree <- function(object,
       "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...)
     )
   } else {
-    ## FIXME: (ML) `disttree` unfortunately never supported vector of parameters! 
+    ## FIXME: (ML) `disttree` unfortunately never supported vector of parameters!
     ##             Here ugly workaround, which must be improved (probabily straight in `disstree`)
     FUN <- switch(type,
-      "quantile" = function(at, pars) sapply(1:NROW(pars), 
-        function(i) family$qdist(p = at[i], eta = as.numeric(family$linkfun(pars[i, ])), 
-          lower.tail = TRUE, log.p = FALSE)),  
-      #"quantile" = function(at, pars) family$qdist(p = at, eta = as.numeric(family$linkfun(pars)), 
-      #    lower.tail = TRUE, log.p = FALSE),  
+      "quantile" = function(at, pars) {
+        sapply(
+          1:NROW(pars),
+          function(i) {
+            family$qdist(
+              p = at[i], eta = as.numeric(family$linkfun(pars[i, ])),
+              lower.tail = TRUE, log.p = FALSE
+            )
+          }
+        )
+      },
+      # "quantile" = function(at, pars) family$qdist(p = at, eta = as.numeric(family$linkfun(pars)),
+      #    lower.tail = TRUE, log.p = FALSE),
       "mean" = function(pars) pars$mu,
       "variance" = function(pars) pars$sigma^2,
       "parameter" = function(pars) pars,
-      "density" = function(at, pars) sapply(1:NROW(pars), 
-        function(i) family$ddist(y = at[i], eta = as.numeric(family$linkfun(pars[i, ])), 
-          log = FALSE, weights = NULL, sum = FALSE)), 
-      "probability" = function(at, pars) sapply(1:NROW(pars), 
-        function(i) family$pdist(q = at[i], eta = as.numeric(family$linkfun(pars[i, ])), 
-          lower.tail = TRUE, log.p = FALSE))
+      "density" = function(at, pars) {
+        sapply(
+          1:NROW(pars),
+          function(i) {
+            family$ddist(
+              y = at[i], eta = as.numeric(family$linkfun(pars[i, ])),
+              log = FALSE, weights = NULL, sum = FALSE
+            )
+          }
+        )
+      },
+      "probability" = function(at, pars) {
+        sapply(
+          1:NROW(pars),
+          function(i) {
+            family$pdist(
+              q = at[i], eta = as.numeric(family$linkfun(pars[i, ])),
+              lower.tail = TRUE, log.p = FALSE
+            )
+          }
+        )
+      }
     )
   }
 
   ## NOTE: for scores we need at = data.frame(y = response, x = model.matrix)
   procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
 }
+
