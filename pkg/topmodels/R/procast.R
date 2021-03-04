@@ -105,7 +105,7 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
     	  }
     	  return(rv)
       }
-      
+
       if(attype == "function") {
         rval <- function(at, pars = pars, ...) NULL
         body(rval) <- call("FUN2a",
@@ -160,6 +160,11 @@ procast.crch <- function(object,
   type <- match.arg(type, c("quantile", "mean", "variance", "parameter", 
     "density", "probability", "score"))
 
+  ## TODO: (ML) Implement score (estfun)
+  if (type == "score") {
+    stop("`type=score` not supported yet.")
+  }
+
   # * is 'at' some kind of 'data'
   # * or the special type 'list' or 'function'
   # * or missing altogether ('none')
@@ -179,8 +184,7 @@ procast.crch <- function(object,
     "variance" = "scale",
     "parameter" = "parameter",
     "density" = "density",
-    "probability" = "probability",
-    "score" = "crps"  #FIXME: (ML) This should be the estfun
+    "probability" = "probability"
   )
 
   # NOTE: (AZ) For scores we need at = data.frame(y = response, x = model.matrix)
@@ -239,6 +243,11 @@ procast.disttree <- function(object,
   ## types of predictions
   type <- match.arg(type, c("quantile", "mean", "variance", "parameter", "density", "probability", "score"))
 
+  ## TODO: (ML) Implement score (estfun)
+  if (type == "score") {
+    stop("`type=score` not supported yet.")
+  }
+
   ## set up function that computes prediction from model parameters
   if (use_internals == FALSE){
     FUN <- switch(type,
@@ -247,15 +256,14 @@ procast.disttree <- function(object,
       "variance" = function(pars) pars$sigma^2,
       "parameter" = function(pars) pars,
       "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-      "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-      "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
+      "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...)
     )
   } else {
     ## FIXME: (ML) `disttree` unfortunately never supported vector of parameters! 
-    ##             Here ugly workaround, but `procast_setup()` destroys right dimensions.
+    ##             Here ugly workaround, which must be improved (probabily straight in `disstree`)
     FUN <- switch(type,
       "quantile" = function(at, pars) sapply(1:NROW(pars), 
-        function(i) family$qdist(p = at, eta = as.numeric(family$linkfun(pars[i, ])), 
+        function(i) family$qdist(p = at[i], eta = as.numeric(family$linkfun(pars[i, ])), 
           lower.tail = TRUE, log.p = FALSE)),  
       #"quantile" = function(at, pars) family$qdist(p = at, eta = as.numeric(family$linkfun(pars)), 
       #    lower.tail = TRUE, log.p = FALSE),  
@@ -263,14 +271,11 @@ procast.disttree <- function(object,
       "variance" = function(pars) pars$sigma^2,
       "parameter" = function(pars) pars,
       "density" = function(at, pars) sapply(1:NROW(pars), 
-        function(i) family$ddist(y = at, eta = as.numeric(family$linkfun(pars[i, ])), 
+        function(i) family$ddist(y = at[i], eta = as.numeric(family$linkfun(pars[i, ])), 
           log = FALSE, weights = NULL, sum = FALSE)), 
       "probability" = function(at, pars) sapply(1:NROW(pars), 
-        function(i) family$pdist(p = at, eta = as.numeric(family$linkfun(pars[i, ])), 
-          lower.tail = TRUE, log.p = FALSE)),
-      "score" = function(at, pars) sapply(1:NROW(pars), 
-        function(i) family$sdist(y = at, eta = as.numeric(family$linkfun(pars[i, ])), 
-          weights, sum = FALSE))
+        function(i) family$pdist(q = at[i], eta = as.numeric(family$linkfun(pars[i, ])), 
+          lower.tail = TRUE, log.p = FALSE))
     )
   }
 
