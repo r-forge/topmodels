@@ -189,10 +189,8 @@ expect_equal(
   check.attributes = FALSE
 )
 
-expect_equal(
-  procast(m2, type = "score", drop = TRUE),
-  predict(m2, type = "crps"),
-  check.attributes = FALSE
+expect_error(
+  procast(m2, type = "score", drop = TRUE)
 )
 
 
