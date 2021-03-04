@@ -45,7 +45,8 @@ qresiduals.default <- function(object,
     }
     nc <- NCOL(object)
   }
-  if(!is.null(dim(object)) & nc == 1L) object <- drop(object)
+  if(!is.null(dim(object)) & nc == 1L) object <- drop(as.matrix(object))  
+  # FIXME: (ML) object can be a data.frame, so make sure drop works by converting to matrix
 
   ## compute quantile residuals  
   if(!is.null(trafo)) object <- trafo(object)  # TODO: Why on the normal scale? Common behaviour compared to traditional diagnostics.

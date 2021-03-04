@@ -228,11 +228,13 @@ procast.disttree <- function(object,
                                "density", "probability", "score"),
                              at = 0.5, 
                              drop = FALSE, 
-                             use_internals = FALSE,  #FIXME: (ML) Just for trying out
+                             use_internals = TRUE,  #FIXME: (ML) Just for development
                              ...) {  #FIXME: (ML) Additional parameters currently not always used
 
   ## First if working for `NO()`
-  stopifnot(object$info$family$family.name == "Normal Distribution")
+  if (object$info$family$family.name != "Normal Distribution") {
+    warning("So far not tested for specified family")
+  }
 
   ## Get family
   family <- object$info$family
