@@ -1,7 +1,6 @@
 ---
 title: |
-  Making and Assessing Distributional Models 
-  in the Framework of Random Forest
+  Graphical Model Assessment of Random Forests in the Framework of Probabilistic Modeling
 author:
 - name: Moritz N. Lang
   affiliation: Department of Statistics, Faculty of Economics and Statistics, Universität Innsbruck
@@ -21,13 +20,18 @@ assessment
 
 **Webpages**: R repositories [disttree](https://R-Forge.R-project.org/projects/partykit/pkg/disttree/) and [topmodels](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/) on R-Forge
 
-Here comes the text. 250 Words or 2500 character maximium. It should contain an
-added contribution since the last *useR* or any other major conference. The
+Here comes the text: 250 Words or 2500 character maximium. It should contain an
+added contribution since the last *useR!* or any other major conference. The
 abstract should be backed by an active repository or preprint and must be
 directly related to R. 
 
 Some alternative title ideas - none are really good:
 
+* Graphical Model Assessment of Proabilistic Forecasts 
+  using Random Forests
+* Graphical Model Assessment of Distributional Random Forest Models
+* Making and Assessing Distributional Models 
+  in the Framework of Random Forest
 * Graphical model evaluation for probabilistic forecasts illustrated by
   distributional trees and forest 
 * Making and assessing probabilistic precipitation forecasts based 
