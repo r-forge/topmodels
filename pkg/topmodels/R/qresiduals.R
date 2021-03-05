@@ -49,6 +49,6 @@ qresiduals.default <- function(object,
   # FIXME: (ML) object can be a data.frame, so make sure drop works by converting to matrix
 
   ## compute quantile residuals  
-  if(!is.null(trafo)) object <- trafo(object)  # TODO: Why on the normal scale? Common behaviour compared to traditional diagnostics.
+  if(!is.null(trafo)) object <- trafo(object)  # TODO: (ML) Why on the normal scale? Common behaviour compared to traditional diagnostics.
   return(object)
 }
