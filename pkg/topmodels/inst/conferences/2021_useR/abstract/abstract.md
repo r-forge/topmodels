@@ -27,15 +27,12 @@ directly related to R.
 
 Some alternative title ideas - none are really good:
 
-* Graphical Model Assessment of Proabilistic Forecasts 
-  using Random Forests
+* Learning and Graphical Assessment of Probability Distribution Forecasts with Random Forests
+* Graphical Model Assessment of Proabilistic Forecasts using Random Forests
 * Graphical Model Assessment of Distributional Random Forest Models
-* Making and Assessing Distributional Models 
-  in the Framework of Random Forest
-* Graphical model evaluation for probabilistic forecasts illustrated by
-  distributional trees and forest 
-* Making and assessing probabilistic precipitation forecasts based 
-on distributional forests.
+* Making and Assessing Distributional Models in the Framework of Random Forest
+* Graphical model evaluation for probabilistic forecasts illustrated by distributional trees and forest 
+* Making and assessing probabilistic precipitation forecasts based on distributional forests
 
 References might be @Hothorn+Hornik+Zeileis:2006, @Schlosser+Hothorn+Stauffer+Zeileis:2019, 
 and @Zeileis+Hothorn+Hornik:2008.
