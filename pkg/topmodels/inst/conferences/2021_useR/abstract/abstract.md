@@ -1,6 +1,6 @@
 ---
 title: |
-  Graphical Model Assessment of Random Forests in the Framework of Probabilistic Modeling
+  Learning and Graphical Assessment of Probability Distribution Forecasts with Random Forests
 author:
 - name: Moritz N. Lang
   affiliation: Department of Statistics, Faculty of Economics and Statistics, Universität Innsbruck
@@ -27,7 +27,7 @@ directly related to R.
 
 Some alternative title ideas - none are really good:
 
-* Learning and Graphical Assessment of Probability Distribution Forecasts with Random Forests
+* Graphical Model Assessment of Random Forests in the Framework of Probabilistic Modeling
 * Graphical Model Assessment of Proabilistic Forecasts using Random Forests
 * Graphical Model Assessment of Distributional Random Forest Models
 * Making and Assessing Distributional Models in the Framework of Random Forest
