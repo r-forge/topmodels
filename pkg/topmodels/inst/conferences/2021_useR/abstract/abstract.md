@@ -19,6 +19,8 @@ bibliography: ref.bib
 
 **Webpages**: R-Forge repositories for the *R* packages [`disttree`](https://R-Forge.R-project.org/projects/partykit/pkg/disttree/) and [`topmodels`](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/).
 
+## Achims's Version
+
 Forecasts in terms of entire probability distributions (often called "probabilistic
 forecasts" for short) - as opposed to predictions of only the mean of these
 distributions - are of prime importance in many different disciplines
@@ -33,7 +35,7 @@ patterns in a data-driven way.
 out-of-sample using visualizations that bring out potential deficits of these
 models
 
----
+## Moritz' Version
 
 As a consequence of the growing importance of probabilistic predictions in
 various application fields due to a necessary functional risk management and
