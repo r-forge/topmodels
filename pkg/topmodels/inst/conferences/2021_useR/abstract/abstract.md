@@ -15,9 +15,25 @@ output: pdf_document
 bibliography: ref.bib
 ---
 
-**Keywords**: Distributional regression, probabilistic forecasts, random forest, graphical model assessment.
+**Keywords**: Distributional regression, probabilistic forecasts, regression trees, random forests, graphical model assessment.
 
 **Webpages**: R-Forge repositories for the *R* packages [`disttree`](https://R-Forge.R-project.org/projects/partykit/pkg/disttree/) and [`topmodels`](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/).
+
+Forecasts in terms of entire probability distributions (often called "probabilistic
+forecasts" for short) - as opposed to predictions of only the mean of these
+distributions - are of prime importance in many different disciplines
+from natural sciences to social sciences and beyond. Hence, distributional
+regression models have been receiving increasing interest over the last decade.
+Here, we make contributions to two common challenges in distributional
+regression modeling:
+
+1. Obtaining sufficiently flexible regression models that can capture complex
+patterns in a data-driven way.
+2. Assessing the goodness-of-fit of distributional models both in-sample and
+out-of-sample using visualizations that bring out potential deficits of these
+models
+
+---
 
 As a consequence of the growing importance of probabilistic predictions in
 various application fields due to a necessary functional risk management and
