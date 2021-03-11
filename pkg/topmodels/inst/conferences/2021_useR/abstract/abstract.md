@@ -19,8 +19,6 @@ bibliography: ref.bib
 
 **Webpages**: R-Forge repositories for the *R* packages [`disttree`](https://R-Forge.R-project.org/projects/partykit/pkg/disttree/) and [`topmodels`](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/).
 
-## Achims's Version
-
 Forecasts in terms of entire probability distributions (often called "probabilistic
 forecasts" for short) - as opposed to predictions of only the mean of these
 distributions - are of prime importance in many different disciplines
@@ -35,33 +33,21 @@ patterns in a data-driven way.
 out-of-sample using visualizations that bring out potential deficits of these
 models
 
-## Moritz' Version
+Distributional trees and forests [@Schlosser+Hothorn+Stauffer+Zeileis:2019]
+blend the recursive partitioning strategy of decision trees with the concept of
+distributional (regression) modeling. The resulting tree-based models can capture non-linear 
+effects and interactions, and automatically select the relevant
+covariates that are associated with changes in the respective
+distribution parameters. To evaluate the goodness-of-fit of the distributional 
+random forest models used in this study, we further present a toolbox that
+provides an unifying infrastructure to obtain
+predictions of probabilities, densities, scores, and Hessian values for
+probabilistic models. The unifying prediction method provides users with many
+different graphical evaluation tools, such as reliability diagrams, PIT
+histograms, rootograms [@Kleiber+Zeileis:2016], and randomized Q-Q plots
+[@Dunn+Smyth:1996].
 
-As a consequence of the growing importance of probabilistic predictions in
-various application fields due to a necessary functional risk management and
-strategy, there is an increasing demand for appropriate probabilistic model
-evaluation. Besides proper probabilistic scores [@Gneiting+Raftery:2007], which
-evaluate not only the expectation but the entire predictive distribution,
-graphical assessment methods are particularly advantageous to diagnose possible
-model misspecification problems.  
-
-Probabilistic predictions are often based on distributional regression models,
-whereby the computation of predictive distributions, probabilities, and
-quantiles is generally dependent on the *R* package being used.  Therefore,
-routines to graphically evaluate probabilistic models are not always available
-and if so then only for specific types of models and distributions provided by
-the corresponding package. An easy to use unified infrastructure to graphical
-assess and compare different probabilistic model types does not yet exist.
-
-Using distribution based random forest models
-[@Schlosser+Hothorn+Stauffer+Zeileis:2019] as an example, we present a toolbox
-providing an unifiying infrastructure to gain predictions of probabilities,
-densities, scores, and Hessian values for probabilistic models. The unifying
-prediction method provides users with many different graphical evaluation
-tools, such as reliability diagrams, PIT histograms, rootograms
-[@Kleiber+Zeileis:2016], and randomized Q-Q plots [@Dunn+Smyth:1996].
-
-The distributional random forests used for illustration are provided in the *R*
+The distributional random forests are provided in the *R*
 package **disttree**, available on R-Forge [@Schlosser+Lang+Zeileis:2019]. The
 unifying toolbox for inference and forecasting of probabilistic
 (distributional) models is provided in the *R* package **topmodels**, also
@@ -71,5 +57,6 @@ density functions, probabilities, quantiles), which so far supports the model
 classes `lm`, `crch`, and `disttree`. For these, **topmodels** provides
 routines to easily graphically assess and compare different probabilistic
 models and model types using `ggplot2` [@Wickham:2016] and base *R* graphics. 
+
 
 ## References
