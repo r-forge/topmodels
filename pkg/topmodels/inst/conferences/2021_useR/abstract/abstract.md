@@ -31,7 +31,7 @@ regression modeling:
 patterns in a data-driven way.
 2. Assessing the goodness-of-fit of distributional models both in-sample and
 out-of-sample using visualizations that bring out potential deficits of these
-models
+models.
 
 Distributional trees and forests [@Schlosser+Hothorn+Stauffer+Zeileis:2019]
 blend the recursive partitioning strategy of decision trees with the concept of
