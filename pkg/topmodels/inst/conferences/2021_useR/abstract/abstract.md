@@ -30,16 +30,8 @@ distributional regression modeling:
 1. Obtaining sufficiently flexible regression models that can capture complex
    patterns in a data-driven way.
 2. Assessing the goodness-of-fit of distributional models both in-sample and
-<<<<<<< .mine
    out-of-sample using visualizations that bring out potential deficits of these
    models.
-||||||| .r1197
-out-of-sample using visualizations that bring out potential deficits of these
-models
-=======
-out-of-sample using visualizations that bring out potential deficits of these
-models.
->>>>>>> .r1203
 
 Regarding challenge 1, we present the *R* package **disttree**
 [@Schlosser+Lang+Zeileis:2019], that implements distributional trees and forests
