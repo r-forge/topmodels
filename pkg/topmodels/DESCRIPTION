@@ -1,18 +1,18 @@
 Package: topmodels
 Title: Infrastructure for Inference and Forecasting in Probabilistic Models
-Version: 0.0-1
-Date: 2018-04-26
-Authors@R: c(person(given = "Christian", family = "Kleiber", role = "aut", email = "Christian.Kleiber@unibas.ch"),
-             person(given = "Ioannis", family = "Kosmidis", role = "aut", email = "i.kosmidis@ucl.ac.uk",
-                    comment = c(ORCID = "0000-0003-1556-0302")),
-             person(given = "Jakob", family = "Messner", role = "aut", email = "jakob.messner@posteo.net",
-                    comment = c(ORCID = "0000-0002-1027-3673")),
+Version: 0.1-0
+Date: 2021-03-12
+Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org",
+                    comment = c(ORCID = "0000-0003-0918-3766")),
              person(given = "Moritz N.", family = "Lang", role = "aut", email = "moritz.n.lang@gmail.com", 
                     comment = c(ORCID = "0000-0002-2533-9903")),
+             person(given = "Christian", family = "Kleiber", role = "ctb", email = "Christian.Kleiber@unibas.ch"),
+             person(given = "Ioannis", family = "Kosmidis", role = "ctb", email = "i.kosmidis@ucl.ac.uk",
+                    comment = c(ORCID = "0000-0003-1556-0302")),
+             person(given = "Jakob", family = "Messner", role = "ctb", email = "jakob.messner@posteo.net",
+                    comment = c(ORCID = "0000-0002-1027-3673")),
              person(given = "Reto", family = "Stauffer", role = "ctb", email = "reto.stauffer@uibk.ac.at",
-                    comment = c(ORCID = "0000-0002-3798-5507")),
-             person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org",
-                    comment = c(ORCID = "0000-0003-0918-3766")))
+                    comment = c(ORCID = "0000-0002-3798-5507")))
 Depends: R (>= 3.0.0)
 Imports: graphics, grDevices, stats, utils
 Suggests: betareg, countreg, crch, disttree, ggplot2, lmtest, MASS, tinytest
