@@ -17,7 +17,7 @@ bibliography: ref.bib
 
 **Keywords**: Distributional regression, probabilistic forecasts, regression trees, random forests, graphical model assessment.
 
-**Webpages**: R-Forge repositories for the *R* packages [`disttree`](https://R-Forge.R-project.org/projects/partykit/pkg/disttree/) and [`topmodels`](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/).
+**Webpages**: R-Forge repositories for the *R* packages [**disttree**](https://R-Forge.R-project.org/projects/partykit/pkg/disttree/) and [**topmodels**](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/).
 
 Forecasts in terms of entire probability distributions (often called
 "probabilistic forecasts" for short) -- as opposed to predictions of only the
@@ -34,7 +34,7 @@ distributional regression modeling:
    models.
 
 Regarding challenge 1, we present the *R* package **disttree**
-[@Schlosser+Lang+Zeileis:2019], that implements distributional trees and forests
+[@disttree], that implements distributional trees and forests
 [@Schlosser+Hothorn+Stauffer+Zeileis:2019]. These blend the recursive
 partitioning strategy of classical regression trees and random forests with
 distributional modeling. The resulting tree-based models can capture nonlinear
@@ -43,13 +43,11 @@ determine differences in the underlying distributional parameters.
 
 For graphically evaluating the goodness-of-fit of the resulting probabilistic
 forecasts (challenge 2), the *R* package **topmodels**
-[@Zeileis+Kleiber+Kosmidis:2018] is introduced, providing extensible
+[@topmodels] is introduced, providing extensible
 probabilistic forecasting infrastructure and corresponding diagnostic graphics
 such as Q-Q plots of randomized residuals, PIT (probability integral transform)
 histograms, reliability diagrams, and rootograms. In addition to distributional
 trees and forests other models can be plugged into these displays, which can be
 rendered both in base *R* graphics and **ggplot2** [@Wickham:2016].
-
-_NOTES:_ Updated years in R-Forge references. Added TH to disttree reference.
 
 ## References
