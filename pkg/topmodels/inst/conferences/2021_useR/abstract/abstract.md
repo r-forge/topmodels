@@ -45,11 +45,10 @@ For graphically evaluating the goodness-of-fit of the resulting probabilistic
 forecasts (challenge 2), the *R* package **topmodels**
 [@Zeileis+Kleiber+Kosmidis:2018] is introduced, providing extensible
 probabilistic forecasting infrastructure and corresponding diagnostic graphics
-such as randomized Q-Q plots [@Dunn+Smyth:1996], PIT (probability integral
-transform) histograms (_FIXME:_ ref?), reliability diagrams (_FIXME:_ ref?), and
-rootograms [@Kleiber+Zeileis:2016]. In addition to distributional trees and
-forests other models can be plugged into these displays, which can be rendered
-both in base *R* graphics and **ggplot2** [@Wickham:2016].
+such as Q-Q plots of randomized residuals, PIT (probability integral transform)
+histograms, reliability diagrams, and rootograms. In addition to distributional
+trees and forests other models can be plugged into these displays, which can be
+rendered both in base *R* graphics and **ggplot2** [@Wickham:2016].
 
 _NOTES:_ Updated years in R-Forge references. Added TH to disttree reference.
 
