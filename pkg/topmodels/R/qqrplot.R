@@ -23,12 +23,27 @@
 ## - qqrplot.default + plot.qqrplot + autoplot.qqrplot
 ##   trafo = qnorm vs. NULL vs. ...
 
-qqrplot <- function(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
-  nsim = 1L, prob = 0.5, range = FALSE, diag = TRUE,
-  col = "black", fill = "lightgray", xlim = NULL, ylim = NULL,
-  main = "Q-Q residuals plot", xlab = "Theoretical quantiles", ylab = "Quantile residuals",
-  ...)
-{
+qqrplot <- function(object, ...) {
+  UseMethod("qqrplot")
+}
+
+
+qqrplot.default <- function(object, 
+                            newdata = NULL, 
+                            trafo = qnorm, 
+                            type = c("random", "quantile"),
+                            nsim = 1L, 
+                            prob = 0.5, 
+                            range = FALSE, 
+                            diag = TRUE,
+                            col = "black", 
+                            fill = "lightgray", 
+                            xlim = NULL, 
+                            ylim = NULL,
+                            main = "Q-Q residuals plot", 
+                            xlab = "Theoretical quantiles", 
+                            ylab = "Quantile residuals",
+                            ...) {
   ## compute quantile residuals
   qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, prob = prob)
   if(is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
@@ -71,6 +86,11 @@ qqrplot <- function(object, newdata = NULL, trafo = qnorm, type = c("random", "q
   
   ## return coordinates invisibly
   invisible(list(theoretical = qthe, residuals = qres))
+}
+
+## actual drawing
+c.qqrplot <- rbind.qqrplot <- function(x, ...) {
+  NULL
 }
 
 ## actual drawing

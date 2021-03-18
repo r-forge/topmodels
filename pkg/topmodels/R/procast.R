@@ -221,7 +221,7 @@ procast.crch <- function(object,
 }
 
 
-procast.disttree <- function(object,
+procast.disttree <- procast.distforest <- function(object,
                              newdata = NULL,
                              na.action = na.pass,
                              type = c(
@@ -242,7 +242,9 @@ procast.disttree <- function(object,
   family <- object$info$family
 
   ## predicted means
-  pars <- predict(object, newdata = newdata, type = "parameter", na.action = na.action)
+  ## FIXME: (ML) FIX `na.action`, not supported by predict.distforest()
+  ##pars <- predict(object, newdata = newdata, type = "parameter", na.action = na.action)
+  pars <- predict(object, newdata = newdata, type = "parameter")
 
   ## types of predictions
   type <- match.arg(type, c("quantile", "mean", "variance", "parameter", "density", "probability", "score"))
