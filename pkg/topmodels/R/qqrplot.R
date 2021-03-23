@@ -34,49 +34,138 @@ qqrplot.default <- function(object,
                             type = c("random", "quantile"),
                             nsim = 1L, 
                             prob = 0.5, 
+                            plot = TRUE,
                             range = FALSE, 
                             diag = TRUE,
-                            col = "black", 
-                            fill = "lightgray", 
-                            xlim = NULL, 
-                            ylim = NULL,
                             main = "Q-Q residuals plot", 
                             xlab = "Theoretical quantiles", 
                             ylab = "Quantile residuals",
                             ...) {
+
   ## compute quantile residuals
   qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, prob = prob)
   if(is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
 
   ## corresponding quantiles on the transformed scale (default: normal)
   if(is.null(trafo)) trafo <- identity
-  q2q <- function(y) trafo(ppoints(length(y)))[order(order(y))]
+  q2q <- function(y) trafo(ppoints(length(y)))[order(order(y))]  ## FIXME: (ML) Why 2 times `order()`
   qthe <- apply(qres, 2L, q2q)
-    
-  ## default plotting ranges
-  if(is.null(xlim)) xlim <- range(qthe)
-  if(is.null(ylim)) ylim <- range(qres)
 
-  ## set up coordinates
-  plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
+  ## collect everything as data.frame
+  rval <- data.frame(theoretical = qthe, residuals = qres)
+  names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
 
   ## polygon for range:
-  ## FIXME currently something goes wrong here - either in qresiduals() or here
+  ## FIXME: (Z) currently something goes wrong here - either in qresiduals() or here
+  ## FIXME: (ML) Does it really go wrong, or just not randomized residuals?
+  ## FIXME: (ML) Why first if sentence? 
   if(!identical(range, FALSE)) {
-    if(isTRUE(range)) range <- c(0.01, 0.99)
-    rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range)
-    y1 <- sort(rg[,1])
-    y2 <- sort(rg[,2])
-    x <- c(q2q(y1), rev(q2q(y2)))
-    y <- c(y1, rev(y2))
-    y[!is.finite(y)] <- 100 * sign(y[!is.finite(y)])
-    x[!is.finite(x)] <- 100 * sign(x[!is.finite(x)])
-    polygon(x, y, col = fill, border = fill)
+    if(isTRUE(range)) range_vec <- c(0.01, 0.99)
+    rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec)
+    
+    rval$theoretical_range_lower <- rg[, 1]
+    rval$theoretical_range_upper <- rg[, 2]
+    rval$residuals_range_lower <- q2q(rg[, 1])
+    rval$residuals_range_upper <- q2q(rg[, 2])
+  }
+
+  attr(rval, "main") <- main
+  attr(rval, "xlab") <- xlab
+  attr(rval, "ylab") <- ylab
+  class(rval) <- c("qqrplot", "data.frame")
+
+  ## also plot by default
+  if(plot){ 
+    plot(rval, range = range, diag = diag, ...)
+  }
+  
+  ## return coordinates invisibly
+  invisible(rval)
+}
+
+## Combine several qqrplots
+c.qqrplot <- rbind.qqrplot <- function(x, ...) {
+  NULL
+}
+
+## actual drawing
+plot.qqrplot <- function(x, 
+                         range = FALSE, 
+                         diag = TRUE,
+                         col = "black", 
+                         fill = "lightgray", 
+                         xlim = NULL, 
+                         ylim = NULL,
+                         main = "Q-Q residuals plot", 
+                         xlab = "Theoretical quantiles", 
+                         ylab = "Quantile residuals",
+                         ...) {
+
+  ## handling of groups
+  if (is.null(x$group)) x$group <- 1L
+  n <- max(x$group)
+
+  ## annotation
+  if (is.null(xlab)) xlab <- TRUE
+  if (is.null(ylab)) ylab <- TRUE
+  if (is.null(main)) main <- TRUE
+  xlab <- rep(xlab, length.out = n)
+  ylab <- rep(ylab, length.out = n)
+  main <- rep(main, length.out = n)
+  if (is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
+  if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
+  if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
+
+  ## polygon for range:
+  ## FIXME: (Z) Currently something goes wrong here - either in qresiduals() or here
+  ## FIXME: (ML) Does it really go wrong, or just not randomized residuals?
+  ## FIXME: (ML) Why first if sentence? 
+  ## FIXME: (ML) Move this part into the plot method 
+  if(
+    !identical(range, FALSE) && 
+    isTRUE(range) && 
+    sum(grepl("range_lower|range_upper", names(x))) == 4 && 
+    !(all.equal(x$theoretical_range_upper, x$theoretical_range_lower) & 
+      all.equal(x$residuals_range_upper, x$residuals_range_lower))
+    ) {
+
+    ## default plotting ranges
+    if(is.null(xlim)) xlim <- range(x[grepl("theoretical", names(x))])
+    if(is.null(ylim)) ylim <- range(x[grepl("residuals", names(x))])
+
+    ## set up coordinates
+    plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
+
+    ## plot polygon
+    y_pol <- c(sort(x$theoretical_range_lower), sort(x$theoretical_range_upper, decreasing = TRUE))
+    x_pol <- c(sort(x$residuals_range_lower), sort(x$residuals_range_upper, decreasing = TRUE))
+    y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)])
+    x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)])
+    polygon(x_pol, y_pol, col = fill, border = fill)
     box()
+  } else {
+ 
+    ## set range to null 
+    x$theoretical_range_lower <- x$theoretical_range_upper <- NULL
+    x$residuals_range_lower <- x$residuals_range_upper <- NULL
+
+    ## default plotting ranges
+    if(is.null(xlim)) xlim <- range(x[grepl("theoretical", names(x))])
+    if(is.null(ylim)) ylim <- range(x[grepl("residuals", names(x))])
+
+    ## set up coordinates
+    plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
+
   }
 
   ## add Q-Q plot(s)
-  for(i in 1L:ncol(qres)) points(qthe[, i], qres[, i], col = col, ...)
+  for (i in 1L:ncol(x[grepl("residuals_[0-9]", names(x))])) {
+    points(
+      x[grepl("theoretical", names(x))][, i], 
+      x[grepl("residuals", names(x))][, i], 
+      col = col, ...
+    )
+  }
   
   ## reference diagonal
   if(!identical(diag, FALSE)) {
@@ -84,18 +173,6 @@ qqrplot.default <- function(object,
     abline(0, 1, col = diag, lty = 2)
   }
   
-  ## return coordinates invisibly
-  invisible(list(theoretical = qthe, residuals = qres))
-}
-
-## actual drawing
-c.qqrplot <- rbind.qqrplot <- function(x, ...) {
-  NULL
-}
-
-## actual drawing
-plot.qqrplot <- function(x, ...) {
-  NULL
 }
 
 ## ggplot2 interface

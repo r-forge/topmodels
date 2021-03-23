@@ -1,7 +1,9 @@
 \name{qqrplot}
 \alias{qqrplot}
+\alias{qqrplot.default}
 
 \alias{plot.qqrplot}
+\alias{lines.qqrplot}
 \alias{autoplot.qqrplot}
 
 \title{Q-Q Plots for Quantile Residuals}
@@ -12,9 +14,10 @@
 }
 
 \usage{
-qqrplot(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
-  nsim = 1L, prob = 0.5, range = FALSE, diag = TRUE,
-  col = "black", fill = "lightgray", xlim = NULL, ylim = NULL,
+qqrplot(object, \dots)
+
+\method{qqrplot}{default}(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
+  nsim = 1L, prob = 0.5, plot = TRUE, range = FALSE, diag = TRUE,
   main = "Q-Q residuals plot", xlab = "Theoretical quantiles",
   ylab = "Quantile residuals", \dots)
 }
@@ -26,12 +29,14 @@ qqrplot(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
   \item{trafo}{function for tranforming residuals from probability scale to
     a different distribution scale (default: Gaussian).}
   \item{type, nsim, prob}{arguments passed to \code{qresiduals}.}
+  \item{plot}{logical. Should the \code{plot} method be called to draw the
+    computed Q-Q plot?}
   \item{range}{logical or quantile specification. Should the range of
     quantiles of the randomized quantile residuals be visualized? If \code{TRUE},
     then \code{range = c(0.01, 0.99)} is used.}
   \item{diag}{logical or color specification. Should a diagonal
     reference line be drawn?}
-  \item{col, fill, xlim, ylim, main, xlab, ylab, \dots}{graphical plotting parameters
+  \item{main, xlab, ylab, \dots}{graphical plotting parameters
     passed to \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
     respectively.}
 }
