@@ -16,6 +16,7 @@ export(
   "autoplot.pithist",  # Must be exported?
 
   "qqrplot",
+  "qqrplot.default",
   "autoplot.qqrplot",  # Must be exported?
 
   "reliagram",
@@ -46,9 +47,13 @@ S3method("procast", "disttree")
 ## methods for qresiduals
 S3method("qresiduals", "default")
 
+## methods for qqrplot
+S3method("qqrplot", "default")
 
 ## methods for class qqrplot
 S3method("plot", "qqrplot")
+S3method("c", "qqrplot")
+S3method("rbind", "qqrplot")
 S3method(ggplot2::autoplot, "qqrplot")
 
 
