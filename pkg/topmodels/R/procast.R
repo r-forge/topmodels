@@ -11,8 +11,7 @@
 # --------------------------------------------------------------------
 # Set up generic function
 # --------------------------------------------------------------------
-procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, ...)
-{
+procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, ...) {
   UseMethod("procast")
 }
 
@@ -20,36 +19,35 @@ procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantil
 # --------------------------------------------------------------------
 # Helper function for nice formatting
 # --------------------------------------------------------------------
-procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
-{
+procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...) {
+
   ## * Is 'at' some kind of 'data'
   ## * or the special type 'list' or 'function'
   ## * or missing altogether ('none')
-  attype <- if(is.null(at) || names(formals(FUN))[1L] == "pars") {
+  attype <- if (is.null(at) || names(formals(FUN))[1L] == "pars") {
     "none"
-  } else if(is.character(at)) {
+  } else if (is.character(at)) {
     match.arg(at, c("function", "list"))
   } else {
     "data"
   }
 
-  if(attype == "none") {
+  if (attype == "none") {
 
     ## If 'at' is missing: prediction is just a transformation of the parameters
     rval <- FUN(pars, ...)
-    if(is.null(dim(rval))) names(rval) <- rownames(pars)
-
+    if (is.null(dim(rval))) names(rval) <- rownames(pars)
   } else {
 
     ## If 'at' is 'list':
     ## prediction is a list of functions with predicted parameters as default
-    if(attype == "list") {
-
+    if (attype == "list") {
       FUN2 <- function(at, pars = pars, ...) NULL
       body(FUN2) <- call("FUN",
         at = as.name("at"),
         pars = as.call(structure(sapply(c("data.frame", names(pars)), as.name), .Names = c("", names(pars)))),
-        as.name("..."))
+        as.name("...")
+      )
       ff <- formals(FUN2)
 
       rval <- lapply(1L:nrow(pars), function(i) {
@@ -58,42 +56,43 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
         FUN2i
       })
       return(rval)
-    
-    ## Otherwise ('at' is 'data' or 'function'):
-    ## set up a function that suitably expands 'at' (if necessary)
-    ## and then either evaluates it at the predicted parameters ('data')
-    ## or sets up a user interface with predicted parameters as default ('function')
+
+      ## Otherwise ('at' is 'data' or 'function'):
+      ## set up a function that suitably expands 'at' (if necessary)
+      ## and then either evaluates it at the predicted parameters ('data')
+      ## or sets up a user interface with predicted parameters as default ('function')
     } else {
       FUN2a <- function(at, pars, ...) {
-    	  n <- NROW(pars)
-	      if(!is.data.frame(at)) {
-          if(length(at) == 1L) at <- rep.int(as.vector(at), n)
-          if(length(at) != n) at <- rbind(at)
-	      }
-    	  if(is.matrix(at) && NROW(at) == 1L) {
-    	    at <- matrix(rep(at, each = n), nrow = n)
-    	    rv <- FUN(as.vector(at), pars = pars[rep(1L:n, ncol(at)), ], ...)
-    	    rv <- matrix(rv, nrow = n)
-    	    rownames(rv) <- rownames(pars)
-    	    colnames(rv) <- paste(substr(type, 1L, 1L),
-    	      round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)), sep = "_")
-    	  } else {
-    	    rv <- FUN(at, pars = pars, ...)
-    	    names(rv) <- rownames(pars)
-    	  }
-    	  return(rv)
+        n <- NROW(pars)
+        if (!is.data.frame(at)) {
+          if (length(at) == 1L) at <- rep.int(as.vector(at), n)
+          if (length(at) != n) at <- rbind(at)
+        }
+        if (is.matrix(at) && NROW(at) == 1L) {
+          at <- matrix(rep(at, each = n), nrow = n)
+          rv <- FUN(as.vector(at), pars = pars[rep(1L:n, ncol(at)), ], ...)
+          rv <- matrix(rv, nrow = n)
+          rownames(rv) <- rownames(pars)
+          colnames(rv) <- paste(substr(type, 1L, 1L),
+            round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)), sep = "_")
+        } else {
+          rv <- FUN(at, pars = pars, ...)
+          names(rv) <- rownames(pars)
+        }
+        return(rv)
       }
 
-      if(attype == "function") {
+      if (attype == "function") {
         rval <- function(at, pars = pars, ...) NULL
         body(rval) <- call("FUN2a",
           at = as.name("at"),
           pars = as.call(structure(sapply(c("data.frame", names(pars)), as.name), .Names = c("", names(pars)))),
-          as.name("..."))
+          as.name("...")
+        )
         ff <- formals(FUN2a)
         formals(rval) <- as.pairlist(c(ff[1L], as.pairlist(structure(
           lapply(names(pars), function(n) call("$", as.name("pars"), n)),
-	        .Names = names(pars))), ff[3L]))
+          .Names = names(pars))), ff[3L]))
         return(rval)
       } else {
         rval <- FUN2a(at, pars = pars, ...)
@@ -103,17 +102,17 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
 
   ## Default: return a data.frame (drop=FALSE) but optionally this can
   ## be dropped to a vector if possible (drop=TRUE)
-  if(drop) {
+  if (drop) {
     if (!is.null(dim(rval)) && NCOL(rval) == 1L) {
       # TODO: (ML) How can this condition ever be fulfilled? Compare code coverage.
       rval <- drop(rval)
     }
   } else {
-    if(is.null(dim(rval))) {
+    if (is.null(dim(rval))) {
       rval <- as.matrix(rval)
-      if(ncol(rval) == 1L) colnames(rval) <- type
+      if (ncol(rval) == 1L) colnames(rval) <- type
     }
-    if(!inherits(rval, "data.frame")) rval <- as.data.frame(rval)
+    if (!inherits(rval, "data.frame")) rval <- as.data.frame(rval)
   }
 
   return(rval)
@@ -123,10 +122,15 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
 # --------------------------------------------------------------------
 # `lm` class
 # --------------------------------------------------------------------
-procast.lm <- function(object, newdata = NULL, na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability", "score"),
-  at = 0.5, drop = FALSE, ...)
-{
+procast.lm <- function(object, 
+                       newdata = NULL, 
+                       na.action = na.pass,
+                       type = c("quantile", "location", "scale", "parameter", 
+                         "density", "probability", "score"),
+                       at = 0.5,
+                       drop = FALSE, 
+                       ...) {
+
   ## Predicted means
   pars <- if (missing(newdata) || is.null(newdata)) {
     object$fitted.values
@@ -139,7 +143,7 @@ procast.lm <- function(object, newdata = NULL, na.action = na.pass,
   pars$sigma <- summary(object)$sigma * sqrt(df.residual(object) / nobs(object))
 
   ## Types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter", 
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter",
     "density", "probability", "score"))
 
   ## Set up function that computes prediction from model parameters
@@ -160,17 +164,17 @@ procast.lm <- function(object, newdata = NULL, na.action = na.pass,
 # --------------------------------------------------------------------
 # `crch` class
 # --------------------------------------------------------------------
-procast.crch <- function(object, 
-                         newdata = NULL, 
+procast.crch <- function(object,
+                         newdata = NULL,
                          na.action = na.pass,
-                         type = c("quantile", "location", "scale", "parameter", 
+                         type = c("quantile", "location", "scale", "parameter",
                            "density", "probability", "score"),
-                         at = 0.5, 
-                         drop = FALSE, 
-                         ...) {  # FIXME: (ML) Additional parameters currently not used
+                         at = 0.5,
+                         drop = FALSE,
+                         ...) { # FIXME: (ML) Additional parameters currently not used
 
   ## Call
-  cl <- match.call()  # FIXME: (ML) Change to normal function call, do not use `eval(cl, parent.frame())`
+  cl <- match.call() # FIXME: (ML) Change to normal function call, do not use `eval(cl, parent.frame())`
   cl[[1]] <- quote(predict)
   cl$drop <- NULL
 
@@ -206,11 +210,9 @@ procast.crch <- function(object,
 
   if (attype == "function") {
     rval <- eval(cl, parent.frame())
-
   } else if (attype == "list") {
     ## FIXME: (ML) Argument `type' == `list' is not yet fully supported in predict.crch()
-    stop("Argument `type' == `list' is not yet supported for crch model classes.") 
-
+    stop("Argument `type' == `list' is not yet supported for crch model classes.")
   } else {
     rval <- eval(cl, parent.frame())
 
@@ -240,16 +242,14 @@ procast.crch <- function(object,
 # `disttree` and `distforest` class
 # --------------------------------------------------------------------
 procast.disttree <- procast.distforest <- function(object,
-                             newdata = NULL,
-                             na.action = na.pass, # FIXME: (ML) Currently not supported
-                             type = c(
-                               "quantile", "location", "scale", "parameter",
-                               "density", "probability", "score"
-                             ),
-                             at = 0.5,
-                             drop = FALSE,
-                             use_internals = TRUE, # FIXME: (ML) Just for development
-                             ...) { # FIXME: (ML) Additional parameters currently not always supported
+                                                   newdata = NULL,
+                                                   na.action = na.pass, # FIXME: (ML) Currently not supported
+                                                   type = c("quantile", "location", "scale", "parameter",
+                                                     "density", "probability", "score"),
+                                                   at = 0.5,
+                                                   drop = FALSE,
+                                                   use_internals = TRUE, # FIXME: (ML) Just for development
+                                                   ...) { # FIXME: (ML) Additional parameters currently not always supported
 
   ## First if working for `NO()`
   ## FIXME: (ML) Extend for all families
@@ -262,12 +262,12 @@ procast.disttree <- procast.distforest <- function(object,
 
   ## Predicted means
   ## FIXME: (ML) Fix `na.action`, not supported by predict.distforest()
-  ##pars <- predict(object, newdata = newdata, type = "parameter", na.action = na.action)
+  # pars <- predict(object, newdata = newdata, type = "parameter", na.action = na.action)
   pars <- predict(object, newdata = newdata, type = "parameter")
 
   ## Types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", 
-    "probability", "score"))
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter", 
+    "density", "probability", "score"))
 
   ## FIXME: (ML) Implement score (estfun)
   if (type == "score") {
@@ -334,31 +334,30 @@ procast.disttree <- procast.distforest <- function(object,
 # --------------------------------------------------------------------
 # `glm` class
 # --------------------------------------------------------------------
-procast.glm <- function(object, 
-                        newdata = NULL, 
+procast.glm <- function(object,
+                        newdata = NULL,
                         na.action = na.pass,
-                        type = c("quantile", "location", "scale", "parameter", 
+                        type = c("quantile", "location", "scale", "parameter",
                           "density", "probability", "score"),
-                        at = 0.5, 
-                        drop = FALSE, 
+                        at = 0.5,
+                        drop = FALSE,
                         ...) {
+  weights <- if (is.null(attr(at, "weights"))) weights(object) else attr(at, "weights")
+  nobs <- if (is.null(attr(at, "nobs"))) nobs(object) else attr(at, "nobs")
+  etastart <- if (is.null(attr(at, "etastart"))) NULL else attr(at, "etastart")
+  mustart <- if (is.null(attr(at, "mustart"))) NULL else attr(at, "mustart")
+  n <- if (is.null(attr(at, "n"))) NULL else attr(at, "n")
 
-  weights <-  if(is.null(attr(at, "weights")))  weights(object) else attr(at, "weights")
-  nobs <-     if(is.null(attr(at, "nobs")))     nobs(object)    else attr(at, "nobs")
-  etastart <- if(is.null(attr(at, "etastart"))) NULL            else attr(at, "etastart")
-  mustart <-  if(is.null(attr(at, "mustart")))  NULL            else attr(at, "mustart")
-  n <-        if(is.null(attr(at, "n")))        NULL            else attr(at, "n")
 
-
-  if(is.null(n)) {
+  if (is.null(n)) {
     ## FIXME: This is not probabily not correct, as we need initializing for `at`
     y <- newresponse(object, newdata = newdata)
 
-    weights <-  attr(y, "weights")  
-    nobs <-     attr(y, "nobs")     
-    etastart <- attr(y, "etastart") 
-    mustart <-  attr(y, "mustart") 
-    n <-        attr(y, "n")        
+    weights <- attr(y, "weights")
+    nobs <- attr(y, "nobs")
+    etastart <- attr(y, "etastart")
+    mustart <- attr(y, "mustart")
+    n <- attr(y, "n")
   }
 
   ## Predicted means
@@ -389,7 +388,6 @@ procast.glm <- function(object,
       "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
       "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
     )
-
   } else if (object$family$family == "poisson") {
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qpois(at, lambda = pars$mu, ...),
@@ -400,14 +398,13 @@ procast.glm <- function(object,
       "probability" = function(at, pars, ...) ppois(at, lambda = pars$mu, ...),
       "score" =  stop("not yet implemented")
     )
-
   } else if (object$family$family == "binomial") {
     ## FIXME: (ML) a commented copy of countreg, is this needed
-    #at <- y * weights / n
-    #if(!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
+    # at <- y * weights / n
+    # if (!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
     #  stop("binomial quantile residuals require integer response")
-    #}
-    #at <- round(at)
+    # }
+    # at <- round(at)
 
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qbinom(at, size = n, prob = pars$mu, ...),
@@ -418,9 +415,8 @@ procast.glm <- function(object,
       "probability" = function(at, pars, ...) pbinom(at, size = n, prob = pars$mu, ...),
       "score" = stop("not yet implemented"),
     )
-   
   } else {
-      stop(sprintf("family %s not implemented yet", object$family$family))
+    stop(sprintf("family %s not implemented yet", object$family$family))
   }
 
   ## set up function that computes prediction from model parameters
