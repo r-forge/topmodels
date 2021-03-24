@@ -16,9 +16,20 @@ qresiduals.default <- function(object,
   ## if 'object' is not a vector/matrix, apply procast(..., type = "probability") method
   if(is.object(object) | !is.numeric(object)) {
     y <- newresponse(object, newdata = newdata)
+  
+    ## to keep the attributes
+    ## FIXME: (ML) in countreg its `at = cbind(y - 1L, y)`, why the difference?
+    ## FIXME: (ML) Increased difference, otherwise did not work for binom and pois
+    ##at <- cbind(y - .Machine$double.eps^0.4, y)
+    at <- cbind(y - .Machine$double.eps^0.8, y)
 
-    object <- procast(object, newdata = newdata, 
-      at = cbind(y - .Machine$double.eps^0.8, y), type = "probability")
+    attr(at, "nobs") <-     attr(y, "nobs")
+    attr(at, "etastart") <- attr(y, "etastart")
+    attr(at, "mustart") <-  attr(y, "mustart")
+    attr(at, "n") <-        attr(y, "n")
+    attr(at, "weights") <-  attr(y, "weights")
+
+    object <- procast(object, newdata = newdata, at = at, type = "probability")
 
     # TODO: (ML) There is no `try()` environment, which errors can be caught
     if (inherits(object, "try-error")) {

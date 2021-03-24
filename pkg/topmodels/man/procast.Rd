@@ -15,7 +15,7 @@
 procast(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, \dots)
 
 \method{procast}{lm}(object, newdata = NULL, na.action = na.pass,
-  type = c("quantile", "mean", "variance", "parameter", "density", 
+  type = c("quantile", "location", "scale", "parameter", "density", 
   "probability", "score"), at = 0.5, drop = FALSE, \dots)
 
 procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", \dots)
@@ -34,7 +34,8 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", \dots)
 
   \item{type}{character specifying the type of probabilistic forecast to compute.
     In \code{procast_setup} the \code{type} is only used for nice labels of the
-    returned data frame.}
+    returned data frame. FIXME: Implement mean/expectation and variance/dispersion instead
+    of location and scale.}
   \item{at}{specification of values at which the forecasts should be evaluated,
     typically a numeric vector but possibly also a matrix or data frame.
     Additionally, \code{at} can be the character string \code{"function"}

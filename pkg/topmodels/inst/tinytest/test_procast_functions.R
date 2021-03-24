@@ -13,13 +13,13 @@ expect_equal(
 )
 
 expect_equal(
-  procast(m, type = "mean", drop = TRUE), 
+  procast(m, type = "location", drop = TRUE), 
   m$fitted.values
 )
 
 expect_equal(
-  unique(procast(m, type = "variance", drop = TRUE)),
-  (summary(m)$sigma * sqrt(df.residual(m) / nobs(m)))^2
+  unique(procast(m, type = "scale", drop = TRUE)),
+  summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
 )
 
 expect_equal(
@@ -160,13 +160,13 @@ expect_equal(
 )
 
 expect_equal(
-  procast(m2, type = "mean", drop = TRUE), 
+  procast(m2, type = "location", drop = TRUE), 
   predict(m2, type = "location"),
   check.attributes = FALSE
 )
 
 expect_equal(
-  procast(m2, type = "variance", drop = TRUE),
+  procast(m2, type = "scale", drop = TRUE),
   predict(m2, type = "scale"),
   check.attributes = FALSE
 )
