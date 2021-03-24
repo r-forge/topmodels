@@ -1,51 +1,30 @@
-## probabilistic forecasting method: procast
+# --------------------------------------------------------------------
+# PROBABILISTIC FORECASTING METHOD: `procast()`
+# --------------------------------------------------------------------
+# TODO: (ML) Do we need/want support weights?
+# TODO: (ML) Which `type`s should be supported?
+# FIXME: (ML) Support types mean/expectation/response and variance/dispersion instead of
+#   location and scale.
+# NOTE: (Z) For scores we need at = data.frame(y = response, x = model.matrix).
+# TODO: (ML) In case `at = function`, it always returns a named vector. Do we want that?
 
-
+# --------------------------------------------------------------------
+# Set up generic function
+# --------------------------------------------------------------------
 procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, ...)
 {
   UseMethod("procast")
 }
-# NOTE: (ML) Do we need/want support of weights, etc.
 
-procast.lm <- function(object, newdata = NULL, na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability", "score"),
-  at = 0.5, drop = FALSE, ...)
-{
-  ## predicted means
-  pars <- if (missing(newdata) || is.null(newdata)) {
-    object$fitted.values
-  } else {
-    predict(object, newdata = newdata, na.action = na.action)
-  }
-  pars <- data.frame(mu = pars)
 
-  ## add maximum likelihood estimator of constant varians
-  pars$sigma <- summary(object)$sigma * sqrt(df.residual(object) / nobs(object))
-
-  ## types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", "probability", "score"))
-
-  ## set up function that computes prediction from model parameters
-  FUN <- switch(type,
-    "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "location" = function(pars) pars$mu,
-    "scale" = function(pars) pars$sigma,
-    "parameter" = function(pars) pars,
-    "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
-  )
-
-  ## NOTE: for scores we need at = data.frame(y = response, x = model.matrix)
-
-  procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
-}
-
+# --------------------------------------------------------------------
+# Helper function for nice formatting
+# --------------------------------------------------------------------
 procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
 {
-  ## - is 'at' some kind of 'data'
-  ## - or the special type 'list' or 'function'
-  ## - or missing altogether ('none')
+  ## * Is 'at' some kind of 'data'
+  ## * or the special type 'list' or 'function'
+  ## * or missing altogether ('none')
   attype <- if(is.null(at) || names(formals(FUN))[1L] == "pars") {
     "none"
   } else if(is.character(at)) {
@@ -56,13 +35,13 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
 
   if(attype == "none") {
 
-    ## if 'at' is missing: prediction is just a transformation of the parameters
+    ## If 'at' is missing: prediction is just a transformation of the parameters
     rval <- FUN(pars, ...)
     if(is.null(dim(rval))) names(rval) <- rownames(pars)
 
   } else {
 
-    ## if 'at' is 'list':
+    ## If 'at' is 'list':
     ## prediction is a list of functions with predicted parameters as default
     if(attype == "list") {
 
@@ -80,7 +59,7 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
       })
       return(rval)
     
-    ## otherwise ('at' is 'data' or 'function'):
+    ## Otherwise ('at' is 'data' or 'function'):
     ## set up a function that suitably expands 'at' (if necessary)
     ## and then either evaluates it at the predicted parameters ('data')
     ## or sets up a user interface with predicted parameters as default ('function')
@@ -122,11 +101,11 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
     }
   }
 
-  ## default: return a data.frame (drop=FALSE) but optionally this can
+  ## Default: return a data.frame (drop=FALSE) but optionally this can
   ## be dropped to a vector if possible (drop=TRUE)
   if(drop) {
     if (!is.null(dim(rval)) && NCOL(rval) == 1L) {
-      # NOTE: (ML) How can condition be fulfilled? Compare code coverage.
+      # TODO: (ML) How can this condition ever be fulfilled? Compare code coverage.
       rval <- drop(rval)
     }
   } else {
@@ -141,6 +120,46 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
 }
 
 
+# --------------------------------------------------------------------
+# `lm` class
+# --------------------------------------------------------------------
+procast.lm <- function(object, newdata = NULL, na.action = na.pass,
+  type = c("quantile", "location", "scale", "parameter", "density", "probability", "score"),
+  at = 0.5, drop = FALSE, ...)
+{
+  ## Predicted means
+  pars <- if (missing(newdata) || is.null(newdata)) {
+    object$fitted.values
+  } else {
+    predict(object, newdata = newdata, na.action = na.action)
+  }
+  pars <- data.frame(mu = pars)
+
+  ## Add maximum likelihood estimator of constant varians
+  pars$sigma <- summary(object)$sigma * sqrt(df.residual(object) / nobs(object))
+
+  ## Types of predictions
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter", 
+    "density", "probability", "score"))
+
+  ## Set up function that computes prediction from model parameters
+  FUN <- switch(type,
+    "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
+    "location" = function(pars) pars$mu,
+    "scale" = function(pars) pars$sigma,
+    "parameter" = function(pars) pars,
+    "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
+    "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
+    "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
+  )
+
+  procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
+}
+
+
+# --------------------------------------------------------------------
+# `crch` class
+# --------------------------------------------------------------------
 procast.crch <- function(object, 
                          newdata = NULL, 
                          na.action = na.pass,
@@ -148,25 +167,25 @@ procast.crch <- function(object,
                            "density", "probability", "score"),
                          at = 0.5, 
                          drop = FALSE, 
-                         ...) {  #FIXME: (ML) Additional parameters currently not used
+                         ...) {  # FIXME: (ML) Additional parameters currently not used
 
-  # Call
+  ## Call
   cl <- match.call()  # FIXME: (ML) Change to normal function call, do not use `eval(cl, parent.frame())`
   cl[[1]] <- quote(predict)
   cl$drop <- NULL
 
-  # Check possible types of predictions
+  ## Check possible types of predictions
   type <- match.arg(type, c("quantile", "location", "scale", "parameter", 
     "density", "probability", "score"))
 
-  ## TODO: (ML) Implement score (estfun)
+  ## FIXME: (ML) Implement score (estfun)
   if (type == "score") {
     stop("`type=score` not supported yet.")
   }
 
-  # * is 'at' some kind of 'data'
-  # * or the special type 'list' or 'function'
-  # * or missing altogether ('none')
+  ## * Is 'at' some kind of 'data'
+  ## * or the special type 'list' or 'function'
+  ## * or missing altogether ('none')
   attype <- if (is.null(at) || type %in% c("location", "scale", "parameter")) {
     "none"
   } else if (is.character(at)) {
@@ -175,8 +194,7 @@ procast.crch <- function(object,
     "data"
   }
 
-  # Set up internal function that computes prediction
-  # NOTE: (ML) Do we want to support more? Should mean be the response? Should score be the crps?
+  ## Set up internal function that computes prediction
   cl$type <- switch(type,
     "quantile" = "quantile",
     "location" = "location",
@@ -186,20 +204,18 @@ procast.crch <- function(object,
     "probability" = "probability"
   )
 
-  # NOTE: (AZ) For scores we need at = data.frame(y = response, x = model.matrix)
-
   if (attype == "function") {
     rval <- eval(cl, parent.frame())
 
   } else if (attype == "list") {
+    ## FIXME: (ML) Argument `type' == `list' is not yet fully supported in predict.crch()
     stop("Argument `type' == `list' is not yet supported for crch model classes.") 
-    # NOTE: (ML) Argument `type' == `list' is not yet fully supported in predict.crch()
 
   } else {
     rval <- eval(cl, parent.frame())
 
-    # Default: return a data.frame (drop=FALSE) but optionally this can
-    # be dropped to a vector if possible (drop=TRUE)
+    ## Default: return a data.frame (drop=FALSE) but optionally this can
+    ## be dropped to a vector if possible (drop=TRUE)
     if (drop) {
       if (!is.null(dim(rval)) && NCOL(rval) == 1L) {
         # NOTE: (ML) How can condition be fulfilled? Compare code coverage.
@@ -220,9 +236,12 @@ procast.crch <- function(object,
 }
 
 
+# --------------------------------------------------------------------
+# `disttree` and `distforest` class
+# --------------------------------------------------------------------
 procast.disttree <- procast.distforest <- function(object,
                              newdata = NULL,
-                             na.action = na.pass,
+                             na.action = na.pass, # FIXME: (ML) Currently not supported
                              type = c(
                                "quantile", "location", "scale", "parameter",
                                "density", "probability", "score"
@@ -230,9 +249,10 @@ procast.disttree <- procast.distforest <- function(object,
                              at = 0.5,
                              drop = FALSE,
                              use_internals = TRUE, # FIXME: (ML) Just for development
-                             ...) { # FIXME: (ML) Additional parameters currently not always used
+                             ...) { # FIXME: (ML) Additional parameters currently not always supported
 
   ## First if working for `NO()`
+  ## FIXME: (ML) Extend for all families
   if (object$info$family$family.name != "Normal Distribution") {
     warning("So far not tested for specified family")
   }
@@ -240,20 +260,21 @@ procast.disttree <- procast.distforest <- function(object,
   ## Get family
   family <- object$info$family
 
-  ## predicted means
-  ## FIXME: (ML) FIX `na.action`, not supported by predict.distforest()
+  ## Predicted means
+  ## FIXME: (ML) Fix `na.action`, not supported by predict.distforest()
   ##pars <- predict(object, newdata = newdata, type = "parameter", na.action = na.action)
   pars <- predict(object, newdata = newdata, type = "parameter")
 
-  ## types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", "probability", "score"))
+  ## Types of predictions
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", 
+    "probability", "score"))
 
-  ## TODO: (ML) Implement score (estfun)
+  ## FIXME: (ML) Implement score (estfun)
   if (type == "score") {
     stop("`type=score` not supported yet.")
   }
 
-  ## set up function that computes prediction from model parameters
+  ## Set up function that computes prediction from model parameters
   if (use_internals == FALSE) {
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
@@ -264,8 +285,8 @@ procast.disttree <- procast.distforest <- function(object,
       "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...)
     )
   } else {
-    ## FIXME: (ML) `disttree` unfortunately never supported vector of parameters!
-    ##             Here ugly workaround, which must be improved (probabily straight in `disstree`)
+    ## FIXME: (ML) `disttree` unfortunately does not support a vector of parameters!
+    ## Here ugly workaround, which must be improved (probabily straight in `disstree`).
     FUN <- switch(type,
       "quantile" = function(at, pars) {
         sapply(
@@ -278,8 +299,6 @@ procast.disttree <- procast.distforest <- function(object,
           }
         )
       },
-      # "quantile" = function(at, pars) family$qdist(p = at, eta = as.numeric(family$linkfun(pars)),
-      #    lower.tail = TRUE, log.p = FALSE),
       "location" = function(pars) pars$mu,
       "scale" = function(pars) pars$sigma,
       "parameter" = function(pars) pars,
@@ -308,16 +327,18 @@ procast.disttree <- procast.distforest <- function(object,
     )
   }
 
-  ## NOTE: for scores we need at = data.frame(y = response, x = model.matrix)
   procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
 }
 
 
-
+# --------------------------------------------------------------------
+# `glm` class
+# --------------------------------------------------------------------
 procast.glm <- function(object, 
                         newdata = NULL, 
                         na.action = na.pass,
-                        type = c("quantile", "location", "scale", "parameter", "density", "probability", "score"),
+                        type = c("quantile", "location", "scale", "parameter", 
+                          "density", "probability", "score"),
                         at = 0.5, 
                         drop = FALSE, 
                         ...) {
@@ -330,7 +351,7 @@ procast.glm <- function(object,
 
 
   if(is.null(n)) {
-    ## FIXME: This is not probabily not correct, as we need this of `at`?!
+    ## FIXME: This is not probabily not correct, as we need initializing for `at`
     y <- newresponse(object, newdata = newdata)
 
     weights <-  attr(y, "weights")  
@@ -340,8 +361,8 @@ procast.glm <- function(object,
     n <-        attr(y, "n")        
   }
 
-  ## predicted means
-  ## TODO: (ML) Always only one predicted parameter
+  ## Predicted means
+  ## FIXME: (ML) Is it really always only one predicted parameter
   pars <- if (missing(newdata) || is.null(newdata)) {
     fitted(object)
   } else {
@@ -349,14 +370,14 @@ procast.glm <- function(object,
   }
   pars <- data.frame(mu = pars)
 
-  ## types of predictions
+  ## Types of predictions
   type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", "probability", "score"))
 
-  ## TODO: (ML) Implement score (estfun)
+  ## FIXME: (ML) Implement score (estfun)
   if (object$family$family == "gaussian") {
 
-    ## add maximum likelihood estimator of constant varians
-    ## FIXME: (ML) do we need second part (compare countreg)?
+    ## Add maximum likelihood estimator of constant varians
+    ## FIXME: (ML) do we need second part (compare countreg)
     pars$sigma <- sqrt(summary(object)$dispersion) * sqrt(df.residual(object) / nobs(object))
 
     FUN <- switch(type,
@@ -381,7 +402,7 @@ procast.glm <- function(object,
     )
 
   } else if (object$family$family == "binomial") {
-    ## TODO: (ML) copy of countreg, is this needed?
+    ## FIXME: (ML) a commented copy of countreg, is this needed
     #at <- y * weights / n
     #if(!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
     #  stop("binomial quantile residuals require integer response")
