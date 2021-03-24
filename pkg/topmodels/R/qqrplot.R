@@ -57,16 +57,18 @@ qqrplot.default <- function(object,
 
   ## polygon for range:
   ## FIXME: (Z) currently something goes wrong here - either in qresiduals() or here
-  ## FIXME: (ML) Does it really go wrong, or just not randomized residuals?
-  ## FIXME: (ML) Why first if sentence? 
+  ## TODO: (ML) Does it really go wrong, or just previously applied to object w/o randomized residuals?
+  ## TODO: (ML) Why first if sentence? 
+  ## TODO: (ML) Is the theoretical lower and upper not always the same?
+  ## TODO: (ML) Instead of range, confidence interval possible?
   if(!identical(range, FALSE)) {
     if(isTRUE(range)) range_vec <- c(0.01, 0.99)
     rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec)
     
-    rval$theoretical_range_lower <- rg[, 1]
-    rval$theoretical_range_upper <- rg[, 2]
-    rval$residuals_range_lower <- q2q(rg[, 1])
-    rval$residuals_range_upper <- q2q(rg[, 2])
+    rval$residuals_range_lower <- rg[, 1]
+    rval$residuals_range_upper <- rg[, 2]
+    rval$theoretical_range_lower <- q2q(rg[, 1])
+    rval$theoretical_range_upper <- q2q(rg[, 2])
   }
 
   attr(rval, "main") <- main
@@ -118,29 +120,28 @@ plot.qqrplot <- function(x,
 
   ## polygon for range:
   ## FIXME: (Z) Currently something goes wrong here - either in qresiduals() or here
-  ## FIXME: (ML) Does it really go wrong, or just not randomized residuals?
-  ## FIXME: (ML) Why first if sentence? 
-  ## FIXME: (ML) Move this part into the plot method 
+  ## TODO: (ML) Does it really go wrong, or just not randomized residuals?
+  ## TODO: (ML) Why first if sentence? 
+  ## TODO: (ML) With increased difference in qresiduals, now check for equality does not work any more.
   if(
     !identical(range, FALSE) && 
     isTRUE(range) && 
     sum(grepl("range_lower|range_upper", names(x))) == 4 && 
-    !(all.equal(x$theoretical_range_upper, x$theoretical_range_lower) & 
-      all.equal(x$residuals_range_upper, x$residuals_range_lower))
+    !(isTRUE(all.equal(x$theoretical_range_upper, x$theoretical_range_lower, tol =  .Machine$double.eps^0.4)) & 
+      isTRUE(all.equal(x$residuals_range_upper, x$residuals_range_lower, tol =  .Machine$double.eps^0.4)))
     ) {
 
-    ## default plotting ranges
-    if(is.null(xlim)) xlim <- range(x[grepl("theoretical", names(x))])
-    if(is.null(ylim)) ylim <- range(x[grepl("residuals", names(x))])
+    ## default plotting ranges (as.matrix to get `finite = TRUE` working)
+    if(is.null(xlim)) xlim <- range(as.matrix(x[grepl("theoretical", names(x))]), finite = TRUE)
+    if(is.null(ylim)) ylim <- range(as.matrix(x[grepl("residuals", names(x))]), finite = TRUE)
 
     ## set up coordinates
     plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
-
     ## plot polygon
-    y_pol <- c(sort(x$theoretical_range_lower), sort(x$theoretical_range_upper, decreasing = TRUE))
-    x_pol <- c(sort(x$residuals_range_lower), sort(x$residuals_range_upper, decreasing = TRUE))
-    y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)])
+    x_pol <- c(sort(x$theoretical_range_lower), sort(x$theoretical_range_upper, decreasing = TRUE))
+    y_pol <- c(sort(x$residuals_range_lower), sort(x$residuals_range_upper, decreasing = TRUE))
     x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)])
+    y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)])
     polygon(x_pol, y_pol, col = fill, border = fill)
     box()
   } else {

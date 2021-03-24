@@ -8,7 +8,7 @@ procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantil
 # NOTE: (ML) Do we need/want support of weights, etc.
 
 procast.lm <- function(object, newdata = NULL, na.action = na.pass,
-  type = c("quantile", "mean", "variance", "parameter", "density", "probability", "score"),
+  type = c("quantile", "location", "scale", "parameter", "density", "probability", "score"),
   at = 0.5, drop = FALSE, ...)
 {
   ## predicted means
@@ -20,17 +20,16 @@ procast.lm <- function(object, newdata = NULL, na.action = na.pass,
   pars <- data.frame(mu = pars)
 
   ## add maximum likelihood estimator of constant varians
-  pars$sigma <- summary(object)$sigma * sqrt(df.residual(object)/nobs(object))
-  ## NOTE: (ML) check if constant sigma in case of `na.action' is what we want
+  pars$sigma <- summary(object)$sigma * sqrt(df.residual(object) / nobs(object))
 
   ## types of predictions
-  type <- match.arg(type, c("quantile", "mean", "variance", "parameter", "density", "probability", "score"))
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", "probability", "score"))
 
   ## set up function that computes prediction from model parameters
   FUN <- switch(type,
     "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "mean" = function(pars) pars$mu,
-    "variance" = function(pars) pars$sigma^2,
+    "location" = function(pars) pars$mu,
+    "scale" = function(pars) pars$sigma,
     "parameter" = function(pars) pars,
     "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
     "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
@@ -145,7 +144,7 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
 procast.crch <- function(object, 
                          newdata = NULL, 
                          na.action = na.pass,
-                         type = c("quantile", "mean", "variance", "parameter", 
+                         type = c("quantile", "location", "scale", "parameter", 
                            "density", "probability", "score"),
                          at = 0.5, 
                          drop = FALSE, 
@@ -157,7 +156,7 @@ procast.crch <- function(object,
   cl$drop <- NULL
 
   # Check possible types of predictions
-  type <- match.arg(type, c("quantile", "mean", "variance", "parameter", 
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter", 
     "density", "probability", "score"))
 
   ## TODO: (ML) Implement score (estfun)
@@ -168,7 +167,7 @@ procast.crch <- function(object,
   # * is 'at' some kind of 'data'
   # * or the special type 'list' or 'function'
   # * or missing altogether ('none')
-  attype <- if (is.null(at) || type %in% c("mean", "variance", "parameter")) {
+  attype <- if (is.null(at) || type %in% c("location", "scale", "parameter")) {
     "none"
   } else if (is.character(at)) {
     match.arg(at, c("function", "list"))
@@ -180,8 +179,8 @@ procast.crch <- function(object,
   # NOTE: (ML) Do we want to support more? Should mean be the response? Should score be the crps?
   cl$type <- switch(type,
     "quantile" = "quantile",
-    "mean" = "location",
-    "variance" = "scale",
+    "location" = "location",
+    "scale" = "scale",
     "parameter" = "parameter",
     "density" = "density",
     "probability" = "probability"
@@ -225,7 +224,7 @@ procast.disttree <- procast.distforest <- function(object,
                              newdata = NULL,
                              na.action = na.pass,
                              type = c(
-                               "quantile", "mean", "variance", "parameter",
+                               "quantile", "location", "scale", "parameter",
                                "density", "probability", "score"
                              ),
                              at = 0.5,
@@ -247,7 +246,7 @@ procast.disttree <- procast.distforest <- function(object,
   pars <- predict(object, newdata = newdata, type = "parameter")
 
   ## types of predictions
-  type <- match.arg(type, c("quantile", "mean", "variance", "parameter", "density", "probability", "score"))
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", "probability", "score"))
 
   ## TODO: (ML) Implement score (estfun)
   if (type == "score") {
@@ -258,8 +257,8 @@ procast.disttree <- procast.distforest <- function(object,
   if (use_internals == FALSE) {
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-      "mean" = function(pars) pars$mu,
-      "variance" = function(pars) pars$sigma^2,
+      "location" = function(pars) pars$mu,
+      "scale" = function(pars) pars$sigma,
       "parameter" = function(pars) pars,
       "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
       "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...)
@@ -281,8 +280,8 @@ procast.disttree <- procast.distforest <- function(object,
       },
       # "quantile" = function(at, pars) family$qdist(p = at, eta = as.numeric(family$linkfun(pars)),
       #    lower.tail = TRUE, log.p = FALSE),
-      "mean" = function(pars) pars$mu,
-      "variance" = function(pars) pars$sigma^2,
+      "location" = function(pars) pars$mu,
+      "scale" = function(pars) pars$sigma,
       "parameter" = function(pars) pars,
       "density" = function(at, pars) {
         sapply(
@@ -313,3 +312,96 @@ procast.disttree <- procast.distforest <- function(object,
   procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
 }
 
+
+
+procast.glm <- function(object, 
+                        newdata = NULL, 
+                        na.action = na.pass,
+                        type = c("quantile", "location", "scale", "parameter", "density", "probability", "score"),
+                        at = 0.5, 
+                        drop = FALSE, 
+                        ...) {
+
+  weights <-  if(is.null(attr(at, "weights")))  weights(object) else attr(at, "weights")
+  nobs <-     if(is.null(attr(at, "nobs")))     nobs(object)    else attr(at, "nobs")
+  etastart <- if(is.null(attr(at, "etastart"))) NULL            else attr(at, "etastart")
+  mustart <-  if(is.null(attr(at, "mustart")))  NULL            else attr(at, "mustart")
+  n <-        if(is.null(attr(at, "n")))        NULL            else attr(at, "n")
+
+
+  if(is.null(n)) {
+    ## FIXME: This is not probabily not correct, as we need this of `at`?!
+    y <- newresponse(object, newdata = newdata)
+
+    weights <-  attr(y, "weights")  
+    nobs <-     attr(y, "nobs")     
+    etastart <- attr(y, "etastart") 
+    mustart <-  attr(y, "mustart") 
+    n <-        attr(y, "n")        
+  }
+
+  ## predicted means
+  ## TODO: (ML) Always only one predicted parameter
+  pars <- if (missing(newdata) || is.null(newdata)) {
+    fitted(object)
+  } else {
+    predict(object, newdata = newdata, na.action = na.action)
+  }
+  pars <- data.frame(mu = pars)
+
+  ## types of predictions
+  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", "probability", "score"))
+
+  ## TODO: (ML) Implement score (estfun)
+  if (object$family$family == "gaussian") {
+
+    ## add maximum likelihood estimator of constant varians
+    ## FIXME: (ML) do we need second part (compare countreg)?
+    pars$sigma <- sqrt(summary(object)$dispersion) * sqrt(df.residual(object) / nobs(object))
+
+    FUN <- switch(type,
+      "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
+      "location" = function(pars) pars$mu,
+      "scale" = function(pars) pars$sigma,
+      "parameter" = function(pars) pars,
+      "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
+      "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
+      "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
+    )
+
+  } else if (object$family$family == "poisson") {
+    FUN <- switch(type,
+      "quantile" = function(at, pars, ...) qpois(at, lambda = pars$mu, ...),
+      "location" = stop("not yet implemented"),
+      "scale" = stop("not yet implemented"),
+      "parameter" = stop("not yet implemented"),
+      "density" = function(at, pars, ...) dpois(at, lambda = pars$mu, ...),
+      "probability" = function(at, pars, ...) ppois(at, lambda = pars$mu, ...),
+      "score" =  stop("not yet implemented")
+    )
+
+  } else if (object$family$family == "binomial") {
+    ## TODO: (ML) copy of countreg, is this needed?
+    #at <- y * weights / n
+    #if(!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
+    #  stop("binomial quantile residuals require integer response")
+    #}
+    #at <- round(at)
+
+    FUN <- switch(type,
+      "quantile" = function(at, pars, ...) qbinom(at, size = n, prob = pars$mu, ...),
+      "location" = stop("not yet implemented"),
+      "scale" = stop("not yet implemented"),
+      "parameter" = stop("not yet implemented"),
+      "density" = function(at, pars, ...) dbinom(at, size = n, prob = pars$mu, ...),
+      "probability" = function(at, pars, ...) pbinom(at, size = n, prob = pars$mu, ...),
+      "score" = stop("not yet implemented"),
+    )
+   
+  } else {
+      stop(sprintf("family %s not implemented yet", object$family$family))
+  }
+
+  ## set up function that computes prediction from model parameters
+  procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
+}

@@ -2,6 +2,7 @@
 
 \alias{newresponse}
 \alias{newresponse.default}
+\alias{newresponse.glm}
 
 \title{Extract Observed Responses from New Data}
 

@@ -10,6 +10,7 @@ export(
 
   "newresponse",
   "newresponse.default",
+  "newresponse.glm",
 
   "pithist",
   "pithist.default",
@@ -36,12 +37,14 @@ export(
 
 ## methods for newresponse
 S3method("newresponse", "default")
+S3method("newresponse", "glm")
 
 
 ## methods for procast
 S3method("procast", "lm")
 S3method("procast", "crch")
 S3method("procast", "disttree")
+S3method("procast", "glm")
 
 
 ## methods for qresiduals

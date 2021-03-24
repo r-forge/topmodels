@@ -62,3 +62,17 @@ Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
     * Merge `rootogram_procast()` and `rootogram_glm`
 * `wormplot()`
     * Start from scratch: Needs to be setup
+
+## Current question/problems
+* Difference for point masses in `qqresiduals()` must be increased to be working for binom/pois but
+  then test fails as results differ for e.g. `qnorm()`.
+* Is the graphical representation of the range in Q-Q plot correct?
+* What types should `procast()` support: location vs. mean/expectation/response, scale vs. variance/dispersion
+
+## Errors in countreg
+* Wrongly set argument `range = TRUE` seems not caught when randomized quantile residuals make no sense.
+```
+m_gauss <- glm(dist ~ speed, data = cars, family = gaussian)
+qqrplot(m_gauss, range = TRUE)
+```
+
