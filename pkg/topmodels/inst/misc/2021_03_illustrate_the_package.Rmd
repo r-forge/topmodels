@@ -24,7 +24,7 @@ This is an demo file to illustrate the R package `procast`. Currently there are 
 After loading the necessary libraries, let's start by fitting some models:
 ```{r}
 m1 <- lm(dist ~ speed, data = cars)
-m2 <- crch(dist ~ speed | speed, left = 30, data = cars)
+m2 <- crch(dist ~ speed | speed, data = cars)
 m3 <- distforest(dist ~ speed, data = cars, ntree = 10)
 ```
 

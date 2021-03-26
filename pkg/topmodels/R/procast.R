@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------
 # PROBABILISTIC FORECASTING METHOD: `procast()`
 # --------------------------------------------------------------------
-# TODO: (ML) Do we need/want support weights?
+# TODO: (ML) Do we need/want support weights -> `newresponse()`?
 # TODO: (ML) Which `type`s should be supported?
 # FIXME: (ML) Support types mean/expectation/response and variance/dispersion instead of
 #   location and scale.
