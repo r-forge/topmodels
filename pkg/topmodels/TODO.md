@@ -3,7 +3,7 @@
 ## 1. General
 ### 1.1 Description file
 * Fix naming and description of package
-* Check authors' contacts *done*
+* Check authors' contacts [**done**]
 
 ### 1.2 Outlook
 * Provide `geom_()` for `ggplot2` instead/additionally to `autoplot()`
@@ -16,8 +16,8 @@
 
 Function name | S3 classes supported | S3 classes planned | TODOs
 --- | --- | --- | ---
-`procast()` | `lm`, `crch`, `disttree` | `glm`, `countreg`, `betareg`, | many
- |  |  | `gam`, `gamlss`, `bamlss` | 
+`procast()` | `lm`, `crch`, (`disttree`) | `glm`, `countreg`, `betareg`, | many
+ | | (`glm`)  | `gam`, `gamlss`, `bamlss` | 
 `procast_setup()` | none | none | none
 `newresponse()` | `default` | no | few
 `qresiduals()` | `default` | no | many 
