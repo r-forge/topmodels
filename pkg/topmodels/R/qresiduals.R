@@ -21,6 +21,7 @@ qresiduals.default <- function(object,
     ## FIXME: (ML) in countreg its `at = cbind(y - 1L, y)`, why the difference?
     ## FIXME: (ML) Increased difference, otherwise did not work for binom and pois
     ##at <- cbind(y - .Machine$double.eps^0.4, y)
+    ##at <- cbind(y - 1L, y)
     at <- cbind(y - .Machine$double.eps^0.8, y)
 
     attr(at, "nobs") <-     attr(y, "nobs")

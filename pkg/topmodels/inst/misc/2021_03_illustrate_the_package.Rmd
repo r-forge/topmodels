@@ -90,3 +90,18 @@ We can also plot all in a single figure without using `facet_grid()`:
 autoplot(c(pit1, pit2, pit3), style = "lines", grid = FALSE, 
          colour = c(1, 2, 3), linetype = c(1, 2, 3))
 ```
+
+## Discrete distributions `glm` model objects
+
+```{r}
+data("CrabSatellites", package = "countreg")
+m_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+
+CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+m_binom <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+
+qqrplot(m_pois)
+try(qqrplot(m_binom))
+```
+
+
