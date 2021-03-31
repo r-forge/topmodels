@@ -342,8 +342,6 @@ procast.glm <- function(object,
                         ...) {
   weights <- if (is.null(attr(at, "weights"))) weights(object) else attr(at, "weights")
   nobs <- if (is.null(attr(at, "nobs"))) nobs(object) else attr(at, "nobs")
-  etastart <- if (is.null(attr(at, "etastart"))) NULL else attr(at, "etastart")
-  mustart <- if (is.null(attr(at, "mustart"))) NULL else attr(at, "mustart")
   n <- if (is.null(attr(at, "n"))) NULL else attr(at, "n")
 
 
@@ -353,8 +351,6 @@ procast.glm <- function(object,
 
     weights <- attr(y, "weights")
     nobs <- attr(y, "nobs")
-    etastart <- attr(y, "etastart")
-    mustart <- attr(y, "mustart")
     n <- attr(y, "n")
   }
 
@@ -397,20 +393,30 @@ procast.glm <- function(object,
       "score" =  stop("not yet implemented")
     )
   } else if (object$family$family == "binomial") {
-    ## FIXME: (ML) a commented copy of countreg, is this needed
-    # at <- y * weights / n
-    # if (!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
-    #  stop("binomial quantile residuals require integer response")
-    # }
-    # at <- round(at)
 
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qbinom(at, size = n, prob = pars$mu, ...),
       "location" = stop("not yet implemented"),
       "scale" = stop("not yet implemented"),
       "parameter" = stop("not yet implemented"),
-      "density" = function(at, pars, ...) dbinom(at, size = n, prob = pars$mu, ...),
-      "probability" = function(at, pars, ...) pbinom(at, size = n, prob = pars$mu, ...),
+      "density" = function(at, pars, ...) {
+        ## FIXME: (ML) copied from countreg, is this needed (1st part why, 2nd part handled in `dbinom`)
+        # at <- y * weights / n  # TODO: (ML) Here `at <- at * weights / n` ?
+        # if (!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
+        #  stop("binomial quantile residuals require integer response")
+        # }
+        # at <- round(at)
+        dbinom(at, size = n, prob = pars$mu, ...)
+      },
+      "probability" = function(at, pars, ...) {
+        ## FIXME: (ML) copied from countreg, is this needed (1st part why, 2nd part no error in `pbinom`)
+        # at <- y * weights / n  # TODO: (ML) Here `at <- at * weights / n` ?
+        # if (!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
+        #  stop("binomial quantile residuals require integer response")
+        # }
+        # at <- round(at)
+        pbinom(at, size = n, prob = pars$mu, ...)
+      },
       "score" = stop("not yet implemented"),
     )
   } else {

@@ -32,6 +32,7 @@ pithist.default <- function(object,
                             style = c("histogram", "lines"),
                             type = c("random", "proportional"),
                             nsim = 1L,
+                            delta = NULL,
                             freq = FALSE,
                             breaks = NULL,
                             xlim = c(0, 1),
@@ -54,7 +55,8 @@ pithist.default <- function(object,
     stop("not yet implemented")  # TODO: (ML) Implement proportional over the inteverals (e.g., below censoring piont)
   } else {
     # TODO: (ML) What is the default fun for?
-    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, type = "random", nsim = nsim)
+    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, type = "random", 
+      nsim = nsim, delta = delta)
   }
 
   ## breaks

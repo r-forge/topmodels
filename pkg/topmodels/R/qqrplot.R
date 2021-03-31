@@ -33,6 +33,7 @@ qqrplot.default <- function(object,
                             trafo = qnorm, 
                             type = c("random", "quantile"),
                             nsim = 1L, 
+                            delta = NULL,
                             prob = 0.5, 
                             plot = TRUE,
                             range = FALSE, 
@@ -43,7 +44,8 @@ qqrplot.default <- function(object,
                             ...) {
 
   ## compute quantile residuals
-  qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, prob = prob)
+  qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, 
+    prob = prob, delta = delta)
   if(is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
 
   ## corresponding quantiles on the transformed scale (default: normal)
