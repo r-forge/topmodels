@@ -7,6 +7,7 @@ qresiduals.default <- function(object,
                                trafo = qnorm, 
                                type = c("random", "quantile"), 
                                nsim = 1L, 
+                               delta = NULL,
                                prob = 0.5, 
                                ...) {
 
@@ -22,11 +23,16 @@ qresiduals.default <- function(object,
     ## FIXME: (ML) Increased difference, otherwise did not work for binom and pois
     ##at <- cbind(y - .Machine$double.eps^0.4, y)
     ##at <- cbind(y - 1L, y)
-    at <- cbind(y - .Machine$double.eps^0.8, y)
+    if(is.null(delta)) {
+      delta <- min(diff(sort(unique(y))))
+      delta <- delta / 5e6
+    } else {
+      stopifnot(is.numeric(delta) && length(delta) == 1)
+    }
+
+    at <- cbind(y - delta, y)
 
     attr(at, "nobs") <-     attr(y, "nobs")
-    attr(at, "etastart") <- attr(y, "etastart")
-    attr(at, "mustart") <-  attr(y, "mustart")
     attr(at, "n") <-        attr(y, "n")
     attr(at, "weights") <-  attr(y, "weights")
 

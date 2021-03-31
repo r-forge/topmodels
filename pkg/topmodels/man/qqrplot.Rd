@@ -17,7 +17,7 @@
 qqrplot(object, \dots)
 
 \method{qqrplot}{default}(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
-  nsim = 1L, prob = 0.5, plot = TRUE, range = FALSE, diag = TRUE,
+  nsim = 1L, delta = NULL, prob = 0.5, plot = TRUE, range = FALSE, diag = TRUE,
   main = "Q-Q residuals plot", xlab = "Theoretical quantiles",
   ylab = "Quantile residuals", \dots)
 }
@@ -28,7 +28,7 @@ qqrplot(object, \dots)
     which to predict. If omitted, the original observations are used.}
   \item{trafo}{function for tranforming residuals from probability scale to
     a different distribution scale (default: Gaussian).}
-  \item{type, nsim, prob}{arguments passed to \code{qresiduals}.}
+  \item{type, nsim, delta, prob}{arguments passed to \code{qresiduals}.}
   \item{plot}{logical. Should the \code{plot} method be called to draw the
     computed Q-Q plot?}
   \item{range}{logical or quantile specification. Should the range of

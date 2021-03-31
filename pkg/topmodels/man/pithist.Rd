@@ -18,7 +18,7 @@ pithist(object, \dots)
 
 \method{pithist}{default}(object, newdata = NULL, plot = TRUE, 
   style = c("histogram", "lines"), type = c("random", "proportional"), nsim = 1L,
-  freq = FALSE, breaks = NULL, xlim = c(0, 1), ylim = NULL, main = NULL,
+  delta = NULL, freq = FALSE, breaks = NULL, xlim = c(0, 1), ylim = NULL, main = NULL,
   xlab = "PIT", ylab = if(freq) "Frequency" else "Density", 
   confint = TRUE, confint_level = 0.95, confint_type = c("exact", "approximation"), ...)
 }
@@ -36,6 +36,10 @@ pithist(object, \dots)
     or distributed proportionally?}
   \item{nsim}{integer. If \code{type} is \code{"random"} how
     many simulated PITs should be drawn?}
+  \item{delta}{numeric. The minimal difference to compute the range of proabilities
+    corresponding to each observation according to get (randomized) quantile residuals. 
+    For \code{NULL}, the minimal observed difference in the resonse 
+    divided by \code{5e-6} is used.}
   \item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
     frequencies, the \code{counts} component of the result; if
     \code{FALSE}, probability densities, component \code{density}, are

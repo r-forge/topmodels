@@ -47,8 +47,6 @@ newresponse.glm <- function(object,
   eval(object$family$initialize)
 
   attr(y, "nobs") <- nobs
-  attr(y, "etastart") <- etastart
-  attr(y, "mustart") <- mustart
   attr(y, "n") <- n
   attr(y, "weights") <- weights
   return(y)
