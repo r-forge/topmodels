@@ -17,7 +17,7 @@
 qqrplot(object, \dots)
 
 \method{qqrplot}{default}(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
-  nsim = 1L, delta = NULL, prob = 0.5, plot = TRUE, range = FALSE, diag = TRUE,
+  nsim = 1L, delta = NULL, prob = NULL, plot = TRUE, range = FALSE, diag = TRUE,
   main = "Q-Q residuals plot", xlab = "Theoretical quantiles",
   ylab = "Quantile residuals", \dots)
 }

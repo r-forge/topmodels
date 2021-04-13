@@ -12,7 +12,7 @@
 qresiduals(object, \dots)
 
 \method{qresiduals}{default}(object, newdata = NULL, trafo = qnorm,
-  type = c("random", "quantile"), nsim = 1L, delta = NULL, prob = 0.5, \dots)
+  type = c("random", "quantile"), nsim = 1L, delta = NULL, prob = NULL, \dots)
 }
 
 \arguments{
@@ -33,7 +33,7 @@ qresiduals(object, \dots)
     For \code{NULL}, the minimal observed difference in the resonse 
     divided by \code{5e-6} is used.}
   \item{prob}{numeric. The probabilities at which quantile residuals should be
-    computed (for \code{type = "quantile"}), defaulting to the median.}
+    computed (for \code{type = "quantile"}), defaulting to the median (\code{0.5}).}
   \item{\dots}{further parameters passed to methods.}
 }
 
