@@ -36,7 +36,7 @@ newresponse.glm <- function(object,
 
   y <- model.response(mf)
 
-  ## TODO: (ML) What is the difference to `weigths()`
+  ## TODO: (ML) What is the difference to `weigths()` (seems to work correct)
   weights <- model.weights(mf)
   if(is.null(weights)) weights <- rep(1, NROW(mf))
 

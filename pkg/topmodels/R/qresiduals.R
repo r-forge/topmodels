@@ -8,11 +8,21 @@ qresiduals.default <- function(object,
                                type = c("random", "quantile"), 
                                nsim = 1L, 
                                delta = NULL,
-                               prob = 0.5, 
+                               prob = NULL,
                                ...) {
 
   ## type of residual for discrete distribution (if any)
   type <- match.arg(type)
+
+  ## check and set prob to default
+  if (type == "random" & !is.null(prob)) {
+    warning("argument `prob` will be ignored for `type = 'random'`")
+    prob <- NULL
+  } else if (type == "quantile" & is.null(prob)) {
+    prob <- 0.5
+  } else if (type == "quantile" & !is.null(prob)) {
+    stopifnot(is.numeric(prob) & is.vector(prob))
+  } 
 
   ## if 'object' is not a vector/matrix, apply procast(..., type = "probability") method
   if(is.object(object) | !is.numeric(object)) {

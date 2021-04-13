@@ -340,13 +340,16 @@ procast.glm <- function(object,
                         at = 0.5,
                         drop = FALSE,
                         ...) {
+
   weights <- if (is.null(attr(at, "weights"))) weights(object) else attr(at, "weights")
   nobs <- if (is.null(attr(at, "nobs"))) nobs(object) else attr(at, "nobs")
   n <- if (is.null(attr(at, "n"))) NULL else attr(at, "n")
 
 
   if (is.null(n)) {
-    ## FIXME: This is not probabily not correct, as we need initializing for `at`
+    ## FIXME: (ML) This is probably not correct, as we need initializing for `at`
+    ## NOTE: (ML) weights and nobs property of the (new) response?
+    ## NOTE: (ML) n property of the model?
     y <- newresponse(object, newdata = newdata)
 
     weights <- attr(y, "weights")
