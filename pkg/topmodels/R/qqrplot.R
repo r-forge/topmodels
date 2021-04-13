@@ -34,7 +34,7 @@ qqrplot.default <- function(object,
                             type = c("random", "quantile"),
                             nsim = 1L, 
                             delta = NULL,
-                            prob = 0.5, 
+                            prob = NULL, 
                             plot = TRUE,
                             range = FALSE, 
                             diag = TRUE,
@@ -65,8 +65,13 @@ qqrplot.default <- function(object,
   ## TODO: (ML) Instead of range, confidence interval possible?
   if(!identical(range, FALSE)) {
     if(isTRUE(range)) range_vec <- c(0.01, 0.99)
-    rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec)
-    
+    rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec, delta = delta)
+
+    ## FIXME: (ML) Alternative version for testing `qresiduals(..., type = "quantile")`
+    # tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
+    #   delta = delta)
+    # rg <- cbind(apply(apply(tmp, 2, sort), 1, min), apply(apply(tmp, 2, sort), 1, max))
+
     rval$residuals_range_lower <- rg[, 1]
     rval$residuals_range_upper <- rg[, 2]
     rval$theoretical_range_lower <- q2q(rg[, 1])
@@ -146,6 +151,7 @@ plot.qqrplot <- function(x,
     y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)])
     polygon(x_pol, y_pol, col = fill, border = fill)
     box()
+
   } else {
  
     ## set range to null 
@@ -169,7 +175,7 @@ plot.qqrplot <- function(x,
       col = col, ...
     )
   }
-  
+
   ## reference diagonal
   if(!identical(diag, FALSE)) {
     if(isTRUE(diag)) diag <- "black"
