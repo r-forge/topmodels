@@ -68,9 +68,14 @@ qqrplot.default <- function(object,
     rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec, delta = delta)
 
     ## FIXME: (ML) Alternative version for testing `qresiduals(..., type = "quantile")`
-    # tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
-    #   delta = delta)
-    # rg <- cbind(apply(apply(tmp, 2, sort), 1, min), apply(apply(tmp, 2, sort), 1, max))
+    #tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
+    #  delta = delta)
+    #rg <- cbind(apply(apply(tmp, 2, sort), 1, min), apply(apply(tmp, 2, sort), 1, max))
+
+    # tmp_mean <- apply(apply(tmp, 2, sort), 1, mean)
+    # tmp_sd <- apply(apply(tmp, 2, sort), 1, sd) 
+    # rg <- cbind(tmp_mean - qt(0.99, df = max(1, nsim - 1)) * tmp_sd / sqrt(nsim), 
+    #   tmp_mean + qt(0.99, df = max(1, nsim - 1)) * tmp_sd / sqrt(nsim))
 
     rval$residuals_range_lower <- rg[, 1]
     rval$residuals_range_upper <- rg[, 2]

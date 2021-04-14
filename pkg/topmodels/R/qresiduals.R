@@ -45,7 +45,6 @@ qresiduals.default <- function(object,
     attr(at, "nobs") <-     attr(y, "nobs")
     attr(at, "n") <-        attr(y, "n")
     attr(at, "weights") <-  attr(y, "weights")
-
     object <- procast(object, newdata = newdata, at = at, type = "probability")
 
     # TODO: (ML) There is no `try()` environment, which errors can be caught
@@ -68,6 +67,10 @@ qresiduals.default <- function(object,
       ## FIXME: probably needs to be done on the transformed rather than the uniform scale...
       ## TODO: (ML) Otherwise akward features for heavily skewed distributions: observational vs. probability scale
       nam <- rownames(object)
+      
+      ## FIXME: Alternative computation
+      #object <- sapply(prob, function(x) qunif(x, min = object[, 1L], max = object[, 2L]))
+
       object <- object[, 1L]  %*% t(1 - prob) + object[, 2L] %*% t(prob)
       dimnames(object) <- list(nam, paste("q", prob, sep = "_"))
     }
