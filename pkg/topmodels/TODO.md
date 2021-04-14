@@ -2,7 +2,7 @@
 
 ## 1. General
 ### 1.1 Description file
-* Fix naming and description of package
+* Fix naming and description of package [**done**]
 * Check authors' contacts [**done**]
 
 ### 1.2 Outlook
@@ -42,9 +42,9 @@ Function name | S3 classes supported | S3 classes planned | TODOs
 Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
 --- | --- | --- | --- | --- | --- | ---
 `pithist` | `default` | yes | yes | yes | yes | few
-`qqrplot` | `default` | no | yes | no | no | many 
+`qqrplot` | `default` | yes | yes | - | no | many 
 `reliagram` | `default`, `crch` | no | no | no | no | many
-`rootogram` | `default`| yes | yes | yes | yes | few
+`rootogram` | `default`| yes | yes | no | yes | few
 `wormplot` | no | no | no | no | no | setup
 
 ### 2.4 Functions for graphical model assessment: TODOs
@@ -52,7 +52,7 @@ Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
     * Streamline code and optional plotting arguments for the user
     * Implement `type = "proportional"`
     * Check again if we need two different CI computations
-* `qqplot()`
+* `qqrplot()`
     * Setup as a generic function and include S3 methods. 
 * `reliagram()`
     * Remove S3 method for `crch`
