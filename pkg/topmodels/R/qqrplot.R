@@ -83,9 +83,9 @@ qqrplot.default <- function(object,
     rval$theoretical_range_upper <- q2q(rg[, 2])
   }
 
-  attr(rval, "main") <- main
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
+  attr(rval, "main") <- main
   class(rval) <- c("qqrplot", "data.frame")
 
   ## also plot by default
@@ -98,9 +98,38 @@ qqrplot.default <- function(object,
 }
 
 ## Combine several qqrplots
-c.qqrplot <- rbind.qqrplot <- function(x, ...) {
-  NULL
+c.qqrplot <- rbind.qqrplot <- function(...) {
+
+  ## list of qqrplots
+  rval <- list(...)
+
+  ## group sizes
+  for (i in seq_along(rval)) {
+    if (is.null(rval[[i]]$group)) rval[[i]]$group <- 1L
+  }
+  n <- lapply(rval, function(r) table(r$group))
+
+  ## labels
+  xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
+  ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  nam <- names(rval)
+  main <- if (is.null(nam)) {
+    as.vector(sapply(rval, function(r) attr(r, "main")))
+  } else {
+    make.unique(rep.int(nam, sapply(n, length)))
+  }
+  n <- unlist(n)
+
+  ## combine and return
+  rval <- do.call("rbind.data.frame", rval)
+  rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
+  attr(rval, "xlab") <- xlab
+  attr(rval, "ylab") <- ylab
+  attr(rval, "main") <- main
+  class(rval) <- c("qqrplot", "data.frame")
+  return(rval)
 }
+
 
 ## actual drawing
 plot.qqrplot <- function(x, 
@@ -130,63 +159,74 @@ plot.qqrplot <- function(x,
   if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
   if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
 
-  ## polygon for range:
-  ## FIXME: (Z) Currently something goes wrong here - either in qresiduals() or here
-  ## TODO: (ML) Does it really go wrong, or just not randomized residuals?
-  ## TODO: (ML) Why first if sentence? 
-  ## TODO: (ML) With increased difference in qresiduals, now check for equality does not work any more.
-  if(
-    !identical(range, FALSE) && 
-    isTRUE(range) && 
-    sum(grepl("range_lower|range_upper", names(x))) == 4 && 
-    !(isTRUE(all.equal(x$theoretical_range_upper, x$theoretical_range_lower, tol =  .Machine$double.eps^0.4)) & 
-      isTRUE(all.equal(x$residuals_range_upper, x$residuals_range_lower, tol =  .Machine$double.eps^0.4)))
-    ) {
+  ## plotting function
+  qqrplot1 <- function(d, ...)  {
 
-    ## default plotting ranges (as.matrix to get `finite = TRUE` working)
-    if(is.null(xlim)) xlim <- range(as.matrix(x[grepl("theoretical", names(x))]), finite = TRUE)
-    if(is.null(ylim)) ylim <- range(as.matrix(x[grepl("residuals", names(x))]), finite = TRUE)
+    ## get group index
+    j <- unique(d$group)
 
-    ## set up coordinates
-    plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
-    ## plot polygon
-    x_pol <- c(sort(x$theoretical_range_lower), sort(x$theoretical_range_upper, decreasing = TRUE))
-    y_pol <- c(sort(x$residuals_range_lower), sort(x$residuals_range_upper, decreasing = TRUE))
-    x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)])
-    y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)])
-    polygon(x_pol, y_pol, col = fill, border = fill)
-    box()
+    ## polygon for range:
+    ## FIXME: (Z) Currently something goes wrong here - either in qresiduals() or here
+    ## TODO: (ML) Does it really go wrong, or just not randomized residuals?
+    ## TODO: (ML) Why first if sentence? 
+    ## TODO: (ML) With increased difference in qresiduals, now check for equality does not work any more.
+    if(
+      !identical(range, FALSE) && 
+      isTRUE(range) && 
+      sum(grepl("range_lower|range_upper", names(d))) == 4 && 
+      !(isTRUE(all.equal(d$theoretical_range_upper, d$theoretical_range_lower, tol =  .Machine$double.eps^0.4)) & 
+        isTRUE(all.equal(d$residuals_range_upper, d$residuals_range_lower, tol =  .Machine$double.eps^0.4)))
+      ) {
 
-  } else {
+      ## default plotting ranges (as.matrix to get `finite = TRUE` working)
+      if(is.null(xlim)) xlim <- range(as.matrix(d[grepl("theoretical", names(d))]), finite = TRUE)
+      if(is.null(ylim)) ylim <- range(as.matrix(d[grepl("residuals", names(d))]), finite = TRUE)
+
+      ## set up coordinates
+      plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
+
+      ## plot polygon
+      x_pol <- c(sort(d$theoretical_range_lower), sort(d$theoretical_range_upper, decreasing = TRUE))
+      y_pol <- c(sort(d$residuals_range_lower), sort(d$residuals_range_upper, decreasing = TRUE))
+      x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)])
+      y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)])
+      polygon(x_pol, y_pol, col = fill, border = fill)
+      box()
+
+    } else {
  
-    ## set range to null 
-    x$theoretical_range_lower <- x$theoretical_range_upper <- NULL
-    x$residuals_range_lower <- x$residuals_range_upper <- NULL
+      ## set range to null 
+      d$theoretical_range_lower <- d$theoretical_range_upper <- NULL
+      d$residuals_range_lower <- d$residuals_range_upper <- NULL
 
-    ## default plotting ranges
-    if(is.null(xlim)) xlim <- range(x[grepl("theoretical", names(x))])
-    if(is.null(ylim)) ylim <- range(x[grepl("residuals", names(x))])
+      ## default plotting ranges
+      if(is.null(xlim)) xlim <- range(x[grepl("theoretical", names(d))])
+      if(is.null(ylim)) ylim <- range(x[grepl("residuals", names(d))])
 
-    ## set up coordinates
-    plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
+      ## set up coordinates
+      plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab[j], ylab = ylab[j], main = main[j])
 
+    }
+
+    ## add Q-Q plot(s)
+    for (i in 1L:ncol(d[grepl("residuals_[0-9]", names(d))])) {
+      points(
+        d[grepl("theoretical", names(d))][, i], 
+        d[grepl("residuals", names(d))][, i], 
+        col = col, ...
+      )
+    }
+
+    ## reference diagonal
+    if(!identical(diag, FALSE)) {
+      if(isTRUE(diag)) diag <- "black"
+      abline(0, 1, col = diag, lty = 2)
+    }
   }
 
-  ## add Q-Q plot(s)
-  for (i in 1L:ncol(x[grepl("residuals_[0-9]", names(x))])) {
-    points(
-      x[grepl("theoretical", names(x))][, i], 
-      x[grepl("residuals", names(x))][, i], 
-      col = col, ...
-    )
-  }
-
-  ## reference diagonal
-  if(!identical(diag, FALSE)) {
-    if(isTRUE(diag)) diag <- "black"
-    abline(0, 1, col = diag, lty = 2)
-  }
-  
+  ## draw plots
+  if (n > 1L) par(mfrow = n2mfrow(n))
+  for (i in 1L:n) qqrplot1(x[x$group == i, ], ...)
 }
 
 ## ggplot2 interface
