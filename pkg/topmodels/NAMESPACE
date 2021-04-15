@@ -73,7 +73,6 @@ S3method(ggplot2::autoplot, "pithist")
 
 ## methods for reliagram
 S3method("reliagram", "default")
-S3method("reliagram", "crch")
 S3method(ggplot2::autoplot, "reliagram")
 
 ## methods for class reliagram
