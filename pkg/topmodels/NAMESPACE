@@ -3,6 +3,7 @@ importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", 
 importFrom("grDevices", "n2mfrow")
 importFrom("grDevices", "adjustcolor")
 importFrom("utils", "head", "tail")
+importFrom("verification", "brier")
 
 export(  
   "procast",

@@ -41,7 +41,10 @@ qqrplot.default <- function(object,
                             main = "Q-Q residuals plot", 
                             xlab = "Theoretical quantiles", 
                             ylab = "Quantile residuals",
+                            tryout = c("quantile", "random-wrong", "random-correct"),  # FIXME: (ML) Remove tryout
                             ...) {
+ 
+  tryout <- match.arg(tryout)  # FIXME: (ML) Remove tryout
 
   ## compute quantile residuals
   qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, 
@@ -63,14 +66,20 @@ qqrplot.default <- function(object,
   ## TODO: (ML) Why first if sentence? 
   ## TODO: (ML) Is the theoretical lower and upper not always the same?
   ## TODO: (ML) Instead of range, confidence interval possible?
-  if(!identical(range, FALSE)) {
-    if(isTRUE(range)) range_vec <- c(0.01, 0.99)
-    rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec, delta = delta)
-
-    ## FIXME: (ML) Alternative version for testing `qresiduals(..., type = "quantile")`
-    #tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
-    #  delta = delta)
-    #rg <- cbind(apply(apply(tmp, 2, sort), 1, min), apply(apply(tmp, 2, sort), 1, max))
+  ## FIXME: (ML) Alternative version for testing `qresiduals(..., type = "quantile")`
+  if (!identical(range, FALSE)) {
+    if (tryout == "quantile") {
+      if (isTRUE(range)) range_vec <- c(0.01, 0.99)
+      rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec, delta = delta)
+    } else if (tryout == "random-correct") {
+      tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
+        delta = delta)
+      rg <- t(apply(apply(tmp, 2, sort), 1, range))
+    } else if (tryout == "random-wrong") {
+      tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
+        delta = delta)
+      rg <- apply(t(apply(tmp, 1, range)), 2, sort)
+    }
 
     # tmp_mean <- apply(apply(tmp, 2, sort), 1, mean)
     # tmp_sd <- apply(apply(tmp, 2, sort), 1, sd) 

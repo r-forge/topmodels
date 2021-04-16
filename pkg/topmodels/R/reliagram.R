@@ -36,7 +36,7 @@ reliagram.default <- function(object,
                               minimum = 10, 
                               ...) {
 
-  require("verification")
+  #require("verification")
 
   ## convert prob into right format
   if(length(prob) == 1) prob <- c((0.5 - prob/2), (0.5 + prob/2))
@@ -60,7 +60,7 @@ reliagram.default <- function(object,
   N <- NROW(obs)
 
   ## compute observed relative frequencies (obar.i) and bin-centers (y.i)
-  temp <- brier(obs = obs, pred = pred, thresholds = breaks, bins = bins)
+  temp <- verification::brier(obs = obs, pred = pred, thresholds = breaks, bins = bins)
 
   ## FIXME: (ML) Do we want to use `brier()`
   ## * Returns returns midpoints of intervals
@@ -94,7 +94,7 @@ reliagram.default <- function(object,
     yhat <- runif(N) < xhat
 
     ### compute observed relative frequencies of the surrogate observations
-    temp <- brier(obs = yhat, pred = xhat, thresholds = breaks, bins = bins)
+    temp <- verification::brier(obs = yhat, pred = xhat, thresholds = breaks, bins = bins)
     temp_obar.i <- temp$obar.i
     temp_obar.i[is.na(temp_obar.i)] <- 0  # FIXME: (ML) Included as I got NAs (see above) 
     obar.i.boot <- rbind(obar.i.boot, temp_obar.i)

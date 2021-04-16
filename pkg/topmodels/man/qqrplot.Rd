@@ -19,7 +19,8 @@ qqrplot(object, \dots)
 \method{qqrplot}{default}(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
   nsim = 1L, delta = NULL, prob = NULL, plot = TRUE, range = FALSE, diag = TRUE,
   main = "Q-Q residuals plot", xlab = "Theoretical quantiles",
-  ylab = "Quantile residuals", \dots)
+  ylab = "Quantile residuals", tryout = c("quantile", "random-wrong", "random-correct"), 
+  \dots)
 }
 
 \arguments{
@@ -39,6 +40,7 @@ qqrplot(object, \dots)
   \item{main, xlab, ylab, \dots}{graphical plotting parameters
     passed to \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
     respectively.}
+  \item{tryout}{TO BE REMOVED}
 }
 
 \details{

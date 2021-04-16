@@ -64,14 +64,17 @@ qresiduals.default <- function(object,
         nrow = nr, ncol = nsim, dimnames = list(rownames(object), paste("r", 1L:nsim, sep = "_"))
       )
     } else {
-      ## FIXME: probably needs to be done on the transformed rather than the uniform scale...
+      ## FIXME: (Z) probably needs to be done on the transformed rather than the uniform scale...
       ## TODO: (ML) Otherwise akward features for heavily skewed distributions: observational vs. probability scale
       nam <- rownames(object)
       
-      ## FIXME: Alternative computation
-      #object <- sapply(prob, function(x) qunif(x, min = object[, 1L], max = object[, 2L]))
+      ## FIXME: (ML) Alternative computation, which is test below.
+      object2 <- sapply(prob, function(x) qunif(x, min = object[, 1L], max = object[, 2L]))
 
       object <- object[, 1L]  %*% t(1 - prob) + object[, 2L] %*% t(prob)
+
+      stopifnot(all.equal(object, object2))  # FIXME: (ML) Test alternative computation
+
       dimnames(object) <- list(nam, paste("q", prob, sep = "_"))
     }
     nc <- NCOL(object)
