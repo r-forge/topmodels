@@ -1,0 +1,60 @@
+---
+title: "`topmodels`: Error Search in `qqrplot()`"
+author: "Moritz N. Lang"
+date: "April 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.align="center") 
+
+# install.packages("topmodels", repos="http://R-Forge.R-project.org")
+require("topmodels")
+```
+
+#### Schaetzung der Modelle
+```{r}
+data("CrabSatellites", package = "countreg")
+m_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+
+CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+m_binom <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+```
+
+#### Reproduktion des Problems
+
+Nach langem Rumprobieren bin ich darauf gekommen, dass ich bei `qqrplot()` bzw. `qresiduals()` mit `type = "random"` auch das Problem reproduzieren kann. Der Unterschied der "range" liegt nur an den leicht anderen Werten durch das Samplen und den Quantilen.
+```{r}
+par(mfrow = c(1, 2), mar = c(4, 4, 1.5, 1.5))
+qqrplot(m_binom, range = TRUE, tryout = "quantile")
+qqrplot(m_binom, range = TRUE, tryout = "random-wrong")
+qqrplot(m_pois, range = TRUE, tryout = "quantile")
+qqrplot(m_pois, range = TRUE, tryout = "random-wrong")
+```
+
+#### Korrektur und Konsequenzen fuer `qresiduals()`
+
+Ich kann jedoch mittels der richtigen Sortierung im `qqrplot()` auch das gewuenschte Bild erzeugen (wie ich dir heute Morgen schon gezeigt hatte).
+```{r}
+qqrplot(m_binom, range = TRUE, tryout = "random-correct")
+qqrplot(m_pois, range = TRUE, tryout = "random-correct")
+```
+
+ 
+Der Unterschied zwischen `tryout = "random-wrong"` und `tryout = "random-correct"` ist die Reihenfolge der Befehle von `sort()` und `range()`, und dies fuert zu den Problemen im Plot. Beide Varianten sind im `qqrplot()` implementiert.
+
+```{r eval=FALSE}
+## random-correct
+tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000,
+  delta = delta)
+rg <- t(apply(apply(tmp, 2, sort), 1, range))
+
+# random-wrong
+tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000,
+  delta = delta)
+rg <- apply(t(apply(tmp, 1, range)), 2, sort)
+```
+
+Mir ist der Unterschied vollkommen klar und dass es Sinn macht, die Samples zuerst fuer den QQ-Plot zu sortieren und dann sich die Range zu berechnen. Nur schaffe ich es (momentan) nicht daraus die richtigen Konsequenzen fuer den Quantilsansatz zu ziehen. 
+

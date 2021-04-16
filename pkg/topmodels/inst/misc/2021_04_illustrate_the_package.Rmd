@@ -1,0 +1,115 @@
+---
+title: "`procast`: Illustrate the package"
+author: "Moritz N. Lang"
+date: "April 2021"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.width=5, fig.align="center") 
+
+# install.packages("topmodels", repos="http://R-Forge.R-project.org")
+# install.packages("crch", repos="http://R-Forge.R-project.org")
+# install.packages("disttree", repos="http://R-Forge.R-project.org")
+
+require("topmodels")
+require("crch")
+require("disttree")
+require("verification")
+```
+
+## Procast
+This is an demo file to illustrate the R package `procast`. Currently there are `procast()` S3 methods for the model classes `lm`, `crch`, and `disttree`. Both the latter in development status.  
+
+After loading the necessary libraries, let's start by fitting some models:
+```{r}
+m1 <- lm(dist ~ speed, data = cars)
+m2 <- crch(dist ~ speed | speed, data = cars)
+m3 <- distforest(dist ~ speed, data = cars, ntree = 10)
+m4 <- glm(dist ~ speed, data = cars)
+```
+
+## Q-Q Plots for Quantile Residuals
+```{r}
+qqr1 <- qqrplot(m1, plot = FALSE)
+qqr2 <- qqrplot(m2, plot = FALSE)
+qqr3 <- qqrplot(m3, plot = FALSE)
+qqr4 <- qqrplot(m4, plot = FALSE)
+
+par(mar = c(4, 4, 1.5, 1.5))
+plot(c(qqr1, qqr2, qqr3, qqr4), pch = 20, col = gray(0.4, alpha = 0.6))
+```
+
+## PIT histogram
+Now we look at PIT histograms by calling `pithist()` which employs i.a. the functions `procast()`, `newresponse()`, and `qresiduals()`. Here solely an model dependent S3 method for `procast()` must be provided/written, all other R functions are ready to use.
+
+```{r}
+pit1 <- pithist(m1, plot = FALSE)
+pit2 <- pithist(m2, plot = FALSE)
+pit3 <- pithist(m3, plot = FALSE)
+```
+
+### PIT histograms with base R
+There are two plotting styles available by setting the argument `style = c("histogram", "lines")`:
+
+```{r}
+plot(pit1, style = "histogram")
+plot(pit1, style = "lines")
+```
+
+We can also combine several PIT histograms in a single plot:
+
+```{r}
+par(mar = c(4, 4, 1.5, 1.5))
+plot(c(pit1, pit2, pit3), style = "histogram")
+```
+
+Or create first a PIT histogram with `style = "lines"` and than add other models:
+
+```{R, fig.height = 3.5}
+plot(pit1, style = "lines")
+lines(c(pit2, pit3), col = c(2, 3))
+```
+
+### PIT histograms with `ggplot2`
+
+```{r include=FALSE}
+require("ggplot2")
+```
+There is also an `autoplot()` function available, which works for single models and also several models.
+```{r, fig.width=4, fig.height = 3}
+autoplot(pit1, style = "histogram")
+```
+
+When we plot several models using the `style = "lines"` we can specify the `colour` and `linetype` arguments, either a single value or a vector with the length of models:
+
+```{r}
+autoplot(c(pit1, pit2, pit3), style = "lines", 
+         colour = c(1, 2, 3), linetype = 1)
+```
+
+We can also plot all in a single figure without using `facet_grid()`:
+
+```{r, fig.height = 3}
+autoplot(c(pit1, pit2, pit3), style = "lines", grid = FALSE, 
+         colour = c(1, 2, 3), linetype = c(1, 2, 3))
+```
+
+## Discrete distributions `glm` model objects
+
+```{r}
+data("CrabSatellites", package = "countreg")
+m_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+
+CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+m_binom <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+
+qqrplot(m_pois, nsim = 100, range = TRUE)
+qqrplot(m_binom, nsim = 100, range = TRUE)
+
+reliagram(m_binom, minimum = 3, extend = FALSE, plot = TRUE)
+reliagram(m_binom, minimum = 0)
+```
+
+
