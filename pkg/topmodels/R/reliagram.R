@@ -54,8 +54,7 @@ reliagram.default <- function(object,
   #rval <- data.frame("<cut prob>", "<aggregate y by prob and thresh>")
 
   ## get/prepare observations
-  #obs <- y <= thresholds  #FIXME: (ML) Dirty hack to tryout function
-  obs <- y
+  obs <- y <= thresholds  #FIXME: (ML) Dirty hack to tryout function
 
   ## define convenience variables
   N <- NROW(obs)
@@ -75,6 +74,7 @@ reliagram.default <- function(object,
   #for (i in 1:(length(breaks) - 1)) {
   #  y.i <- c(y.i, mean(pred[pred >= breaks[i] & pred < breaks[i + 1]]))
   #}
+
   ## Moritz' style for y.i -> problem here, when no predictions within intervals
   #y.i <- as.numeric(aggregate(pred, by = list(cut(pred, breaks, include.lowest = TRUE)), mean)[,2])
 
