@@ -43,7 +43,7 @@ Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
 --- | --- | --- | --- | --- | --- | ---
 `pithist` | `default` | yes | yes | yes | yes | few
 `qqrplot` | `default` | yes | yes | - | no | many 
-`reliagram` | `default`, `crch` | no | no | no | no | many
+`reliagram` | `default` | no | yes | no | no | many
 `rootogram` | `default`| yes | yes | no | yes | few
 `wormplot` | no | no | no | no | no | setup
 
@@ -55,8 +55,8 @@ Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
 * `qqrplot()`
     * Setup as a generic function and include S3 methods. 
 * `reliagram()`
-    * Remove S3 method for `crch`
-    * Implement all S3 plotting methods
+    * Improve default method, get rid of `verification` package?
+    * Implement generic functions
     * Get newest fancy version of Reto
 * `rootogram()`
     * Move away from `countreg` default: Make argument `object` mandatory
@@ -66,10 +66,11 @@ Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
 
 ## Current question/problems
 * How to do perform initilization correctly for `glm` objects?
-* Should we increase the difference of the evaluation `at` in `qqresiduals()` to work for dicscrete distribution (binom, pois etc.) which leads to a wrong results for qnorm (compare tests).
+* Should we increase the difference of the evaluation `at` in `qqresiduals()` to work for dicscrete distribution (binom, pois etc.) which leads to a wrong results for qnorm (compare tests). [SOLVED]
 * How should we handle values outside (truncation)/censoring points. These lead to skewed PIT histograms.
 * Is the graphical representation of the range in Q-Q plot correct?
-* What types should `procast()` support: location vs. mean/expectation/response, scale vs. variance/dispersion
+* What types should `procast()` support: location vs. mean/expectation/response, scale vs. variance/dispersion?
+* Why is the range not working in `qqrplot`.
 
 ## Errors in countreg
 * Wrongly set argument `range = TRUE` leads to an error when randomized quantile residuals make no sense, which seems not be caught.
