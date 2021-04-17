@@ -1,9 +1,8 @@
 import("stats")
-importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect")
+importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect", "text")
 importFrom("grDevices", "n2mfrow")
 importFrom("grDevices", "adjustcolor")
 importFrom("utils", "head", "tail")
-importFrom("verification", "brier")
 
 export(  
   "procast",
@@ -74,6 +73,9 @@ S3method(ggplot2::autoplot, "pithist")
 
 ## methods for reliagram
 S3method("reliagram", "default")
+S3method("plot", "reliagram")
+S3method("lines", "reliagram")
+S3method("c", "reliagram")
 S3method(ggplot2::autoplot, "reliagram")
 
 ## methods for class reliagram

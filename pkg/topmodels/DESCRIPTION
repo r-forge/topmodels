@@ -14,7 +14,7 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
              person(given = "Reto", family = "Stauffer", role = "ctb", email = "reto.stauffer@uibk.ac.at",
                     comment = c(ORCID = "0000-0002-3798-5507")))
 Depends: R (>= 3.0.0)
-Imports: graphics, grDevices, stats, utils, verification
+Imports: graphics, grDevices, stats, utils
 Suggests: betareg, countreg, crch, disttree, ggplot2, lmtest, MASS, tinytest
 Description: Unified infrastructure for probabilistic models and distributional regressions:
              Computations of probabilities, densities, scores, and Hessians.

@@ -3,6 +3,8 @@
 \alias{reliagram.default}
 
 \alias{plot.reliagram}
+\alias{lines.reliagram}
+\alias{c.reliagram}
 \alias{autoplot.reliagram}
 
 \title{Reliagram (Extended Reliability Diagram)}
