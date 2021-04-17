@@ -1,5 +1,5 @@
 ---
-title: "`topmodels`: Error Search in `qqrplot()`"
+title: "`topmodels`: Fehler Suche im `qqrplot()`"
 author: "Moritz N. Lang"
 date: "April 2021"
 output: html_document
@@ -9,9 +9,13 @@ editor_options:
 ```{r include=FALSE}
 knitr::opts_chunk$set(fig.align="center") 
 
-# install.packages("topmodels", repos="http://R-Forge.R-project.org")
-require("topmodels")
+if(!require("devtools")) install.packages("devtools")
+install_svn("svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels", 
+            revision = "r1226", quiet = TRUE, upgrade = "never")
+library("topmodels")
 ```
+
+### Analyse Moritz
 
 #### Schaetzung der Modelle
 ```{r}
@@ -57,4 +61,42 @@ rg <- apply(t(apply(tmp, 1, range)), 2, sort)
 ```
 
 Mir ist der Unterschied vollkommen klar und dass es Sinn macht, die Samples zuerst fuer den QQ-Plot zu sortieren und dann sich die Range zu berechnen. Nur schaffe ich es (momentan) nicht daraus die richtigen Konsequenzen fuer den Quantilsansatz zu ziehen. 
+
+
+## Analyse Achim (Mail vom 16.04.21)
+
+Moritz,
+
+vielen Dank fuer die Arbeit daran. Also klar ist:
+
+(1) Meine alte Implementierung ist einfach falsch.
+
+(2) Das Problem ist deutlich komplexer als eigentlich gedacht.
+
+Wir brauchen naemlich nicht Maximum und Minimum (bzw. andere Quantile) von den Residuen - sondern von den Ordnungsstatistiken der Residuen! Wenn man die trafo = qnorm erstmal aussen vor laesst und alles auf der Wahrscheinlichkeitsskala macht, dann haben wir folgende Situation:
+
+* X ist eine multivariate Zufallsvariable aus einer n-dimensionalen Verteilung.
+
+* Die n Komponenten von X sind unabhaengig voneinander verteilt aber nicht identisch.
+
+* Fuer jedes i = 1, ..., n gilt:  X_i ~ U_i, wobei U_i eine Gleichverteilung auf einem Teilintervall von [0, 1] ist.
+
+* Wir kennen also die Verteilung von jedem X_i und koennten damit auch leicht die Quantile dieser Verteilung berechnen. Das habe ich bisher immer gemacht.
+
+* Was wir aber tatsaechlich brauchen ist die Verteilung (bzw. die Quantile) der Ordnungsstatistiken der X_i. Die schreibt man ueblicherweise als X_(i) mit i = 1, ..., n und X_(1) <= X_(2) <= ... <= X_(n).
+
+* Die Frage ist also, was die Verteilung bzw. die Quantile von X_(i) (gesprochen: "X, geordnet i") sind.
+
+Wenn man in die Wikipedia schaut (https://en.wikipedia.org/wiki/Order_statistic), dann wird dort nur der Fall behandelt, dass die X_i unabhaengig sind (haben wir) und identisch verteilt (haben wir nicht). Da kaemen dann bei einer Gleichverteilung bestimmte Beta-Verteilungen heraus.
+
+* Doch es gibt dort auch einen Verweis auf den Fall, den wir brauchen. Das nennt sich dann: https://en.wikipedia.org/wiki/Bapat%E2%80%93Beg_theorem Die haben die gemeinsame Verteilung der Ordnungsstatistiken hergeleitet und fuer moderates n kann man die Verteilungsfunktion sogar ausrechnen.
+
+* ABER: Wir braeuchten dann ja nicht nur die Verteilungsfunktion sondern die Quantilsfunktion (muessten also noch invertieren). Ausserdem geht das dann fuer groessere n alles nicht mehr, siehe Abschnitt "Complexity".
+
+Summa summarum: Es schaut fuer mich so aus, als waere das nicht praktikabel das exakt zu berechnen. Ich werde bei Gelegenheit nochmal Christian fragen, ob er da noch eine Chance sieht.
+
+Derweil: Implementier mal Deine random-correct Variante. Was besseres weiss ich momentan nicht.
+
+lg,
+Z
 
