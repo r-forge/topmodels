@@ -20,43 +20,36 @@ reliagram <- function(object, ...) {
 
 reliagram.default <- function(object, 
                               newdata = NULL,
+                              plot = TRUE,
                               breaks = seq(0, 1, by = 0.1), 
                               thresholds = NULL, 
                               y = NULL, 
-                              plot = TRUE,
+                              minimum = 10, 
+                              confint = TRUE, 
+                              confint_level = 0.95,
+                              confint_nboot = 250, 
                               xlab = NULL, 
                               ylab = NULL, 
-                              bins = TRUE, 
-                              prob = c(0.05, 0.95), 
-                              nboot = 250, 
-                              add = FALSE, 
-                              shaded = FALSE, 
-                              print.bs = FALSE, 
-                              confint = TRUE, 
-                              minimum = 10, 
+                              main = NULL,
                               ...) {
 
-  ## convert prob into right format
-  if(length(prob) == 1) prob <- c((0.5 - prob/2), (0.5 + prob/2))
-  if(max(prob) >= 1 | min(prob) <= 0) stop("confidence interval probabilities outside [0,1]")
 
-pred <- object
-  #### data + thresholds
-  ##y <- if(is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
-  ##thresholds <- if(is.null(thresholds)) median(y, na.rm = TRUE) else as.numeric(thresholds)
+  ## data + thresholds
+  y <- if(is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
+  thresholds <- if(is.null(thresholds)) median(y, na.rm = TRUE) else as.numeric(thresholds)
 
-  #### predicted probabilities
-  ##pred <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
-  ##  drop = TRUE)
+  ## predicted probabilities
+  pred <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
+    drop = TRUE)
 
-  #### TODO: (Z) compute quantities to be plotted
-  ###rval <- data.frame("<cut prob>", "<aggregate y by prob and thresh>")
+  ## TODO: (Z) compute quantities to be plotted
+  #rval <- data.frame("<cut prob>", "<aggregate y by prob and thresh>")
 
-  #### get and prepare observations
-  ##obs <- y <= thresholds  #FIXME: (ML) Dirty hack to tryout function
+  ## get and prepare observations
+  y <- y <= thresholds  #FIXME: (ML) Dirty hack to tryout function
 
   ## define convenience variables
-  N <- NROW(obs)
+  N <- NROW(y)
 
   ## compute number of prediction and idx for minimum number of prediction per probability subset
   n_pred <- aggregate(
@@ -91,7 +84,7 @@ pred <- object
 
   ## consistency resampling from Broecker (2007) 
   obs_rf_boot <- vector("list", length = N)
-  for (i in 1:nboot) {
+  for (i in 1:confint_nboot) {
     ## take bootstrap sample from predictions (surrogate forecasts)
     xhat <- sample(pred, replace = TRUE)
 
@@ -106,8 +99,10 @@ pred <- object
   obs_rf_boot <- do.call("rbind", obs_rf_boot)
 
   ## compute lower and upper limits for reliable forecasts
-  lowerlimit <- apply(obs_rf_boot, 2, quantile, prob = prob[1], na.rm = TRUE)[min_idx]
-  upperlimit <- apply(obs_rf_boot, 2, quantile, prob = prob[2], na.rm = TRUE)[min_idx]
+  confint_prob <- (1 - confint_level) / 2
+  confint_prob <- c(confint_prob, 1 - confint_prob)
+  lowerlimit <- apply(obs_rf_boot, 2, quantile, prob = confint_prob[1], na.rm = TRUE)[min_idx]
+  upperlimit <- apply(obs_rf_boot, 2, quantile, prob = confint_prob[2], na.rm = TRUE)[min_idx]
 
   ## return value
   rval <- data.frame(
@@ -120,12 +115,13 @@ pred <- object
   ## attributes for graphical display
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
-  attr(rval, "bs") <- mean(obs - pred)^2
+  attr(rval, "bs") <- mean(y - pred)^2
   class(rval) <- c("reliagram", "data.frame")
 
   ## plot by default
   if (plot) {
-    plot(rval, shaded = shaded, confint = confint, print.bs = print.bs, ...)
+    plot(rval, 
+    confint = confint, ...)
   }
 
   ## return invisibly
@@ -134,9 +130,8 @@ pred <- object
 
 
 ## actual drawing
-plot.reliagram <- function(object, 
-                           shaded = !confint, 
-                           confint = FALSE, 
+plot.reliagram <- function(x, 
+                           confint = TRUE, 
                            abline = TRUE,
                            xlim = c(0, 1), 
                            ylim = c(0, 1), 
@@ -144,47 +139,45 @@ plot.reliagram <- function(object,
                            ylab = "Observed relative frequency",
                            lwd = 2, 
                            type = "b", 
-                           print.bs = FALSE, 
+                           print_info = FALSE, 
                            col = "black", 
-                           fill = "lightgray",
+                           fill = adjustcolor(1, alpha.f = 0.1),
                            extend = TRUE, 
                            ...) {
-
-  ## auxiliary variable for polygon function (shading)
-  shading <- na.omit(cbind(c(object$mean_pr, rev(object$mean_pr)), c(object$upperlimit, rev(object$lowerlimit))))
 
   plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, lwd = lwd, col = col, 
     xaxs = "i", yaxs = "i", ...)
 
-  if(!identical(shaded, FALSE)) {
-    if(identical(shaded, TRUE)) shaded <- rgb(col2rgb(col)[1]/255, col2rgb(col)[2]/255, col2rgb(col)[3]/255, alpha = 0.1)
-    with(object, polygon(shading[,1], shading[,2], col = shaded, border = NA))
-  }
-
   if(confint) {
     if(extend) { 
       polygon(
-        c(0, object$mean_pr, 1, rev(object$mean_pr), 0), 
-        c(0, object$lowerlimit, 1, rev(object$upperlimit), 0), 
-        col = fill, border = fill
+        c(0, x$mean_pr, 1, rev(x$mean_pr), 0), 
+        c(0, x$lowerlimit, 1, rev(x$upperlimit), 0), 
+        col = fill, border = NA
       )
     } else {
       polygon(
-        c(object$mean_pr, rev(object$mean_pr)), 
-        c(object$lowerlimit, rev(object$upperlimit)), 
-        col = fill, border = fill
+        c(x$mean_pr, rev(x$mean_pr)), 
+        c(x$lowerlimit, rev(x$upperlimit)), 
+        col = fill, border = NA
       )
     }
     box()
   }
 
   if(abline) abline(0, 1, lty = 2)
-  lines(obs_rf ~ mean_pr, object, type = type, lwd = lwd, col = col, ...)
-  if(print.bs) text(0,1, paste0("BS = ", signif(attr(object, "bs"), 4)), adj = c(0,1))
+
+  lines(obs_rf ~ mean_pr, x, type = type, lwd = lwd, col = col, ...)
+
+  if(print_info) text(0, 1, paste0("BS = ", signif(attr(x, "bs"), 4)), adj = c(0,1))
 }
 
 
 lines.reliagram <- function(x, ...) {
+  NULL
+}
+
+c.reliagram <- function(x, ...) {
   NULL
 }
 

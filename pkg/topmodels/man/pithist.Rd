@@ -4,6 +4,7 @@
 
 \alias{plot.pithist}
 \alias{lines.pithist}
+\alias{c.pithist}
 \alias{autoplot.pithist}
 
 \title{PIT Histograms for Assessing Goodness of Fit of Probability Models}
