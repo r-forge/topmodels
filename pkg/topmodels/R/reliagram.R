@@ -36,56 +36,61 @@ reliagram.default <- function(object,
                               minimum = 10, 
                               ...) {
 
-  #require("verification")
-
   ## convert prob into right format
   if(length(prob) == 1) prob <- c((0.5 - prob/2), (0.5 + prob/2))
   if(max(prob) >= 1 | min(prob) <= 0) stop("confidence interval probabilities outside [0,1]")
 
-  ## data + thresholds
-  y <- if(is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
-  thresholds <- if(is.null(thresholds)) median(y, na.rm = TRUE) else as.numeric(thresholds)
+pred <- object
+  #### data + thresholds
+  ##y <- if(is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
+  ##thresholds <- if(is.null(thresholds)) median(y, na.rm = TRUE) else as.numeric(thresholds)
 
-  ## predicted probabilities
-  pred <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
-    drop = TRUE)
+  #### predicted probabilities
+  ##pred <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
+  ##  drop = TRUE)
 
-  ## TODO: (Z) compute quantities to be plotted
-  #rval <- data.frame("<cut prob>", "<aggregate y by prob and thresh>")
+  #### TODO: (Z) compute quantities to be plotted
+  ###rval <- data.frame("<cut prob>", "<aggregate y by prob and thresh>")
 
-  ## get/prepare observations
-  obs <- y <= thresholds  #FIXME: (ML) Dirty hack to tryout function
+  #### get and prepare observations
+  ##obs <- y <= thresholds  #FIXME: (ML) Dirty hack to tryout function
 
   ## define convenience variables
   N <- NROW(obs)
 
-  ## compute observed relative frequencies (obar.i) and bin-centers (y.i)
-  temp <- verification::brier(obs = obs, pred = pred, thresholds = breaks, bins = bins)
+  ## compute number of prediction and idx for minimum number of prediction per probability subset
+  n_pred <- aggregate(
+    pred, 
+    by = list(prob = cut(pred, breaks, include.lowest = TRUE)), 
+    FUN = length, 
+    drop = FALSE
+  )[, "x"]
+  min_idx <- which(n_pred >= minimum)
 
-  ## FIXME: (ML) Do we want to use `brier()`
-  ## * Returns returns midpoints of intervals
-  ## * Also removes NAs in case no observations are within breaks
-  minimumIndex <- which(temp$prob.y * N >= minimum)
-  y.i <- temp$y.i[minimumIndex]  
-  obar.i <- temp$obar.i[minimumIndex]
+  ## compute observed relative frequencies of positive examples (obs_rf)
+  obs_rf <- as.numeric(
+    aggregate(
+      y, 
+      by = list(prob = cut(pred, breaks, include.lowest = TRUE)), 
+      FUN = mean, 
+      drop = FALSE
+      )[, "x"]
+  )
+  obs_rf <- obs_rf[min_idx]
 
-  ## Jakob's style for y.i
-  #y.i <- NULL
-  #for (i in 1:(length(breaks) - 1)) {
-  #  y.i <- c(y.i, mean(pred[pred >= breaks[i] & pred < breaks[i + 1]]))
-  #}
-
-  ## Moritz' style for y.i -> problem here, when no predictions within intervals
-  #y.i <- as.numeric(aggregate(pred, by = list(cut(pred, breaks, include.lowest = TRUE)), mean)[,2])
-
-  ## Moritz' style for y.i
-  #obar.i <- as.numeric(
-  #  aggregate(obs, by = list(cut(pred, breaks, include.lowest = TRUE)), mean)[, 2]
-  #)
-
+  ## compute mean predicted probability (mean_pr)
+  mean_pr <- as.numeric(
+    aggregate(
+      pred, 
+      by = list(prob = cut(pred, breaks, include.lowest = TRUE)), 
+      FUN = mean, 
+      drop = FALSE
+    )[, "x"]
+  )
+  mean_pr <- mean_pr[min_idx]
 
   ## consistency resampling from Broecker (2007) 
-  obar.i.boot <- NULL
+  obs_rf_boot <- vector("list", length = N)
   for (i in 1:nboot) {
     ## take bootstrap sample from predictions (surrogate forecasts)
     xhat <- sample(pred, replace = TRUE)
@@ -93,25 +98,23 @@ reliagram.default <- function(object,
     ## surrogate observations that are reliable by construction
     yhat <- runif(N) < xhat
 
-    ### compute observed relative frequencies of the surrogate observations
-    temp <- verification::brier(obs = yhat, pred = xhat, thresholds = breaks, bins = bins)
-    temp_obar.i <- temp$obar.i
-    temp_obar.i[is.na(temp_obar.i)] <- 0  # FIXME: (ML) Included as I got NAs (see above) 
-    obar.i.boot <- rbind(obar.i.boot, temp_obar.i)
+    ## compute observed relative frequencies of the surrogate observations
+    obs_rf_boot[[i]] <- as.numeric(
+      aggregate(yhat, by = list(prob = cut(xhat, breaks, include.lowest = TRUE)), mean, drop = FALSE)[, "x"]
+    )
   }
+  obs_rf_boot <- do.call("rbind", obs_rf_boot)
 
   ## compute lower and upper limits for reliable forecasts
-  lowerlimit <- apply(obar.i.boot, 2, quantile, prob = prob[1], na.rm = TRUE)[minimumIndex]
-  upperlimit <- apply(obar.i.boot, 2, quantile, prob = prob[2], na.rm = TRUE)[minimumIndex]
+  lowerlimit <- apply(obs_rf_boot, 2, quantile, prob = prob[1], na.rm = TRUE)[min_idx]
+  upperlimit <- apply(obs_rf_boot, 2, quantile, prob = prob[2], na.rm = TRUE)[min_idx]
 
   ## return value
   rval <- data.frame(
-    obar.i, 
-    y.i, 
+    obs_rf, 
+    mean_pr, 
     lowerlimit, 
     upperlimit
-    ## FIXME: (ML) Still needed? If yes subset with minimumIndex and use not temp of resampling
-    #prob.y = N * temp$prob.y  
   )
 
   ## attributes for graphical display
@@ -148,7 +151,7 @@ plot.reliagram <- function(object,
                            ...) {
 
   ## auxiliary variable for polygon function (shading)
-  shading <- na.omit(cbind(c(object$y.i, rev(object$y.i)), c(object$upperlimit, rev(object$lowerlimit))))
+  shading <- na.omit(cbind(c(object$mean_pr, rev(object$mean_pr)), c(object$upperlimit, rev(object$lowerlimit))))
 
   plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, lwd = lwd, col = col, 
     xaxs = "i", yaxs = "i", ...)
@@ -161,13 +164,13 @@ plot.reliagram <- function(object,
   if(confint) {
     if(extend) { 
       polygon(
-        c(0, object$y.i, 1, rev(object$y.i), 0), 
+        c(0, object$mean_pr, 1, rev(object$mean_pr), 0), 
         c(0, object$lowerlimit, 1, rev(object$upperlimit), 0), 
         col = fill, border = fill
       )
     } else {
       polygon(
-        c(object$y.i, rev(object$y.i)), 
+        c(object$mean_pr, rev(object$mean_pr)), 
         c(object$lowerlimit, rev(object$upperlimit)), 
         col = fill, border = fill
       )
@@ -176,7 +179,7 @@ plot.reliagram <- function(object,
   }
 
   if(abline) abline(0, 1, lty = 2)
-  lines(obar.i ~ y.i, object, type = type, lwd = lwd, col = col, ...)
+  lines(obs_rf ~ mean_pr, object, type = type, lwd = lwd, col = col, ...)
   if(print.bs) text(0,1, paste0("BS = ", signif(attr(object, "bs"), 4)), adj = c(0,1))
 }
 
