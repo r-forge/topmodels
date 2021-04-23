@@ -22,21 +22,27 @@ reliagram.default <- function(object,
                               newdata = NULL,
                               plot = TRUE,
                               breaks = seq(0, 1, by = 0.1), 
+                              probs = 0.5, 
                               thresholds = NULL, 
                               y = NULL, 
                               minimum = 10, 
                               confint = TRUE, 
                               confint_level = 0.95,
                               confint_nboot = 250, 
+                              extend_left = NULL,
+                              extend_right = NULL,
                               xlab = NULL, 
                               ylab = NULL, 
                               main = NULL,
                               ...) {
 
+  ## TODO: (ML) argument validy check
+
 
   ## data + thresholds
   y <- if(is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
-  thresholds <- if(is.null(thresholds)) median(y, na.rm = TRUE) else as.numeric(thresholds)
+  thresholds <- if(is.null(thresholds)) quantile(y, probs = probs, na.rm = TRUE) 
+  thresholds <- as.numeric(thresholds)
 
   ## predicted probabilities
   pred <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
@@ -59,6 +65,10 @@ reliagram.default <- function(object,
     drop = FALSE
   )[, "x"]
   min_idx <- which(n_pred >= minimum)
+
+  ## check if ci should be extended
+  if(is.null(extend_left)) extend_left <- 1 %in% min_idx
+  if(is.null(extend_right)) extend_right <- (length(breaks) - 1) %in% min_idx
 
   ## compute observed relative frequencies of positive examples (obs_rf)
   obs_rf <- as.numeric(
@@ -121,7 +131,7 @@ reliagram.default <- function(object,
   ## plot by default
   if (plot) {
     plot(rval, 
-    confint = confint, ...)
+    confint = confint, extend_left = extend_left, extend_right = extend_right, ...)
   }
 
   ## return invisibly
@@ -142,28 +152,31 @@ plot.reliagram <- function(x,
                            print_info = FALSE, 
                            col = "black", 
                            fill = adjustcolor(1, alpha.f = 0.1),
-                           extend = TRUE, 
+                           extend_left = TRUE, 
+                           extend_right = TRUE, 
                            ...) {
 
   plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, lwd = lwd, col = col, 
     xaxs = "i", yaxs = "i", ...)
+  box()
 
-  if(confint) {
-    if(extend) { 
-      polygon(
-        c(0, x$mean_pr, 1, rev(x$mean_pr), 0), 
-        c(0, x$lowerlimit, 1, rev(x$upperlimit), 0), 
-        col = fill, border = NA
-      )
-    } else {
-      polygon(
-        c(x$mean_pr, rev(x$mean_pr)), 
-        c(x$lowerlimit, rev(x$upperlimit)), 
-        col = fill, border = NA
-      )
-    }
-    box()
-  }
+  polygon(
+    na.omit(c(
+      ifelse(extend_left, 0, NA), 
+      x$mean_pr, 
+      ifelse(extend_right, 1, NA), 
+      rev(x$mean_pr), 
+      ifelse(extend_left, 0, NA)
+    )), 
+    na.omit(c(
+      ifelse(extend_left, 0, NA), 
+      x$lowerlimit, 
+      ifelse(extend_right, 1, NA), 
+      rev(x$upperlimit), 
+      ifelse(extend_left, 0, NA)
+    )), 
+    col = fill, border = NA
+  )
 
   if(abline) abline(0, 1, lty = 2)
 
