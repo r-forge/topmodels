@@ -25,35 +25,49 @@ reliagram.default <- function(object,
                               probs = 0.5, 
                               thresholds = NULL, 
                               y = NULL, 
-                              minimum = 0,
                               confint = TRUE, 
                               confint_level = 0.95,
                               confint_nboot = 250, 
-                              extend_left = NULL,
-                              extend_right = NULL,
-                              xlab = NULL, 
-                              ylab = NULL, 
+                              xlab = "Forecast probability", 
+                              ylab = "Observed relative frequency",
                               main = NULL,
                               ...) {
 
-  ## TODO: (ML) argument validy check
+  ## sanity checks (breaks is checked within `cut()`)
+  stopifnot(is.logical(plot))
+  stopifnot(is.numeric(probs) && is.null(dim(probs)))
+  stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
+  stopifnot(is.null(y) || (is.numeric(y) && is.null(dim(y))))
+  stopifnot(is.logical(confint))
+  stopifnot(
+    is.numeric(confint_level) &&
+    is.null(dim(confint_level)) &&
+    length(confint_level) == 1 &&
+    confint_level >= 0 &&
+    confint_level <= 1
+  )
+  stopifnot(
+    is.numeric(confint_nboot) &&
+    is.null(dim(confint_nboot)) &&
+    length(confint_level) == 1 &&
+    confint_level >= 0
+  )
 
-  ## TODO: (ML) annotations
-  ## default annotation
-  #if(is.null(xlab)) {
-  #  xlab <- if(is.null(names(dimnames(object)))) {
-  #    deparse(substitute(object))
-  #  } else {
-  #    names(dimnames(object))[1L]
-  #  }
-  #}
-  #if(is.null(ylab)) {
-  #  ylab <- if(scale == "raw") "Frequency" else "sqrt(Frequency)"
-  #}
-  if(is.null(main)) main <- deparse(substitute(object))
+  ## fix length of annotations
+  if(length(xlab) < length(probs)) xlab <- rep(xlab, length.out = length(probs))
+  if(length(ylab) < length(probs)) ylab <- rep(ylab, length.out = length(probs))
+  if(is.null(main)) {
+    main <- deparse(substitute(object))
+    main <- sprintf("%s (prob = %.2f)", main, probs)
+  }
 
   ## data + thresholds
   y <- if(is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
+  ## FIXME: (ML) This can lead to an error
+  ## R> x <- 1
+  ## R> x <- if(is.null(x)) 2
+  ## R> x
+  ## NULL 
   thresholds <- if(is.null(thresholds)) quantile(y, probs = probs, na.rm = TRUE) 
   thresholds <- as.numeric(thresholds)
 
@@ -61,16 +75,13 @@ reliagram.default <- function(object,
   pred <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
     drop = FALSE)
 
-  ## TODO: (Z) compute quantities to be plotted
-  #rval <- data.frame("<cut prob>", "<aggregate y by prob and thresh>")
-
   ## get and prepare observations
-  #y <- y <= thresholds  #FIXME: (ML) Dirty hack to tryout function
   y <- sapply(thresholds, function(x) y <= x)
 
   ## define convenience variables
   N <- NROW(y)
 
+  ## loop over all probs
   rval <- vector(mode = "list", length = NCOL(y))
   for (idx in 1:NCOL(y)) {
     ## compute number of prediction and idx for minimum number of prediction per probability subset
@@ -80,11 +91,6 @@ reliagram.default <- function(object,
       FUN = length, 
       drop = FALSE
     )[, "x"]
-    min_idx <- which(n_pred >= minimum)
-
-    ## check if ci should be extended
-    if(is.null(extend_left)) extend_left <- 1 %in% min_idx
-    if(is.null(extend_right)) extend_right <- (length(breaks) - 1) %in% min_idx
 
     ## compute observed relative frequencies of positive examples (obs_rf)
     obs_rf <- as.numeric(
@@ -95,7 +101,6 @@ reliagram.default <- function(object,
         drop = FALSE
         )[, "x"]
     )
-    obs_rf <- obs_rf[min_idx]
 
     ## compute mean predicted probability (mean_pr)
     mean_pr <- as.numeric(
@@ -106,56 +111,68 @@ reliagram.default <- function(object,
         drop = FALSE
       )[, "x"]
     )
-    mean_pr <- mean_pr[min_idx]
 
     ## consistency resampling from Broecker (2007) 
-    obs_rf_boot <- vector("list", length = N)
-    for (i in 1:confint_nboot) {
-      ## take bootstrap sample from predictions (surrogate forecasts)
-      xhat <- sample(pred[, idx], replace = TRUE)
+    if (confint) {
+      obs_rf_boot <- vector("list", length = N)
+      for (i in 1:confint_nboot) {
 
-      ## surrogate observations that are reliable by construction
-      yhat <- runif(N) < xhat
+        ## take bootstrap sample from predictions (surrogate forecasts)
+        xhat <- sample(pred[, idx], replace = TRUE)
 
-      ## compute observed relative frequencies of the surrogate observations
-      obs_rf_boot[[i]] <- as.numeric(
-        aggregate(yhat, by = list(prob = cut(xhat, breaks, include.lowest = TRUE)), mean, drop = FALSE)[, "x"]
-      )
+        ## surrogate observations that are reliable by construction
+        yhat <- runif(N) < xhat
+
+        ## compute observed relative frequencies of the surrogate observations
+        obs_rf_boot[[i]] <- as.numeric(
+          aggregate(
+            yhat, 
+            by = list(prob = cut(xhat, breaks, include.lowest = TRUE)), 
+            FUN = mean, 
+            drop = FALSE
+          )[, "x"]
+        )
+      }
+      obs_rf_boot <- do.call("rbind", obs_rf_boot)
+
+      ## compute lower and upper limits for reliable forecasts
+      confint_prob <- (1 - confint_level) / 2
+      confint_prob <- c(confint_prob, 1 - confint_prob)
+      ci_lwr <- apply(obs_rf_boot, 2, quantile, prob = confint_prob[1], na.rm = TRUE)
+      ci_upr <- apply(obs_rf_boot, 2, quantile, prob = confint_prob[2], na.rm = TRUE)
+    } else {
+      ci_lwr <- NA
+      ci_upr <- NA
+      confint_level <- NA
     }
-    obs_rf_boot <- do.call("rbind", obs_rf_boot)
-
-    ## compute lower and upper limits for reliable forecasts
-    confint_prob <- (1 - confint_level) / 2
-    confint_prob <- c(confint_prob, 1 - confint_prob)
-    lowerlimit <- apply(obs_rf_boot, 2, quantile, prob = confint_prob[1], na.rm = TRUE)[min_idx]
-    upperlimit <- apply(obs_rf_boot, 2, quantile, prob = confint_prob[2], na.rm = TRUE)[min_idx]
 
     ## return value
     rval_i <- data.frame(
       obs_rf, 
       mean_pr, 
-      lowerlimit, 
-      upperlimit
+      n_pred,
+      ci_lwr, 
+      ci_upr
     )
 
     ## attributes for graphical display
-    attr(rval_i, "xlab") <- xlab
-    attr(rval_i, "ylab") <- ylab
-    attr(rval_i, "main") <- main
+    attr(rval_i, "xlab") <- xlab[idx]
+    attr(rval_i, "ylab") <- ylab[idx]
+    attr(rval_i, "main") <- main[idx]
     attr(rval_i, "prob") <- probs[idx]
-    attr(rval_i, "bs") <- mean(y[, idx] - pred[, idx])^2
+    attr(rval_i, "confint_level") <- confint_level
+    attr(rval_i, "bs") <- mean(y[, idx] - pred[, idx])^2  # FIXME: (ML) Does not match for minimum != 0
     class(rval_i) <- c("reliagram", "data.frame")
 
     rval[[idx]] <- rval_i
   }
 
-  ## Combine different groups
+  ## combine different groups
   rval <- do.call(c, rval)
 
   ## plot by default
   if (plot) {
-    plot(rval, 
-    confint = confint, extend_left = extend_left, extend_right = extend_right, ...)
+    plot(rval, confint = confint, ...)
   }
 
   ## return invisibly
@@ -165,20 +182,22 @@ reliagram.default <- function(object,
 
 ## actual drawing
 plot.reliagram <- function(x, 
+                           minimum = 0,
                            confint = TRUE, 
                            abline = TRUE,
                            xlim = c(0, 1), 
                            ylim = c(0, 1), 
-                           xlab = "Forecast probability", 
-                           ylab = "Observed relative frequency",
+                           xlab = NULL,
+                           ylab = NULL,
                            main = NULL,
+                           col = "black",
+                           fill = adjustcolor(1, alpha.f = 0.2),
                            lwd = 2, 
+                           pch = 19,
                            type = "b", 
                            print_info = FALSE, 
-                           col = "black", 
-                           fill = adjustcolor(1, alpha.f = 0.1),
-                           extend_left = TRUE, 
-                           extend_right = TRUE, 
+                           extend_left = NULL, 
+                           extend_right = NULL, 
                            ...) {
 
   ## handling of groups
@@ -194,42 +213,54 @@ plot.reliagram <- function(x,
   main <- rep(main, length.out = n)
   if (is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
   if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
-  if (is.logical(main)) main <- ifelse(main, sprintf("%s (prob = %.2f)", attr(x, "main"), attr(x, "prob")), "")
+  if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
 
   ## plotting function
   reliagramplot1 <- function(d, ...)  {
 
-    ##as.vector(sapply(rval, function(r) sprintf("%s (prob = %.2f)", attr(r, "main"), attr(r, "prob"))))
+    ## get lines with sufficient observations
+    min_idx <- which(d$n_pred >= minimum)
+
+    ## check where ci should be extended
+    if(is.null(extend_left)) extend_left <- 1 %in% min_idx
+    if(is.null(extend_right)) extend_right <- nrow(d) %in% min_idx
 
     ## get group index
     j <- unique(d$group)
 
+    ## trigger plot
     plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab[j], ylab = ylab[j], main = main[j], 
-      lwd = lwd, col = col, xaxs = "i", yaxs = "i", ...)
+      xaxs = "i", yaxs = "i", ...)
     box()
+  
+    ## plot ci
+    if (confint & !is.na(attr(d, "confint_level"))) {
+      polygon(
+        na.omit(c(
+          ifelse(extend_left, 0, NA), 
+          d[min_idx, "mean_pr"], 
+          ifelse(extend_right, 1, NA), 
+          rev(d[min_idx, "mean_pr"]), 
+          ifelse(extend_left, 0, NA)
+        )), 
+        na.omit(c(
+          ifelse(extend_left, 0, NA), 
+          d[min_idx, "ci_lwr"], 
+          ifelse(extend_right, 1, NA), 
+          rev(d[min_idx, "ci_upr"]), 
+          ifelse(extend_left, 0, NA)
+        )), 
+        col = fill, border = NA
+      )
+    }
 
-    polygon(
-      na.omit(c(
-        ifelse(extend_left, 0, NA), 
-        d$mean_pr, 
-        ifelse(extend_right, 1, NA), 
-        rev(d$mean_pr), 
-        ifelse(extend_left, 0, NA)
-      )), 
-      na.omit(c(
-        ifelse(extend_left, 0, NA), 
-        d$lowerlimit, 
-        ifelse(extend_right, 1, NA), 
-        rev(d$upperlimit), 
-        ifelse(extend_left, 0, NA)
-      )), 
-      col = fill, border = NA
-    )
-
+    ## plot perfect prediction
     if(abline) abline(0, 1, lty = 2)
 
-    lines(obs_rf ~ mean_pr, d, type = type, lwd = lwd, col = col, ...)
+    ## plot reliability line
+    lines(obs_rf ~ mean_pr, d[min_idx, ], type = type, lwd = lwd, pch = pch, col = col, ...)
 
+    ## print info
     if(print_info) text(0, 1, paste0("BS = ", signif(attr(x, "bs"), 4)), adj = c(0,1))
   }
 
