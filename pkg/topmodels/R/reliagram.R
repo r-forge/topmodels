@@ -195,14 +195,15 @@ plot.reliagram <- function(x,
                            fill = adjustcolor("black", alpha.f = 0.2),  # single or n colors 
                            lwd = 2,   # single or n colors 
                            pch = 19,  # single or n colors 
+                           lty = 1,
                            type = "b",  # single or n colors 
                            add_info = TRUE,  # single or n colors  
                            extend_left = NULL, # either null or logical of length 1 / n
                            extend_right = NULL, # either null or logical of length 1 / n
                            ...) {
   ## sanity checks 
-  ## (lengths of all arguments are checked by recycling; `diag` w/i abline;
-  ## `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `pch`, `type` and `...` w/i `plot()`)
+  ## (lengths of all arguments are checked by recycling; `diag` w/i abline; `xlim`, `ylim`, 
+  ## `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`)
   stopifnot(is.logical(single_graph))
   stopifnot(is.numeric(minimum), all(minimum >= 0))
   stopifnot(is.logical(confint))
@@ -218,7 +219,7 @@ plot.reliagram <- function(x,
   if (is.null(extend_left)) extend_left <- NA
   if (is.null(extend_right)) extend_right <- NA
   plot_arg <- data.frame(1:n, minimum, confint, diag, xlim1 = xlim[[1]], xlim2 = xlim[[2]], 
-    ylim1 = ylim[[1]], ylim2 = ylim[[2]], col, fill, lwd, pch, type,
+    ylim1 = ylim[[1]], ylim2 = ylim[[2]], col, fill, lwd, pch, lty, type,
     add_info, extend_left, extend_right)[, -1]
 
   ## annotation
@@ -302,13 +303,13 @@ plot.reliagram <- function(x,
 
     ## plot reliability line
     lines(obs_rf ~ mean_pr, d[min_idx, ], type = plot_arg$type[j], lwd = plot_arg$lwd[j], 
-      pch = plot_arg$pch[j], col = plot_arg$col[j], ...)
+      pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...)
 
     ## print info
     if(single_graph && j == 1 && plot_arg$add_info[j]) {
       legend(
         "bottomright", 
-        sprintf("%s = %.4f", attr(d, "main"), signif(attr(x, "bs"), 4)),
+        sprintf("%s = %.4f", unlist(attr(d, "main")), signif(attr(d, "bs"), 4)),
         pch = plot_arg$pch,
         col = plot_arg$col,
         bty = "n",
@@ -335,11 +336,12 @@ lines.reliagram <- function(x,
                            col = "black",
                            lwd = 2,
                            pch = 19,
+                           lty = 1,
                            type = "b",
                            ...) {
   ## sanity checks 
   ## (lengths of all arguments are checked by recycling, 
-  ## `col`, `lwd`, `pch`, `type` and `...` w/i `plot()`)
+  ## `col`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`)
   stopifnot(is.numeric(minimum), all(minimum >= 0))
 
   ## handling of groups
@@ -347,7 +349,7 @@ lines.reliagram <- function(x,
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, minimum, col, lwd, pch, type)[, -1]
+  plot_arg <- data.frame(1:n, minimum, col, lwd, pch, lty, type)[, -1]
 
   ## plotting function
   reliagramplot2 <- function(d, ...)  {
@@ -360,7 +362,7 @@ lines.reliagram <- function(x,
 
     ## plot reliability line
     lines(obs_rf ~ mean_pr, d[min_idx, ], type = plot_arg$type[j], lwd = plot_arg$lwd[j], 
-      pch = plot_arg$pch[j], col = plot_arg$col[j], ...)
+      pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...)
   }
 
   ## draw plots
