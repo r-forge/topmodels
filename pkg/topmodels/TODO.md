@@ -43,7 +43,7 @@ Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
 --- | --- | --- | --- | --- | --- | ---
 `pithist` | `default` | yes | yes | yes | yes | few
 `qqrplot` | `default` | yes | yes | - | no | many 
-`reliagram` | `default` | no | yes | no | no | many
+`reliagram` | `default` | yes | yes | yes | no | few
 `rootogram` | `default`| yes | yes | no | yes | few
 `wormplot` | no | no | no | no | no | setup
 
