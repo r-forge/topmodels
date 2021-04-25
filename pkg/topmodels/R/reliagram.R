@@ -19,23 +19,23 @@ reliagram <- function(object, ...) {
 }
 
 
-reliagram.default <- function(object, 
+reliagram.default <- function(object,
                               newdata = NULL,
                               plot = TRUE,
-                              breaks = seq(0, 1, by = 0.1), 
-                              probs = 0.5, 
-                              thresholds = NULL, 
-                              y = NULL, 
-                              confint = TRUE, 
+                              breaks = seq(0, 1, by = 0.1),
+                              probs = 0.5,
+                              thresholds = NULL,
+                              y = NULL,
+                              confint = TRUE,
                               confint_level = 0.95,
-                              confint_nboot = 250, 
+                              confint_nboot = 250,
                               single_graph = FALSE,
-                              xlab = "Forecast probability", 
+                              xlab = "Forecast probability",
                               ylab = "Observed relative frequency",
                               main = NULL,
                               ...) {
 
-  ## sanity checks 
+  ## sanity checks
   ## (`object` and `newdata` w/i `newrepsone()`; `breaks w/i `cut()`, `...` w/i `plot()`)
   stopifnot(is.logical(plot))
   stopifnot(is.numeric(probs), is.null(dim(probs)))
@@ -59,22 +59,24 @@ reliagram.default <- function(object,
   stopifnot(is.null(main) || (length(main) == 1 || length(main) == length(probs)))
 
   ## fix length of annotations
-  if(length(xlab) < length(probs)) xlab <- rep(xlab, length.out = length(probs))
-  if(length(ylab) < length(probs)) ylab <- rep(ylab, length.out = length(probs))
-  if(is.null(main)) {
+  if (length(xlab) < length(probs)) xlab <- rep(xlab, length.out = length(probs))
+  if (length(ylab) < length(probs)) ylab <- rep(ylab, length.out = length(probs))
+  if (is.null(main)) {
     main <- deparse(substitute(object))
     main <- sprintf("%s (prob = %.2f)", main, probs)
   }
 
   ## data + thresholds
-  y <- if(is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
-  thresholds <- if(is.null(thresholds)) quantile(y, probs = probs, na.rm = TRUE) else thresholds
+  y <- if (is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
+  thresholds <- if (is.null(thresholds)) quantile(y, probs = probs, na.rm = TRUE) else thresholds
   thresholds <- as.numeric(thresholds)
 
   ## predicted probabilities
-  pred <- procast(object, newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
-    drop = FALSE)
-  stopifnot(NROW(pred) == length(y))  # FIXME: (ML) allow argument `y` or only allow argument `newdata`
+  pred <- procast(object,
+    newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
+    drop = FALSE
+  )
+  stopifnot(NROW(pred) == length(y)) # FIXME: (ML) allow argument `y` or only allow argument `newdata`
 
   ## get and prepare observations
   y <- sapply(thresholds, function(x) y <= x)
@@ -87,33 +89,33 @@ reliagram.default <- function(object,
   for (idx in 1:NCOL(y)) {
     ## compute number of prediction and idx for minimum number of prediction per probability subset
     n_pred <- aggregate(
-      pred[, idx], 
-      by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)), 
-      FUN = length, 
+      pred[, idx],
+      by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)),
+      FUN = length,
       drop = FALSE
     )[, "x"]
 
     ## compute observed relative frequencies of positive examples (obs_rf)
     obs_rf <- as.numeric(
       aggregate(
-        y[, idx], 
-        by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)), 
-        FUN = mean, 
+        y[, idx],
+        by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)),
+        FUN = mean,
         drop = FALSE
-        )[, "x"]
+      )[, "x"]
     )
 
     ## compute mean predicted probability (mean_pr)
     mean_pr <- as.numeric(
       aggregate(
-        pred[, idx], 
-        by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)), 
-        FUN = mean, 
+        pred[, idx],
+        by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)),
+        FUN = mean,
         drop = FALSE
       )[, "x"]
     )
 
-    ## consistency resampling from Broecker (2007) 
+    ## consistency resampling from Broecker (2007)
     if (confint) {
       obs_rf_boot <- vector("list", length = N)
       for (i in 1:confint_nboot) {
@@ -127,9 +129,9 @@ reliagram.default <- function(object,
         ## compute observed relative frequencies of the surrogate observations
         obs_rf_boot[[i]] <- as.numeric(
           aggregate(
-            yhat, 
-            by = list(prob = cut(xhat, breaks, include.lowest = TRUE)), 
-            FUN = mean, 
+            yhat,
+            by = list(prob = cut(xhat, breaks, include.lowest = TRUE)),
+            FUN = mean,
             drop = FALSE
           )[, "x"]
         )
@@ -149,10 +151,10 @@ reliagram.default <- function(object,
 
     ## return value
     rval_i <- data.frame(
-      obs_rf, 
-      mean_pr, 
+      obs_rf,
+      mean_pr,
       n_pred,
-      ci_lwr, 
+      ci_lwr,
       ci_upr
     )
 
@@ -162,7 +164,7 @@ reliagram.default <- function(object,
     attr(rval_i, "main") <- main[idx]
     attr(rval_i, "prob") <- probs[idx]
     attr(rval_i, "confint_level") <- confint_level
-    attr(rval_i, "bs") <- mean(y[, idx] - pred[, idx])^2  # FIXME: (ML) Does not match for minimum != 0
+    attr(rval_i, "bs") <- mean(y[, idx] - pred[, idx])^2 # FIXME: (ML) Does not match for minimum != 0
     class(rval_i) <- c("reliagram", "data.frame")
 
     rval[[idx]] <- rval_i
@@ -181,28 +183,28 @@ reliagram.default <- function(object,
 }
 
 
-plot.reliagram <- function(x, 
-                           single_graph = FALSE,  # logical
-                           minimum = 0,  # single or n values
-                           confint = TRUE,  # single or n values 
-                           diag = TRUE,  # single or n values, logical or color
-                           xlim = c(0, 1),  # single vector of lenght 2, or list w/ 2 vectors of length n
-                           ylim = c(0, 1),  # single vector of lenght 2, or list w/ 2 vectors of length n
-                           xlab = NULL,  # single or n values   
-                           ylab = NULL,  # single or n values 
-                           main = NULL,  # single or n values 
-                           col = "black",  # single or n colors 
-                           fill = adjustcolor("black", alpha.f = 0.2),  # single or n colors 
-                           lwd = 2,  # single or n values
-                           pch = 19,  # single or n values 
-                           lty = 1,  # single or n values 
-                           type = "b",  # single or n values 
-                           add_info = TRUE,  # single or n values  
+plot.reliagram <- function(x,
+                           single_graph = FALSE, # logical
+                           minimum = 0, # single or n values
+                           confint = TRUE, # single or n values
+                           diag = TRUE, # single or n values, logical or color
+                           xlim = c(0, 1), # single vector of lenght 2, or list w/ 2 vectors of length n
+                           ylim = c(0, 1), # single vector of lenght 2, or list w/ 2 vectors of length n
+                           xlab = NULL, # single or n values
+                           ylab = NULL, # single or n values
+                           main = NULL, # single or n values
+                           col = "black", # single or n colors
+                           fill = adjustcolor("black", alpha.f = 0.2), # single or n colors
+                           lwd = 2, # single or n values
+                           pch = 19, # single or n values
+                           lty = 1, # single or n values
+                           type = "b", # single or n values
+                           add_info = TRUE, # single or n values
                            extend_left = NULL, # either null or logical of length 1 / n
                            extend_right = NULL, # either null or logical of length 1 / n
                            ...) {
-  ## sanity checks 
-  ## (lengths of all arguments are checked by recycling; `diag` w/i abline; `xlim`, `ylim`, 
+  ## sanity checks
+  ## (lengths of all arguments are checked by recycling; `diag` w/i abline; `xlim`, `ylim`,
   ## `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`)
   stopifnot(is.logical(single_graph))
   stopifnot(is.numeric(minimum), all(minimum >= 0))
@@ -218,14 +220,15 @@ plot.reliagram <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.null(extend_left)) extend_left <- NA
   if (is.null(extend_right)) extend_right <- NA
-  plot_arg <- data.frame(1:n, minimum, confint, diag, xlim1 = xlim[[1]], xlim2 = xlim[[2]], 
-    ylim1 = ylim[[1]], ylim2 = ylim[[2]], col, fill, lwd, pch, lty, type,
-    add_info, extend_left, extend_right)[, -1]
+  plot_arg <- data.frame(1:n, minimum, confint, diag,
+    xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
+    col, fill, lwd, pch, lty, type, add_info, extend_left, extend_right
+  )[, -1]
 
   ## annotation
   if (single_graph) {
-    if (is.null(xlab)) xlab = "Forecast probability"
-    if (is.null(ylab)) ylab = "Observed relative frequency"
+    if (is.null(xlab)) xlab <- "Forecast probability"
+    if (is.null(ylab)) ylab <- "Observed relative frequency"
     if (is.null(main)) main <- "Reliability Diagram"
   } else {
     if (is.null(xlab)) xlab <- TRUE
@@ -240,7 +243,7 @@ plot.reliagram <- function(x,
   }
 
   ## plotting function
-  reliagramplot1 <- function(d, ...)  {
+  reliagramplot1 <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -254,16 +257,20 @@ plot.reliagram <- function(x,
 
     ## trigger plot
     if (j == 1) {
-      plot(0, 0, type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]), 
-        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j], 
-        ylab = ylab[j], main = main[j], 
-        xaxs = "i", yaxs = "i", ...)
+      plot(0, 0,
+        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
+        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j],
+        ylab = ylab[j], main = main[j],
+        xaxs = "i", yaxs = "i", ...
+      )
       box()
     } else if (!single_graph && j > 1) {
-      plot(0, 0, type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]), 
-        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j], 
-        ylab = ylab[j], main = main[j], 
-        xaxs = "i", yaxs = "i", ...)
+      plot(0, 0,
+        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
+        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j],
+        ylab = ylab[j], main = main[j],
+        xaxs = "i", yaxs = "i", ...
+      )
       box()
     }
 
@@ -271,44 +278,46 @@ plot.reliagram <- function(x,
     if (plot_arg$confint[j] & !is.na(attr(d, "confint_level"))) {
       polygon(
         na.omit(c(
-          ifelse(plot_arg$extend_left[j], 0, NA), 
-          d[min_idx, "mean_pr"], 
-          ifelse(plot_arg$extend_right[j], 1, NA), 
-          rev(d[min_idx, "mean_pr"]), 
+          ifelse(plot_arg$extend_left[j], 0, NA),
+          d[min_idx, "mean_pr"],
+          ifelse(plot_arg$extend_right[j], 1, NA),
+          rev(d[min_idx, "mean_pr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
-        )), 
+        )),
         na.omit(c(
-          ifelse(plot_arg$extend_left[j], 0, NA), 
-          d[min_idx, "ci_lwr"], 
-          ifelse(plot_arg$extend_right[j], 1, NA), 
-          rev(d[min_idx, "ci_upr"]), 
+          ifelse(plot_arg$extend_left[j], 0, NA),
+          d[min_idx, "ci_lwr"],
+          ifelse(plot_arg$extend_right[j], 1, NA),
+          rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
-        )), 
+        )),
         col = plot_arg$fill[j], border = NA
       )
     }
 
     ## plot reference diagonal
     if (j == 1) {
-      if(!identical(plot_arg$diag[j], FALSE)) {
-        if(isTRUE(plot_arg$diag[j])) plot_arg$diag[j] <- "black"
+      if (!identical(plot_arg$diag[j], FALSE)) {
+        if (isTRUE(plot_arg$diag[j])) plot_arg$diag[j] <- "black"
         abline(0, 1, col = plot_arg$diag[j], lty = 2)
       }
     } else if (!single_graph && j > 1) {
-      if(!identical(plot_arg$diag[j], FALSE)) {
-        if(isTRUE(plot_arg$diag[j])) plot_arg$diag[j] <- "black"
+      if (!identical(plot_arg$diag[j], FALSE)) {
+        if (isTRUE(plot_arg$diag[j])) plot_arg$diag[j] <- "black"
         abline(0, 1, col = plot_arg$diag[j], lty = 2)
       }
     }
 
     ## plot reliability line
-    lines(obs_rf ~ mean_pr, d[min_idx, ], type = plot_arg$type[j], lwd = plot_arg$lwd[j], 
-      pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...)
+    lines(obs_rf ~ mean_pr, d[min_idx, ],
+      type = plot_arg$type[j], lwd = plot_arg$lwd[j],
+      pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...
+    )
 
     ## print info
-    if(single_graph && j == 1 && plot_arg$add_info[j]) {
+    if (single_graph && j == 1 && plot_arg$add_info[j]) {
       legend(
-        "bottomright", 
+        "bottomright",
         sprintf("%s = %.4f", unlist(attr(d, "main")), signif(attr(d, "bs"), 4)),
         pch = plot_arg$pch,
         col = plot_arg$col,
@@ -318,7 +327,7 @@ plot.reliagram <- function(x,
       )
     } else if (!single_graph && plot_arg$add_info[j]) {
       legend(
-        "bottomright", 
+        "bottomright",
         sprintf("BS = %.4f", signif(attr(d, "bs")[j], 4)),
         bty = "n"
       )
@@ -331,16 +340,16 @@ plot.reliagram <- function(x,
 }
 
 
-lines.reliagram <- function(x, 
-                           minimum = 0,
-                           col = "black",
-                           lwd = 2,
-                           pch = 19,
-                           lty = 1,
-                           type = "b",
-                           ...) {
-  ## sanity checks 
-  ## (lengths of all arguments are checked by recycling, 
+lines.reliagram <- function(x,
+                            minimum = 0,
+                            col = "black",
+                            lwd = 2,
+                            pch = 19,
+                            lty = 1,
+                            type = "b",
+                            ...) {
+  ## sanity checks
+  ## (lengths of all arguments are checked by recycling,
   ## `col`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`)
   stopifnot(is.numeric(minimum), all(minimum >= 0))
 
@@ -352,7 +361,7 @@ lines.reliagram <- function(x,
   plot_arg <- data.frame(1:n, minimum, col, lwd, pch, lty, type)[, -1]
 
   ## plotting function
-  reliagramplot2 <- function(d, ...)  {
+  reliagramplot2 <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -361,8 +370,10 @@ lines.reliagram <- function(x,
     min_idx <- which(d$n_pred >= plot_arg$minimum[j])
 
     ## plot reliability line
-    lines(obs_rf ~ mean_pr, d[min_idx, ], type = plot_arg$type[j], lwd = plot_arg$lwd[j], 
-      pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...)
+    lines(obs_rf ~ mean_pr, d[min_idx, ],
+      type = plot_arg$type[j], lwd = plot_arg$lwd[j],
+      pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...
+    )
   }
 
   ## draw plots
@@ -415,10 +426,10 @@ autoplot.reliagram <- function(object, ...) {
 
 
 ### methods might only add custom y and thresholds  ## FIXME: (ML) What is that for?
-#reliagram.crch <- function(object, newdata = NULL,
+# reliagram.crch <- function(object, newdata = NULL,
 #  breaks = seq(0, 1, by = 0.1), thresholds = NULL, ...)
-#{
+# {
 #  y <- if((missing(newdata) || is.null(newdata)) && !is.null(object$y)) object$y else newresponse(object, newdata = newdata)
 #  if(is.null(thresholds)) thresholds <- object$left
 #  reliagram(object, breaks = breaks, thresholds = thresholds, y = y, ...)
-#}
+# }
