@@ -92,8 +92,8 @@ pithist.default <- function(object,
       x = tmp_hist$mids,
       y = tmp_hist$counts,
       width = diff(tmp_hist$breaks),
-      ci_lower = ci[1],
-      ci_upper = ci[2],
+      ci_lwr = ci[1],
+      ci_upr = ci[2],
       pp = pp
     )
   } else {
@@ -101,8 +101,8 @@ pithist.default <- function(object,
       x = tmp_hist$mids,
       y = tmp_hist$density,
       width = diff(tmp_hist$breaks),
-      ci_lower = ci[1],
-      ci_upper = ci[2],
+      ci_lwr = ci[1],
+      ci_upr = ci[2],
       pp = pp
     )
   }
@@ -206,17 +206,17 @@ plot.pithist <- function(x,
     y <- d$y
 
     j <- unique(d$group)
-    ci_lower <- if (confint) unique(d$ci_lower) else NULL
-    ci_upper <- if (confint) unique(d$ci_upper) else NULL
+    ci_lwr <- if (confint) unique(d$ci_lwr) else NULL
+    ci_upr <- if (confint) unique(d$ci_upr) else NULL
     pp <- unique(d$pp)
     stopifnot(
       length(pp) == 1,
-      ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
+      ifelse(confint, length(ci_lwr) == 1, length(ci_lwr) == 0)
     )
 
     ## defaults
     if (is.null(xlim)) xlim <- range(c(xleft, xright))
-    if (is.null(ylim)) ylim <- range(c(0, y, ci_lower, ci_upper))
+    if (is.null(ylim)) ylim <- range(c(0, y, ci_lwr, ci_upr))
 
     ## draw pithist
     plot(0, 0,
@@ -229,8 +229,8 @@ plot.pithist <- function(x,
     }
     rect(xleft, 0, xright, y, border = border, col = fill)
     abline(h = pp, col = col[1], lty = lty[1], lwd = lwd)
-    if (confint) abline(h = ci_lower, col = col[2], lty = lty[2], lwd = lwd)
-    if (confint) abline(h = ci_upper, col = col[2], lty = lty[2], lwd = lwd)
+    if (confint) abline(h = ci_lwr, col = col[2], lty = lty[2], lwd = lwd)
+    if (confint) abline(h = ci_upr, col = col[2], lty = lty[2], lwd = lwd)
   }
 
   ## plotting function
@@ -240,17 +240,17 @@ plot.pithist <- function(x,
     y <- c(d$y, d$y[NROW(d)])
 
     j <- unique(d$group)
-    ci_lower <- if (confint) unique(d$ci_lower) else NULL
-    ci_upper <- if (confint) unique(d$ci_upper) else NULL
+    ci_lwr <- if (confint) unique(d$ci_lwr) else NULL
+    ci_upr <- if (confint) unique(d$ci_upr) else NULL
     pp <- unique(d$pp)
     stopifnot(
       length(pp) == 1,
-      ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
+      ifelse(confint, length(ci_lwr) == 1, length(ci_lwr) == 0)
     )
 
     ## defaults
     if (is.null(xlim)) xlim <- range(x)
-    if (is.null(ylim)) ylim <- range(c(0, y, ci_lower, ci_upper))
+    if (is.null(ylim)) ylim <- range(c(0, y, ci_lwr, ci_upr))
     ## draw pithist
     plot(0, 0,
       type = "n", xlim = xlim, ylim = ylim,
@@ -262,7 +262,7 @@ plot.pithist <- function(x,
     }
 
     if (confint) {
-      polygon(c(0, 1, 1, 0), c(ci_lower, ci_lower, ci_upper, ci_upper),
+      polygon(c(0, 1, 1, 0), c(ci_lwr, ci_lwr, ci_upr, ci_upr),
         col = fill, border = NA
       )
     }
@@ -307,13 +307,13 @@ lines.pithist <- function(x,
     y <- c(d$y, d$y[NROW(d)])
 
     j <- unique(d$group)
-    ci_lower <- if (confint) unique(d$ci_lower) else NULL
-    ci_upper <- if (confint) unique(d$ci_upper) else NULL
-    stopifnot(ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0))
+    ci_lwr <- if (confint) unique(d$ci_lwr) else NULL
+    ci_upr <- if (confint) unique(d$ci_upr) else NULL
+    stopifnot(ifelse(confint, length(ci_lwr) == 1, length(ci_lwr) == 0))
 
     ## draw pithist
     if (confint) {
-      polygon(c(0, 1, 1, 0), c(ci_lower, ci_lower, ci_upper, ci_upper),
+      polygon(c(0, 1, 1, 0), c(ci_lwr, ci_lwr, ci_upr, ci_upr),
         col = fill, border = NA
       )
     }
@@ -354,12 +354,12 @@ autoplot.pithist <- function(object,
   )
 
   ## get CI and perfect prediction
-  ci_lower <- if (confint) unique(object$ci_lower) else NULL
-  ci_upper <- if (confint) unique(object$ci_upper) else NULL
+  ci_lwr <- if (confint) unique(object$ci_lwr) else NULL
+  ci_upr <- if (confint) unique(object$ci_upr) else NULL
   pp <- unique(object$pp)
   stopifnot(
     length(pp) == 1,
-    ifelse(confint, length(ci_lower) == 1, length(ci_lower) == 0)
+    ifelse(confint, length(ci_lwr) == 1, length(ci_lwr) == 0)
   )
 
   if (style == "histogram") {
@@ -383,8 +383,8 @@ autoplot.pithist <- function(object,
     rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y / 2", width = "width", height = "y")) +
       ggplot2::geom_tile(colour = border, fill = fill) +
       ggplot2::geom_hline(yintercept = pp, colour = colour[1], linetype = linetype[1], size = size) +
-      ggplot2::geom_hline(yintercept = ci_lower, colour = colour[2], linetype = linetype[2], size = size) +
-      ggplot2::geom_hline(yintercept = ci_upper, colour = colour[3], linetype = linetype[3], size = size)
+      ggplot2::geom_hline(yintercept = ci_lwr, colour = colour[2], linetype = linetype[2], size = size) +
+      ggplot2::geom_hline(yintercept = ci_upr, colour = colour[3], linetype = linetype[3], size = size)
 
     ## grouping (if any)
     if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model")
@@ -425,7 +425,7 @@ autoplot.pithist <- function(object,
     if (grid == TRUE & length(unique(colour)) == 1L & length(unique(linetype)) == 1L) {
       rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
         ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
           fill = fill, alpha = 0.5, colour = NA
         ) +
         ggplot2::geom_step(stat = calc_pit_points, linetype = linetype, size = size, colour = colour)
@@ -446,7 +446,7 @@ autoplot.pithist <- function(object,
     } else if (grid == TRUE & (length(unique(colour)) > 1L | length(unique(linetype)) > 1L)) {
       rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", linetype = "group", colour = "group")) +
         ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
           fill = fill, alpha = 0.5, colour = NA
         ) +
         ggplot2::geom_step(stat = calc_pit_points, size = size) +
@@ -469,7 +469,7 @@ autoplot.pithist <- function(object,
     } else if (grid == FALSE & length(unique(colour)) == 1L & length(unique(linetype)) == 1L) {
       rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", colour = "group")) +
         ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
           fill = fill, alpha = 0.5, colour = NA
         ) +
         ggplot2::geom_step(stat = calc_pit_points, linetype = linetype[1], size = size) + 
@@ -488,7 +488,7 @@ autoplot.pithist <- function(object,
     } else {  # grid == FALSE  & (length(unique(colour)) > 1L | length(unique(linetype)) > 1L)
       rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", linetype = "group", colour = "group")) +
         ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lower, ymax = ci_upper,
+          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
           fill = fill, alpha = 0.5, colour = NA
         ) +
         ggplot2::geom_step(stat = calc_pit_points, size = size) + 

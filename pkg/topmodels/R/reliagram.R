@@ -193,11 +193,11 @@ plot.reliagram <- function(x,
                            main = NULL,  # single or n values 
                            col = "black",  # single or n colors 
                            fill = adjustcolor("black", alpha.f = 0.2),  # single or n colors 
-                           lwd = 2,   # single or n colors 
-                           pch = 19,  # single or n colors 
-                           lty = 1,
-                           type = "b",  # single or n colors 
-                           add_info = TRUE,  # single or n colors  
+                           lwd = 2,  # single or n values
+                           pch = 19,  # single or n values 
+                           lty = 1,  # single or n values 
+                           type = "b",  # single or n values 
+                           add_info = TRUE,  # single or n values  
                            extend_left = NULL, # either null or logical of length 1 / n
                            extend_right = NULL, # either null or logical of length 1 / n
                            ...) {
