@@ -18,6 +18,7 @@ reliagram <- function(object, ...) {
   UseMethod("reliagram")
 }
 
+
 reliagram.default <- function(object, 
                               newdata = NULL,
                               plot = TRUE,
@@ -35,7 +36,7 @@ reliagram.default <- function(object,
                               ...) {
 
   ## sanity checks 
-  ## (`object` and `newdata` w/i `newrepsone()`, `breaks w/i `cut()`, `...` w/i `plot()`)
+  ## (`object` and `newdata` w/i `newrepsone()`; `breaks w/i `cut()`, `...` w/i `plot()`)
   stopifnot(is.logical(plot))
   stopifnot(is.numeric(probs), is.null(dim(probs)))
   stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
@@ -180,7 +181,6 @@ reliagram.default <- function(object,
 }
 
 
-## actual drawing
 plot.reliagram <- function(x, 
                            single_graph = FALSE,  # logical
                            minimum = 0,  # single or n values
@@ -196,16 +196,17 @@ plot.reliagram <- function(x,
                            lwd = 2,   # single or n colors 
                            pch = 19,  # single or n colors 
                            type = "b",  # single or n colors 
-                           print_info = TRUE,  # single or n colors  
+                           add_info = TRUE,  # single or n colors  
                            extend_left = NULL, # either null or logical of length 1 / n
                            extend_right = NULL, # either null or logical of length 1 / n
                            ...) {
   ## sanity checks 
-  ## (lengths of all arguments are checked by recycling, `diag` w/i abline, `...` w/i `plot()`)
+  ## (lengths of all arguments are checked by recycling; `diag` w/i abline;
+  ## `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `pch`, `type` and `...` w/i `plot()`)
   stopifnot(is.logical(single_graph))
   stopifnot(is.numeric(minimum), all(minimum >= 0))
   stopifnot(is.logical(confint))
-  stopifnot(is.logical(print_info))
+  stopifnot(is.logical(add_info))
   stopifnot(is.null(extend_left) || is.logical(extend_left))
   stopifnot(is.null(extend_right) || is.logical(extend_right))
 
@@ -218,7 +219,7 @@ plot.reliagram <- function(x,
   if (is.null(extend_right)) extend_right <- NA
   plot_arg <- data.frame(1:n, minimum, confint, diag, xlim1 = xlim[[1]], xlim2 = xlim[[2]], 
     ylim1 = ylim[[1]], ylim2 = ylim[[2]], col, fill, lwd, pch, type,
-    print_info, extend_left, extend_right)[, -1]
+    add_info, extend_left, extend_right)[, -1]
 
   ## annotation
   if (single_graph) {
@@ -304,7 +305,7 @@ plot.reliagram <- function(x,
       pch = plot_arg$pch[j], col = plot_arg$col[j], ...)
 
     ## print info
-    if(single_graph && j == 1 && plot_arg$print_info[j]) {
+    if(single_graph && j == 1 && plot_arg$add_info[j]) {
       legend(
         "bottomright", 
         sprintf("%s = %.4f", attr(d, "main"), signif(attr(x, "bs"), 4)),
@@ -314,7 +315,7 @@ plot.reliagram <- function(x,
         title = "Brier Score",
         y.intersp = 0.9
       )
-    } else if (!single_graph && plot_arg$print_info[j]) {
+    } else if (!single_graph && plot_arg$add_info[j]) {
       legend(
         "bottomright", 
         sprintf("BS = %.4f", signif(attr(d, "bs")[j], 4)),
@@ -329,9 +330,45 @@ plot.reliagram <- function(x,
 }
 
 
-lines.reliagram <- function(x, ...) {
-  NULL
+lines.reliagram <- function(x, 
+                           minimum = 0,
+                           col = "black",
+                           lwd = 2,
+                           pch = 19,
+                           type = "b",
+                           ...) {
+  ## sanity checks 
+  ## (lengths of all arguments are checked by recycling, 
+  ## `col`, `lwd`, `pch`, `type` and `...` w/i `plot()`)
+  stopifnot(is.numeric(minimum), all(minimum >= 0))
+
+  ## handling of groups
+  if (is.null(x$group)) x$group <- 1L
+  n <- max(x$group)
+
+  ## recycle arguments for plotting to match the number of groups
+  plot_arg <- data.frame(1:n, minimum, col, lwd, pch, type)[, -1]
+
+  ## plotting function
+  reliagramplot2 <- function(d, ...)  {
+
+    ## get group index
+    j <- unique(d$group)
+
+    ## get lines with sufficient observations
+    min_idx <- which(d$n_pred >= plot_arg$minimum[j])
+
+    ## plot reliability line
+    lines(obs_rf ~ mean_pr, d[min_idx, ], type = plot_arg$type[j], lwd = plot_arg$lwd[j], 
+      pch = plot_arg$pch[j], col = plot_arg$col[j], ...)
+  }
+
+  ## draw plots
+  for (i in 1L:n) {
+    reliagramplot2(x[x$group == i, ], ...)
+  }
 }
+
 
 c.reliagram <- rbind.reliagram <- function(...) {
 
@@ -369,7 +406,7 @@ c.reliagram <- rbind.reliagram <- function(...) {
   return(rval)
 }
 
-## ggplot2 interface
+
 autoplot.reliagram <- function(object, ...) {
   NULL
 }
