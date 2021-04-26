@@ -1,5 +1,5 @@
 import("stats")
-importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect", "text", "legend")
+importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect", "text", "legend", "segments")
 importFrom("grDevices", "n2mfrow")
 importFrom("grDevices", "adjustcolor")
 importFrom("utils", "head", "tail")

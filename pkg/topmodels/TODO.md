@@ -41,9 +41,9 @@ Function name | S3 classes supported | S3 classes planned | TODOs
 
 Class | S3 classes | `c()` | `plot()` | `lines()` | `autoplot()` | TODOs
 --- | --- | --- | --- | --- | --- | ---
+`reliagram` | `default` | yes | yes | yes | no | few
 `pithist` | `default` | yes | yes | yes | yes | few
 `qqrplot` | `default` | yes | yes | - | no | many 
-`reliagram` | `default` | yes | yes | yes | no | few
 `rootogram` | `default`| yes | yes | no | yes | few
 `wormplot` | no | no | no | no | no | setup
 

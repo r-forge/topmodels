@@ -18,10 +18,11 @@
 pithist(object, \dots)
 
 \method{pithist}{default}(object, newdata = NULL, plot = TRUE, 
-  style = c("histogram", "lines"), type = c("random", "proportional"), nsim = 1L,
-  delta = NULL, freq = FALSE, breaks = NULL, xlim = c(0, 1), ylim = NULL, main = NULL,
-  xlab = "PIT", ylab = if(freq) "Frequency" else "Density", 
-  confint = TRUE, confint_level = 0.95, confint_type = c("exact", "approximation"), ...)
+  style = c("histogram", "lines"), type = c("random", "proportional"), nsim = 1L, 
+  delta = NULL, freq = FALSE, breaks = NULL, confint = TRUE, 
+  confint_level = 0.95, confint_type = c("exact", "approximation"),
+  single_graph = FALSE, xlim = c(0, 1), ylim = NULL,
+  xlab = "PIT", ylab = if (freq) "Frequency" else "Density", main = NULL, ...)
 }
 
 \arguments{
@@ -46,14 +47,16 @@ pithist(object, \dots)
     \code{FALSE}, probability densities, component \code{density}, are
     plotted (so that the histogram has a total area of one).}
   \item{breaks}{numeric. Breaks for the histogram intervals.}
-  \item{xlim, ylim}{graphical parameters. These may pertain either to the 
-    whole plot or just the histogram or just the fitted line.}
-  \item{xlab, ylab, main}{graphical parameters.}
   \item{confint}{logical. Should confident intervals be drawn?}
   \item{confint_level}{numeric. The confidence level required.}
   \item{confint_type}{character. Which type of confidence interval. 
     According to Agresti and Coull (1998) for interval estimation of binomial 
     proportions an approximation can be better than exact.}
+  \item{single_graph}{logical. Should all computed extended reliability diagrams be plotted in a 
+    single graph?}
+  \item{xlim, ylim}{graphical parameters. These may pertain either to the 
+    whole plot or just the histogram or just the fitted line.}
+  \item{xlab, ylab, main}{graphical parameters.}
   \item{\dots}{further graphical parameters.}
 }
 
