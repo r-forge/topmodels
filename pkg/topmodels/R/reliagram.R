@@ -36,12 +36,12 @@ reliagram.default <- function(object,
                               ...) {
 
   ## sanity checks
-  ## (`object` and `newdata` w/i `newrepsone()`; `breaks w/i `cut()`, `...` w/i `plot()`)
+  ## `object` and `newdata` w/i `newrepsone()`; `breaks w/i `cut()`, `...` w/i `plot()`;
+  ## `confint` in `polygon()`
   stopifnot(is.logical(plot))
   stopifnot(is.numeric(probs), is.null(dim(probs)))
   stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
   stopifnot(is.null(y) || (is.numeric(y) && is.null(dim(y))))
-  stopifnot(is.logical(confint))
   stopifnot(
     is.numeric(confint_level),
     length(confint_level) == 1,
@@ -50,8 +50,8 @@ reliagram.default <- function(object,
   )
   stopifnot(
     is.numeric(confint_nboot),
-    length(confint_level) == 1,
-    confint_level >= 0
+    length(confint_nboot) == 1,
+    confint_nboot >= 0
   )
   stopifnot(is.logical(single_graph))
   stopifnot(length(xlab) == 1 || length(xlab) == length(probs))
@@ -116,7 +116,7 @@ reliagram.default <- function(object,
     )
 
     ## consistency resampling from Broecker (2007)
-    if (confint) {
+    if (!identical(confint, FALSE)) {
       obs_rf_boot <- vector("list", length = N)
       for (i in 1:confint_nboot) {
 
@@ -149,7 +149,7 @@ reliagram.default <- function(object,
       confint_level <- NA
     }
 
-    ## return value
+    ## collect everything as data.frame
     rval_i <- data.frame(
       obs_rf,
       mean_pr,
@@ -186,15 +186,15 @@ reliagram.default <- function(object,
 plot.reliagram <- function(x,
                            single_graph = FALSE, # logical
                            minimum = 0, # single or n values
-                           confint = TRUE, # single or n values
-                           diag = TRUE, # single or n values, logical or color
+                           confint = TRUE, # single or n values, logical or color 
+                           ref = TRUE, # single or n values, logical or color
                            xlim = c(0, 1), # single vector of lenght 2, or list w/ 2 vectors of length n
                            ylim = c(0, 1), # single vector of lenght 2, or list w/ 2 vectors of length n
                            xlab = NULL, # single or n values
                            ylab = NULL, # single or n values
                            main = NULL, # single or n values
                            col = "black", # single or n colors
-                           fill = adjustcolor("black", alpha.f = 0.2), # single or n colors
+                           fill = adjustcolor("black", alpha.f = 0.2), # single or n colors (convenience for confint)
                            lwd = 2, # single or n values
                            pch = 19, # single or n values
                            lty = 1, # single or n values
@@ -204,11 +204,11 @@ plot.reliagram <- function(x,
                            extend_right = NULL, # either null or logical of length 1 / n
                            ...) {
   ## sanity checks
-  ## (lengths of all arguments are checked by recycling; `diag` w/i abline; `xlim`, `ylim`,
-  ## `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`)
+  ## lengths of all arguments are checked by recycling; `ref` w/i `abline()`; `xlim`, `ylim`,
+  ## `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`
+  ## `confint` in `polygon()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.numeric(minimum), all(minimum >= 0))
-  stopifnot(is.logical(confint))
   stopifnot(is.logical(add_info))
   stopifnot(is.null(extend_left) || is.logical(extend_left))
   stopifnot(is.null(extend_right) || is.logical(extend_right))
@@ -220,7 +220,7 @@ plot.reliagram <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.null(extend_left)) extend_left <- NA
   if (is.null(extend_right)) extend_right <- NA
-  plot_arg <- data.frame(1:n, minimum, confint, diag,
+  plot_arg <- data.frame(1:n, minimum, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
     col, fill, lwd, pch, lty, type, add_info, extend_left, extend_right
   )[, -1]
@@ -243,7 +243,7 @@ plot.reliagram <- function(x,
   }
 
   ## plotting function
-  reliagramplot1 <- function(d, ...) {
+  reliagramplot <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -251,20 +251,12 @@ plot.reliagram <- function(x,
     ## get lines with sufficient observations
     min_idx <- which(d$n_pred >= plot_arg$minimum[j])
 
-    ## check where ci should be extended
+    ## check where confint should be extended
     if (is.na(plot_arg$extend_left[j])) plot_arg$extend_left[j] <- 1 %in% min_idx
     if (is.na(plot_arg$extend_right[j])) plot_arg$extend_right[j] <- nrow(d) %in% min_idx
 
     ## trigger plot
-    if (j == 1) {
-      plot(0, 0,
-        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
-        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j],
-        ylab = ylab[j], main = main[j],
-        xaxs = "i", yaxs = "i", ...
-      )
-      box()
-    } else if (!single_graph && j > 1) {
+    if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
         type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
         ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j],
@@ -274,8 +266,10 @@ plot.reliagram <- function(x,
       box()
     }
 
-    ## plot ci
-    if (plot_arg$confint[j] & !is.na(attr(d, "confint_level"))) {
+    ## plot confint polygon
+    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level"))) {
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
         na.omit(c(
           ifelse(plot_arg$extend_left[j], 0, NA),
@@ -291,22 +285,18 @@ plot.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
-        col = plot_arg$fill[j], border = NA
+        col = colorspace::adjust_transparency(plot_arg$confint[j], alpha = 0.3), 
+        border = NA
       )
     }
 
-    ## plot reference diagonal
-    if (j == 1) {
-      if (!identical(plot_arg$diag[j], FALSE)) {
-        if (isTRUE(plot_arg$diag[j])) plot_arg$diag[j] <- "black"
-        abline(0, 1, col = plot_arg$diag[j], lty = 2)
+    ## plot reference line
+    if (j == 1 || (!single_graph && j > 1)) {
+      if (!identical(plot_arg$ref[j], FALSE)) {
+        if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+        abline(0, 1, col = plot_arg$ref[j], lty = 2)
       }
-    } else if (!single_graph && j > 1) {
-      if (!identical(plot_arg$diag[j], FALSE)) {
-        if (isTRUE(plot_arg$diag[j])) plot_arg$diag[j] <- "black"
-        abline(0, 1, col = plot_arg$diag[j], lty = 2)
-      }
-    }
+    } 
 
     ## plot reliability line
     lines(obs_rf ~ mean_pr, d[min_idx, ],
@@ -336,38 +326,84 @@ plot.reliagram <- function(x,
 
   ## draw plots
   if (!single_graph && n > 1L) par(mfrow = n2mfrow(n))
-  for (i in 1L:n) reliagramplot1(x[x$group == i, ], ...)
+  for (i in 1L:n) reliagramplot(x[x$group == i, ], ...)
 }
 
 
 lines.reliagram <- function(x,
                             minimum = 0,
+                            confint = FALSE,
+                            ref = FALSE,
                             col = "black",
+                            fill = adjustcolor("black", alpha.f = 0.2), # single or n colors (convenience for confint)
                             lwd = 2,
                             pch = 19,
                             lty = 1,
                             type = "b",
+                            extend_left = NULL, # either null or logical of length 1 / n
+                            extend_right = NULL, # either null or logical of length 1 / n
                             ...) {
   ## sanity checks
-  ## (lengths of all arguments are checked by recycling,
-  ## `col`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`)
+  ## lengths of all arguments are checked by recycling,
+  ## `col`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`
+  ## `ref` w/i `abline()`; `confint` w/i `polygon()`
   stopifnot(is.numeric(minimum), all(minimum >= 0))
+  stopifnot(is.null(extend_left) || is.logical(extend_left))
+  stopifnot(is.null(extend_right) || is.logical(extend_right))
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, minimum, col, lwd, pch, lty, type)[, -1]
+  if (is.null(extend_left)) extend_left <- NA
+  if (is.null(extend_right)) extend_right <- NA
+  plot_arg <- data.frame(
+    1:n, minimum, confint, ref, col, fill, lwd, pch, lty, type, extend_left, extend_right
+  )[, -1]
 
   ## plotting function
-  reliagramplot2 <- function(d, ...) {
+  reliagramplot <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
 
     ## get lines with sufficient observations
     min_idx <- which(d$n_pred >= plot_arg$minimum[j])
+
+    ## check where confint should be extended
+    if (is.na(plot_arg$extend_left[j])) plot_arg$extend_left[j] <- 1 %in% min_idx
+    if (is.na(plot_arg$extend_right[j])) plot_arg$extend_right[j] <- nrow(d) %in% min_idx
+
+    ## plot confint polygon
+    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level"))) {
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
+      polygon(
+        na.omit(c(
+          ifelse(plot_arg$extend_left[j], 0, NA),
+          d[min_idx, "mean_pr"],
+          ifelse(plot_arg$extend_right[j], 1, NA),
+          rev(d[min_idx, "mean_pr"]),
+          ifelse(plot_arg$extend_left[j], 0, NA)
+        )),
+        na.omit(c(
+          ifelse(plot_arg$extend_left[j], 0, NA),
+          d[min_idx, "ci_lwr"],
+          ifelse(plot_arg$extend_right[j], 1, NA),
+          rev(d[min_idx, "ci_upr"]),
+          ifelse(plot_arg$extend_left[j], 0, NA)
+        )),
+        col = colorspace::adjust_transparency(plot_arg$confint[j], alpha = 0.3),
+        border = NA
+      )
+    }
+
+    ## plot reference line
+    if (!identical(plot_arg$ref[j], FALSE)) {
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+      abline(0, 1, col = plot_arg$ref[j], lty = 2)
+    }
 
     ## plot reliability line
     lines(obs_rf ~ mean_pr, d[min_idx, ],
@@ -378,7 +414,7 @@ lines.reliagram <- function(x,
 
   ## draw plots
   for (i in 1L:n) {
-    reliagramplot2(x[x$group == i, ], ...)
+    reliagramplot(x[x$group == i, ], ...)
   }
 }
 
