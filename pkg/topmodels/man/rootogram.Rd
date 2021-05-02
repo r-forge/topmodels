@@ -22,37 +22,35 @@
 \usage{
 rootogram(object, \dots)
 
-\method{rootogram}{default}(object, fitted, breaks = NULL,
-  style = c("hanging", "standing", "suspended"),
-  scale = c("sqrt", "raw"), plot = TRUE,
-  width = NULL, xlab = NULL, ylab = NULL, main = NULL, \dots)
+\method{rootogram}{default}(object, newdata = NULL, plot = TRUE, 
+  style = c("hanging", "standing", "suspended"), 
+  scale = c("sqrt", "raw"), breaks = NULL, width = NULL, 
+  xlab = NULL, ylab = NULL, main = NULL, \dots)
 
-\method{plot}{rootogram}(x,
-  xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, main = NULL,
-  border = "black", fill = "lightgray", col = "#B61A51",
-  lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, \dots)
+\method{plot}{rootogram}(x, style = c("hanging", "standing", "suspended"), 
+  ref = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, 
+  main = NULL, border = "black", fill = adjustcolor("black", alpha.f = 0.2), 
+  col = "red", lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, \dots)
 
 \method{autoplot}{rootogram}(object, colour = c("black", "#B61A51"),
   fill = "darkgray", size = c(1.2, 4), \dots)
 }
 
 \arguments{
-  \item{object}{an object. For the \code{default} method this needs to
-    be a vector/table of observed frequencies. Currently, there are also
-    methods for \code{numeric}, \code{glm} objects.}
-  \item{fitted}{an specification of the fitted frequencies. For the
-    \code{default} method this needs to be a vector/table. For the
-    \code{numeric} method (see below) this can also be a character
-    string. For the regression object methods, this is not needed.}
-  \item{breaks}{numeric. Breaks for the histogram intervals.}
+  \item{object}{an object from which an rootogram can be extracted 
+    with \code{\link{procast}}.}
+  \item{newdata}{optionally, a data frame in which to look for variables with
+    which to predict. If omitted, the original observations are used.}
+  \item{plot}{logical. Should the \code{plot} method be called to
+    draw the computed extended reliability diagram?}
   \item{style}{character specifying the syle of rootogram (see below).}
   \item{scale}{character specifying whether raw frequencies or their
     square roots (default) should be drawn.}
-  \item{plot}{logical. Should the \code{plot} method be called to
-    draw the computed rootogram?}
+  \item{breaks}{numeric. Breaks for the histogram intervals.}
   \item{width}{numeric. Widths of the histogram bars.}
   \item{xlab, ylab, main}{graphical parameters.}
   \item{x}{object of class \code{"rootogram"}.}
+  \item{ref}{logical. Should a reference line be plotted?}
   \item{xlim, ylim, border, fill, col, lwd, pch, lty, type, axes}{graphical
     parameters. These may pertain either to the whole plot or just the
     histogram or just the fitted line.}
@@ -131,9 +129,10 @@ Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
 \seealso{\code{\link[stats]{glm}}}
 
 \examples{
-## linear regression models (homoscedastic Gaussian response)
-m <- glm(dist ~ speed, data = cars)
-rootogram(m)
+require("crch")
+m1 <- glm(dist ~ speed, data = cars)
+m2 <- crch(dist ~ speed | speed, data = cars)
+plot(c(rootogram(m1, plot = FALSE), rootogram(m2, plot = FALSE)), col = c(1, 2))
 }
 
 \keyword{hplot}

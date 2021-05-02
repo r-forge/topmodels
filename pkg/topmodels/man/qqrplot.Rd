@@ -70,10 +70,18 @@ Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile Residuals.}
 \seealso{\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}}
 
 \examples{
-## linear regression models (homoscedastic Gaussian response)
-m <- lm(dist ~ speed, data = cars)
-qqrplot(m)
-qqrplot(m, trafo = NULL)
+data("CrabSatellites", package = "countreg")
+CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+
+m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+m3 <- lm(dist ~ speed, data = cars)
+
+q1 <- qqrplot(m1, nsim = 100, confint = TRUE)
+q2 <- qqrplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
+q3 <- qqrplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
+
+plot(c(q1, q2), single_graph = FALSE, col = c(1, 1), fill = c(1, 3), ref = c(2, 2))
 }
 
 \keyword{hplot}

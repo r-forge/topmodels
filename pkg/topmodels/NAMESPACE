@@ -1,5 +1,5 @@
 import("stats")
-importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect", "text", "legend", "segments")
+importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect", "text", "legend", "segments", "points.default", "lines.default")
 importFrom("grDevices", "n2mfrow")
 importFrom("grDevices", "adjustcolor")
 importFrom("utils", "head", "tail")
@@ -25,8 +25,6 @@ export(
   "autoplot.reliagram",  # Must be exported?
 
   "rootogram",
-  "rootogram_glm",  # FIXME: (ML) Must be exported for `eval(cl, parent.frame())`, find workaround
-  "rootogram_procast",  # FIXME: (ML) Must be exported for `eval(cl, parent.frame())`, find workaround
   "rootogram.default",
   "autoplot.rootogram",  # Must be exported?
 
@@ -91,7 +89,7 @@ S3method("rootogram", "default")
 S3method("plot", "rootogram")
 S3method("c", "rootogram")
 S3method("rbind", "rootogram")
-S3method("+", "rootogram")
+#S3method("+", "rootogram")
 S3method(ggplot2::autoplot, "rootogram")
 
 

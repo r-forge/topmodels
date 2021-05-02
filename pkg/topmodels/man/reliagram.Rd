@@ -68,8 +68,11 @@ m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
 
 rel1 <- reliagram(m1, probs = c(0.2, 0.6))
 rel2 <- reliagram(m2, plot = FALSE)
+rel3 <- reliagram(m3, plot = FALSE)
 
 plot(c(rel1, rel2), single_graph = TRUE, col = c(1, 2, 3), lty = c(1, 2, 3), pch = c(1, 2, 3))
-lines(reliagram(m3, plot = FALSE), col = 4, lty = 4)
+
+plot(rel1, single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+lines(rel3, col = 3, lty = 2, confint = 3)
 }
 
