@@ -30,76 +30,112 @@ qqrplot <- function(object, ...) {
 
 qqrplot.default <- function(object, 
                             newdata = NULL, 
+                            plot = TRUE,
                             trafo = qnorm, 
-                            type = c("random", "quantile"),
+                            type = c("random", "quantile"), # FIXME: (ML) `type = quantile` not working
                             nsim = 1L, 
                             delta = NULL,
-                            prob = NULL, 
-                            plot = TRUE,
-                            range = FALSE, 
-                            diag = TRUE,
-                            main = "Q-Q residuals plot", 
+                            prob = NULL, # FIXME: (ML) Solely used for type = quantile (not working)
+                            confint = TRUE, 
+                            confint_level = 0.95,
+                            confint_nsim = 250, 
+                            single_graph = FALSE,
                             xlab = "Theoretical quantiles", 
                             ylab = "Quantile residuals",
-                            tryout = c("quantile", "random-wrong", "random-correct"),  # FIXME: (ML) Remove tryout
+                            main = "Q-Q residuals plot", # FIXME: (ML) Achim prefers other title
                             ...) {
- 
-  tryout <- match.arg(tryout)  # FIXME: (ML) Remove tryout
 
+  ## sanity checks
+  ## `object`, `newdata`, `delta and `prob` w/i `qresiduals()`
+  ## `confint` w/i `polygon()`
+  ## `delta` w/i `qresiduals()`
+  ## `...` in `plot()`
+  stopifnot(is.logical(plot))
+  stopifnot(is.null(trafo) | is.function(trafo))
+  stopifnot(is.numeric(nsim), length(nsim) == 1)
+  stopifnot(
+    is.numeric(confint_level),
+    length(confint_level) == 1,
+    confint_level >= 0,
+    confint_level <= 1
+  )
+  stopifnot(is.logical(single_graph))
+  stopifnot(length(xlab) == 1)
+  stopifnot(length(ylab) == 1)
+  stopifnot(length(main) == 1 | length(main) == 0)
+
+  ## match arguments
+  type <- match.arg(type, c("random", "quantile"))
+ 
   ## compute quantile residuals
   qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, 
     prob = prob, delta = delta)
-  if(is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
+  if (is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
 
-  ## corresponding quantiles on the transformed scale (default: normal)
-  if(is.null(trafo)) trafo <- identity
-  q2q <- function(y) trafo(ppoints(length(y)))[order(order(y))]  ## FIXME: (ML) Why 2 times `order()`
+  ## compute corresponding quantiles on the transformed scale (default: normal)
+  if (is.null(trafo)) trafo <- identity
+  q2q <- function(y) trafo(ppoints(length(y)))[order(order(y))]
   qthe <- apply(qres, 2L, q2q)
 
-  ## collect everything as data.frame
-  rval <- data.frame(theoretical = qthe, residuals = qres)
-  names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
+  ## compute ci interval
+  ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
+  if (!identical(confint, FALSE)) {
+    tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = confint_nsim, 
+      delta = delta)
+    confint_prob <- (1 - confint_level) / 2
+    confint_prob <- c(confint_prob, 1 - confint_prob)
+    residuals_ci_lwr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[1], na.rm = TRUE)
+    residuals_ci_upr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[2], na.rm = TRUE)
+    theoretical_ci_lwr <- q2q(residuals_ci_lwr)
+    theoretical_ci_upr <- q2q(residuals_ci_upr)
 
-  ## polygon for range:
-  ## FIXME: (Z) currently something goes wrong here - either in qresiduals() or here
-  ## TODO: (ML) Does it really go wrong, or just previously applied to object w/o randomized residuals?
-  ## TODO: (ML) Why first if sentence? 
-  ## TODO: (ML) Is the theoretical lower and upper not always the same?
-  ## TODO: (ML) Instead of range, confidence interval possible?
-  ## FIXME: (ML) Alternative version for testing `qresiduals(..., type = "quantile")`
-  if (!identical(range, FALSE)) {
-    if (tryout == "quantile") {
-      if (isTRUE(range)) range_vec <- c(0.01, 0.99)
-      rg <- qresiduals(object, newdata = newdata, type = "quantile", prob = range_vec, delta = delta)
-    } else if (tryout == "random-correct") {
-      tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
-        delta = delta)
-      rg <- t(apply(apply(tmp, 2, sort), 1, range))
-    } else if (tryout == "random-wrong") {
-      tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = 10000, 
-        delta = delta)
-      rg <- apply(t(apply(tmp, 1, range)), 2, sort)
+    ## FIXME: (ML) Dirty hack to get CI only for discrete values 
+    if (isTRUE(all.equal(residuals_ci_lwr, residuals_ci_upr, tol = .Machine$double.eps^0.4))) {
+      residuals_ci_lwr <- NULL
+      residuals_ci_upr <- NULL
+      theoretical_ci_lwr <- NULL
+      theoretical_ci_upr <- NULL
+      confint <- FALSE
     }
-
-    # tmp_mean <- apply(apply(tmp, 2, sort), 1, mean)
-    # tmp_sd <- apply(apply(tmp, 2, sort), 1, sd) 
-    # rg <- cbind(tmp_mean - qt(0.99, df = max(1, nsim - 1)) * tmp_sd / sqrt(nsim), 
-    #   tmp_mean + qt(0.99, df = max(1, nsim - 1)) * tmp_sd / sqrt(nsim))
-
-    rval$residuals_range_lower <- rg[, 1]
-    rval$residuals_range_upper <- rg[, 2]
-    rval$theoretical_range_lower <- q2q(rg[, 1])
-    rval$theoretical_range_upper <- q2q(rg[, 2])
+  } else {
+    residuals_ci_lwr <- NULL
+    residuals_ci_upr <- NULL
+    theoretical_ci_lwr <- NULL
+    theoretical_ci_upr <- NULL
   }
 
+  ## collect everything as data.frame
+  if (any(vapply(
+    list(residuals_ci_lwr, residuals_ci_upr, theoretical_ci_lwr, 1), 
+    FUN = is.null, 
+    FUN.VALUE = FALSE
+  ))) {
+    rval <- data.frame(
+      theoretical = qthe, 
+      residuals = qres
+    )
+  } else {
+    rval <- data.frame(
+      theoretical = qthe, 
+      residuals = qres,
+      residuals_ci_lwr,
+      residuals_ci_upr,
+      theoretical_ci_lwr,
+      theoretical_ci_upr
+    )
+  }
+  names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
+
+  ## attributes for graphical display
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
+  attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
   class(rval) <- c("qqrplot", "data.frame")
 
   ## also plot by default
   if(plot){ 
-    plot(rval, range = range, diag = diag, ...)
+    try(plot(rval, confint = confint, ...))
   }
   
   ## return coordinates invisibly
@@ -121,6 +157,7 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
   ## labels
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
     as.vector(sapply(rval, function(r) attr(r, "main")))
@@ -130,112 +167,240 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
   n <- unlist(n)
 
   ## combine and return
-  rval <- do.call("rbind.data.frame", rval)
+  all_names <- unique(unlist(lapply(rval, names)))
+  if (any(grepl("theoretical_1", all_names)) & any(grepl("^theoretical$", all_names))) {
+    for (i in 1:length(rval)) {
+      names(rval[[i]])[grepl("^theoretical$", names(rval[[i]]))] <- "theoretical_1";
+      names(rval[[i]])[grepl("^residuals$", names(rval[[i]]))] <- "residuals_1"
+    }
+  all_names <- unique(unlist(lapply(rval, names)))
+  }
+
+  for(i in 1:length(rval)) class(rval[[i]]) <- "data.frame"  # FIXME: (ML) What generic class for `c()`?
+  rval <- do.call("rbind.data.frame", 
+            c(lapply(  # FIXME: (ML) What generic class for `c()`?
+              rval,
+              function(x) data.frame(c(x, sapply(setdiff(all_names, names(x)), function(y) NA)))),
+              make.row.names = FALSE)
+          )
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
+  attr(rval, "confint_level") <- confint_level
   class(rval) <- c("qqrplot", "data.frame")
   return(rval)
 }
 
 
 ## actual drawing
-plot.qqrplot <- function(x, 
-                         range = FALSE, 
-                         diag = TRUE,
-                         col = "black", 
-                         fill = "lightgray", 
+plot.qqrplot <- function(x,
+                         single_graph = FALSE,
+                         confint = TRUE, 
+                         ref = TRUE,
                          xlim = NULL, 
                          ylim = NULL,
-                         main = "Q-Q residuals plot", 
-                         xlab = "Theoretical quantiles", 
-                         ylab = "Quantile residuals",
+                         xlab = NULL,
+                         ylab = NULL,
+                         main = NULL,
+                         col = adjustcolor("black", alpha.f = 0.2), 
+                         fill = adjustcolor("black", alpha.f = 0.2), 
+                         pch = 19,
                          ...) {
+
+  ## sanity checks
+  ## lengths of all arguments are checked by recycling; `ref` w/i `abline()`
+  ## `xlim`, `ylim`, `xlab`, `ylab`, `main` and `....` w/i `plot()`
+  ## `col`, `pch` w/i `lines()`
+  ## `confint`, `fill` in `polygon()`
+  stopifnot(is.logical(single_graph))
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
+  ## recycle arguments for plotting to match the number of groups
+  if (is.null(xlim)) xlim <- c(NA, NA)
+  if (is.null(ylim)) ylim <- c(NA, NA)
+  plot_arg <- data.frame(1:n, confint, ref,
+    xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
+    col, fill, pch 
+  )[, -1]
+
   ## annotation
-  if (is.null(xlab)) xlab <- TRUE
-  if (is.null(ylab)) ylab <- TRUE
-  if (is.null(main)) main <- TRUE
-  xlab <- rep(xlab, length.out = n)
-  ylab <- rep(ylab, length.out = n)
-  main <- rep(main, length.out = n)
-  if (is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
-  if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
-  if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
+  if (single_graph) {
+    if (is.null(xlab)) xlab <- "Theoretical quantiles"
+    if (is.null(ylab)) ylab <- "Quantile residuals"
+    if (is.null(main)) main <- "Q-Q residuals plot" # FIXME: (ML) Achim prefers other title
+  } else {
+    if (is.null(xlab)) xlab <- TRUE
+    if (is.null(ylab)) ylab <- TRUE
+    if (is.null(main)) main <- TRUE
+    xlab <- rep(xlab, length.out = n)
+    ylab <- rep(ylab, length.out = n)
+    main <- rep(main, length.out = n)
+    if (is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
+    if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
+    if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
+  }
 
   ## plotting function
-  qqrplot1 <- function(d, ...)  {
+  qqrplot_plot <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
 
-    ## polygon for range:
-    ## FIXME: (Z) Currently something goes wrong here - either in qresiduals() or here
-    ## TODO: (ML) Does it really go wrong, or just not randomized residuals?
-    ## TODO: (ML) Why first if sentence? 
-    ## TODO: (ML) With increased difference in qresiduals, now check for equality does not work any more.
+    ## get xlim and ylim conditional on confint
     if(
-      !identical(range, FALSE) && 
-      isTRUE(range) && 
-      sum(grepl("range_lower|range_upper", names(d))) == 4 && 
-      !(isTRUE(all.equal(d$theoretical_range_upper, d$theoretical_range_lower, tol =  .Machine$double.eps^0.4)) & 
-        isTRUE(all.equal(d$residuals_range_upper, d$residuals_range_lower, tol =  .Machine$double.eps^0.4)))
-      ) {
-
-      ## default plotting ranges (as.matrix to get `finite = TRUE` working)
-      if(is.null(xlim)) xlim <- range(as.matrix(d[grepl("theoretical", names(d))]), finite = TRUE)
-      if(is.null(ylim)) ylim <- range(as.matrix(d[grepl("residuals", names(d))]), finite = TRUE)
-
-      ## set up coordinates
-      plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main)
-
-      ## plot polygon
-      x_pol <- c(sort(d$theoretical_range_lower), sort(d$theoretical_range_upper, decreasing = TRUE))
-      y_pol <- c(sort(d$residuals_range_lower), sort(d$residuals_range_upper, decreasing = TRUE))
-      x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)])
-      y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)])
-      polygon(x_pol, y_pol, col = fill, border = fill)
-      box()
-
+      !identical(plot_arg$confint[j], FALSE) && 
+      !is.na(attr(d, "confint_level")[j])
+    ) {
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+        xlim <- range(as.matrix(d[grepl("theoretical", names(d))]), finite = TRUE)
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+        ylim <- range(as.matrix(d[grepl("residuals", names(d))]), finite = TRUE)
     } else {
- 
-      ## set range to null 
-      d$theoretical_range_lower <- d$theoretical_range_upper <- NULL
-      d$residuals_range_lower <- d$residuals_range_upper <- NULL
-
-      ## default plotting ranges
-      if(is.null(xlim)) xlim <- range(x[grepl("theoretical", names(d))])
-      if(is.null(ylim)) ylim <- range(x[grepl("residuals", names(d))])
-
-      ## set up coordinates
-      plot(0, 0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab[j], ylab = ylab[j], main = main[j])
-
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+        xlim <- range(as.matrix(d[grepl("^theoretical$|theoretical_[0-9]", names(d))]), finite = TRUE)
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+        ylim <- range(as.matrix(d[grepl("^residuals$|residuals_[0-9]", names(d))]), finite = TRUE)
     }
 
-    ## add Q-Q plot(s)
+    ## trigger plot
+    if (j == 1 || (!single_graph && j > 1)) {
+      plot(0, 0,
+        type = "n", xlim = xlim, ylim = ylim,
+        xlab = xlab[j], ylab = ylab[j], main = main[j], ...
+      )
+      box()
+    }
+
+    ## plot confint polygon
+    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
+
+      x_pol <- c(sort(d$theoretical_ci_lwr), sort(d$theoretical_ci_upr, decreasing = TRUE))
+      y_pol <- c(sort(d$residuals_ci_lwr), sort(d$residuals_ci_upr, decreasing = TRUE))
+      x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
+      y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
+
+      polygon(
+        x_pol, 
+        y_pol, 
+        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
+        border = NA
+      )
+    }
+
+
+    ## add qq plot
     for (i in 1L:ncol(d[grepl("residuals_[0-9]", names(d))])) {
       points(
         d[grepl("theoretical", names(d))][, i], 
         d[grepl("residuals", names(d))][, i], 
-        col = col, ...
+        col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
 
-    ## reference diagonal
-    if(!identical(diag, FALSE)) {
-      if(isTRUE(diag)) diag <- "black"
-      abline(0, 1, col = diag, lty = 2)
+    ## plot reference diagonal
+    if (j == 1 || (!single_graph && j > 1)) {
+      if (!identical(plot_arg$ref[j], FALSE)) {
+        if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+        abline(0, 1, col = plot_arg$ref[j], lty = 2)
+      }
     }
+
   }
 
   ## draw plots
   if (n > 1L) par(mfrow = n2mfrow(n))
-  for (i in 1L:n) qqrplot1(x[x$group == i, ], ...)
+  for (i in 1L:n) qqrplot_plot(x[x$group == i, ], ...)
+}
+
+
+points.qqrplot <- function(x,
+                           confint = FALSE, 
+                           ref = FALSE,
+                           col = adjustcolor("black", alpha.f = 0.2), 
+                           fill = adjustcolor("black", alpha.f = 0.2), 
+                           pch = 19,
+                           ...) {
+
+  ## sanity checks
+  ## lengths of all arguments are checked by recycling; `ref` w/i `abline()`
+  ## `col`, `pch` w/i `lines()`
+  ## `confint`, `fill` in `polygon()`
+
+  ## handling of groups
+  if (is.null(x$group)) x$group <- 1L
+  n <- max(x$group)
+
+  ## recycle arguments for plotting to match the number of groups
+  plot_arg <- data.frame(1:n, confint, ref, col, fill, pch )[, -1]
+
+  ## plotting function
+  qqrplot_plot <- function(d, ...) {
+
+    ## get group index
+    j <- unique(d$group)
+
+    ## get xlim and ylim conditional on confint
+    if(
+      !identical(plot_arg$confint[j], FALSE) && 
+      !is.na(attr(d, "confint_level")[j])
+    ) {
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+        xlim <- range(as.matrix(d[grepl("theoretical", names(d))]), finite = TRUE)
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+        ylim <- range(as.matrix(d[grepl("residuals", names(d))]), finite = TRUE)
+    } else {
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+        xlim <- range(as.matrix(d[grepl("^theoretical$|theoretical_[0-9]", names(d))]), finite = TRUE)
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+        ylim <- range(as.matrix(d[grepl("^residuals$|residuals_[0-9]", names(d))]), finite = TRUE)
+    }
+
+    ## plot confint polygon
+    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
+
+      x_pol <- c(sort(d$theoretical_ci_lwr), sort(d$theoretical_ci_upr, decreasing = TRUE))
+      y_pol <- c(sort(d$residuals_ci_lwr), sort(d$residuals_ci_upr, decreasing = TRUE))
+      x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
+      y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
+
+      polygon(
+        x_pol, 
+        y_pol, 
+        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
+        border = NA
+      )
+    }
+
+
+    ## add qq plot
+    for (i in 1L:ncol(d[grepl("residuals_[0-9]", names(d))])) {
+      points(
+        d[grepl("theoretical", names(d))][, i], 
+        d[grepl("residuals", names(d))][, i], 
+        col = plot_arg$col[j], pch = plot_arg$pch[j], ...
+      )
+    }
+
+    ## plot reference diagonal
+    if (!identical(plot_arg$ref[j], FALSE)) {
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+      abline(0, 1, col = plot_arg$ref[j], lty = 2)
+    }
+
+  }
+
+  ## draw plots
+  for (i in 1L:n) {
+    qqrplot_plot(x[x$group == i, ], ...)
+  }
 }
 
 ## ggplot2 interface

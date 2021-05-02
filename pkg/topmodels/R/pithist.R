@@ -30,7 +30,7 @@ pithist.default <- function(object,
                             newdata = NULL,
                             plot = TRUE,
                             style = c("histogram", "lines"),
-                            type = c("random", "proportional"),
+                            type = c("random", "proportional"),  # FIXME: (ML) see below
                             nsim = 1L,
                             delta = NULL,
                             freq = FALSE,
@@ -63,6 +63,7 @@ pithist.default <- function(object,
   stopifnot(is.null(ylim) || (is.numeric(ylim) && length(ylim) == 2))
   stopifnot(length(xlab) == 1)
   stopifnot(length(ylab) == 1)
+  stopifnot(length(main) == 1 | length(main) == 0)
 
   ## match arguments
   style <- match.arg(style, c("histogram", "lines"))
@@ -71,7 +72,8 @@ pithist.default <- function(object,
   ## either compute proportion exactly (to do...) or approximate by simulation
   type <- match.arg(type, c("random", "proportional"))
   if (type == "proportional") {  
-    # FIXME: (ML) Implement proportional over the inteverals (e.g., below censoring point)
+    # FIXME: (ML) implement proportional over the inteverals (e.g., below censoring point)
+    # FIXME: (ML) confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
     stop("not yet implemented")
   } else {
     p <- qresiduals.default(object, newdata = newdata, trafo = NULL, type = "random", 
@@ -128,7 +130,7 @@ pithist.default <- function(object,
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "confint_level") <- confint_level
+  attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
   class(rval) <- c("pithist", "data.frame")
 
   ## plot by default
@@ -164,6 +166,7 @@ c.pithist <- rbind.pithist <- function(...) {
   ## labels
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
     as.vector(sapply(rval, function(r) attr(r, "main")))
@@ -175,10 +178,11 @@ c.pithist <- rbind.pithist <- function(...) {
   ## combine and return
   rval <- do.call("rbind.data.frame", rval)
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
+  attr(rval, "freq") <- freq
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "freq") <- freq
+  attr(rval, "confint_level") <- confint_level
   class(rval) <- c("pithist", "data.frame")
   return(rval)
 }
@@ -298,7 +302,7 @@ plot.pithist <- function(x,
     }
 
     ## plot confint lines
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level"))) {
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
       abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
       abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
@@ -344,19 +348,19 @@ plot.pithist <- function(x,
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
         type = "n", xlim = xlim, ylim = ylim,
-        xlab = xlab[j], ylab = ylab[j], main = main[j], ...
+        xlab = xlab[j], ylab = ylab[j], xaxs = "i", main = main[j], ...
       )
       box()
     }
 
     ## plot confint polygon
     ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level"))) {
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
         c(0, 1, 1, 0), 
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
-        col = colorspace::adjust_transparency(plot_arg$confint[j], alpha = 0.3), 
+        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2), 
         border = NA
         ) 
     }
@@ -364,7 +368,7 @@ plot.pithist <- function(x,
     ## plot ref line 
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-      segments(x0 = 0, y0 = pp, x1 = 1, y1 = pp, col = plot_arg$ref[j], lty = 2, lwd = 1.5)
+      segments(x0 = 0, y0 = pp, x1 = 1, y1 = pp, col = plot_arg$ref[j], lty = 2, lwd = 1)
     }
 
     ## plot stepfun
@@ -441,12 +445,12 @@ lines.pithist <- function(x,
 
     ## plot confint polygon
     ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level"))) {
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
         c(0, 1, 1, 0),
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
-        col = colorspace::adjust_transparency(plot_arg$confint[j], alpha = 0.3),
+        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
         border = NA
         )
     }

@@ -55,6 +55,7 @@ S3method("qqrplot", "default")
 
 ## methods for class qqrplot
 S3method("plot", "qqrplot")
+S3method("points", "qqrplot")
 S3method("c", "qqrplot")
 S3method("rbind", "qqrplot")
 S3method(ggplot2::autoplot, "qqrplot")
