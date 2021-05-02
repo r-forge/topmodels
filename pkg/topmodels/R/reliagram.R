@@ -243,7 +243,7 @@ plot.reliagram <- function(x,
   }
 
   ## plotting function
-  reliagramplot <- function(d, ...) {
+  reliagram_plot <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -268,7 +268,7 @@ plot.reliagram <- function(x,
 
     ## plot confint polygon
     ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level"))) {
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
         na.omit(c(
@@ -285,10 +285,12 @@ plot.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
-        col = colorspace::adjust_transparency(plot_arg$confint[j], alpha = 0.3), 
+        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2), 
         border = NA
       )
     }
+    
+
 
     ## plot reference line
     if (j == 1 || (!single_graph && j > 1)) {
@@ -326,7 +328,7 @@ plot.reliagram <- function(x,
 
   ## draw plots
   if (!single_graph && n > 1L) par(mfrow = n2mfrow(n))
-  for (i in 1L:n) reliagramplot(x[x$group == i, ], ...)
+  for (i in 1L:n) reliagram_plot(x[x$group == i, ], ...)
 }
 
 
@@ -377,7 +379,7 @@ lines.reliagram <- function(x,
 
     ## plot confint polygon
     ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level"))) {
+    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
         na.omit(c(
@@ -394,7 +396,7 @@ lines.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
-        col = colorspace::adjust_transparency(plot_arg$confint[j], alpha = 0.3),
+        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
         border = NA
       )
     }
@@ -434,6 +436,7 @@ c.reliagram <- rbind.reliagram <- function(...) {
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
   prob <- unlist(lapply(rval, function(r) attr(r, "prob")))
+  confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
   bs <- unlist(lapply(rval, function(r) attr(r, "bs")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
@@ -449,11 +452,13 @@ c.reliagram <- rbind.reliagram <- function(...) {
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "bs") <- bs
   attr(rval, "prob") <- prob
+  attr(rval, "confint_level") <- confint_level
+  attr(rval, "bs") <- bs
   class(rval) <- c("reliagram", "data.frame")
   return(rval)
 }
+
 
 
 autoplot.reliagram <- function(object, ...) {

@@ -3,7 +3,8 @@
 \alias{qqrplot.default}
 
 \alias{plot.qqrplot}
-\alias{lines.qqrplot}
+\alias{points.qqrplot}
+\alias{c.qqrplot}
 \alias{autoplot.qqrplot}
 
 \title{Q-Q Plots for Quantile Residuals}
@@ -16,31 +17,32 @@
 \usage{
 qqrplot(object, \dots)
 
-\method{qqrplot}{default}(object, newdata = NULL, trafo = qnorm, type = c("random", "quantile"),
-  nsim = 1L, delta = NULL, prob = NULL, plot = TRUE, range = FALSE, diag = TRUE,
-  main = "Q-Q residuals plot", xlab = "Theoretical quantiles",
-  ylab = "Quantile residuals", tryout = c("quantile", "random-wrong", "random-correct"), 
-  \dots)
+\method{qqrplot}{default}(object, newdata = NULL, plot = TRUE, trafo = qnorm,
+  type = c("random", "quantile"), nsim = 1L, delta = NULL, prob = NULL, confint = TRUE, 
+  confint_level = 0.95, confint_nsim = 250, single_graph = FALSE, 
+  xlab = "Theoretical quantiles", ylab = "Quantile residuals",
+  main = "Q-Q residuals plot", \dots)
 }
 
 \arguments{
   \item{object}{an object (for which a \code{\link{qresiduals}} method exists).}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
+  \item{plot}{logical. Should the \code{plot} method be called to draw the
+    computed Q-Q plot?}
   \item{trafo}{function for tranforming residuals from probability scale to
     a different distribution scale (default: Gaussian).}
   \item{type, nsim, delta, prob}{arguments passed to \code{qresiduals}.}
-  \item{plot}{logical. Should the \code{plot} method be called to draw the
-    computed Q-Q plot?}
-  \item{range}{logical or quantile specification. Should the range of
+  \item{confint}{logical or quantile specification. Should the range of
     quantiles of the randomized quantile residuals be visualized? If \code{TRUE},
     then \code{range = c(0.01, 0.99)} is used.}
-  \item{diag}{logical or color specification. Should a diagonal
-    reference line be drawn?}
-  \item{main, xlab, ylab, \dots}{graphical plotting parameters
+  \item{confint_level}{numeric. The confidence level required.}
+  \item{confint_nsim}{numeric. The number of simulated quantiles.}
+  \item{single_graph}{logical. Should all computed extended reliability diagrams be plotted in a single
+    graph?}
+  \item{xlab, ylab, main, \dots}{graphical plotting parameters
     passed to \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
     respectively.}
-  \item{tryout}{TO BE REMOVED}
 }
 
 \details{
