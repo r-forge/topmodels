@@ -66,11 +66,11 @@ pithist.default <- function(object,
   stopifnot(length(main) == 1 | length(main) == 0)
 
   ## match arguments
-  style <- match.arg(style, c("histogram", "lines"))
-  confint_type <- match.arg(confint_type, c("exact", "approximation"))
+  style <- match.arg(style)
+  confint_type <- match.arg(confint_type)
 
   ## either compute proportion exactly (to do...) or approximate by simulation
-  type <- match.arg(type, c("random", "proportional"))
+  type <- match.arg(type)
   if (type == "proportional") {  
     # FIXME: (ML) implement proportional over the inteverals (e.g., below censoring point)
     # FIXME: (ML) confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
@@ -215,7 +215,7 @@ plot.pithist <- function(x,
   )
 
   ## set style
-  style <- match.arg(style, c("histogram", "lines"))
+  style <- match.arg(style)
   if (single_graph && style == "histogram"){
     style <- "lines"
   }
@@ -462,7 +462,7 @@ lines.pithist <- function(x,
     }
 
     ## plot stepfun
-    lines(y ~ x, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
+    lines.default(y ~ x, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
   }
 
   ## draw plots
@@ -487,7 +487,7 @@ autoplot.pithist <- function(object,
                              ...) {
 
   ## match arguments
-  style <- match.arg(style, c("histogram", "lines"))
+  style <- match.arg(style)
 
   ## determine grouping
   class(object) <- "data.frame"

@@ -25,7 +25,7 @@ reliagram.default <- function(object,
                               breaks = seq(0, 1, by = 0.1),
                               probs = 0.5,
                               thresholds = NULL,
-                              y = NULL,
+                              y = NULL, # FIXME: (ML) allow argument `y` or only allow argument `newdata`
                               confint = TRUE,
                               confint_level = 0.95,
                               confint_nboot = 250,

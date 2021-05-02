@@ -83,21 +83,18 @@ histogram (FIXME: not yet implemented).
 
 \examples{
 require("crch")
-## linear regression models (homoscedastic Gaussian response)
 m1 <- lm(dist ~ speed, data = cars)
-pit1 <- pithist(m1)
-
-## linear regression models (heteroscedastic Gaussian response)
 m2 <- crch(dist ~ speed | speed, data = cars)
-
-## censored linear regression models (heteroscedastic Gaussian response)
 m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
 
+pit1 <- pithist(m1)
 pit2 <- pithist(m2, plot = FALSE)
 pit3 <- pithist(m3, plot = FALSE)
 
-plot(pit1, style = "lines")
-lines(c(pit2, pit3), col = c(2, 3))
+plot(c(pit1, pit2, pit3), col = c(1, 2, 3))
+
+plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE)
+lines(pit3, col = 3)
 }
 
 \keyword{hplot}

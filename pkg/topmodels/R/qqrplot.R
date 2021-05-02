@@ -65,7 +65,7 @@ qqrplot.default <- function(object,
   stopifnot(length(main) == 1 | length(main) == 0)
 
   ## match arguments
-  type <- match.arg(type, c("random", "quantile"))
+  type <- match.arg(type)
  
   ## compute quantile residuals
   qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, 
@@ -296,7 +296,7 @@ plot.qqrplot <- function(x,
 
     ## add qq plot
     for (i in 1L:ncol(d[grepl("residuals_[0-9]", names(d))])) {
-      points(
+      points.default(
         d[grepl("theoretical", names(d))][, i], 
         d[grepl("residuals", names(d))][, i], 
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...

@@ -143,8 +143,7 @@ procast.lm <- function(object,
   pars$sigma <- summary(object)$sigma * sqrt(df.residual(object) / nobs(object))
 
   ## Types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter",
-    "density", "probability", "score"))
+  type <- match.arg(type)
 
   ## Set up function that computes prediction from model parameters
   FUN <- switch(type,
@@ -179,8 +178,7 @@ procast.crch <- function(object,
   cl$drop <- NULL
 
   ## Check possible types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter", 
-    "density", "probability", "score"))
+  type <- match.arg(type)
 
   ## FIXME: (ML) Implement score (estfun)
   if (type == "score") {
@@ -264,8 +262,7 @@ procast.disttree <- procast.distforest <- function(object,
   pars <- predict(object, newdata = newdata, type = "parameter")
 
   ## Types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter", 
-    "density", "probability", "score"))
+  type <- match.arg(type)
 
   ## FIXME: (ML) Implement score (estfun)
   if (type == "score") {
@@ -367,7 +364,7 @@ procast.glm <- function(object,
   pars <- data.frame(mu = pars)
 
   ## Types of predictions
-  type <- match.arg(type, c("quantile", "location", "scale", "parameter", "density", "probability", "score"))
+  type <- match.arg(type)
 
   ## FIXME: (ML) Implement score (estfun)
   if (object$family$family == "gaussian") {
