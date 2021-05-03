@@ -91,6 +91,8 @@ pit1 <- pithist(m1)
 pit2 <- pithist(m2, plot = FALSE)
 pit3 <- pithist(m3, plot = FALSE)
 
+plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
+
 plot(c(pit1, pit2, pit3), col = c(1, 2, 3))
 
 plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE)

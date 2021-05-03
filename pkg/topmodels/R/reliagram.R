@@ -267,7 +267,6 @@ plot.reliagram <- function(x,
     }
 
     ## plot confint polygon
-    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
@@ -378,7 +377,6 @@ lines.reliagram <- function(x,
     if (is.na(plot_arg$extend_right[j])) plot_arg$extend_right[j] <- nrow(d) %in% min_idx
 
     ## plot confint polygon
-    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(

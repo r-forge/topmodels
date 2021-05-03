@@ -64,7 +64,7 @@ rootogram.default <- function(object,
   }
 
   ## data and weights
-  y <- newresponse(object, newdata = newdata) # TODO: (ML) What about na.action
+  y <- newresponse(object, newdata = newdata) # FIXME: (ML) What about na.action
   w <- attr(y, "weights")
 
   ## breaks, midpoints, widths
@@ -89,6 +89,7 @@ rootogram.default <- function(object,
   ## FIXME: (ML) Do we need terms here? No info in `newresponse()` or `procast()` output?
 
   ## raw vs. sqrt scale
+  ## FIXME: (ML) Move scale in plot fun
   if(scale == "sqrt") {
     y <- if(style == "hanging") sqrt(expctd) - sqrt(obsrvd) else 0
     height <- if(style == "suspended") sqrt(expctd) - sqrt(obsrvd) else sqrt(obsrvd)
