@@ -81,7 +81,8 @@ q1 <- qqrplot(m1, nsim = 100, confint = TRUE)
 q2 <- qqrplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
 q3 <- qqrplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
 
-plot(c(q1, q2), single_graph = FALSE, col = c(1, 1), fill = c(1, 3), ref = c(2, 2))
+plot(c(q1, q2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
+points(q3, col = "lightblue")
 }
 
 \keyword{hplot}

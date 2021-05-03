@@ -354,7 +354,6 @@ plot.pithist <- function(x,
     }
 
     ## plot confint polygon
-    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
@@ -444,7 +443,6 @@ lines.pithist <- function(x,
     )
 
     ## plot confint polygon
-    ## FIXME: (ML) why does `colorspace::adjust_transparency(..., alpha = TRUE)` not work?
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(

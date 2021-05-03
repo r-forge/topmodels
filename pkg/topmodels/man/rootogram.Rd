@@ -132,7 +132,7 @@ Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
 require("crch")
 m1 <- glm(dist ~ speed, data = cars)
 m2 <- crch(dist ~ speed | speed, data = cars)
-plot(c(rootogram(m1, plot = FALSE), rootogram(m2, plot = FALSE)), col = c(1, 2))
+plot(c(rootogram(m1, plot = FALSE), rootogram(m2, plot = FALSE)), col = c(1, 3), ref = "red")
 }
 
 \keyword{hplot}
