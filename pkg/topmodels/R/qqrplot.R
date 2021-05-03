@@ -288,7 +288,7 @@ plot.qqrplot <- function(x,
       polygon(
         x_pol, 
         y_pol, 
-        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
       )
     }
@@ -374,7 +374,7 @@ points.qqrplot <- function(x,
       polygon(
         x_pol, 
         y_pol, 
-        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
       )
     }
