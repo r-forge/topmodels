@@ -360,7 +360,7 @@ plot.pithist <- function(x,
       polygon(
         c(0, 1, 1, 0), 
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
-        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2), 
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
         ) 
     }
@@ -450,7 +450,7 @@ lines.pithist <- function(x,
       polygon(
         c(0, 1, 1, 0),
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
-        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
         )
     }

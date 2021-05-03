@@ -285,7 +285,7 @@ plot.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
-        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2), 
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2), 
         border = NA
       )
     }
@@ -396,7 +396,7 @@ lines.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
-        col = my_adjust_transparency(plot_arg$confint[j], alpha = TRUE, default = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2), 
         border = NA
       )
     }

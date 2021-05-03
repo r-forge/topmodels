@@ -4,6 +4,9 @@ importFrom("grDevices", "n2mfrow")
 importFrom("grDevices", "adjustcolor")
 importFrom("utils", "head", "tail")
 
+importFrom("grDevices", "col2rgb", "rgb")  # FIXME: (ML) Remove after using colorspace again
+
+
 export(  
   "procast",
   "procast_setup",
