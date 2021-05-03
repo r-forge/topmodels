@@ -25,7 +25,7 @@ qresiduals.default <- function(object,
   } 
 
   ## if 'object' is not a vector/matrix, apply procast(..., type = "probability") method
-  if(is.object(object) | !is.numeric(object)) {
+  if(is.object(object) | !is.numeric(object)) { # FIXME: (ML) No else, numeric object
     y <- newresponse(object, newdata = newdata)
   
     ## to keep the attributes

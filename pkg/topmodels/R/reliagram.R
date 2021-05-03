@@ -25,7 +25,6 @@ reliagram.default <- function(object,
                               breaks = seq(0, 1, by = 0.1),
                               probs = 0.5,
                               thresholds = NULL,
-                              y = NULL, # FIXME: (ML) allow argument `y` or only allow argument `newdata`
                               confint = TRUE,
                               confint_level = 0.95,
                               confint_nboot = 250,
@@ -41,7 +40,6 @@ reliagram.default <- function(object,
   stopifnot(is.logical(plot))
   stopifnot(is.numeric(probs), is.null(dim(probs)))
   stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
-  stopifnot(is.null(y) || (is.numeric(y) && is.null(dim(y))))
   stopifnot(
     is.numeric(confint_level),
     length(confint_level) == 1,
@@ -67,16 +65,17 @@ reliagram.default <- function(object,
   }
 
   ## data + thresholds
-  y <- if (is.null(y)) newresponse(object, newdata = newdata) else as.numeric(y)
-  thresholds <- if (is.null(thresholds)) quantile(y, probs = probs, na.rm = TRUE) else thresholds
+  y <- newresponse(object, newdata = newdata)
+  thresholds <- if (is.null(thresholds)) quantile(y, probs = probs, na.rm = TRUE) else thresholds # FIXME: (ML) Test if thresholds work in main title
   thresholds <- as.numeric(thresholds)
 
-  ## predicted probabilities
+  ## predicted probabilities  # FIXME: (ML) Check format and dim of thresholds and pred
   pred <- procast(object,
     newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
     drop = FALSE
   )
   stopifnot(NROW(pred) == length(y)) # FIXME: (ML) allow argument `y` or only allow argument `newdata`
+  browser()
 
   ## get and prepare observations
   y <- sapply(thresholds, function(x) y <= x)

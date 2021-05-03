@@ -19,7 +19,7 @@ reliagram(object, \dots)
 
 \method{reliagram}{default}(object, newdata = NULL, plot = TRUE,
   breaks = seq(0, 1, by = 0.1), probs = 0.5, thresholds = NULL,
-  y = NULL, confint = TRUE, confint_level = 0.95, confint_nboot = 250,
+  confint = TRUE, confint_level = 0.95, confint_nboot = 250,
   single_graph = FALSE, xlab = "Forecast probability", 
   ylab = "Observed relative frequency", main = NULL, ...) 
 }
@@ -37,7 +37,6 @@ reliagram(object, \dots)
     or several thresholds. Only used if \code{thresholds} is not specified.}
   \item{thresholds}{numeric vector specifying both where to cut the observations into binary values
       and at which values the predicted probabilities should be calculated (\code{\link{procast}}).}
-  \item{y}{numeric vector. Observed or out-of-sample observations. FIXME: (ML) Might be removed.}
   \item{confint}{logical. Should confident intervals be calculated and drawn?}
   \item{confint_level}{numeric. The confidence level required.}
   \item{confint_nboot}{numeric. The number of bootstrap steps.}

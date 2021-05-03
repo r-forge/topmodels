@@ -176,7 +176,7 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
   all_names <- unique(unlist(lapply(rval, names)))
   }
 
-  for(i in 1:length(rval)) class(rval[[i]]) <- "data.frame"  # FIXME: (ML) What generic class for `c()`?
+  for(i in 1:length(rval)) class(rval[[i]]) <- "data.frame"  # FIXME: (ML) What generic class for `c()`? Move to top!
   rval <- do.call("rbind.data.frame", 
             c(lapply(  # FIXME: (ML) What generic class for `c()`?
               rval,

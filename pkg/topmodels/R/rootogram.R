@@ -89,7 +89,7 @@ rootogram.default <- function(object,
   ## FIXME: (ML) Do we need terms here? No info in `newresponse()` or `procast()` output?
 
   ## raw vs. sqrt scale
-  ## FIXME: (ML) Move scale in plot fun
+  ## FIXME: (ML) Move scale in plot fun: Let it there (Z)
   if(scale == "sqrt") {
     y <- if(style == "hanging") sqrt(expctd) - sqrt(obsrvd) else 0
     height <- if(style == "suspended") sqrt(expctd) - sqrt(obsrvd) else sqrt(obsrvd)
