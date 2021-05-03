@@ -43,24 +43,24 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
 --- | --- | --- | --- | --- | --- | ---
 `reliagram` | `default` | yes | yes | yes | no | few
 `pithist` | `default` | yes | yes | yes | yes | few
-`qqrplot` | `default` | yes | yes | yes | no | many 
-`rootogram` | `default`| yes | yes | no | yes | few
+`qqrplot` | `default` | yes | yes | yes | no | few 
+`rootogram` | `default`| yes | yes | - | yes | few
 `wormplot` | no | no | no | no | no | setup
 
 ### 2.4 Functions for graphical model assessment: TODOs
 * `pithist()`
-    * Streamline code and optional plotting arguments for the user
-    * Implement `type = "proportional"`
+    * Streamline code and optional plotting arguments for the user [DONE]
+    * Implement `type = "proportional"` 
     * Check again if we need two different CI computations
 * `qqrplot()`
-    * Setup as a generic function and include S3 methods. 
+    * Setup as a generic function and include S3 methods [DONE]
 * `reliagram()`
-    * Improve default method, get rid of `verification` package?
-    * Implement generic functions
+    * Improve default method, get rid of `verification` package? [DONE]
+    * Implement generic functions [DONE]
     * Get newest fancy version of Reto
 * `rootogram()`
-    * Move away from `countreg` default: Make argument `object` mandatory
-    * Merge `rootogram_procast()` and `rootogram_glm`
+    * Move away from `countreg` default: Make argument `object` mandatory [DONE]
+    * Merge `rootogram_procast()` and `rootogram_glm` [DONE]
 * `wormplot()`
     * Start from scratch: Needs to be setup
 
