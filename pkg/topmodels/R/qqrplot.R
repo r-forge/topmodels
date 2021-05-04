@@ -205,6 +205,7 @@ plot.qqrplot <- function(x,
                          main = NULL,
                          col = adjustcolor("black", alpha.f = 0.2), 
                          fill = adjustcolor("black", alpha.f = 0.2), 
+                         alpha_min = 0.2, # single or n values  
                          pch = 19,
                          ...) {
 
@@ -213,6 +214,7 @@ plot.qqrplot <- function(x,
   ## `xlim`, `ylim`, `xlab`, `ylab`, `main` and `....` w/i `plot()`
   ## `col`, `pch` w/i `lines()`
   ## `confint`, `fill` in `polygon()`
+  ## `alpha_min` w/i colorspace fun 
   stopifnot(is.logical(single_graph))
 
   ## handling of groups
@@ -224,7 +226,7 @@ plot.qqrplot <- function(x,
   if (is.null(ylim)) ylim <- c(NA, NA)
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    col, fill, pch 
+    col, fill, alpha_min, pch 
   )[, -1]
 
   ## annotation
@@ -287,7 +289,7 @@ plot.qqrplot <- function(x,
       polygon(
         x_pol, 
         y_pol, 
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min =  plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -323,6 +325,7 @@ points.qqrplot <- function(x,
                            ref = FALSE,
                            col = adjustcolor("black", alpha.f = 0.2), 
                            fill = adjustcolor("black", alpha.f = 0.2), 
+                           alpha_min = 0.2,
                            pch = 19,
                            ...) {
 
@@ -330,13 +333,14 @@ points.qqrplot <- function(x,
   ## lengths of all arguments are checked by recycling; `ref` w/i `abline()`
   ## `col`, `pch` w/i `lines()`
   ## `confint`, `fill` in `polygon()`
+  ## `alpha_min` w/i colorspace fun 
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, confint, ref, col, fill, pch )[, -1]
+  plot_arg <- data.frame(1:n, confint, ref, col, fill, alpha_min, pch )[, -1]
 
   ## plotting function
   qqrplot_plot <- function(d, ...) {
@@ -372,7 +376,7 @@ points.qqrplot <- function(x,
       polygon(
         x_pol, 
         y_pol, 
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }

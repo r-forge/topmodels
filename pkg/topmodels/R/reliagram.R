@@ -202,6 +202,7 @@ plot.reliagram <- function(x,
                            main = NULL, # single or n values
                            col = "black", # single or n colors
                            fill = adjustcolor("black", alpha.f = 0.2), # single or n colors (convenience for confint)
+                           alpha_min = 0.2, # single or n values  
                            lwd = 2, # single or n values
                            pch = 19, # single or n values
                            lty = 1, # single or n values
@@ -213,7 +214,8 @@ plot.reliagram <- function(x,
   ## sanity checks
   ## lengths of all arguments are checked by recycling; `ref` w/i `abline()`; `xlim`, `ylim`,
   ## `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`
-  ## `confint` in `polygon()`
+  ## `confint` w/i `polygon()`
+  ## `alpha_min` w/i colorspace fun 
   stopifnot(is.logical(single_graph))
   stopifnot(is.numeric(minimum), all(minimum >= 0))
   stopifnot(is.logical(add_info))
@@ -229,7 +231,7 @@ plot.reliagram <- function(x,
   if (is.null(extend_right)) extend_right <- NA
   plot_arg <- data.frame(1:n, minimum, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
-    col, fill, lwd, pch, lty, type, add_info, extend_left, extend_right
+    col, fill, alpha_min, lwd, pch, lty, type, add_info, extend_left, extend_right
   )[, -1]
 
   ## annotation
@@ -299,7 +301,7 @@ plot.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2), 
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]), 
         border = NA
       )
     }
@@ -370,6 +372,7 @@ lines.reliagram <- function(x,
                             ref = FALSE,
                             col = "black",
                             fill = adjustcolor("black", alpha.f = 0.2), # single or n colors (convenience for confint)
+                            alpha_min = 0.2, # single or n values  
                             lwd = 2,
                             pch = 19,
                             lty = 1,
@@ -381,6 +384,7 @@ lines.reliagram <- function(x,
   ## lengths of all arguments are checked by recycling,
   ## `col`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`
   ## `ref` w/i `abline()`; `confint` w/i `polygon()`
+  ## `alpha_min` w/i colorspace fun 
   stopifnot(is.numeric(minimum), all(minimum >= 0))
   stopifnot(is.null(extend_left) || is.logical(extend_left))
   stopifnot(is.null(extend_right) || is.logical(extend_right))
@@ -393,7 +397,7 @@ lines.reliagram <- function(x,
   if (is.null(extend_left)) extend_left <- NA
   if (is.null(extend_right)) extend_right <- NA
   plot_arg <- data.frame(
-    1:n, minimum, confint, ref, col, fill, lwd, pch, lty, type, extend_left, extend_right
+    1:n, minimum, confint, ref, col, fill, alpha_min, lwd, pch, lty, type, extend_left, extend_right
   )[, -1]
 
   ## plotting function
@@ -427,7 +431,7 @@ lines.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2), 
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]), 
         border = NA
       )
     }
