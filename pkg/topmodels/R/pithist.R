@@ -201,14 +201,13 @@ plot.pithist <- function(x,
                          col = "black",
                          fill = adjustcolor("black", alpha.f = 0.2),
                          alpha_min = 0.2,
-                         border = "black",
-                         lwd = 2,
+                         lwd = NULL,
                          lty = 1,
                          ...) {
 
   ## sanity checks
   ## lengths of all arguments are checked by recycling; `ref` and `confint` w/i `abline()`;
-  ## `xlim`, `ylim`, xlab`, `ylab`, `main`, `col`, `fill`, `border`, `lwd`, `lty` and `...` w/i `plot()`
+  ## `xlim`, `ylim`, xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
   ## `alpha_min` w/i colorspace fun 
   stopifnot(is.logical(single_graph))
   if (single_graph) stopifnot(
@@ -225,6 +224,9 @@ plot.pithist <- function(x,
   if (n > 1 && single_graph && style == "histogram"){
     style <- "lines"
   }
+
+  ## set lwd
+  if (is.null(lwd)) lwd <- if (style == "histogram") 1 else 2
 
   ## recycle arguments for plotting to match the number of groups
   if (is.null(ylim)) ylim <- c(NA, NA)
@@ -295,17 +297,18 @@ plot.pithist <- function(x,
     }
 
     ## plot pithist
-    rect(xleft, 0, xright, y, border = plot_arg$border[j], col = plot_arg$fill[j])
+    rect(xleft, 0, xright, y, border = plot_arg$col[j], col = plot_arg$fill[j], 
+      lty = plot_arg$lty[j], lwd = plot_arg$lwd[j])
 
     ## plot ref line 
     if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "red3"
       abline(h = pp, col = plot_arg$ref[j], lty = 1, lwd = 1.5)
     }
 
     ## plot confint lines
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "red3"
       abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
       abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
     }

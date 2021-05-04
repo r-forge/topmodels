@@ -18,9 +18,9 @@
 reliagram(object, \dots)
 
 \method{reliagram}{default}(object, newdata = NULL, plot = TRUE,
-  breaks = seq(0, 1, by = 0.1), probs = 0.5, thresholds = NULL,
+  breaks = seq(0, 1, by = 0.1), quantiles = 0.5, thresholds = NULL,
   confint = TRUE, confint_level = 0.95, confint_nboot = 250,
-  single_graph = FALSE, xlab = "Forecast probability", 
+  confint_seed = 1, single_graph = FALSE, xlab = "Forecast probability", 
   ylab = "Observed relative frequency", main = NULL, ...) 
 }
 
@@ -33,13 +33,14 @@ reliagram(object, \dots)
     draw the computed extended reliability diagram?}
   \item{breaks}{numeric vector passed on to \code{\link{cut}} in order to bin 
     the observations and the predicted probabilities.}
-  \item{probs}{numeric vector of probabilities with values in [0,1] to calculate single
+  \item{quantiles}{numeric vector of quantile probabilities with values in [0,1] to calculate single
     or several thresholds. Only used if \code{thresholds} is not specified.}
   \item{thresholds}{numeric vector specifying both where to cut the observations into binary values
       and at which values the predicted probabilities should be calculated (\code{\link{procast}}).}
   \item{confint}{logical. Should confident intervals be calculated and drawn?}
   \item{confint_level}{numeric. The confidence level required.}
   \item{confint_nboot}{numeric. The number of bootstrap steps.}
+  \item{confint_seed}{numeric. The seed to be set for the bootstrapping.}
   \item{single_graph}{logical. Should all computed extended reliability diagrams be plotted in a single
     graph?}
   \item{xlab, ylab, main}{graphical parameters.}
@@ -65,7 +66,7 @@ m1 <- lm(dist ~ speed, data = cars)
 m2 <- crch(dist ~ speed | speed, data = cars)
 m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
 
-rel1 <- reliagram(m1, probs = c(0.2, 0.6))
+rel1 <- reliagram(m1, quantiles = c(0.2, 0.6))
 rel2 <- reliagram(m2, plot = FALSE)
 rel3 <- reliagram(m3, plot = FALSE)
 

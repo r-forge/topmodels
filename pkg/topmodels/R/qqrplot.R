@@ -39,6 +39,7 @@ qqrplot.default <- function(object,
                             confint = TRUE, 
                             confint_level = 0.95,
                             confint_nsim = 250, 
+                            confint_seed = 1,
                             single_graph = FALSE,
                             xlab = "Theoretical quantiles", 
                             ylab = "Quantile residuals",
@@ -80,6 +81,7 @@ qqrplot.default <- function(object,
   ## compute ci interval
   ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   if (!identical(confint, FALSE)) {
+    set.seed(confint_seed)
     tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = confint_nsim, 
       delta = delta)
     confint_prob <- (1 - confint_level) / 2
