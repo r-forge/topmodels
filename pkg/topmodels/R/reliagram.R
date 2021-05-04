@@ -249,8 +249,8 @@ plot.reliagram <- function(x,
     if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
   }
 
-  ## plotting function
-  reliagram_plot <- function(d, ...) {
+  ## function to trigger figure and plot confint 
+  reliagram_trigger <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -303,8 +303,16 @@ plot.reliagram <- function(x,
         border = NA
       )
     }
-    
+  }
 
+  ## plotting function
+  reliagram_plot <- function(d, ...) {
+
+    ## get group index
+    j <- unique(d$group)
+
+    ## get lines with sufficient observations
+    min_idx <- which(d$n_pred >= plot_arg$minimum[j])
 
     ## plot reference line
     if (j == 1 || (!single_graph && j > 1)) {
@@ -321,7 +329,7 @@ plot.reliagram <- function(x,
     )
 
     ## print info
-    if (single_graph && j == 1 && plot_arg$add_info[j]) {
+    if (single_graph && j == n && plot_arg$add_info[j]) {
       legend(
         "bottomright",
         sprintf("%s = %.4f", unlist(attr(d, "main")), signif(attr(d, "bs"), 4)),
@@ -342,7 +350,17 @@ plot.reliagram <- function(x,
 
   ## draw plots
   if (!single_graph && n > 1L) par(mfrow = n2mfrow(n))
-  for (i in 1L:n) reliagram_plot(x[x$group == i, ], ...)
+
+  ## draw polygons first
+  if (single_graph) {
+    for (i in 1L:n) reliagram_trigger(x[x$group == i, ], ...)
+    for (i in 1L:n) reliagram_plot(x[x$group == i, ], ...)
+  } else {
+    for (i in 1L:n) {
+      reliagram_trigger(x[x$group == i, ], ...)
+      reliagram_plot(x[x$group == i, ], ...)
+    }
+  }
 }
 
 
