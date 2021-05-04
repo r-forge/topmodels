@@ -28,6 +28,7 @@ reliagram.default <- function(object,
                               confint = TRUE,
                               confint_level = 0.95,
                               confint_nboot = 250,
+                              confint_seed = 1,
                               single_graph = FALSE,
                               xlab = "Forecast probability",
                               ylab = "Observed relative frequency",
@@ -124,6 +125,7 @@ reliagram.default <- function(object,
 
     ## consistency resampling from Broecker (2007)
     if (!identical(confint, FALSE)) {
+      set.seed(confint_seed)
       obs_rf_boot <- vector("list", length = N)
       for (i in 1:confint_nboot) {
 

@@ -19,7 +19,7 @@ qqrplot(object, \dots)
 
 \method{qqrplot}{default}(object, newdata = NULL, plot = TRUE, trafo = qnorm,
   type = c("random", "quantile"), nsim = 1L, delta = NULL, prob = NULL, confint = TRUE, 
-  confint_level = 0.95, confint_nsim = 250, single_graph = FALSE, 
+  confint_level = 0.95, confint_nsim = 250, confint_seed = 1, single_graph = FALSE, 
   xlab = "Theoretical quantiles", ylab = "Quantile residuals",
   main = "Q-Q residuals plot", \dots)
 }
@@ -38,6 +38,7 @@ qqrplot(object, \dots)
     then \code{range = c(0.01, 0.99)} is used.}
   \item{confint_level}{numeric. The confidence level required.}
   \item{confint_nsim}{numeric. The number of simulated quantiles.}
+  \item{confint_seed}{numeric. The seed to be set for calculating the confidence interval.}
   \item{single_graph}{logical. Should all computed extended reliability diagrams be plotted in a single
     graph?}
   \item{xlab, ylab, main, \dots}{graphical plotting parameters

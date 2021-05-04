@@ -30,7 +30,7 @@ rootogram(object, \dots)
 \method{plot}{rootogram}(x, style = c("hanging", "standing", "suspended"), 
   ref = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, 
   main = NULL, border = "black", fill = adjustcolor("black", alpha.f = 0.2), 
-  col = "red", lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, \dots)
+  col = "red3", lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, \dots)
 
 \method{autoplot}{rootogram}(object, colour = c("black", "#B61A51"),
   fill = "darkgray", size = c(1.2, 4), \dots)
