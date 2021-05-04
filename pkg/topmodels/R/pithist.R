@@ -214,15 +214,15 @@ plot.pithist <- function(x,
     length(unique(attr(x, "freq"))) == 1
   )
 
-  ## set style
-  style <- match.arg(style)
-  if (single_graph && style == "histogram"){
-    style <- "lines"
-  }
-
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
+
+  ## set style
+  style <- match.arg(style)
+  if (n > 1 && single_graph && style == "histogram"){
+    style <- "lines"
+  }
 
   ## recycle arguments for plotting to match the number of groups
   if (is.null(ylim)) ylim <- c(NA, NA)
@@ -248,8 +248,8 @@ plot.pithist <- function(x,
     if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
   }
 
-  ## plotting function: traditional pithist
-  pithist_histogram <- function(d, ...) {
+  ## function to plot pithist (style = "histogram")
+  pithist_plot <- function(d, ...) {
   
     ## get group index
     j <- unique(d$group)
@@ -310,8 +310,8 @@ plot.pithist <- function(x,
 
   }
 
-  ## plotting function: stepwise pithist
-  pithist_lines <- function(d, ...) {
+  ## function to trigger figure and plot confint (style = "lines")
+  pitlines_trigger <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -320,7 +320,7 @@ plot.pithist <- function(x,
     x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
     y <- c(d$y, d$y[NROW(d)])
 
-   ## prepare confint lines and check if they consist of unique values
+    ## prepare confint lines and check if they consist of unique values
     if (!identical(plot_arg$confint[j], FALSE)) {
       ci_lwr <- unique(d$ci_lwr)
       ci_upr <- unique(d$ci_upr)
@@ -332,13 +332,6 @@ plot.pithist <- function(x,
       ci_lwr <- NULL
       ci_upr <- NULL
     }
-
-    ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$pp)
-    stopifnot(
-      "`pp` in attr of object `x` must consist of unique values per group index" =
-      length(pp) == 1
-    )
 
     ## get xlim and ylim
     if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) xlim <- range(x)
@@ -361,8 +354,26 @@ plot.pithist <- function(x,
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
-        ) 
+      ) 
     }
+  }
+
+  ## function to trigger figure and plot confint (style = "lines")
+  pitlines_plot <- function(d, ...) {
+
+    ## get group index
+    j <- unique(d$group)
+
+    ## step elements
+    x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+    y <- c(d$y, d$y[NROW(d)])
+
+    ## prepare ref line and check if it consists of unique values
+    pp <- unique(d$pp)
+    stopifnot(
+      "`pp` in attr of object `x` must consist of unique values per group index" =
+      length(pp) == 1
+    )
 
     ## plot ref line 
     if (!identical(plot_arg$ref[j], FALSE)) {
@@ -376,11 +387,19 @@ plot.pithist <- function(x,
 
   ## draw plots
   if (!single_graph && n > 1L) par(mfrow = n2mfrow(n))
-  for (i in 1L:n) {
+
+  ## draw polygons first
+  if (single_graph || n == 1) {
     if (style == "histogram") {
-      pithist_histogram(x[x$group == i, ], ...)
+      for (i in 1L:n) pithist_plot(x[x$group == i, ], ...)
     } else {
-      pithist_lines(x[x$group == i, ], ...)
+      for (i in 1L:n) pitlines_trigger(x[x$group == i, ], ...)
+      for (i in 1L:n) pitlines_plot(x[x$group == i, ], ...)
+    }
+  } else {
+    for (i in 1L:n) {
+      pitlines_trigger(x[x$group == i, ], ...)
+      pitlines_plot(x[x$group == i, ], ...)
     }
   }
 }
@@ -413,7 +432,7 @@ lines.pithist <- function(x,
   )[, -1]
 
   ## plotting function: stepwise pithist
-  pithist_lines <- function(d, ...) {
+  pitlines_lines <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -465,7 +484,7 @@ lines.pithist <- function(x,
 
   ## draw plots
   for (i in 1L:n) {
-    pithist_lines(x[x$group == i, ], ...)
+    pitlines_lines(x[x$group == i, ], ...)
   }
 }
 
