@@ -23,7 +23,7 @@ reliagram.default <- function(object,
                               newdata = NULL,
                               plot = TRUE,
                               breaks = seq(0, 1, by = 0.1),
-                              probs = 0.5,
+                              quantiles = 0.5,
                               thresholds = NULL,
                               confint = TRUE,
                               confint_level = 0.95,
@@ -38,7 +38,7 @@ reliagram.default <- function(object,
   ## `object` and `newdata` w/i `newrepsone()`; `breaks w/i `cut()`, `...` w/i `plot()`;
   ## `confint` in `polygon()`
   stopifnot(is.logical(plot))
-  stopifnot(is.numeric(probs), is.null(dim(probs)))
+  stopifnot(is.numeric(quantiles), is.null(dim(quantiles)))
   stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
   stopifnot(
     is.numeric(confint_level),
@@ -52,30 +52,38 @@ reliagram.default <- function(object,
     confint_nboot >= 0
   )
   stopifnot(is.logical(single_graph))
-  stopifnot(length(xlab) == 1 || length(xlab) == length(probs))
-  stopifnot(length(ylab) == 1 || length(ylab) == length(probs))
-  stopifnot(is.null(main) || (length(main) == 1 || length(main) == length(probs)))
-
-  ## fix length of annotations
-  if (length(xlab) < length(probs)) xlab <- rep(xlab, length.out = length(probs))
-  if (length(ylab) < length(probs)) ylab <- rep(ylab, length.out = length(probs))
-  if (is.null(main)) {
-    main <- deparse(substitute(object))
-    main <- sprintf("%s (prob = %.2f)", main, probs)
-  }
+  stopifnot(length(xlab) == 1 || length(xlab) == length(quantiles))
+  stopifnot(length(ylab) == 1 || length(ylab) == length(quantiles))
+  stopifnot(is.null(main) || (length(main) == 1 || length(main) == length(quantiles)))
 
   ## data + thresholds
   y <- newresponse(object, newdata = newdata)
-  thresholds <- if (is.null(thresholds)) quantile(y, probs = probs, na.rm = TRUE) else thresholds # FIXME: (ML) Test if thresholds work in main title
-  thresholds <- as.numeric(thresholds)
+  if (is.null(thresholds)){
+    thresholds <- quantile(y, probs = quantiles, na.rm = TRUE)
+    thresholds <- as.numeric(thresholds)
+    thresholds_text <- sprintf("q_%.2f", signif(quantiles, 2))
+  } else {
+    thresholds
+    thresholds_text <- as.character(signif(thresholds, 2))
+  }
+
+  ## fix length of annotations
+  if (length(xlab) < length(quantiles)) xlab <- rep(xlab, length.out = length(quantiles))
+  if (length(ylab) < length(quantiles)) ylab <- rep(ylab, length.out = length(quantiles))
+  if (is.null(main)) {
+    main <- deparse(substitute(object))
+    main <- sprintf("%s (threshold = %s)", main, thresholds_text)
+  }
+
 
   ## predicted probabilities  # FIXME: (ML) Check format and dim of thresholds and pred
   pred <- procast(object,
     newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
     drop = FALSE
   )
-  stopifnot(NROW(pred) == length(y)) # FIXME: (ML) allow argument `y` or only allow argument `newdata`
-  browser()
+
+  ## make sure lengths match (can't really happen after no arg `y` exists anymore)
+  stopifnot(NROW(pred) == length(y)) 
 
   ## get and prepare observations
   y <- sapply(thresholds, function(x) y <= x)
@@ -83,7 +91,7 @@ reliagram.default <- function(object,
   ## define convenience variables
   N <- NROW(y)
 
-  ## loop over all probs
+  ## loop over all quantiles
   rval <- vector(mode = "list", length = NCOL(y))
   for (idx in 1:NCOL(y)) {
     ## compute number of prediction and idx for minimum number of prediction per probability subset
@@ -161,7 +169,7 @@ reliagram.default <- function(object,
     attr(rval_i, "xlab") <- xlab[idx]
     attr(rval_i, "ylab") <- ylab[idx]
     attr(rval_i, "main") <- main[idx]
-    attr(rval_i, "prob") <- probs[idx]
+    attr(rval_i, "threshold") <- thresholds_text[idx]
     attr(rval_i, "confint_level") <- confint_level
     attr(rval_i, "bs") <- mean(y[, idx] - pred[, idx])^2 # FIXME: (ML) Does not match for minimum != 0
     class(rval_i) <- c("reliagram", "data.frame")
@@ -253,6 +261,14 @@ plot.reliagram <- function(x,
     ## check where confint should be extended
     if (is.na(plot_arg$extend_left[j])) plot_arg$extend_left[j] <- 1 %in% min_idx
     if (is.na(plot_arg$extend_right[j])) plot_arg$extend_right[j] <- nrow(d) %in% min_idx
+
+    ## modify main using subscript for quantiles
+    if (grepl("threshold = q_[0-9]+\\.?([0-9]+)?)$", main[j])){
+      tmp_quantile <- regmatches(main[j], regexpr("q_[0-9]+\\.?([0-9]+)?", main[j]))
+      tmp_quantile <- regmatches(tmp_quantile, regexpr("[0-9]+\\.?([0-9]+)?", tmp_quantile))
+      tmp_text <- sub('q_[0-9]+\\.?([0-9]+)?)', '', main[j])
+      main[j] <- as.expression(bquote(.(tmp_text)*q[.(tmp_quantile)]*")"))
+    }
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
