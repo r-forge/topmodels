@@ -32,10 +32,8 @@ qqrplot.default <- function(object,
                             newdata = NULL, 
                             plot = TRUE,
                             trafo = qnorm, 
-                            type = c("random", "quantile"), # FIXME: (ML) `type = quantile` not working
                             nsim = 1L, 
                             delta = NULL,
-                            prob = NULL, # FIXME: (ML) Solely used for type = quantile (not working)
                             confint = TRUE, 
                             confint_level = 0.95,
                             confint_nsim = 250, 
@@ -65,12 +63,8 @@ qqrplot.default <- function(object,
   stopifnot(length(ylab) == 1)
   stopifnot(length(main) == 1 | length(main) == 0)
 
-  ## match arguments
-  type <- match.arg(type)
- 
   ## compute quantile residuals
-  qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = nsim, 
-    prob = prob, delta = delta)
+  qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = "random", nsim = nsim, delta = delta)
   if (is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
 
   ## compute corresponding quantiles on the transformed scale (default: normal)
@@ -82,7 +76,7 @@ qqrplot.default <- function(object,
   ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   if (!identical(confint, FALSE)) {
     set.seed(confint_seed)
-    tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = type, nsim = confint_nsim, 
+    tmp <- qresiduals(object, newdata = newdata, trafo = trafo, type = "random", nsim = confint_nsim, 
       delta = delta)
     confint_prob <- (1 - confint_level) / 2
     confint_prob <- c(confint_prob, 1 - confint_prob)
@@ -149,6 +143,9 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
 
   ## list of qqrplots
   rval <- list(...)
+  
+  ## remove temporary the class
+  for(i in 1:length(rval)) class(rval[[i]]) <- "data.frame"  # TODO: (ML) How does that work with lapply?
 
   ## group sizes
   for (i in seq_along(rval)) {
@@ -178,13 +175,13 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
   all_names <- unique(unlist(lapply(rval, names)))
   }
 
-  for(i in 1:length(rval)) class(rval[[i]]) <- "data.frame"  # FIXME: (ML) What generic class for `c()`? Move to top!
   rval <- do.call("rbind.data.frame", 
-            c(lapply(  # FIXME: (ML) What generic class for `c()`?
+            c(lapply(
               rval,
               function(x) data.frame(c(x, sapply(setdiff(all_names, names(x)), function(y) NA)))),
               make.row.names = FALSE)
           )
+
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
