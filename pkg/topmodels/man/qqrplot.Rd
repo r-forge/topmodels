@@ -18,7 +18,7 @@
 qqrplot(object, \dots)
 
 \method{qqrplot}{default}(object, newdata = NULL, plot = TRUE, trafo = qnorm,
-  type = c("random", "quantile"), nsim = 1L, delta = NULL, prob = NULL, confint = TRUE, 
+  nsim = 1L, delta = NULL, confint = TRUE, 
   confint_level = 0.95, confint_nsim = 250, confint_seed = 1, single_graph = FALSE, 
   xlab = "Theoretical quantiles", ylab = "Quantile residuals",
   main = "Q-Q residuals plot", \dots)
@@ -32,7 +32,7 @@ qqrplot(object, \dots)
     computed Q-Q plot?}
   \item{trafo}{function for tranforming residuals from probability scale to
     a different distribution scale (default: Gaussian).}
-  \item{type, nsim, delta, prob}{arguments passed to \code{qresiduals}.}
+  \item{nsim, delta}{arguments passed to \code{qresiduals}.}
   \item{confint}{logical or quantile specification. Should the range of
     quantiles of the randomized quantile residuals be visualized? If \code{TRUE},
     then \code{range = c(0.01, 0.99)} is used.}
