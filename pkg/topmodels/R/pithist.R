@@ -200,6 +200,7 @@ plot.pithist <- function(x,
                          main = NULL,
                          col = "black",
                          fill = adjustcolor("black", alpha.f = 0.2),
+                         alpha_min = 0.2,
                          border = "black",
                          lwd = 2,
                          lty = 1,
@@ -208,6 +209,7 @@ plot.pithist <- function(x,
   ## sanity checks
   ## lengths of all arguments are checked by recycling; `ref` and `confint` w/i `abline()`;
   ## `xlim`, `ylim`, xlab`, `ylab`, `main`, `col`, `fill`, `border`, `lwd`, `lty` and `...` w/i `plot()`
+  ## `alpha_min` w/i colorspace fun 
   stopifnot(is.logical(single_graph))
   if (single_graph) stopifnot(
     "for `single_graph` all `freq` in attr of object `x` must be of the same type" = 
@@ -228,7 +230,7 @@ plot.pithist <- function(x,
   if (is.null(ylim)) ylim <- c(NA, NA)
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
-    col, fill, lwd, lty
+    col, fill, alpha_min, lwd, lty
   )[, -1]
 
   ## annotation
@@ -352,7 +354,7 @@ plot.pithist <- function(x,
       polygon(
         c(0, 1, 1, 0), 
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       ) 
     }
@@ -410,6 +412,7 @@ lines.pithist <- function(x,
                           ref = FALSE,
                           col = "black",
                           fill = adjustcolor(1, alpha.f = 0.2),
+                          alpha_min = 0.2, 
                           lwd = 2,
                           lty = 1,
                           ...) {
@@ -417,6 +420,7 @@ lines.pithist <- function(x,
   ## sanity checks
   ## lengths of all arguments are checked by recycling; `ref` and `confint` w/i `abline()`;
   ## `col`, `fill`, `lwd`, `lty` and `...` w/i `lines()`
+  ## `alpha_min` w/i colorspace fun 
   stopifnot(
     "all `freq` in attr of object `x` must be of the same type" =
     length(unique(attr(x, "freq"))) == 1
@@ -428,7 +432,7 @@ lines.pithist <- function(x,
 
   ## recycle arguments for plotting to match the number of groups
   plot_arg <- data.frame(
-    1:n, confint, ref, col, fill, lwd, lty
+    1:n, confint, ref, col, fill, alpha_min, lwd, lty
   )[, -1]
 
   ## plotting function: stepwise pithist
@@ -467,7 +471,7 @@ lines.pithist <- function(x,
       polygon(
         c(0, 1, 1, 0),
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
         )
     }
