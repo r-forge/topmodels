@@ -4,6 +4,17 @@ newresponse <- function(object, ...) {
 
 newresponse.default <- function(object, newdata, na.action = na.pass, ...)
 {
+
+  stopifnot(
+    "`object` must be a (model) OO object:\n  * you have supplied a base object" = 
+      is.object(object),
+      !all(class(object) == "list"),
+    "`object` must be a (model) OO object:\n  * you have supplied an object of the single class `data.frame`" = 
+      !all(class(object) == "data.frame"),
+     "`object` must be a (model) OO object:\n  * you have supplied a numeric" =  
+      !is.numeric(object) # TODO: (ML) is this case already caught by `is.object()`?
+  )
+
   ## FIXME: use expand.model.frame() instead of this hand-crafted code
   if(missing(newdata) || is.null(newdata)) {
     mf <- model.frame(object)
