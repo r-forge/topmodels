@@ -24,8 +24,18 @@ qresiduals.default <- function(object,
     stopifnot(is.numeric(prob) & is.vector(prob))
   } 
 
-  ## if 'object' is not a vector/matrix, apply procast(..., type = "probability") method
-  if(is.object(object) | !is.numeric(object)) { # FIXME: (ML) No else, numeric object
+  if(!is.object(object) || 
+    all(class(object) == "data.frame") || 
+    is.numeric(object)) { # TODO: (ML) is this case already caught by `is.object()`?
+
+    stop(paste0("`object` must be a (model) 00 object:\n" ,
+      "  * you have supplied either a base object,\n",
+      "  * an object of the single class `data.frame` or\n",
+      "  * a numeric."
+    ))
+
+  } else {
+
     y <- newresponse(object, newdata = newdata)
   
     ## to keep the attributes

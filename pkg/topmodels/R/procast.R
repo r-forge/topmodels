@@ -130,7 +130,7 @@ procast.lm <- function(object,
                        at = 0.5,
                        drop = FALSE, 
                        ...) {
-
+  
   ## Predicted means
   pars <- if (missing(newdata) || is.null(newdata)) {
     object$fitted.values
