@@ -23,6 +23,10 @@ export(
   "qqrplot.default",
   "autoplot.qqrplot",  # Must be exported?
 
+  "wormplot",
+  "wormplot.default",
+  "autoplot.wormplot",  # Must be exported?
+
   "reliagram",
   "reliagram.default",
   "autoplot.reliagram",  # Must be exported?
@@ -61,6 +65,15 @@ S3method("c", "qqrplot")
 S3method("rbind", "qqrplot")
 S3method(ggplot2::autoplot, "qqrplot")
 
+## methods for wormplot
+S3method("wormplot", "default")
+
+## methods for class wormplot
+S3method("plot", "wormplot")
+S3method("points", "wormplot")
+S3method("c", "wormplot")
+S3method("rbind", "wormplot")
+S3method(ggplot2::autoplot, "wormplot")
 
 ## methods for pithist
 S3method("pithist", "default")
