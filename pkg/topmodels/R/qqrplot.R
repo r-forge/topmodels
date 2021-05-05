@@ -80,44 +80,44 @@ qqrplot.default <- function(object,
       delta = delta)
     confint_prob <- (1 - confint_level) / 2
     confint_prob <- c(confint_prob, 1 - confint_prob)
-    residuals_ci_lwr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[1], na.rm = TRUE)
-    residuals_ci_upr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[2], na.rm = TRUE)
-    theoretical_ci_lwr <- q2q(residuals_ci_lwr)
-    theoretical_ci_upr <- q2q(residuals_ci_upr)
+    qres_ci_lwr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[1], na.rm = TRUE)
+    qres_ci_upr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[2], na.rm = TRUE)
+    qthe_ci_lwr <- q2q(qres_ci_lwr)
+    qthe_ci_upr <- q2q(qres_ci_upr)
 
     ## FIXME: (ML) Dirty hack to get CI only for discrete values 
-    if (isTRUE(all.equal(residuals_ci_lwr, residuals_ci_upr, tol = .Machine$double.eps^0.4))) {
-      residuals_ci_lwr <- NULL
-      residuals_ci_upr <- NULL
-      theoretical_ci_lwr <- NULL
-      theoretical_ci_upr <- NULL
+    if (isTRUE(all.equal(qres_ci_lwr, qres_ci_upr, tol = .Machine$double.eps^0.4))) {
+      qres_ci_lwr <- NULL
+      qres_ci_upr <- NULL
+      qthe_ci_lwr <- NULL
+      qthe_ci_upr <- NULL
       confint <- FALSE
     }
   } else {
-    residuals_ci_lwr <- NULL
-    residuals_ci_upr <- NULL
-    theoretical_ci_lwr <- NULL
-    theoretical_ci_upr <- NULL
+    qres_ci_lwr <- NULL
+    qres_ci_upr <- NULL
+    qthe_ci_lwr <- NULL
+    qthe_ci_upr <- NULL
   }
 
   ## collect everything as data.frame
   if (any(vapply(
-    list(residuals_ci_lwr, residuals_ci_upr, theoretical_ci_lwr, 1), 
+    list(qres_ci_lwr, qres_ci_upr, qthe_ci_lwr, 1), 
     FUN = is.null, 
     FUN.VALUE = FALSE
   ))) {
     rval <- data.frame(
-      theoretical = qthe, 
-      residuals = qres
+      qthe = qthe, 
+      qres = qres
     )
   } else {
     rval <- data.frame(
-      theoretical = qthe, 
-      residuals = qres,
-      residuals_ci_lwr,
-      residuals_ci_upr,
-      theoretical_ci_lwr,
-      theoretical_ci_upr
+      qthe = qthe, 
+      qres = qres,
+      qres_ci_lwr,
+      qres_ci_upr,
+      qthe_ci_lwr,
+      qthe_ci_upr
     )
   }
   names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
@@ -167,10 +167,10 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
 
   ## combine and return
   all_names <- unique(unlist(lapply(rval, names)))
-  if (any(grepl("theoretical_1", all_names)) & any(grepl("^theoretical$", all_names))) {
+  if (any(grepl("qthe_1", all_names)) & any(grepl("^qthe$", all_names))) {
     for (i in 1:length(rval)) {
-      names(rval[[i]])[grepl("^theoretical$", names(rval[[i]]))] <- "theoretical_1";
-      names(rval[[i]])[grepl("^residuals$", names(rval[[i]]))] <- "residuals_1"
+      names(rval[[i]])[grepl("^qthe$", names(rval[[i]]))] <- "qthe_1";
+      names(rval[[i]])[grepl("^qres$", names(rval[[i]]))] <- "qres_1"
     }
   all_names <- unique(unlist(lapply(rval, names)))
   }
@@ -257,14 +257,14 @@ plot.qqrplot <- function(x,
       !is.na(attr(d, "confint_level")[j])
     ) {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("theoretical", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("qthe", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("residuals", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("qres", names(d))]), finite = TRUE)
     } else {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("^theoretical$|theoretical_[0-9]", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("^qthe$|qthe_[0-9]", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("^residuals$|residuals_[0-9]", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("^qres$|qres_[0-9]", names(d))]), finite = TRUE)
     }
 
     ## trigger plot
@@ -280,8 +280,8 @@ plot.qqrplot <- function(x,
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
 
-      x_pol <- c(sort(d$theoretical_ci_lwr), sort(d$theoretical_ci_upr, decreasing = TRUE))
-      y_pol <- c(sort(d$residuals_ci_lwr), sort(d$residuals_ci_upr, decreasing = TRUE))
+      x_pol <- c(sort(d$qthe_ci_lwr), sort(d$qthe_ci_upr, decreasing = TRUE))
+      y_pol <- c(sort(d$qres_ci_lwr), sort(d$qres_ci_upr, decreasing = TRUE))
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
@@ -295,10 +295,10 @@ plot.qqrplot <- function(x,
 
 
     ## add qq plot
-    for (i in 1L:ncol(d[grepl("residuals_[0-9]", names(d))])) {
+    for (i in 1L:ncol(d[grepl("^qres$|qres_[0-9]", names(d))])) {
       points.default(
-        d[grepl("theoretical", names(d))][, i], 
-        d[grepl("residuals", names(d))][, i], 
+        d[grepl("qthe", names(d))][, i], 
+        d[grepl("qres", names(d))][, i], 
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
@@ -353,22 +353,22 @@ points.qqrplot <- function(x,
       !is.na(attr(d, "confint_level")[j])
     ) {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("theoretical", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("qthe", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("residuals", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("qres", names(d))]), finite = TRUE)
     } else {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("^theoretical$|theoretical_[0-9]", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("^qthe$|qthe_[0-9]", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("^residuals$|residuals_[0-9]", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("^qres$|qres_[0-9]", names(d))]), finite = TRUE)
     }
 
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
 
-      x_pol <- c(sort(d$theoretical_ci_lwr), sort(d$theoretical_ci_upr, decreasing = TRUE))
-      y_pol <- c(sort(d$residuals_ci_lwr), sort(d$residuals_ci_upr, decreasing = TRUE))
+      x_pol <- c(sort(d$qthe_ci_lwr), sort(d$qthe_ci_upr, decreasing = TRUE))
+      y_pol <- c(sort(d$qres_ci_lwr), sort(d$qres_ci_upr, decreasing = TRUE))
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
@@ -382,10 +382,10 @@ points.qqrplot <- function(x,
 
 
     ## add qq plot
-    for (i in 1L:ncol(d[grepl("residuals_[0-9]", names(d))])) {
+    for (i in 1L:ncol(d[grepl("^qres$|qres_[0-9]", names(d))])) {
       points(
-        d[grepl("theoretical", names(d))][, i], 
-        d[grepl("residuals", names(d))][, i], 
+        d[grepl("qthe", names(d))][, i], 
+        d[grepl("qres", names(d))][, i], 
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
