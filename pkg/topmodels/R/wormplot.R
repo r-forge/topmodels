@@ -19,7 +19,7 @@ wormplot.default <- function(object,
                             confint_seed = 1,
                             single_graph = FALSE,
                             xlab = "Theoretical quantiles", 
-                            ylab = "Quantile residuals - theoretical quantiles",
+                            ylab = "Deviation",
                             main = "Worm plot", # FIXME: (ML) Achim prefers other title
                             ...) {
 
@@ -79,6 +79,23 @@ wormplot.default <- function(object,
     qthe_ci_upr <- NULL
   }
 
+  ## setup function to calculate ref lines (ci interval according to Van Burren and Fredriks (2001) p. 1276)
+  ## FIXME: (ML) Allow flexible trafos for `pnorm()`, `dnorm()` and `qnorm()`
+  ciplot <- function(n, level = 0.95, lz = -2.75, hz = 2.75, dz = 0.25) {
+    stopifnot(is.numeric(n), length(n) == 1)
+    stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+    stopifnot(is.numeric(lz), length(lz) == 1)
+    stopifnot(is.numeric(hz), length(hz) == 1)
+    stopifnot(is.numeric(dz), length(dz) == 1)
+
+    z <- seq(lz, hz, dz)
+    p <- pnorm(z)
+    se <- (1 / dnorm(z)) * (sqrt(p * (1 - p) / n))
+    low <- qnorm((1 - level) / 2 ) * se
+    high <- -low
+    return(list(z = z, low = as.numeric(low), high = as.numeric(high)))
+  }
+
   ## collect everything as data.frame
   if (any(vapply(
     list(qres_ci_lwr, qres_ci_upr, qthe_ci_lwr, 1), 
@@ -105,6 +122,7 @@ wormplot.default <- function(object,
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
+  attr(rval, "ref_fun") <- list(ciplot)
   attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
   class(rval) <- c("wormplot", "data.frame")
 
@@ -136,6 +154,7 @@ c.wormplot <- rbind.wormplot <- function(...) {
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
   confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
+  ref_fun <- unlist(lapply(rval, function(r) attr(r, "ref_fun")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
     as.vector(sapply(rval, function(r) attr(r, "main")))
@@ -166,6 +185,7 @@ c.wormplot <- rbind.wormplot <- function(...) {
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- confint_level
+  attr(rval, "ref_fun") <- ref_fun
   class(rval) <- c("wormplot", "data.frame")
   return(rval)
 }
@@ -181,7 +201,7 @@ plot.wormplot <- function(x,
                          xlab = NULL,
                          ylab = NULL,
                          main = NULL,
-                         col = adjustcolor("black", alpha.f = 0.2), 
+                         col = "black",
                          fill = adjustcolor("black", alpha.f = 0.2), 
                          alpha_min = 0.2, # single or n values  
                          pch = 19,
@@ -210,7 +230,7 @@ plot.wormplot <- function(x,
   ## annotation
   if (single_graph) {
     if (is.null(xlab)) xlab <- "Theoretical quantiles"
-    if (is.null(ylab)) ylab <- "Quantile residuals - theoretical quantiles"
+    if (is.null(ylab)) ylab <- "Deviation"
     if (is.null(main)) main <- "Worm plot" # FIXME: (ML) Achim prefers other title
   } else {
     if (is.null(xlab)) xlab <- TRUE
@@ -245,6 +265,16 @@ plot.wormplot <- function(x,
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
         ylim <- range(as.matrix(d[grepl("^diff_qres_qthe$|diff_qres_qthe_[0-9]", names(d))]), finite = TRUE)
     }
+
+    ## calculate ref lines
+    ## FIXME: (ML) All data should be prepared in `wormplot.default()`, but length does not fit to rval.
+    ## FIXME: (ML) Adapt to other trafos (density and quantile functions).
+    #level <- 0.95
+    #ref_x <- seq(xlim[1] - 10, xlim[2] + 10, 0.25)
+    #p <- pnorm(ref_x)
+    #se <- (1 / dnorm(ref_x)) * (sqrt(p * (1 - p) / NROW(d)))
+    #ref_low <- qnorm((1 - level) / 2) * se
+    #ref_high <- -ref_low
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
@@ -285,7 +315,16 @@ plot.wormplot <- function(x,
     if (j == 1 || (!single_graph && j > 1)) {
       if (!identical(plot_arg$ref[j], FALSE)) {
         if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+        ref_lines <- attr(d, "ref_fun")[[j]](
+          n = length(d$diff_qres_qthe), 
+          level = 0.95, 
+          lz = xlim[1] - 10, 
+          hz = xlim[2] + 10, 
+          dz = 0.25
+        )
         abline(h = 0, col = plot_arg$ref[j], lty = 2)
+        lines(ref_lines$z, ref_lines$low, col = plot_arg$ref[j], lty = 2)
+        lines(ref_lines$z, ref_lines$high, col = plot_arg$ref[j], lty = 2)
       }
     }
 
@@ -300,7 +339,7 @@ plot.wormplot <- function(x,
 points.wormplot <- function(x,
                            confint = FALSE, 
                            ref = FALSE,
-                           col = adjustcolor("black", alpha.f = 0.2), 
+                           col = "black",
                            fill = adjustcolor("black", alpha.f = 0.2), 
                            alpha_min = 0.2,
                            pch = 19,

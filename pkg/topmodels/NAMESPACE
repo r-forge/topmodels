@@ -1,8 +1,7 @@
 import("stats")
 importFrom("graphics", "abline", "axis", "box", "hist", "lines", "par", "plot", "points", "polygon", "rect", "text", "legend", "segments", "points.default", "lines.default")
-importFrom("grDevices", "n2mfrow")
-importFrom("grDevices", "adjustcolor")
-importFrom("utils", "head", "tail")
+importFrom("grDevices", "n2mfrow", "adjustcolor", "dev.interactive")
+importFrom("utils", "head", "tail", "methods")
 
 importFrom("grDevices", "col2rgb", "rgb")  # FIXME: (ML) Remove after using colorspace again
 
@@ -10,6 +9,8 @@ importFrom("grDevices", "col2rgb", "rgb")  # FIXME: (ML) Remove after using colo
 export(  
   "procast",
   "procast_setup",
+  
+  "topmodels",
 
   "newresponse",
   "newresponse.default",

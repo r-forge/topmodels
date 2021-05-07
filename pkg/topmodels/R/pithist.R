@@ -112,7 +112,7 @@ pithist.default <- function(object,
       width = diff(tmp_hist$breaks),
       ci_lwr = ci[1],
       ci_upr = ci[2],
-      pp = pp
+      ref = pp
     )
   } else {
     rval <- data.frame(
@@ -121,7 +121,7 @@ pithist.default <- function(object,
       width = diff(tmp_hist$breaks),
       ci_lwr = ci[1],
       ci_upr = ci[2],
-      pp = pp
+      ref = pp
     )
   }
 
@@ -277,9 +277,9 @@ plot.pithist <- function(x,
     } 
 
     ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$pp) 
+    pp <- unique(d$ref) 
     stopifnot(
-      "`pp` in attr of object `x` must consist of unique values per group index" =
+      "`ref` in attr of object `x` must consist of unique values per group index" =
       length(pp) == 1
     )
 
@@ -302,13 +302,13 @@ plot.pithist <- function(x,
 
     ## plot ref line 
     if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "red3"
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
       abline(h = pp, col = plot_arg$ref[j], lty = 1, lwd = 1.5)
     }
 
     ## plot confint lines
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "red3"
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
       abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
       abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
     }
@@ -374,9 +374,9 @@ plot.pithist <- function(x,
     y <- c(d$y, d$y[NROW(d)])
 
     ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$pp)
+    pp <- unique(d$ref) 
     stopifnot(
-      "`pp` in attr of object `x` must consist of unique values per group index" =
+      "`ref` in attr of object `x` must consist of unique values per group index" =
       length(pp) == 1
     )
 
@@ -462,9 +462,9 @@ lines.pithist <- function(x,
     }
 
     ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$pp)
+    pp <- unique(d$ref) 
     stopifnot(
-      "`pp` in attr of object `x` must consist of unique values per group index" =
+      "`ref` in attr of object `x` must consist of unique values per group index" =
       length(pp) == 1
     )
 
@@ -525,10 +525,10 @@ autoplot.pithist <- function(object,
   ## get CI and perfect prediction
   ci_lwr <- if (confint) unique(object$ci_lwr) else NULL
   ci_upr <- if (confint) unique(object$ci_upr) else NULL
-  pp <- unique(object$pp)
+  pp <- unique(object$ref)
   stopifnot(
-    length(pp) == 1,
-    ifelse(confint, length(ci_lwr) == 1, length(ci_lwr) == 0)
+    "`pp` in attr of object `x` must consist of unique values per group index" =
+    length(pp) == 1
   )
 
   if (style == "histogram") {
