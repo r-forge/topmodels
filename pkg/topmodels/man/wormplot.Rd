@@ -21,7 +21,7 @@ wormplot(object, \dots)
   nsim = 1L, delta = NULL, confint = TRUE, 
   confint_level = 0.95, confint_nsim = 250, confint_seed = 1, single_graph = FALSE, 
   xlab = "Theoretical quantiles", ylab = "Deviation",
-  main = "Worm plot", \dots)
+  main = NULL, \dots)
 }
 
 \arguments{

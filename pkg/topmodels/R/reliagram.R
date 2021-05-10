@@ -271,7 +271,7 @@ plot.reliagram <- function(x,
       tmp_quantile <- regmatches(main[j], regexpr("q_[0-9]+\\.?([0-9]+)?", main[j]))
       tmp_quantile <- regmatches(tmp_quantile, regexpr("[0-9]+\\.?([0-9]+)?", tmp_quantile))
       tmp_text <- sub('q_[0-9]+\\.?([0-9]+)?)', '', main[j])
-      main[j] <- as.expression(bquote(.(tmp_text)*q[.(tmp_quantile)]*")"))
+      main[j] <- as.expression(bquote(bold(.(tmp_text)*q[.(tmp_quantile)]*")")))
     }
 
     ## trigger plot

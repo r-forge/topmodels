@@ -21,7 +21,7 @@ qqrplot(object, \dots)
   nsim = 1L, delta = NULL, confint = TRUE, 
   confint_level = 0.95, confint_nsim = 250, confint_seed = 1, single_graph = FALSE, 
   xlab = "Theoretical quantiles", ylab = "Quantile residuals",
-  main = "Q-Q residuals plot", \dots)
+  main = NULL, \dots)
 }
 
 \arguments{
