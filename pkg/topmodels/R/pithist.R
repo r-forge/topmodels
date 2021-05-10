@@ -200,6 +200,7 @@ plot.pithist <- function(x,
                          main = NULL,
                          col = "black",
                          fill = adjustcolor("black", alpha.f = 0.2),
+                         border = "black",
                          alpha_min = 0.2,
                          lwd = NULL,
                          lty = 1,
@@ -232,7 +233,7 @@ plot.pithist <- function(x,
   if (is.null(ylim)) ylim <- c(NA, NA)
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
-    col, fill, alpha_min, lwd, lty
+    border, col, fill, alpha_min, lwd, lty
   )[, -1]
 
   ## annotation
@@ -296,8 +297,14 @@ plot.pithist <- function(x,
       box()
     }
 
+    if (plot_arg$fill[j] == adjustcolor("black", alpha.f = 0.2) && 
+      plot_arg$col[j] != "black") {
+      message(" * As the argument `col` is set but no argument `fill` is specified, \n   the former is used for colorizing the PIT histogram. \n * For proper usage, solely provide `fill` for histogram style plots.")
+      plot_arg$fill[j] <- plot_arg$col[j]
+    }
+
     ## plot pithist
-    rect(xleft, 0, xright, y, border = plot_arg$col[j], col = plot_arg$fill[j], 
+    rect(xleft, 0, xright, y, border = plot_arg$border[j], col = plot_arg$fill[j], 
       lty = plot_arg$lty[j], lwd = plot_arg$lwd[j])
 
     ## plot ref line 
@@ -414,7 +421,7 @@ lines.pithist <- function(x,
                           confint = FALSE,
                           ref = FALSE,
                           col = "black",
-                          fill = adjustcolor(1, alpha.f = 0.2),
+                          fill = adjustcolor("black", alpha.f = 0.2),
                           alpha_min = 0.2, 
                           lwd = 2,
                           lty = 1,

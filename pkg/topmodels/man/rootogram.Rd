@@ -164,13 +164,8 @@ x <- rpois(100, lambda = 3)
 ## glm method: fitted values via glm()
 m2 <- glm(y ~ x, family = poisson)
 
-## correctly specified Poisson model fit (mu = 3.34)
-par(mfrow = c(2, 3))
-rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
-rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
-rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
-
-## misspecified Poisson model fit (mu = 3.32)
+## correctly specified Poisson model fit
+par(mfrow = c(1, 3))
 rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
 rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
 rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
