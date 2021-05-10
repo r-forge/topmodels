@@ -41,7 +41,7 @@ qqrplot.default <- function(object,
                             single_graph = FALSE,
                             xlab = "Theoretical quantiles", 
                             ylab = "Quantile residuals",
-                            main = "Q-Q residuals plot", # FIXME: (ML) Achim prefers other title
+                            main = NULL,
                             ...) {
 
   ## sanity checks
@@ -99,6 +99,9 @@ qqrplot.default <- function(object,
     qthe_ci_lwr <- NULL
     qthe_ci_upr <- NULL
   }
+
+  ## labels
+  if (is.null(main)) main <- deparse(substitute(object))
 
   ## collect everything as data.frame
   if (any(vapply(

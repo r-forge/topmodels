@@ -20,7 +20,7 @@ wormplot.default <- function(object,
                             single_graph = FALSE,
                             xlab = "Theoretical quantiles", 
                             ylab = "Deviation",
-                            main = "Worm plot", # FIXME: (ML) Achim prefers other title
+                            main = NULL,
                             ...) {
 
   ## sanity checks
@@ -95,6 +95,9 @@ wormplot.default <- function(object,
     high <- -low
     return(list(z = z, low = as.numeric(low), high = as.numeric(high)))
   }
+
+  ## labels
+  if (is.null(main)) main <- deparse(substitute(object))
 
   ## collect everything as data.frame
   if (any(vapply(
