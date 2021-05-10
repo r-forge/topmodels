@@ -2,9 +2,12 @@ newresponse <- function(object, ...) {
   UseMethod("newresponse")
 }
 
-newresponse.default <- function(object, newdata, na.action = na.pass, ...)
-{
+newresponse.default <- function(object, 
+                                newdata, 
+                                na.action = na.pass, 
+                                ...) {
 
+  ## Sanity checks
   stopifnot(
     "`object` must be a (model) OO object:\n  * you have supplied a base object" = 
       is.object(object),
@@ -15,20 +18,27 @@ newresponse.default <- function(object, newdata, na.action = na.pass, ...)
       !is.numeric(object) # TODO: (ML) is this case already caught by `is.object()`?
   )
 
-  ## FIXME: use expand.model.frame() instead of this hand-crafted code
+  ## Get model.frame
+  ## FIXME: (Z) Use expand.model.frame() instead of this hand-crafted code
   if(missing(newdata) || is.null(newdata)) {
     mf <- model.frame(object)
   } else {
     mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
   }
   
-  ## TODO: (ML) Is this so correct and should we do that (needed for rootogram)
-  w <- model.weights(mf)
-  if(is.null(w)) w <- rep(1, NROW(mf))
+  ## Get weights
+  ## FIXME: (ML) Is this so correct and should we do that (needed for rootogram)
+  weights <- model.weights(mf)
+  if(is.null(weights)) weights <- rep(1, NROW(mf))
 
+  ## Get response
   y <- model.response(mf)
 
-  attr(y, "weights") <- w
+  ## FIXME: (ML)
+  ## * Not very nice to return attributes here
+  ## * How to guess properly if response is continous?!
+  attr(y, "response_type") <- "continuous"
+  attr(y, "weights") <- weights
   return(y)
 }
 
@@ -38,27 +48,40 @@ newresponse.glm <- function(object,
                             na.action = na.pass, 
                             ...) {
 
-  ## FIXME: use expand.model.frame() instead of this hand-crafted code
+  ## Get model.frame
+  ## FIXME: (Z) use expand.model.frame() instead of this hand-crafted code
   if(missing(newdata) || is.null(newdata)) {
     mf <- model.frame(object)
   } else {
     mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
   }
 
-  y <- model.response(mf)
-
-  ## TODO: (ML) What is the difference to `weigths()` (seems to work correct)
+  ## Get weights
+  ## FIXME: (ML) Is this so correct and should we do that (needed for rootogram)
+  ## FIXME: (ML) What is the difference to `weights()` (seems to work correct)
   weights <- model.weights(mf)
   if(is.null(weights)) weights <- rep(1, NROW(mf))
 
+  ## Get response
+  y <- model.response(mf)
+
+  ## Initialize family to get nobs and n
   nobs <- nobs(object)
   etastart <- NULL
   mustart <- NULL
   n <- NULL
   eval(object$family$initialize)
 
+  ## Get response type
+  if (object$family$family %in% "gaussian") {
+    response_type <- "continuous"
+  } else {
+    response_type <- "discrete"
+  }
+
   attr(y, "nobs") <- nobs
   attr(y, "n") <- n
   attr(y, "weights") <- weights
+  attr(y, "response_type") <- response_type
   return(y)
 }
