@@ -22,10 +22,10 @@
 \usage{
 rootogram(object, \dots)
 
-\method{rootogram}{default}(object, newdata = NULL, plot = TRUE, 
-  style = c("hanging", "standing", "suspended"), 
+\method{rootogram}{default}(object, newdata = NULL, na.action = na.pass, 
+  plot = TRUE,  style = c("hanging", "standing", "suspended"), 
   scale = c("sqrt", "raw"), breaks = NULL, width = NULL, 
-  xlab = NULL, ylab = NULL, main = NULL, \dots)
+  response_type = NULL, xlab = NULL, ylab = NULL, main = NULL, \dots)
 
 \method{plot}{rootogram}(x, style = c("hanging", "standing", "suspended"), 
   ref = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, 
@@ -41,6 +41,8 @@ rootogram(object, \dots)
     with \code{\link{procast}}.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
+  \item{na.action}{function determining what should be done with missing
+    values in \code{newdata}.  The default is to employ \code{NA}.}
   \item{plot}{logical. Should the \code{plot} method be called to
     draw the computed extended reliability diagram?}
   \item{style}{character specifying the syle of rootogram (see below).}
@@ -48,6 +50,9 @@ rootogram(object, \dots)
     square roots (default) should be drawn.}
   \item{breaks}{numeric. Breaks for the histogram intervals.}
   \item{width}{numeric. Widths of the histogram bars.}
+  \item{response_type}{To set the default values for \code{breaks} and \code{widths}.
+    Currently different defaults are available for "discrete" and "continous" responses,
+    as well as for the special case of a "logseries" response distribution.}
   \item{xlab, ylab, main}{graphical parameters.}
   \item{x}{object of class \code{"rootogram"}.}
   \item{ref}{logical. Should a reference line be plotted?}
@@ -129,10 +134,56 @@ Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
 \seealso{\code{\link[stats]{glm}}}
 
 \examples{
-require("crch")
-m1 <- glm(dist ~ speed, data = cars)
-m2 <- crch(dist ~ speed | speed, data = cars)
-plot(c(rootogram(m1, plot = FALSE), rootogram(m2, plot = FALSE)), col = c(1, 3), ref = "red")
+## plots and output
+
+## number of deaths by horsekicks in Prussian army (Von Bortkiewicz 1898)
+deaths <- rep(0:4, c(109, 65, 22, 3, 1))
+
+## fit glm model
+m1 <- glm(deaths ~ 1, family = poisson)
+rootogram(m1)
+
+## inspect output (without plotting)
+r1 <- rootogram(m1, plot = FALSE)
+r1
+
+## combine plots
+plot(c(r1, r1), col = c(1, 2), ref = 4, lty = c(1, 2))
+
+
+#-------------------------------------------------------------------------------
+
+## different styles
+
+## artificial data from negative binomial (mu = 3, theta = 2)
+## and Poisson (mu = 3) distribution
+set.seed(1090)
+y <- rnbinom(100, mu = 3, size = 2)
+x <- rpois(100, lambda = 3)
+
+## glm method: fitted values via glm()
+m2 <- glm(y ~ x, family = poisson)
+
+## correctly specified Poisson model fit (mu = 3.34)
+par(mfrow = c(2, 3))
+rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
+rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
+rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
+
+## misspecified Poisson model fit (mu = 3.32)
+rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
+rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
+rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
+par(mfrow = c(1, 1))
+
+#-------------------------------------------------------------------------------
+## linear regression with normal/Gaussian response: anorexia data
+
+data("anorexia", package = "MASS")
+
+m3 <- glm(Postwt ~ Prewt + Treat + offset(Prewt), family = gaussian, data = anorexia)
+rootogram(m3, ylim = c(-1, 4))
+abline(h = c(-1, 1), col = 4, lty = 2, lwd = 2)
 }
 
 \keyword{hplot}

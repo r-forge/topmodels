@@ -29,11 +29,13 @@ rootogram <- function(object, ...) {
 
 rootogram.default <- function(object, 
                               newdata = NULL,
+                              na.action = na.pass,
                               plot = TRUE,
                               style = c("hanging", "standing", "suspended"),
                               scale = c("sqrt", "raw"), 
                               breaks = NULL,
                               width = NULL, 
+                              response_type = NULL,
                               xlab = NULL, 
                               ylab = NULL,
                               main = NULL, 
@@ -64,15 +66,29 @@ rootogram.default <- function(object,
   }
 
   ## data and weights
-  y <- newresponse(object, newdata = newdata) # FIXME: (ML) What about na.action
+  y <- newresponse(object, newdata = newdata, na.action = na.action)
   w <- attr(y, "weights")
+  if(is.null(response_type)) response_type <- attr(y, "response_type")
+  response_type <- match.arg(response_type, c("discrete", "logseries", "continuous"))
 
-  ## breaks, midpoints, widths
-  if(is.null(breaks)) breaks <- "Sturges"
+  ## set breaks and midpoints
+  if (is.null(breaks) && response_type == "discrete") {
+    breaks <- -1L:max(y[w > 0]) + 0.5
+  } else if (is.null(breaks) && response_type == "logseries") {
+    breaks <- 0L:max(y[w > 0]) + 0.5
+  } else if (is.null(breaks)) {
+    breaks <- "Sturges"
+  }
   breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
-  # breaks <- -1L:size + 0.5 # FIXME: (ML) What about breaks for binom etc.
-  x <- (head(breaks, -1L) + tail(breaks, -1L))/2
-  if (is.null(width)) width <- 1# FIXME: (ML) What about width = 0.9 for discrete dist?
+  x <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+
+  
+  ## set widths
+  if (is.null(width) && (response_type == "discrete" || response_type == "logseries")) {
+    width <- 0.9
+  } else if (is.null(width)) {
+    width <- 1
+  }
 
   obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
 
