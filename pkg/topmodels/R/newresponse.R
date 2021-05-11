@@ -4,6 +4,11 @@ newresponse <- function(object, ...) {
 
 newresponse.default <- function(object, 
                                 newdata, 
+                                ## FIXME: (ML) 
+                                ## * Does it work as it should? 
+                                ## * Should response have no NAs when covariates have NAs. 
+                                ## * With na.pass, response and forecast won't match anymore
+                                ## * Compare rootogram()
                                 na.action = na.pass, 
                                 ...) {
 
@@ -23,7 +28,11 @@ newresponse.default <- function(object,
   if(missing(newdata) || is.null(newdata)) {
     mf <- model.frame(object)
   } else {
-    mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
+    ## FIXME: (ML) See FIXME for `na.action`: 
+    ## * Commented code of Z: this produces full response also when NAs in covariates (for na.action = na.omit)
+    ## * Uncommented code is similar to countreg
+    #mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
+    mf <- model.frame(terms(object), newdata, na.action = na.action)
   }
   
   ## Get weights
@@ -45,6 +54,11 @@ newresponse.default <- function(object,
 
 newresponse.glm <- function(object, 
                             newdata, 
+                            ## FIXME: (ML) 
+                            ## * Does it work as it should? 
+                            ## * Should response have no NAs when covariates have NAs. 
+                            ## * With na.pass, response and forecast won't match anymore
+                            ## * Compare rootogram()
                             na.action = na.pass, 
                             ...) {
 
@@ -53,7 +67,11 @@ newresponse.glm <- function(object,
   if(missing(newdata) || is.null(newdata)) {
     mf <- model.frame(object)
   } else {
-    mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
+    ## FIXME: (ML) See FIXME for `na.action`: 
+    ## * Commented code of Z: this produces full response also when NAs in covariates (for na.action = na.omit)
+    ## * Uncommented code is similar to countreg
+    #mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
+    mf <- model.frame(terms(object), newdata, na.action = na.action)
   }
 
   ## Get weights

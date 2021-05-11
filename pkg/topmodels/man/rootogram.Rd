@@ -22,7 +22,7 @@
 \usage{
 rootogram(object, \dots)
 
-\method{rootogram}{default}(object, newdata = NULL, na.action = na.pass, 
+\method{rootogram}{default}(object, newdata = NULL, 
   plot = TRUE,  style = c("hanging", "standing", "suspended"), 
   scale = c("sqrt", "raw"), breaks = NULL, width = NULL, 
   response_type = NULL, xlab = NULL, ylab = NULL, main = NULL, \dots)
@@ -30,7 +30,7 @@ rootogram(object, \dots)
 \method{plot}{rootogram}(x, style = c("hanging", "standing", "suspended"), 
   ref = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, 
   main = NULL, border = "black", fill = adjustcolor("black", alpha.f = 0.2), 
-  col = 2, lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, \dots)
+  col = 2, lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, box = FALSE, \dots)
 
 \method{autoplot}{rootogram}(object, colour = c("black", "#B61A51"),
   fill = "darkgray", size = c(1.2, 4), \dots)
@@ -41,8 +41,8 @@ rootogram(object, \dots)
     with \code{\link{procast}}.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
-  \item{na.action}{function determining what should be done with missing
-    values in \code{newdata}.  The default is to employ \code{NA}.}
+  %\item{na.action}{function determining what should be done with missing
+  %  values in \code{newdata}.  The default is to employ \code{NA}.}
   \item{plot}{logical. Should the \code{plot} method be called to
     draw the computed extended reliability diagram?}
   \item{style}{character specifying the syle of rootogram (see below).}
@@ -56,7 +56,7 @@ rootogram(object, \dots)
   \item{xlab, ylab, main}{graphical parameters.}
   \item{x}{object of class \code{"rootogram"}.}
   \item{ref}{logical. Should a reference line be plotted?}
-  \item{xlim, ylim, border, fill, col, lwd, pch, lty, type, axes}{graphical
+  \item{xlim, ylim, border, fill, col, lwd, pch, lty, type, axes, box}{graphical
     parameters. These may pertain either to the whole plot or just the
     histogram or just the fitted line.}
   \item{colour, size}{graphical parameters passed to \code{geom_line}

@@ -29,7 +29,7 @@ rootogram <- function(object, ...) {
 
 rootogram.default <- function(object, 
                               newdata = NULL,
-                              na.action = na.pass,
+                              #na.action = na.pass, # FIXME: (ML) na.action must be na.omit, see newresponse()
                               plot = TRUE,
                               style = c("hanging", "standing", "suspended"),
                               scale = c("sqrt", "raw"), 
@@ -66,7 +66,7 @@ rootogram.default <- function(object,
   }
 
   ## data and weights
-  y <- newresponse(object, newdata = newdata, na.action = na.action)
+  y <- newresponse(object, newdata = newdata, na.action = na.omit)
   w <- attr(y, "weights")
   if(is.null(response_type)) response_type <- attr(y, "response_type")
   response_type <- match.arg(response_type, c("discrete", "logseries", "continuous"))
@@ -102,7 +102,11 @@ rootogram.default <- function(object,
         at = breaks[i], drop = TRUE) 
   }
   expctd <- colSums(p * w)
-  ## FIXME: (ML) Do we need terms here? No info in `newresponse()` or `procast()` output?
+  ## FIXME: (ML) Do we need terms here? No info in `newresponse()` or `procast()` output? What did I mean?
+  ## FIXME: (ML) 
+  ## * This code will fail if NAs in response, newresponse() omits cases, procast() not.
+  ## * Same error in countreg::procast.glm()
+  ## * Should we allow other na.actions? What if NAs in covariates: newresponse will not match to forecast.
 
   ## raw vs. sqrt scale
   ## FIXME: (ML) Move scale in plot fun: Let it there (Z)
@@ -195,6 +199,7 @@ plot.rootogram <- function(x,
                            lty = 1, 
                            type = NULL, 
                            axes = TRUE, 
+                           box = FALSE,
                            ...) {
 
   ## sanity checks
@@ -203,6 +208,7 @@ plot.rootogram <- function(x,
   ## `border` and `fill` w/i `rect()`
   ##  `col`, `lwd`, `pch`, `lty` and `type` w/i `lines()`
   stopifnot(is.logical(axes))
+  stopifnot(is.logical(box))
 
   ## set style
   style <- match.arg(style)
@@ -219,7 +225,7 @@ plot.rootogram <- function(x,
   if (is.null(ylim)) ylim <- c(NA, NA)
   plot_arg <- data.frame(1:n, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    border, fill, col, lwd, pch, lty, type, axes
+    border, fill, col, lwd, pch, lty, type, axes, box
   )[, -1]
 
   ## annotation
@@ -246,7 +252,6 @@ plot.rootogram <- function(x,
     ytop <- d$y + d$height
     
     ## get xlim and ylim
-    ## get xlim and ylim
     if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) xlim <- range(c(xleft, xright))
     if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) ylim <- range(c(ybottom, ytop, d$line))
 
@@ -256,6 +261,9 @@ plot.rootogram <- function(x,
     if(plot_arg$axes[j]) {
       axis(1)
       axis(2)
+    }
+    if(plot_arg$box[j]) {
+      box()
     }
 
     ## plot rootogram
