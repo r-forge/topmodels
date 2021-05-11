@@ -212,6 +212,8 @@ plot.reliagram <- function(x,
                            add_info = TRUE, # single or n values
                            extend_left = NULL, # either null or logical of length 1 / n
                            extend_right = NULL, # either null or logical of length 1 / n
+                           axes = TRUE,
+                           box = TRUE,
                            ...) {
   ## sanity checks
   ## lengths of all arguments are checked by recycling; `ref` w/i `abline()`; `xlim`, `ylim`,
@@ -223,6 +225,8 @@ plot.reliagram <- function(x,
   stopifnot(is.logical(add_info))
   stopifnot(is.null(extend_left) || is.logical(extend_left))
   stopifnot(is.null(extend_right) || is.logical(extend_right))
+  stopifnot(is.logical(axes))
+  stopifnot(is.logical(box))
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
@@ -233,7 +237,7 @@ plot.reliagram <- function(x,
   if (is.null(extend_right)) extend_right <- NA
   plot_arg <- data.frame(1:n, minimum, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
-    col, fill, alpha_min, lwd, pch, lty, type, add_info, extend_left, extend_right
+    col, fill, alpha_min, lwd, pch, lty, type, add_info, extend_left, extend_right, axes, box
   )[, -1]
 
   ## annotation
@@ -280,9 +284,15 @@ plot.reliagram <- function(x,
         type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
         ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j],
         ylab = ylab[j], main = main[j],
-        xaxs = "i", yaxs = "i", ...
+        xaxs = "i", yaxs = "i", axes = FALSE, ...
       )
-      box()
+      if(plot_arg$axes[j]) {
+        axis(1)
+        axis(2)
+      }
+      if(plot_arg$box[j]) {
+        box()
+      }
     }
 
     ## plot confint polygon

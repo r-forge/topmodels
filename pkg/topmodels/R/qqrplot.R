@@ -209,6 +209,8 @@ plot.qqrplot <- function(x,
                          fill = adjustcolor("black", alpha.f = 0.2), 
                          alpha_min = 0.2, # single or n values  
                          pch = 19,
+                         axes = TRUE,
+                         box = TRUE,
                          ...) {
 
   ## sanity checks
@@ -218,6 +220,8 @@ plot.qqrplot <- function(x,
   ## `confint`, `fill` in `polygon()`
   ## `alpha_min` w/i colorspace fun 
   stopifnot(is.logical(single_graph))
+  stopifnot(is.logical(axes))
+  stopifnot(is.logical(box))
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
@@ -228,7 +232,7 @@ plot.qqrplot <- function(x,
   if (is.null(ylim)) ylim <- c(NA, NA)
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    col, fill, alpha_min, pch 
+    col, fill, alpha_min, pch, axes, box
   )[, -1]
 
   ## annotation
@@ -274,9 +278,15 @@ plot.qqrplot <- function(x,
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
         type = "n", xlim = xlim, ylim = ylim,
-        xlab = xlab[j], ylab = ylab[j], main = main[j], ...
+        xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...
       )
-      box()
+      if(plot_arg$axes[j]) {
+        axis(1)
+        axis(2)
+      }
+      if(plot_arg$box[j]) {
+        box()
+      }
     }
 
     ## plot confint polygon

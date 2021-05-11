@@ -204,6 +204,8 @@ plot.pithist <- function(x,
                          alpha_min = 0.2,
                          lwd = NULL,
                          lty = 1,
+                         axes = TRUE,
+                         box = TRUE,
                          ...) {
 
   ## sanity checks
@@ -211,6 +213,8 @@ plot.pithist <- function(x,
   ## `xlim`, `ylim`, xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
   ## `alpha_min` w/i colorspace fun 
   stopifnot(is.logical(single_graph))
+  stopifnot(is.logical(axes))
+  stopifnot(is.logical(box))
   if (single_graph) stopifnot(
     "for `single_graph` all `freq` in attr of object `x` must be of the same type" = 
     length(unique(attr(x, "freq"))) == 1
@@ -233,7 +237,7 @@ plot.pithist <- function(x,
   if (is.null(ylim)) ylim <- c(NA, NA)
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
-    border, col, fill, alpha_min, lwd, lty
+    border, col, fill, alpha_min, lwd, lty, axes, box
   )[, -1]
 
   ## annotation
@@ -292,9 +296,15 @@ plot.pithist <- function(x,
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
         type = "n", xlim = xlim, ylim = ylim,
-        xlab = xlab[j], ylab = ylab[j], main = main[j], ...
+        xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...
       )
-      box()
+      if(plot_arg$axes[j]) {
+        axis(1)
+        axis(2)
+      }
+      if(plot_arg$box[j]) {
+        box()
+      }
     }
 
     if (plot_arg$fill[j] == adjustcolor("black", alpha.f = 0.2) && 
@@ -353,9 +363,15 @@ plot.pithist <- function(x,
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
         type = "n", xlim = xlim, ylim = ylim,
-        xlab = xlab[j], ylab = ylab[j], xaxs = "i", main = main[j], ...
+        xlab = xlab[j], ylab = ylab[j], xaxs = "i", main = main[j], axes = FALSE, ...
       )
-      box()
+      if(plot_arg$axes[j]) {
+        axis(1)
+        axis(2)
+      }
+      if(plot_arg$box[j]) {
+        box()
+      }
     }
 
     ## plot confint polygon
