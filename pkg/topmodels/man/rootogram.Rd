@@ -27,12 +27,11 @@ rootogram(object, \dots)
   scale = c("sqrt", "raw"), breaks = NULL, width = NULL, 
   response_type = NULL, xlab = NULL, ylab = NULL, main = NULL, \dots)
 
-\method{plot}{rootogram}(x, style = c("hanging", "standing", "suspended"), 
-  ref = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, 
-  main = NULL, border = "black", fill = adjustcolor("black", alpha.f = 0.2), 
+\method{plot}{rootogram}(x, ref = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, 
+  ylab = NULL, main = NULL, border = "black", fill = adjustcolor("black", alpha.f = 0.2), 
   col = 2, lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, box = FALSE, \dots)
 
-\method{autoplot}{rootogram}(object, colour = c("black", "#B61A51"),
+\method{autoplot}{rootogram}(object, colour = c(1, 2),
   fill = "darkgray", size = c(1.2, 4), \dots)
 }
 

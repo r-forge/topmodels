@@ -184,7 +184,6 @@ c.rootogram <- rbind.rootogram <- function(...)
 }
 
 plot.rootogram <- function(x,
-                           style = c("hanging", "standing", "suspended"),
                            ref = TRUE,
                            xlim = NULL, 
                            ylim = NULL, 
@@ -209,9 +208,6 @@ plot.rootogram <- function(x,
   ##  `col`, `lwd`, `pch`, `lty` and `type` w/i `lines()`
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
-
-  ## set style
-  style <- match.arg(style)
 
   ## handling of groups
   if(is.null(x$group)) x$group <- 1L
@@ -290,8 +286,11 @@ plot.rootogram <- function(x,
 
 
 autoplot.rootogram <- function(object,
-  colour = c("black", "#B61A51"), fill = "darkgray", size = c(1.2, 4), ...)
-{
+                               colour = c(1, 2),
+                               fill = "darkgray",
+                               size = c(1.2, 4), 
+                               ...) {
+
   ## determine grouping
   class(object) <- "data.frame"
   if(is.null(object$group)) object$group <- 1L
@@ -306,7 +305,7 @@ autoplot.rootogram <- function(object,
     ggplot2::geom_line(colour = colour[2L], size = size[1L]) +
     ggplot2::geom_hline(yintercept = 0)
   if(all(table(object$group) <= 20L)) rval <- rval + ggplot2::geom_point(colour = colour[2L], size = size[2L])
-
+  
   ## grouping (if any)
   if(n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
   
@@ -319,7 +318,7 @@ autoplot.rootogram <- function(object,
 }
 
 
-## FIXME: (ML) Implement
+## FIXME: (ML) Should this be implemented?
 #"+.rootogram" <- function(e1, e2) {
 #  style <- unique(c(attr(e1, "style"), attr(e2, "style")))
 #  if(length(style) > 1L) {
