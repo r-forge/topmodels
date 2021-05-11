@@ -71,20 +71,60 @@ topmodels <- function(object,
     }
   }
 
-  ## prepare plotting arguments (needed to display main titles correct)
+  ## get call and set topmodel() args to NULL 
   mc <- as.list(match.call())[-1]
   mc$which <- NULL
   mc$ask <- NULL
   mc$spar <- NULL
   mc$pages <- NULL
-  # FIXME: (ML) Make only valid arguments in ... are passed on to functions
 
+  ## get possible arguments
+  arg_avail <- list()
+  arg_avail[["rootogram"]] <- unique(names(c(formals(rootogram.default), formals(plot.rootogram))))
+  arg_avail[["pithist"]] <- unique(names(c(formals(pithist.default), formals(plot.pithist))))
+  arg_avail[["reliagram"]] <- unique(names(c(formals(reliagram.default), formals(plot.reliagram))))
+  arg_avail[["qqrplot"]] <- unique(names(c(formals(qqrplot.default), formals(plot.qqrplot))))
+  arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(plot.wormplot))))
+
+  arg_avail <- lapply(arg_avail, function(x) unique(c(x, names(par()))))
+  arg_avail <- lapply(arg_avail, function(x) x[x != "..."])
+
+  ## warning if any provided arg is not valid argument
+  if (any(!(names(mc) %in% unique(do.call("c", arg_avail))))) {
+    warning(sprintf(
+      "The following arguments are not valid in any of the topmodels' plotting functions: %s", 
+      paste0(names(mc)[!(names(mc) %in% unique(do.call("c", arg_avail)))], collapse = ",")
+    ))
+  }
+
+  ## prepare a list of arguments for each plot and fill it with arguments
+  mc <- lapply(mc, function(x) if (typeof(x) == "language") eval(x) else x)
+  arg <- list("rootogram" = mc, "pithist" = mc, "reliagram" = mc, "qqrplot" = mc, "wormplot" = mc)
+  arg <- lapply(seq_along(arg), # check if named vector is provided and any of the names matches function name 
+    function(idx) lapply(arg[[idx]], 
+      function(x) {
+        if (is.null(names(x))) {
+          x 
+        } else if (!is.null(names(x)) && !names(arg)[idx] %in% names(x)) {
+          NULL 
+        } else {
+          x[names(x) == names(arg)[idx]]
+        }
+      }
+    )
+  )
+  arg <- lapply(arg, function(x) x[!sapply(x, is.null)]) # remove NULLs from list
+
+  ## look up if provided arguments match possible arguments
+  arg <- lapply(seq_along(arg), function(idx) arg[[idx]][names(arg[[idx]]) %in% arg_avail[[idx]]]) 
+
+  ## call functions and prepare return value
   rval <- list()
-  if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, mc)
-  if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, mc)
-  if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, mc)
-  if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, mc)
-  if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, mc)
+  if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
+  if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
+  if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
+  if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
+  if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
 
   return(invisible(rval))
 }
