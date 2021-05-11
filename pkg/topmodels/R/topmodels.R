@@ -99,6 +99,15 @@ topmodels <- function(object,
 
   ## prepare a list of arguments for each plot and fill it with arguments
   mc <- lapply(mc, function(x) if (typeof(x) == "language") eval(x) else x)
+
+  tmp_check <- sapply(mc, function(x) (length(x) > 1 && is.null(names(x))) || any(!names(x) %in% which))
+  if (any(tmp_check)) {
+    warning(sprintf(
+      "The following arguments are not correctly specified and therefore (partially) omitted: %s", 
+      paste0(names(mc)[tmp_check], collapse = ",")
+    ))
+  }
+
   arg <- list("rootogram" = mc, "pithist" = mc, "reliagram" = mc, "qqrplot" = mc, "wormplot" = mc)
   arg <- lapply(seq_along(arg), # check if named vector is provided and any of the names matches function name 
     function(idx) lapply(arg[[idx]], 
@@ -113,6 +122,7 @@ topmodels <- function(object,
       }
     )
   )
+
   arg <- lapply(arg, function(x) x[!sapply(x, is.null)]) # remove NULLs from list
 
   ## look up if provided arguments match possible arguments
