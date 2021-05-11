@@ -110,17 +110,17 @@ qqrplot.default <- function(object,
     FUN.VALUE = FALSE
   ))) {
     rval <- data.frame(
-      qthe = qthe, 
-      qres = qres
+      x = qthe, 
+      y = qres
     )
   } else {
     rval <- data.frame(
-      qthe = qthe, 
-      qres = qres,
-      qres_ci_lwr,
-      qres_ci_upr,
-      qthe_ci_lwr,
-      qthe_ci_upr
+      x = qthe, 
+      y = qres,
+      y_ci_lwr = qres_ci_lwr,
+      y_ci_upr = qres_ci_upr,
+      x_ci_lwr = qthe_ci_lwr,
+      x_ci_upr = qthe_ci_upr
     )
   }
   names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
@@ -170,10 +170,10 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
 
   ## combine and return
   all_names <- unique(unlist(lapply(rval, names)))
-  if (any(grepl("qthe_1", all_names)) & any(grepl("^qthe$", all_names))) {
+  if (any(grepl("x_1", all_names)) & any(grepl("^x$", all_names))) {
     for (i in 1:length(rval)) {
-      names(rval[[i]])[grepl("^qthe$", names(rval[[i]]))] <- "qthe_1";
-      names(rval[[i]])[grepl("^qres$", names(rval[[i]]))] <- "qres_1"
+      names(rval[[i]])[grepl("^x$", names(rval[[i]]))] <- "x_1";
+      names(rval[[i]])[grepl("^y$", names(rval[[i]]))] <- "y_1"
     }
   all_names <- unique(unlist(lapply(rval, names)))
   }
@@ -260,14 +260,14 @@ plot.qqrplot <- function(x,
       !is.na(attr(d, "confint_level")[j])
     ) {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("qthe", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("qres", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
     } else {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("^qthe$|qthe_[0-9]", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("^qres$|qres_[0-9]", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
     }
 
     ## trigger plot
@@ -283,8 +283,8 @@ plot.qqrplot <- function(x,
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
 
-      x_pol <- c(sort(d$qthe_ci_lwr), sort(d$qthe_ci_upr, decreasing = TRUE))
-      y_pol <- c(sort(d$qres_ci_lwr), sort(d$qres_ci_upr, decreasing = TRUE))
+      x_pol <- c(sort(d$x_ci_lwr), sort(d$x_ci_upr, decreasing = TRUE))
+      y_pol <- c(sort(d$y_ci_lwr), sort(d$y_ci_upr, decreasing = TRUE))
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
@@ -298,10 +298,10 @@ plot.qqrplot <- function(x,
 
 
     ## add qq plot
-    for (i in 1L:ncol(d[grepl("^qres$|qres_[0-9]", names(d))])) {
+    for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
       points.default(
-        d[grepl("qthe", names(d))][, i], 
-        d[grepl("qres", names(d))][, i], 
+        d[grepl("x", names(d))][, i], 
+        d[grepl("y", names(d))][, i], 
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
@@ -356,22 +356,22 @@ points.qqrplot <- function(x,
       !is.na(attr(d, "confint_level")[j])
     ) {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("qthe", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("qres", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
     } else {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("^qthe$|qthe_[0-9]", names(d))]), finite = TRUE)
+        xlim <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
       if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("^qres$|qres_[0-9]", names(d))]), finite = TRUE)
+        ylim <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
     }
 
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
 
-      x_pol <- c(sort(d$qthe_ci_lwr), sort(d$qthe_ci_upr, decreasing = TRUE))
-      y_pol <- c(sort(d$qres_ci_lwr), sort(d$qres_ci_upr, decreasing = TRUE))
+      x_pol <- c(sort(d$x_ci_lwr), sort(d$x_ci_upr, decreasing = TRUE))
+      y_pol <- c(sort(d$y_ci_lwr), sort(d$y_ci_upr, decreasing = TRUE))
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
@@ -385,10 +385,10 @@ points.qqrplot <- function(x,
 
 
     ## add qq plot
-    for (i in 1L:ncol(d[grepl("^qres$|qres_[0-9]", names(d))])) {
+    for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
       points(
-        d[grepl("qthe", names(d))][, i], 
-        d[grepl("qres", names(d))][, i], 
+        d[grepl("x", names(d))][, i], 
+        d[grepl("y", names(d))][, i], 
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }

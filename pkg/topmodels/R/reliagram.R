@@ -160,8 +160,8 @@ reliagram.default <- function(object,
 
     ## collect everything as data.frame
     rval_i <- data.frame(
-      obs_rf,
-      mean_pr,
+      x = mean_pr,
+      y = obs_rf,
       n_pred,
       ci_lwr,
       ci_upr
@@ -291,9 +291,9 @@ plot.reliagram <- function(x,
       polygon(
         na.omit(c(
           ifelse(plot_arg$extend_left[j], 0, NA),
-          d[min_idx, "mean_pr"],
+          d[min_idx, "x"],
           ifelse(plot_arg$extend_right[j], 1, NA),
-          rev(d[min_idx, "mean_pr"]),
+          rev(d[min_idx, "x"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
         na.omit(c(
@@ -327,7 +327,7 @@ plot.reliagram <- function(x,
     } 
 
     ## plot reliability line
-    lines(obs_rf ~ mean_pr, d[min_idx, ],
+    lines(y ~ x, d[min_idx, ],
       type = plot_arg$type[j], lwd = plot_arg$lwd[j],
       pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...
     )
@@ -421,9 +421,9 @@ lines.reliagram <- function(x,
       polygon(
         na.omit(c(
           ifelse(plot_arg$extend_left[j], 0, NA),
-          d[min_idx, "mean_pr"],
+          d[min_idx, "x"],
           ifelse(plot_arg$extend_right[j], 1, NA),
-          rev(d[min_idx, "mean_pr"]),
+          rev(d[min_idx, "x"]),
           ifelse(plot_arg$extend_left[j], 0, NA)
         )),
         na.omit(c(
@@ -445,7 +445,7 @@ lines.reliagram <- function(x,
     }
 
     ## plot reliability line
-    lines(obs_rf ~ mean_pr, d[min_idx, ],
+    lines(y ~ x, d[min_idx, ],
       type = plot_arg$type[j], lwd = plot_arg$lwd[j],
       pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...
     )
