@@ -31,6 +31,7 @@ rootogram.default <- function(object,
                               newdata = NULL,
                               #na.action = na.pass, # FIXME: (ML) na.action must be na.omit, see newresponse()
                               plot = TRUE,
+                              flavor = NULL,
                               style = c("hanging", "standing", "suspended"),
                               scale = c("sqrt", "raw"), 
                               breaks = NULL,
@@ -44,6 +45,11 @@ rootogram.default <- function(object,
   ## `object` and `newdata` w/i `newrepsone()`
   ## `breaks` w/i `hist()`
   stopifnot(is.logical(plot))
+  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
+  stopifnot(
+    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" = 
+    is.null(flavor) || !inherits(flavor, "try-error")
+  )
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1))
   stopifnot(length(xlab) == 1 | length(xlab) == 0)
@@ -53,6 +59,13 @@ rootogram.default <- function(object,
   ## match arguments
   scale <- match.arg(scale)
   style <- match.arg(style)
+
+  ## set flavor
+  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
+    flavor <- "tidyverse"
+  } else if (is.null(flavor)) {
+    flavor <- "base"
+  } 
 
   ## default annotation
   if (is.null(xlab)) {
@@ -135,10 +148,18 @@ rootogram.default <- function(object,
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  class(rval) <- c("rootogram", "data.frame")
-  
+
+  if (flavor == "base") {
+    class(rval) <- c("rootogram", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("rootogram", class(rval))
+  }
+
   ## also plot by default
-  if(plot) {
+  if (plot & flavor == "tidyverse") {
+    try(print(ggplot2::autoplot(rval, ...)))
+  } else if (plot) {
     try(plot(rval, ...))
   }
   
@@ -147,10 +168,22 @@ rootogram.default <- function(object,
  
 }
 
-c.rootogram <- rbind.rootogram <- function(...)
-{
+c.rootogram <- rbind.rootogram <- function(...) {
+
   ## list of rootograms
   rval <- list(...)
+
+  ## set flavor to tidyverse if any rval is a tibble
+  if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
+    flavor <- "tidyverse"
+  } else {
+    flavor <- "base"
+  }
+
+  ## convert always to data.frame
+  if (flavor == "tidyverse") {
+    rval <- lapply(rval, as.data.frame)
+  }
   
   ## group sizes
   for(i in seq_along(rval)) {
@@ -171,7 +204,7 @@ c.rootogram <- rbind.rootogram <- function(...)
   }
   n <- unlist(n)
 
-  ## combine and return
+  ## combine
   rval <- do.call("rbind.data.frame", rval)
   rval$group <- if(length(n) < 2L) NULL else rep.int(seq_along(n), n)
   attr(rval, "style") <- style
@@ -179,9 +212,19 @@ c.rootogram <- rbind.rootogram <- function(...)
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  class(rval) <- c("rootogram", "data.frame")
+ 
+  ## set class according to flavor
+  if (flavor == "base") {
+    class(rval) <- c("rootogram", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("rootogram", class(rval))
+  }
+
+  ## return
   return(rval)
 }
+
 
 plot.rootogram <- function(x,
                            ref = TRUE,
@@ -208,6 +251,9 @@ plot.rootogram <- function(x,
   ##  `col`, `lwd`, `pch`, `lty` and `type` w/i `lines()`
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
+
+  ## convert always to data.frame
+  x <- as.data.frame(x)
 
   ## handling of groups
   if(is.null(x$group)) x$group <- 1L
