@@ -23,7 +23,7 @@
 rootogram(object, \dots)
 
 \method{rootogram}{default}(object, newdata = NULL, 
-  plot = TRUE,  style = c("hanging", "standing", "suspended"), 
+  plot = TRUE,  flavor = NULL, style = c("hanging", "standing", "suspended"), 
   scale = c("sqrt", "raw"), breaks = NULL, width = NULL, 
   response_type = NULL, xlab = NULL, ylab = NULL, main = NULL, \dots)
 
@@ -44,6 +44,11 @@ rootogram(object, \dots)
   %  values in \code{newdata}.  The default is to employ \code{NA}.}
   \item{plot}{logical. Should the \code{plot} method be called to
     draw the computed extended reliability diagram?}
+  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
+    graphic, accordingly the invisible return value is either a \code{data.frame}
+    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
+    "tidyverse", or it's chosen automatically conditional
+    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
   \item{style}{character specifying the syle of rootogram (see below).}
   \item{scale}{character specifying whether raw frequencies or their
     square roots (default) should be drawn.}
