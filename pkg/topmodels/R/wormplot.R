@@ -229,6 +229,8 @@ plot.wormplot <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.null(xlim)) xlim <- c(NA, NA)
   if (is.null(ylim)) ylim <- c(NA, NA)
+  if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
+  if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     col, fill, alpha_min, pch, axes, box 
@@ -262,15 +264,23 @@ plot.wormplot <- function(x,
       !identical(plot_arg$confint[j], FALSE) && 
       !is.na(attr(d, "confint_level")[j])
     ) {
-      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
-      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
+        tmp <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
+        plot_arg[j, c("xlim1", "xlim2")] <- tmp
+      }
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
+        tmp <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
+        plot_arg[j, c("ylim1", "ylim2")] <- tmp
+      }
     } else {
-      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-        xlim <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
-      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-        ylim <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
+        tmp <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
+        plot_arg[j, c("xlim1", "xlim2")] <- tmp
+      }
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
+        tmp <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
+        plot_arg[j, c("ylim1", "ylim2")] <- tmp
+      }
     }
 
     ## calculate ref lines
@@ -286,7 +296,8 @@ plot.wormplot <- function(x,
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
-        type = "n", xlim = xlim, ylim = ylim,
+        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
+        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
         xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...
       )
       if(plot_arg$axes[j]) {
@@ -331,8 +342,8 @@ plot.wormplot <- function(x,
         ref_lines <- attr(d, "ref_fun")[[j]](
           n = length(d$y), 
           level = 0.95, 
-          lz = xlim[1] - 10, 
-          hz = xlim[2] + 10, 
+          lz = plot_arg$xlim1[j] - 10, 
+          hz = plot_arg$xlim2[j] + 10, 
           dz = 0.25
         )
         abline(h = 0, col = plot_arg$ref[j], lty = 2)

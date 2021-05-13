@@ -39,7 +39,7 @@ pithist.default <- function(object,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
                             single_graph = FALSE,
-                            xlim = c(0, 1),
+                            xlim = c(0, 1),  # FIXME: (ML) Different for other plot functions
                             ylim = NULL,
                             xlab = "PIT",
                             ylab = if (freq) "Frequency" else "Density",
@@ -227,6 +227,7 @@ plot.pithist <- function(x,
   ## set style
   style <- match.arg(style)
   if (n > 1 && single_graph && style == "histogram"){
+    message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "lines"
   }
 
@@ -234,7 +235,10 @@ plot.pithist <- function(x,
   if (is.null(lwd)) lwd <- if (style == "histogram") 1 else 2
 
   ## recycle arguments for plotting to match the number of groups
+  if (is.null(xlim)) xlim <- c(NA, NA)
   if (is.null(ylim)) ylim <- c(NA, NA)
+  if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
+  if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
     border, col, fill, alpha_min, lwd, lty, axes, box
@@ -289,13 +293,16 @@ plot.pithist <- function(x,
     )
 
     ## get xlim and ylim
-    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) xlim <- range(c(xleft, xright))
-    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) ylim <- range(c(0, y, ci_lwr, ci_upr))
+    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+      plot_arg[j, c("xlim1", "xlim2")] <- range(c(xleft, xright))
+    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+      plot_arg[j, c("ylim1", "ylim2")] <- range(c(0, y, ci_lwr, ci_upr))
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
-        type = "n", xlim = xlim, ylim = ylim,
+        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]), 
+        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
         xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...
       )
       if(plot_arg$axes[j]) {
@@ -356,13 +363,16 @@ plot.pithist <- function(x,
     }
 
     ## get xlim and ylim
-    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) xlim <- range(x)
-    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) ylim <- range(c(0, y, ci_lwr, ci_upr))
+    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+      plot_arg[j, c("xlim1", "xlim2")] <- range(x)
+    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+      plot_arg[j, c("ylim1", "ylim2")] <- range(c(0, y, ci_lwr, ci_upr))
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
-        type = "n", xlim = xlim, ylim = ylim,
+        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]), 
+        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
         xlab = xlab[j], ylab = ylab[j], xaxs = "i", main = main[j], axes = FALSE, ...
       )
       if(plot_arg$axes[j]) {
@@ -425,9 +435,13 @@ plot.pithist <- function(x,
       for (i in 1L:n) pitlines_plot(x[x$group == i, ], ...)
     }
   } else {
-    for (i in 1L:n) {
-      pitlines_trigger(x[x$group == i, ], ...)
-      pitlines_plot(x[x$group == i, ], ...)
+    if (style == "histogram") {
+      for (i in 1L:n) pithist_plot(x[x$group == i, ], ...)
+    } else {
+      for (i in 1L:n) {
+        pitlines_trigger(x[x$group == i, ], ...)
+        pitlines_plot(x[x$group == i, ], ...)
+      }
     }
   }
 }

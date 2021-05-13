@@ -31,8 +31,9 @@ rootogram(object, \dots)
   ylab = NULL, main = NULL, border = "black", fill = adjustcolor("black", alpha.f = 0.2), 
   col = 2, lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, box = FALSE, \dots)
 
-\method{autoplot}{rootogram}(object, colour = c(1, 2),
-  fill = "darkgray", size = c(1.2, 4), \dots)
+\method{autoplot}{rootogram}(object, ref = TRUE, border = "black", 
+  fill = "darkgray", colour = 2, size = 1.2, shape = 19,
+  linetype = 1, type = NULL, \dots)
 }
 
 \arguments{
@@ -63,7 +64,7 @@ rootogram(object, \dots)
   \item{xlim, ylim, border, fill, col, lwd, pch, lty, type, axes, box}{graphical
     parameters. These may pertain either to the whole plot or just the
     histogram or just the fitted line.}
-  \item{colour, size}{graphical parameters passed to \code{geom_line}
+  \item{colour, size, shape, linetype}{graphical parameters passed to \code{geom_line}
     and \code{geom_point}, respectively.}
   \item{\dots}{further graphical parameters passed to the plotting
     function.}
