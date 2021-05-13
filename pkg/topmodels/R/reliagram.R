@@ -235,6 +235,8 @@ plot.reliagram <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.null(extend_left)) extend_left <- NA
   if (is.null(extend_right)) extend_right <- NA
+  if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
+  if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, minimum, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
     col, fill, alpha_min, lwd, pch, lty, type, add_info, extend_left, extend_right, axes, box

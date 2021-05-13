@@ -265,6 +265,8 @@ plot.rootogram <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.null(xlim)) xlim <- c(NA, NA)
   if (is.null(ylim)) ylim <- c(NA, NA)
+  if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
+  if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     border, fill, col, lwd, pch, lty, type, axes, box
@@ -294,11 +296,14 @@ plot.rootogram <- function(x,
     ytop <- d$y + d$height
     
     ## get xlim and ylim
-    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) xlim <- range(c(xleft, xright))
-    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) ylim <- range(c(ybottom, ytop, d$line))
+    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+      plot_arg[j, c("xlim1", "xlim2")] <- range(c(xleft, xright))
+    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+      plot_arg[j, c("ylim1", "ylim2")] <- range(c(ybottom, ytop, d$line))
 
     ## trigger plot
-    plot(0, 0, type = "n", xlim = xlim, ylim = ylim,
+    plot(0, 0, type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
+      ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), 
       xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...)
     if(plot_arg$axes[j]) {
       axis(1)
@@ -332,10 +337,23 @@ plot.rootogram <- function(x,
 
 
 autoplot.rootogram <- function(object,
-                               colour = c(1, 2),
+                               ref = TRUE,
+                               #xlim = NULL, 
+                               #ylim = NULL, 
+                               #xlab = NULL, 
+                               #ylab = NULL, 
+                               #main = NULL,
+                               border = "black",  
                                fill = "darkgray",
-                               size = c(1.2, 4), 
+                               colour = 2, #col
+                               size = 1.2, #lwd 
+                               shape = 19, #pch
+                               linetype = 1, #lty
+                               type = NULL, 
+                               #axes = TRUE, 
+                               #box = FALSE,
                                ...) {
+
 
   ## determine grouping
   class(object) <- "data.frame"
@@ -344,16 +362,37 @@ autoplot.rootogram <- function(object,
   object$group <- factor(object$group, levels = 1L:n, 
     labels = make.names(attr(object, "main"), unique = TRUE))
 
+  ## arguments for plotting
+  if(is.null(type)) type <- ifelse(any(table(object$group) > 20L), "l", "b")
+
+  ## recycle arguments for plotting to match the number of groups
+  if(is.logical(ref)) ref <- ifelse(ref, 1, NA)  # get colors right 
+  plot_arg <- data.frame(1:n, fill, colour, size, shape, ref, linetype)[, -1]
+
+  ## recycle arguments for plotting to match the number of groups
+  plot_arg2 <- data.frame(1:n, border, size, type, colour)[, -1]
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+  plot_arg2$type[plot_arg2$type == "l"] <- NA  # get colors right
+  plot_arg2$type[!is.na(plot_arg2$type)] <- plot_arg2$colour[!is.na(plot_arg2$type)]  # get colors right
+
   ## rectangles and fitted lines
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "x - width/2", xmax = "x + width/2", 
       ymin = "y", ymax = "y + height", x = "x", y = "line")) +
-    ggplot2::geom_rect(colour = colour[1L], fill = fill) + 
-    ggplot2::geom_line(colour = colour[2L], size = size[1L]) +
-    ggplot2::geom_hline(yintercept = 0)
-  if(all(table(object$group) <= 20L)) rval <- rval + ggplot2::geom_point(colour = colour[2L], size = size[2L])
-  
+    ggplot2::geom_rect(ggplot2::aes_string(fill = "group"), colour = plot_arg2$border, show.legend = FALSE) + 
+    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), show.legend = FALSE) +
+    ggplot2::geom_hline(yintercept = 0, colour = plot_arg$ref) +
+    ggplot2::geom_point(ggplot2::aes_string(shape = "group"), 
+      colour = plot_arg2$type, size = plot_arg2$size * 2.2, show.legend = FALSE)
+
   ## grouping (if any)
   if(n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
+
+  rval <- rval + 
+            ggplot2::scale_colour_manual(values = plot_arg$colour) + 
+            ggplot2::scale_fill_manual(values = plot_arg$fill) + 
+            ggplot2::scale_size_manual(values = plot_arg$size) + 
+            ggplot2::scale_shape_manual(values = plot_arg$shape) + 
+            ggplot2::scale_linetype_manual(values = plot_arg$linetype)
   
   ## annotation
   rval <- rval + ggplot2::xlab(paste(unique(attr(object, "xlab")), collapse = "/")) +
