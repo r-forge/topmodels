@@ -338,11 +338,9 @@ plot.rootogram <- function(x,
 
 autoplot.rootogram <- function(object,
                                ref = TRUE,
-                               #xlim = NULL, 
-                               #ylim = NULL, 
-                               #xlab = NULL, 
-                               #ylab = NULL, 
-                               #main = NULL,
+                               xlab = NULL, 
+                               ylab = NULL, 
+                               main = NULL,
                                border = "black",  
                                fill = "darkgray",
                                colour = 2, #col
@@ -350,29 +348,35 @@ autoplot.rootogram <- function(object,
                                shape = 19, #pch
                                linetype = 1, #lty
                                type = NULL, 
-                               #axes = TRUE, 
-                               #box = FALSE,
                                ...) {
-
 
   ## determine grouping
   class(object) <- "data.frame"
   if (is.null(object$group)) object$group <- 1L
   n <- max(object$group)
-  object$group <- factor(object$group, levels = 1L:n, 
-    labels = make.names(attr(object, "main"), unique = TRUE))
 
-  ## arguments for plotting
+  ## get annotations in the right lengths
+  if(is.null(xlab)) xlab <- attr(object, "xlab")
+  xlab <- paste(unique(xlab), collapse = "/")
+  if(is.null(ylab)) ylab <- attr(object, "ylab")
+  ylab <- paste(unique(ylab), collapse = "/")
+  if(is.null(main)) main <- attr(object, "main")
+  main <- make.names(rep_len(main, n), unique = TRUE)
+
+  ## prepare grouping
+  object$group <- factor(object$group, levels = 1L:n, labels = main)
+
+  ## determine if points should be plotted
   if (is.null(type)) type <- ifelse(any(table(object$group) > 20L), "l", "b")
 
   ## recycle arguments for plotting to match the number of groups
-  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # get colors right 
+  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
   plot_arg <- data.frame(1:n, fill, colour, size, shape, ref, linetype)[, -1]
 
-  ## recycle arguments for plotting to match the number of groups
+  ## recycle arguments for plotting to match the object rows
   plot_arg2 <- data.frame(1:n, border, size, type, colour)[, -1]
   plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
-  plot_arg2$type <- ifelse(plot_arg2$type == "l", 0, 1)
+  plot_arg2$type <- ifelse(plot_arg2$type == "l", 0, 1)  # alpha = 0 for not plotting
 
   ## rectangles and fitted lines
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "x - width/2", xmax = "x + width/2", 
@@ -382,23 +386,23 @@ autoplot.rootogram <- function(object,
       show.legend = FALSE) +
     ggplot2::geom_hline(yintercept = 0, colour = plot_arg$ref) +
     ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"), 
-      alpha = plot_arg2$type, size = plot_arg2$size * 2.2, show.legend = FALSE)
+      alpha = plot_arg2$type, size = plot_arg2$size * 2.2, show.legend = FALSE) 
 
-  ## grouping (if any)
-  if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
-
+  ## set the colors, shapes, etc.
   rval <- rval + 
             ggplot2::scale_colour_manual(values = plot_arg$colour) + 
             ggplot2::scale_fill_manual(values = plot_arg$fill) + 
             ggplot2::scale_size_manual(values = plot_arg$size) + 
             ggplot2::scale_shape_manual(values = plot_arg$shape) + 
             ggplot2::scale_linetype_manual(values = plot_arg$linetype)
+
+  ## grouping (if any)
+  if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
   
   ## annotation
-  rval <- rval + ggplot2::xlab(paste(unique(attr(object, "xlab")), collapse = "/")) +
-    ggplot2::ylab(paste(unique(attr(object, "ylab")), collapse = "/"))
+  rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
 
-  ## return with annotation
+  ## return ggplot object
   rval
 }
 
