@@ -232,7 +232,7 @@ plot.pithist <- function(x,
   }
 
   ## set lwd
-  if (is.null(lwd)) lwd <- if (style == "histogram") 1 else 2
+  if (is.null(lwd)) lwd <- if (style == "histogram") 1.5 else 2
 
   ## recycle arguments for plotting to match the number of groups
   if (is.null(xlim)) xlim <- c(NA, NA)
@@ -322,19 +322,19 @@ plot.pithist <- function(x,
 
     ## plot pithist
     rect(xleft, 0, xright, y, border = plot_arg$border[j], col = plot_arg$fill[j], 
-      lty = plot_arg$lty[j], lwd = plot_arg$lwd[j])
+      lty = plot_arg$lty[j])
 
     ## plot ref line 
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-      abline(h = pp, col = plot_arg$ref[j], lty = 1, lwd = 1.5)
+      abline(h = pp, col = plot_arg$ref[j], lty = 1, lwd = plot_arg$lwd[j])
     }
 
     ## plot confint lines
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
-      abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
-      abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = 1.5)
+      abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
+      abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
     }
 
   }
@@ -535,88 +535,130 @@ lines.pithist <- function(x,
 
 ## ggplot2 interface
 autoplot.pithist <- function(object,
+                             single_graph = FALSE,
                              style = c("histogram", "lines"),
-                             grid = TRUE,
                              confint = TRUE,
+                             ref = TRUE,
+                             legend = FALSE, #FIXME: (ML) Implement in base?
+                             xlim = c(0, 1), #FIXME: (ML) Implement in other ggplot and not comparable to base
+                             ylim = c(0, NA), #FIXME: (ML) Implement in other ggplot and not comparable to base
+                             xlab = NULL,
+                             ylab = NULL,
+                             main = NULL,
                              colour = "black",
                              fill = "darkgray",
                              border = "black",
-                             linetype = c(1, 2),
-                             size = 0.5,
-                             ylim = c(0, NA),
-                             xlim = c(0, 1),
+                             alpha_min = 0.2,
+                             size = NULL, 
+                             linetype = 1,
                              ...) {
 
-  ## match arguments
-  style <- match.arg(style)
+  ## sanity checks
+  stopifnot(is.logical(single_graph))
+  if (single_graph) stopifnot(
+    "for `single_graph` all `freq` in attr of `object` must be of the same type" =
+    length(unique(attr(object, "freq"))) == 1
+  )
 
   ## determine grouping
   class(object) <- "data.frame"
   if (is.null(object$group)) object$group <- 1L
   n <- max(object$group)
-  object$group <- factor(object$group,
-    levels = 1L:n,
-    labels = make.names(attr(object, "main"), unique = TRUE)
-  )
 
-  ## get CI and perfect prediction
-  ci_lwr <- if (confint) unique(object$ci_lwr) else NULL
-  ci_upr <- if (confint) unique(object$ci_upr) else NULL
-  pp <- unique(object$ref)
-  stopifnot(
-    "`pp` in attr of object `x` must consist of unique values per group index" =
-    length(pp) == 1
-  )
+  ## set style
+  style <- match.arg(style)
+  if (n > 1 && single_graph && style == "histogram"){
+    message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
+    style <- "lines"
+  }
+
+  ## set size
+  if (is.null(size)) size <- if (style == "histogram") 0.6 else 0.8
+
+  ## get annotations in the right lengths
+  if(is.null(xlab)) xlab <- attr(object, "xlab")
+  xlab <- paste(unique(xlab), collapse = "/")
+  if(is.null(ylab)) ylab <- attr(object, "ylab")
+  ylab <- paste(unique(ylab), collapse = "/")
+  if(is.null(main)) main <- attr(object, "main")
+  main <- make.names(rep_len(main, n), unique = TRUE)
+
+  ## prepare grouping
+  object$group <- factor(object$group, levels = 1L:n, labels = main)
+
+  ## get x and y limit
+  if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
+  if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
+
+  ## recycle arguments for plotting to match the number of groups (for geom w/o aes)
+  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
+  if (is.logical(confint)) confint <- ifelse(confint, 1, NA)  # color = NA for not plotting
+  plot_arg <- data.frame(1:n, 
+    fill, colour, size, ref, linetype, confint, border, alpha_min
+  )[, -1]
+
+  ## recycle arguments for plotting to match the object rows (for geom w/ aes)
+  plot_arg2 <- data.frame(1:n, border, size, colour, ref, confint, fill, linetype)[, -1]
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
 
   if (style == "histogram") {
 
-    if (length(colour) == 1L) {
-      colour <- rep(colour[1], 3L)
-    } else if (length(colour) == 2L) {
-      colour <- c(colour[1], rep(colour[2], 2L))
-    } else {
-      colour <- colour[1:3]
+    ## check if colour and no fill is set
+    if (all(fill == "darkgray") && any(colour != "black")) {
+      message(" * As the argument `colour` is set but no argument `fill` is specified, \n   the former is used for colorizing the PIT histogram. \n * For proper usage, solely provide `fill` for histogram style plots.")
+      plot_arg$fill <- plot_arg$col
     }
 
-    if (length(linetype) == 1L) {
-      linetype <- rep(linetype[1], 3L)
-    } else if (length(linetype) == 2L) {
-      linetype <- c(linetype[1], rep(linetype[2], 2L))
-    } else {
-      linetype <- linetype[1:3]
-    }
-
+    ## actual plotting
     rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y / 2", width = "width", height = "y")) +
-      ggplot2::geom_tile(colour = border, fill = fill) +
-      ggplot2::geom_hline(yintercept = pp, colour = colour[1], linetype = linetype[1], size = size) +
-      ggplot2::geom_hline(yintercept = ci_lwr, colour = colour[2], linetype = linetype[2], size = size) +
-      ggplot2::geom_hline(yintercept = ci_upr, colour = colour[3], linetype = linetype[3], size = size)
+      ggplot2::geom_tile(ggplot2::aes_string(fill = "group"), colour = plot_arg2$border) + 
+      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ref", size = "group"), colour = plot_arg2$ref) + 
+      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_lwr", size = "group"), 
+        colour = plot_arg2$confint, linetype = 2) +
+      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_upr", size = "group"), 
+        colour = plot_arg2$confint, linetype = 2)
+
+    ## set the colors, shapes, etc.
+    rval <- rval +
+      ggplot2::scale_fill_manual(values = plot_arg$fill) +
+      ggplot2::scale_size_manual(values = plot_arg$size)
+
+    ## add legend
+    if (legend) {
+      rval <- rval + ggplot2::labs(fill = "Model") +
+        ggplot2::guides(fill = "legend", size = "none")
+    } else {
+      rval <- rval + ggplot2::guides(fill = "none", size = "none")
+    }
+
+    ## set x and y limits 
+    rval <- rval + ggplot2::xlim(xlim)
+    rval <- rval + ggplot2::ylim(ylim)
 
     ## grouping (if any)
     if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model")
 
+    ## annotation
+    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+
+    ## return ggplot object
+    rval
+
   } else {
 
-    if (length(colour) < n) {
-      group_colours <- rep(colour[1], n)
-    } else {
-      group_colours <- colour
-    }
-    names(group_colours) <- levels(object$group)
+    ## set alpha for polygon
+    plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx) 
+      set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
 
-    if (length(linetype) < n) {
-      group_linetypes <- rep(linetype[1], n)
-    } else {
-      group_linetypes <- linetype
-    }
-    names(group_linetypes) <- levels(object$group)
+    ## set fill to NA in case of no confint
+    plot_arg$fill[is.na(plot_arg$confint)] <- NA
 
     ## stat helper function to get left/right points from respective mid points
     calc_pit_points <- ggplot2::ggproto("calc_pit_points", ggplot2::Stat,
 
       # Required as we operate on groups (facetting)
       compute_group = function(data, scales) {
-        ## Manipulate object  #TODO: Proably not "very nice" code
+        ## Manipulate object  #TODO: (ML) Could maybe be improved?
         nd <- data.frame(
           x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
           y = c(data$y, data$y[NROW(data)])
@@ -628,97 +670,43 @@ autoplot.pithist <- function(object,
       required_aes = c("x", "y")
     )
 
-    if (grid == TRUE & length(unique(colour)) == 1L & length(unique(linetype)) == 1L) {
-      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
-        ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
-          fill = fill, alpha = 0.5, colour = NA
-        ) +
-        ggplot2::geom_step(stat = calc_pit_points, linetype = linetype, size = size, colour = colour)
+    ## actual plotting
+    rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
+      ggplot2::geom_rect(ggplot2::aes_string(ymin = "ci_lwr", ymax = "ci_upr", fill = "group"), 
+        xmin = 0, xmax = 1, colour = NA, show.legend = FALSE) +
+      ggplot2::geom_step(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
+        stat = calc_pit_points)
 
-      if (!all(is.na(ylim))) {
-        rval <- rval + ggplot2::ylim(ylim)
-      }
+    ## set the colors, shapes, etc.
+    rval <- rval +
+      ggplot2::scale_colour_manual(values = plot_arg$colour) +
+      ggplot2::scale_fill_manual(values = plot_arg$fill) +
+      ggplot2::scale_size_manual(values = plot_arg$size) +
+      ggplot2::scale_linetype_manual(values = plot_arg$linetype) 
 
-      if (!all(is.na(xlim))) {
-        rval <- rval + ggplot2::xlim(xlim)
-      }
-
-      ## grouping (if any)
-      if (n > 1L) {
-        rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model") + ggplot2::labs(linetype = "Model")
-      }
-  
-    } else if (grid == TRUE & (length(unique(colour)) > 1L | length(unique(linetype)) > 1L)) {
-      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", linetype = "group", colour = "group")) +
-        ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
-          fill = fill, alpha = 0.5, colour = NA
-        ) +
-        ggplot2::geom_step(stat = calc_pit_points, size = size) +
-        ggplot2::scale_colour_manual(values = group_colours) +
-        ggplot2::scale_linetype_manual(values = group_linetypes)
-
-      if (!all(is.na(ylim))) {
-        rval <- rval + ggplot2::ylim(ylim)
-      }
-
-      if (!all(is.na(xlim))) {
-        rval <- rval + ggplot2::xlim(xlim)
-      }
-
-      ## grouping (if any)
-      if (n > 1L) {
-        rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model") + ggplot2::labs(linetype = "Model")
-      }
-  
-    } else if (grid == FALSE & length(unique(colour)) == 1L & length(unique(linetype)) == 1L) {
-      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", colour = "group")) +
-        ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
-          fill = fill, alpha = 0.5, colour = NA
-        ) +
-        ggplot2::geom_step(stat = calc_pit_points, linetype = linetype[1], size = size) + 
-        ggplot2::scale_colour_manual(values = group_colours) + 
-        ggplot2::scale_linetype_manual(values = group_linetypes) + 
-        ggplot2::labs(colour = "Model") + 
-        ggplot2::theme(legend.position = "none")
-
-      if (!all(is.na(ylim))) {
-        rval <- rval + ggplot2::ylim(ylim)
-      }
-
-      if (!all(is.na(xlim))) {
-        rval <- rval + ggplot2::xlim(xlim)
-      }
-    } else {  # grid == FALSE  & (length(unique(colour)) > 1L | length(unique(linetype)) > 1L)
-      rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width", linetype = "group", colour = "group")) +
-        ggplot2::geom_rect(
-          xmin = 0, xmax = 1, ymin = ci_lwr, ymax = ci_upr,
-          fill = fill, alpha = 0.5, colour = NA
-        ) +
-        ggplot2::geom_step(stat = calc_pit_points, size = size) + 
-        ggplot2::scale_colour_manual(values = group_colours) + 
-        ggplot2::scale_linetype_manual(values = group_linetypes) + 
-        ggplot2::labs(colour = "Model") + 
-        ggplot2::labs(linetype = "Model")
-
-      if (!all(is.na(ylim))) {
-        rval <- rval + ggplot2::ylim(ylim)
-      }
-
-      if (!all(is.na(xlim))) {
-        rval <- rval + ggplot2::xlim(xlim)
-      }
+    ## add legend
+    if (legend) {
+      rval <- rval + ggplot2::labs(colour = "Model") +
+        ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+    } else {
+      rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
     }
+
+    ## set x and y limits 
+    rval <- rval + ggplot2::xlim(xlim)
+    rval <- rval + ggplot2::ylim(ylim)
+
+    ## grouping (if any)
+    if (!single_graph && n > 1L) {
+      rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model") + ggplot2::labs(linetype = "Model")
+    }
+
+    ## annotation
+    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+
+    ## return ggplot object
+    rval
   }
-
-  ## annotation
-  rval <- rval + ggplot2::xlab(paste(unique(attr(object, "xlab")), collapse = "/")) +
-    ggplot2::ylab(paste(unique(attr(object, "ylab")), collapse = "/"))
-
-  ## return with annotation
-  rval
 }
 
 

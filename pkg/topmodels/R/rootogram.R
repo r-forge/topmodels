@@ -390,11 +390,11 @@ autoplot.rootogram <- function(object,
 
   ## set the colors, shapes, etc.
   rval <- rval + 
-            ggplot2::scale_colour_manual(values = plot_arg$colour) + 
-            ggplot2::scale_fill_manual(values = plot_arg$fill) + 
-            ggplot2::scale_size_manual(values = plot_arg$size) + 
-            ggplot2::scale_shape_manual(values = plot_arg$shape) + 
-            ggplot2::scale_linetype_manual(values = plot_arg$linetype)
+    ggplot2::scale_colour_manual(values = plot_arg$colour) + 
+    ggplot2::scale_fill_manual(values = plot_arg$fill) + 
+    ggplot2::scale_size_manual(values = plot_arg$size) + 
+    ggplot2::scale_shape_manual(values = plot_arg$shape) + 
+    ggplot2::scale_linetype_manual(values = plot_arg$linetype)
 
   ## grouping (if any)
   if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
