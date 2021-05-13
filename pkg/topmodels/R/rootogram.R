@@ -357,35 +357,35 @@ autoplot.rootogram <- function(object,
 
   ## determine grouping
   class(object) <- "data.frame"
-  if(is.null(object$group)) object$group <- 1L
+  if (is.null(object$group)) object$group <- 1L
   n <- max(object$group)
   object$group <- factor(object$group, levels = 1L:n, 
     labels = make.names(attr(object, "main"), unique = TRUE))
 
   ## arguments for plotting
-  if(is.null(type)) type <- ifelse(any(table(object$group) > 20L), "l", "b")
+  if (is.null(type)) type <- ifelse(any(table(object$group) > 20L), "l", "b")
 
   ## recycle arguments for plotting to match the number of groups
-  if(is.logical(ref)) ref <- ifelse(ref, 1, NA)  # get colors right 
+  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # get colors right 
   plot_arg <- data.frame(1:n, fill, colour, size, shape, ref, linetype)[, -1]
 
   ## recycle arguments for plotting to match the number of groups
   plot_arg2 <- data.frame(1:n, border, size, type, colour)[, -1]
   plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
-  plot_arg2$type[plot_arg2$type == "l"] <- NA  # get colors right
-  plot_arg2$type[!is.na(plot_arg2$type)] <- plot_arg2$colour[!is.na(plot_arg2$type)]  # get colors right
+  plot_arg2$type <- ifelse(plot_arg2$type == "l", 0, 1)
 
   ## rectangles and fitted lines
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(xmin = "x - width/2", xmax = "x + width/2", 
       ymin = "y", ymax = "y + height", x = "x", y = "line")) +
     ggplot2::geom_rect(ggplot2::aes_string(fill = "group"), colour = plot_arg2$border, show.legend = FALSE) + 
-    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), show.legend = FALSE) +
+    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
+      show.legend = FALSE) +
     ggplot2::geom_hline(yintercept = 0, colour = plot_arg$ref) +
-    ggplot2::geom_point(ggplot2::aes_string(shape = "group"), 
-      colour = plot_arg2$type, size = plot_arg2$size * 2.2, show.legend = FALSE)
+    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"), 
+      alpha = plot_arg2$type, size = plot_arg2$size * 2.2, show.legend = FALSE)
 
   ## grouping (if any)
-  if(n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
+  if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .)
 
   rval <- rval + 
             ggplot2::scale_colour_manual(values = plot_arg$colour) + 
