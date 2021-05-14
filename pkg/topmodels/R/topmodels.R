@@ -16,6 +16,7 @@
 
 
 topmodels <- function(object, 
+                      flavor = NULL,
                       newdata = NULL,
                       na.action = na.pass, 
                       which = NULL,
@@ -23,6 +24,20 @@ topmodels <- function(object,
                       spar = TRUE,
                       pages = NULL,
                       ...) {
+
+  ## sanity checks
+  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
+  stopifnot(
+    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" =
+    is.null(flavor) || !inherits(flavor, "try-error")
+  )
+
+  ## guess flavor
+  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
+    flavor <- "tidyverse"
+  } else if (is.null(flavor)) {
+    flavor <- "base"
+  }
 
   ## check if S3 methods exist
   if (!any(class(object) %in% gsub("procast.", "", methods("procast")))) {
@@ -63,7 +78,7 @@ topmodels <- function(object,
     ask <- FALSE
   }
 
-  if (spar) {
+  if (spar && !flavor == "tidyverse") {
     if (!ask) {
       par(mfrow = n2mfrow(length(which)))
     } else {
@@ -80,11 +95,20 @@ topmodels <- function(object,
 
   ## get possible arguments
   arg_avail <- list()
-  arg_avail[["rootogram"]] <- unique(names(c(formals(rootogram.default), formals(plot.rootogram))))
-  arg_avail[["pithist"]] <- unique(names(c(formals(pithist.default), formals(plot.pithist))))
-  arg_avail[["reliagram"]] <- unique(names(c(formals(reliagram.default), formals(plot.reliagram))))
-  arg_avail[["qqrplot"]] <- unique(names(c(formals(qqrplot.default), formals(plot.qqrplot))))
-  arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(plot.wormplot))))
+
+  if (flavor == "base") {
+    arg_avail[["rootogram"]] <- unique(names(c(formals(rootogram.default), formals(plot.rootogram))))
+    arg_avail[["pithist"]] <- unique(names(c(formals(pithist.default), formals(plot.pithist))))
+    arg_avail[["reliagram"]] <- unique(names(c(formals(reliagram.default), formals(plot.reliagram))))
+    arg_avail[["qqrplot"]] <- unique(names(c(formals(qqrplot.default), formals(plot.qqrplot))))
+    arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(plot.wormplot))))
+  } else {
+    arg_avail[["rootogram"]] <- unique(names(c(formals(rootogram.default), formals(autoplot.rootogram))))
+    arg_avail[["pithist"]] <- unique(names(c(formals(pithist.default), formals(autoplot.pithist))))
+    arg_avail[["reliagram"]] <- unique(names(c(formals(reliagram.default), formals(autoplot.reliagram))))
+    arg_avail[["qqrplot"]] <- unique(names(c(formals(qqrplot.default), formals(autoplot.qqrplot))))
+    arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(autoplot.wormplot))))
+  }
 
   arg_avail <- lapply(arg_avail, function(x) unique(c(x, names(par()))))
   arg_avail <- lapply(arg_avail, function(x) x[x != "..."])
@@ -100,6 +124,7 @@ topmodels <- function(object,
   ## prepare a list of arguments for each plot and fill it with arguments
   mc <- lapply(mc, function(x) if (typeof(x) == "language") eval(x) else x)
 
+  ## remove all invalid names
   tmp_check <- sapply(mc, function(x) (length(x) > 1 && is.null(names(x))) || any(!names(x) %in% which))
   if (any(tmp_check)) {
     warning(sprintf(
@@ -108,8 +133,9 @@ topmodels <- function(object,
     ))
   }
 
+  ## check if named vector is provided and any of the names matches function name 
   arg <- list("rootogram" = mc, "pithist" = mc, "reliagram" = mc, "qqrplot" = mc, "wormplot" = mc)
-  arg <- lapply(seq_along(arg), # check if named vector is provided and any of the names matches function name 
+  arg <- lapply(seq_along(arg), 
     function(idx) lapply(arg[[idx]], 
       function(x) {
         if (is.null(names(x))) {
@@ -122,19 +148,56 @@ topmodels <- function(object,
       }
     )
   )
-
-  arg <- lapply(arg, function(x) x[!sapply(x, is.null)]) # remove NULLs from list
+ 
+  ## remove NULLs from list
+  arg <- lapply(arg, function(x) x[!sapply(x, is.null)])
 
   ## look up if provided arguments match possible arguments
   arg <- lapply(seq_along(arg), function(idx) arg[[idx]][names(arg[[idx]]) %in% arg_avail[[idx]]]) 
 
-  ## call functions and prepare return value
+  ## set names
+  names(arg) <- c("rootogram", "pithist", "reliagram", "qqrplot", "wormplot")
+
   rval <- list()
-  if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
-  if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
-  if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
-  if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
-  if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
+  if (flavor == "base") {
+    ## calculate and plot
+    if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
+    if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
+    if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
+    if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
+    if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
+  } else {
+    ## first calculate 
+    arg <- lapply(arg, function(x) c(x, plot = FALSE))
+    if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
+    if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
+    if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
+    if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
+    if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
+
+    ## use return val as new object
+    for (name in names(rval)) {
+      arg[[name]]$object <- rval[[name]]
+    }
+
+    ## get plotting dimension for grid
+    ## TODO: (ML) Can you specify layout.pos.col w/o exact location? Can maybe be improved.
+    plt_dim <- n2mfrow(length(which))
+    plt_names <- names(rval)
+    plt_rows <- rep_len(rep(1:plt_dim[1], each = plt_dim[2]), length(plt_names))
+    plt_cols <- rep_len(1:plt_dim[2], length(plt_names))
+
+    ## set up grid and plot 
+    ## FIXME: (ML) Works as additional args of main funs are not used in autoplot. Rewrite cleaner version.
+    grid::grid.newpage()
+    grid::pushViewport(grid::viewport(layout = grid::grid.layout(plt_dim[1], plt_dim[2])))
+    for (idx in seq_along(plt_names)) {
+      print(
+        do.call(ggplot2::autoplot, arg[[plt_names[idx]]]), 
+        vp = grid::viewport(layout.pos.row = plt_rows[idx], layout.pos.col = plt_cols[idx])
+      )
+    }
+  }
 
   return(invisible(rval))
 }

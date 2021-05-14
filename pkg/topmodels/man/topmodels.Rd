@@ -9,12 +9,17 @@
 }
 
 \usage{
-topmodels(object, newdata = NULL, na.action = na.pass, which = NULL, 
+topmodels(object, flavor = NULL, newdata = NULL, na.action = na.pass, which = NULL, 
   ask = dev.interactive(), spar = TRUE, pages = NULL, ...)
 }
 
 \arguments{
   \item{object}{An object supported by \code{"procast"}.}
+  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
+    graphic, accordingly the invisible return value is either a \code{data.frame}
+    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
+    "tidyverse", or it's chosen automatically conditional
+    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
   \item{na.action}{function determining what should be done with missing
