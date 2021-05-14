@@ -60,7 +60,7 @@ rootogram.default <- function(object,
   scale <- match.arg(scale)
   style <- match.arg(style)
 
-  ## set flavor
+  ## guess flavor
   if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
     flavor <- "tidyverse"
   } else if (is.null(flavor)) {
@@ -156,7 +156,7 @@ rootogram.default <- function(object,
     class(rval) <- c("rootogram", class(rval))
   }
 
-  ## also plot by default
+  ## plot by default
   if (plot & flavor == "tidyverse") {
     try(print(ggplot2::autoplot(rval, ...)))
   } else if (plot) {
