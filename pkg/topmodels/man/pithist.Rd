@@ -17,7 +17,7 @@
 \usage{
 pithist(object, \dots)
 
-\method{pithist}{default}(object, newdata = NULL, plot = TRUE, 
+\method{pithist}{default}(object, newdata = NULL, plot = TRUE, flavor = NULL,
   style = c("histogram", "lines"), type = c("random", "proportional"), nsim = 1L, 
   delta = NULL, freq = FALSE, breaks = NULL, confint = TRUE, 
   confint_level = 0.95, confint_type = c("exact", "approximation"),
@@ -32,6 +32,11 @@ pithist(object, \dots)
     which to predict. If omitted, the original observations are used.}
   \item{plot}{logical. Should the \code{plot} method be called to
     draw the computed PIT histogram?}
+  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
+    graphic, accordingly the invisible return value is either a \code{data.frame}
+    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
+    "tidyverse", or it's chosen automatically conditional
+    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
   \item{style}{character specifying the syle of rootogram (see below). FIXME: Description}
   \item{type}{character. In case of discrete distributions should
     the PITs be drawn randomly from the corresponding interval
