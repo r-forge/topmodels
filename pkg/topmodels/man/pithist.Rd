@@ -21,7 +21,7 @@ pithist(object, \dots)
   style = c("histogram", "lines"), type = c("random", "proportional"), nsim = 1L, 
   delta = NULL, freq = FALSE, breaks = NULL, confint = TRUE, 
   confint_level = 0.95, confint_type = c("exact", "approximation"),
-  single_graph = FALSE, xlim = c(0, 1), ylim = NULL,
+  single_graph = FALSE, xlim = c(0, 1), ylim = c(0, NA),
   xlab = "PIT", ylab = if (freq) "Frequency" else "Density", main = NULL, ...)
 }
 
