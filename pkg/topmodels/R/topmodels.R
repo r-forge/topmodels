@@ -20,9 +20,9 @@ topmodels <- function(object,
                       newdata = NULL,
                       na.action = na.pass, 
                       which = NULL,
-                      ask = dev.interactive(),
-                      spar = TRUE,
-                      pages = NULL,
+                      ask = dev.interactive(), # FIXME: (ML) Does not work for ggplot.
+                      spar = TRUE, # FIXME: (ML) What does this do? Needed? Does not work for ggplot.
+                      pages = NULL, # FIXME: (ML) Does not work for ggplot.
                       ...) {
 
   ## sanity checks
@@ -48,7 +48,7 @@ topmodels <- function(object,
   }
 
   # check which method should be plotted
-  which.match <- c("pithist", "qqrplot", "reliagram", "rootogram", "wormplot")
+  which.match <- c("rootogram", "pithist", "reliagram", "qqrplot", "wormplot")
   if (is.null(which)) which <- which.match
   if (!is.character(which)) {
     if (any(which > 5L))
@@ -69,7 +69,7 @@ topmodels <- function(object,
     on.exit(par(op))
   }
 
-  if (!is.null(pages)) {
+  if (!is.null(pages)) { #TODO: (ML) Do we really want to plot all on single device when aks = FALSE?
     ask <- !(pages == 1)
   }
 
@@ -166,7 +166,8 @@ topmodels <- function(object,
     if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
     if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
     if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
-  } else {
+  } else { 
+    ## FIXME: (ML) parameter ask does not work for ggplot(), always pages = 1
     ## first calculate 
     arg <- lapply(arg, function(x) c(x, plot = FALSE))
     if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])

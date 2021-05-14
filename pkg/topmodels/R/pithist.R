@@ -41,7 +41,7 @@ pithist.default <- function(object,
                             confint_type = c("exact", "approximation"),
                             single_graph = FALSE,
                             xlim = c(0, 1),  # FIXME: (ML) Different for other plot functions
-                            ylim = NULL,
+                            ylim = c(0, NA),
                             xlab = "PIT",
                             ylab = if (freq) "Frequency" else "Density",
                             main = NULL,
@@ -65,8 +65,8 @@ pithist.default <- function(object,
     confint_level <= 1
   )
   stopifnot(is.logical(single_graph))
-  stopifnot(is.numeric(xlim), length(xlim) == 2)
-  stopifnot(is.null(ylim) || (is.numeric(ylim) && length(ylim) == 2))
+  stopifnot(length(xlim) == 2 && (all(is.na(xlim)) || is.numeric(xlim)))
+  stopifnot(length(ylim) == 2 && (all(is.na(ylim)) || is.numeric(ylim)))
   stopifnot(length(xlab) == 1)
   stopifnot(length(ylab) == 1)
   stopifnot(length(main) == 1 | length(main) == 0)
@@ -95,7 +95,7 @@ pithist.default <- function(object,
 
   ## get breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(NROW(p), c(0, 50, 5000, 1000000, Inf))]
-  if (length(breaks) == 1L) breaks <- seq(xlim[1L], xlim[2L], length.out = breaks + 1L)
+  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L) #FIXME: (ML) Or xlim?
 
   ## compute ci interval
   if (confint_type == "exact") {
@@ -235,7 +235,7 @@ plot.pithist <- function(x,
                          confint = TRUE,
                          ref = TRUE,
                          xlim = c(0, 1),
-                         ylim = NULL,
+                         ylim = c(0, NA),
                          xlab = NULL,
                          ylab = NULL,
                          main = NULL,
@@ -251,7 +251,7 @@ plot.pithist <- function(x,
 
   ## sanity checks
   ## lengths of all arguments are checked by recycling; `ref` and `confint` w/i `abline()`;
-  ## `xlim`, `ylim`, xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
+  ## xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
   ## `alpha_min` w/i colorspace fun 
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(axes))
@@ -260,6 +260,11 @@ plot.pithist <- function(x,
     "for `single_graph` all `freq` in attr of object `x` must be of the same type" = 
     length(unique(attr(x, "freq"))) == 1
   )
+  stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
+  stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  ## convert always to data.frame
+  x <- as.data.frame(x)
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
@@ -276,8 +281,6 @@ plot.pithist <- function(x,
   if (is.null(lwd)) lwd <- if (style == "histogram") 1.5 else 2
 
   ## recycle arguments for plotting to match the number of groups
-  if (is.null(xlim)) xlim <- c(NA, NA)
-  if (is.null(ylim)) ylim <- c(NA, NA)
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, confint, ref,
@@ -334,10 +337,12 @@ plot.pithist <- function(x,
     )
 
     ## get xlim and ylim
-    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-      plot_arg[j, c("xlim1", "xlim2")] <- range(c(xleft, xright))
-    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-      plot_arg[j, c("ylim1", "ylim2")] <- range(c(0, y, ci_lwr, ci_upr))
+    ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
+    xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
+    if (any(xlim_idx))
+      plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(c(xleft, xright))[xlim_idx]
+    if (any(ylim_idx))
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(0, y, ci_lwr, ci_upr))[ylim_idx]
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
@@ -404,10 +409,12 @@ plot.pithist <- function(x,
     }
 
     ## get xlim and ylim
-    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
-      plot_arg[j, c("xlim1", "xlim2")] <- range(x)
-    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
-      plot_arg[j, c("ylim1", "ylim2")] <- range(c(0, y, ci_lwr, ci_upr))
+    ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
+    xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
+    if (any(xlim_idx)) 
+      plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(x)[xlim_idx]
+    if (any(ylim_idx)) 
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(y, ci_lwr, ci_upr))[ylim_idx]
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
