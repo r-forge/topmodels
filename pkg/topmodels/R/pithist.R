@@ -145,6 +145,7 @@ pithist.default <- function(object,
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
 
+  ## add class
   if (flavor == "base") {
     class(rval) <- c("pithist", "data.frame")
   } else {

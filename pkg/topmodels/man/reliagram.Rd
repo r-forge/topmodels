@@ -17,7 +17,7 @@
 \usage{
 reliagram(object, \dots)
 
-\method{reliagram}{default}(object, newdata = NULL, plot = TRUE,
+\method{reliagram}{default}(object, newdata = NULL, plot = TRUE, flavor = NULL,
   breaks = seq(0, 1, by = 0.1), quantiles = 0.5, thresholds = NULL,
   confint = TRUE, confint_level = 0.95, confint_nboot = 250,
   confint_seed = 1, single_graph = FALSE, xlab = "Forecast probability", 
@@ -31,6 +31,11 @@ reliagram(object, \dots)
     which to predict. If omitted, the original observations are used.}
   \item{plot}{logical. Should the \code{plot} method be called to
     draw the computed extended reliability diagram?}
+  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
+    graphic, accordingly the invisible return value is either a \code{data.frame}
+    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
+    "tidyverse", or it's chosen automatically conditional
+    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
   \item{breaks}{numeric vector passed on to \code{\link{cut}} in order to bin 
     the observations and the predicted probabilities or a function applied to the predicted 
     probabilities to calculate a numeric value for \code{\link{cut}}. Typically quantiles to ensure

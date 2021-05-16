@@ -8,20 +8,21 @@ wormplot <- function(object, ...) {
 
 
 wormplot.default <- function(object, 
-                            newdata = NULL, 
-                            plot = TRUE,
-                            trafo = qnorm, 
-                            nsim = 1L, 
-                            delta = NULL,
-                            confint = TRUE, 
-                            confint_level = 0.95,
-                            confint_nsim = 250, 
-                            confint_seed = 1,
-                            single_graph = FALSE,
-                            xlab = "Theoretical quantiles", 
-                            ylab = "Deviation",
-                            main = NULL,
-                            ...) {
+                             newdata = NULL, 
+                             plot = TRUE,
+                             flavor = NULL,
+                             trafo = qnorm, 
+                             nsim = 1L, 
+                             delta = NULL,
+                             confint = TRUE, 
+                             confint_level = 0.95,
+                             confint_nsim = 250, 
+                             confint_seed = 1,
+                             single_graph = FALSE,
+                             xlab = "Theoretical quantiles", 
+                             ylab = "Deviation",
+                             main = NULL,
+                             ...) {
 
   ## sanity checks
   ## `object`, `newdata`, `delta and `prob` w/i `qresiduals()`
@@ -29,6 +30,11 @@ wormplot.default <- function(object,
   ## `delta` w/i `qresiduals()`
   ## `...` in `plot()`
   stopifnot(is.logical(plot))
+  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
+  stopifnot(
+    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" =
+    is.null(flavor) || !inherits(flavor, "try-error")
+  )
   stopifnot(is.null(trafo) | is.function(trafo))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(
@@ -41,6 +47,13 @@ wormplot.default <- function(object,
   stopifnot(length(xlab) == 1)
   stopifnot(length(ylab) == 1)
   stopifnot(length(main) == 1 | length(main) == 0)
+
+  ## guess flavor
+  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
+    flavor <- "tidyverse"
+  } else if (is.null(flavor)) {
+    flavor <- "base"
+  }
 
   ## compute quantile residuals
   qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = "random", nsim = nsim, delta = delta)
@@ -127,10 +140,18 @@ wormplot.default <- function(object,
   attr(rval, "main") <- main
   attr(rval, "ref_fun") <- list(ciplot)
   attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
-  class(rval) <- c("wormplot", "data.frame")
 
-  ## also plot by default
-  if(plot){ 
+  if (flavor == "base") {
+    class(rval) <- c("wormplot", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("wormplot", class(rval))
+  }
+
+  ## plot by default
+  if (plot & flavor == "tidyverse") {
+    try(print(ggplot2::autoplot(rval, confint = confint, ...)))
+  } else if (plot) {
     try(plot(rval, confint = confint, ...))
   }
   
@@ -143,9 +164,23 @@ c.wormplot <- rbind.wormplot <- function(...) {
 
   ## list of wormplots
   rval <- list(...)
+
+  ## set flavor to tidyverse if any rval is a tibble
+  if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
+    flavor <- "tidyverse"
+  } else {
+    flavor <- "base"
+  }
   
   ## remove temporary the class
-  for(i in 1:length(rval)) class(rval[[i]]) <- "data.frame"  # TODO: (ML) How does that work with lapply?
+  ## TODO: (ML) How does that work with lapply?
+  ## FIXME: (ML) Maybe this can be nicer?
+  for(i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "wormplot"]
+
+  ## convert always to data.frame
+  if (flavor == "tidyverse") {
+    rval <- lapply(rval, as.data.frame)
+  }
 
   ## group sizes
   for (i in seq_along(rval)) {
@@ -189,7 +224,15 @@ c.wormplot <- rbind.wormplot <- function(...) {
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- confint_level
   attr(rval, "ref_fun") <- ref_fun
-  class(rval) <- c("wormplot", "data.frame")
+
+  ## set class according to flavor
+  if (flavor == "base") {
+    class(rval) <- c("wormplot", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("wormplot", class(rval))
+  }
+
   return(rval)
 }
 
@@ -446,7 +489,136 @@ points.wormplot <- function(x,
 }
 
 ## ggplot2 interface
-autoplot.wormplot <- function(object, ...) {
-  NULL
-}
+autoplot.wormplot <- function(object, 
+                             single_graph = FALSE, 
+                             confint = TRUE, 
+                             ref = TRUE, 
+                             xlim = c(NA, NA),
+                             ylim = c(NA, NA),
+                             xlab = NULL, 
+                             ylab = NULL, 
+                             main = NULL, 
+                             colour = "black",
+                             fill = adjustcolor("black", alpha.f = 0.2), 
+                             alpha_min = 0.2, 
+                             size = 2, 
+                             shape = 19, 
+                             linetype = 1, 
+                             legend = FALSE,
+                             ...) {
 
+  ## sanity checks
+  stopifnot(is.logical(single_graph))
+
+  ## determine grouping
+  class(object) <- "data.frame"
+  if (is.null(object$group)) object$group <- 1L
+  n <- max(object$group)
+
+  ## get annotations in the right lengths
+  if(is.null(xlab)) xlab <- attr(object, "xlab")
+  xlab <- paste(unique(xlab), collapse = "/")
+  if(is.null(ylab)) ylab <- attr(object, "ylab")
+  ylab <- paste(unique(ylab), collapse = "/")
+  if(is.null(main)) main <- attr(object, "main")
+  main <- make.names(rep_len(main, n), unique = TRUE)
+
+  ## prepare grouping
+  object$group <- factor(object$group, levels = 1L:n, labels = main)
+
+  ## get x and y limit
+  if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
+  if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
+
+  ## calulate reference lines
+  ## FIXME: (ML) Can be done nicer
+  ref_lines <- attr(object, "ref_fun")[[1]](
+    n = length(object$y),
+    level = 0.95,
+    lz = min(object$x, na.rm = TRUE),
+    hz = max(object$x, na.rm = TRUE),
+    dz = 0.25
+  )
+  ref_lines <- do.call("cbind", ref_lines)
+  ref_lines <- as.data.frame(ref_lines)
+
+  ## stat helper function to get left/right points from respective mid points
+  calc_confint_polygon <- ggplot2::ggproto("calc_confint_polygon", ggplot2::Stat,
+
+    # Required as we operate on groups (facetting)
+    compute_group = function(data, scales) {
+      ## Manipulate object  #TODO: (ML) Could maybe be improved?
+      nd <- data.frame(
+        x = c(data$x_ci_lwr, rev(data$x_ci_upr)),
+        y = c(data$y_ci_lwr, rev(data$y_ci_upr))
+      )
+      nd
+    },
+
+    # Tells us what we need
+    required_aes = c("x_ci_lwr", "x_ci_upr", "y_ci_lwr", "y_ci_upr")
+  )
+
+  ## recycle arguments for plotting to match the number of groups (for geom w/o aes)
+  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
+  if (is.logical(confint)) confint <- ifelse(confint, 1, NA)  # color = NA for not plotting
+  plot_arg <- data.frame(1:n,
+    fill, colour, size, ref, linetype, confint, alpha_min
+  )[, -1]
+
+  ## recycle arguments for plotting to match the object rows (for geom w/ aes)
+  ## FIXME: (ML) Why does it need to be equal to the length of the object and not to the number of groups?
+  plot_arg2 <- data.frame(1:n, size, colour, ref, confint, fill, linetype)[, -1]
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+
+  ## set alpha for polygon
+  plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx)
+    set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
+
+  ## set fill to NA in case of no confint
+  plot_arg$fill[is.na(plot_arg$confint)] <- NA
+
+  ## actual plotting
+  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
+    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"),
+      show.legend = FALSE) + 
+    ggplot2::geom_polygon(ggplot2::aes_string(x_ci_lwr = "x_ci_lwr", x_ci_upr = "x_ci_upr", 
+      y_ci_lwr = "y_ci_lwr", y_ci_upr = "y_ci_upr", fill = "group"), 
+      stat = calc_confint_polygon, show.legend = FALSE) 
+
+  if (ref) {
+    rval <- rval + 
+      ggplot2::geom_line(ggplot2::aes_string(x = "z", y = "low"), data = ref_lines, linetype = 2) + 
+      ggplot2::geom_line(ggplot2::aes_string(x = "z", y = "high"), data = ref_lines, linetype = 2) 
+  }
+
+  ## set the colors, shapes, etc.
+  rval <- rval +
+    ggplot2::scale_colour_manual(values = plot_arg$colour) +
+    ggplot2::scale_fill_manual(values = plot_arg$fill) +
+    ggplot2::scale_size_manual(values = plot_arg$size) +
+    ggplot2::scale_linetype_manual(values = plot_arg$linetype)
+
+  ## add legend
+  if (legend) {
+    rval <- rval + ggplot2::labs(colour = "Model") +
+      ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+  } else {
+    rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
+  }
+
+  ## set x and y limits 
+  rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
+  rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
+
+  ## grouping (if any)
+  if (!single_graph && n > 1L) {
+    rval <- rval + ggplot2::facet_grid(group ~ .) 
+  }
+
+  ## annotation
+  rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+
+  ## return ggplot object
+  rval
+}
