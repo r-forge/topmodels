@@ -56,6 +56,7 @@ reliagram.default <- function(object,
   stopifnot(length(xlab) == 1 || length(xlab) == length(quantiles))
   stopifnot(length(ylab) == 1 || length(ylab) == length(quantiles))
   stopifnot(is.null(main) || (length(main) == 1 || length(main) == length(quantiles)))
+  stopifnot(is.numeric(breaks) || is.function(breaks))
 
   ## data + thresholds
   y <- newresponse(object, newdata = newdata)
@@ -64,10 +65,9 @@ reliagram.default <- function(object,
     thresholds <- as.numeric(thresholds)
     thresholds_text <- sprintf("q_%.2f", signif(quantiles, 2))
   } else {
-    thresholds
     thresholds_text <- as.character(signif(thresholds, 2))
   }
-
+  
   ## fix length of annotations
   if (length(xlab) < length(quantiles)) xlab <- rep(xlab, length.out = length(quantiles))
   if (length(ylab) < length(quantiles)) ylab <- rep(ylab, length.out = length(quantiles))
@@ -75,7 +75,6 @@ reliagram.default <- function(object,
     main <- deparse(substitute(object))
     main <- sprintf("%s (threshold = %s)", main, thresholds_text)
   }
-
 
   ## predicted probabilities  # FIXME: (ML) Check format and dim of thresholds and pred
   pred <- procast(object,
@@ -95,6 +94,13 @@ reliagram.default <- function(object,
   ## loop over all quantiles
   rval <- vector(mode = "list", length = NCOL(y))
   for (idx in 1:NCOL(y)) {
+
+    ## calculate breaks
+    if (is.function(breaks)) {
+      try(breaks <- as.numeric(breaks(pred[, idx])))
+      stopifnot("`breaks` function must produce a numeric valid to be used w/i `cut()`" = is.numeric(breaks))
+    }
+
     ## compute number of prediction and idx for minimum number of prediction per probability subset
     n_pred <- aggregate(
       pred[, idx],
@@ -114,14 +120,17 @@ reliagram.default <- function(object,
     )
 
     ## compute mean predicted probability (mean_pr)
-    mean_pr <- as.numeric(
-      aggregate(
-        pred[, idx],
-        by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)),
-        FUN = mean,
-        drop = FALSE
-      )[, "x"]
+    tmp_mean_pr <- aggregate(
+      pred[, idx],
+      by = list(prob = cut(pred[, idx], breaks, include.lowest = TRUE)),
+      FUN = mean,
+      drop = FALSE
     )
+    mean_pr <- as.numeric(tmp_mean_pr[, "x"])
+
+    ## calculate pred with mean values (for calulating bs) 
+    lookup <- as.numeric(cut(pred[, idx], breaks, include.lowest = TRUE))
+    pred_bin <- tmp_mean_pr$x[lookup]
 
     ## consistency resampling from Broecker (2007)
     if (!identical(confint, FALSE)) {
@@ -162,6 +171,8 @@ reliagram.default <- function(object,
     rval_i <- data.frame(
       x = mean_pr,
       y = obs_rf,
+      bin_lwr = breaks[-length(breaks)],
+      bin_upr = breaks[-1] ,
       n_pred,
       ci_lwr,
       ci_upr
@@ -173,7 +184,18 @@ reliagram.default <- function(object,
     attr(rval_i, "main") <- main[idx]
     attr(rval_i, "threshold") <- thresholds_text[idx]
     attr(rval_i, "confint_level") <- confint_level
-    attr(rval_i, "bs") <- mean(y[, idx] - pred[, idx])^2 # FIXME: (ML) Does not match for minimum != 0
+
+    ## add bs, rel, res, and unc
+    ## TODO: (ML) Check what to do with NAs exactly
+    ## NOTE: (ML) Here the unique forecasts equal the mean forecasts per bin (as in `verification` pkg):
+    ##  * Hence, BS is not independent to the bins
+    ##  * Hence, BS should vary conditional on the minimum
+    attr(rval_i, "bs") <- mean((pred_bin - y[, idx])^2)
+    attr(rval_i, "rel") <- sum(n_pred * (mean_pr - obs_rf)^2, na.rm = TRUE) / sum(n_pred)
+    attr(rval_i, "res") <- sum(n_pred * (obs_rf - mean(y[, idx]))^2, na.rm = TRUE) / sum(n_pred)
+    attr(rval_i, "unc") <- mean(y[, idx]) * (1 - mean(y[, idx]))
+
+    ## add class
     class(rval_i) <- c("reliagram", "data.frame")
 
     rval[[idx]] <- rval_i
@@ -209,7 +231,9 @@ plot.reliagram <- function(x,
                            pch = 19, # single or n values
                            lty = 1, # single or n values
                            type = "b", # single or n values
+                           add_hist = TRUE,
                            add_info = TRUE, # single or n values
+                           add_rug = TRUE,
                            extend_left = NULL, # either null or logical of length 1 / n
                            extend_right = NULL, # either null or logical of length 1 / n
                            axes = TRUE,
@@ -232,6 +256,11 @@ plot.reliagram <- function(x,
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
+  ## intern for single plot, single_graph is set to FALSE
+  if (n == 1) {
+    single_graph <- FALSE
+  }
+
   ## recycle arguments for plotting to match the number of groups
   if (is.null(extend_left)) extend_left <- NA
   if (is.null(extend_right)) extend_right <- NA
@@ -239,7 +268,8 @@ plot.reliagram <- function(x,
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, minimum, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
-    col, fill, alpha_min, lwd, pch, lty, type, add_info, extend_left, extend_right, axes, box
+    col, fill, alpha_min, lwd, pch, lty, type, add_hist, add_info, add_rug, 
+    extend_left, extend_right, axes, box
   )[, -1]
 
   ## annotation
@@ -344,22 +374,48 @@ plot.reliagram <- function(x,
       pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...
     )
 
-    ## print info
-    if (single_graph && j == n && plot_arg$add_info[j]) {
-      legend(
-        "bottomright",
-        sprintf("%s = %.4f", unlist(attr(d, "main")), signif(attr(d, "bs"), 4)),
-        pch = plot_arg$pch,
-        col = plot_arg$col,
-        bty = "n",
-        title = "Brier Score",
-        y.intersp = 0.9
+    ## add rugs
+    if (!single_graph && !identical(plot_arg$add_rug[j], FALSE)) {
+      if (isTRUE(plot_arg$add_rug[j])) plot_arg$add_rug[j] <- plot_arg$col[j]
+      tmp_rugs <- c(d$bin_lwr, d$bin_upr[NROW(d)])
+      tmp_rugs <- tmp_rugs[tmp_rugs >= plot_arg$xlim1[j] & tmp_rugs <= plot_arg$xlim2[j]]
+      rug(tmp_rugs, lwd = 1, ticksize = 0.02, col = plot_arg$add_rug[j])
+    }
+
+     
+    ## add hist
+    if (!single_graph && !identical(plot_arg$add_hist[j], FALSE)) {
+      if (isTRUE(plot_arg$add_hist[j])) plot_arg$add_hist[j] <- plot_arg$fill[j]
+      tmp_x <- par("pin")[1]
+      tmp_y <- par("pin")[2]
+      tmp_height <- 0.3  * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j]))
+      tmp_width <- (0.3 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j]))) * tmp_y / tmp_x
+
+      add_hist_reliagram(
+        d$n_pred, 
+        c(d$bin_lwr, d$bin_upr[NROW(d)]), 
+        xpos = 0.025 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j])) + plot_arg$xlim1[j], 
+        ypos = 0.925 * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j])) - tmp_height + plot_arg$ylim1[j], 
+        width = tmp_width,
+        height = tmp_height,
+        col = plot_arg$add_hist[j]
       )
-    } else if (!single_graph && plot_arg$add_info[j]) {
+    }
+
+    ## print info
+    if (!single_graph && plot_arg$add_info[j]) {
       legend(
         "bottomright",
-        sprintf("BS = %.4f", signif(attr(d, "bs")[j], 4)),
-        bty = "n"
+        c(
+          "BS", signif(attr(d, "bs")[j], 3), 
+          "REL", signif(attr(d, "rel")[j], 3), 
+          "RES", signif(attr(d, "res")[j], 3), 
+          "UNC", signif(attr(d, "unc")[j], 3)
+        ),
+        cex = 0.8,
+        ncol = 4,
+        bty = "n",
+        inset = c(0.01, 0.01)
       )
     }
   }
@@ -487,6 +543,9 @@ c.reliagram <- rbind.reliagram <- function(...) {
   prob <- unlist(lapply(rval, function(r) attr(r, "prob")))
   confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
   bs <- unlist(lapply(rval, function(r) attr(r, "bs")))
+  rel <- unlist(lapply(rval, function(r) attr(r, "rel")))
+  res <- unlist(lapply(rval, function(r) attr(r, "res")))
+  unc <- unlist(lapply(rval, function(r) attr(r, "unc")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
     as.vector(sapply(rval, function(r) attr(r, "main")))
@@ -504,14 +563,195 @@ c.reliagram <- rbind.reliagram <- function(...) {
   attr(rval, "prob") <- prob
   attr(rval, "confint_level") <- confint_level
   attr(rval, "bs") <- bs
+  attr(rval, "rel") <- rel
+  attr(rval, "res") <- res
+  attr(rval, "unc") <- unc
   class(rval) <- c("reliagram", "data.frame")
   return(rval)
 }
 
 
 
-autoplot.reliagram <- function(object, ...) {
-  NULL
+autoplot.reliagram <- function(object, 
+                                single_graph = FALSE, 
+                                #minimum = 0, # FIXME: (ML) currently not supported
+                                confint = TRUE, 
+                                ref = TRUE, 
+                                xlim = c(0, 1),
+                                ylim = c(0, 1),
+                                xlab = NULL, 
+                                ylab = NULL, 
+                                main = NULL, 
+                                colour = "black",
+                                fill = adjustcolor("black", alpha.f = 0.2), 
+                                alpha_min = 0.2, 
+                                size = 1.2, 
+                                shape = 19, 
+                                linetype = 1, 
+                                type = "b",
+                                add_info = TRUE,
+                                extend_left = TRUE,
+                                extend_right = TRUE,
+                                legend = FALSE,
+                                ...) {
+
+  ## sanity checks
+  stopifnot(is.logical(single_graph))
+  if (single_graph) stopifnot(
+    "for `single_graph` all `freq` in attr of `object` must be of the same type" =
+    length(unique(attr(object, "freq"))) == 1
+  )
+
+  ## determine grouping
+  class(object) <- "data.frame"
+  if (is.null(object$group)) object$group <- 1L
+  n <- max(object$group)
+
+  ## get annotations in the right lengths
+  if(is.null(xlab)) xlab <- attr(object, "xlab")
+  xlab <- paste(unique(xlab), collapse = "/")
+  if(is.null(ylab)) ylab <- attr(object, "ylab")
+  ylab <- paste(unique(ylab), collapse = "/")
+  if(is.null(main)) main <- attr(object, "main")
+  main <- make.names(rep_len(main, n), unique = TRUE)
+
+  ## prepare grouping
+  object$group <- factor(object$group, levels = 1L:n, labels = main)
+
+  ## get x and y limit
+  if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
+  if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
+
+  ## stat helper function to get left/right points from respective mid points
+  calc_confint_polygon <- ggplot2::ggproto("calc_confint_polygon", ggplot2::Stat,
+
+    # Required as we operate on groups (facetting)
+    compute_group = function(data, scales) {
+      ## Manipulate object  #TODO: (ML) Could maybe be improved?
+      if (extend_left & extend_right) {
+        nd <- data.frame(
+          x = c(0, data$x, 1, rev(data$x), 0),
+          y = c(0, data$ci_lwr, 1, rev(data$ci_upr), 0)
+        )
+      } else if (extend_left) {
+        nd <- data.frame(
+          x = c(0, data$x, rev(data$x), 0),
+          y = c(0, data$ci_lwr, rev(data$ci_upr), 0)
+        )
+      } else if (extend_right) {
+        nd <- data.frame(
+          x = c(data$x, 1, rev(data$x)),
+          y = c(data$ci_lwr, 1, rev(data$ci_upr))
+        )
+      } else { 
+        nd <- data.frame(
+          x = c(data$x, rev(data$x)),
+          y = c(data$ci_lwr, rev(data$ci_upr))
+        )
+      }
+      nd
+    },
+
+    # Tells us what we need
+    required_aes = c("x", "ci_lwr", "ci_upr")
+  )
+
+  ## recycle arguments for plotting to match the number of groups (for geom w/o aes)
+  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
+  if (is.logical(confint)) confint <- ifelse(confint, 1, NA)  # color = NA for not plotting
+  plot_arg <- data.frame(1:n,
+    fill, colour, size, ref, linetype, confint, alpha_min
+  )[, -1]
+
+  ## recycle arguments for plotting to match the object rows (for geom w/ aes)
+  ## FIXME: (ML) Why does it need to be equal to the length of the object and not to the number of groups?
+  plot_arg2 <- data.frame(1:n, size, colour, ref, confint, fill, linetype, type)[, -1]
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+  plot_arg2$type <- ifelse(plot_arg2$type == "l", 0, 1)  # alpha = 0 for not plotting
+
+  ## set alpha for polygon
+  plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx)
+    set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
+
+  ## set fill to NA in case of no confint
+  plot_arg$fill[is.na(plot_arg$confint)] <- NA
+
+  ## actual plotting
+  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
+    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group")) +
+    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"),
+      alpha = plot_arg2$type, size = plot_arg2$size * 2.2, show.legend = FALSE) + 
+    ggplot2::geom_abline(slope = 1, linetype = 2, colour = plot_arg$ref) + 
+    ggplot2::geom_polygon(ggplot2::aes_string(ci_lwr = "ci_lwr", ci_upr = "ci_upr", fill = "group"), 
+      stat = calc_confint_polygon, show.legend = FALSE) 
+    #ggplot2::geom_polygon(ggplot2::aes_string(x = "x", y = "y", fill = "group"), data = df_polygon, 
+    #  show.legend = FALSE) 
+
+  ## set the colors, shapes, etc.
+  rval <- rval +
+    ggplot2::scale_colour_manual(values = plot_arg$colour) +
+    ggplot2::scale_fill_manual(values = plot_arg$fill) +
+    ggplot2::scale_size_manual(values = plot_arg$size) +
+    ggplot2::scale_linetype_manual(values = plot_arg$linetype)
+
+  ## add legend
+  if (legend) {
+    rval <- rval + ggplot2::labs(colour = "Model") +
+      ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+  } else {
+    rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
+  }
+
+  ## set x and y limits 
+  rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
+  rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
+
+  ## grouping (if any)
+  if (!single_graph && n > 1L) {
+    rval <- rval + ggplot2::facet_grid(group ~ .) 
+  }
+
+  ## annotation
+  rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+
+  ## return ggplot object
+  rval
+}
+
+
+add_hist_reliagram <- function(n, 
+                               breaks, 
+                               xpos, 
+                               ypos, 
+                               width = .2,
+                               height = .2, 
+                               col = "lightgray", 
+                               main = NULL) {
+  n[is.na(n)] <- 0 #FIXME: (ML) Check if you can do that!
+  max_n <- max(n)
+  for (i in seq_along(n)) {
+    x <- xpos + breaks[c(i, i + 1)] * width
+    y <- ypos + c(0, n[i] / max_n * height)
+    rect(x[1L], y[1L], x[2L], y[2L], col = col)
+  }
+
+  ytick <- pretty(c(0, max_n * .8), 4)
+  ytick <- ytick[ytick > 0 & ytick < max_n]
+  text(xpos + 1.05 * width, ypos + ytick / max_n * height, ytick, cex = .8, adj = c(0.0,0.5))
+  segments(
+    x0 = rep(xpos, length(ytick)), 
+    x1 = rep(xpos + 1 * width, length(ytick)), 
+    y0 = ypos + ytick / max_n * height,
+    col = "darkgray", lwd = .5, lty = 2)
+  segments(
+    x0 = rep(xpos + 0.975 * width, length(ytick)), 
+    x1 = rep(xpos + 1.025 * width, length(ytick)), 
+    y0 = ypos + ytick / max_n * height,
+    lwd = .5)
+  if (is.null(main)) {
+    main <- sprintf("N=%d", sum(n))
+  }
+  text(xpos + width / 2, ypos + 1.1 * height, font = 2, cex = 0.8, main)
 }
 
 
