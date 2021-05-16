@@ -646,6 +646,7 @@ autoplot.pithist <- function(object,
   )[, -1]
 
   ## recycle arguments for plotting to match the object rows (for geom w/ aes)
+  ## FIXME: (ML) Why does it need to be equal to the length of the object and not to the number of groups?
   plot_arg2 <- data.frame(1:n, border, size, colour, ref, confint, fill, linetype)[, -1]
   plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
 
@@ -746,7 +747,7 @@ autoplot.pithist <- function(object,
 
     ## grouping (if any)
     if (!single_graph && n > 1L) {
-      rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model") + ggplot2::labs(linetype = "Model")
+      rval <- rval + ggplot2::facet_grid(group ~ .) 
     }
 
     ## annotation

@@ -98,7 +98,7 @@ pit3 <- pithist(m3, plot = FALSE)
 
 plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
 
-plot(c(pit1, pit2, pit3), col = c(1, 2, 3))
+plot(c(pit1, pit2, pit3), col = c(1, 2, 3), style = "lines")
 
 plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE)
 lines(pit3, col = 3)

@@ -32,9 +32,12 @@ reliagram(object, \dots)
   \item{plot}{logical. Should the \code{plot} method be called to
     draw the computed extended reliability diagram?}
   \item{breaks}{numeric vector passed on to \code{\link{cut}} in order to bin 
-    the observations and the predicted probabilities.}
+    the observations and the predicted probabilities or a function applied to the predicted 
+    probabilities to calculate a numeric value for \code{\link{cut}}. Typically quantiles to ensure
+    equal number of predictions per bin, e.g., by \code{breaks = function(x) quantile(x)}.}
   \item{quantiles}{numeric vector of quantile probabilities with values in [0,1] to calculate single
-    or several thresholds. Only used if \code{thresholds} is not specified.}
+    or several thresholds. Only used if \code{thresholds} is not specified. For binary responses 
+    typically the 50\%-quantile is used.}
   \item{thresholds}{numeric vector specifying both where to cut the observations into binary values
       and at which values the predicted probabilities should be calculated (\code{\link{procast}}).}
   \item{confint}{logical. Should confident intervals be calculated and drawn?}

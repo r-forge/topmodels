@@ -374,6 +374,7 @@ autoplot.rootogram <- function(object,
   plot_arg <- data.frame(1:n, fill, colour, size, shape, ref, linetype)[, -1]
 
   ## recycle arguments for plotting to match the object rows
+  ## FIXME: (ML) Why does it need to be equal to the length of the object and not to the number of groups?
   plot_arg2 <- data.frame(1:n, border, size, type, colour)[, -1]
   plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
   plot_arg2$type <- ifelse(plot_arg2$type == "l", 0, 1)  # alpha = 0 for not plotting
