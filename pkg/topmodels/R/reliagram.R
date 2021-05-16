@@ -22,6 +22,7 @@ reliagram <- function(object, ...) {
 reliagram.default <- function(object,
                               newdata = NULL,
                               plot = TRUE,
+                              flavor = NULL,
                               breaks = seq(0, 1, by = 0.1),
                               quantiles = 0.5,
                               thresholds = NULL,
@@ -39,6 +40,11 @@ reliagram.default <- function(object,
   ## `object` and `newdata` w/i `newrepsone()`; `breaks w/i `cut()`, `...` w/i `plot()`;
   ## `confint` in `polygon()`
   stopifnot(is.logical(plot))
+  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
+  stopifnot(
+    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" =
+    is.null(flavor) || !inherits(flavor, "try-error")
+  )
   stopifnot(is.numeric(quantiles), is.null(dim(quantiles)))
   stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
   stopifnot(
@@ -57,6 +63,13 @@ reliagram.default <- function(object,
   stopifnot(length(ylab) == 1 || length(ylab) == length(quantiles))
   stopifnot(is.null(main) || (length(main) == 1 || length(main) == length(quantiles)))
   stopifnot(is.numeric(breaks) || is.function(breaks))
+
+  ## guess flavor
+  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
+    flavor <- "tidyverse"
+  } else if (is.null(flavor)) {
+    flavor <- "base"
+  }
 
   ## data + thresholds
   y <- newresponse(object, newdata = newdata)
@@ -139,16 +152,16 @@ reliagram.default <- function(object,
       for (i in 1:confint_nboot) {
 
         ## take bootstrap sample from predictions (surrogate forecasts)
-        xhat <- sample(pred[, idx], replace = TRUE)
+        pred_hat <- sample(pred[, idx], replace = TRUE)
 
         ## surrogate observations that are reliable by construction
-        yhat <- runif(N) < xhat
+        yhat <- runif(N) < pred_hat
 
         ## compute observed relative frequencies of the surrogate observations
         obs_rf_boot[[i]] <- as.numeric(
           aggregate(
             yhat,
-            by = list(prob = cut(xhat, breaks, include.lowest = TRUE)),
+            by = list(prob = cut(pred_hat, breaks, include.lowest = TRUE)),
             FUN = mean,
             drop = FALSE
           )[, "x"]
@@ -191,12 +204,17 @@ reliagram.default <- function(object,
     ##  * Hence, BS is not independent to the bins
     ##  * Hence, BS should vary conditional on the minimum
     attr(rval_i, "bs") <- mean((pred_bin - y[, idx])^2)
-    attr(rval_i, "rel") <- sum(n_pred * (mean_pr - obs_rf)^2, na.rm = TRUE) / sum(n_pred)
-    attr(rval_i, "res") <- sum(n_pred * (obs_rf - mean(y[, idx]))^2, na.rm = TRUE) / sum(n_pred)
+    attr(rval_i, "rel") <- sum(n_pred * (mean_pr - obs_rf)^2, na.rm = TRUE) / sum(n_pred, na.rm = TRUE)
+    attr(rval_i, "res") <- sum(n_pred * (obs_rf - mean(y[, idx]))^2, na.rm = TRUE) / sum(n_pred, na.rm = TRUE)
     attr(rval_i, "unc") <- mean(y[, idx]) * (1 - mean(y[, idx]))
 
     ## add class
-    class(rval_i) <- c("reliagram", "data.frame")
+    if (flavor == "base") {
+      class(rval_i) <- c("reliagram", "data.frame")
+    } else {
+      rval_i <- tibble::as_tibble(rval_i)
+      class(rval_i) <- c("reliagram", class(rval_i))
+    }
 
     rval[[idx]] <- rval_i
   }
@@ -205,8 +223,15 @@ reliagram.default <- function(object,
   rval <- do.call(c, rval)
 
   ## plot by default
-  if (plot) {
-    try(plot(rval, confint = confint, single_graph = single_graph, ...))
+  ## plot by default
+  if (plot & flavor == "tidyverse") {
+    try(print(ggplot2::autoplot(rval,
+      confint = confint, single_graph = single_graph, ...)
+    ))
+  } else if (plot) {
+    try(plot(rval,
+      confint = confint, single_graph = single_graph, ...
+    ))
   }
 
   ## return invisibly
@@ -251,6 +276,9 @@ plot.reliagram <- function(x,
   stopifnot(is.null(extend_right) || is.logical(extend_right))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
+
+  ## convert always to data.frame
+  x <- as.data.frame(x)
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
@@ -528,8 +556,20 @@ lines.reliagram <- function(x,
 
 c.reliagram <- rbind.reliagram <- function(...) {
 
-  ## list of pithists
+  ## list of reliagrams
   rval <- list(...)
+
+  ## set flavor to tidyverse if any rval is a tibble
+  if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
+    flavor <- "tidyverse"
+  } else {
+    flavor <- "base"
+  }
+
+  ## convert always to data.frame
+  if (flavor == "tidyverse") {
+    rval <- lapply(rval, as.data.frame)
+  }
 
   ## group sizes
   for (i in seq_along(rval)) {
@@ -566,7 +606,15 @@ c.reliagram <- rbind.reliagram <- function(...) {
   attr(rval, "rel") <- rel
   attr(rval, "res") <- res
   attr(rval, "unc") <- unc
-  class(rval) <- c("reliagram", "data.frame")
+
+  ## set class according to flavor
+  if (flavor == "base") {
+    class(rval) <- c("reliagram", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("reliagram", class(rval))
+  }
+
   return(rval)
 }
 
