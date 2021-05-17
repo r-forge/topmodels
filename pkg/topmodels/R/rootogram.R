@@ -319,7 +319,7 @@ plot.rootogram <- function(x,
     ## plot ref line 
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-      abline(h = 0, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
+      abline(h = 0, col = plot_arg$ref[j], lty = 1, lwd = 1.25)
     }
 
     lines(d$x, d$line,
@@ -385,7 +385,7 @@ autoplot.rootogram <- function(object,
     ggplot2::geom_rect(ggplot2::aes_string(fill = "group"), colour = plot_arg2$border, show.legend = FALSE) + 
     ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
       show.legend = FALSE) +
-    ggplot2::geom_hline(yintercept = 0, colour = plot_arg$ref, linetype = 2) +
+    ggplot2::geom_hline(yintercept = 0, colour = plot_arg$ref, linetype = 1) +
     ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"), 
       alpha = plot_arg2$type, size = plot_arg2$size * 2, show.legend = FALSE) 
 

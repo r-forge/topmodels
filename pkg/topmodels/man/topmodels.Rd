@@ -48,8 +48,23 @@ FIXME
 }
 
 \examples{
-m <- lm(dist ~ speed, data = cars)
-topmodels(m)
+data("CrabSatellites", package = "countreg")
+CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+
+m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+
+## base graphics
+topmodels(m1, pages = 1, flavor = "base")
+topmodels(m1, pages = 1, nsim = 10, flavor = "base")
+topmodels(m1, pages = 1, nsim = 30, fill = 2, flavor = "base")
+topmodels(m1, pages = 1, nsim = 30, ref = 2, flavor = "base")
+topmodels(m1, pages = 1, nsim = 30, fill =2, add_hist = 2, flavor = "base")
+
+## ggplot2 graphics
+topmodels(m1, pages = 1, nsim = 30, flavor = "tidyverse")
+topmodels(m2, pages = 1, nsim = 30, flavor = "tidyverse")
+
 }
 
 \keyword{regression}
