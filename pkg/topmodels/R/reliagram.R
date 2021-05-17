@@ -1,4 +1,4 @@
-## Reliagram (reliability diagram)
+# Reliagram (reliability diagram)
 ##
 ## - Oabserved y in-sample or out-of-sample (n x 1)
 ## - Thresholds in y (k x 1)
@@ -392,7 +392,7 @@ plot.reliagram <- function(x,
     if (j == 1 || (!single_graph && j > 1)) {
       if (!identical(plot_arg$ref[j], FALSE)) {
         if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-        abline(0, 1, col = plot_arg$ref[j], lty = 2)
+        abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
       }
     } 
 
@@ -537,7 +537,7 @@ lines.reliagram <- function(x,
     ## plot reference line
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-      abline(0, 1, col = plot_arg$ref[j], lty = 2)
+      abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
     }
 
     ## plot reliability line
@@ -633,7 +633,7 @@ autoplot.reliagram <- function(object,
                                 colour = "black",
                                 fill = adjustcolor("black", alpha.f = 0.2), 
                                 alpha_min = 0.2, 
-                                size = 1.2, 
+                                size = 1, 
                                 shape = 19, 
                                 linetype = 1, 
                                 type = "b",
@@ -728,7 +728,7 @@ autoplot.reliagram <- function(object,
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
     ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group")) +
     ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"),
-      alpha = plot_arg2$type, size = plot_arg2$size * 2.2, show.legend = FALSE) + 
+      alpha = plot_arg2$type, size = plot_arg2$size * 2, show.legend = FALSE) + 
     ggplot2::geom_abline(slope = 1, linetype = 2, colour = plot_arg$ref) + 
     ggplot2::geom_polygon(ggplot2::aes_string(ci_lwr = "ci_lwr", ci_upr = "ci_upr", fill = "group"), 
       stat = calc_confint_polygon, show.legend = FALSE) 

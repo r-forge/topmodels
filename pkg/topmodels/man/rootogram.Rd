@@ -32,7 +32,7 @@ rootogram(object, \dots)
   col = 2, lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, box = FALSE, \dots)
 
 \method{autoplot}{rootogram}(object, ref = TRUE,  xlab = NULL, ylab = NULL,
-  main = NULL, border = "black", fill = "darkgray", colour = 2, size = 1.2, shape = 19,
+  main = NULL, border = "black", fill = "darkgray", colour = 2, size = 1, shape = 19,
   linetype = 1, type = NULL, \dots)
 }
 

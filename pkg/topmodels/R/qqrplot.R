@@ -248,7 +248,7 @@ plot.qqrplot <- function(x,
                          xlab = NULL,
                          ylab = NULL,
                          main = NULL,
-                         col = "black",
+                         col = adjustcolor("black", alpha.f = 0.4), 
                          fill = adjustcolor("black", alpha.f = 0.2), 
                          alpha_min = 0.2, # single or n values  
                          pch = 19,
@@ -374,7 +374,7 @@ plot.qqrplot <- function(x,
     if (j == 1 || (!single_graph && j > 1)) {
       if (!identical(plot_arg$ref[j], FALSE)) {
         if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-        abline(0, 1, col = plot_arg$ref[j], lty = 2)
+        abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
       }
     }
 
@@ -389,7 +389,7 @@ plot.qqrplot <- function(x,
 points.qqrplot <- function(x,
                            confint = FALSE, 
                            ref = FALSE,
-                           col = "black",
+                           col = adjustcolor("black", alpha.f = 0.4), 
                            fill = adjustcolor("black", alpha.f = 0.2), 
                            alpha_min = 0.2,
                            pch = 19,
@@ -444,7 +444,7 @@ points.qqrplot <- function(x,
     ## plot reference diagonal
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-      abline(0, 1, col = plot_arg$ref[j], lty = 2)
+      abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
     }
 
   }
@@ -465,7 +465,7 @@ autoplot.qqrplot <- function(object,
                              xlab = NULL, 
                              ylab = NULL, 
                              main = NULL, 
-                             colour = "black",
+                             colour = adjustcolor("black", alpha.f = 0.4), 
                              fill = adjustcolor("black", alpha.f = 0.2), 
                              alpha_min = 0.2, 
                              size = 2, 
@@ -493,6 +493,14 @@ autoplot.qqrplot <- function(object,
   ## prepare grouping
   object$group <- factor(object$group, levels = 1L:n, labels = main)
 
+  ## FIXME: (ML) This must be done in base and somehow nicer!
+  object <- tidyr::pivot_longer(object, cols = names(object)[grepl("^x$|x_[0-9]", names(object))],
+                            names_to = "x_sim", values_to = "x")
+  object <- tidyr::pivot_longer(object, cols = names(object)[grepl("^y$|y_[0-9]", names(object))],
+                            names_to = "y_sim", values_to = "y")
+  object <- object[which(gsub("x", "", object$x_sim) == gsub("y", "", object$y_sim)), ]
+  object$y_sim <- NULL
+
   ## get x and y limit
   if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
   if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
@@ -518,7 +526,7 @@ autoplot.qqrplot <- function(object,
   if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
   if (is.logical(confint)) confint <- ifelse(confint, 1, NA)  # color = NA for not plotting
   plot_arg <- data.frame(1:n,
-    fill, colour, size, ref, linetype, confint, alpha_min
+    fill, colour, size, ref, linetype, confint, alpha_min, shape
   )[, -1]
 
   ## recycle arguments for plotting to match the object rows (for geom w/ aes)
@@ -537,15 +545,21 @@ autoplot.qqrplot <- function(object,
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
     ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"),
       show.legend = FALSE) + 
-    ggplot2::geom_abline(slope = 1, linetype = 2, colour = plot_arg$ref) + 
-    ggplot2::geom_polygon(ggplot2::aes_string(x_ci_lwr = "x_ci_lwr", x_ci_upr = "x_ci_upr", 
-      y_ci_lwr = "y_ci_lwr", y_ci_upr = "y_ci_upr", fill = "group"), 
-      stat = calc_confint_polygon, show.legend = FALSE) 
+    ggplot2::geom_abline(slope = 1, linetype = 2, colour = plot_arg$ref)
+
+  ## add conf
+  if (!identical(confint, FALSE) && all(c("x_ci_lwr", "x_ci_upr", "y_ci_lwr", "y_ci_upr") %in% names(object))) {
+    rval <- rval +
+      ggplot2::geom_polygon(ggplot2::aes_string(x_ci_lwr = "x_ci_lwr", x_ci_upr = "x_ci_upr",
+        y_ci_lwr = "y_ci_lwr", y_ci_upr = "y_ci_upr", fill = "group"),
+        stat = calc_confint_polygon, show.legend = FALSE)
+  }
 
   ## set the colors, shapes, etc.
   rval <- rval +
     ggplot2::scale_colour_manual(values = plot_arg$colour) +
     ggplot2::scale_fill_manual(values = plot_arg$fill) +
+    ggplot2::scale_shape_manual(values = plot_arg$shape) +
     ggplot2::scale_size_manual(values = plot_arg$size) +
     ggplot2::scale_linetype_manual(values = plot_arg$linetype)
 
