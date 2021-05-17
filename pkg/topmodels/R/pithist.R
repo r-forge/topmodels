@@ -279,7 +279,7 @@ plot.pithist <- function(x,
   }
 
   ## set lwd
-  if (is.null(lwd)) lwd <- if (style == "histogram") 1.5 else 2
+  if (is.null(lwd)) lwd <- if (style == "histogram") 1.25 else 2
 
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
@@ -622,7 +622,7 @@ autoplot.pithist <- function(object,
   }
 
   ## set size
-  if (is.null(size)) size <- if (style == "histogram") 0.6 else 0.8
+  if (is.null(size)) size <- if (style == "histogram") 0.5 else 1
 
   ## get annotations in the right lengths
   if(is.null(xlab)) xlab <- attr(object, "xlab")
@@ -682,8 +682,7 @@ autoplot.pithist <- function(object,
     }
 
     ## set x and y limits 
-    rval <- rval + ggplot2::xlim(xlim)
-    rval <- rval + ggplot2::ylim(ylim)
+    rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim)
 
     ## grouping (if any)
     if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model")
@@ -742,9 +741,9 @@ autoplot.pithist <- function(object,
       rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
     }
 
+
     ## set x and y limits 
-    rval <- rval + ggplot2::xlim(xlim)
-    rval <- rval + ggplot2::ylim(ylim)
+    rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim)
 
     ## grouping (if any)
     if (!single_graph && n > 1L) {

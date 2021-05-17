@@ -83,12 +83,12 @@ m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
 m3 <- lm(dist ~ speed, data = cars)
 
-q1 <- wormplot(m1, nsim = 100, confint = TRUE)
-q2 <- wormplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
-q3 <- wormplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
+w1 <- wormplot(m1, nsim = 100, confint = TRUE)
+w2 <- wormplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
+w3 <- wormplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
 
-plot(c(q1, q2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
-points(q3, col = "lightblue")
+plot(c(w1, w2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
+points(w3, col = "lightblue")
 }
 
 \keyword{hplot}
