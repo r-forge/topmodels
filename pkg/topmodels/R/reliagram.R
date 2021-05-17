@@ -259,8 +259,6 @@ plot.reliagram <- function(x,
                            add_hist = TRUE,
                            add_info = TRUE, # single or n values
                            add_rug = TRUE,
-                           extend_left = NULL, # either null or logical of length 1 / n
-                           extend_right = NULL, # either null or logical of length 1 / n
                            axes = TRUE,
                            box = TRUE,
                            ...) {
@@ -272,8 +270,6 @@ plot.reliagram <- function(x,
   stopifnot(is.logical(single_graph))
   stopifnot(is.numeric(minimum), all(minimum >= 0))
   stopifnot(is.logical(add_info))
-  stopifnot(is.null(extend_left) || is.logical(extend_left))
-  stopifnot(is.null(extend_right) || is.logical(extend_right))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
 
@@ -290,14 +286,12 @@ plot.reliagram <- function(x,
   }
 
   ## recycle arguments for plotting to match the number of groups
-  if (is.null(extend_left)) extend_left <- NA
-  if (is.null(extend_right)) extend_right <- NA
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, minimum, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
     col, fill, alpha_min, lwd, pch, lty, type, add_hist, add_info, add_rug, 
-    extend_left, extend_right, axes, box
+    axes, box
   )[, -1]
 
   ## annotation
@@ -323,12 +317,15 @@ plot.reliagram <- function(x,
     ## get group index
     j <- unique(d$group)
 
-    ## get lines with sufficient observations
+    ## get bins with sufficient observations
     min_idx <- which(d$n_pred >= plot_arg$minimum[j])
+    if (length(min_idx) == 0) {
+      stop(sprintf("no bin has sufficent cases for defined minimum = %s\n", plot_arg$minimum[j]))
+    }
 
-    ## check where confint should be extended
-    if (is.na(plot_arg$extend_left[j])) plot_arg$extend_left[j] <- 1 %in% min_idx
-    if (is.na(plot_arg$extend_right[j])) plot_arg$extend_right[j] <- nrow(d) %in% min_idx
+    ## get minimum and maximum breaks to decide if extend confint polygon to the corners
+    extend_left <- min(d$bin_lwr) == min(d[min_idx, "bin_lwr"])
+    extend_right <- max(d$bin_upr) == max(d[min_idx, "bin_upr"])
 
     ## modify main using subscript for quantiles
     if (grepl("threshold = q_[0-9]+\\.?([0-9]+)?)$", main[j])){
@@ -360,18 +357,18 @@ plot.reliagram <- function(x,
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
         na.omit(c(
-          ifelse(plot_arg$extend_left[j], 0, NA),
+          ifelse(extend_left, 0, NA),
           d[min_idx, "x"],
-          ifelse(plot_arg$extend_right[j], 1, NA),
+          ifelse(extend_right, 1, NA),
           rev(d[min_idx, "x"]),
-          ifelse(plot_arg$extend_left[j], 0, NA)
+          ifelse(extend_left, 0, NA)
         )),
         na.omit(c(
-          ifelse(plot_arg$extend_left[j], 0, NA),
+          ifelse(extend_left, 0, NA),
           d[min_idx, "ci_lwr"],
-          ifelse(plot_arg$extend_right[j], 1, NA),
+          ifelse(extend_right, 1, NA),
           rev(d[min_idx, "ci_upr"]),
-          ifelse(plot_arg$extend_left[j], 0, NA)
+          ifelse(extend_left, 0, NA)
         )),
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]), 
         border = NA
@@ -413,7 +410,7 @@ plot.reliagram <- function(x,
      
     ## add hist
     if (!single_graph && !identical(plot_arg$add_hist[j], FALSE)) {
-      if (isTRUE(plot_arg$add_hist[j])) plot_arg$add_hist[j] <- plot_arg$fill[j]
+      if (isTRUE(plot_arg$add_hist[j])) plot_arg$add_hist[j] <- "lightgray"
       tmp_x <- par("pin")[1]
       tmp_y <- par("pin")[2]
       tmp_height <- 0.3  * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j]))
@@ -422,6 +419,7 @@ plot.reliagram <- function(x,
       add_hist_reliagram(
         d$n_pred, 
         c(d$bin_lwr, d$bin_upr[NROW(d)]), 
+        plot_arg$minimum[j],
         xpos = 0.025 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j])) + plot_arg$xlim1[j], 
         ypos = 0.925 * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j])) - tmp_height + plot_arg$ylim1[j], 
         width = tmp_width,
@@ -475,8 +473,6 @@ lines.reliagram <- function(x,
                             pch = 19,
                             lty = 1,
                             type = "b",
-                            extend_left = NULL, # either null or logical of length 1 / n
-                            extend_right = NULL, # either null or logical of length 1 / n
                             ...) {
   ## sanity checks
   ## lengths of all arguments are checked by recycling,
@@ -484,18 +480,14 @@ lines.reliagram <- function(x,
   ## `ref` w/i `abline()`; `confint` w/i `polygon()`
   ## `alpha_min` w/i colorspace fun 
   stopifnot(is.numeric(minimum), all(minimum >= 0))
-  stopifnot(is.null(extend_left) || is.logical(extend_left))
-  stopifnot(is.null(extend_right) || is.logical(extend_right))
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  if (is.null(extend_left)) extend_left <- NA
-  if (is.null(extend_right)) extend_right <- NA
   plot_arg <- data.frame(
-    1:n, minimum, confint, ref, col, fill, alpha_min, lwd, pch, lty, type, extend_left, extend_right
+    1:n, minimum, confint, ref, col, fill, alpha_min, lwd, pch, lty, type
   )[, -1]
 
   ## plotting function
@@ -507,27 +499,27 @@ lines.reliagram <- function(x,
     ## get lines with sufficient observations
     min_idx <- which(d$n_pred >= plot_arg$minimum[j])
 
-    ## check where confint should be extended
-    if (is.na(plot_arg$extend_left[j])) plot_arg$extend_left[j] <- 1 %in% min_idx
-    if (is.na(plot_arg$extend_right[j])) plot_arg$extend_right[j] <- nrow(d) %in% min_idx
+    ## get minimum and maximum breaks to decide if extend confint polygon to the corners
+    extend_left <- min(d$bin_lwr) == min(d[min_idx, "bin_lwr"])
+    extend_right <- max(d$bin_upr) == max(d[min_idx, "bin_upr"])
 
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
         na.omit(c(
-          ifelse(plot_arg$extend_left[j], 0, NA),
+          ifelse(extend_left, 0, NA),
           d[min_idx, "x"],
-          ifelse(plot_arg$extend_right[j], 1, NA),
+          ifelse(extend_right, 1, NA),
           rev(d[min_idx, "x"]),
-          ifelse(plot_arg$extend_left[j], 0, NA)
+          ifelse(extend_left, 0, NA)
         )),
         na.omit(c(
-          ifelse(plot_arg$extend_left[j], 0, NA),
+          ifelse(extend_left, 0, NA),
           d[min_idx, "ci_lwr"],
-          ifelse(plot_arg$extend_right[j], 1, NA),
+          ifelse(extend_right, 1, NA),
           rev(d[min_idx, "ci_upr"]),
-          ifelse(plot_arg$extend_left[j], 0, NA)
+          ifelse(extend_left, 0, NA)
         )),
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]), 
         border = NA
@@ -638,8 +630,6 @@ autoplot.reliagram <- function(object,
                                 linetype = 1, 
                                 type = "b",
                                 add_info = TRUE,
-                                extend_left = TRUE,
-                                extend_right = TRUE,
                                 legend = FALSE,
                                 ...) {
 
@@ -670,23 +660,27 @@ autoplot.reliagram <- function(object,
   if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
   if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
 
+  ## get minimum and maximum breaks to decide if extend confint polygon to the corners
+  min_break <- min(object$bin_lwr)
+  max_break <- max(object$bin_upr)
+
   ## stat helper function to get left/right points from respective mid points
   calc_confint_polygon <- ggplot2::ggproto("calc_confint_polygon", ggplot2::Stat,
 
     # Required as we operate on groups (facetting)
     compute_group = function(data, scales) {
       ## Manipulate object  #TODO: (ML) Could maybe be improved?
-      if (extend_left & extend_right) {
+      if (min(data$bin_lwr) == min_break & max(data$bin_upr) == max_break) {
         nd <- data.frame(
           x = c(0, data$x, 1, rev(data$x), 0),
           y = c(0, data$ci_lwr, 1, rev(data$ci_upr), 0)
         )
-      } else if (extend_left) {
+      } else if (min(data$bin_lwr) == min_break) {
         nd <- data.frame(
           x = c(0, data$x, rev(data$x), 0),
           y = c(0, data$ci_lwr, rev(data$ci_upr), 0)
         )
-      } else if (extend_right) {
+      } else if (max(data$bin_upr) == max_break) {
         nd <- data.frame(
           x = c(data$x, 1, rev(data$x)),
           y = c(data$ci_lwr, 1, rev(data$ci_upr))
@@ -701,7 +695,7 @@ autoplot.reliagram <- function(object,
     },
 
     # Tells us what we need
-    required_aes = c("x", "ci_lwr", "ci_upr")
+    required_aes = c("x", "ci_lwr", "ci_upr", "bin_lwr", "bin_upr")
   )
 
   ## recycle arguments for plotting to match the number of groups (for geom w/o aes)
@@ -724,14 +718,19 @@ autoplot.reliagram <- function(object,
   ## set fill to NA in case of no confint
   plot_arg$fill[is.na(plot_arg$confint)] <- NA
 
+  ## FIXME: (ML) Improve NA handling for cases w/o observations
   ## actual plotting
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
-    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group")) +
+    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
+      na.rm = TRUE) +
     ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"),
-      alpha = plot_arg2$type, size = plot_arg2$size * 2, show.legend = FALSE) + 
+      alpha = plot_arg2$type, size = plot_arg2$size * 2, show.legend = FALSE, na.rm = TRUE) + 
     ggplot2::geom_abline(slope = 1, linetype = 2, colour = plot_arg$ref) + 
-    ggplot2::geom_polygon(ggplot2::aes_string(ci_lwr = "ci_lwr", ci_upr = "ci_upr", fill = "group"), 
-      stat = calc_confint_polygon, show.legend = FALSE) 
+    ggplot2::geom_polygon(ggplot2::aes_string(
+        ci_lwr = "ci_lwr", ci_upr = "ci_upr", 
+        bin_lwr = "bin_lwr", bin_upr = "bin_upr", fill = "group"
+      ), 
+      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE) 
     #ggplot2::geom_polygon(ggplot2::aes_string(x = "x", y = "y", fill = "group"), data = df_polygon, 
     #  show.legend = FALSE) 
 
@@ -769,19 +768,27 @@ autoplot.reliagram <- function(object,
 
 add_hist_reliagram <- function(n, 
                                breaks, 
+                               minimum,
                                xpos, 
                                ypos, 
                                width = .2,
                                height = .2, 
                                col = "lightgray", 
                                main = NULL) {
-  n[is.na(n)] <- 0 #FIXME: (ML) Check if you can do that!
+
+  idx_min <- which(n < minimum)
+  n[is.na(n) | n < minimum] <- 0 
   max_n <- max(n)
   for (i in seq_along(n)) {
     x <- xpos + breaks[c(i, i + 1)] * width
     y <- ypos + c(0, n[i] / max_n * height)
     rect(x[1L], y[1L], x[2L], y[2L], col = col)
   }
+  points(
+    na.omit(filter(breaks, c(0.5, 0.5), sides = 2))[idx_min] * width + xpos, 
+    rep(0, length(n))[idx_min] + ypos, 
+    pch = 4
+  )
 
   ytick <- pretty(c(0, max_n * .8), 4)
   ytick <- ytick[ytick > 0 & ytick < max_n]

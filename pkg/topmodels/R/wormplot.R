@@ -538,6 +538,7 @@ autoplot.wormplot <- function(object,
   object$group <- factor(object$group, levels = 1L:n, labels = main)
 
   ## FIXME: (ML) This must be done in base and somehow nicer!
+  ref_fun <- attr(object, "ref_fun")[[1]]
   object <- tidyr::pivot_longer(object, cols = names(object)[grepl("^x$|x_[0-9]", names(object))],
                             names_to = "x_sim", values_to = "x")
   object <- tidyr::pivot_longer(object, cols = names(object)[grepl("^y$|y_[0-9]", names(object))],
@@ -598,12 +599,12 @@ autoplot.wormplot <- function(object,
     if (isTRUE(ref)) plot_arg$ref <- "black"
     rval <- rval + 
       ggplot2::geom_function(
-        fun = attr(object, "ref_fun")[[1]], 
+        fun = ref_fun, 
         args = list(n = NROW(object), level = 0.95, which = "lower"),
         linetype = 2, col = plot_arg$ref
       ) +  
       ggplot2::geom_function(
-        fun = attr(object, "ref_fun")[[1]],
+        fun = ref_fun,
         args = list(n = NROW(object), level = 0.95, which = "upper"),
         linetype = 2, col = plot_arg$ref
       ) + 
