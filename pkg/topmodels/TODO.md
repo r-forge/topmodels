@@ -16,11 +16,11 @@
 
 Function name | S3 classes supported | S3 classes planned | TODOs
 --- | --- | --- | ---
-`procast()` | `lm`, `crch`, (`disttree`) | `glm`, `countreg`, `betareg`, | many
+`procast()` | `lm`, `crch`, (`disttree`) | `glm`, `countreg`, `betareg`, | yes
  | | (`glm`)  | `gam`, `gamlss`, `bamlss` | 
 `procast_setup()` | none | none | none
-`newresponse()` | `default` | no | few
-`qresiduals()` | `default` | no | many 
+`newresponse()` | `default` | no | yes
+`qresiduals()` | `default` | no | yes 
 
 ### 2.2 Functions for forecasting: TODOs
 * `procast()` 
@@ -41,11 +41,11 @@ Function name | S3 classes supported | S3 classes planned | TODOs
 
 Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TODOs
 --- | --- | --- | --- | --- | --- | ---
-`reliagram` | `default` | yes | yes | yes | no | few
+`reliagram` | `default` | yes | yes | yes | yes | few
 `pithist` | `default` | yes | yes | yes | yes | few
-`qqrplot` | `default` | yes | yes | yes | no | few 
+`qqrplot` | `default` | yes | yes | yes | yes | few 
 `rootogram` | `default`| yes | yes | - | yes | few
-`wormplot` | no | no | no | no | no | setup
+`wormplot` | yes | yes | yes | yes | yes | few
 
 ### 2.4 Functions for graphical model assessment: TODOs
 * `pithist()`
@@ -62,9 +62,9 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
     * Move away from `countreg` default: Make argument `object` mandatory [DONE]
     * Merge `rootogram_procast()` and `rootogram_glm` [DONE]
 * `wormplot()`
-    * Start from scratch: Needs to be setup
+    * Start from scratch: Needs to be setup [DONE]
 
-## Current question/problems
+# Update 2021-04-16
 * How to do perform initilization correctly for `glm` objects?
 * Should we increase the difference of the evaluation `at` in `qqresiduals()` to work for dicscrete distribution (binom, pois etc.) which leads to a wrong results for qnorm (compare tests). [SOLVED]
 * How should we handle values outside (truncation)/censoring points. These lead to skewed PIT histograms.
@@ -79,3 +79,71 @@ m_gauss <- glm(dist ~ speed, data = cars, family = gaussian)
 qqrplot(m_gauss, range = TRUE)
 ```
 
+# Update 2021-05-18
+
+## Demonstration
+```
+devtools::load_all()
+data("CrabSatellites", package = "countreg")
+CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+m3 <- lm(dist ~ speed, data = cars)
+
+rootogram(m1)
+rootogram(m2)
+rootogram(m3)
+
+r1 <- reliagram(m1)
+r1b <- reliagram(m1, minimum = 30)
+r2 <- reliagram(m2)
+r3 <- reliagram(m3)
+plot(c(r1, r2))
+plot(c(r1, r2), col = c(1, 2))
+plot(c(r1, r2), confint = c(FALSE, TRUE))
+plot(c(r1, r2), confint = c(1, 2), single_graph = TRUE)
+lines(r3, col = 2)
+
+autoplot(r1)
+reliagram(m1, flavor = "tidyverse")
+
+topmodels(m1, pages = 1)
+topmodels(m1, pages = 1, fill = 2)
+topmodels(m1, pages = 1, nsim = 10)
+topmodels(m1, pages = 1, nsim = 10, flavor = "t")
+
+```
+
+## General Points
+* Concept for plotting functions: `ref = TRUE`, `ref = c(col, col)`, `...`
+* topmodels()
+* flavor "base" vs. "tidyverse"
+* autoplot: 
+    * same arguments than base
+    * same concept with groups as for base plotting functions 
+    * `col = colour`, `pch = symbol`, `lty = linetype`, `cex = lwd = size`, ...
+    * not all finished implemented, especially gropus can be difficult
+ 
+## Current TODOs:
+* Several bugfixes, especially in `autoplot()` with `single_graph = TRUE`
+* `pithist()` proportional methodos
+* legend()
+
+## Outlook (until conference)
+* Further streamlining incl. FIXMEs, clean up code and comments
+* Check naming of in/out arguments
+* Implement proper testing
+* Adapt manuals (also for plotting funs)
+* Maybe simple homepage
+* `procast()`
+* `newresponse()`
+* `qresiduals()`
+
+## Questions for Achim
+* `na.action`: see `newresponse()`
+* `response_type` + `newresponse()` in general
+* rootogram: breaks no special options, `+.rootogram()`
+* procast: weights, named data.frames as rval, scores (estfun), which models supported
+* reliagram: extend to left/right border, minimum, new confint representation, `reliagram.crch()`
+* topmodels: arguments compare `bamlss()`
+* wormplot: `ciplot()`
