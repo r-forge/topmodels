@@ -267,6 +267,9 @@ plot.wormplot <- function(x,
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
 
+  ## convert always to data.frame
+  x <- as.data.frame(x)
+
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
@@ -428,6 +431,9 @@ points.wormplot <- function(x,
   ## `col`, `pch` w/i `lines()`
   ## `confint`, `fill` in `polygon()`
   ## `alpha_min` w/i colorspace fun 
+
+  ## convert always to data.frame
+  x <- as.data.frame(x)
 
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L

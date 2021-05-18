@@ -481,6 +481,9 @@ lines.reliagram <- function(x,
   ## `alpha_min` w/i colorspace fun 
   stopifnot(is.numeric(minimum), all(minimum >= 0))
 
+  ## convert always to data.frame
+  x <- as.data.frame(x)
+
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
@@ -633,13 +636,6 @@ autoplot.reliagram <- function(object,
                                 legend = FALSE,
                                 ...) {
 
-  ## sanity checks
-  stopifnot(is.logical(single_graph))
-  if (single_graph) stopifnot(
-    "for `single_graph` all `freq` in attr of `object` must be of the same type" =
-    length(unique(attr(object, "freq"))) == 1
-  )
-
   ## determine grouping
   class(object) <- "data.frame"
   if (is.null(object$group)) object$group <- 1L
@@ -700,7 +696,6 @@ autoplot.reliagram <- function(object,
 
   ## recycle arguments for plotting to match the number of groups (for geom w/o aes)
   if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
-  if (is.logical(confint)) confint <- ifelse(confint, 1, NA)  # color = NA for not plotting
   plot_arg <- data.frame(1:n,
     fill, colour, size, ref, linetype, confint, alpha_min
   )[, -1]
@@ -715,8 +710,16 @@ autoplot.reliagram <- function(object,
   plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx)
     set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
 
-  ## set fill to NA in case of no confint
-  plot_arg$fill[is.na(plot_arg$confint)] <- NA
+  ## set fill to NA in case of no confint #FIXME: (ML) Implement nicer
+  if (is.logical(plot_arg$confint)) {
+    plot_arg$fill[!plot_arg$confint] <- NA   # color = NA for not plotting
+  } else {
+    ## set alpha for polygon
+    plot_arg$confint <- sapply(seq_along(plot_arg$confint), function(idx)
+      set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx]))
+
+    plot_arg$fill <- plot_arg$confint
+  }
 
   ## FIXME: (ML) Improve NA handling for cases w/o observations
   ## actual plotting
