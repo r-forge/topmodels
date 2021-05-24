@@ -293,7 +293,7 @@ plot.pithist <- function(x,
   if (single_graph) {
     if (is.null(xlab)) xlab <- "PIT"
     if (is.null(ylab)) ylab <- if (all(attr(x, "freq"))) "Frequency" else "Density"
-    if (is.null(main)) main <- "PIT Histogram"
+    if (is.null(main)) main <- "PIT histogram"
   } else {
     if (is.null(xlab)) xlab <- TRUE
     if (is.null(ylab)) ylab <- TRUE

@@ -152,6 +152,12 @@ topmodels <- function(object,
   ## remove NULLs from list
   arg <- lapply(arg, function(x) x[!sapply(x, is.null)])
 
+  ## add proper titles
+  arg <- lapply(seq_along(arg), function(idx) {
+    arg[[idx]]$main <- c("Rootogram", "PIT histogram", "Reliability diagram",
+      "Q-Q residuals plot", "Worm plot")[idx]; arg[[idx]]
+  })
+
   ## look up if provided arguments match possible arguments
   arg <- lapply(seq_along(arg), function(idx) arg[[idx]][names(arg[[idx]]) %in% arg_avail[[idx]]]) 
 
