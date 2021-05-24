@@ -95,7 +95,7 @@ rootogram(m2)
 rootogram(m3)
 
 r1 <- reliagram(m1)
-r1b <- reliagram(m1, minimum = 30)
+r1b <- reliagram(m1, minimum = 10)
 r2 <- reliagram(m2)
 r3 <- reliagram(m3)
 plot(c(r1, r2))
@@ -104,6 +104,7 @@ plot(c(r1, r2), confint = c(FALSE, TRUE))
 plot(c(r1, r2), confint = c(1, 2), single_graph = TRUE)
 lines(r3, col = 2)
 
+library("ggplot2")
 autoplot(r1)
 reliagram(m1, flavor = "tidyverse")
 
