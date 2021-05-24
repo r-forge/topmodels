@@ -24,7 +24,8 @@ set_minimum_transparency <- function(col, alpha_min) {
   alpha <- extract_transparency(col, mode = "numeric", default = alpha_min)
 
   ## set alpha (minimum if necessary)
-  if (alpha_min < alpha) alpha <- alpha_min
+  alpha <- ifelse(alpha > alpha_min, alpha_min, alpha)
+
   col <- adjust_transparency(col, alpha = alpha)
  
   return(col) 

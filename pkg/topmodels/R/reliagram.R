@@ -22,7 +22,7 @@ reliagram <- function(object, ...) {
 reliagram.default <- function(object,
                               newdata = NULL,
                               plot = TRUE,
-                              flavor = NULL,
+                              class = NULL,
                               breaks = seq(0, 1, by = 0.1),
                               quantiles = 0.5,
                               thresholds = NULL,
@@ -39,12 +39,6 @@ reliagram.default <- function(object,
   ## sanity checks
   ## `object` and `newdata` w/i `newrepsone()`; `breaks w/i `cut()`, `...` w/i `plot()`;
   ## `confint` in `polygon()`
-  stopifnot(is.logical(plot))
-  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
-  stopifnot(
-    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" =
-    is.null(flavor) || !inherits(flavor, "try-error")
-  )
   stopifnot(is.numeric(quantiles), is.null(dim(quantiles)))
   stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
   stopifnot(
@@ -64,12 +58,29 @@ reliagram.default <- function(object,
   stopifnot(is.null(main) || (length(main) == 1 || length(main) == length(quantiles)))
   stopifnot(is.numeric(breaks) || is.function(breaks))
 
-  ## guess flavor
-  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
-    flavor <- "tidyverse"
-  } else if (is.null(flavor)) {
-    flavor <- "base"
+  ## guess plotting flavor
+  if (isFALSE(plot)) {
+    plot <- "none"
+  } else if (isTRUE(plot)) {
+    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+  } else if (!is.character(plot)) {
+    plot <- "base"
   }
+  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
+  stopifnot(
+    "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
+    !inherits(plot, "try-error")
+  )
+
+  ## guess output class
+  if (is.null(class)) {
+    class <- if("tibble" %in% loadedNamespaces()) "tibble" else "data.frame"
+  }
+  class <- try(match.arg(class, c("tibble", "data.frame")))
+  stopifnot(
+    "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
+    !inherits(class, "try-error")
+  )
 
   ## data + thresholds
   y <- newresponse(object, newdata = newdata)
@@ -209,7 +220,7 @@ reliagram.default <- function(object,
     attr(rval_i, "unc") <- mean(y[, idx]) * (1 - mean(y[, idx]))
 
     ## add class
-    if (flavor == "base") {
+    if (class == "data.frame") {
       class(rval_i) <- c("reliagram", "data.frame")
     } else {
       rval_i <- tibble::as_tibble(rval_i)
@@ -224,11 +235,11 @@ reliagram.default <- function(object,
 
   ## plot by default
   ## plot by default
-  if (plot & flavor == "tidyverse") {
+  if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval,
       confint = confint, single_graph = single_graph, ...)
     ))
-  } else if (plot) {
+  } else if (plot == "base") {
     try(plot(rval,
       confint = confint, single_graph = single_graph, ...
     ))
@@ -255,10 +266,11 @@ plot.reliagram <- function(x,
                            lwd = 2, # single or n values
                            pch = 19, # single or n values
                            lty = 1, # single or n values
-                           type = "b", # single or n values
+                           type = NULL, # single or n values
                            add_hist = TRUE,
                            add_info = TRUE, # single or n values
                            add_rug = TRUE,
+                           add_min = TRUE, 
                            axes = TRUE,
                            box = TRUE,
                            ...) {
@@ -285,12 +297,15 @@ plot.reliagram <- function(x,
     single_graph <- FALSE
   }
 
+  ## determine if points should be plotted
+  if (is.null(type)) type <- ifelse(table(x$group) > 20L, "l", "b")
+
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, minimum, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
-    col, fill, alpha_min, lwd, pch, lty, type, add_hist, add_info, add_rug, 
+    col, fill, alpha_min, lwd, pch, lty, type, add_hist, add_info, add_rug, add_min,
     axes, box
   )[, -1]
 
@@ -352,6 +367,14 @@ plot.reliagram <- function(x,
       }
     }
 
+    ## plot reference line
+    if (j == 1 || (!single_graph && j > 1)) {
+      if (!identical(plot_arg$ref[j], FALSE)) {
+        if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+        abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
+      }
+    } 
+
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
@@ -385,19 +408,17 @@ plot.reliagram <- function(x,
     ## get lines with sufficient observations
     min_idx <- which(d$n_pred >= plot_arg$minimum[j])
 
-    ## plot reference line
-    if (j == 1 || (!single_graph && j > 1)) {
-      if (!identical(plot_arg$ref[j], FALSE)) {
-        if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-        abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
-      }
-    } 
-
     ## plot reliability line
     lines(y ~ x, d[min_idx, ],
       type = plot_arg$type[j], lwd = plot_arg$lwd[j],
       pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...
     )
+
+    ## plot points below minimum 
+    if (!identical(plot_arg$add_min[j], FALSE)) {
+      if (isTRUE(plot_arg$add_min[j])) plot_arg$add_min[j] <- 4
+      points(y ~ x, d[-min_idx, ], pch = plot_arg$add_min[j], col = plot_arg$col[j], ...)
+    }
 
     ## add rugs
     if (!single_graph && !identical(plot_arg$add_rug[j], FALSE)) {
@@ -420,7 +441,7 @@ plot.reliagram <- function(x,
         d$n_pred, 
         c(d$bin_lwr, d$bin_upr[NROW(d)]), 
         plot_arg$minimum[j],
-        xpos = 0.025 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j])) + plot_arg$xlim1[j], 
+        xpos = 0.05 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j])) + plot_arg$xlim1[j], 
         ypos = 0.925 * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j])) - tmp_height + plot_arg$ylim1[j], 
         width = tmp_width,
         height = tmp_height,
@@ -554,15 +575,15 @@ c.reliagram <- rbind.reliagram <- function(...) {
   ## list of reliagrams
   rval <- list(...)
 
-  ## set flavor to tidyverse if any rval is a tibble
+  ## set class to tibble if any rval is a tibble
   if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
-    flavor <- "tidyverse"
+    class <- "tibble"
   } else {
-    flavor <- "base"
+    class <- "data.frame"
   }
 
   ## convert always to data.frame
-  if (flavor == "tidyverse") {
+  if (class == "tibble") {
     rval <- lapply(rval, as.data.frame)
   }
 
@@ -602,8 +623,8 @@ c.reliagram <- rbind.reliagram <- function(...) {
   attr(rval, "res") <- res
   attr(rval, "unc") <- unc
 
-  ## set class according to flavor
-  if (flavor == "base") {
+  ## set class to data.frame or tibble
+  if (class == "data.frame") {
     class(rval) <- c("reliagram", "data.frame")
   } else {
     rval <- tibble::as_tibble(rval)
@@ -616,28 +637,31 @@ c.reliagram <- rbind.reliagram <- function(...) {
 
 
 autoplot.reliagram <- function(object, 
-                                single_graph = FALSE, 
-                                #minimum = 0, # FIXME: (ML) currently not supported
-                                confint = TRUE, 
-                                ref = TRUE, 
-                                xlim = c(0, 1),
-                                ylim = c(0, 1),
-                                xlab = NULL, 
-                                ylab = NULL, 
-                                main = NULL, 
-                                colour = "black",
-                                fill = adjustcolor("black", alpha.f = 0.2), 
-                                alpha_min = 0.2, 
-                                size = 1, 
-                                shape = 19, 
-                                linetype = 1, 
-                                type = "b",
-                                add_info = TRUE,
-                                legend = FALSE,
-                                ...) {
+                               single_graph = FALSE, 
+                               minimum = 0,
+                               confint = TRUE, 
+                               ref = TRUE, 
+                               xlim = c(0, 1),
+                               ylim = c(0, 1),
+                               xlab = NULL, 
+                               ylab = NULL, 
+                               main = NULL, 
+                               colour = "black",
+                               fill = adjustcolor("black", alpha.f = 0.2), 
+                               alpha_min = 0.2, 
+                               size = 1, 
+                               shape = 19, 
+                               linetype = 1, 
+                               type = NULL,
+                               add_info = TRUE,
+                               add_min = TRUE,
+                               legend = FALSE,
+                               ...) {
+
+  ## convert always to data.frame
+  object <- as.data.frame(object)
 
   ## determine grouping
-  class(object) <- "data.frame"
   if (is.null(object$group)) object$group <- 1L
   n <- max(object$group)
 
@@ -647,16 +671,30 @@ autoplot.reliagram <- function(object,
   if(is.null(ylab)) ylab <- attr(object, "ylab")
   ylab <- paste(unique(ylab), collapse = "/")
   if(is.null(main)) main <- attr(object, "main")
-  main <- make.names(rep_len(main, n), unique = TRUE)
+  main <- make.unique(rep_len(main, n))
 
   ## prepare grouping
   object$group <- factor(object$group, levels = 1L:n, labels = main)
 
-  ## get x and y limit
+  ## get base style arguments
+  add_arg <- list(...)
+  if (!is.null(add_arg$pch)) shape <- add_arg$pch
+  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  if (!is.null(add_arg$lty)) linetype <- add_arg$lty
+
+  ## get x and y limit in correct format
   if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
   if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
 
-  ## get minimum and maximum breaks to decide if extend confint polygon to the corners
+  ## determine if points should be plotted
+  if (is.null(type)) type <- ifelse(table(object$group) > 20L, "l", "b")
+
+  ## set color to NA for not plotting
+  type <- ifelse(type == "l", 0, 1)
+  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)
+  if (is.logical(add_min)) add_min <- ifelse(add_min, 4, NA)
+
+  ## get min and max breaks to decide if extend confint polygon to the corners
   min_break <- min(object$bin_lwr)
   max_break <- max(object$bin_upr)
 
@@ -665,7 +703,7 @@ autoplot.reliagram <- function(object,
 
     # Required as we operate on groups (facetting)
     compute_group = function(data, scales) {
-      ## Manipulate object  #TODO: (ML) Could maybe be improved?
+      ## Manipulate object  #TODO: (ML) Could possibly be improved?
       if (min(data$bin_lwr) == min_break & max(data$bin_upr) == max_break) {
         nd <- data.frame(
           x = c(0, data$x, 1, rev(data$x), 0),
@@ -694,50 +732,58 @@ autoplot.reliagram <- function(object,
     required_aes = c("x", "ci_lwr", "ci_upr", "bin_lwr", "bin_upr")
   )
 
-  ## recycle arguments for plotting to match the number of groups (for geom w/o aes)
-  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
+  ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(1:n,
-    fill, colour, size, ref, linetype, confint, alpha_min
+    colour, fill, size, linetype, confint, alpha_min, minimum
   )[, -1]
 
-  ## recycle arguments for plotting to match the object rows (for geom w/ aes)
-  ## FIXME: (ML) Why does it need to be equal to the length of the object and not to the number of groups?
-  plot_arg2 <- data.frame(1:n, size, colour, ref, confint, fill, linetype, type)[, -1]
-  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
-  plot_arg2$type <- ifelse(plot_arg2$type == "l", 0, 1)  # alpha = 0 for not plotting
-
-  ## set alpha for polygon
-  plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx)
-    set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
-
-  ## set fill to NA in case of no confint #FIXME: (ML) Implement nicer
+  ## prepare fill color for confint (must be done on vector to match args) 
   if (is.logical(plot_arg$confint)) {
-    plot_arg$fill[!plot_arg$confint] <- NA   # color = NA for not plotting
-  } else {
-    ## set alpha for polygon
-    plot_arg$confint <- sapply(seq_along(plot_arg$confint), function(idx)
-      set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx]))
 
-    plot_arg$fill <- plot_arg$confint
+    ## use fill and set alpha
+    plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx)
+      set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
+
+    ## set color to NA for not plotting
+    plot_arg$fill[!plot_arg$confint] <- NA
+
+  } else {
+
+    ## use confint and set alpha 
+    plot_arg$fill <- sapply(seq_along(plot_arg$confint), function(idx)
+      set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx]))
   }
 
-  ## FIXME: (ML) Improve NA handling for cases w/o observations
+  ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
+  plot_arg2 <- data.frame(1:n, ref, type, size, shape, minimum, add_min)[, -1]
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+
+  ## set points to NA with no sufficent number of predictions
+  idx_min <- which(object$n_pred < plot_arg2$minimum)
+  object2 <- object[idx_min, ]
+  object[idx_min, c("x", "y")] <- NA
+
   ## actual plotting
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
-    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
-      na.rm = TRUE) +
-    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"),
-      alpha = plot_arg2$type, size = plot_arg2$size * 2, show.legend = FALSE, na.rm = TRUE) + 
-    ggplot2::geom_abline(slope = 1, linetype = 2, colour = plot_arg$ref) + 
+    ggplot2::geom_abline(ggplot2::aes_string(intercept = 0, slope = 1), 
+      linetype = 2, colour = plot_arg2$ref) + 
     ggplot2::geom_polygon(ggplot2::aes_string(
         ci_lwr = "ci_lwr", ci_upr = "ci_upr", 
         bin_lwr = "bin_lwr", bin_upr = "bin_upr", fill = "group"
       ), 
-      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE) 
-    #ggplot2::geom_polygon(ggplot2::aes_string(x = "x", y = "y", fill = "group"), data = df_polygon, 
-    #  show.legend = FALSE) 
+      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE) +
+    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
+      na.rm = TRUE) +
+    ggplot2::geom_point(ggplot2::aes_string(colour = "group"),
+      alpha = plot_arg2$type, size = plot_arg2$size * 2, shape = plot_arg2$shape, 
+      show.legend = FALSE, na.rm = TRUE) 
 
-  ## set the colors, shapes, etc.
+  rval <- rval + 
+    ggplot2::geom_point(ggplot2::aes_string(x = "x", y = "y"), data = object2,
+      alpha = plot_arg2$type[idx_min], size = plot_arg2$size[idx_min] * 2, shape = plot_arg2$add_min[idx_min],
+      show.legend = FALSE, na.rm = TRUE)
+
+  ## set the colors, shapes, etc. for the groups
   rval <- rval +
     ggplot2::scale_colour_manual(values = plot_arg$colour) +
     ggplot2::scale_fill_manual(values = plot_arg$fill) +
@@ -780,18 +826,21 @@ add_hist_reliagram <- function(n,
                                main = NULL) {
 
   idx_min <- which(n < minimum)
-  n[is.na(n) | n < minimum] <- 0 
+  n[is.na(n)] <- 0 
+  #n[is.na(n) | n < minimum] <- 0 
   max_n <- max(n)
+  col <- rep(col, max_n)
+  col[n < minimum] <- 0
   for (i in seq_along(n)) {
     x <- xpos + breaks[c(i, i + 1)] * width
     y <- ypos + c(0, n[i] / max_n * height)
-    rect(x[1L], y[1L], x[2L], y[2L], col = col)
+    rect(x[1L], y[1L], x[2L], y[2L], col = col[i])
   }
-  points(
-    na.omit(filter(breaks, c(0.5, 0.5), sides = 2))[idx_min] * width + xpos, 
-    rep(0, length(n))[idx_min] + ypos, 
-    pch = 4
-  )
+  #points(
+  #  na.omit(filter(breaks, c(0.5, 0.5), sides = 2))[idx_min] * width + xpos, 
+  #  rep(0, length(n))[idx_min] + ypos, 
+  #  pch = 4
+  #)
 
   ytick <- pretty(c(0, max_n * .8), 4)
   ytick <- ytick[ytick > 0 & ytick < max_n]
@@ -806,8 +855,22 @@ add_hist_reliagram <- function(n,
     x1 = rep(xpos + 1.025 * width, length(ytick)), 
     y0 = ypos + ytick / max_n * height,
     lwd = .5)
+
+  if (length(idx_min) > 0) {
+    text(xpos + -0.05 * width, ypos + minimum / max_n * height, "Min.", cex = .8, adj = c(1, 0.5))
+    segments(
+      x0 = rep(xpos, length(ytick)), 
+      x1 = rep(xpos + 1 * width, length(ytick)), 
+      y0 = ypos + minimum / max_n * height,
+      col = "darkgray", lwd = .5, lty = 1)
+    segments(
+      x0 = rep(xpos - 0.025 * width, length(ytick)), 
+      x1 = rep(xpos + 0.025 * width, length(ytick)), 
+      y0 = ypos + minimum / max_n * height,
+      lwd = .5)
+  }
   if (is.null(main)) {
-    main <- sprintf("N=%d", sum(n))
+    main <- sprintf("N=%d", sum(n[n > minimum]))
   }
   text(xpos + width / 2, ypos + 1.1 * height, font = 2, cex = 0.8, main)
 }
