@@ -313,7 +313,7 @@ plot.reliagram <- function(x,
   if (single_graph) {
     if (is.null(xlab)) xlab <- "Forecast probability"
     if (is.null(ylab)) ylab <- "Observed relative frequency"
-    if (is.null(main)) main <- "Reliability Diagram"
+    if (is.null(main)) main <- "Reliability diagram"
   } else {
     if (is.null(xlab)) xlab <- TRUE
     if (is.null(ylab)) ylab <- TRUE
