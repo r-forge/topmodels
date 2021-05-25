@@ -176,3 +176,12 @@ convert_transparency <- function(x, mode = "numeric") {
   return(x)
 }
 
+
+annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) 
+  {
+    ggplot2::layer(data = data, stat = ggplot2::StatIdentity, position = ggplot2::PositionIdentity, 
+          geom = ggplot2:::GeomCustomAnn,
+          inherit.aes = TRUE, params = list(grob = grob, 
+                                            xmin = xmin, xmax = xmax, 
+                                            ymin = ymin, ymax = ymax))
+  }
