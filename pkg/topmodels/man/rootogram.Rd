@@ -23,7 +23,7 @@
 rootogram(object, \dots)
 
 \method{rootogram}{default}(object, newdata = NULL, 
-  plot = TRUE,  flavor = NULL, style = c("hanging", "standing", "suspended"), 
+  plot = TRUE,  class = NULL, style = c("hanging", "standing", "suspended"), 
   scale = c("sqrt", "raw"), breaks = NULL, width = NULL, 
   response_type = NULL, xlab = NULL, ylab = NULL, main = NULL, \dots)
 
@@ -43,13 +43,14 @@ rootogram(object, \dots)
     which to predict. If omitted, the original observations are used.}
   %\item{na.action}{function determining what should be done with missing
   %  values in \code{newdata}.  The default is to employ \code{NA}.}
-  \item{plot}{logical. Should the \code{plot} method be called to
-    draw the computed extended reliability diagram?}
-  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
-    graphic, accordingly the invisible return value is either a \code{data.frame}
-    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
-    "tidyverse", or it's chosen automatically conditional
-    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
+  \item{plot}{Should the \code{plot} or \code{autoplot} method be called to
+    draw the computed extended reliability diagram? Either set \code{plot} expicitly to
+    "base" vs. "ggplot2" to choose the type of plot, or for a logical \code{plot} argument it's chosen
+    conditional if the package \code{ggplot2} is loaded.}
+  \item{class}{Should the invisible return value be either a \code{data.frame}
+    or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
+    "tibble", or for NULL it's chosen automatically conditional
+    if the package \code{tibble} is loaded.}
   \item{style}{character specifying the syle of rootogram (see below).}
   \item{scale}{character specifying whether raw frequencies or their
     square roots (default) should be drawn.}

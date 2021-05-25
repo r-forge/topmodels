@@ -29,7 +29,7 @@ pithist <- function(object, ...) {
 pithist.default <- function(object,
                             newdata = NULL,
                             plot = TRUE,
-                            flavor = NULL,
+                            class = NULL,
                             style = c("histogram", "lines"),
                             type = c("random", "proportional"),  # FIXME: (ML) see below
                             nsim = 1L,
@@ -49,12 +49,6 @@ pithist.default <- function(object,
 
   ## sanity checks
   ## `object` and `newdata` w/i `newrepsone()`; `delta w/i `qresiduals()`, `confint` in `abline()`
-  stopifnot(is.logical(plot))
-  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
-  stopifnot(
-    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" =
-    is.null(flavor) || !inherits(flavor, "try-error")
-  )
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(is.logical(freq))
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
@@ -75,12 +69,29 @@ pithist.default <- function(object,
   style <- match.arg(style)
   confint_type <- match.arg(confint_type)
 
-  ## guess flavor
-  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
-    flavor <- "tidyverse"
-  } else if (is.null(flavor)) {
-    flavor <- "base"
+  ## guess plotting flavor
+  if (isFALSE(plot)) {
+    plot <- "none"
+  } else if (isTRUE(plot)) {
+    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+  } else if (!is.character(plot)) {
+    plot <- "base"
   }
+  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
+  stopifnot(
+    "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
+    !inherits(plot, "try-error")
+  )
+
+  ## guess output class
+  if (is.null(class)) {
+    class <- if("tibble" %in% loadedNamespaces()) "tibble" else "data.frame"
+  }
+  class <- try(match.arg(class, c("tibble", "data.frame")))
+  stopifnot(
+    "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
+    !inherits(class, "try-error")
+  )
 
   ## either compute proportion exactly (to do...) or approximate by simulation
   type <- match.arg(type)
@@ -146,7 +157,7 @@ pithist.default <- function(object,
   attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
 
   ## add class
-  if (flavor == "base") {
+  if (class == "data.frame") {
     class(rval) <- c("pithist", "data.frame")
   } else {
     rval <- tibble::as_tibble(rval)
@@ -154,11 +165,11 @@ pithist.default <- function(object,
   }
 
   ## plot by default
-  if (plot & flavor == "tidyverse") {
+  if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval, 
       style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, ...)
     ))
-  } else if (plot) {
+  } else if (plot == "base") {
     try(plot(rval, 
       style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, ...
     ))
@@ -174,15 +185,15 @@ c.pithist <- rbind.pithist <- function(...) {
   ## list of pithists
   rval <- list(...)
 
-  ## set flavor to tidyverse if any rval is a tibble
+  ## set class to tibble if any rval is a tibble
   if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
-    flavor <- "tidyverse"
+    class <- "tibble"
   } else {
-    flavor <- "base"
+    class <- "base"
   }
 
   ## convert always to data.frame
-  if (flavor == "tidyverse") {
+  if (class == "tibble") {
     rval <- lapply(rval, as.data.frame)
   }
 
@@ -217,8 +228,8 @@ c.pithist <- rbind.pithist <- function(...) {
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- confint_level
 
-  ## set class according to flavor
-  if (flavor == "base") {
+  ## set class to data.frame or tibble
+  if (class == "data.frame") {
     class(rval) <- c("pithist", "data.frame")
   } else {
     rval <- tibble::as_tibble(rval)

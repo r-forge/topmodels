@@ -17,7 +17,7 @@
 \usage{
 pithist(object, \dots)
 
-\method{pithist}{default}(object, newdata = NULL, plot = TRUE, flavor = NULL,
+\method{pithist}{default}(object, newdata = NULL, plot = TRUE, class = NULL,
   style = c("histogram", "lines"), type = c("random", "proportional"), nsim = 1L, 
   delta = NULL, freq = FALSE, breaks = NULL, confint = TRUE, 
   confint_level = 0.95, confint_type = c("exact", "approximation"),
@@ -30,13 +30,14 @@ pithist(object, \dots)
     extracted with \code{\link{procast}}.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
-  \item{plot}{logical. Should the \code{plot} method be called to
-    draw the computed PIT histogram?}
-  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
-    graphic, accordingly the invisible return value is either a \code{data.frame}
-    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
-    "tidyverse", or it's chosen automatically conditional
-    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
+  \item{plot}{Should the \code{plot} or \code{autoplot} method be called to
+    draw the computed extended reliability diagram? Either set \code{plot} expicitly to
+    "base" vs. "ggplot2" to choose the type of plot, or for a logical \code{plot} argument it's chosen
+    conditional if the package \code{ggplot2} is loaded.}
+  \item{class}{Should the invisible return value be either a \code{data.frame}
+    or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
+    "tibble", or for NULL it's chosen automatically conditional
+    if the package \code{tibble} is loaded.}
   \item{style}{character specifying the syle of rootogram (see below). FIXME: Description}
   \item{type}{character. In case of discrete distributions should
     the PITs be drawn randomly from the corresponding interval

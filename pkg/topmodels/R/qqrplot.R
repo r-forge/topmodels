@@ -31,7 +31,7 @@ qqrplot <- function(object, ...) {
 qqrplot.default <- function(object, 
                             newdata = NULL, 
                             plot = TRUE,
-                            flavor = NULL,
+                            class = NULL,
                             trafo = qnorm, 
                             nsim = 1L, 
                             delta = NULL,
@@ -50,12 +50,6 @@ qqrplot.default <- function(object,
   ## `confint` w/i `polygon()`
   ## `delta` w/i `qresiduals()`
   ## `...` in `plot()`
-  stopifnot(is.logical(plot))
-  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
-  stopifnot(
-    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" =
-    is.null(flavor) || !inherits(flavor, "try-error")
-  )
   stopifnot(is.null(trafo) | is.function(trafo))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(
@@ -69,12 +63,29 @@ qqrplot.default <- function(object,
   stopifnot(length(ylab) == 1)
   stopifnot(length(main) == 1 | length(main) == 0)
 
-  ## guess flavor
-  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
-    flavor <- "tidyverse"
-  } else if (is.null(flavor)) {
-    flavor <- "base"
+  ## guess plotting flavor
+  if (isFALSE(plot)) {
+    plot <- "none"
+  } else if (isTRUE(plot)) {
+    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+  } else if (!is.character(plot)) {
+    plot <- "base"
   }
+  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
+  stopifnot(
+    "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
+    !inherits(plot, "try-error")
+  )
+
+  ## guess output class
+  if (is.null(class)) {
+    class <- if("tibble" %in% loadedNamespaces()) "tibble" else "data.frame"
+  }
+  class <- try(match.arg(class, c("tibble", "data.frame")))
+  stopifnot(
+    "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
+    !inherits(class, "try-error")
+  )
 
   ## compute quantile residuals
   qres <- qresiduals(object, newdata = newdata, trafo = trafo, type = "random", nsim = nsim, delta = delta)
@@ -144,7 +155,7 @@ qqrplot.default <- function(object,
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
 
-  if (flavor == "base") {
+  if (class == "data.frame") {
     class(rval) <- c("qqrplot", "data.frame")
   } else {
     rval <- tibble::as_tibble(rval)
@@ -152,9 +163,9 @@ qqrplot.default <- function(object,
   }
 
   ## plot by default
-  if (plot & flavor == "tidyverse") {
+  if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval, confint = confint, ...)))
-  } else if (plot) {
+  } else if (plot == "base") {
     try(plot(rval, confint = confint, ...))
   }
 
@@ -168,11 +179,11 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
   ## list of qqrplots
   rval <- list(...)
 
-  ## set flavor to tidyverse if any rval is a tibble
+  ## set class to tibble if any rval is a tibble
   if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
-    flavor <- "tidyverse"
+    class <- "tibble"
   } else {
-    flavor <- "base"
+    class <- "data.frame"
   }
 
   ## remove temporary the class
@@ -181,7 +192,7 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
   for(i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "qqrplot"]  
 
   ## convert always to data.frame
-  if (flavor == "tidyverse") {
+  if (class == "tibble") {
     rval <- lapply(rval, as.data.frame)
   }
 
@@ -226,8 +237,8 @@ c.qqrplot <- rbind.qqrplot <- function(...) {
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- confint_level
 
-  ## set class according to flavor
-  if (flavor == "base") {
+  ## set class to data.frame or tibble
+  if (class == "data.frame") {
     class(rval) <- c("qqrplot", "data.frame")
   } else {
     rval <- tibble::as_tibble(rval)
