@@ -652,7 +652,9 @@ autoplot.reliagram <- function(object,
                                shape = 19, 
                                linetype = 1, 
                                type = NULL,
+                               add_hist = TRUE,
                                add_info = TRUE,
+                               add_rug = TRUE,
                                add_min = TRUE,
                                legend = FALSE,
                                ...) {
@@ -801,6 +803,49 @@ autoplot.reliagram <- function(object,
   rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
   rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
 
+  ## add histogram
+  if (!identical(add_hist, FALSE) & (n == 1 | !single_graph && n > 1L)) {
+    if (isTRUE(add_hist)) add_hist <- "lightgray"
+
+    object$n_pred[is.na(object$n_pred)] <- 0
+
+    ## draw histogram
+    add_hist <- ggplot2::ggplot(object, 
+        ggplot2::aes_string(xmin = "bin_lwr", xmax = "bin_upr", ymin = 0, ymax = "n_pred", 
+          fill = factor(object$n_pred > plot_arg2$minimum, levels = c(TRUE, FALSE)))) + 
+      ggplot2::geom_rect(show.legend = FALSE, colour = "black", size = 0.25) + 
+      ggplot2::scale_fill_manual(values = c(add_hist, "white")) + 
+      ggplot2::theme_void()
+
+    ## add minimum line
+    if (minimum > 0) {
+    add_hist <- add_hist +
+      ggplot2::geom_segment(y = minimum, yend = minimum, x = 0, xend = 1) + 
+      ggplot2::geom_text(x = 0, y = minimum, label = "Min.", size = 3, vjust = -0.5)
+    }
+ 
+    ## add simple y axis 
+    ytick <- pretty(c(0, max(object$n_pred)), 4)
+    ytick <- ytick[ytick > 0 & ytick < max(object$n_pred)]
+
+    for (i in seq_along(ytick)) {
+      add_hist <- add_hist + 
+        ggplot2::geom_segment(y = ytick[i], yend = ytick[i], x = 0.975, xend = 1.025) + 
+        ggplot2::geom_text(x = 1.05, y = ytick[i], label = ytick[i], size = 3, nudge_x = 0.15, hjust = 0)
+    }
+
+    ## add nobs
+    add_hist <- add_hist + 
+      ggplot2::geom_text(x = mean(c(object$bin_lwr, object$bin_upr), na.rm = TRUE), y = max(object$n_pred), 
+        label = paste0("n = ", sum(object$n_pred[object$n_pred > minimum], na.rm = TRUE)), 
+        size = 4, nudge_x = -0.05)
+  
+    ## transform to `grob`
+    add_hist <- ggplot2::ggplotGrob(add_hist)
+
+    rval <- rval + ggplot2::annotation_custom(add_hist, 0.05, 0.3, 0.7, 0.95)
+  }
+
   ## grouping (if any)
   if (!single_graph && n > 1L) {
     rval <- rval + ggplot2::facet_grid(group ~ .) 
@@ -869,7 +914,7 @@ add_hist_reliagram <- function(n,
       lwd = .5)
   }
   if (is.null(main)) {
-    main <- sprintf("N=%d", sum(n[n > minimum]))
+    main <- sprintf("n=%d", sum(n[n > minimum]))
   }
   text(xpos + width / 2, ypos + 1.1 * height, font = 2, cex = 0.8, main)
 }
