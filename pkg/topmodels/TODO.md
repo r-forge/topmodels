@@ -141,10 +141,12 @@ topmodels(m1, pages = 1, nsim = 10, flavor = "t")
 * `qresiduals()`
 
 ## Questions for Achim
+* topmodels: arguments compare `bamlss()`
+* S3 methods for topmodels: plot, autoplot?
+* Difference between `search()` and `loadedNamespaces()`
+* reliagram: extend to left/right border, minimum, new confint representation, `reliagram.crch()`
+* wormplot: `ciplot()`
 * `na.action`: see `newresponse()`
 * `response_type` + `newresponse()` in general
 * rootogram: breaks no special options, `+.rootogram()`
 * procast: weights, named data.frames as rval, scores (estfun), which models supported
-* reliagram: extend to left/right border, minimum, new confint representation, `reliagram.crch()`
-* topmodels: arguments compare `bamlss()`
-* wormplot: `ciplot()`
