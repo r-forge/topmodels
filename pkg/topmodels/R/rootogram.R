@@ -31,7 +31,7 @@ rootogram.default <- function(object,
                               newdata = NULL,
                               #na.action = na.pass, # FIXME: (ML) na.action must be na.omit, see newresponse()
                               plot = TRUE,
-                              flavor = NULL,
+                              class = NULL,
                               style = c("hanging", "standing", "suspended"),
                               scale = c("sqrt", "raw"), 
                               breaks = NULL,
@@ -44,12 +44,6 @@ rootogram.default <- function(object,
   ## sanity checks
   ## `object` and `newdata` w/i `newrepsone()`
   ## `breaks` w/i `hist()`
-  stopifnot(is.logical(plot))
-  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
-  stopifnot(
-    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" = 
-    is.null(flavor) || !inherits(flavor, "try-error")
-  )
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1))
   stopifnot(length(xlab) == 1 | length(xlab) == 0)
@@ -60,12 +54,29 @@ rootogram.default <- function(object,
   scale <- match.arg(scale)
   style <- match.arg(style)
 
-  ## guess flavor
-  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
-    flavor <- "tidyverse"
-  } else if (is.null(flavor)) {
-    flavor <- "base"
-  } 
+  ## guess plotting flavor
+  if (isFALSE(plot)) {
+    plot <- "none"
+  } else if (isTRUE(plot)) {
+    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+  } else if (!is.character(plot)) {
+    plot <- "base"
+  }
+  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
+  stopifnot(
+    "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
+    !inherits(plot, "try-error")
+  )
+
+  ## guess output class
+  if (is.null(class)) {
+    class <- if("tibble" %in% loadedNamespaces()) "tibble" else "data.frame"
+  }
+  class <- try(match.arg(class, c("tibble", "data.frame")))
+  stopifnot(
+    "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
+    !inherits(class, "try-error")
+  )
 
   ## default annotation
   if (is.null(xlab)) {
@@ -149,7 +160,7 @@ rootogram.default <- function(object,
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
 
-  if (flavor == "base") {
+  if (class == "data.frame") {
     class(rval) <- c("rootogram", "data.frame")
   } else {
     rval <- tibble::as_tibble(rval)
@@ -157,9 +168,9 @@ rootogram.default <- function(object,
   }
 
   ## plot by default
-  if (plot & flavor == "tidyverse") {
+  if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval, ...)))
-  } else if (plot) {
+  } else if (plot == "base") {
     try(plot(rval, ...))
   }
   
@@ -173,15 +184,15 @@ c.rootogram <- rbind.rootogram <- function(...) {
   ## list of rootograms
   rval <- list(...)
 
-  ## set flavor to tidyverse if any rval is a tibble
+  ## set class to tibble if any rval is a tibble
   if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
-    flavor <- "tidyverse"
+    class <- "tibble"
   } else {
-    flavor <- "base"
+    class <- "data.frame"
   }
 
   ## convert always to data.frame
-  if (flavor == "tidyverse") {
+  if (class == "tibble") {
     rval <- lapply(rval, as.data.frame)
   }
   
@@ -213,8 +224,8 @@ c.rootogram <- rbind.rootogram <- function(...) {
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
  
-  ## set class according to flavor
-  if (flavor == "base") {
+  ## set class to data.frame or tibble
+  if (class == "data.frame") {
     class(rval) <- c("rootogram", "data.frame")
   } else {
     rval <- tibble::as_tibble(rval)

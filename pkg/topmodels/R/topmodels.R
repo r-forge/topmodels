@@ -16,7 +16,8 @@
 
 
 topmodels <- function(object, 
-                      flavor = NULL,
+                      plot = TRUE,
+                      class = NULL,
                       newdata = NULL,
                       na.action = na.pass, 
                       which = NULL,
@@ -25,19 +26,30 @@ topmodels <- function(object,
                       pages = NULL, # FIXME: (ML) Does not work for ggplot.
                       ...) {
 
-  ## sanity checks
-  if (!is.null(flavor)) flavor <- try(match.arg(flavor, c("base", "tidyverse")), silent = TRUE)
+  ## guess plotting flavor
+  if (isFALSE(plot)) {
+    plot <- "none"
+  } else if (isTRUE(plot)) {
+    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+  } else if (!is.character(plot)) {
+    plot <- "base"
+  }
+  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
   stopifnot(
-    "`flavor` must either be NULL, or match the arguments 'base' or 'tidyverse'" =
-    is.null(flavor) || !inherits(flavor, "try-error")
+    "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
+    !inherits(plot, "try-error")
   )
 
-  ## guess flavor
-  if (is.null(flavor) && "ggplot2" %in% (.packages()) && any(c("dplyr", "tibble") %in% (.packages()))) {
-    flavor <- "tidyverse"
-  } else if (is.null(flavor)) {
-    flavor <- "base"
+  ## guess output class
+  if (is.null(class)) {
+    class <- if("tibble" %in% loadedNamespaces()) "tibble" else "data.frame"
   }
+  class <- try(match.arg(class, c("tibble", "data.frame")))
+  stopifnot(
+    "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
+    !inherits(class, "try-error")
+  )
+
 
   ## check if S3 methods exist
   if (!any(class(object) %in% gsub("procast.", "", methods("procast")))) {
@@ -78,7 +90,7 @@ topmodels <- function(object,
     ask <- FALSE
   }
 
-  if (spar && !flavor == "tidyverse") {
+  if (spar && !plot == "ggplot2") {
     if (!ask) {
       par(mfrow = n2mfrow(length(which)))
     } else {
@@ -96,7 +108,7 @@ topmodels <- function(object,
   ## get possible arguments
   arg_avail <- list()
 
-  if (flavor == "base") {
+  if (plot == "base") {
     arg_avail[["rootogram"]] <- unique(names(c(formals(rootogram.default), formals(plot.rootogram))))
     arg_avail[["pithist"]] <- unique(names(c(formals(pithist.default), formals(plot.pithist))))
     arg_avail[["reliagram"]] <- unique(names(c(formals(reliagram.default), formals(plot.reliagram))))
@@ -165,7 +177,7 @@ topmodels <- function(object,
   names(arg) <- c("rootogram", "pithist", "reliagram", "qqrplot", "wormplot")
 
   rval <- list()
-  if (flavor == "base") {
+  if (plot == "base") {
     ## calculate and plot
     if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
     if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
@@ -175,7 +187,7 @@ topmodels <- function(object,
   } else { 
     ## FIXME: (ML) parameter ask does not work for ggplot(), always pages = 1
     ## first calculate 
-    arg <- lapply(arg, function(x) c(x, plot = FALSE))
+    arg <- lapply(arg, function(x) {x$plot <- FALSE; x})
     if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
     if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
     if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])

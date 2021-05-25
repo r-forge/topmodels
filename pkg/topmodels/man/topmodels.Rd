@@ -9,17 +9,20 @@
 }
 
 \usage{
-topmodels(object, flavor = NULL, newdata = NULL, na.action = na.pass, which = NULL, 
-  ask = dev.interactive(), spar = TRUE, pages = NULL, ...)
+topmodels(object, plot = TRUE, class = NULL, newdata = NULL, na.action = na.pass, 
+  which = NULL, ask = dev.interactive(), spar = TRUE, pages = NULL, ...)
 }
 
 \arguments{
   \item{object}{An object supported by \code{"procast"}.}
-  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
-    graphic, accordingly the invisible return value is either a \code{data.frame}
-    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
-    "tidyverse", or it's chosen automatically conditional
-    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
+  \item{plot}{Should the \code{plot} or \code{autoplot} method be called to
+    draw all chosen plots? Either set \code{plot} expicitly to
+    "base" vs. "ggplot2" to choose the type of plot, or for a logical \code{plot} argument it's chosen
+    conditional if the package \code{ggplot2} is loaded.}
+  \item{class}{Should the invisible return value be either a \code{data.frame}
+    or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
+    "tibble", or for NULL it's chosen automatically conditional
+    if the package \code{tibble} is loaded.}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
   \item{na.action}{function determining what should be done with missing
@@ -55,15 +58,15 @@ m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
 
 ## base graphics
-topmodels(m1, pages = 1, flavor = "base")
-topmodels(m1, pages = 1, nsim = 10, flavor = "base")
-topmodels(m1, pages = 1, nsim = 30, fill = 2, flavor = "base")
-topmodels(m1, pages = 1, nsim = 30, ref = 2, flavor = "base")
-topmodels(m1, pages = 1, nsim = 30, fill =2, add_hist = 2, flavor = "base")
+topmodels(m1, pages = 1, plot = "base")
+topmodels(m1, pages = 1, nsim = 10, plot = "base")
+topmodels(m1, pages = 1, nsim = 30, fill = 2, plot = "base")
+topmodels(m1, pages = 1, nsim = 30, ref = 2, plot = "base")
+topmodels(m1, pages = 1, nsim = 30, fill =2, add_hist = 2, plot = "base")
 
 ## ggplot2 graphics
-topmodels(m1, pages = 1, nsim = 30, flavor = "tidyverse")
-topmodels(m2, pages = 1, nsim = 30, flavor = "tidyverse")
+topmodels(m1, pages = 1, nsim = 30, plot = "ggplot2")
+topmodels(m2, pages = 1, nsim = 30, plot = "ggplot2")
 
 }
 

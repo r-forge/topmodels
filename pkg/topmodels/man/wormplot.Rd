@@ -17,7 +17,7 @@
 \usage{
 wormplot(object, \dots)
 
-\method{wormplot}{default}(object, newdata = NULL, plot = TRUE, flavor = NULL,
+\method{wormplot}{default}(object, newdata = NULL, plot = TRUE, class = NULL,
   trafo = qnorm, nsim = 1L, delta = NULL, confint = TRUE, 
   confint_level = 0.95, confint_nsim = 250, confint_seed = 1, single_graph = FALSE, 
   xlab = "Theoretical quantiles", ylab = "Deviation",
@@ -28,13 +28,14 @@ wormplot(object, \dots)
   \item{object}{an object (for which a \code{\link{qresiduals}} method exists).}
   \item{newdata}{optionally, a data frame in which to look for variables with
     which to predict. If omitted, the original observations are used.}
-  \item{plot}{logical. Should the \code{plot} method be called to draw the
-    computed Q-Q plot?}
-  \item{flavor}{Should the rootogram be a \code{base} or \code{ggplot2} style
-    graphic, accordingly the invisible return value is either a \code{data.frame}
-    or a \code{tibble}. Either set \code{flavor} expicitly to "base" vs.
-    "tidyverse", or it's chosen automatically conditional
-    if the packages \code{ggplot2} and \code{dplyr} or \code{tibble} are loaded.}
+  \item{plot}{Should the \code{plot} or \code{autoplot} method be called to
+    draw the computed worm plot? Either set \code{plot} expicitly to
+    "base" vs. "ggplot2" to choose the type of plot, or for a logical \code{plot} argument it's chosen
+    conditional if the package \code{ggplot2} is loaded.}
+  \item{class}{Should the invisible return value be either a \code{data.frame}
+    or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
+    "tibble", or for NULL it's chosen automatically conditional
+    if the package \code{tibble} is loaded.}
   \item{trafo}{function for tranforming residuals from probability scale to
     a different distribution scale (default: Gaussian).}
   \item{nsim, delta}{arguments passed to \code{qresiduals}.}

@@ -234,7 +234,6 @@ reliagram.default <- function(object,
   rval <- do.call(c, rval)
 
   ## plot by default
-  ## plot by default
   if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval,
       confint = confint, single_graph = single_graph, ...)
