@@ -453,10 +453,10 @@ plot.reliagram <- function(x,
       legend(
         "bottomright",
         c(
-          "BS", signif(attr(d, "bs")[j], 3), 
-          "REL", signif(attr(d, "rel")[j], 3), 
-          "RES", signif(attr(d, "res")[j], 3), 
-          "UNC", signif(attr(d, "unc")[j], 3)
+          "BS",  sprintf("%.3f", signif(attr(d, "bs")[j],  3)), 
+          "REL", sprintf("%.3f", signif(attr(d, "rel")[j], 3)), 
+          "RES", sprintf("%.3f", signif(attr(d, "res")[j], 3)), 
+          "UNC", sprintf("%.3f", signif(attr(d, "unc")[j], 3))
         ),
         cex = 0.8,
         ncol = 4,
@@ -757,6 +757,13 @@ autoplot.reliagram <- function(object,
 
   ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
   plot_arg2 <- data.frame(1:n, ref, type, size, shape, minimum, add_min)[, -1]
+  plot_arg2$info <- sprintf(
+    "BS     REL   RES   UNC\n%.3f  %.3f  %.3f  %.3f",
+    signif(attr(object, "bs"), 3),
+    signif(attr(object, "rel"), 3),
+    signif(attr(object, "res"), 3),
+    signif(attr(object, "unc"), 3)
+  )
   plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
 
   ## set points to NA with no sufficent number of predictions
@@ -807,43 +814,64 @@ autoplot.reliagram <- function(object,
   if (!identical(add_hist, FALSE) & (n == 1 | !single_graph && n > 1L)) {
     if (isTRUE(add_hist)) add_hist <- "lightgray"
 
-    object$n_pred[is.na(object$n_pred)] <- 0
+    get_inset <- function(df) {
+      df$n_pred[is.na(df$n_pred)] <- 0
 
-    ## draw histogram
-    add_hist <- ggplot2::ggplot(object, 
-        ggplot2::aes_string(xmin = "bin_lwr", xmax = "bin_upr", ymin = 0, ymax = "n_pred", 
-          fill = factor(object$n_pred > plot_arg2$minimum, levels = c(TRUE, FALSE)))) + 
-      ggplot2::geom_rect(show.legend = FALSE, colour = "black", size = 0.25) + 
-      ggplot2::scale_fill_manual(values = c(add_hist, "white")) + 
-      ggplot2::theme_void()
+      ## draw histogram
+      rval_inset <- ggplot2::ggplot(df, 
+          ggplot2::aes_string(x = "x", y = "y", xmin = "bin_lwr", xmax = "bin_upr", ymin = 0, ymax = "n_pred", 
+            fill = "above_min")) +
+        ggplot2::geom_rect(show.legend = FALSE, colour = "black", size = 0.25) +
+        ggplot2::scale_fill_manual(values = c(add_hist, "white")) + 
+        ggplot2::theme_void()
 
-    ## add minimum line
-    if (minimum > 0) {
-    add_hist <- add_hist +
-      ggplot2::geom_segment(y = minimum, yend = minimum, x = 0, xend = 1) + 
-      ggplot2::geom_text(x = 0, y = minimum, label = "Min.", size = 3, vjust = -0.5)
-    }
+      ## add minimum line
+      if (any(df$minimum > 0)) {
+      rval_inset <- rval_inset +
+        ggplot2::geom_segment(y = df$minimum, yend = df$minimum, x = 0, xend = 1) + 
+        ggplot2::geom_text(x = 0, y = df$minimum, label = "Min.", size = 3, hjust = 1,
+          nudge_x = -0.15)
+      }
  
-    ## add simple y axis 
-    ytick <- pretty(c(0, max(object$n_pred)), 4)
-    ytick <- ytick[ytick > 0 & ytick < max(object$n_pred)]
+      ## add simple y axis 
+      ytick <- pretty(c(0, max(df$n_pred)), 4)
+      ytick <- ytick[ytick > 0 & ytick < max(df$n_pred)]
 
-    for (i in seq_along(ytick)) {
-      add_hist <- add_hist + 
-        ggplot2::geom_segment(y = ytick[i], yend = ytick[i], x = 0.975, xend = 1.025) + 
-        ggplot2::geom_text(x = 1.05, y = ytick[i], label = ytick[i], size = 3, nudge_x = 0.15, hjust = 0)
+      for (i in seq_along(ytick)) {
+        rval_inset <- rval_inset + 
+          ggplot2::geom_segment(y = ytick[i], yend = ytick[i], x = 0.975, xend = 1.025) + 
+          ggplot2::geom_text(x = 1.05, y = ytick[i], label = ytick[i], size = 3, nudge_x = 0.15, hjust = 0)
+      }
+
+      # add nobs
+      rval_inset <- rval_inset + 
+        ggplot2::geom_text(x = mean(c(df$bin_lwr, df$bin_upr), na.rm = TRUE), y = max(df$n_pred), 
+          label = paste0("n = ", sum(df$n_pred[df$n_pred >= df$minimum], na.rm = TRUE)), 
+          size = 4, nudge_y = 0.35)
+
+      ## return graph
+      rval_inset
     }
 
-    ## add nobs
-    add_hist <- add_hist + 
-      ggplot2::geom_text(x = mean(c(object$bin_lwr, object$bin_upr), na.rm = TRUE), y = max(object$n_pred), 
-        label = paste0("n = ", sum(object$n_pred[object$n_pred > minimum], na.rm = TRUE)), 
-        size = 4, nudge_x = -0.05)
+    ## add needed variables to df
+    object$above_min <- factor(object$n_pred >= plot_arg2$minimum, levels = c(TRUE, FALSE))
+    object$minimum <- plot_arg2$minimum
   
-    ## transform to `grob`
-    add_hist <- ggplot2::ggplotGrob(add_hist)
+    ## loop over different groups
+    insets <- lapply(split(object, object$group), function(x) {
+        annotation_custom2(
+          grob = ggplot2::ggplotGrob(get_inset(x)),
+          data = data.frame(x),
+          ymin = 0.7, ymax = 0.95, xmin = 0.05, xmax = 0.3
+        )
+    })
+    rval <- rval + insets
+  }
 
-    rval <- rval + ggplot2::annotation_custom(add_hist, 0.05, 0.3, 0.7, 0.95)
+  ## add info annotation
+  if (add_info & (n == 1 | !single_graph && n > 1L)) {
+    rval <- rval + 
+      ggplot2::geom_text(x = 1, y = 0.06, hjust = 1, label = plot_arg2$info, size = 3)
   }
 
   ## grouping (if any)
@@ -900,7 +928,7 @@ add_hist_reliagram <- function(n,
     y0 = ypos + ytick / max_n * height,
     lwd = .5)
 
-  if (length(idx_min) > 0) {
+  if (minimum > 0) {
     text(xpos + -0.05 * width, ypos + minimum / max_n * height, "Min.", cex = .8, adj = c(1, 0.5))
     segments(
       x0 = rep(xpos, length(ytick)), 
