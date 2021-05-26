@@ -61,6 +61,7 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
       ## set up a function that suitably expands 'at' (if necessary)
       ## and then either evaluates it at the predicted parameters ('data')
       ## or sets up a user interface with predicted parameters as default ('function')
+      ## FIXME: (ML) added drop = FALSE below, to work for glm w/ family = poisson. check!
     } else {
       FUN2a <- function(at, pars, ...) {
         n <- NROW(pars)
@@ -70,7 +71,7 @@ procast_setup <- function(pars, FUN, at = NULL, drop = FALSE, type = "procast", 
         }
         if (is.matrix(at) && NROW(at) == 1L) {
           at <- matrix(rep(at, each = n), nrow = n)
-          rv <- FUN(as.vector(at), pars = pars[rep(1L:n, ncol(at)), ], ...)
+          rv <- FUN(as.vector(at), pars = pars[rep(1L:n, ncol(at)), , drop = FALSE], ...)
           rv <- matrix(rv, nrow = n)
           rownames(rv) <- rownames(pars)
           colnames(rv) <- paste(substr(type, 1L, 1L),

@@ -83,5 +83,7 @@ plot(c(rel1, rel2), single_graph = TRUE, col = c(1, 2, 3), lty = c(1, 2, 3), pch
 
 plot(rel1, single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 lines(rel3, col = 3, lty = 2, confint = 3)
+
+reliagram(m1, quantiles = c(0.2, 0.6), minimum = c(2, 6), plot = "ggplot2")
 }
 
