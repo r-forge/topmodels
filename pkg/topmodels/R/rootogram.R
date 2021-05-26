@@ -70,7 +70,7 @@ rootogram.default <- function(object,
 
   ## guess output class
   if (is.null(class)) {
-    class <- if("tibble" %in% loadedNamespaces()) "tibble" else "data.frame"
+    class <- if("package:tibble" %in% search()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
