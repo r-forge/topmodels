@@ -74,7 +74,7 @@ reliagram.default <- function(object,
 
   ## guess output class
   if (is.null(class)) {
-    class <- if("tibble" %in% loadedNamespaces()) "tibble" else "data.frame"
+    class <- if("package:tibble" %in% search()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
@@ -91,13 +91,26 @@ reliagram.default <- function(object,
   } else {
     thresholds_text <- as.character(signif(thresholds, 2))
   }
-  
+
+  ## arguments xlab/ylab/main needed for `single_graph = TRUE`
+  if (single_graph) {
+    arg_xlab <- xlab[1]
+    arg_ylab <- ylab[1]
+    arg_main <- main[1]
+  } else {
+    arg_xlab <- NULL 
+    arg_ylab <- NULL 
+    arg_main <- NULL 
+  }
+
   ## fix length of annotations
   if (length(xlab) < length(quantiles)) xlab <- rep(xlab, length.out = length(quantiles))
   if (length(ylab) < length(quantiles)) ylab <- rep(ylab, length.out = length(quantiles))
   if (is.null(main)) {
     main <- deparse(substitute(object))
     main <- sprintf("%s (threshold = %s)", main, thresholds_text)
+  } else if (length(main) < length(quantiles)) {
+    main <- rep(main, length.out = length(quantiles))
   }
 
   ## predicted probabilities  # FIXME: (ML) Check format and dim of thresholds and pred
@@ -236,11 +249,11 @@ reliagram.default <- function(object,
   ## plot by default
   if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval,
-      confint = confint, single_graph = single_graph, ...)
+      confint = confint, single_graph = single_graph, main = arg_main, ...)
     ))
   } else if (plot == "base") {
     try(plot(rval,
-      confint = confint, single_graph = single_graph, ...
+      confint = confint, single_graph = single_graph, main = arg_main, xlab = arg_xlab, ylab = arg_ylab, ...
     ))
   }
 
@@ -291,9 +304,11 @@ plot.reliagram <- function(x,
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
-  ## intern for single plot, single_graph is set to FALSE
+  ## set single_multigraph for single plot always to FALSE
   if (n == 1) {
-    single_graph <- FALSE
+    single_multigraph <- FALSE
+  } else {
+    single_multigraph <- single_graph
   }
 
   ## determine if points should be plotted
@@ -309,10 +324,10 @@ plot.reliagram <- function(x,
   )[, -1]
 
   ## annotation
-  if (single_graph) {
-    if (is.null(xlab)) xlab <- "Forecast probability"
-    if (is.null(ylab)) ylab <- "Observed relative frequency"
-    if (is.null(main)) main <- "Reliability diagram"
+  if (single_multigraph) {
+    xlab <- if (is.null(xlab)) "Forecast probability" else xlab
+    ylab <- if (is.null(ylab)) "Observed relative frequency" else ylab
+    main <- if (is.null(main)) "Reliability diagram" else main
   } else {
     if (is.null(xlab)) xlab <- TRUE
     if (is.null(ylab)) ylab <- TRUE
@@ -323,6 +338,9 @@ plot.reliagram <- function(x,
     if (is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
     if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
     if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
+
+    ## FIXME: (ML) main title must not be unique; hence also works w/ empty main. Different in `autoplot()`
+    # main <- make.unique(rep_len(main, n))
   }
 
   ## function to trigger figure and plot confint 
@@ -350,7 +368,7 @@ plot.reliagram <- function(x,
     }
 
     ## trigger plot
-    if (j == 1 || (!single_graph && j > 1)) {
+    if (j == 1 || (!single_multigraph && j > 1)) {
       plot(0, 0,
         type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
         ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]), xlab = xlab[j],
@@ -367,7 +385,7 @@ plot.reliagram <- function(x,
     }
 
     ## plot reference line
-    if (j == 1 || (!single_graph && j > 1)) {
+    if (j == 1 || (!single_multigraph && j > 1)) {
       if (!identical(plot_arg$ref[j], FALSE)) {
         if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
         abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
@@ -420,7 +438,7 @@ plot.reliagram <- function(x,
     }
 
     ## add rugs
-    if (!single_graph && !identical(plot_arg$add_rug[j], FALSE)) {
+    if (!identical(plot_arg$add_rug[j], FALSE)) {
       if (isTRUE(plot_arg$add_rug[j])) plot_arg$add_rug[j] <- plot_arg$col[j]
       tmp_rugs <- c(d$bin_lwr, d$bin_upr[NROW(d)])
       tmp_rugs <- tmp_rugs[tmp_rugs >= plot_arg$xlim1[j] & tmp_rugs <= plot_arg$xlim2[j]]
@@ -429,7 +447,7 @@ plot.reliagram <- function(x,
 
      
     ## add hist
-    if (!single_graph && !identical(plot_arg$add_hist[j], FALSE)) {
+    if (!single_multigraph && !identical(plot_arg$add_hist[j], FALSE)) {
       if (isTRUE(plot_arg$add_hist[j])) plot_arg$add_hist[j] <- "lightgray"
       tmp_x <- par("pin")[1]
       tmp_y <- par("pin")[2]
@@ -449,7 +467,7 @@ plot.reliagram <- function(x,
     }
 
     ## print info
-    if (!single_graph && plot_arg$add_info[j]) {
+    if (!single_multigraph && plot_arg$add_info[j]) {
       legend(
         "bottomright",
         c(
@@ -467,10 +485,10 @@ plot.reliagram <- function(x,
   }
 
   ## draw plots
-  if (!single_graph && n > 1L) par(mfrow = n2mfrow(n))
+  if (!single_multigraph && n > 1L) par(mfrow = n2mfrow(n))
 
   ## draw polygons first
-  if (single_graph) {
+  if (single_multigraph) {
     for (i in 1L:n) reliagram_trigger(x[x$group == i, ], ...)
     for (i in 1L:n) reliagram_plot(x[x$group == i, ], ...)
   } else {
@@ -666,13 +684,20 @@ autoplot.reliagram <- function(object,
   if (is.null(object$group)) object$group <- 1L
   n <- max(object$group)
 
+  ## get title
+  if (!is.null(main)) {
+    title <- main[1]
+    object$title <- factor(title)
+  }
+
   ## get annotations in the right lengths
-  if(is.null(xlab)) xlab <- attr(object, "xlab")
+  if (is.null(xlab)) xlab <- attr(object, "xlab")
   xlab <- paste(unique(xlab), collapse = "/")
-  if(is.null(ylab)) ylab <- attr(object, "ylab")
+  if (is.null(ylab)) ylab <- attr(object, "ylab")
   ylab <- paste(unique(ylab), collapse = "/")
-  if(is.null(main)) main <- attr(object, "main")
+  if (is.null(main)) main <- attr(object, "main")
   main <- make.unique(rep_len(main, n))
+
 
   ## prepare grouping
   object$group <- factor(object$group, levels = 1L:n, labels = main)
@@ -694,6 +719,7 @@ autoplot.reliagram <- function(object,
   type <- ifelse(type == "l", 0, 1)
   if (is.logical(ref)) ref <- ifelse(ref, 1, NA)
   if (is.logical(add_min)) add_min <- ifelse(add_min, 4, NA)
+  if (is.logical(add_rug)) add_rug <- ifelse(add_rug, colour, NA)
 
   ## get min and max breaks to decide if extend confint polygon to the corners
   min_break <- min(object$bin_lwr)
@@ -735,7 +761,7 @@ autoplot.reliagram <- function(object,
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(1:n,
-    colour, fill, size, linetype, confint, alpha_min, minimum
+    colour, fill, size, linetype, confint, alpha_min, minimum, add_rug
   )[, -1]
 
   ## prepare fill color for confint (must be done on vector to match args) 
@@ -756,14 +782,7 @@ autoplot.reliagram <- function(object,
   }
 
   ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
-  plot_arg2 <- data.frame(1:n, ref, type, size, shape, minimum, add_min)[, -1]
-  plot_arg2$info <- sprintf(
-    "BS     REL   RES   UNC\n%.3f  %.3f  %.3f  %.3f",
-    signif(attr(object, "bs"), 3),
-    signif(attr(object, "rel"), 3),
-    signif(attr(object, "res"), 3),
-    signif(attr(object, "unc"), 3)
-  )
+  plot_arg2 <- data.frame(1:n, ref, type, size, shape, minimum, add_min, add_rug)[, -1]
   plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
 
   ## set points to NA with no sufficent number of predictions
@@ -775,7 +794,8 @@ autoplot.reliagram <- function(object,
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
     ggplot2::geom_abline(ggplot2::aes_string(intercept = 0, slope = 1), 
       linetype = 2, colour = plot_arg2$ref) + 
-    ggplot2::geom_polygon(ggplot2::aes_string(
+    ggplot2::geom_polygon(
+      ggplot2::aes_string(
         ci_lwr = "ci_lwr", ci_upr = "ci_upr", 
         bin_lwr = "bin_lwr", bin_upr = "bin_upr", fill = "group"
       ), 
@@ -786,10 +806,18 @@ autoplot.reliagram <- function(object,
       alpha = plot_arg2$type, size = plot_arg2$size * 2, shape = plot_arg2$shape, 
       show.legend = FALSE, na.rm = TRUE) 
 
+  ## add points below minimum
   rval <- rval + 
     ggplot2::geom_point(ggplot2::aes_string(x = "x", y = "y"), data = object2,
       alpha = plot_arg2$type[idx_min], size = plot_arg2$size[idx_min] * 2, shape = plot_arg2$add_min[idx_min],
       show.legend = FALSE, na.rm = TRUE)
+
+  ## add rugs
+  rval <- rval + 
+    ggplot2::geom_rug(ggplot2::aes_string(x = "x"), 
+      data = data.frame(x = object$bin_lwr[1], group = factor(1L:n, labels = main)),
+      inherit.aes = FALSE, colour = plot_arg$add_rug) +
+    ggplot2::geom_rug(ggplot2::aes_string(x = "bin_upr"), y = NA, colour = plot_arg2$add_rug)
 
   ## set the colors, shapes, etc. for the groups
   rval <- rval +
@@ -828,29 +856,41 @@ autoplot.reliagram <- function(object,
       ## add minimum line
       if (any(df$minimum > 0)) {
       rval_inset <- rval_inset +
-        ggplot2::geom_segment(y = df$minimum, yend = df$minimum, x = 0, xend = 1) + 
-        ggplot2::geom_text(x = 0, y = df$minimum, label = "Min.", size = 3, hjust = 1,
-          nudge_x = -0.15)
+        ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"), 
+          data = data.frame(x = 0, xend = 1, y = unique(df$minimum), yend = unique(df$minimum)), 
+          inherit.aes = FALSE) +
+        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
+          data = data.frame(x = 0, y = unique(df$minimum), label = "Min."), inherit.aes = FALSE,
+          size = 3, hjust = 1, nudge_x = -0.01)
       }
  
       ## add simple y axis 
       ytick <- pretty(c(0, max(df$n_pred)), 4)
       ytick <- ytick[ytick > 0 & ytick < max(df$n_pred)]
 
-      for (i in seq_along(ytick)) {
-        rval_inset <- rval_inset + 
-          ggplot2::geom_segment(y = ytick[i], yend = ytick[i], x = 0.975, xend = 1.025) + 
-          ggplot2::geom_text(x = 1.05, y = ytick[i], label = ytick[i], size = 3, nudge_x = 0.15, hjust = 0)
-      }
+      rval_inset <- rval_inset +
+        ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"), 
+          data = data.frame(x = 0.985, xend = 1.015, y = ytick, yend = ytick), 
+          inherit.aes = FALSE) +
+        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
+        data = data.frame(x = 1.015, y = ytick, label = ytick), inherit.aes = FALSE,
+        size = 3, hjust = 0, nudge_x = 0.01)
 
       # add nobs
       rval_inset <- rval_inset + 
-        ggplot2::geom_text(x = mean(c(df$bin_lwr, df$bin_upr), na.rm = TRUE), y = max(df$n_pred), 
-          label = paste0("n = ", sum(df$n_pred[df$n_pred >= df$minimum], na.rm = TRUE)), 
-          size = 4, nudge_y = 0.35)
+        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
+          data = data.frame(
+            x = mean(c(df$bin_lwr, df$bin_upr), na.rm = TRUE), 
+            y = max(df$n_pred), 
+            label = paste0("n = ", sum(df$n_pred[df$n_pred >= df$minimum], na.rm = TRUE))
+          ), 
+          inherit.aes = FALSE, size = 4
+        )
 
       ## return graph
-      rval_inset
+      rval_inset <- rval_inset +
+        ggplot2::scale_x_continuous(expand = c(0.1, 0.1)) + 
+        ggplot2::scale_y_continuous(expand = c(0.1, 0.1))
     }
 
     ## add needed variables to df
@@ -871,13 +911,29 @@ autoplot.reliagram <- function(object,
   ## add info annotation
   if (add_info & (n == 1 | !single_graph && n > 1L)) {
     rval <- rval + 
-      ggplot2::geom_text(x = 1, y = 0.06, hjust = 1, label = plot_arg2$info, size = 3)
+      ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
+        data = data.frame(
+          x = 1, y = 0.06, 
+          label = sprintf(
+            "BS    REL   RES   UNC\n%.3f  %.3f  %.3f  %.3f",
+            signif(attr(object, "bs"), 3),
+            signif(attr(object, "rel"), 3),
+            signif(attr(object, "res"), 3),
+            signif(attr(object, "unc"), 3)
+          ),
+          group = factor(1L:n, labels = main)
+        ), 
+        inherit.aes = FALSE, size = 3, hjust = 1
+      )
   }
 
   ## grouping (if any)
   if (!single_graph && n > 1L) {
     rval <- rval + ggplot2::facet_grid(group ~ .) 
+  } else if (!is.null(object$title)) {
+    rval <- rval + ggplot2::facet_wrap(title ~ .)
   }
+
 
   ## annotation
   rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
