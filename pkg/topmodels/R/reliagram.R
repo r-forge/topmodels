@@ -1,5 +1,4 @@
-## PROGRAMMING OUTLINE
-## Reliagram (reliability diagram)
+## Programming outline: Reliagram (reliability diagram)
 ##
 ## - Observed y in-sample or out-of-sample (n x 1)
 ## - Thresholds in y (k x 1)
@@ -41,7 +40,7 @@ reliagram.default <- function(object,
   # -------------------------------------------------------------------
   ## sanity checks
   ## * `object` and `newdata` w/i `newrepsone()`
-  ## * `breaks w/i `cut()`; 
+  ## * `breaks w/i `cut()`;
   ## * `...` w/i `plot()` and `autoplot()`
   ## * `confint` in `polygon()`
   stopifnot(is.numeric(quantiles), is.null(dim(quantiles)))
@@ -67,24 +66,24 @@ reliagram.default <- function(object,
   if (isFALSE(plot)) {
     plot <- "none"
   } else if (isTRUE(plot)) {
-    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+    plot <- if ("package:ggplot2" %in% search()) "ggplot2" else "base"
   } else if (!is.character(plot)) {
     plot <- "base"
   }
   plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
   stopifnot(
     "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
-    !inherits(plot, "try-error")
+      !inherits(plot, "try-error")
   )
 
   ## guess output class
   if (is.null(class)) {
-    class <- if("package:tibble" %in% search()) "tibble" else "data.frame"
+    class <- if ("package:tibble" %in% search()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
     "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
-    !inherits(class, "try-error")
+      !inherits(class, "try-error")
   )
 
   ## arguments xlab/ylab/main needed in case of `single_graph = TRUE`
@@ -93,9 +92,9 @@ reliagram.default <- function(object,
     arg_ylab <- ylab[1]
     arg_main <- main[1]
   } else {
-    arg_xlab <- NULL 
-    arg_ylab <- NULL 
-    arg_main <- NULL 
+    arg_xlab <- NULL
+    arg_ylab <- NULL
+    arg_main <- NULL
   }
 
   # -------------------------------------------------------------------
@@ -103,7 +102,7 @@ reliagram.default <- function(object,
   # -------------------------------------------------------------------
   ## get data and threshold(s)
   y <- newresponse(object, newdata = newdata)
-  if (is.null(thresholds)){
+  if (is.null(thresholds)) {
     thresholds <- quantile(y, probs = quantiles, na.rm = TRUE)
     thresholds <- as.numeric(thresholds)
     thresholds_text <- sprintf("q_%.2f", signif(quantiles, 2))
@@ -128,7 +127,7 @@ reliagram.default <- function(object,
   )
 
   ## make sure lengths match (can't really go wrong after no arg `y` exists anymore)
-  stopifnot(NROW(pred) == length(y)) 
+  stopifnot(NROW(pred) == length(y))
 
   ## get and prepare observations
   y <- sapply(thresholds, function(x) y <= x)
@@ -137,7 +136,7 @@ reliagram.default <- function(object,
   N <- NROW(y)
 
   # -------------------------------------------------------------------
-  # COMPUTATION OF RELIABILITY DIAGRAM W/ CONSISTENCY RESAMPLING 
+  # COMPUTATION OF RELIABILITY DIAGRAM W/ CONSISTENCY RESAMPLING
   # -------------------------------------------------------------------
   ## loop over all quantiles (several possible thresholds)
   rval <- vector(mode = "list", length = NCOL(y))
@@ -176,7 +175,7 @@ reliagram.default <- function(object,
     )
     mean_pr <- as.numeric(tmp_mean_pr[, "x"])
 
-    ## calculate pred with mean values (for calulating bs) 
+    ## calculate pred with mean values (for calulating bs)
     lookup <- as.numeric(cut(pred[, idx], breaks, include.lowest = TRUE))
     pred_bin <- tmp_mean_pr$x[lookup]
 
@@ -220,7 +219,7 @@ reliagram.default <- function(object,
       x = mean_pr,
       y = obs_rf,
       bin_lwr = breaks[-length(breaks)],
-      bin_upr = breaks[-1] ,
+      bin_upr = breaks[-1],
       n_pred,
       ci_lwr,
       ci_upr
@@ -263,8 +262,8 @@ reliagram.default <- function(object,
   ## plot by default
   if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval,
-      confint = confint, single_graph = single_graph, main = arg_main, ...)
-    ))
+      confint = confint, single_graph = single_graph, main = arg_main, ...
+    )))
   } else if (plot == "base") {
     try(plot(rval,
       confint = confint, single_graph = single_graph, main = arg_main, xlab = arg_xlab, ylab = arg_ylab, ...
@@ -296,7 +295,7 @@ plot.reliagram <- function(x,
                            add_hist = TRUE,
                            add_info = TRUE,
                            add_rug = TRUE,
-                           add_min = TRUE, 
+                           add_min = TRUE,
                            axes = TRUE,
                            box = TRUE,
                            ...) {
@@ -304,11 +303,11 @@ plot.reliagram <- function(x,
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## sanity checks:
-  ## * lengths of all arguments are checked by recycling 
-  ## * `ref` w/i `abline()`; `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, 
+  ## * lengths of all arguments are checked by recycling
+  ## * `ref` w/i `abline()`; `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`,
   ##     `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`
   ## * `confint` w/i `polygon()`
-  ## * `alpha_min` w/i `set_minimum_transparency()` 
+  ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.numeric(minimum), all(minimum >= 0))
   stopifnot(is.logical(add_info))
@@ -336,7 +335,7 @@ plot.reliagram <- function(x,
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, minimum, confint, ref,
-    xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
+    xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     col, fill, alpha_min, lwd, pch, lty, type, add_hist, add_info, add_rug, add_min,
     axes, box
   )[, -1]
@@ -361,7 +360,7 @@ plot.reliagram <- function(x,
   }
 
   # -------------------------------------------------------------------
-  # FUNCTION TO TRIGGER FIGURE AND PLOT CONFINT 
+  # FUNCTION TO TRIGGER FIGURE AND PLOT CONFINT
   # -------------------------------------------------------------------
   reliagram_trigger <- function(d, ...) {
 
@@ -379,11 +378,11 @@ plot.reliagram <- function(x,
     extend_right <- max(d$bin_upr) == max(d[min_idx, "bin_upr"])
 
     ## modify main using subscript for quantiles
-    if (grepl("threshold = q_[0-9]+\\.?([0-9]+)?)$", main[j])){
+    if (grepl("threshold = q_[0-9]+\\.?([0-9]+)?)$", main[j])) {
       tmp_quantile <- regmatches(main[j], regexpr("q_[0-9]+\\.?([0-9]+)?", main[j]))
       tmp_quantile <- regmatches(tmp_quantile, regexpr("[0-9]+\\.?([0-9]+)?", tmp_quantile))
-      tmp_text <- sub('q_[0-9]+\\.?([0-9]+)?)', '', main[j])
-      main[j] <- as.expression(bquote(bold(.(tmp_text)*q[.(tmp_quantile)]*")")))
+      tmp_text <- sub("q_[0-9]+\\.?([0-9]+)?)", "", main[j])
+      main[j] <- as.expression(bquote(bold(.(tmp_text) * q[.(tmp_quantile)] * ")")))
     }
 
     ## trigger plot
@@ -394,11 +393,11 @@ plot.reliagram <- function(x,
         ylab = ylab[j], main = main[j],
         xaxs = "i", yaxs = "i", axes = FALSE, ...
       )
-      if(plot_arg$axes[j]) {
+      if (plot_arg$axes[j]) {
         axis(1)
         axis(2)
       }
-      if(plot_arg$box[j]) {
+      if (plot_arg$box[j]) {
         box()
       }
     }
@@ -409,7 +408,7 @@ plot.reliagram <- function(x,
         if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
         abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
       }
-    } 
+    }
 
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
@@ -429,7 +428,7 @@ plot.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(extend_left, 0, NA)
         )),
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]), 
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -452,7 +451,7 @@ plot.reliagram <- function(x,
       pch = plot_arg$pch[j], lty = plot_arg$lty[j], col = plot_arg$col[j], ...
     )
 
-    ## plot points below minimum 
+    ## plot points below minimum
     if (!identical(plot_arg$add_min[j], FALSE)) {
       if (isTRUE(plot_arg$add_min[j])) plot_arg$add_min[j] <- 4
       points(y ~ x, d[-min_idx, ], pch = plot_arg$add_min[j], col = plot_arg$col[j], ...)
@@ -465,21 +464,21 @@ plot.reliagram <- function(x,
       tmp_rugs <- tmp_rugs[tmp_rugs >= plot_arg$xlim1[j] & tmp_rugs <= plot_arg$xlim2[j]]
       rug(tmp_rugs, lwd = 1, ticksize = 0.02, col = plot_arg$add_rug[j])
     }
-     
+
     ## add hist
     if (!single_multigraph && !identical(plot_arg$add_hist[j], FALSE)) {
       if (isTRUE(plot_arg$add_hist[j])) plot_arg$add_hist[j] <- "lightgray"
       tmp_x <- par("pin")[1]
       tmp_y <- par("pin")[2]
-      tmp_height <- 0.3  * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j]))
+      tmp_height <- 0.3 * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j]))
       tmp_width <- (0.3 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j]))) * tmp_y / tmp_x
 
       add_hist_reliagram(
-        d$n_pred, 
-        c(d$bin_lwr, d$bin_upr[NROW(d)]), 
+        d$n_pred,
+        c(d$bin_lwr, d$bin_upr[NROW(d)]),
         plot_arg$minimum[j],
-        xpos = 0.05 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j])) + plot_arg$xlim1[j], 
-        ypos = 0.925 * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j])) - tmp_height + plot_arg$ylim1[j], 
+        xpos = 0.05 * diff(c(plot_arg$xlim1[j], plot_arg$xlim2[j])) + plot_arg$xlim1[j],
+        ypos = 0.925 * diff(c(plot_arg$ylim1[j], plot_arg$ylim2[j])) - tmp_height + plot_arg$ylim1[j],
         width = tmp_width,
         height = tmp_height,
         col = plot_arg$add_hist[j]
@@ -491,9 +490,9 @@ plot.reliagram <- function(x,
       legend(
         "bottomright",
         c(
-          "BS",  sprintf("%.3f", signif(attr(d, "bs")[j],  3)), 
-          "REL", sprintf("%.3f", signif(attr(d, "rel")[j], 3)), 
-          "RES", sprintf("%.3f", signif(attr(d, "res")[j], 3)), 
+          "BS",  sprintf("%.3f", signif(attr(d, "bs")[j], 3)),
+          "REL", sprintf("%.3f", signif(attr(d, "rel")[j], 3)),
+          "RES", sprintf("%.3f", signif(attr(d, "res")[j], 3)),
           "UNC", sprintf("%.3f", signif(attr(d, "unc")[j], 3))
         ),
         cex = 0.8,
@@ -542,7 +541,7 @@ lines.reliagram <- function(x,
   ## * lengths of all arguments are checked by recycling
   ## * `col`, `lwd`, `pch`, `lty`, `type` and `...` w/i `plot()`
   ## * `ref` w/i `abline()`; `confint` w/i `polygon()`
-  ## * `alpha_min` w/i `set_minimum_transparency()` 
+  ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.numeric(minimum), all(minimum >= 0))
 
   ## convert always to data.frame
@@ -590,7 +589,7 @@ lines.reliagram <- function(x,
           rev(d[min_idx, "ci_upr"]),
           ifelse(extend_left, 0, NA)
         )),
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]), 
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -692,22 +691,22 @@ c.reliagram <- rbind.reliagram <- function(...) {
 
 
 
-autoplot.reliagram <- function(object, 
-                               single_graph = FALSE, 
+autoplot.reliagram <- function(object,
+                               single_graph = FALSE,
                                minimum = 0,
-                               confint = TRUE, 
-                               ref = TRUE, 
+                               confint = TRUE,
+                               ref = TRUE,
                                xlim = c(0, 1),
                                ylim = c(0, 1),
-                               xlab = NULL, 
-                               ylab = NULL, 
-                               main = NULL, 
+                               xlab = NULL,
+                               ylab = NULL,
+                               main = NULL,
                                colour = "black",
-                               fill = adjustcolor("black", alpha.f = 0.2), 
-                               alpha_min = 0.2, 
-                               size = 1, 
-                               shape = 19, 
-                               linetype = 1, 
+                               fill = adjustcolor("black", alpha.f = 0.2),
+                               alpha_min = 0.2,
+                               size = 1,
+                               shape = 19,
+                               linetype = 1,
                                type = NULL,
                                add_hist = TRUE,
                                add_info = TRUE,
@@ -715,7 +714,6 @@ autoplot.reliagram <- function(object,
                                add_min = TRUE,
                                legend = FALSE,
                                ...) {
-
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
@@ -790,7 +788,7 @@ autoplot.reliagram <- function(object,
           x = c(data$x, 1, rev(data$x)),
           y = c(data$ci_lwr, 1, rev(data$ci_upr))
         )
-      } else { 
+      } else {
         nd <- data.frame(
           x = c(data$x, rev(data$x)),
           y = c(data$ci_lwr, rev(data$ci_upr))
@@ -804,25 +802,27 @@ autoplot.reliagram <- function(object,
   )
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
-  plot_arg <- data.frame(1:n,
+  plot_arg <- data.frame(
+    1:n,
     colour, fill, size, linetype, confint, alpha_min, minimum, add_rug
   )[, -1]
 
-  ## prepare fill color for confint (must be done on vector to match args) 
+  ## prepare fill color for confint (must be done on vector to match args)
   if (is.logical(plot_arg$confint)) {
 
     ## use fill and set alpha
-    plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx)
-      set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
+    plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx) {
+      set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx])
+    })
 
     ## set color to NA for not plotting
     plot_arg$fill[!plot_arg$confint] <- NA
-
   } else {
 
-    ## use confint and set alpha 
-    plot_arg$fill <- sapply(seq_along(plot_arg$confint), function(idx)
-      set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx]))
+    ## use confint and set alpha
+    plot_arg$fill <- sapply(seq_along(plot_arg$confint), function(idx) {
+      set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx])
+    })
   }
 
   ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
@@ -838,31 +838,38 @@ autoplot.reliagram <- function(object,
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
-    ggplot2::geom_abline(ggplot2::aes_string(intercept = 0, slope = 1), 
-      linetype = 2, colour = plot_arg2$ref) + 
+    ggplot2::geom_abline(ggplot2::aes_string(intercept = 0, slope = 1),
+      linetype = 2, colour = plot_arg2$ref
+    ) +
     ggplot2::geom_polygon(
       ggplot2::aes_string(
-        ci_lwr = "ci_lwr", ci_upr = "ci_upr", 
+        ci_lwr = "ci_lwr", ci_upr = "ci_upr",
         bin_lwr = "bin_lwr", bin_upr = "bin_upr", fill = "group"
-      ), 
-      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE) +
-    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
-      na.rm = TRUE) +
+      ),
+      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE
+    ) +
+    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"),
+      na.rm = TRUE
+    ) +
     ggplot2::geom_point(ggplot2::aes_string(colour = "group"),
-      alpha = plot_arg2$type, size = plot_arg2$size * 2, shape = plot_arg2$shape, 
-      show.legend = FALSE, na.rm = TRUE) 
+      alpha = plot_arg2$type, size = plot_arg2$size * 2, shape = plot_arg2$shape,
+      show.legend = FALSE, na.rm = TRUE
+    )
 
   ## add points below minimum
-  rval <- rval + 
-    ggplot2::geom_point(ggplot2::aes_string(x = "x", y = "y"), data = object2,
+  rval <- rval +
+    ggplot2::geom_point(ggplot2::aes_string(x = "x", y = "y"),
+      data = object2,
       alpha = plot_arg2$type[idx_min], size = plot_arg2$size[idx_min] * 2, shape = plot_arg2$add_min[idx_min],
-      show.legend = FALSE, na.rm = TRUE)
+      show.legend = FALSE, na.rm = TRUE
+    )
 
   ## add rugs
-  rval <- rval + 
-    ggplot2::geom_rug(ggplot2::aes_string(x = "x"), 
+  rval <- rval +
+    ggplot2::geom_rug(ggplot2::aes_string(x = "x"),
       data = data.frame(x = object$bin_lwr[1], group = factor(1L:n, labels = main)),
-      inherit.aes = FALSE, colour = plot_arg$add_rug) +
+      inherit.aes = FALSE, colour = plot_arg$add_rug
+    ) +
     ggplot2::geom_rug(ggplot2::aes_string(x = "bin_upr"), y = NA, colour = plot_arg2$add_rug)
 
   ## set the colors, shapes, etc. for the groups
@@ -883,7 +890,7 @@ autoplot.reliagram <- function(object,
     rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
   }
 
-  ## set x and y limits 
+  ## set x and y limits
   rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
   rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
 
@@ -897,64 +904,72 @@ autoplot.reliagram <- function(object,
       df$n_pred[is.na(df$n_pred)] <- 0
 
       ## draw histogram
-      rval_inset <- ggplot2::ggplot(df, 
-          ggplot2::aes_string(x = "x", y = "y", xmin = "bin_lwr", xmax = "bin_upr", ymin = 0, ymax = "n_pred", 
-            fill = "above_min")) +
+      rval_inset <- ggplot2::ggplot(
+        df,
+        ggplot2::aes_string(
+          x = "x", y = "y", xmin = "bin_lwr", xmax = "bin_upr", ymin = 0, ymax = "n_pred",
+          fill = "above_min"
+        )
+      ) +
         ggplot2::geom_rect(show.legend = FALSE, colour = "black", size = 0.25) +
-        ggplot2::scale_fill_manual(values = c(add_hist, "white")) + 
+        ggplot2::scale_fill_manual(values = c(add_hist, "white")) +
         ggplot2::theme_void()
 
       ## add minimum line
       if (any(df$minimum > 0)) {
-      rval_inset <- rval_inset +
-        ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"), 
-          data = data.frame(x = 0, xend = 1, y = unique(df$minimum), yend = unique(df$minimum)), 
-          inherit.aes = FALSE) +
-        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
-          data = data.frame(x = 0, y = unique(df$minimum), label = "Min."), inherit.aes = FALSE,
-          size = 3, hjust = 1, nudge_x = -0.01)
+        rval_inset <- rval_inset +
+          ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"),
+            data = data.frame(x = 0, xend = 1, y = unique(df$minimum), yend = unique(df$minimum)),
+            inherit.aes = FALSE
+          ) +
+          ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
+            data = data.frame(x = 0, y = unique(df$minimum), label = "Min."), inherit.aes = FALSE,
+            size = 3, hjust = 1, nudge_x = -0.01
+          )
       }
- 
-      ## add simple y axis 
+
+      ## add simple y axis
       ytick <- pretty(c(0, max(df$n_pred)), 4)
       ytick <- ytick[ytick > 0 & ytick < max(df$n_pred)]
 
       rval_inset <- rval_inset +
-        ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"), 
-          data = data.frame(x = 0.985, xend = 1.015, y = ytick, yend = ytick), 
-          inherit.aes = FALSE) +
-        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
-        data = data.frame(x = 1.015, y = ytick, label = ytick), inherit.aes = FALSE,
-        size = 3, hjust = 0, nudge_x = 0.01)
+        ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"),
+          data = data.frame(x = 0.985, xend = 1.015, y = ytick, yend = ytick),
+          inherit.aes = FALSE
+        ) +
+        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
+          data = data.frame(x = 1.015, y = ytick, label = ytick), inherit.aes = FALSE,
+          size = 3, hjust = 0, nudge_x = 0.01
+        )
 
       # add nobs
-      rval_inset <- rval_inset + 
-        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
+      rval_inset <- rval_inset +
+        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
           data = data.frame(
-            x = mean(c(df$bin_lwr, df$bin_upr), na.rm = TRUE), 
-            y = max(df$n_pred), 
+            x = mean(c(df$bin_lwr, df$bin_upr), na.rm = TRUE),
+            y = max(df$n_pred),
             label = paste0("n = ", sum(df$n_pred[df$n_pred >= df$minimum], na.rm = TRUE))
-          ), 
+          ),
           inherit.aes = FALSE, size = 4
         )
 
       ## return graph
       rval_inset <- rval_inset +
-        ggplot2::scale_x_continuous(expand = c(0.1, 0.1)) + 
+        ggplot2::scale_x_continuous(expand = c(0.1, 0.1)) +
         ggplot2::scale_y_continuous(expand = c(0.1, 0.1))
     }
 
     ## add needed variables to df
     object$above_min <- factor(object$n_pred >= plot_arg2$minimum, levels = c(TRUE, FALSE))
     object$minimum <- plot_arg2$minimum
-  
+
     ## loop over different groups
     insets <- lapply(split(object, object$group), function(x) {
-        annotation_custom2(
-          grob = ggplot2::ggplotGrob(get_inset(x)),
-          data = data.frame(x),
-          ymin = 0.7, ymax = 0.95, xmin = 0.05, xmax = 0.3
-        )
+      annotation_custom2(
+        grob = ggplot2::ggplotGrob(get_inset(x)),
+        data = data.frame(x),
+        ymin = 0.7, ymax = 0.95, xmin = 0.05, xmax = 0.3
+      )
     })
     rval <- rval + insets
   }
@@ -963,10 +978,10 @@ autoplot.reliagram <- function(object,
   # ADD INFORMATION IF WANTED
   # -------------------------------------------------------------------
   if (add_info & (n == 1 | !single_graph && n > 1L)) {
-    rval <- rval + 
-      ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"), 
+    rval <- rval +
+      ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
         data = data.frame(
-          x = 1, y = 0.06, 
+          x = 1, y = 0.06,
           label = sprintf(
             "BS    REL   RES   UNC\n%.3f  %.3f  %.3f  %.3f",
             signif(attr(object, "bs"), 3),
@@ -975,7 +990,7 @@ autoplot.reliagram <- function(object,
             signif(attr(object, "unc"), 3)
           ),
           group = factor(1L:n, labels = main)
-        ), 
+        ),
         inherit.aes = FALSE, size = 3, hjust = 1
       )
   }
@@ -985,7 +1000,7 @@ autoplot.reliagram <- function(object,
   # -------------------------------------------------------------------
   ## grouping
   if (!single_graph && n > 1L) {
-    rval <- rval + ggplot2::facet_grid(group ~ .) 
+    rval <- rval + ggplot2::facet_grid(group ~ .)
   } else if (!is.null(object$title)) {
     rval <- rval + ggplot2::facet_wrap(title ~ .)
   }
@@ -995,71 +1010,69 @@ autoplot.reliagram <- function(object,
 }
 
 
-add_hist_reliagram <- function(n, 
-                               breaks, 
+add_hist_reliagram <- function(n,
+                               breaks,
                                minimum,
-                               xpos, 
-                               ypos, 
+                               xpos,
+                               ypos,
                                width = .2,
-                               height = .2, 
-                               col = "lightgray", 
+                               height = .2,
+                               col = "lightgray",
                                main = NULL) {
-
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   idx_min <- which(n < minimum)
-  n[is.na(n)] <- 0 
+  n[is.na(n)] <- 0
   max_n <- max(n)
   col <- rep(col, max_n)
   col[n < minimum] <- 0
 
   # -------------------------------------------------------------------
-  # PLOT HISTOGRAM
+  # PLOT 
   # -------------------------------------------------------------------
+  ## plot histogram
   for (i in seq_along(n)) {
     x <- xpos + breaks[c(i, i + 1)] * width
     y <- ypos + c(0, n[i] / max_n * height)
     rect(x[1L], y[1L], x[2L], y[2L], col = col[i])
   }
 
-  # -------------------------------------------------------------------
-  # PLOT Y-AXIS
-  # -------------------------------------------------------------------
+  ## plot y-axis
   ytick <- pretty(c(0, max_n * .8), 4)
   ytick <- ytick[ytick > 0 & ytick < max_n]
-  text(xpos + 1.05 * width, ypos + ytick / max_n * height, ytick, cex = .8, adj = c(0.0,0.5))
+  text(xpos + 1.05 * width, ypos + ytick / max_n * height, ytick, cex = .8, adj = c(0.0, 0.5))
   segments(
-    x0 = rep(xpos, length(ytick)), 
-    x1 = rep(xpos + 1 * width, length(ytick)), 
+    x0 = rep(xpos, length(ytick)),
+    x1 = rep(xpos + 1 * width, length(ytick)),
     y0 = ypos + ytick / max_n * height,
-    col = "darkgray", lwd = .5, lty = 2)
+    col = "darkgray", lwd = .5, lty = 2
+  )
   segments(
-    x0 = rep(xpos + 0.975 * width, length(ytick)), 
-    x1 = rep(xpos + 1.025 * width, length(ytick)), 
+    x0 = rep(xpos + 0.975 * width, length(ytick)),
+    x1 = rep(xpos + 1.025 * width, length(ytick)),
     y0 = ypos + ytick / max_n * height,
-    lwd = .5)
+    lwd = .5
+  )
 
-  # -------------------------------------------------------------------
-  # PLOT MINIMUM
-  # -------------------------------------------------------------------
+  ## plot minimum if exists
   if (minimum > 0) {
     text(xpos + -0.05 * width, ypos + minimum / max_n * height, "Min.", cex = .8, adj = c(1, 0.5))
     segments(
-      x0 = rep(xpos, length(ytick)), 
-      x1 = rep(xpos + 1 * width, length(ytick)), 
+      x0 = rep(xpos, length(ytick)),
+      x1 = rep(xpos + 1 * width, length(ytick)),
       y0 = ypos + minimum / max_n * height,
-      col = "darkgray", lwd = .5, lty = 1)
+      col = "darkgray", lwd = .5, lty = 1
+    )
     segments(
-      x0 = rep(xpos - 0.025 * width, length(ytick)), 
-      x1 = rep(xpos + 0.025 * width, length(ytick)), 
+      x0 = rep(xpos - 0.025 * width, length(ytick)),
+      x1 = rep(xpos + 0.025 * width, length(ytick)),
       y0 = ypos + minimum / max_n * height,
-      lwd = .5)
+      lwd = .5
+    )
   }
 
-  # -------------------------------------------------------------------
-  # PLOT TITLE
-  # -------------------------------------------------------------------
+  ## add title 
   if (is.null(main)) {
     main <- sprintf("n=%d", sum(n[n > minimum]))
   }
@@ -1070,19 +1083,19 @@ add_hist_reliagram <- function(n,
 ## FIXME: (ML) Idea to setup up a crch specific reliagram:
 ##   * Set threshold to censor point
 ##   * Only programming outline
-# reliagram.crch <- function(object, 
+# reliagram.crch <- function(object,
 #                           newdata = NULL,
-#                           breaks = seq(0, 1, by = 0.1), 
-#                           thresholds = NULL, 
+#                           breaks = seq(0, 1, by = 0.1),
+#                           thresholds = NULL,
 #                           ...) {
 #   if((missing(newdata) || is.null(newdata)) && !is.null(object$y)) {
-#     y <- object$y 
-#   } else { 
+#     y <- object$y
+#   } else {
 #     y <- newresponse(object, newdata = newdata)
 #   }
-# 
+#
 #   if(is.null(thresholds)) thresholds <- object$left
-# 
+#
 #   ## call reliagram
 #   reliagram(object, breaks = breaks, thresholds = thresholds, y = y, ...)
 # }
