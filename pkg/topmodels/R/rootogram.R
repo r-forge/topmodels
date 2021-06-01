@@ -29,7 +29,6 @@ rootogram <- function(object, ...) {
 
 rootogram.default <- function(object, 
                               newdata = NULL,
-                              #na.action = na.pass, # FIXME: (ML) na.action must be na.omit, see newresponse()
                               plot = TRUE,
                               class = NULL,
                               style = c("hanging", "standing", "suspended"),
@@ -90,7 +89,7 @@ rootogram.default <- function(object,
   }
 
   ## data and weights
-  y <- newresponse(object, newdata = newdata, na.action = na.omit)
+  y <- newresponse(object, newdata = newdata, na.action = na.pass)
   w <- attr(y, "weights")
   if(is.null(response_type)) response_type <- attr(y, "response_type")
   response_type <- match.arg(response_type, c("discrete", "logseries", "continuous"))
@@ -105,7 +104,6 @@ rootogram.default <- function(object,
   }
   breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
   x <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
-
   
   ## set widths
   if (is.null(width) && (response_type == "discrete" || response_type == "logseries")) {
@@ -114,26 +112,30 @@ rootogram.default <- function(object,
     width <- 1
   }
 
-  obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
-
-  ## expected frequencies
+  ## expected frequencies (part1)
   p <- matrix(NA, nrow = length(y), ncol = length(breaks) - 1L)
   for (i in 1L:ncol(p)) {
     p[, i] <- 
-      procast(object, newdata = newdata, na.action = na.omit, type = "probability", 
+      procast(object, newdata = newdata, na.action = na.pass, type = "probability", 
         at = breaks[i + 1L], drop = TRUE) -
-      procast(object, newdata = newdata, na.action = na.omit, type = "probability", 
+      procast(object, newdata = newdata, na.action = na.pass, type = "probability", 
         at = breaks[i], drop = TRUE) 
   }
+
+  ## handle NAs 
+  ## TODO: (ML) Maybe allow arg `na.action` in the future
+  idx_not_na <- as.logical(complete.cases(y) * complete.cases(p))
+  y <- y[idx_not_na]
+  p <- p[idx_not_na, ]
+  w <- w[idx_not_na]
+
+  ## observed frequencies
+  obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
+
+  ## expected frequencies (part2)
   expctd <- colSums(p * w)
-  ## FIXME: (ML) Do we need terms here? No info in `newresponse()` or `procast()` output? What did I mean?
-  ## FIXME: (ML) 
-  ## * This code will fail if NAs in response, newresponse() omits cases, procast() not.
-  ## * Same error in countreg::procast.glm()
-  ## * Should we allow other na.actions? What if NAs in covariates: newresponse will not match to forecast.
 
   ## raw vs. sqrt scale
-  ## FIXME: (ML) Move scale in plot fun: Let it there (Z)
   if(scale == "sqrt") {
     y <- if(style == "hanging") sqrt(expctd) - sqrt(obsrvd) else 0
     height <- if(style == "suspended") sqrt(expctd) - sqrt(obsrvd) else sqrt(obsrvd)
