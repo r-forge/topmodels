@@ -36,6 +36,9 @@ qresiduals.default <- function(object,
 
   } else {
 
+    ## FIXME: (ML) Implement correct NA handling: 
+    ## * In newresponse() for y
+    ## * Which is used for at w/i procast()
     y <- newresponse(object, newdata = newdata)
   
     ## to keep the attributes

@@ -1,4 +1,4 @@
-## PIT histogram
+## Programming outline: PIT histogram
 ##
 ## - Observed y in-sample or out-of-sample (n x 1)
 ## - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2)
@@ -7,12 +7,12 @@
 ## - Breaks for predicted probabilities in [0, 1] (m x 1)
 ##
 ## - Cut probabilities at breaks -> (m-1) groups and draw histogram
-## - TODO: In case of point masses either use a random draw
+## - In case of point masses either use a random draw
 ##   or distribute evenly across relevant intervals 
-## - TODO: Random draws could be drawn by hist() (current solution)
+## - Random draws could be drawn by hist() (current solution)
 ##   but proportional distribution requires drawing rectangles by hand
-## - TODO: add confidence interval as well.
-## - TODO: Instead of shaded rectangles plus reference line and CI lines
+## - Add confidence interval as well.
+## - Instead of shaded rectangles plus reference line and CI lines
 ##   support shaded CI plus step lines
 
 ## Functions:
@@ -31,7 +31,7 @@ pithist.default <- function(object,
                             plot = TRUE,
                             class = NULL,
                             style = c("histogram", "lines"),
-                            type = c("random", "proportional"),  # FIXME: (ML) see below
+                            type = c("random", "proportional"),  # FIXME: (ML) not yet implemented
                             nsim = 1L,
                             delta = NULL,
                             freq = FALSE,
@@ -40,15 +40,20 @@ pithist.default <- function(object,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
                             single_graph = FALSE,
-                            xlim = c(0, 1),  # FIXME: (ML) Different for other plot functions
+                            xlim = c(0, 1),
                             ylim = c(0, NA),
                             xlab = "PIT",
                             ylab = if (freq) "Frequency" else "Density",
                             main = NULL,
                             ...) {
-
+  # -------------------------------------------------------------------
+  # SET UP PRELIMINARIES
+  # -------------------------------------------------------------------
   ## sanity checks
-  ## `object` and `newdata` w/i `newrepsone()`; `delta w/i `qresiduals()`, `confint` in `abline()`
+  ## * `object` and `newdata` w/i `newrepsone()`
+  ## * `delta w/i `qresiduals()`
+  ## * `...` w/i `plot()` and `autoplot()`
+  ## * `confint` in `abline()`
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(is.logical(freq))
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
@@ -68,6 +73,7 @@ pithist.default <- function(object,
   ## match arguments
   style <- match.arg(style)
   confint_type <- match.arg(confint_type)
+  type <- match.arg(type)
 
   ## guess plotting flavor
   if (isFALSE(plot)) {
@@ -93,11 +99,14 @@ pithist.default <- function(object,
     !inherits(class, "try-error")
   )
 
+  # -------------------------------------------------------------------
+  # COMPUTATION OF PIT
+  # -------------------------------------------------------------------
   ## either compute proportion exactly (to do...) or approximate by simulation
-  type <- match.arg(type)
   if (type == "proportional") {  
-    # FIXME: (ML) implement proportional over the inteverals (e.g., below censoring point)
-    # FIXME: (ML) confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
+    ## FIXME: (ML) 
+    ## * Implement proportional over the inteverals (e.g., below censoring point)
+    ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
     stop("not yet implemented")
   } else {
     p <- qresiduals.default(object, newdata = newdata, trafo = NULL, type = "random", 
@@ -106,7 +115,8 @@ pithist.default <- function(object,
 
   ## get breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(NROW(p), c(0, 50, 5000, 1000000, Inf))]
-  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L) #FIXME: (ML) Or xlim?
+  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L) 
+  #FIXME: (ML) Maybe use xlim instead or `0` and `1`
 
   ## compute ci interval
   if (confint_type == "exact") {
@@ -127,8 +137,12 @@ pithist.default <- function(object,
   ## labels
   if (is.null(main)) main <- deparse(substitute(object))
 
+  # -------------------------------------------------------------------
+  # OUTPUT AND OPTIONAL PLOTTING
+  # -------------------------------------------------------------------
   ## collect everything as data.frame
-  tmp_hist <- hist(p, breaks = breaks, plot = FALSE) # TODO: (ML) Maybe get rid of `hist()`
+  tmp_hist <- hist(p, breaks = breaks, plot = FALSE) 
+  ## TODO: (ML) Maybe get rid of `hist()`
   if (freq) {
     rval <- data.frame(
       x = tmp_hist$mids,
@@ -181,6 +195,9 @@ pithist.default <- function(object,
 
 
 c.pithist <- rbind.pithist <- function(...) {
+  # -------------------------------------------------------------------
+  # GET DATA
+  # -------------------------------------------------------------------
 
   ## list of pithists
   rval <- list(...)
@@ -189,7 +206,7 @@ c.pithist <- rbind.pithist <- function(...) {
   if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
     class <- "tibble"
   } else {
-    class <- "base"
+    class <- "data.frame"
   }
 
   ## convert always to data.frame
@@ -203,6 +220,9 @@ c.pithist <- rbind.pithist <- function(...) {
   }
   n <- lapply(rval, function(r) table(r$group))
 
+  # -------------------------------------------------------------------
+  # PREPARE DATA
+  # -------------------------------------------------------------------
   ## check if all of same `freq`
   freq <- unlist(lapply(rval, function(r) attr(r, "freq")))
   stopifnot(length(unique(freq)) == 1)
@@ -219,6 +239,9 @@ c.pithist <- rbind.pithist <- function(...) {
   }
   n <- unlist(n)
 
+  # -------------------------------------------------------------------
+  # RETURN DATA
+  # -------------------------------------------------------------------
   ## combine and return
   rval <- do.call("rbind.data.frame", rval)
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
@@ -260,11 +283,14 @@ plot.pithist <- function(x,
                          axes = TRUE,
                          box = TRUE,
                          ...) {
-
+  # -------------------------------------------------------------------
+  # SET UP PRELIMINARIES
+  # -------------------------------------------------------------------
   ## sanity checks
-  ## lengths of all arguments are checked by recycling; `ref` and `confint` w/i `abline()`;
-  ## xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
-  ## `alpha_min` w/i colorspace fun 
+  ## * lengths of all arguments are checked by recycling
+  ## * `ref` and `confint` w/i `abline()`
+  ## * `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
+  ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
@@ -317,7 +343,9 @@ plot.pithist <- function(x,
     if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
   }
 
-  ## function to plot pithist (style = "histogram")
+  # -------------------------------------------------------------------
+  # MAIN PLOTTING FUNCTION FOR 'HISTOGRAM-STYLE PITHIST'
+  # -------------------------------------------------------------------
   pithist_plot <- function(d, ...) {
   
     ## get group index
@@ -397,7 +425,10 @@ plot.pithist <- function(x,
 
   }
 
-  ## function to trigger figure and plot confint (style = "lines")
+
+  # -------------------------------------------------------------------
+  # FUNCTION TO TRIGGER FIGURE AND PLOT CONFINT FOR 'LINE-STYLE PITHIST'
+  # -------------------------------------------------------------------
   pitlines_trigger <- function(d, ...) {
 
     ## get group index
@@ -456,7 +487,9 @@ plot.pithist <- function(x,
     }
   }
 
-  ## function to trigger figure and plot confint (style = "lines")
+  # -------------------------------------------------------------------
+  # MAIN PLOTTING FUNCTION FOR 'LINE_STYLE PITHIST'
+  # -------------------------------------------------------------------
   pitlines_plot <- function(d, ...) {
 
     ## get group index
@@ -483,7 +516,10 @@ plot.pithist <- function(x,
     lines(y ~ x, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
   }
 
-  ## draw plots
+  # -------------------------------------------------------------------
+  # DRAW PLOTS
+  # -------------------------------------------------------------------
+  ## set up necessary panels
   if (!single_graph && n > 1L) par(mfrow = n2mfrow(n))
 
   ## draw polygons first
@@ -516,11 +552,14 @@ lines.pithist <- function(x,
                           lwd = 2,
                           lty = 1,
                           ...) {
-
+  # -------------------------------------------------------------------
+  # SET UP PRELIMINARIES
+  # -------------------------------------------------------------------
   ## sanity checks
-  ## lengths of all arguments are checked by recycling; `ref` and `confint` w/i `abline()`;
-  ## `col`, `fill`, `lwd`, `lty` and `...` w/i `lines()`
-  ## `alpha_min` w/i colorspace fun 
+  ## * lengths of all arguments are checked by recycling
+  ## * `ref` and `confint` w/i `abline()`
+  ## * `col`, `fill`, `lwd`, `lty` and `...` w/i `lines()`
+  ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(
     "all `freq` in attr of object `x` must be of the same type" =
     length(unique(attr(x, "freq"))) == 1
@@ -535,7 +574,9 @@ lines.pithist <- function(x,
     1:n, confint, ref, col, fill, alpha_min, lwd, lty
   )[, -1]
 
-  ## plotting function: stepwise pithist
+  # -------------------------------------------------------------------
+  # MAIN PLOTTING FUNCTION FOR LINES
+  # -------------------------------------------------------------------
   pitlines_lines <- function(d, ...) {
 
     ## get group index
@@ -586,14 +627,15 @@ lines.pithist <- function(x,
     lines.default(y ~ x, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
   }
 
-  ## draw plots
+  # -------------------------------------------------------------------
+  # DRAW PLOTS
+  # -------------------------------------------------------------------
   for (i in 1L:n) {
     pitlines_lines(x[x$group == i, ], ...)
   }
 }
 
 
-## ggplot2 interface
 autoplot.pithist <- function(object,
                              single_graph = FALSE,
                              style = c("histogram", "lines"),
