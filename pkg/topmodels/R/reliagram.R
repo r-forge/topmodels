@@ -275,6 +275,80 @@ reliagram.default <- function(object,
 }
 
 
+c.reliagram <- rbind.reliagram <- function(...) {
+  # -------------------------------------------------------------------
+  # GET DATA
+  # -------------------------------------------------------------------
+  ## list of reliagrams
+  rval <- list(...)
+
+  ## set class to tibble if any rval is a tibble
+  if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
+    class <- "tibble"
+  } else {
+    class <- "data.frame"
+  }
+
+  ## convert always to data.frame
+  if (class == "tibble") {
+    rval <- lapply(rval, as.data.frame)
+  }
+
+  ## group sizes
+  for (i in seq_along(rval)) {
+    if (is.null(rval[[i]]$group)) rval[[i]]$group <- 1L
+  }
+  n <- lapply(rval, function(r) table(r$group))
+
+  # -------------------------------------------------------------------
+  # PREPARE DATA
+  # -------------------------------------------------------------------
+  ## labels
+  xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
+  ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  prob <- unlist(lapply(rval, function(r) attr(r, "prob")))
+  confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
+  bs <- unlist(lapply(rval, function(r) attr(r, "bs")))
+  rel <- unlist(lapply(rval, function(r) attr(r, "rel")))
+  res <- unlist(lapply(rval, function(r) attr(r, "res")))
+  unc <- unlist(lapply(rval, function(r) attr(r, "unc")))
+  nam <- names(rval)
+  main <- if (is.null(nam)) {
+    as.vector(sapply(rval, function(r) attr(r, "main")))
+  } else {
+    make.unique(rep.int(nam, sapply(n, length)))
+  }
+  n <- unlist(n)
+
+  # -------------------------------------------------------------------
+  # RETURN DATA
+  # -------------------------------------------------------------------
+  ## combine and return
+  rval <- do.call("rbind.data.frame", rval)
+  rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
+  attr(rval, "xlab") <- xlab
+  attr(rval, "ylab") <- ylab
+  attr(rval, "main") <- main
+  attr(rval, "prob") <- prob
+  attr(rval, "confint_level") <- confint_level
+  attr(rval, "bs") <- bs
+  attr(rval, "rel") <- rel
+  attr(rval, "res") <- res
+  attr(rval, "unc") <- unc
+
+  ## set class to data.frame or tibble
+  if (class == "data.frame") {
+    class(rval) <- c("reliagram", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("reliagram", class(rval))
+  }
+
+  ## return
+  return(rval)
+}
+
+
 plot.reliagram <- function(x,
                            single_graph = FALSE,
                            minimum = 0,
@@ -614,81 +688,6 @@ lines.reliagram <- function(x,
     reliagramplot(x[x$group == i, ], ...)
   }
 }
-
-
-c.reliagram <- rbind.reliagram <- function(...) {
-
-  # -------------------------------------------------------------------
-  # GET DATA
-  # -------------------------------------------------------------------
-  ## list of reliagrams
-  rval <- list(...)
-
-  ## set class to tibble if any rval is a tibble
-  if (any(do.call("c", lapply(rval, class)) %in% "tbl")) {
-    class <- "tibble"
-  } else {
-    class <- "data.frame"
-  }
-
-  ## convert always to data.frame
-  if (class == "tibble") {
-    rval <- lapply(rval, as.data.frame)
-  }
-
-  ## group sizes
-  for (i in seq_along(rval)) {
-    if (is.null(rval[[i]]$group)) rval[[i]]$group <- 1L
-  }
-  n <- lapply(rval, function(r) table(r$group))
-
-  # -------------------------------------------------------------------
-  # PREPARE DATA
-  # -------------------------------------------------------------------
-  ## labels
-  xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
-  ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
-  prob <- unlist(lapply(rval, function(r) attr(r, "prob")))
-  confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
-  bs <- unlist(lapply(rval, function(r) attr(r, "bs")))
-  rel <- unlist(lapply(rval, function(r) attr(r, "rel")))
-  res <- unlist(lapply(rval, function(r) attr(r, "res")))
-  unc <- unlist(lapply(rval, function(r) attr(r, "unc")))
-  nam <- names(rval)
-  main <- if (is.null(nam)) {
-    as.vector(sapply(rval, function(r) attr(r, "main")))
-  } else {
-    make.unique(rep.int(nam, sapply(n, length)))
-  }
-  n <- unlist(n)
-
-  # -------------------------------------------------------------------
-  # RETURN DATA
-  # -------------------------------------------------------------------
-  ## combine and return
-  rval <- do.call("rbind.data.frame", rval)
-  rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
-  attr(rval, "xlab") <- xlab
-  attr(rval, "ylab") <- ylab
-  attr(rval, "main") <- main
-  attr(rval, "prob") <- prob
-  attr(rval, "confint_level") <- confint_level
-  attr(rval, "bs") <- bs
-  attr(rval, "rel") <- rel
-  attr(rval, "res") <- res
-  attr(rval, "unc") <- unc
-
-  ## set class to data.frame or tibble
-  if (class == "data.frame") {
-    class(rval) <- c("reliagram", "data.frame")
-  } else {
-    rval <- tibble::as_tibble(rval)
-    class(rval) <- c("reliagram", class(rval))
-  }
-
-  return(rval)
-}
-
 
 
 autoplot.reliagram <- function(object,
