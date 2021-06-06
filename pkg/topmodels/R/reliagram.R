@@ -41,8 +41,8 @@ reliagram.default <- function(object,
   ## sanity checks
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `breaks w/i `cut()`;
+  ## * `confint` w/i `polygon()`
   ## * `...` w/i `plot()` and `autoplot()`
-  ## * `confint` in `polygon()`
   stopifnot(is.numeric(quantiles), is.null(dim(quantiles)))
   stopifnot(is.null(thresholds) || (is.numeric(thresholds) && is.null(dim(thresholds))))
   stopifnot(
@@ -724,6 +724,8 @@ autoplot.reliagram <- function(object,
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
+  stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
+  stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -752,10 +754,6 @@ autoplot.reliagram <- function(object,
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
-  ## get x and y limit in correct format
-  if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
-  if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
-
   ## determine if points should be plotted
   if (is.null(type)) type <- ifelse(table(object$group) > 20L, "l", "b")
 
