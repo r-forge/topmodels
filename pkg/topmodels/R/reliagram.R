@@ -722,6 +722,9 @@ autoplot.reliagram <- function(object,
   if (!is.null(add_arg$lwd)) size <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
+  ## sanity checks
+  stopifnot(is.logical(single_graph))
+
   ## convert data always to data.frame
   object <- as.data.frame(object)
 
@@ -766,12 +769,12 @@ autoplot.reliagram <- function(object,
   min_break <- min(object$bin_lwr)
   max_break <- max(object$bin_upr)
 
-  ## stat helper function to get left/right points from respective mid points
+  ## stat helper function to get polygon 
   calc_confint_polygon <- ggplot2::ggproto("calc_confint_polygon", ggplot2::Stat,
 
-    # Required as we operate on groups (facetting)
+    # required as we operate on groups (facetting)
     compute_group = function(data, scales) {
-      ## Manipulate object  #TODO: (ML) Could possibly be improved?
+      ## manipulate object
       if (min(data$bin_lwr) == min_break & max(data$bin_upr) == max_break) {
         nd <- data.frame(
           x = c(0, data$x, 1, rev(data$x), 0),
@@ -796,7 +799,7 @@ autoplot.reliagram <- function(object,
       nd
     },
 
-    # Tells us what we need
+    # tells us what we need
     required_aes = c("x", "ci_lwr", "ci_upr", "bin_lwr", "bin_upr")
   )
 
@@ -836,6 +839,7 @@ autoplot.reliagram <- function(object,
   # -------------------------------------------------------------------
   # MAIN PLOTTING
   # -------------------------------------------------------------------
+  ## actual plotting
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
     ggplot2::geom_abline(ggplot2::aes_string(intercept = 0, slope = 1),
       linetype = 2, colour = plot_arg2$ref

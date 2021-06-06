@@ -8,7 +8,7 @@
 ##
 ## - Cut probabilities at breaks -> (m-1) groups and draw histogram
 ## - In case of point masses either use a random draw
-##   or distribute evenly across relevant intervals 
+##   or distribute evenly across relevant intervals
 ## - Random draws could be drawn by hist() (current solution)
 ##   but proportional distribution requires drawing rectangles by hand
 ## - Add confidence interval as well.
@@ -31,7 +31,7 @@ pithist.default <- function(object,
                             plot = TRUE,
                             class = NULL,
                             style = c("histogram", "lines"),
-                            type = c("random", "proportional"),  # FIXME: (ML) not yet implemented
+                            type = c("random", "proportional"), # FIXME: (ML) not yet implemented
                             nsim = 1L,
                             delta = NULL,
                             freq = FALSE,
@@ -79,44 +79,46 @@ pithist.default <- function(object,
   if (isFALSE(plot)) {
     plot <- "none"
   } else if (isTRUE(plot)) {
-    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+    plot <- if ("package:ggplot2" %in% search()) "ggplot2" else "base"
   } else if (!is.character(plot)) {
     plot <- "base"
   }
   plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
   stopifnot(
     "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
-    !inherits(plot, "try-error")
+      !inherits(plot, "try-error")
   )
 
   ## guess output class
   if (is.null(class)) {
-    class <- if("package:tibble" %in% search()) "tibble" else "data.frame"
+    class <- if ("package:tibble" %in% search()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
     "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
-    !inherits(class, "try-error")
+      !inherits(class, "try-error")
   )
 
   # -------------------------------------------------------------------
   # COMPUTATION OF PIT
   # -------------------------------------------------------------------
   ## either compute proportion exactly (to do...) or approximate by simulation
-  if (type == "proportional") {  
-    ## FIXME: (ML) 
+  if (type == "proportional") {
+    ## FIXME: (ML)
     ## * Implement proportional over the inteverals (e.g., below censoring point)
     ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
     stop("not yet implemented")
   } else {
-    p <- qresiduals.default(object, newdata = newdata, trafo = NULL, type = "random", 
-      nsim = nsim, delta = delta)
+    p <- qresiduals.default(object,
+      newdata = newdata, trafo = NULL, type = "random",
+      nsim = nsim, delta = delta
+    )
   }
 
   ## get breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(NROW(p), c(0, 50, 5000, 1000000, Inf))]
-  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L) 
-  #FIXME: (ML) Maybe use xlim instead or `0` and `1`
+  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
+  ## FIXME: (ML) Maybe use xlim instead or `0` and `1`
 
   ## compute ci interval
   if (confint_type == "exact") {
@@ -141,7 +143,7 @@ pithist.default <- function(object,
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
   ## collect everything as data.frame
-  tmp_hist <- hist(p, breaks = breaks, plot = FALSE) 
+  tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
   ## TODO: (ML) Maybe get rid of `hist()`
   if (freq) {
     rval <- data.frame(
@@ -180,11 +182,11 @@ pithist.default <- function(object,
 
   ## plot by default
   if (plot == "ggplot2") {
-    try(print(ggplot2::autoplot(rval, 
-      style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, ...)
-    ))
+    try(print(ggplot2::autoplot(rval,
+      style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, ...
+    )))
   } else if (plot == "base") {
-    try(plot(rval, 
+    try(plot(rval,
       style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, ...
     ))
   }
@@ -294,10 +296,12 @@ plot.pithist <- function(x,
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
-  if (single_graph) stopifnot(
-    "for `single_graph` all `freq` in attr of object `x` must be of the same type" = 
-    length(unique(attr(x, "freq"))) == 1
-  )
+  if (single_graph) {
+    stopifnot(
+      "for `single_graph` all `freq` in attr of object `x` must be of the same type" =
+        length(unique(attr(x, "freq"))) == 1
+    )
+  }
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
@@ -310,7 +314,7 @@ plot.pithist <- function(x,
 
   ## set style
   style <- match.arg(style)
-  if (n > 1 && single_graph && style == "histogram"){
+  if (n > 1 && single_graph && style == "histogram") {
     message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "lines"
   }
@@ -322,7 +326,7 @@ plot.pithist <- function(x,
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, confint, ref,
-    xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]], 
+    xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     border, col, fill, alpha_min, lwd, lty, axes, box
   )[, -1]
 
@@ -347,7 +351,7 @@ plot.pithist <- function(x,
   # MAIN PLOTTING FUNCTION FOR 'HISTOGRAM-STYLE PITHIST'
   # -------------------------------------------------------------------
   pithist_plot <- function(d, ...) {
-  
+
     ## get group index
     j <- unique(d$group)
 
@@ -358,59 +362,63 @@ plot.pithist <- function(x,
 
     ## prepare confint lines and check if they consist of unique values
     if (!identical(plot_arg$confint[j], FALSE)) {
-      ci_lwr <- unique(d$ci_lwr) 
+      ci_lwr <- unique(d$ci_lwr)
       ci_upr <- unique(d$ci_upr)
       stopifnot(
         "`ci_lwr` and `ci_upr` in attr of object `x` must consist of unique values per group index" =
-        length(ci_lwr) == 1 & length(ci_upr) == 1
+          length(ci_lwr) == 1 & length(ci_upr) == 1
       )
     } else {
       ci_lwr <- NULL
       ci_upr <- NULL
-    } 
+    }
 
     ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$ref) 
+    pp <- unique(d$ref)
     stopifnot(
       "`ref` in attr of object `x` must consist of unique values per group index" =
-      length(pp) == 1
+        length(pp) == 1
     )
 
     ## get xlim and ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
-    if (any(xlim_idx))
+    if (any(xlim_idx)) {
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(c(xleft, xright))[xlim_idx]
-    if (any(ylim_idx))
+    }
+    if (any(ylim_idx)) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(0, y, ci_lwr, ci_upr))[ylim_idx]
+    }
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
-        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]), 
+        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
         ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
         xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...
       )
-      if(plot_arg$axes[j]) {
+      if (plot_arg$axes[j]) {
         axis(1)
         axis(2)
       }
-      if(plot_arg$box[j]) {
+      if (plot_arg$box[j]) {
         box()
       }
     }
 
-    if (plot_arg$fill[j] == adjustcolor("black", alpha.f = 0.2) && 
+    if (plot_arg$fill[j] == adjustcolor("black", alpha.f = 0.2) &&
       plot_arg$col[j] != "black") {
       message(" * As the argument `col` is set but no argument `fill` is specified, \n   the former is used for colorizing the PIT histogram. \n * For proper usage, solely provide `fill` for histogram style plots.")
       plot_arg$fill[j] <- plot_arg$col[j]
     }
 
     ## plot pithist
-    rect(xleft, 0, xright, y, border = plot_arg$border[j], col = plot_arg$fill[j], 
-      lty = plot_arg$lty[j])
+    rect(xleft, 0, xright, y,
+      border = plot_arg$border[j], col = plot_arg$fill[j],
+      lty = plot_arg$lty[j]
+    )
 
-    ## plot ref line 
+    ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
       abline(h = pp, col = plot_arg$ref[j], lty = 1, lwd = plot_arg$lwd[j])
@@ -422,7 +430,6 @@ plot.pithist <- function(x,
       abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
       abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
     }
-
   }
 
 
@@ -435,7 +442,7 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+    z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
     y <- c(d$y, d$y[NROW(d)])
 
     ## prepare confint lines and check if they consist of unique values
@@ -444,7 +451,7 @@ plot.pithist <- function(x,
       ci_upr <- unique(d$ci_upr)
       stopifnot(
         "`ci_lwr` and `ci_upr` in attr of object `x` must consist of unique values per group index" =
-        length(ci_lwr) == 1 & length(ci_upr) == 1
+          length(ci_lwr) == 1 & length(ci_upr) == 1
       )
     } else {
       ci_lwr <- NULL
@@ -454,23 +461,28 @@ plot.pithist <- function(x,
     ## get xlim and ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
-    if (any(xlim_idx)) 
-      plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(x)[xlim_idx]
-    if (any(ylim_idx)) 
+    if (any(xlim_idx)) {
+      plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(z)[xlim_idx]
+    }
+    if (any(ylim_idx) && !single_graph) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(y, ci_lwr, ci_upr))[ylim_idx]
+    }
+    if (any(ylim_idx) && single_graph) {
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(x$y, x$ci_lwr, x$ci_upr))[ylim_idx]
+    }
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
       plot(0, 0,
-        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]), 
+        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
         ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
         xlab = xlab[j], ylab = ylab[j], xaxs = "i", main = main[j], axes = FALSE, ...
       )
-      if(plot_arg$axes[j]) {
+      if (plot_arg$axes[j]) {
         axis(1)
         axis(2)
       }
-      if(plot_arg$box[j]) {
+      if (plot_arg$box[j]) {
         box()
       }
     }
@@ -479,11 +491,11 @@ plot.pithist <- function(x,
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
       polygon(
-        c(0, 1, 1, 0), 
+        c(0, 1, 1, 0),
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
-      ) 
+      )
     }
   }
 
@@ -496,24 +508,24 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+    z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
     y <- c(d$y, d$y[NROW(d)])
 
     ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$ref) 
+    pp <- unique(d$ref)
     stopifnot(
       "`ref` in attr of object `x` must consist of unique values per group index" =
-      length(pp) == 1
+        length(pp) == 1
     )
 
-    ## plot ref line 
+    ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
       segments(x0 = 0, y0 = pp, x1 = 1, y1 = pp, col = plot_arg$ref[j], lty = 2, lwd = 1)
     }
 
     ## plot stepfun
-    lines(y ~ x, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
+    lines(y ~ z, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
   }
 
   # -------------------------------------------------------------------
@@ -548,7 +560,7 @@ lines.pithist <- function(x,
                           ref = FALSE,
                           col = "black",
                           fill = adjustcolor("black", alpha.f = 0.2),
-                          alpha_min = 0.2, 
+                          alpha_min = 0.2,
                           lwd = 2,
                           lty = 1,
                           ...) {
@@ -562,7 +574,7 @@ lines.pithist <- function(x,
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(
     "all `freq` in attr of object `x` must be of the same type" =
-    length(unique(attr(x, "freq"))) == 1
+      length(unique(attr(x, "freq"))) == 1
   )
 
   ## handling of groups
@@ -586,13 +598,13 @@ lines.pithist <- function(x,
     x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
     y <- c(d$y, d$y[NROW(d)])
 
-   ## prepare confint lines and check if they consist of unique values
+    ## prepare confint lines and check if they consist of unique values
     if (!identical(plot_arg$confint[j], FALSE)) {
       ci_lwr <- unique(d$ci_lwr)
       ci_upr <- unique(d$ci_upr)
       stopifnot(
         "`ci_lwr` and `ci_upr` in attr of object `x` must consist of unique values per group index" =
-        length(ci_lwr) == 1 & length(ci_upr) == 1
+          length(ci_lwr) == 1 & length(ci_upr) == 1
       )
     } else {
       ci_lwr <- NULL
@@ -600,10 +612,10 @@ lines.pithist <- function(x,
     }
 
     ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$ref) 
+    pp <- unique(d$ref)
     stopifnot(
       "`ref` in attr of object `x` must consist of unique values per group index" =
-      length(pp) == 1
+        length(pp) == 1
     )
 
     ## plot confint polygon
@@ -614,10 +626,10 @@ lines.pithist <- function(x,
         c(ci_lwr, ci_lwr, ci_upr, ci_upr),
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
-        )
+      )
     }
 
-    ## plot ref line 
+    ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
       segments(x0 = 0, y0 = pp, x1 = 1, y1 = pp, col = plot_arg$ref[j], lty = 2, lwd = 1.5)
@@ -641,9 +653,9 @@ autoplot.pithist <- function(object,
                              style = c("histogram", "lines"),
                              confint = TRUE,
                              ref = TRUE,
-                             legend = FALSE, #FIXME: (ML) Implement in base?
-                             xlim = c(0, 1), #FIXME: (ML) Implement in other ggplot and not comparable to base
-                             ylim = c(0, NA), #FIXME: (ML) Implement in other ggplot and not comparable to base
+                             legend = FALSE,
+                             xlim = c(0, 1),
+                             ylim = c(0, NA),
                              xlab = NULL,
                              ylab = NULL,
                              main = NULL,
@@ -651,25 +663,60 @@ autoplot.pithist <- function(object,
                              fill = "darkgray",
                              border = "black",
                              alpha_min = 0.2,
-                             size = NULL, 
+                             size = NULL,
                              linetype = 1,
                              ...) {
+  # -------------------------------------------------------------------
+  # SET UP PRELIMINARIES
+  # -------------------------------------------------------------------
+  ## get base style arguments
+  add_arg <- list(...)
+  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
-  if (single_graph) stopifnot(
-    "for `single_graph` all `freq` in attr of `object` must be of the same type" =
-    length(unique(attr(object, "freq"))) == 1
-  )
+  if (single_graph) {
+    stopifnot(
+      "for `single_graph` all `freq` in attr of `object` must be of the same type" =
+        length(unique(attr(object, "freq"))) == 1
+    )
+  }
+
+  ## convert data always to data.frame
+  object <- as.data.frame(object)
 
   ## determine grouping
-  class(object) <- "data.frame"
   if (is.null(object$group)) object$group <- 1L
   n <- max(object$group)
 
-  ## set style
+  ## get title
+  if (!is.null(main)) {
+    title <- main[1]
+    object$title <- factor(title)
+  }
+
+  ## get annotations in the right lengths
+  if (is.null(xlab)) xlab <- attr(object, "xlab")
+  xlab <- paste(unique(xlab), collapse = "/")
+  if (is.null(ylab)) ylab <- attr(object, "ylab")
+  ylab <- paste(unique(ylab), collapse = "/")
+  if (is.null(main)) main <- attr(object, "main")
+  main <- make.names(rep_len(main, n), unique = TRUE)
+
+  ## prepare grouping
+  object$group <- factor(object$group, levels = 1L:n, labels = main)
+
+  # -------------------------------------------------------------------
+  # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
+  # -------------------------------------------------------------------
+  ## get x and y limit in correct format
+  if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
+  if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
+
+  ## determine which style should be plotted
   style <- match.arg(style)
-  if (n > 1 && single_graph && style == "histogram"){
+  if (n > 1 && single_graph && style == "histogram") {
     message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "lines"
   }
@@ -677,54 +724,96 @@ autoplot.pithist <- function(object,
   ## set size
   if (is.null(size)) size <- if (style == "histogram") 0.5 else 1
 
-  ## get annotations in the right lengths
-  if(is.null(xlab)) xlab <- attr(object, "xlab")
-  xlab <- paste(unique(xlab), collapse = "/")
-  if(is.null(ylab)) ylab <- attr(object, "ylab")
-  ylab <- paste(unique(ylab), collapse = "/")
-  if(is.null(main)) main <- attr(object, "main")
-  main <- make.names(rep_len(main, n), unique = TRUE)
+  ## set color to NA for not plotting
+  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)
 
-  ## prepare grouping
-  object$group <- factor(object$group, levels = 1L:n, labels = main)
+  ## only needed for `style == "lines"`
+  ## stat helper function to get left/right points from respective mid points
+  calc_pit_points <- ggplot2::ggproto("calc_pit_points", ggplot2::Stat,
 
-  ## get x and y limit
-  if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
-  if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
+    # required as we operate on groups (facetting)
+    compute_group = function(data, scales) {
+      ## manipulate object
+      nd <- data.frame(
+        x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+        y = c(data$y, data$y[NROW(data)])
+      )
+      nd
+    },
 
-  ## recycle arguments for plotting to match the number of groups (for geom w/o aes)
-  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)  # color = NA for not plotting
-  if (is.logical(confint)) confint <- ifelse(confint, 1, NA)  # color = NA for not plotting
-  plot_arg <- data.frame(1:n, 
-    fill, colour, size, ref, linetype, confint, border, alpha_min
+    # tells us what we need
+    required_aes = c("x", "y")
+  )
+
+  ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
+  plot_arg <- data.frame(
+    1:n,
+    fill, colour, size, linetype, confint, alpha_min
   )[, -1]
 
-  ## recycle arguments for plotting to match the object rows (for geom w/ aes)
-  ## FIXME: (ML) Why does it need to be equal to the length of the object and not to the number of groups?
-  plot_arg2 <- data.frame(1:n, border, size, colour, ref, confint, fill, linetype)[, -1]
-  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
-
+  ## prepare fill and confint color depending on style
   if (style == "histogram") {
+
+    ## set color to NA for not plotting
+    if (is.logical(confint)) confint <- ifelse(confint, 1, NA)
 
     ## check if colour and no fill is set
     if (all(fill == "darkgray") && any(colour != "black")) {
       message(" * As the argument `colour` is set but no argument `fill` is specified, \n   the former is used for colorizing the PIT histogram. \n * For proper usage, solely provide `fill` for histogram style plots.")
-      plot_arg$fill <- plot_arg$col
+      plot_arg$fill <- plot_arg$colour
     }
+  } else {
+    if (is.logical(plot_arg$confint)) {
+
+      ## use fill and set alpha
+      plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx) {
+        set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx])
+      })
+
+      ## set color to NA for not plotting
+      plot_arg$fill[!plot_arg$confint] <- NA
+    } else {
+      ## use confint and set alpha
+      plot_arg$fill <- sapply(seq_along(plot_arg$confint), function(idx) {
+        set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx])
+      })
+    }
+  }
+
+  ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
+  plot_arg2 <- data.frame(1:n, border, colour, ref, confint)[, -1]
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+
+  # -------------------------------------------------------------------
+  # MAIN PLOTTING
+  # -------------------------------------------------------------------
+  if (style == "histogram") {
 
     ## actual plotting
-    rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y / 2", width = "width", height = "y")) +
-      ggplot2::geom_tile(ggplot2::aes_string(fill = "group"), colour = plot_arg2$border) + 
-      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ref", size = "group"), colour = plot_arg2$ref) + 
-      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_lwr", size = "group"), 
-        colour = plot_arg2$confint, linetype = 2) +
-      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_upr", size = "group"), 
-        colour = plot_arg2$confint, linetype = 2)
+    rval <- ggplot2::ggplot(
+      object,
+      ggplot2::aes_string(x = "x", y = "y / 2", width = "width", height = "y")
+    ) +
+      ggplot2::geom_tile(ggplot2::aes_string(fill = "group"),
+        colour = plot_arg2$border
+      ) +
+      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ref", size = "group"),
+        colour = plot_arg2$ref
+      ) +
+      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_lwr", size = "group"),
+        colour = plot_arg2$confint, linetype = 2
+      ) +
+      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_upr", size = "group"),
+        colour = plot_arg2$confint, linetype = 2
+      )
 
-    ## set the colors, shapes, etc.
+    ## set the colors, shapes, etc. for the groups
     rval <- rval +
       ggplot2::scale_fill_manual(values = plot_arg$fill) +
       ggplot2::scale_size_manual(values = plot_arg$size)
+
+    ## annotation
+    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
 
     ## add legend
     if (legend) {
@@ -734,57 +823,29 @@ autoplot.pithist <- function(object,
       rval <- rval + ggplot2::guides(fill = "none", size = "none")
     }
 
-    ## set x and y limits 
-    rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim)
-
-    ## grouping (if any)
-    if (n > 1L) rval <- rval + ggplot2::facet_grid(group ~ .) + ggplot2::labs(colour = "Model")
-
-    ## annotation
-    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
-
-    ## return ggplot object
-    rval
-
+    ## set x and y limits
+    rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
+    rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
   } else {
-
-    ## set alpha for polygon
-    plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx) 
-      set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx]))
-
-    ## set fill to NA in case of no confint
-    plot_arg$fill[is.na(plot_arg$confint)] <- NA
-
-    ## stat helper function to get left/right points from respective mid points
-    calc_pit_points <- ggplot2::ggproto("calc_pit_points", ggplot2::Stat,
-
-      # Required as we operate on groups (facetting)
-      compute_group = function(data, scales) {
-        ## Manipulate object  #TODO: (ML) Could maybe be improved?
-        nd <- data.frame(
-          x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
-          y = c(data$y, data$y[NROW(data)])
-        )
-        nd
-      },
-
-      # Tells us what we need
-      required_aes = c("x", "y")
-    )
 
     ## actual plotting
     rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
-      ggplot2::geom_rect(ggplot2::aes_string(ymin = "ci_lwr", ymax = "ci_upr", fill = "group"), 
-        xmin = 0, xmax = 1, colour = NA, show.legend = FALSE) +
-      ggplot2::geom_step(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"), 
-        stat = calc_pit_points)
+      ggplot2::geom_rect(ggplot2::aes_string(ymin = "ci_lwr", ymax = "ci_upr", fill = "group"),
+        xmin = 0, xmax = 1, colour = NA, show.legend = FALSE
+      ) +
+      ggplot2::geom_step(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"),
+        stat = calc_pit_points
+      )
 
     ## set the colors, shapes, etc.
     rval <- rval +
       ggplot2::scale_colour_manual(values = plot_arg$colour) +
       ggplot2::scale_fill_manual(values = plot_arg$fill) +
       ggplot2::scale_size_manual(values = plot_arg$size) +
-      ggplot2::scale_linetype_manual(values = plot_arg$linetype) 
+      ggplot2::scale_linetype_manual(values = plot_arg$linetype)
+
+    ## add annotation
+    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
 
     ## add legend
     if (legend) {
@@ -794,21 +855,23 @@ autoplot.pithist <- function(object,
       rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
     }
 
-
-    ## set x and y limits 
-    rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim)
-
-    ## grouping (if any)
-    if (!single_graph && n > 1L) {
-      rval <- rval + ggplot2::facet_grid(group ~ .) 
-    }
-
-    ## annotation
-    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
-
-    ## return ggplot object
-    rval
+    ## set x and y limits
+    rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
+    rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
   }
+
+  # -------------------------------------------------------------------
+  # GROUPING (IF ANY) AND RETURN PLOT
+  # -------------------------------------------------------------------
+  ## grouping
+  if (!single_graph && n > 1L) {
+    rval <- rval + ggplot2::facet_grid(group ~ .)
+  } else if (!is.null(object$title)) {
+    rval <- rval + ggplot2::facet_wrap(title ~ .)
+  }
+
+  ## return ggplot object
+  rval
 }
 
 
