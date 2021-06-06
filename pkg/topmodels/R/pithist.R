@@ -52,8 +52,8 @@ pithist.default <- function(object,
   ## sanity checks
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `delta w/i `qresiduals()`
+  ## * `confint` w/i `abline()`
   ## * `...` w/i `plot()` and `autoplot()`
-  ## * `confint` in `abline()`
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(is.logical(freq))
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
@@ -200,7 +200,6 @@ c.pithist <- rbind.pithist <- function(...) {
   # -------------------------------------------------------------------
   # GET DATA
   # -------------------------------------------------------------------
-
   ## list of pithists
   rval <- list(...)
 
@@ -577,6 +576,9 @@ lines.pithist <- function(x,
       length(unique(attr(x, "freq"))) == 1
   )
 
+  ## convert always to data.frame
+  x <- as.data.frame(x)
+
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
@@ -682,6 +684,8 @@ autoplot.pithist <- function(object,
         length(unique(attr(object, "freq"))) == 1
     )
   }
+  stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
+  stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -710,10 +714,6 @@ autoplot.pithist <- function(object,
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
-  ## get x and y limit in correct format
-  if (is.null(xlim)) xlim <- c(NA_real_, NA_real_)
-  if (is.null(ylim)) ylim <- c(NA_real_, NA_real_)
-
   ## determine which style should be plotted
   style <- match.arg(style)
   if (n > 1 && single_graph && style == "histogram") {
@@ -875,8 +875,8 @@ autoplot.pithist <- function(object,
 }
 
 
-## helper function to calculate CI employing `qbinom()`
 get_confint <- function(n, bins, level, freq) {
+  ## helper function to calculate CI employing `qbinom()`
   a <- (1 - level) / 2
   a <- c(a, 1 - a)
   rval <- qbinom(a, size = n, prob = 1 / bins)
@@ -885,17 +885,17 @@ get_confint <- function(n, bins, level, freq) {
 }
 
 
-## helper function to calculate an approximated CI according to Agresti & Coull (1998)
-## doi=10.1080/00031305.1998.10480550
 get_confint_agresti <- function(x, n, level, bins, freq) {
+  ## helper function to calculate an approximated CI according to Agresti & Coull (1998)
+  ## doi=10.1080/00031305.1998.10480550
   rval <- add4ci(x, n, level)$conf.int * n
   if (!freq) rval <- rval / (n / bins)
   rval
 }
 
 
-## copy of `add4ci` package from package `PropCIs` by Ralph Scherer (licensed under GPL-2/GPL-3)
 add4ci <- function(x, n, conf.level) {
+  ## copy of `add4ci` package from package `PropCIs` by Ralph Scherer (licensed under GPL-2/GPL-3)
   ptilde <- (x + 2) / (n + 4)
   z <- abs(qnorm((1 - conf.level) / 2))
   stderr <- sqrt(ptilde * (1 - ptilde) / (n + 4))
