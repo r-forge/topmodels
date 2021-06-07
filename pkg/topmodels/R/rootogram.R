@@ -1,6 +1,6 @@
 ## Programming outline: Rootogram
 ##
-## - Oabserved y in-sample or out-of-sample (n x 1)
+## - Observed y in-sample or out-of-sample (n x 1)
 ## - Breaks for observations (m x 1)
 ## - Predicted probabilities at breaks F_y(br1), ..., F_y(brm) (n x m)
 ##

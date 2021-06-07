@@ -1,17 +1,3 @@
-#my_adjust_transparency <- function(col, alpha, default = 1) {
-#  if (!isTRUE(alpha)) {
-#    return(colorspace::adjust_transparency(col = col, alpha = alpha))
-#  } else {
-#    str_alpha <- substr(colorspace::adjust_transparency(col, alpha = TRUE), 8, 9)
-#    str_col <- substr(colorspace::adjust_transparency(col, alpha = TRUE), 1, 7)
-#    if (str_alpha == "FF") {
-#      return(colorspace::adjust_transparency(str_col, alpha = default))
-#    } else { 
-#      return(col)
-#    }
-#  }
-#}
-
 set_minimum_transparency <- function(col, alpha_min) {
   ## sanity checks
   ## `col` w/i `extract_transparency()`
