@@ -647,9 +647,7 @@ autoplot.qqrplot <- function(object,
 
   ## add points
   rval <- rval +
-    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"),
-      show.legend = FALSE
-    )
+    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"))
 
   ## set the colors, shapes, etc.
   rval <- rval +
@@ -665,9 +663,9 @@ autoplot.qqrplot <- function(object,
   ## add legend
   if (legend) {
     rval <- rval + ggplot2::labs(colour = "Model") +
-      ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+      ggplot2::guides(colour = "legend", shape = "none", size = "none")
   } else {
-    rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
+    rval <- rval + ggplot2::guides(colour = "none", shape = "none", size = "none")
   }
 
   ## set x and y limits
