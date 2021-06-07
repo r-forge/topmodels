@@ -632,10 +632,7 @@ autoplot.qqrplot <- function(object,
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
     ggplot2::geom_abline(ggplot2::aes_string(intercept = 0, slope = 1),
       linetype = 2, colour = plot_arg2$ref
-    ) +
-    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"),
-      show.legend = FALSE
-    )
+  )
 
   ## add conf
   if (all(c("x_ci_lwr", "x_ci_upr", "y_ci_lwr", "y_ci_upr") %in% names(object))) {
@@ -647,6 +644,12 @@ autoplot.qqrplot <- function(object,
       stat = calc_confint_polygon, show.legend = FALSE
       )
   }
+
+  ## add points
+  rval <- rval +
+    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"),
+      show.legend = FALSE
+    )
 
   ## set the colors, shapes, etc.
   rval <- rval +
