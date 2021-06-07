@@ -87,7 +87,7 @@ qqrplot.default <- function(object,
   )
 
   # -------------------------------------------------------------------
-  # COMPUTEATION OF QUANTILE RESIDUALS
+  # COMPUTATION OF QUANTILE RESIDUALS
   # -------------------------------------------------------------------
   qres <- qresiduals(object,
     newdata = newdata, trafo = trafo, type = "random", nsim = nsim, delta = delta
@@ -564,7 +564,7 @@ autoplot.qqrplot <- function(object,
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
   ## Get a long data.frame with all x and y simulations
-  ## FIXME: (ML) This must be done in base and somehow nicer!
+  ## FIXME: (ML) This must be done in base and somehow nicer
   object <- tidyr::pivot_longer(object,
     cols = names(object)[grepl("^x$|x_[0-9]", names(object))],
     names_to = "x_sim", values_to = "x"
@@ -623,7 +623,7 @@ autoplot.qqrplot <- function(object,
 
   ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
   plot_arg2 <- data.frame(1:n, ref)[, -1, drop = FALSE]
-  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, table(object$group)))
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING
@@ -641,7 +641,7 @@ autoplot.qqrplot <- function(object,
         x_ci_lwr = "x_ci_lwr", x_ci_upr = "x_ci_upr",
         y_ci_lwr = "y_ci_lwr", y_ci_upr = "y_ci_upr", fill = "group"
       ),
-      stat = calc_confint_polygon, show.legend = FALSE
+      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE
       )
   }
 
