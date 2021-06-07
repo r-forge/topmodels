@@ -1,8 +1,8 @@
-topmodels <- function(object, 
+topmodels <- function(object,
                       plot = TRUE,
                       class = NULL,
                       newdata = NULL,
-                      na.action = na.pass, 
+                      na.action = na.pass,
                       which = NULL,
                       ask = dev.interactive(), # FIXME: (ML) Does not work for ggplot.
                       spar = TRUE, # FIXME: (ML) What does this do? Needed? Does not work for ggplot.
@@ -15,31 +15,33 @@ topmodels <- function(object,
   if (isFALSE(plot)) {
     plot <- "none"
   } else if (isTRUE(plot)) {
-    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+    plot <- if ("package:ggplot2" %in% search()) "ggplot2" else "base"
   } else if (!is.character(plot)) {
     plot <- "base"
   }
   plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
   stopifnot(
     "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
-    !inherits(plot, "try-error")
+      !inherits(plot, "try-error")
   )
 
   ## guess output class
   if (is.null(class)) {
-    class <- if("package:tibble" %in% search()) "tibble" else "data.frame"
+    class <- if ("package:tibble" %in% search()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
     "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
-    !inherits(class, "try-error")
+      !inherits(class, "try-error")
   )
 
   ## check if S3 methods exist
   if (!any(class(object) %in% gsub("procast.", "", methods("procast")))) {
     stop(
-      sprintf("The `object` must be one of the following classes: %s.", 
-      paste(gsub("procast.", "", methods("procast")), collapse = ", "))
+      sprintf(
+        "The `object` must be one of the following classes: %s.",
+        paste(gsub("procast.", "", methods("procast")), collapse = ", ")
+      )
     )
   }
 
@@ -47,8 +49,9 @@ topmodels <- function(object,
   which.match <- c("rootogram", "pithist", "reliagram", "qqrplot", "wormplot")
   if (is.null(which)) which <- which.match
   if (!is.character(which)) {
-    if (any(which > 5L))
+    if (any(which > 5L)) {
       which <- which[which <= 5L]
+    }
     which <- which.match[which]
   } else {
     which <- which.match[pmatch(tolower(which), which.match)]
@@ -68,7 +71,7 @@ topmodels <- function(object,
     ask <- FALSE
   }
 
-  if (prod(par("mfcol")) >=  length(which)) {
+  if (prod(par("mfcol")) >= length(which)) {
     spar <- FALSE
     ask <- FALSE
   }
@@ -84,7 +87,7 @@ topmodels <- function(object,
   # -------------------------------------------------------------------
   # CHECK ARGUMENTS AND PREPARE FUNCTION CALLS
   # -------------------------------------------------------------------
-  ## get call and set topmodel() args to NULL 
+  ## get call and set topmodel() args to NULL
   mc <- as.list(match.call())[-1]
   mc$which <- NULL
   mc$ask <- NULL
@@ -114,7 +117,7 @@ topmodels <- function(object,
   ## warning if any provided arg is not valid argument
   if (any(!(names(mc) %in% unique(do.call("c", arg_avail))))) {
     warning(sprintf(
-      "The following arguments are not valid in any of the topmodels' plotting functions: %s", 
+      "The following arguments are not valid in any of the topmodels' plotting functions: %s",
       paste0(names(mc)[!(names(mc) %in% unique(do.call("c", arg_avail)))], collapse = ",")
     ))
   }
@@ -126,38 +129,45 @@ topmodels <- function(object,
   tmp_check <- sapply(mc, function(x) (length(x) > 1 && is.null(names(x))) || any(!names(x) %in% which))
   if (any(tmp_check)) {
     warning(sprintf(
-      "The following arguments are not correctly specified and therefore (partially) omitted: %s", 
+      "The following arguments are not correctly specified and therefore (partially) omitted: %s",
       paste0(names(mc)[tmp_check], collapse = ",")
     ))
   }
 
-  ## check if named vector is provided and any of the names matches function name 
+  ## check if named vector is provided and any of the names matches function name
   arg <- list("rootogram" = mc, "pithist" = mc, "reliagram" = mc, "qqrplot" = mc, "wormplot" = mc)
-  arg <- lapply(seq_along(arg), 
-    function(idx) lapply(arg[[idx]], 
-      function(x) {
-        if (is.null(names(x))) {
-          x 
-        } else if (!is.null(names(x)) && !names(arg)[idx] %in% names(x)) {
-          NULL 
-        } else {
-          x[names(x) == names(arg)[idx]]
+  arg <- lapply(
+    seq_along(arg),
+    function(idx) {
+      lapply(
+        arg[[idx]],
+        function(x) {
+          if (is.null(names(x))) {
+            x
+          } else if (!is.null(names(x)) && !names(arg)[idx] %in% names(x)) {
+            NULL
+          } else {
+            x[names(x) == names(arg)[idx]]
+          }
         }
-      }
-    )
+      )
+    }
   )
- 
+
   ## remove NULLs from list
   arg <- lapply(arg, function(x) x[!sapply(x, is.null)])
 
   ## add proper titles
   arg <- lapply(seq_along(arg), function(idx) {
-    arg[[idx]]$main <- c("Rootogram", "PIT histogram", "Reliability diagram",
-      "Q-Q residuals plot", "Worm plot")[idx]; arg[[idx]]
+    arg[[idx]]$main <- c(
+      "Rootogram", "PIT histogram", "Reliability diagram",
+      "Q-Q residuals plot", "Worm plot"
+    )[idx]
+    arg[[idx]]
   })
 
   ## look up if provided arguments match possible arguments
-  arg <- lapply(seq_along(arg), function(idx) arg[[idx]][names(arg[[idx]]) %in% arg_avail[[idx]]]) 
+  arg <- lapply(seq_along(arg), function(idx) arg[[idx]][names(arg[[idx]]) %in% arg_avail[[idx]]])
 
   ## set names
   names(arg) <- c("rootogram", "pithist", "reliagram", "qqrplot", "wormplot")
@@ -170,18 +180,21 @@ topmodels <- function(object,
   if (plot == "base") {
     ## calculate and plot
     if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
-    if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
+    if ("pithist" %in% which) rval$pithist <- do.call(pithist, arg[[2]])
     if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
-    if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
-    if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
-  } else { 
-    ## first calculate 
-    arg <- lapply(arg, function(x) {x$plot <- FALSE; x})
+    if ("qqrplot" %in% which) rval$qqrplot <- do.call(qqrplot, arg[[4]])
+    if ("wormplot" %in% which) rval$wormplot <- do.call(wormplot, arg[[5]])
+  } else {
+    ## first calculate
+    arg <- lapply(arg, function(x) {
+      x$plot <- FALSE
+      x
+    })
     if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
-    if ("pithist"   %in% which) rval$pithist <-   do.call(pithist, arg[[2]])
+    if ("pithist" %in% which) rval$pithist <- do.call(pithist, arg[[2]])
     if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
-    if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
-    if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
+    if ("qqrplot" %in% which) rval$qqrplot <- do.call(qqrplot, arg[[4]])
+    if ("wormplot" %in% which) rval$wormplot <- do.call(wormplot, arg[[5]])
 
     ## use return val as new object
     for (name in names(rval)) {
@@ -195,15 +208,15 @@ topmodels <- function(object,
     plt_rows <- rep_len(rep(1:plt_dim[1], each = plt_dim[2]), length(plt_names))
     plt_cols <- rep_len(1:plt_dim[2], length(plt_names))
 
-    ## set up grid and plot 
-    ## TODO: (ML) 
-    ## * Works as additional args of main funs are not used in autoplot (except `names(par())`) 
+    ## set up grid and plot
+    ## TODO: (ML)
+    ## * Works as additional args of main funs are not used in autoplot (except `names(par())`)
     ## * Rewrite cleaner version.
     grid::grid.newpage()
     grid::pushViewport(grid::viewport(layout = grid::grid.layout(plt_dim[1], plt_dim[2])))
     for (idx in seq_along(plt_names)) {
       print(
-        do.call(ggplot2::autoplot, arg[[plt_names[idx]]]), 
+        do.call(ggplot2::autoplot, arg[[plt_names[idx]]]),
         vp = grid::viewport(layout.pos.row = plt_rows[idx], layout.pos.col = plt_cols[idx])
       )
     }
@@ -214,7 +227,3 @@ topmodels <- function(object,
   # -------------------------------------------------------------------
   return(invisible(rval))
 }
-
-                       
-
-  

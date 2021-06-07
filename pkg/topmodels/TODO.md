@@ -165,4 +165,8 @@ topmodels(m1, pages = 1, nsim = 10, flavor = "t")
 * in-sample vs. out-of-sample / aggregated vs. observation-wise contributions
 * out-of-sample logLik()/logs(), crps(), ..., discretized log-score
 
-
+## OLD TODO for procast()
+* Do we need/want support weights -> `newresponse()`?
+* Which `type`s should be supported?
+* Support types mean/expectation/response and variance/dispersion instead of location and scale.
+* In case `at = function`, it always returns a named vector. Do we want that?
