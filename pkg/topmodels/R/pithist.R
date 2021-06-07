@@ -782,7 +782,7 @@ autoplot.pithist <- function(object,
 
   ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
   plot_arg2 <- data.frame(1:n, border, colour, ref, confint)[, -1]
-  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, table(object$group)))
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING

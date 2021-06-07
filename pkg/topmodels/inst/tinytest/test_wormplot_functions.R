@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------
-# TESTS FOR FUNCTIONS WITHIN `qqrplot.R`
+# TESTS FOR FUNCTIONS WITHIN `wormplot.R`
 # --------------------------------------------------------------------
 
 # --------------------------------------------------------------------
@@ -17,7 +17,7 @@ m3 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 nd_cars <- cars[1:10, ]
 
 expect_silent( 
-  qqrplot(m1, 
+  wormplot(m1, 
     newdata = nd_cars, class = "tibble", trafo = qnorm, nsim = 1L, delta = NULL, 
     confint = "black", confint_level = 0.9, confint_nsim = 20, confint_seed = 3, 
     xlab = "test", ylab = "test", main = "test", plot = "base"
@@ -25,15 +25,15 @@ expect_silent(
 )
 
 expect_silent( 
-  qqrplot(m2, 
+  wormplot(m2, 
     newdata = nd_cars, class = "tibble", trafo = qnorm, nsim = 1L, delta = 1E-10,
     confint = "black", confint_level = 0.9, confint_nsim = 20, confint_seed = 3, 
     xlab = "test", ylab = "test", main = "test", plot = "base"
   )
 )
 
-q2 <- qqrplot(m2, nsim = 50L, plot = FALSE)
-q3 <- qqrplot(m3, nsim = 50L, plot = TRUE)
+q2 <- wormplot(m2, nsim = 50L, plot = FALSE)
+q3 <- wormplot(m3, nsim = 50L, plot = TRUE)
 
 expect_silent(
   autoplot(c(q2, q3), single_graph = TRUE, pch = 3, legend = TRUE)

@@ -827,7 +827,7 @@ autoplot.reliagram <- function(object,
 
   ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
   plot_arg2 <- data.frame(1:n, ref, type, size, shape, minimum, add_min, add_rug)[, -1]
-  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, each = nrow(object) / n))
+  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, table(object$group)))
 
   ## set points to NA with no sufficent number of predictions
   idx_min <- which(object$n_pred < plot_arg2$minimum)
