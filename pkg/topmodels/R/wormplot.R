@@ -1,6 +1,6 @@
 ## Programming outline: Wormplot
 ##
-## - Showing the difference between the empirical quantile and 
+## - Showing the difference between the empirical quantile and
 ##   the unit normal quantile following Van Buuren and Fredriks (2001)
 ##
 ## Functions:
@@ -14,19 +14,19 @@ wormplot <- function(object, ...) {
 }
 
 
-wormplot.default <- function(object, 
-                             newdata = NULL, 
+wormplot.default <- function(object,
+                             newdata = NULL,
                              plot = TRUE,
                              class = NULL,
-                             trafo = qnorm, 
-                             nsim = 1L, 
+                             trafo = qnorm,
+                             nsim = 1L,
                              delta = NULL,
-                             confint = TRUE, 
+                             confint = TRUE,
                              confint_level = 0.95,
-                             confint_nsim = 250, 
+                             confint_nsim = 250,
                              confint_seed = 1,
                              single_graph = FALSE,
-                             xlab = "Theoretical quantiles", 
+                             xlab = "Theoretical quantiles",
                              ylab = "Deviation",
                              main = NULL,
                              ...) {
@@ -55,30 +55,30 @@ wormplot.default <- function(object,
   if (isFALSE(plot)) {
     plot <- "none"
   } else if (isTRUE(plot)) {
-    plot <- if("package:ggplot2" %in% search()) "ggplot2" else "base"
+    plot <- if ("package:ggplot2" %in% search()) "ggplot2" else "base"
   } else if (!is.character(plot)) {
     plot <- "base"
   }
   plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
   stopifnot(
     "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
-    !inherits(plot, "try-error")
+      !inherits(plot, "try-error")
   )
 
   ## guess output class
   if (is.null(class)) {
-    class <- if("package:tibble" %in% search()) "tibble" else "data.frame"
+    class <- if ("package:tibble" %in% search()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
     "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
-    !inherits(class, "try-error")
+      !inherits(class, "try-error")
   )
 
   # -------------------------------------------------------------------
   # COMPUTATION OF QUANTILE RESIDUALS
   # -------------------------------------------------------------------
-  qres <- qresiduals(object, 
+  qres <- qresiduals(object,
     newdata = newdata, trafo = trafo, type = "random", nsim = nsim, delta = delta
   )
   if (is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
@@ -92,8 +92,8 @@ wormplot.default <- function(object,
   ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   if (!identical(confint, FALSE)) {
     set.seed(confint_seed)
-    tmp <- qresiduals(object, 
-      newdata = newdata, trafo = trafo, type = "random", nsim = confint_nsim, 
+    tmp <- qresiduals(object,
+      newdata = newdata, trafo = trafo, type = "random", nsim = confint_nsim,
       delta = delta
     )
     confint_prob <- (1 - confint_level) / 2
@@ -129,7 +129,7 @@ wormplot.default <- function(object,
 
     p <- pnorm(x)
     se <- (1 / dnorm(x)) * (sqrt(p * (1 - p) / n))
-    rval <- as.numeric(qnorm((1 - level) / 2 ) * se)
+    rval <- as.numeric(qnorm((1 - level) / 2) * se)
 
     if (which == "lower") {
       rval
@@ -146,8 +146,8 @@ wormplot.default <- function(object,
   # -------------------------------------------------------------------
   ## collect everything as data.frame
   if (any(vapply(
-    list(qres_ci_lwr, qres_ci_upr, qthe_ci_lwr, 1), 
-    FUN = is.null, 
+    list(qres_ci_lwr, qres_ci_upr, qthe_ci_lwr, 1),
+    FUN = is.null,
     FUN.VALUE = FALSE
   ))) {
     rval <- data.frame(
@@ -186,7 +186,7 @@ wormplot.default <- function(object,
   } else if (plot == "base") {
     try(plot(rval, confint = confint, ...))
   }
-  
+
   ## return coordinates invisibly
   invisible(rval)
 }
@@ -205,10 +205,10 @@ c.wormplot <- rbind.wormplot <- function(...) {
   } else {
     class <- "data.frame"
   }
-  
+
   ## remove temporary the class (needed below for `c()`)
   ## FIXME: (ML) Rewrite by, e.g., employing `lapply()`
-  for(i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "wormplot"]
+  for (i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "wormplot"]
 
   ## convert always to data.frame
   if (class == "tibble") {
@@ -244,14 +244,14 @@ c.wormplot <- rbind.wormplot <- function(...) {
   all_names <- unique(unlist(lapply(rval, names)))
   if (any(grepl("x_1", all_names)) & any(grepl("^x$", all_names))) {
     for (i in 1:length(rval)) {
-      names(rval[[i]])[grepl("^x$", names(rval[[i]]))] <- "x_1";
+      names(rval[[i]])[grepl("^x$", names(rval[[i]]))] <- "x_1"
       names(rval[[i]])[grepl("^y$", names(rval[[i]]))] <- "y_1"
     }
     all_names <- unique(unlist(lapply(rval, names)))
   }
 
   rval <- do.call(
-    "rbind.data.frame", 
+    "rbind.data.frame",
     c(lapply(
       rval,
       function(x) data.frame(c(x, sapply(setdiff(all_names, names(x)), function(y) NA)))
@@ -281,21 +281,21 @@ c.wormplot <- rbind.wormplot <- function(...) {
 
 
 plot.wormplot <- function(x,
-                         single_graph = FALSE,
-                         confint = TRUE, 
-                         ref = TRUE,
-                         xlim = c(NA, NA),
-                         ylim = c(NA, NA),
-                         xlab = NULL,
-                         ylab = NULL,
-                         main = NULL,
-                         col = adjustcolor("black", alpha.f = 0.4), 
-                         fill = adjustcolor("black", alpha.f = 0.2), 
-                         alpha_min = 0.2, # single or n values  
-                         pch = 19,
-                         axes = TRUE,
-                         box = TRUE,
-                         ...) {
+                          single_graph = FALSE,
+                          confint = TRUE,
+                          ref = TRUE,
+                          xlim = c(NA, NA),
+                          ylim = c(NA, NA),
+                          xlab = NULL,
+                          ylab = NULL,
+                          main = NULL,
+                          col = adjustcolor("black", alpha.f = 0.4),
+                          fill = adjustcolor("black", alpha.f = 0.2),
+                          alpha_min = 0.2, # single or n values
+                          pch = 19,
+                          axes = TRUE,
+                          box = TRUE,
+                          ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
@@ -324,7 +324,7 @@ plot.wormplot <- function(x,
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, confint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    col, fill, alpha_min, pch, axes, box 
+    col, fill, alpha_min, pch, axes, box
   )[, -1]
 
   ## annotation
@@ -344,16 +344,18 @@ plot.wormplot <- function(x,
     if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
   }
 
-  ## plotting function
+  # -------------------------------------------------------------------
+  # MAIN PLOTTING FUNCTION
+  # -------------------------------------------------------------------
   wormplot_plot <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
 
     ## get xlim and ylim conditional on confint
-    if(
-      !identical(plot_arg$confint[j], FALSE) && 
-      !is.na(attr(d, "confint_level")[j])
+    if (
+      !identical(plot_arg$confint[j], FALSE) &&
+        !is.na(attr(d, "confint_level")[j])
     ) {
       if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
         tmp <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
@@ -381,11 +383,11 @@ plot.wormplot <- function(x,
         ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
         xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...
       )
-      if(plot_arg$axes[j]) {
+      if (plot_arg$axes[j]) {
         axis(1)
         axis(2)
       }
-      if(plot_arg$box[j]) {
+      if (plot_arg$box[j]) {
         box()
       }
     }
@@ -400,9 +402,9 @@ plot.wormplot <- function(x,
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
       polygon(
-        x_pol, 
-        y_pol, 
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min =  plot_arg$alpha_min[j]),
+        x_pol,
+        y_pol,
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -410,8 +412,8 @@ plot.wormplot <- function(x,
     ## add qq plot
     for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
       points.default(
-        d[grepl("x", names(d))][, i], 
-        d[grepl("y", names(d))][, i], 
+        d[grepl("x", names(d))][, i],
+        d[grepl("y", names(d))][, i],
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
@@ -421,12 +423,12 @@ plot.wormplot <- function(x,
       if (!identical(plot_arg$ref[j], FALSE)) {
         if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
         ref_fun <- attr(d, "ref_fun")
-        ref_fun <- if(is.list(ref_fun)) ref_fun else list(ref_fun)
+        ref_fun <- if (is.list(ref_fun)) ref_fun else list(ref_fun)
         curve(
           ref_fun[[j]](
-            x, 
+            x,
             n = NROW(d),
-            level = 0.95, 
+            level = 0.95,
             which = "lower"
           ),
           lty = 2,
@@ -438,9 +440,9 @@ plot.wormplot <- function(x,
         )
         curve(
           ref_fun[[j]](
-            x, 
+            x,
             n = NROW(d),
-            level = 0.95, 
+            level = 0.95,
             which = "upper"
           ),
           lty = 2,
@@ -453,7 +455,6 @@ plot.wormplot <- function(x,
         abline(h = 0, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
       }
     }
-
   }
 
   # -------------------------------------------------------------------
@@ -468,13 +469,13 @@ plot.wormplot <- function(x,
 
 
 points.wormplot <- function(x,
-                           confint = FALSE, 
-                           ref = FALSE,
-                           col = "black",
-                           fill = adjustcolor("black", alpha.f = 0.4), 
-                           alpha_min = 0.2,
-                           pch = 19,
-                           ...) {
+                            confint = FALSE,
+                            ref = FALSE,
+                            col = "black",
+                            fill = adjustcolor("black", alpha.f = 0.4),
+                            alpha_min = 0.2,
+                            pch = 19,
+                            ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
@@ -493,7 +494,7 @@ points.wormplot <- function(x,
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, confint, ref, col, fill, alpha_min, pch )[, -1]
+  plot_arg <- data.frame(1:n, confint, ref, col, fill, alpha_min, pch)[, -1]
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR POINTS
@@ -504,19 +505,23 @@ points.wormplot <- function(x,
     j <- unique(d$group)
 
     ## get xlim and ylim conditional on confint
-    if(
-      !identical(plot_arg$confint[j], FALSE) && 
-      !is.na(attr(d, "confint_level")[j])
+    if (
+      !identical(plot_arg$confint[j], FALSE) &&
+        !is.na(attr(d, "confint_level")[j])
     ) {
-      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
         xlim <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
-      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+      }
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
         ylim <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
+      }
     } else {
-      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) 
+      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
         xlim <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
-      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) 
+      }
+      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
         ylim <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
+      }
     }
 
     ## plot confint polygon
@@ -529,8 +534,8 @@ points.wormplot <- function(x,
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
       polygon(
-        x_pol, 
-        y_pol, 
+        x_pol,
+        y_pol,
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
@@ -545,8 +550,8 @@ points.wormplot <- function(x,
     ## add qq plot
     for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
       points(
-        d[grepl("x", names(d))][, i], 
-        d[grepl("y", names(d))][, i], 
+        d[grepl("x", names(d))][, i],
+        d[grepl("y", names(d))][, i],
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
@@ -561,21 +566,21 @@ points.wormplot <- function(x,
 }
 
 
-autoplot.wormplot <- function(object, 
-                              single_graph = FALSE, 
-                              confint = TRUE, 
-                              ref = TRUE, 
+autoplot.wormplot <- function(object,
+                              single_graph = FALSE,
+                              confint = TRUE,
+                              ref = TRUE,
                               xlim = c(NA, NA),
                               ylim = c(NA, NA),
-                              xlab = NULL, 
-                              ylab = NULL, 
-                              main = NULL, 
-                              colour = adjustcolor("black", alpha.f = 0.4), 
-                              fill = adjustcolor("black", alpha.f = 0.2), 
-                              alpha_min = 0.2, 
-                              size = 2, 
-                              shape = 19, 
-                              linetype = 1, 
+                              xlab = NULL,
+                              ylab = NULL,
+                              main = NULL,
+                              colour = adjustcolor("black", alpha.f = 0.4),
+                              fill = adjustcolor("black", alpha.f = 0.2),
+                              alpha_min = 0.2,
+                              size = 2,
+                              shape = 19,
+                              linetype = 1,
                               legend = FALSE,
                               ...) {
   # -------------------------------------------------------------------
@@ -606,11 +611,11 @@ autoplot.wormplot <- function(object,
   }
 
   ## get annotations in the right lengths
-  if(is.null(xlab)) xlab <- attr(object, "xlab")
+  if (is.null(xlab)) xlab <- attr(object, "xlab")
   xlab <- paste(unique(xlab), collapse = "/")
-  if(is.null(ylab)) ylab <- attr(object, "ylab")
+  if (is.null(ylab)) ylab <- attr(object, "ylab")
   ylab <- paste(unique(ylab), collapse = "/")
-  if(is.null(main)) main <- attr(object, "main")
+  if (is.null(main)) main <- attr(object, "main")
   main <- make.names(rep_len(main, n), unique = TRUE)
 
   ## prepare grouping
@@ -622,14 +627,18 @@ autoplot.wormplot <- function(object,
   ## Get ref_fun
   ## FIXME: (ML) Uses always (only) the first `ref_fun()`
   ref_fun <- attr(object, "ref_fun")
-  ref_fun <- if(is.list(ref_fun)) ref_fun[[1]] else ref_fun
+  ref_fun <- if (is.list(ref_fun)) ref_fun[[1]] else ref_fun
 
   ## Get a long data.frame with all x and y simulations
   ## FIXME: (ML) This must be done in base and somehow nicer
-  object <- tidyr::pivot_longer(object, cols = names(object)[grepl("^x$|x_[0-9]", names(object))],
-                            names_to = "x_sim", values_to = "x")
-  object <- tidyr::pivot_longer(object, cols = names(object)[grepl("^y$|y_[0-9]", names(object))],
-                            names_to = "y_sim", values_to = "y")
+  object <- tidyr::pivot_longer(object,
+    cols = names(object)[grepl("^x$|x_[0-9]", names(object))],
+    names_to = "x_sim", values_to = "x"
+  )
+  object <- tidyr::pivot_longer(object,
+    cols = names(object)[grepl("^y$|y_[0-9]", names(object))],
+    names_to = "y_sim", values_to = "y"
+  )
   object <- object[which(gsub("x", "", object$x_sim) == gsub("y", "", object$y_sim)), ]
   object$y_sim <- NULL
   object <- as.data.frame(object)
@@ -652,7 +661,8 @@ autoplot.wormplot <- function(object,
   )
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
-  plot_arg <- data.frame(1:n,
+  plot_arg <- data.frame(
+    1:n,
     fill, colour, size, linetype, confint, alpha_min, shape
   )[, -1]
 
@@ -682,47 +692,52 @@ autoplot.wormplot <- function(object,
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   ## actual plotting
-  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
-    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"),
-      show.legend = FALSE) 
+  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y"))
 
   ## add conf
   if (all(c("x_ci_lwr", "x_ci_upr", "y_ci_lwr", "y_ci_upr") %in% names(object))) {
-    rval <- rval + 
-      ggplot2::geom_polygon(ggplot2::aes_string(x_ci_lwr = "x_ci_lwr", x_ci_upr = "x_ci_upr", 
-        y_ci_lwr = "y_ci_lwr", y_ci_upr = "y_ci_upr", fill = "group"), 
-        stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE) 
+    rval <- rval +
+      ggplot2::geom_polygon(ggplot2::aes_string(
+        x_ci_lwr = "x_ci_lwr", x_ci_upr = "x_ci_upr",
+        y_ci_lwr = "y_ci_lwr", y_ci_upr = "y_ci_upr", fill = "group"
+      ),
+      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE
+      )
   }
 
   ## add ref lines
   if (!identical(ref, FALSE)) {
     if (isTRUE(ref)) plot_arg2$ref <- "black"
     ## FIXME: (ML) no group specific colors work for `geom_function()`
-    rval <- rval + 
+    rval <- rval +
       ggplot2::geom_function(
-        fun = ref_fun, 
+        fun = ref_fun,
         args = list(n = NROW(object), level = 0.95, which = "lower"),
         linetype = 2, col = unique(plot_arg2$ref)[1]
-      ) +  
+      ) +
       ggplot2::geom_function(
         fun = ref_fun,
         args = list(n = NROW(object), level = 0.95, which = "upper"),
         linetype = 2, col = unique(plot_arg2$ref)[1]
-      ) + 
+      ) +
       ggplot2::geom_hline(ggplot2::aes_string(yintercept = 0), col = plot_arg2$ref, linetype = 2)
 
     ## do not include ref lines in ylim
     ylim[1] <- ifelse(
-      is.na(ylim)[1], 
-      min(c(object$y[is.finite(object$y)], object$y_ci_lwr[is.finite(object$y_ci_lwr)])), 
+      is.na(ylim)[1],
+      min(c(object$y[is.finite(object$y)], object$y_ci_lwr[is.finite(object$y_ci_lwr)])),
       ylim[1]
     )
     ylim[2] <- ifelse(
-      is.na(ylim)[2], 
-      max(c(object$y[is.finite(object$y)], object$y_ci_up[is.finite(object$y_ci_upr)])), 
+      is.na(ylim)[2],
+      max(c(object$y[is.finite(object$y)], object$y_ci_up[is.finite(object$y_ci_upr)])),
       ylim[2]
     )
   }
+
+  ## add points
+  rval <- rval + 
+    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group", size = "group"))
 
   ## set the colors, shapes, etc.
   rval <- rval +
@@ -738,13 +753,13 @@ autoplot.wormplot <- function(object,
   ## add legend
   if (legend) {
     rval <- rval + ggplot2::labs(colour = "Model") +
-      ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+      ggplot2::guides(colour = "legend", shape = "none", size = "none")
   } else {
-    rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
+    rval <- rval + ggplot2::guides(colour = "none", shape = "none", size = "none")
   }
 
   ## set x and y limits (zoom only due to ref_fun)
-  rval <- rval + ggplot2::coord_cartesian(xlim= xlim, ylim = ylim, expand = 0.01)
+  rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = 0.01)
 
   # -------------------------------------------------------------------
   # GROUPING (IF ANY) AND RETURN PLOT

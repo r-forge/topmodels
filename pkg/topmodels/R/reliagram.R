@@ -757,7 +757,7 @@ autoplot.reliagram <- function(object,
   ## determine if points should be plotted
   if (is.null(type)) type <- ifelse(table(object$group) > 20L, "l", "b")
 
-  ## set color to NA for not plotting
+  ## set alpha to 0 or color to NA for not plotting
   type <- ifelse(type == "l", 0, 1)
   if (is.logical(ref)) ref <- ifelse(ref, 1, NA)
   if (is.logical(add_min)) add_min <- ifelse(add_min, 4, NA)

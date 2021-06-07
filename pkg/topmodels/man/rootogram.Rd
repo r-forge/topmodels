@@ -27,13 +27,13 @@ rootogram(object, \dots)
   scale = c("sqrt", "raw"), breaks = NULL, width = NULL, 
   response_type = NULL, xlab = NULL, ylab = NULL, main = NULL, \dots)
 
-\method{plot}{rootogram}(x, ref = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, 
+\method{plot}{rootogram}(x, ref = TRUE, xlim = c(NA, NA), ylim = c(NA, NA), xlab = NULL, 
   ylab = NULL, main = NULL, border = "black", fill = adjustcolor("black", alpha.f = 0.2),
   col = 2, lwd = 2, pch = 19, lty = 1, type = NULL, axes = TRUE, box = FALSE, \dots)
 
-\method{autoplot}{rootogram}(object, ref = TRUE,  xlab = NULL, ylab = NULL,
-  main = NULL, border = "black", fill = "darkgray", colour = 2, size = 1, shape = 19,
-  linetype = 1, type = NULL, \dots)
+\method{autoplot}{rootogram}(object, ref = TRUE,  xlim = c(NA, NA), ylim = c(NA, NA),
+  xlab = NULL, ylab = NULL, main = NULL, border = "black", fill = "darkgray", 
+  colour = 2, size = 1, shape = 19, linetype = 1, type = NULL, legend = FALSE, \dots)
 }
 
 \arguments{
@@ -67,6 +67,7 @@ rootogram(object, \dots)
     histogram or just the fitted line.}
   \item{colour, size, shape, linetype}{graphical parameters passed to \code{geom_line}
     and \code{geom_point}, respectively.}
+  \item{legend}{logical. Should a legend be added in the \code{ggplot2} style graphic?}
   \item{\dots}{further graphical parameters passed to the plotting
     function.}
 }
