@@ -10,7 +10,7 @@
 
 \usage{
 topmodels(object, plot = TRUE, class = NULL, newdata = NULL, na.action = na.pass, 
-  which = NULL, ask = dev.interactive(), spar = TRUE, pages = NULL, ...)
+  which = NULL, ask = dev.interactive(), spar = TRUE, single_page = NULL, ...)
 }
 
 \arguments{
@@ -35,9 +35,11 @@ topmodels(object, plot = TRUE, class = NULL, newdata = NULL, na.action = na.pass
     fitted probabilistic distributional forecast, \code{"qqrplot"} shows a
     quantile-quantile plot of quantile residuals, \code{"wormplot"} shows a worm
     plot again using quantile resiudals.}
-  \item{ask}{For multiple plots, the user is asked to show the next plot.}
-  \item{spar}{Should graphical parameters be set?}
-  \item{pages}{For numeric one, all plots will be shown on a single page.}
+  \item{ask}{For multiple plots, the user is asked to show the next plot. Will be 
+    ignored for \code{ggplot2} style graphics.}
+  \item{spar}{Should graphical parameters be set? Will be ignored for \code{ggplot2} style graphics.}
+  \item{single_page}{Logical. Should all plots be shown on a single page? Only choice for
+    \code{ggplot2} style graphics.}
   \item{\dots}{Arguments to be passed to \code{\link{rootogram}}, \code{\link{pithist}},
     \code{\link{reliagram}}, \code{\link{qqrplot}}, and \code{\link{wormplot}}.}
 }

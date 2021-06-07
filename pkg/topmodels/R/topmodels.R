@@ -1,20 +1,3 @@
-## TODO:
-## - Z: create R-Forge repos "topmodels" [done]
-## - Z: svndump "crch" -> import to "topmodels" on R-Forge [done]
-## - Z: package skeleton "topmodels" on R-Forge [done]
-## - Z: procast() generic plus flexible procast_setup() [done]
-## - JM: procast.crch() with new procast_setup() infrastructure.
-## - JM: reliagram() prototype
-## - JM: port pithist() from "countreg" + add type = "proportional" + Manu style
-## - Z: port qqrplot() and rootogram() from "countreg" plus adaptations
-## - JM/Z/.../CK/IK/.../SW/MS/GS/???: procast methods for betareg, countreg, glm, gamlss, mgcv::gam, ...
-
-## TODO:
-## - scoring rules for fitted model objects:
-##   in-sample vs. out-of-sample / aggregated vs. observation-wise contributions
-## - out-of-sample logLik()/logs(), crps(), ..., discretized log-score
-
-
 topmodels <- function(object, 
                       plot = TRUE,
                       class = NULL,
@@ -23,9 +6,11 @@ topmodels <- function(object,
                       which = NULL,
                       ask = dev.interactive(), # FIXME: (ML) Does not work for ggplot.
                       spar = TRUE, # FIXME: (ML) What does this do? Needed? Does not work for ggplot.
-                      pages = NULL, # FIXME: (ML) Does not work for ggplot.
+                      single_page = NULL, # FIXME: (ML) Does not work for ggplot.
                       ...) {
-
+  # -------------------------------------------------------------------
+  # SET UP PRELIMINARIES
+  # -------------------------------------------------------------------
   ## guess plotting flavor
   if (isFALSE(plot)) {
     plot <- "none"
@@ -50,7 +35,6 @@ topmodels <- function(object,
     !inherits(class, "try-error")
   )
 
-
   ## check if S3 methods exist
   if (!any(class(object) %in% gsub("procast.", "", methods("procast")))) {
     stop(
@@ -74,18 +58,17 @@ topmodels <- function(object,
     stop("argument which is specified wrong!")
   }
 
-
   ## define layout of plot
-  if (spar) {
+  if (spar && !plot == "ggplot2") {
     op <- par(no.readonly = TRUE)
     on.exit(par(op))
   }
 
-  if (!is.null(pages)) { #TODO: (ML) Do we really want to plot all on single device when aks = FALSE?
-    ask <- !(pages == 1)
+  if (isTRUE(single_page)) {
+    ask <- FALSE
   }
 
-  if (prod(par("mfcol")) > 1L) {
+  if (prod(par("mfcol")) >=  length(which)) {
     spar <- FALSE
     ask <- FALSE
   }
@@ -98,12 +81,15 @@ topmodels <- function(object,
     }
   }
 
+  # -------------------------------------------------------------------
+  # CHECK ARGUMENTS AND PREPARE FUNCTION CALLS
+  # -------------------------------------------------------------------
   ## get call and set topmodel() args to NULL 
   mc <- as.list(match.call())[-1]
   mc$which <- NULL
   mc$ask <- NULL
   mc$spar <- NULL
-  mc$pages <- NULL
+  mc$single_page <- NULL
 
   ## get possible arguments
   arg_avail <- list()
@@ -176,6 +162,10 @@ topmodels <- function(object,
   ## set names
   names(arg) <- c("rootogram", "pithist", "reliagram", "qqrplot", "wormplot")
 
+
+  # -------------------------------------------------------------------
+  # FUNCTION CALLS: CALCULATE AND PLOT
+  # -------------------------------------------------------------------
   rval <- list()
   if (plot == "base") {
     ## calculate and plot
@@ -185,7 +175,6 @@ topmodels <- function(object,
     if ("qqrplot"   %in% which) rval$qqrplot <-   do.call(qqrplot, arg[[4]])
     if ("wormplot"  %in% which) rval$wormplot <-  do.call(wormplot, arg[[5]])
   } else { 
-    ## FIXME: (ML) parameter ask does not work for ggplot(), always pages = 1
     ## first calculate 
     arg <- lapply(arg, function(x) {x$plot <- FALSE; x})
     if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
@@ -207,7 +196,9 @@ topmodels <- function(object,
     plt_cols <- rep_len(1:plt_dim[2], length(plt_names))
 
     ## set up grid and plot 
-    ## FIXME: (ML) Works as additional args of main funs are not used in autoplot. Rewrite cleaner version.
+    ## TODO: (ML) 
+    ## * Works as additional args of main funs are not used in autoplot (except `names(par())`) 
+    ## * Rewrite cleaner version.
     grid::grid.newpage()
     grid::pushViewport(grid::viewport(layout = grid::grid.layout(plt_dim[1], plt_dim[2])))
     for (idx in seq_along(plt_names)) {
@@ -218,6 +209,9 @@ topmodels <- function(object,
     }
   }
 
+  # -------------------------------------------------------------------
+  # RETURN INVISIBLY
+  # -------------------------------------------------------------------
   return(invisible(rval))
 }
 
