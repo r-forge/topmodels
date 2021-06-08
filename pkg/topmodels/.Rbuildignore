@@ -1,6 +1,13 @@
+inst/conferences
+inst/misc
+inst/only_local
 TODO.md
 TODO.pdf
 ^_pkgdown\.yml$
+^README\.Rmd$
+^README\.md$
+^README\.html$
 ^contact.md$
+^logo*.png$
 vignettes/topmodels.Rmd
 

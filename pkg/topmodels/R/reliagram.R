@@ -24,8 +24,7 @@
 #' 
 #' TODO: (ML)
 #' 
-#' @aliases reliagram reliagram.default plot.reliagram lines.reliagram
-#' c.reliagram autoplot.reliagram
+#' @aliases reliagram reliagram.default c.reliagram 
 #' @param object an object from which an extended reliability diagram can be
 #' extracted with \code{\link{procast}}.
 #' @param newdata optionally, a data frame in which to look for variables with
@@ -59,10 +58,6 @@
 #' diagrams be plotted in a single graph?
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters.
-#' @param x,minimum,ref,xlim,ylim,col,fill,alpha_min,lwd,pch,lty,type,add_hist,add_info,add_rug,add_min,axes,box additional graphical
-#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
-#' @param colour,size,shape,linetype,legend graphical parameters passed for 
-#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @seealso \code{\link{procast}}
 #' @references Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability
 #' of Reliability Diagrams}.  \emph{Weather and Forecasting}, \bold{22}(3),
@@ -350,8 +345,6 @@ reliagram.default <- function(object,
 }
 
 
-#' @rdname reliagram
-#' @method c reliagram
 #' @export
 c.reliagram <- function(...) {
   # -------------------------------------------------------------------
@@ -427,14 +420,50 @@ c.reliagram <- function(...) {
 }
 
 
-#' @rdname reliagram
-#' @method rbind reliagram
 #' @export
 rbind.reliagram <- c.reliagram
 
 
-#' @rdname reliagram
-#' @method plot reliagram
+#' Plotting a Reliagram (Extended Reliability Diagram)
+#' 
+#' Reliagram (extended reliability diagram) for assessing the reliability of a
+#' fitted probabilistic distributional forecast.
+#' 
+#' TODO: (ML)
+#' 
+#' @aliases plot.reliagram lines.reliagram autoplot.reliagram
+#' @param object,x an object of class \code{reliagram}.
+#' @param single_graph logical. Should all computed extended reliability
+#' diagrams be plotted in a single graph?
+#' @param confint logical. Should confident intervals be calculated and drawn?
+#' @param xlab,ylab,main graphical parameters.
+#' @param \dots further graphical parameters.
+#' @param minimum,ref,xlim,ylim,col,fill,alpha_min,lwd,pch,lty,type,add_hist,add_info,add_rug,add_min,axes,box additional graphical
+#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' @param colour,size,shape,linetype,legend graphical parameters passed for 
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
+#' @seealso \code{\link{procast}}
+#' @references Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability
+#' of Reliability Diagrams}.  \emph{Weather and Forecasting}, \bold{22}(3),
+#' 651--661. doi:10.1175/WAF993.1.
+#' @examples
+#' 
+#' require("crch")
+#' m1 <- lm(dist ~ speed, data = cars)
+#' m2 <- crch(dist ~ speed | speed, data = cars)
+#' m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+#' 
+#' rel1 <- reliagram(m1, quantiles = c(0.2, 0.6))
+#' rel2 <- reliagram(m2, plot = FALSE)
+#' rel3 <- reliagram(m3, plot = FALSE)
+#' 
+#' plot(c(rel1, rel2), single_graph = TRUE, col = c(1, 2, 3), lty = c(1, 2, 3), pch = c(1, 2, 3))
+#' 
+#' plot(rel1, single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+#' lines(rel3, col = 3, lty = 2, confint = 3)
+#' 
+#' reliagram(m1, quantiles = c(0.2, 0.6), minimum = c(2, 6), plot = "ggplot2")
+#' 
 #' @export
 plot.reliagram <- function(x,
                            single_graph = FALSE,
@@ -683,7 +712,7 @@ plot.reliagram <- function(x,
 }
 
 
-#' @rdname reliagram
+#' @rdname plot.reliagram
 #' @method lines reliagram
 #' @export
 lines.reliagram <- function(x,
@@ -780,7 +809,7 @@ lines.reliagram <- function(x,
 }
 
 
-#' @rdname reliagram
+#' @rdname plot.reliagram
 #' @method autoplot reliagram
 #' @exportS3Method ggplot2::autoplot
 autoplot.reliagram <- function(object,

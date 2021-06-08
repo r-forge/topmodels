@@ -22,13 +22,20 @@ navbar:
       href: contact.html
 
 reference:
-  - title: "Diagnostic graphics"
+  - title: "Probabilistic model diagnostics"
     contents: 
       - pithist
       - qqrplot
       - reliagram
       - rootogram
       - wormplot
+  - title: "Plotting probabilistic model diagnostic"
+    contents: 
+      - plot.pithist
+      - plot.qqrplot
+      - plot.reliagram
+      - plot.rootogram
+      - plot.wormplot
       - topmodels
   - title: "Procast infrastructure"
     contents: 

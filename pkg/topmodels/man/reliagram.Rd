@@ -3,11 +3,7 @@
 \name{reliagram}
 \alias{reliagram}
 \alias{reliagram.default}
-\alias{plot.reliagram}
-\alias{lines.reliagram}
 \alias{c.reliagram}
-\alias{autoplot.reliagram}
-\alias{rbind.reliagram}
 \title{Reliagram (Extended Reliability Diagram)}
 \usage{
 reliagram(object, ...)
@@ -28,78 +24,6 @@ reliagram(object, ...)
   xlab = "Forecast probability",
   ylab = "Observed relative frequency",
   main = NULL,
-  ...
-)
-
-\method{c}{reliagram}(...)
-
-\method{rbind}{reliagram}(...)
-
-\method{plot}{reliagram}(
-  x,
-  single_graph = FALSE,
-  minimum = 0,
-  confint = TRUE,
-  ref = TRUE,
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  xlab = NULL,
-  ylab = NULL,
-  main = NULL,
-  col = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
-  lwd = 2,
-  pch = 19,
-  lty = 1,
-  type = NULL,
-  add_hist = TRUE,
-  add_info = TRUE,
-  add_rug = TRUE,
-  add_min = TRUE,
-  axes = TRUE,
-  box = TRUE,
-  ...
-)
-
-\method{lines}{reliagram}(
-  x,
-  minimum = 0,
-  confint = FALSE,
-  ref = FALSE,
-  col = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
-  lwd = 2,
-  pch = 19,
-  lty = 1,
-  type = "b",
-  ...
-)
-
-\method{autoplot}{reliagram}(
-  object,
-  single_graph = FALSE,
-  minimum = 0,
-  confint = TRUE,
-  ref = TRUE,
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  xlab = NULL,
-  ylab = NULL,
-  main = NULL,
-  colour = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
-  size = 1,
-  shape = 19,
-  linetype = 1,
-  type = NULL,
-  add_hist = TRUE,
-  add_info = TRUE,
-  add_rug = TRUE,
-  add_min = TRUE,
-  legend = FALSE,
   ...
 )
 }
@@ -150,12 +74,6 @@ probabilities should be calculated (\code{\link{procast}}).}
 diagrams be plotted in a single graph?}
 
 \item{xlab, ylab, main}{graphical parameters.}
-
-\item{x, minimum, ref, xlim, ylim, col, fill, alpha_min, lwd, pch, lty, type, add_hist, add_info, add_rug, add_min, axes, box}{additional graphical
-parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
-
-\item{colour, size, shape, linetype, legend}{graphical parameters passed for 
-\code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
 }
 \description{
 Reliagram (extended reliability diagram) for assessing the reliability of a

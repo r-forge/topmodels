@@ -37,8 +37,7 @@
 #' Additional options are offered for models with discrete responses where
 #' randomization of quantiles is needed.
 #' 
-#' @aliases qqrplot qqrplot.default plot.qqrplot points.qqrplot c.qqrplot
-#' autoplot.qqrplot
+#' @aliases qqrplot qqrplot.default c.qqrplot
 #' @param object an object (for which a \code{\link{qresiduals}} method
 #' exists).
 #' @param newdata optionally, a data frame in which to look for variables with
@@ -66,10 +65,6 @@
 #' @param xlab,ylab,main,\dots graphical plotting parameters passed to
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
-#' @param x,ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
-#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
-#' @param colour,size,shape,linetype,legend graphical parameters passed for 
-#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @return An list is returned invisibly with: \item{normal}{the theoretical
 #' normal quantiles,} \item{residuals}{the empirical quantile residuals.}
 #' @seealso \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
@@ -262,8 +257,6 @@ qqrplot.default <- function(object,
 }
 
 
-#' @rdname qqrplot
-#' @method c qqrplot
 #' @export
 c.qqrplot <- function(...) {
   # -------------------------------------------------------------------
@@ -351,14 +344,62 @@ c.qqrplot <- function(...) {
 }
 
 
-#' @rdname qqrplot
-#' @method rbind qqrplot
 #' @export
 rbind.qqrplot <- c.qqrplot
 
 
-#' @rdname qqrplot
-#' @method plot qqrplot
+#' Plotting Q-Q Plots for Quantile Residuals
+#' 
+#' Visualize goodness of fit of regression models by Q-Q plots using quantile
+#' residuals.
+#' 
+#' Q-Q residual draw quantile residuals (by default: transformed to standard
+#' normal scale) against theoretical quantiles from the same distribution.
+#' Alternatively, transformations to other distributions can also be used,
+#' specifically using no transformation at all, i.e., remaining on the uniform
+#' scale (via \code{trafo = NULL} or equivalently \code{qunif} or
+#' \code{identity}).
+#' 
+#' Additional options are offered for models with discrete responses where
+#' randomization of quantiles is needed.
+#' 
+#' @aliases plot.qqrplot points.qqrplot autoplot.qqrplot
+#' @param x,object an object of class \code{qqrplot}.
+#' @param single_graph logical. Should all computed extended reliability
+#' diagrams be plotted in a single graph?
+#' @param confint logical or quantile specification. Should the range of
+#' quantiles of the randomized quantile residuals be visualized? If
+#' \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.
+#' @param xlab,ylab,main,\dots graphical plotting parameters passed to
+#' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
+#' respectively.
+#' @param ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
+#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' @param colour,size,shape,linetype,legend graphical parameters passed for 
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
+#' @return An list is returned invisibly with: \item{normal}{the theoretical
+#' normal quantiles,} \item{residuals}{the empirical quantile residuals.}
+#' @seealso \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
+#' Residuals.} \emph{Journal of Computational and Graphical Statistics},
+#' \bold{5}, 1--10.
+#' @keywords hplot
+#' @examples
+#' 
+#' data("CrabSatellites", package = "countreg")
+#' CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+#' 
+#' m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+#' m3 <- lm(dist ~ speed, data = cars)
+#' 
+#' q1 <- qqrplot(m1, nsim = 100, confint = TRUE)
+#' q2 <- qqrplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
+#' q3 <- qqrplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
+#' 
+#' plot(c(q1, q2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
+#' points(q3, col = "lightblue")
+#' 
 #' @export
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
@@ -518,7 +559,7 @@ plot.qqrplot <- function(x,
 }
 
 
-#' @rdname qqrplot
+#' @rdname plot.qqrplot
 #' @method points qqrplot
 #' @export
 points.qqrplot <- function(x,
@@ -599,7 +640,7 @@ points.qqrplot <- function(x,
 }
 
 
-#' @rdname qqrplot
+#' @rdname plot.qqrplot
 #' @method autoplot qqrplot
 #' @exportS3Method ggplot2::autoplot
 autoplot.qqrplot <- function(object,

@@ -43,6 +43,7 @@ expect_silent(
   autoplot(c(q2, q3), single_graph = FALSE, pch = 3, legend = TRUE)
 )
 
+dev.new()
 expect_silent(
   plot(c(q2, q3), single_graph = TRUE, confint = FALSE)
 )
@@ -54,7 +55,4 @@ expect_silent(
 expect_silent(
   points(q3, confint = TRUE, ref = TRUE)
 )
-
-
-
-
+dev.off()

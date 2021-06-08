@@ -3,11 +3,7 @@
 \name{pithist}
 \alias{pithist}
 \alias{pithist.default}
-\alias{plot.pithist}
-\alias{lines.pithist}
 \alias{c.pithist}
-\alias{autoplot.pithist}
-\alias{rbind.pithist}
 \title{PIT Histograms for Assessing Goodness of Fit of Probability Models}
 \usage{
 pithist(object, ...)
@@ -32,65 +28,6 @@ pithist(object, ...)
   xlab = "PIT",
   ylab = if (freq) "Frequency" else "Density",
   main = NULL,
-  ...
-)
-
-\method{c}{pithist}(...)
-
-\method{rbind}{pithist}(...)
-
-\method{plot}{pithist}(
-  x,
-  single_graph = FALSE,
-  style = c("histogram", "lines"),
-  confint = TRUE,
-  ref = TRUE,
-  xlim = c(0, 1),
-  ylim = c(0, NA),
-  xlab = NULL,
-  ylab = NULL,
-  main = NULL,
-  col = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  border = "black",
-  alpha_min = 0.2,
-  lwd = NULL,
-  lty = 1,
-  axes = TRUE,
-  box = TRUE,
-  ...
-)
-
-\method{lines}{pithist}(
-  x,
-  confint = FALSE,
-  ref = FALSE,
-  col = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
-  lwd = 2,
-  lty = 1,
-  ...
-)
-
-\method{autoplot}{pithist}(
-  object,
-  single_graph = FALSE,
-  style = c("histogram", "lines"),
-  confint = TRUE,
-  ref = TRUE,
-  xlim = c(0, 1),
-  ylim = c(0, NA),
-  xlab = NULL,
-  ylab = NULL,
-  main = NULL,
-  colour = "black",
-  fill = "darkgray",
-  border = "black",
-  alpha_min = 0.2,
-  size = NULL,
-  linetype = 1,
-  legend = FALSE,
   ...
 )
 }
@@ -151,12 +88,6 @@ diagrams be plotted in a single graph?}
 plot or just the histogram or just the fitted line.}
 
 \item{xlab, ylab, main}{graphical parameters.}
-
-\item{x, ref, col, fill, border, alpha_min, lwd, lty, axes, box}{additional graphical
-parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
-
-\item{colour, size, linetype, legend}{graphical parameters passed for 
-\code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
 }
 \description{
 PIT histograms graphically compare empirical probabilities from fitted
