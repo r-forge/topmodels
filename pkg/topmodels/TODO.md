@@ -9,7 +9,7 @@
 * Set up homepage
 * One vignette 'get started'
 * One vignette 'technical specifications/framework'
-* One vignette per each plot
+* One vignette per each graphical evaulation method
 
 ### 1.3 Long term outlook
 * Provide `geom_()` for `ggplot2` instead/additionally to `autoplot()`
