@@ -18,7 +18,8 @@ Imports: graphics, grDevices, stats, utils, colorspace, grid
 Suggests: betareg, countreg, crch, disttree, ggplot2, tibble, tidyr, lmtest, MASS, tinytest
 Description: Unified infrastructure for probabilistic models and distributional regressions:
              Computations of probabilities, densities, scores, and Hessians.
-	     Probabilistic forecasting. Diagnostic graphics like rootograms, PIT histograms,
-	     reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots.
+	           Probabilistic forecasting. Diagnostic graphics like rootograms, PIT histograms,
+	           reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots.
 License: GPL-2 | GPL-3
+Encoding: UTF-8
 RoxygenNote: 7.1.1

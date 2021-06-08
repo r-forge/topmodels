@@ -1,7 +1,40 @@
+#' Extract Observed Responses from New Data
+#' 
+#' Generic function and methods for computing (randomized) quantile residuals.
+#' 
+#' This is a convenience function to accompany \code{\link{procast}}, e.g., for
+#' computing predicted probabilities at the observed responses (also known as
+#' the probability integral transform, PIT).
+#' 
+#' @aliases newresponse newresponse.default newresponse.glm
+#' @param object a fitted model object. For the \code{default} method this
+#' needs to needs to be \code{formula}-based so that
+#' \code{\link[stats]{model.frame}} can be used to extract the response from
+#' the original data the model was fitted to or \code{\link[stats]{terms}} can
+#' be used to set up the response on \code{newdata}.
+#' @param newdata optionally, a data frame in which to look for variables with
+#' which to predict. If omitted, the original observations are used.
+#' @param na.action function determining what should be done with missing
+#' values in \code{newdata}.  The default is to employ \code{NA}.
+#' @param \dots further parameters passed to methods.
+#' @return A vector of new responses.
+#' @seealso \code{\link[stats]{terms}}, \code{\link[stats]{model.frame}}
+#' @keywords regression
+#' @examples
+#' 
+#' ## linear regression models (homoscedastic Gaussian response)
+#' m <- lm(dist ~ speed, data = cars)
+#' newresponse(m)
+#' newresponse(m, newdata = cars[1:3, ])
+#' 
+#' @export
 newresponse <- function(object, ...) {
   UseMethod("newresponse")
 }
 
+#' @rdname newresponse
+#' @method newresponse default
+#' @export
 newresponse.default <- function(object,
                                 newdata,
                                 na.action = na.pass,
@@ -57,6 +90,9 @@ newresponse.default <- function(object,
 }
 
 
+#' @rdname newresponse
+#' @method newresponse glm
+#' @export
 newresponse.glm <- function(object,
                             newdata,
                             na.action = na.pass,

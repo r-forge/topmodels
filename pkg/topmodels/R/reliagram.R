@@ -1,24 +1,99 @@
-## Programming outline: Reliagram (reliability diagram)
-##
-## - Observed y in-sample or out-of-sample (n x 1)
-## - Thresholds in y (k x 1)
-## - Predicted probabilities F_y(thresh) at thresholds (n x k)
-## - Breaks for predicted probabilities in [0, 1] (m x 1)
-##
-## - Cut probabilities at breaks -> (m-1) groups
-## - Cut y at thresholds, aggregate by groups -> (m-1) x k proportions
-##
-## Functions:
-## - reliagram() generic plus default method
-## - Return object of class "reliagram" that is plotted by default
-## - But has plot=FALSE so that suitable methods can be added afterwards
-## - At least methods: plot(), autoplot(), lines()
+# -------------------------------------------------------------------
+# Programming outline: Reliagram (reliability diagram)
+# -------------------------------------------------------------------
+# - Observed y in-sample or out-of-sample (n x 1)
+# - Thresholds in y (k x 1)
+# - Predicted probabilities F_y(thresh) at thresholds (n x k)
+# - Breaks for predicted probabilities in [0, 1] (m x 1)
+#
+# - Cut probabilities at breaks -> (m-1) groups
+# - Cut y at thresholds, aggregate by groups -> (m-1) x k proportions
+#
+# Functions:
+# - reliagram() generic plus default method
+# - Return object of class "reliagram" that is plotted by default
+# - But has plot=FALSE so that suitable methods can be added afterwards
+# - At least methods: plot(), autoplot(), lines()
+# -------------------------------------------------------------------
 
+
+#' Reliagram (Extended Reliability Diagram)
+#' 
+#' Reliagram (extended reliability diagram) for assessing the reliability of a
+#' fitted probabilistic distributional forecast.
+#' 
+#' TODO: (ML)
+#' 
+#' @aliases reliagram reliagram.default plot.reliagram lines.reliagram
+#' c.reliagram autoplot.reliagram
+#' @param object an object from which an extended reliability diagram can be
+#' extracted with \code{\link{procast}}.
+#' @param newdata optionally, a data frame in which to look for variables with
+#' which to predict. If omitted, the original observations are used.
+#' @param plot Should the \code{plot} or \code{autoplot} method be called to
+#' draw the computed extended reliability diagram? Either set \code{plot}
+#' expicitly to "base" vs. "ggplot2" to choose the type of plot, or for a
+#' logical \code{plot} argument it's chosen conditional if the package
+#' \code{ggplot2} is loaded.
+#' @param class Should the invisible return value be either a \code{data.frame}
+#' or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
+#' "tibble", or for NULL it's chosen automatically conditional if the package
+#' \code{tibble} is loaded.
+#' @param breaks numeric vector passed on to \code{\link{cut}} in order to bin
+#' the observations and the predicted probabilities or a function applied to
+#' the predicted probabilities to calculate a numeric value for
+#' \code{\link{cut}}. Typically quantiles to ensure equal number of predictions
+#' per bin, e.g., by \code{breaks = function(x) quantile(x)}.
+#' @param quantiles numeric vector of quantile probabilities with values in
+#' [0,1] to calculate single or several thresholds. Only used if
+#' \code{thresholds} is not specified. For binary responses typically the
+#' 50\%-quantile is used.
+#' @param thresholds numeric vector specifying both where to cut the
+#' observations into binary values and at which values the predicted
+#' probabilities should be calculated (\code{\link{procast}}).
+#' @param confint logical. Should confident intervals be calculated and drawn?
+#' @param confint_level numeric. The confidence level required.
+#' @param confint_nboot numeric. The number of bootstrap steps.
+#' @param confint_seed numeric. The seed to be set for the bootstrapping.
+#' @param single_graph logical. Should all computed extended reliability
+#' diagrams be plotted in a single graph?
+#' @param xlab,ylab,main graphical parameters.
+#' @param \dots further graphical parameters.
+#' @param x,minimum,ref,xlim,ylim,col,fill,alpha_min,lwd,pch,lty,type,add_hist,add_info,add_rug,add_min,axes,box additional graphical
+#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' @param colour,size,shape,linetype,legend graphical parameters passed for 
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
+#' @seealso \code{\link{procast}}
+#' @references Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability
+#' of Reliability Diagrams}.  \emph{Weather and Forecasting}, \bold{22}(3),
+#' 651--661. doi:10.1175/WAF993.1.
+#' @examples
+#' 
+#' require("crch")
+#' m1 <- lm(dist ~ speed, data = cars)
+#' m2 <- crch(dist ~ speed | speed, data = cars)
+#' m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+#' 
+#' rel1 <- reliagram(m1, quantiles = c(0.2, 0.6))
+#' rel2 <- reliagram(m2, plot = FALSE)
+#' rel3 <- reliagram(m3, plot = FALSE)
+#' 
+#' plot(c(rel1, rel2), single_graph = TRUE, col = c(1, 2, 3), lty = c(1, 2, 3), pch = c(1, 2, 3))
+#' 
+#' plot(rel1, single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+#' lines(rel3, col = 3, lty = 2, confint = 3)
+#' 
+#' reliagram(m1, quantiles = c(0.2, 0.6), minimum = c(2, 6), plot = "ggplot2")
+#' 
+#' @export
 reliagram <- function(object, ...) {
   UseMethod("reliagram")
 }
 
 
+#' @rdname reliagram
+#' @method reliagram default
+#' @export
 reliagram.default <- function(object,
                               newdata = NULL,
                               plot = TRUE,
@@ -275,7 +350,10 @@ reliagram.default <- function(object,
 }
 
 
-c.reliagram <- rbind.reliagram <- function(...) {
+#' @rdname reliagram
+#' @method c reliagram
+#' @export
+c.reliagram <- function(...) {
   # -------------------------------------------------------------------
   # GET DATA
   # -------------------------------------------------------------------
@@ -349,6 +427,15 @@ c.reliagram <- rbind.reliagram <- function(...) {
 }
 
 
+#' @rdname reliagram
+#' @method rbind reliagram
+#' @export
+rbind.reliagram <- c.reliagram
+
+
+#' @rdname reliagram
+#' @method plot reliagram
+#' @export
 plot.reliagram <- function(x,
                            single_graph = FALSE,
                            minimum = 0,
@@ -596,6 +683,9 @@ plot.reliagram <- function(x,
 }
 
 
+#' @rdname reliagram
+#' @method lines reliagram
+#' @export
 lines.reliagram <- function(x,
                             minimum = 0,
                             confint = FALSE,
@@ -690,6 +780,9 @@ lines.reliagram <- function(x,
 }
 
 
+#' @rdname reliagram
+#' @method autoplot reliagram
+#' @exportS3Method ggplot2::autoplot
 autoplot.reliagram <- function(object,
                                single_graph = FALSE,
                                minimum = 0,
