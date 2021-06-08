@@ -2,15 +2,22 @@
 
 ## 1. General
 ### 1.1 Description file
-* Fix naming and description of package [**done**]
+* Fix naming and description of package
 * Check authors' contacts [**done**]
 
-### 1.2 Outlook
+### 1.2 `pkgdown` homepage
+* Set up homepage
+* One vignette 'get started'
+* One vignette 'technical specifications/framework'
+* One vignette per each plot
+
+### 1.3 Long term outlook
 * Provide `geom_()` for `ggplot2` instead/additionally to `autoplot()`
 * Provide infrastucture for `scoringRules`: in-sample vs. out-of-sample  and aggregated vs. observation-wise contributions
 * Implement discretized log-score
+* S3 methods for topmodels: plot, autoplot?
 
-## 2. Functions
+## 2. Package
 
 ### 2.1 Functions for forecasting: Summary
 
@@ -23,19 +30,21 @@ Function name | S3 classes supported | S3 classes planned | TODOs
 `qresiduals()` | `default` | no | yes 
 
 ### 2.2 Functions for forecasting: TODOs
+* In general
+    * Correctly support `na.action`
 * `procast()` 
-    * Improve S3 method for `crch`: Use functions instead of `eval()` and `disttree`
+    * Which `type`s should be supported
+    * Improve S3 method for `crch`: Use functions instead of `eval()`
     * Improve S3 method for `disttree`: Check compatability w/ forests and other families, and make usage of (not yet implemented) vectorized family functions
+    * In case `at = function`, it always returns a named vector. Do we want that?
     * Extend S3 classes (maybe w/ more flexible default method)
     * Implement `at = data.frame(y = response, x = model.matrix)` for scores
-    * Implement scores.
+    * Implement scores
 * `newresponse()`
-    * Implement (correctly) weights
-    * Use `expand.model.frame()` 
-    * How to handle `glm` objects
+    * Check implementation of weights
+    * Rethink how and where to define `response_type` for `rootogram()`
 * `qresiduals()`
-    * Fix `type = "quantile"`: Probably needs to be done on the transformed scale
-    * Check if correctly working for discrete variables (no?!)
+    * Fix `type = "quantile"`: Compare order statistics!!
 
 ### 2.3 Functions for graphical model assessment: Summary
 
@@ -45,128 +54,62 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
 `pithist` | `default` | yes | yes | yes | yes | few
 `qqrplot` | `default` | yes | yes | yes | yes | few 
 `rootogram` | `default`| yes | yes | - | yes | few
-`wormplot` | yes | yes | yes | yes | yes | few
+`wormplot` | `default` | yes | yes | yes | yes | few
 
 ### 2.4 Functions for graphical model assessment: TODOs
+* In general
+    * Check order of different layers
+    * Check consistency of `xlim` and `ylim`
+    * Check names and consistency of all (plotting) arguments
+* In detail
+    * Check again initilization for `glm` objects?
+    * How should we handle values outside (truncation)/censoring points - these can lead to skewed PIT histograms.
 * `pithist()`
-    * Streamline code and optional plotting arguments for the user [DONE]
-    * Implement `type = "proportional"` 
+    * Implement proportional method (`type = "proportional"`)
     * Check again if we need two different CI computations
-* `qqrplot()`
-    * Setup as a generic function and include S3 methods [DONE]
-* `reliagram()`
-    * Improve default method, get rid of `verification` package? [DONE]
-    * Implement generic functions [DONE]
-    * Get newest fancy version of Reto
-* `rootogram()`
-    * Move away from `countreg` default: Make argument `object` mandatory [DONE]
-    * Merge `rootogram_procast()` and `rootogram_glm` [DONE]
 * `wormplot()`
-    * Start from scratch: Needs to be setup [DONE]
+    * ciplot (Burren and Frederiks) for other `trafo`: Compare order statistics!! 
 
-# Update 2021-04-16
-* How to do perform initilization correctly for `glm` objects?
-* Should we increase the difference of the evaluation `at` in `qqresiduals()` to work for dicscrete distribution (binom, pois etc.) which leads to a wrong results for qnorm (compare tests). [SOLVED]
-* How should we handle values outside (truncation)/censoring points. These lead to skewed PIT histograms.
-* Is the graphical representation of the range in Q-Q plot correct?
-* What types should `procast()` support: location vs. mean/expectation/response, scale vs. variance/dispersion?
-* Why is the range not working in `qqrplot`.
+## 3. Random notes
+* Errors in countreg
+    * Wrongly set argument `range = TRUE` leads to an error when randomized quantile residuals make no sense, which seems not be caught.
+        * `m_gauss <- glm(dist ~ speed, data = cars, family = gaussian)`
+        *  `qqrplot(m_gauss, range = TRUE)`
+* Old notes by Achim/Jakob
+    * Z: create R-Forge repos "topmodels" [done]
+    * Z: svndump "crch" -> import to "topmodels" on R-Forge [done]
+    * Z: package skeleton "topmodels" on R-Forge [done]
+    * Z: procast() generic plus flexible procast_setup() [done]
+    * JM: procast.crch() with new procast_setup() infrastructure.
+    * JM: reliagram() prototype
+    * JM: port pithist() from "countreg" + add type = "proportional" + Manu style
+    * Z: port qqrplot() and rootogram() from "countreg" plus adaptations
+    * JM/Z/.../CK/IK/.../SW/MS/GS/???: procast methods for betareg, countreg, glm, gamlss, mgcv::gam, ...
+    * scoring rules for fitted model objects:
+    * in-sample vs. out-of-sample / aggregated vs. observation-wise contributions
+    * out-of-sample logLik()/logs(), crps(), ..., discretized log-score
 
-## Errors in countreg
-* Wrongly set argument `range = TRUE` leads to an error when randomized quantile residuals make no sense, which seems not be caught.
-```
-m_gauss <- glm(dist ~ speed, data = cars, family = gaussian)
-qqrplot(m_gauss, range = TRUE)
-```
+## 4. Current Questions
+* Package
+    * rootogram: breaks no special options, `+.rootogram()`
+    * procast: named data.frames as rval, scores (estfun), support which types
+* Check layers in plots
+* Check naming of arguments
+* Organization of manuals
+* Help to setup pkgdown 
+* Content of presentation use-R
+    * Kurz distributional modeling motivieren
+    * Idee mit Baeumen und Waeldern anreissen, verfuegbar in disttree
+    * Beispiel auf Datensatz zeigen
+    * Frage: Wie weiss man, ob das Modell ok funktioniert oder nicht?
+    * Scoring rules aber zugehoerige Grafiken
+    * An Beispiel herzeigen
+    * Ausblick: Allgemeine Toolbox fuer generelle Modelle mit Base-Grafiken und ggplot2.
 
-# Update 2021-05-18
-
-## Demonstration
-```
-devtools::load_all()
-data("CrabSatellites", package = "countreg")
-CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
-m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
-m3 <- lm(dist ~ speed, data = cars)
-
-rootogram(m1)
-rootogram(m2)
-rootogram(m3)
-
-r1 <- reliagram(m1)
-r1b <- reliagram(m1, minimum = 10)
-r2 <- reliagram(m2)
-r3 <- reliagram(m3)
-plot(c(r1, r2))
-plot(c(r1, r2), col = c(1, 2))
-plot(c(r1, r2), confint = c(FALSE, TRUE))
-plot(c(r1, r2), confint = c(1, 2), single_graph = TRUE)
-lines(r3, col = 2)
-
-library("ggplot2")
-autoplot(r1)
-reliagram(m1, flavor = "tidyverse")
-
-topmodels(m1, pages = 1)
-topmodels(m1, pages = 1, fill = 2)
-topmodels(m1, pages = 1, nsim = 10)
-topmodels(m1, pages = 1, nsim = 10, flavor = "t")
-
-```
-
-## General Points
-* Concept for plotting functions: `ref = TRUE`, `ref = c(col, col)`, `...`
-* topmodels()
-* flavor "base" vs. "tidyverse"
-* autoplot: 
-    * same arguments than base
-    * same concept with groups as for base plotting functions 
-    * `col = colour`, `pch = symbol`, `lty = linetype`, `cex = lwd = size`, ...
-    * not all finished implemented, especially gropus can be difficult
- 
-## Current TODOs:
-* Several bugfixes, especially in `autoplot()` with `single_graph = TRUE`
-* `pithist()` proportional methodos
-* legend()
-
-## Outlook (until conference)
-* Further streamlining incl. FIXMEs, clean up code and comments
+## 5. Next steps
+* Streamline `procast()`
 * Check naming of in/out arguments
-* Implement proper testing
 * Adapt manuals (also for plotting funs)
-* Maybe simple homepage
-* `procast()`
-* `newresponse()`
-* `qresiduals()`
+* Implement simple homepage
+* Some testing by working group (Reto)
 
-## Questions for Achim
-* topmodels: arguments compare `bamlss()`
-* S3 methods for topmodels: plot, autoplot?
-* Difference between `search()` and `loadedNamespaces()`
-* reliagram: extend to left/right border, minimum, new confint representation, `reliagram.crch()`
-* wormplot: `ciplot()`
-* `na.action`: see `newresponse()`
-* `response_type` + `newresponse()` in general
-* rootogram: breaks no special options, `+.rootogram()`
-* procast: weights, named data.frames as rval, scores (estfun), which models supported
-
-## OLD TODO by Achim
-* Z: create R-Forge repos "topmodels" [done]
-* Z: svndump "crch" -> import to "topmodels" on R-Forge [done]
-* Z: package skeleton "topmodels" on R-Forge [done]
-* Z: procast() generic plus flexible procast_setup() [done]
-* JM: procast.crch() with new procast_setup() infrastructure.
-* JM: reliagram() prototype
-* JM: port pithist() from "countreg" + add type = "proportional" + Manu style
-* Z: port qqrplot() and rootogram() from "countreg" plus adaptations
-* JM/Z/.../CK/IK/.../SW/MS/GS/???: procast methods for betareg, countreg, glm, gamlss, mgcv::gam, ...
-* scoring rules for fitted model objects:
-* in-sample vs. out-of-sample / aggregated vs. observation-wise contributions
-* out-of-sample logLik()/logs(), crps(), ..., discretized log-score
-
-## OLD TODO for procast()
-* Do we need/want support weights -> `newresponse()`?
-* Which `type`s should be supported?
-* Support types mean/expectation/response and variance/dispersion instead of location and scale.
-* In case `at = function`, it always returns a named vector. Do we want that?
