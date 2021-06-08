@@ -1,5 +1,5 @@
 url: "https://topmodels.R-Forge.R-project.org/"
-destination: "../www/"
+destination: "../../www/"
 
 template:
   assets: "pkgdown/assets/"
