@@ -9,18 +9,15 @@ _&#x3c;&#x41;&#x63;&#x68;&#x69;&#x6d;&#x2e;&#x5a;&#x65;&#x69;&#x6c;&#x65;&#x69;&
 
 For discussions we also try to follow these channels:
 
-- [StackOverflow](https://stackoverflow.com/questions/tagged/standard-error) with `[standard-error]` and `[r]` tags (for questions about code/programming)
-- [StackExchange](https://stats.stackexchange.com/questions/tagged/robust-standard-error) with `[robust-standard-error]` and `[r]` tags (for questions about methods)
-- [Twitter](https://twitter.com/AchimZeileis) (include `@AchimZeileis`)
+- [StackOverflow](https://StackOverflow.com/questions/tagged/topmodels) with `topmodels` and `r` tags
+- [Twitter](https://twitter.com) (see the developers' handles below)
 - [R-help](https://stat.ethz.ch/mailman/listinfo/R-help) mailing list
 
 ## Authors
 
-- Moritz lang
-  <a href="https://orcid.org/0000-0003-0918-3766" target="orcid.widget"><span class="fab fa-orcid orcid"></span></a>
-  <a href="https://www.zeileis.org/"><span class="fa fa-user"></span></a>
-  <a href="http://github.com/zeileis/"><span class="fa fa-github"></span></a>
-  <a href="https://twitter.com/AchimZeileis"><span class="fa fa-twitter-square"></span></a>
+- Moritz N. Lang
+  <a href="https://orcid.org/0000-0002-2533-9903" target="orcid.widget"><span class="fab fa-orcid orcid"></span></a>
+  <a href="https://twitter.com/MoritzNLang"><span class="fa fa-twitter-square"></span></a>
 - Achim Zeileis
   <a href="https://orcid.org/0000-0003-0918-3766" target="orcid.widget"><span class="fab fa-orcid orcid"></span></a>
   <a href="https://www.zeileis.org/"><span class="fa fa-user"></span></a>

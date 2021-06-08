@@ -1,2 +1,6 @@
 TODO.md
 TODO.pdf
+^_pkgdown\.yml$
+^contact.md$
+vignettes/topmodels.Rmd
+

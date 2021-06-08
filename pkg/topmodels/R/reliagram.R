@@ -141,7 +141,7 @@ reliagram.default <- function(object,
   if (isFALSE(plot)) {
     plot <- "none"
   } else if (isTRUE(plot)) {
-    plot <- if ("package:ggplot2" %in% search()) "ggplot2" else "base"
+    plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
   } else if (!is.character(plot)) {
     plot <- "base"
   }
@@ -153,7 +153,7 @@ reliagram.default <- function(object,
 
   ## guess output class
   if (is.null(class)) {
-    class <- if ("package:tibble" %in% search()) "tibble" else "data.frame"
+    class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
@@ -392,7 +392,7 @@ c.reliagram <- function(...) {
   unc <- unlist(lapply(rval, function(r) attr(r, "unc")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
-    as.vector(sapply(rval, function(r) attr(r, "main")))
+    as.vector(unlist(lapply(rval, function(r) attr(r, "main"))))
   } else {
     make.unique(rep.int(nam, sapply(n, length)))
   }
@@ -1041,7 +1041,7 @@ autoplot.reliagram <- function(object,
         ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
           data = data.frame(
             x = mean(c(df$bin_lwr, df$bin_upr), na.rm = TRUE),
-            y = max(df$n_pred),
+            y = max(df$n_pred) + max(df$n_pred) * 0.15,
             label = paste0("n = ", sum(df$n_pred[df$n_pred >= df$minimum], na.rm = TRUE))
           ),
           inherit.aes = FALSE, size = 4

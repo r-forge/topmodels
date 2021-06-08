@@ -205,7 +205,7 @@ rootogram.default <- function(object,
   if (isFALSE(plot)) {
     plot <- "none"
   } else if (isTRUE(plot)) {
-    plot <- if ("package:ggplot2" %in% search()) "ggplot2" else "base"
+    plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
   } else if (!is.character(plot)) {
     plot <- "base"
   }
@@ -217,7 +217,7 @@ rootogram.default <- function(object,
 
   ## guess output class
   if (is.null(class)) {
-    class <- if ("package:tibble" %in% search()) "tibble" else "data.frame"
+    class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
