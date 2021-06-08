@@ -1,7 +1,68 @@
+#' (Randomized) Quantile Residuals
+#' 
+#' Generic function and methods for computing (randomized) quantile residuals.
+#' 
+#' (Randomized) quantile residuals have been suggested by Dunn and Smyth
+#' (1996). For regression models with a continuous response distribution this
+#' simply computes theoretical standard normal quantiles corresponding to the
+#' probability integral transform of the fitted distribution. For discrete
+#' distributions, a random theoretical normal quantile is drawn from the range
+#' of probabilities corresponding to each observation. Hence, in \code{qqrplot}
+#' the default is to use \code{trafo = qnorm} but other transformations can
+#' also be used, specifically using the uniform probability scale (via
+#' \code{trafo = NULL} or equivalently \code{qunif} or \code{identity}).
+#' 
+#' The default \code{qresiduals} method can compute randomized quantile
+#' residuals from a vector (which essentially just calls
+#' \code{\link[stats]{qnorm}}) or a 2-column matrix of probabilities. The
+#' latter offers to either draw \code{"random"} samples from the distribution
+#' or compute corresponding \code{"quantile"}s such as the median etc.
+#' 
+#' @aliases qresiduals qresiduals.default
+#' @param object an object. For the \code{default} method this needs to be
+#' either a specification of probabilities (vector or 2-dimensional matrix of
+#' probabilities) or an object from which the these can be obtained with
+#' \code{\link{procast}}.
+#' @param newdata optionally, a data frame in which to look for variables with
+#' which to predict. If omitted, the original observations are used.
+#' @param trafo function for tranforming residuals from probability scale to a
+#' different distribution scale (default: Gaussian).
+#' @param type character specifying whether - in the case of discrete response
+#' distributions - randomized quantile residuals or their corresponding
+#' quantiles should be computed.
+#' @param nsim numeric. The number of simulated randomized quantile residuals
+#' per observation (for \code{type = "numeric"}).
+#' @param delta numeric. The minimal difference to compute the range of
+#' proabilities corresponding to each observation according to get (randomized)
+#' quantile residuals.  For \code{NULL}, the minimal observed difference in the
+#' resonse divided by \code{5e-6} is used.
+#' @param prob numeric. The probabilities at which quantile residuals should be
+#' computed (for \code{type = "quantile"}), defaulting to the median
+#' (\code{0.5}).
+#' @param \dots further parameters passed to methods.
+#' @return A vector or matrix of quantile residuals.
+#' @note Note that there is also a \code{\link[statmod]{qresiduals}} function
+#' in the \pkg{statmod} package that is not generic and always returns a single
+#' random quantile residual.
+#' @seealso \code{\link[stats]{qnorm}}, \code{\link{qqrplot}}
+#' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
+#' Residuals.} \emph{Journal of Computational and Graphical Statistics},
+#' \bold{5}, 1--10.
+#' @keywords regression
+#' @examples
+#' 
+#' ## linear regression models (homoscedastic Gaussian response)
+#' m <- lm(dist ~ speed, data = cars)
+#' qresiduals(m)
+#' 
+#' @export
 qresiduals <- function(object, ...) {
   UseMethod("qresiduals")
 }
 
+#' @rdname qresiduals
+#' @method qresiduals default
+#' @export
 qresiduals.default <- function(object, 
                                newdata = NULL, 
                                trafo = qnorm, 

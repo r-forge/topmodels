@@ -1,19 +1,97 @@
-## Programming outline: Wormplot
-##
-## - Showing the difference between the empirical quantile and
-##   the unit normal quantile following Van Buuren and Fredriks (2001)
-##
-## Functions:
-## - wormplot() generic plus default method
-## - Return object of class "wormplot" that is plotted by default
-## - But has plot=FALSE so that suitable methods can be added afterwards
-## - At least methods: plot(), autoplot()
+# -------------------------------------------------------------------
+# Programming outline: Wormplot
+# -------------------------------------------------------------------
+# - Showing the difference between the empirical quantile and
+#   the unit normal quantile following Van Buuren and Fredriks (2001)
+#
+# Functions:
+# - wormplot() generic plus default method
+# - Return object of class "wormplot" that is plotted by default
+# - But has plot=FALSE so that suitable methods can be added afterwards
+# - At least methods: plot(), autoplot()
+# -------------------------------------------------------------------
 
+
+#' Worm Plots for Quantile Residuals
+#' 
+#' Visualize goodness of fit of regression models by Worm plots using quantile
+#' residuals.
+#' 
+#' FIXME: Q-Q residual draw quantile residuals (by default: transformed to
+#' standard normal scale) against theoretical quantiles from the same
+#' distribution. Alternatively, transformations to other distributions can also
+#' be used, specifically using no transformation at all, i.e., remaining on the
+#' uniform scale (via \code{trafo = NULL} or equivalently \code{qunif} or
+#' \code{identity}).
+#' 
+#' Additional options are offered for models with discrete responses where
+#' randomization of quantiles is needed.
+#' 
+#' @aliases wormplot wormplot.default plot.wormplot points.wormplot c.wormplot
+#' autoplot.wormplot
+#' @param object an object (for which a \code{\link{qresiduals}} method
+#' exists).
+#' @param newdata optionally, a data frame in which to look for variables with
+#' which to predict. If omitted, the original observations are used.
+#' @param plot Should the \code{plot} or \code{autoplot} method be called to
+#' draw the computed worm plot? Either set \code{plot} expicitly to "base" vs.
+#' "ggplot2" to choose the type of plot, or for a logical \code{plot} argument
+#' it's chosen conditional if the package \code{ggplot2} is loaded.
+#' @param class Should the invisible return value be either a \code{data.frame}
+#' or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
+#' "tibble", or for NULL it's chosen automatically conditional if the package
+#' \code{tibble} is loaded.
+#' @param trafo function for tranforming residuals from probability scale to a
+#' different distribution scale (default: Gaussian).
+#' @param nsim,delta arguments passed to \code{qresiduals}.
+#' @param confint logical or quantile specification. Should the range of
+#' quantiles of the randomized quantile residuals be visualized? If
+#' \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.
+#' @param confint_level numeric. The confidence level required.
+#' @param confint_nsim numeric. The number of simulated quantiles.
+#' @param confint_seed numeric. The seed to be set for calculating the
+#' confidence interval.
+#' @param single_graph logical. Should all computed extended reliability
+#' diagrams be plotted in a single graph?
+#' @param xlab,ylab,main,\dots graphical plotting parameters passed to
+#' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
+#' respectively.
+#' @param x,ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
+#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' @param colour,size,shape,linetype,legend graphical parameters passed for 
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
+#' @return An list is returned invisibly with: \item{normal}{the theoretical
+#' normal quantiles,} \item{residuals}{the empirical quantile residuals.}
+#' @seealso \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' @references FIXME: Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
+#' Residuals.} \emph{Journal of Computational and Graphical Statistics},
+#' \bold{5}, 1--10.
+#' @keywords hplot
+#' @examples
+#' 
+#' data("CrabSatellites", package = "countreg")
+#' CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+#' 
+#' m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
+#' m3 <- lm(dist ~ speed, data = cars)
+#' 
+#' w1 <- wormplot(m1, nsim = 100, confint = TRUE)
+#' w2 <- wormplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
+#' w3 <- wormplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
+#' 
+#' plot(c(w1, w2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
+#' points(w3, col = "lightblue")
+#' 
+#' @export
 wormplot <- function(object, ...) {
   UseMethod("wormplot")
 }
 
 
+#' @rdname wormplot
+#' @method wormplot default
+#' @export
 wormplot.default <- function(object,
                              newdata = NULL,
                              plot = TRUE,
@@ -192,7 +270,10 @@ wormplot.default <- function(object,
 }
 
 
-c.wormplot <- rbind.wormplot <- function(...) {
+#' @rdname wormplot
+#' @method c wormplot
+#' @export
+c.wormplot <- function(...) {
   # -------------------------------------------------------------------
   # GET DATA
   # -------------------------------------------------------------------
@@ -280,6 +361,15 @@ c.wormplot <- rbind.wormplot <- function(...) {
 }
 
 
+#' @rdname wormplot
+#' @method rbind wormplot
+#' @export
+rbind.wormplot <- c.wormplot
+
+
+#' @rdname wormplot
+#' @method plot wormplot
+#' @export
 plot.wormplot <- function(x,
                           single_graph = FALSE,
                           confint = TRUE,
@@ -468,6 +558,9 @@ plot.wormplot <- function(x,
 }
 
 
+#' @rdname wormplot
+#' @method points wormplot
+#' @export
 points.wormplot <- function(x,
                             confint = FALSE,
                             ref = FALSE,
@@ -566,6 +659,9 @@ points.wormplot <- function(x,
 }
 
 
+#' @rdname wormplot
+#' @method autoplot wormplot
+#' @exportS3Method ggplot2::autoplot
 autoplot.wormplot <- function(object,
                               single_graph = FALSE,
                               confint = TRUE,

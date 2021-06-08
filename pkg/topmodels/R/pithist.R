@@ -1,31 +1,124 @@
-## Programming outline: PIT histogram
-##
-## - Observed y in-sample or out-of-sample (n x 1)
-## - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2)
-## - Two columns can be essentially equal -> continuous
-##   or different -> (partially) discrete
-## - Breaks for predicted probabilities in [0, 1] (m x 1)
-##
-## - Cut probabilities at breaks -> (m-1) groups and draw histogram
-## - In case of point masses either use a random draw
-##   or distribute evenly across relevant intervals
-## - Random draws could be drawn by hist() (current solution)
-##   but proportional distribution requires drawing rectangles by hand
-## - Add confidence interval as well.
-## - Instead of shaded rectangles plus reference line and CI lines
-##   support shaded CI plus step lines
+# -------------------------------------------------------------------
+# Programming outline: PIT histogram
+# -------------------------------------------------------------------
+# - Observed y in-sample or out-of-sample (n x 1)
+# - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2)
+# - Two columns can be essentially equal -> continuous
+#   or different -> (partially) discrete
+# - Breaks for predicted probabilities in [0, 1] (m x 1)
+#
+# - Cut probabilities at breaks -> (m-1) groups and draw histogram
+# - In case of point masses either use a random draw
+#   or distribute evenly across relevant intervals
+# - Random draws could be drawn by hist() (current solution)
+#   but proportional distribution requires drawing rectangles by hand
+# - Add confidence interval as well.
+# - Instead of shaded rectangles plus reference line and CI lines
+#   support shaded CI plus step lines
 
-## Functions:
-## - pithist() generic plus default method
-## - Return object of class "pithist" that is plotted by default
-## - But has plot=FALSE so that suitable methods can be added afterwards
-## - At least methods: plot(), autoplot(), lines(), possibly c(), +
+# Functions:
+# - pithist() generic plus default method
+# - Return object of class "pithist" that is plotted by default
+# - But has plot=FALSE so that suitable methods can be added afterwards
+# - At least methods: plot(), autoplot(), lines(), possibly c(), +
+# -------------------------------------------------------------------
 
+
+#' PIT Histograms for Assessing Goodness of Fit of Probability Models
+#' 
+#' PIT histograms graphically compare empirical probabilities from fitted
+#' models with a uniform distribution.
+#' 
+#' PIT histograms graphically the probability integral transform (PIT), i.e.,
+#' observed probabilities from fitted probability models, with a uniform
+#' distribution. It leverages the \code{\link{procast}} generic and then
+#' essentially draws a \code{\link[graphics]{hist}}.
+#' 
+#' In case of discrete distributions the PIT is either drawn randomly from the
+#' corresponding interval or distributed proportionally in the histogram
+#' (FIXME: not yet implemented).
+#' 
+#' @aliases pithist pithist.default plot.pithist lines.pithist c.pithist
+#' autoplot.pithist
+#' @param object an object from which probability integral transforms can be
+#' extracted with \code{\link{procast}}.
+#' @param newdata optionally, a data frame in which to look for variables with
+#' which to predict. If omitted, the original observations are used.
+#' @param plot Should the \code{plot} or \code{autoplot} method be called to
+#' draw the computed extended reliability diagram? Either set \code{plot}
+#' expicitly to "base" vs. "ggplot2" to choose the type of plot, or for a
+#' logical \code{plot} argument it's chosen conditional if the package
+#' \code{ggplot2} is loaded.
+#' @param class Should the invisible return value be either a \code{data.frame}
+#' or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
+#' "tibble", or for NULL it's chosen automatically conditional if the package
+#' \code{tibble} is loaded.
+#' @param style character specifying the syle of rootogram (see below). FIXME:
+#' Description
+#' @param type character. In case of discrete distributions should the PITs be
+#' drawn randomly from the corresponding interval or distributed
+#' proportionally?
+#' @param nsim integer. If \code{type} is \code{"random"} how many simulated
+#' PITs should be drawn?
+#' @param delta numeric. The minimal difference to compute the range of
+#' proabilities corresponding to each observation according to get (randomized)
+#' quantile residuals.  For \code{NULL}, the minimal observed difference in the
+#' resonse divided by \code{5e-6} is used.
+#' @param freq logical. If \code{TRUE}, the PIT histogram is represented by
+#' frequencies, the \code{counts} component of the result; if \code{FALSE},
+#' probability densities, component \code{density}, are plotted (so that the
+#' histogram has a total area of one).
+#' @param breaks numeric. Breaks for the histogram intervals.
+#' @param confint logical. Should confident intervals be drawn?
+#' @param confint_level numeric. The confidence level required.
+#' @param confint_type character. Which type of confidence interval.  According
+#' to Agresti and Coull (1998) for interval estimation of binomial proportions
+#' an approximation can be better than exact.
+#' @param single_graph logical. Should all computed extended reliability
+#' diagrams be plotted in a single graph?
+#' @param xlim,ylim graphical parameters. These may pertain either to the whole
+#' plot or just the histogram or just the fitted line.
+#' @param xlab,ylab,main graphical parameters.
+#' @param \dots further graphical parameters.
+#' @param x,ref,col,fill,border,alpha_min,lwd,lty,axes,box additional graphical
+#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' @param colour,size,linetype,legend graphical parameters passed for 
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
+#' @seealso \code{\link{procast}}, \code{\link[graphics]{hist}}
+#' @references Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
+#' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
+#' 
+#' Agresti A, Coull A B (1998). \dQuote{Approximate is Better than ``Exact''
+#' for Interval Estimation of Binomial Proportions.} \emph{The American
+#' Statistician}, \bold{52}(2), 119--126.
+#' @keywords hplot
+#' @examples
+#' 
+#' require("crch")
+#' m1 <- lm(dist ~ speed, data = cars)
+#' m2 <- crch(dist ~ speed | speed, data = cars)
+#' m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+#' 
+#' pit1 <- pithist(m1)
+#' pit2 <- pithist(m2, plot = FALSE)
+#' pit3 <- pithist(m3, plot = FALSE)
+#' 
+#' plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
+#' 
+#' plot(c(pit1, pit2, pit3), col = c(1, 2, 3), style = "lines")
+#' 
+#' plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE)
+#' lines(pit3, col = 3)
+#' 
+#' @export
 pithist <- function(object, ...) {
   UseMethod("pithist")
 }
 
 
+#' @rdname pithist
+#' @method pithist default
+#' @export
 pithist.default <- function(object,
                             newdata = NULL,
                             plot = TRUE,
@@ -196,7 +289,10 @@ pithist.default <- function(object,
 }
 
 
-c.pithist <- rbind.pithist <- function(...) {
+#' @rdname pithist
+#' @method c pithist
+#' @export
+c.pithist <- function(...) {
   # -------------------------------------------------------------------
   # GET DATA
   # -------------------------------------------------------------------
@@ -265,6 +361,15 @@ c.pithist <- rbind.pithist <- function(...) {
 }
 
 
+#' @rdname pithist
+#' @method rbind pithist
+#' @export
+rbind.pithist <- c.pithist
+
+
+#' @rdname pithist
+#' @method plot pithist
+#' @export
 plot.pithist <- function(x,
                          single_graph = FALSE,
                          style = c("histogram", "lines"),
@@ -554,6 +659,9 @@ plot.pithist <- function(x,
 }
 
 
+#' @rdname pithist
+#' @method lines pithist
+#' @export
 lines.pithist <- function(x,
                           confint = FALSE,
                           ref = FALSE,
@@ -650,12 +758,14 @@ lines.pithist <- function(x,
 }
 
 
+#' @rdname pithist
+#' @method autoplot pithist
+#' @exportS3Method ggplot2::autoplot
 autoplot.pithist <- function(object,
                              single_graph = FALSE,
                              style = c("histogram", "lines"),
                              confint = TRUE,
                              ref = TRUE,
-                             legend = FALSE,
                              xlim = c(0, 1),
                              ylim = c(0, NA),
                              xlab = NULL,
@@ -667,6 +777,7 @@ autoplot.pithist <- function(object,
                              alpha_min = 0.2,
                              size = NULL,
                              linetype = 1,
+                             legend = FALSE,
                              ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
