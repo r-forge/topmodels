@@ -1,0 +1,37 @@
+url: "https://topmodels.R-Forge.R-project.org/"
+destination: "../www/"
+
+template:
+  assets: "pkgdown/assets/"
+  opengraph:
+    image:
+      src: logo.png
+    twitter:
+      creator: "@AchimZeileis"
+      card: summary
+
+navbar:
+  left:
+    - text: "Get started"
+      href: articles/topmodels.html
+    - text: "Reference"
+      href: reference/index.html
+    - text: "Changelog"
+      href: news/index.html
+    - text: "Contact"
+      href: contact.html
+
+reference:
+  - title: "Diagnostic graphics"
+    contents: 
+      - pithist
+      - qqrplot
+      - reliagram
+      - rootogram
+      - wormplot
+      - topmodels
+  - title: "Procast infrastructure"
+    contents: 
+      - procast
+      - qresiduals
+      - newresponse

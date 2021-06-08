@@ -1,0 +1,24 @@
+---
+title: "topmodels"
+author: "Moritz Lang, Achim Zeileis"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+vignette: >
+  %\VignetteIndexEntry{topmodels}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{topmodels,crch,ggplot2}
+  %\VignetteKeywords{FIXME}
+  %\VignettePackage{topmodels}
+---
+
+```{r preliminaries, echo=FALSE, message=FALSE}
+library("topmodels")
+options(digits = 4)
+```
+
+## Overview
+
+FIXME
