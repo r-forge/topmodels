@@ -38,8 +38,7 @@
 #' corresponding interval or distributed proportionally in the histogram
 #' (FIXME: not yet implemented).
 #' 
-#' @aliases pithist pithist.default plot.pithist lines.pithist c.pithist
-#' autoplot.pithist
+#' @aliases pithist pithist.default c.pithist
 #' @param object an object from which probability integral transforms can be
 #' extracted with \code{\link{procast}}.
 #' @param newdata optionally, a data frame in which to look for variables with
@@ -80,10 +79,6 @@
 #' plot or just the histogram or just the fitted line.
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters.
-#' @param x,ref,col,fill,border,alpha_min,lwd,lty,axes,box additional graphical
-#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
-#' @param colour,size,linetype,legend graphical parameters passed for 
-#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @seealso \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
 #' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
@@ -289,8 +284,6 @@ pithist.default <- function(object,
 }
 
 
-#' @rdname pithist
-#' @method c pithist
 #' @export
 c.pithist <- function(...) {
   # -------------------------------------------------------------------
@@ -361,14 +354,65 @@ c.pithist <- function(...) {
 }
 
 
-#' @rdname pithist
-#' @method rbind pithist
 #' @export
 rbind.pithist <- c.pithist
 
 
-#' @rdname pithist
-#' @method plot pithist
+#' Plotting a PIT Histogram
+#' 
+#' PIT histograms graphically compare empirical probabilities from fitted
+#' models with a uniform distribution.
+#' 
+#' PIT histograms graphically the probability integral transform (PIT), i.e.,
+#' observed probabilities from fitted probability models, with a uniform
+#' distribution. It leverages the \code{\link{procast}} generic and then
+#' essentially draws a \code{\link[graphics]{hist}}.
+#' 
+#' In case of discrete distributions the PIT is either drawn randomly from the
+#' corresponding interval or distributed proportionally in the histogram
+#' (FIXME: not yet implemented).
+#' 
+#' @aliases plot.pithist lines.pithist autoplot.pithist
+#' @param object,x an object of class \code{pithist}.
+#' @param single_graph logical. Should all computed extended reliability
+#' diagrams be plotted in a single graph?
+#' @param style character specifying the syle of rootogram (see below). FIXME:
+#' Description
+#' @param confint logical. Should confident intervals be drawn?
+#' @param xlim,ylim graphical parameters. These may pertain either to the whole
+#' plot or just the histogram or just the fitted line.
+#' @param xlab,ylab,main graphical parameters.
+#' @param \dots further graphical parameters.
+#' @param ref,col,fill,border,alpha_min,lwd,lty,axes,box additional graphical
+#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' @param colour,size,linetype,legend graphical parameters passed for 
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
+#' @seealso \code{\link{procast}}, \code{\link[graphics]{hist}}
+#' @references Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
+#' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
+#' 
+#' Agresti A, Coull A B (1998). \dQuote{Approximate is Better than ``Exact''
+#' for Interval Estimation of Binomial Proportions.} \emph{The American
+#' Statistician}, \bold{52}(2), 119--126.
+#' @keywords hplot
+#' @examples
+#' 
+#' require("crch")
+#' m1 <- lm(dist ~ speed, data = cars)
+#' m2 <- crch(dist ~ speed | speed, data = cars)
+#' m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+#' 
+#' pit1 <- pithist(m1)
+#' pit2 <- pithist(m2, plot = FALSE)
+#' pit3 <- pithist(m3, plot = FALSE)
+#' 
+#' plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
+#' 
+#' plot(c(pit1, pit2, pit3), col = c(1, 2, 3), style = "lines")
+#' 
+#' plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE)
+#' lines(pit3, col = 3)
+#' 
 #' @export
 plot.pithist <- function(x,
                          single_graph = FALSE,
@@ -659,7 +703,7 @@ plot.pithist <- function(x,
 }
 
 
-#' @rdname pithist
+#' @rdname plot.pithist
 #' @method lines pithist
 #' @export
 lines.pithist <- function(x,
@@ -758,7 +802,7 @@ lines.pithist <- function(x,
 }
 
 
-#' @rdname pithist
+#' @rdname plot.pithist
 #' @method autoplot pithist
 #' @exportS3Method ggplot2::autoplot
 autoplot.pithist <- function(object,
