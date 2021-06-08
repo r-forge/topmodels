@@ -9,11 +9,6 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-"
 )
 options(digits = 4)
-library("topmodels")
-data("CrabSatellites", package = "countreg")
-CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
-
-m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 ```
 
 ## Infrastructure for Inference and Forecasting in Probabilistic Models
@@ -27,6 +22,13 @@ Modular object-oriented implementation with support for many model objects, incl
 `lm`, `glm`, `crch`, `disttree`, and more to come.
 
 ```{r topmodels, echo=FALSE, results="hide"}
+library("topmodels")
+library("ggplot2")
+data("CrabSatellites", package = "countreg")
+CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+
+m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+
 theme_set(theme_minimal())
 svg(filename = paste0(file.path(getwd(), "man", "figures"), "/README-topmodels.svg"),
   width = 9, height = 7.5)
