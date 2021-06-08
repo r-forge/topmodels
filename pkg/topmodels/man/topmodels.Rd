@@ -14,6 +14,7 @@ topmodels(
   ask = dev.interactive(),
   spar = TRUE,
   single_page = NULL,
+  envir = parent.frame(),
   ...
 )
 }
@@ -54,6 +55,8 @@ be ignored for \code{ggplot2} style graphics.}
 \item{single_page}{Logical. Should all plots be shown on a single page? Only
 choice for \code{ggplot2} style graphics.}
 
+\item{envir}{environment, default is \code{parent.frame()}}
+
 \item{\dots}{Arguments to be passed to \code{\link{rootogram}},
 \code{\link{pithist}}, \code{\link{reliagram}}, \code{\link{qqrplot}}, and
 \code{\link{wormplot}}.}
@@ -77,15 +80,15 @@ m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
 
 ## base graphics
-topmodels(m1, pages = 1, plot = "base")
-topmodels(m1, pages = 1, nsim = 10, plot = "base")
-topmodels(m1, pages = 1, nsim = 30, fill = 2, plot = "base")
-topmodels(m1, pages = 1, nsim = 30, ref = 2, plot = "base")
-topmodels(m1, pages = 1, nsim = 30, fill =2, add_hist = 2, plot = "base")
+topmodels(m1, single_page = TRUE, plot = "base")
+topmodels(m1, single_page = TRUE, nsim = 10, plot = "base")
+topmodels(m1, single_page = TRUE, nsim = 30, fill = 2, plot = "base")
+topmodels(m1, single_page = TRUE, nsim = 30, ref = 2, plot = "base")
+topmodels(m1, single_page = TRUE, nsim = 30, fill =2, add_hist = 2, plot = "base")
 
 ## ggplot2 graphics
-topmodels(m1, pages = 1, nsim = 30, plot = "ggplot2")
-topmodels(m2, pages = 1, nsim = 30, plot = "ggplot2")
+topmodels(m1, single_page = TRUE, nsim = 30, plot = "ggplot2")
+topmodels(m2, single_page = TRUE, nsim = 30, plot = "ggplot2")
 
 
 }

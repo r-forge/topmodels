@@ -32,6 +32,7 @@
 #' \code{ggplot2} style graphics.
 #' @param single_page Logical. Should all plots be shown on a single page? Only
 #' choice for \code{ggplot2} style graphics.
+#' @param envir environment, default is \code{parent.frame()}
 #' @param \dots Arguments to be passed to \code{\link{rootogram}},
 #' \code{\link{pithist}}, \code{\link{reliagram}}, \code{\link{qqrplot}}, and
 #' \code{\link{wormplot}}.
@@ -46,15 +47,15 @@
 #' m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
 #' 
 #' ## base graphics
-#' topmodels(m1, pages = 1, plot = "base")
-#' topmodels(m1, pages = 1, nsim = 10, plot = "base")
-#' topmodels(m1, pages = 1, nsim = 30, fill = 2, plot = "base")
-#' topmodels(m1, pages = 1, nsim = 30, ref = 2, plot = "base")
-#' topmodels(m1, pages = 1, nsim = 30, fill =2, add_hist = 2, plot = "base")
+#' topmodels(m1, single_page = TRUE, plot = "base")
+#' topmodels(m1, single_page = TRUE, nsim = 10, plot = "base")
+#' topmodels(m1, single_page = TRUE, nsim = 30, fill = 2, plot = "base")
+#' topmodels(m1, single_page = TRUE, nsim = 30, ref = 2, plot = "base")
+#' topmodels(m1, single_page = TRUE, nsim = 30, fill =2, add_hist = 2, plot = "base")
 #' 
 #' ## ggplot2 graphics
-#' topmodels(m1, pages = 1, nsim = 30, plot = "ggplot2")
-#' topmodels(m2, pages = 1, nsim = 30, plot = "ggplot2")
+#' topmodels(m1, single_page = TRUE, nsim = 30, plot = "ggplot2")
+#' topmodels(m2, single_page = TRUE, nsim = 30, plot = "ggplot2")
 #' 
 #' 
 #' @export 
@@ -67,6 +68,7 @@ topmodels <- function(object,
                       ask = dev.interactive(), # FIXME: (ML) Does not work for ggplot.
                       spar = TRUE, # FIXME: (ML) What does this do? Needed? Does not work for ggplot.
                       single_page = NULL, # FIXME: (ML) Does not work for ggplot.
+                      envir = parent.frame(),
                       ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -75,7 +77,7 @@ topmodels <- function(object,
   if (isFALSE(plot)) {
     plot <- "none"
   } else if (isTRUE(plot)) {
-    plot <- if ("package:ggplot2" %in% search()) "ggplot2" else "base"
+    plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
   } else if (!is.character(plot)) {
     plot <- "base"
   }
@@ -87,7 +89,7 @@ topmodels <- function(object,
 
   ## guess output class
   if (is.null(class)) {
-    class <- if ("package:tibble" %in% search()) "tibble" else "data.frame"
+    class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
@@ -239,22 +241,22 @@ topmodels <- function(object,
   rval <- list()
   if (plot == "base") {
     ## calculate and plot
-    if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
-    if ("pithist" %in% which) rval$pithist <- do.call(pithist, arg[[2]])
-    if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
-    if ("qqrplot" %in% which) rval$qqrplot <- do.call(qqrplot, arg[[4]])
-    if ("wormplot" %in% which) rval$wormplot <- do.call(wormplot, arg[[5]])
+    if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]], envir = envir)
+    if ("pithist" %in% which) rval$pithist <- do.call(pithist, arg[[2]], envir = envir)
+    if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]], envir = envir)
+    if ("qqrplot" %in% which) rval$qqrplot <- do.call(qqrplot, arg[[4]], envir = envir)
+    if ("wormplot" %in% which) rval$wormplot <- do.call(wormplot, arg[[5]], envir = envir)
   } else {
     ## first calculate
     arg <- lapply(arg, function(x) {
       x$plot <- FALSE
       x
     })
-    if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]])
-    if ("pithist" %in% which) rval$pithist <- do.call(pithist, arg[[2]])
-    if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]])
-    if ("qqrplot" %in% which) rval$qqrplot <- do.call(qqrplot, arg[[4]])
-    if ("wormplot" %in% which) rval$wormplot <- do.call(wormplot, arg[[5]])
+    if ("rootogram" %in% which) rval$rootogram <- do.call(rootogram, arg[[1]], envir = envir)
+    if ("pithist" %in% which) rval$pithist <- do.call(pithist, arg[[2]], envir = envir)
+    if ("reliagram" %in% which) rval$reliagram <- do.call(reliagram, arg[[3]], envir = envir)
+    if ("qqrplot" %in% which) rval$qqrplot <- do.call(qqrplot, arg[[4]], envir = envir)
+    if ("wormplot" %in% which) rval$wormplot <- do.call(wormplot, arg[[5]], envir = envir)
 
     ## use return val as new object
     for (name in names(rval)) {

@@ -9,7 +9,7 @@
 * Set up homepage
 * One vignette 'get started'
 * One vignette 'technical specifications/framework'
-* One vignette per each graphical evaulation method
+* One vignette per each graphical evaluation method
 
 ### 1.3 Long term outlook
 * Provide `geom_()` for `ggplot2` instead/additionally to `autoplot()`
@@ -64,6 +64,8 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
 * In detail
     * Check again initilization for `glm` objects?
     * How should we handle values outside (truncation)/censoring points - these can lead to skewed PIT histograms.
+* `reliagram()`
+    * Implement additionally to absolute histogram a frquency histogram (for base and ggplot2).
 * `pithist()`
     * Implement proportional method (`type = "proportional"`)
     * Check again if we need two different CI computations
