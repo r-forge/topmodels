@@ -51,6 +51,7 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
     "score"),
   at = 0.5,
   drop = FALSE,
+  use_distfamily = TRUE,
   ...
 )
 
@@ -73,6 +74,7 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
     "score"),
   at = 0.5,
   drop = FALSE,
+  use_distfamily = TRUE,
   ...
 )
 }
@@ -108,6 +110,8 @@ frame.  Additionally, \code{at} can be the character string
 
 \item{drop}{logical. Should forecasts be returned in a data frame (default)
 or (if possible) dropped to a vector, see details below.}
+
+\item{use_distfamily}{For intern use only, will not be supported in the future.}
 }
 \value{
 Either a \code{data.frame} of predictions (in case of multivariate
