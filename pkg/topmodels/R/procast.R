@@ -385,9 +385,9 @@ procast.disttree <- function(object,
   # -------------------------------------------------------------------
   ## First if working for `NO()`
   ## FIXME: (ML) Extend for all families
-  if (object$info$family$family.name != "Normal Distribution") {
-    warning("So far not tested for specified family")
-  }
+  #if (object$info$family$family.name != "Normal Distribution") {
+  #  warning("So far not tested for specified family")
+  #}
 
   ## Get family
   family <- object$info$family
