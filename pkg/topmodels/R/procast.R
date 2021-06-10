@@ -367,6 +367,7 @@ procast.crch <- function(object,
 
 #' @rdname procast
 #' @method procast disttree
+#' @param use_distfamily For intern use only, will not be supported in the future.
 #' @export
 procast.disttree <- function(object,
                              newdata = NULL,
@@ -377,9 +378,8 @@ procast.disttree <- function(object,
                              ),
                              at = 0.5,
                              drop = FALSE,
-                             ...) { # FIXME: (ML) Additional parameters currently not always supported
-
-  use_internals <- TRUE # FIXME: (ML) Just for development
+                             use_distfamily = TRUE,
+                             ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES AND NECESSARY ARGUMENTS
   # -------------------------------------------------------------------
@@ -406,7 +406,8 @@ procast.disttree <- function(object,
   }
 
   ## Set up function that computes prediction from model parameters
-  if (use_internals == FALSE) {
+  if (!use_distfamily) {
+    warning("For `use_distfamily = FALSE`, `qnorm()`, `dnorm()`, and `pnorm()` are used")
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
       "location" = function(pars) pars$mu,
@@ -419,6 +420,21 @@ procast.disttree <- function(object,
     ## FIXME: (ML) `disttree` unfortunately does not support a vector of parameters!
     ## Here ugly workaround, which must be improved (probabily straight in `disstree`).
     FUN <- switch(type,
+      "quantile" = function(at, pars, ...) {
+        object <- cbind(at = at, pars)
+        rval <- sapply(
+          1:NROW(object),
+          function(idx) {
+            family$qdist(
+              p = as.numeric(object[idx, grepl("at", names(object))]),
+              eta = as.numeric(family$linkfun(object[idx, !grepl("at", names(object))])),
+              ...
+            )
+          }
+        ) 
+        rval <- if (NCOL(at) > 1) t(rval) else rval
+        return(rval)
+      },
       "quantile" = function(at, pars) {
         sapply(
           1:NROW(pars),
@@ -433,27 +449,35 @@ procast.disttree <- function(object,
       "location" = function(pars) pars$mu,
       "scale" = function(pars) pars$sigma,
       "parameter" = function(pars) pars,
-      "density" = function(at, pars) {
-        sapply(
-          1:NROW(pars),
-          function(i) {
+      "density" = function(at, pars, ...) {
+        object <- cbind(at = at, pars)
+        rval <- sapply(
+          1:NROW(object),
+          function(idx) {
             family$ddist(
-              y = at[i], eta = as.numeric(family$linkfun(pars[i, ])),
-              log = FALSE, weights = NULL, sum = FALSE
+              y = as.numeric(object[idx, grepl("at", names(object))]),
+              eta = as.numeric(family$linkfun(object[idx, !grepl("at", names(object))])),
+              ...
             )
           }
-        )
+        ) 
+        rval <- if (NCOL(at) > 1) t(rval) else rval
+        return(rval)
       },
-      "probability" = function(at, pars) {
-        sapply(
-          1:NROW(pars),
-          function(i) {
+      "probability" = function(at, pars, ...) {
+        object <- cbind(at = at, pars)
+        rval <- sapply(
+          1:NROW(object),
+          function(idx) {
             family$pdist(
-              q = at[i], eta = as.numeric(family$linkfun(pars[i, ])),
-              lower.tail = TRUE, log.p = FALSE
+              q = as.numeric(object[idx, grepl("at", names(object))]),
+              eta = as.numeric(family$linkfun(object[idx, !grepl("at", names(object))])),
+              ...
             )
           }
-        )
+        ) 
+        rval <- if (NCOL(at) > 1) t(rval) else rval
+        return(rval)
       }
     )
   }
