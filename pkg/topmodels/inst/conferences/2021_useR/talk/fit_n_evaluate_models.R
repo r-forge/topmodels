@@ -211,4 +211,8 @@ worm2_df1 <- wormplot(m_df1, newdata = test, plot = FALSE)
 autoplot(c("lm" = worm2_lm1, "random_forest" = worm2_df1),
   col = 1:2, fill = 1:2, single_graph = TRUE, legend = TRUE)
 
-
+save(root1_lm1, root1_df1, rel1_lm1, rel1_df1, 
+  pit1_lm1, pit1_df1, qq1_lm1, qq1_df1, worm1_lm1, worm1_df1, 
+  root2_lm1, root2_df1, rel2_lm1, rel2_df1, 
+  pit2_lm1, pit2_df1, qq2_lm1, qq2_df1, worm2_lm1, worm2_df1, 
+  file = "Data/topmodels_axams.rda")
