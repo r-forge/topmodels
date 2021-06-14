@@ -45,6 +45,7 @@
 \usepackage{graphicx}
 \usetikzlibrary{positioning,shapes,arrows,decorations.pathreplacing,calc,automata,mindmap,trees,tikzmark,decorations.pathreplacing}
 \usepackage{xcolor}
+\usepackage{fontawesome}
 \usepackage{ccicons}
 
 %% Define some new commands
@@ -382,7 +383,7 @@ based on \code{partykit}\\
 \begin{frame}
 \frametitle{Motivation}
 
-\vspace{-1em}
+\vspace{-0.75em}
 
 \textbf{Distributional:}
 \begin{itemize}
@@ -489,7 +490,7 @@ based on \code{partykit}\\
       %\item<3-> Only observations $\bold{x}_i$ in the same subgroup as a 
       %(new) observation $\bold{x}$ enter the parameter estimation.
       \item<2-> Weighted parameter estimation:\\The weight of observation $i$ for the parameter 
-        estimatation for a 
+        estimation for a 
         (new) observation $j$ is the mean of assignments to the same node.
       \end{enumerate}
       \end{minipage}
@@ -558,7 +559,7 @@ based on \code{partykit}\\
 \begin{frame}[fragile]
 \frametitle{Application}
 
-\vspace{-1em}
+\vspace{-0.75em}
 
 \textbf{Goal:} Probabilistic precipitation forecasting.
 
@@ -661,8 +662,8 @@ if(file.exists("Data/crps_cross.rda")){
 
 \begin{center}
 \vspace{-0.6cm}
-\setkeys{Gin}{width=0.6\textwidth}
-<<rain_cross_axams_crps_skills_score, fig=TRUE, echo=FALSE, height=5.0, width=7.4>>=
+\setkeys{Gin}{width=0.7\textwidth}
+<<rain_cross_axams_crps_skills_score, fig=TRUE, echo=FALSE, height=5.6, width=6.8>>=
 #par(mar = c(2.5,2,1,2))
 boxplot(1 - crps_cross[,c(2,3,4)] / crps_cross[,6], ylim = c(-0.005, 0.065),
         names = c("Distributional forest", "Prespecified GAMLSS", "Boosted GAMLSS"),
@@ -673,14 +674,6 @@ boxplot(1 - crps_cross[,c(2,3,4)] / crps_cross[,6], ylim = c(-0.005, 0.065),
 abline(h = 0, col = pal["EMOS"], lwd = 2)
 @
 \end{center}
-
-\vspace*{-0.3cm}
-<<echo=TRUE,eval=FALSE>>=
-m_lm <- lm(robs ~ tppow_mean, data = RainAxams)
-m_df <- distforest(robs ~ ., 
-                 family = dist_list_cens_normal, 
-                 data = RainAxams, ...)
-@
 \end{frame}
 
 
@@ -704,20 +697,34 @@ if(file.exists("Data/topmodels_axams.rda")){
 \begin{frame}[fragile]
 \frametitle{Graphical assessment}
 
-\vspace{-1em}
+\vspace{-0.75em}
 
-\textbf{Rootogram:} 
+\textbf{Preliminaries:} 
 
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_df_rootogram, fig=TRUE, echo=FALSE, height=5.3, width=8.8>>=
-autoplot(root1_lm1, legend = TRUE)
-@
-\end{center}
-
-\vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-rootogram(m_lm, plot = "ggplot2", legend = TRUE)
+install.packages("disttree", repos="http://R-Forge.R-project.org")
+install.packages("topmodels", repos="http://R-Forge.R-project.org")
+@
+<<echo=TRUE,eval=FALSE>>=
+library("disttree")
+library("topmodels")
+@
+<<echo=TRUE,eval=FALSE>>=
+data("RainAxams", package = "disttree")
+@
+
+\vspace*{1em}
+
+\textbf{Model fitting:} 
+
+<<echo=TRUE,eval=FALSE>>=
+forest <- distforest(robs ~ ., 
+                     family = dist_list_cens_normal, 
+                     data = RainAxams, ...)
+
+@
+<<echo=TRUE,eval=FALSE>>=
+linear <- lm(robs ~ tppow_mean, data = RainAxams)
 @
 \end{frame}
 
@@ -726,20 +733,20 @@ rootogram(m_lm, plot = "ggplot2", legend = TRUE)
 \begin{frame}[fragile]
 \frametitle{Graphical assessment}
 
-\vspace{-1em}
+\vspace{-0.75em}
 
 \textbf{Rootogram:} 
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_lm_rootogram, fig=TRUE, echo=FALSE, height=5.3, width=8.8>>=
-autoplot(root1_df1, legend = TRUE)
+<<rain_topmodels_df_rootogram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(linear = root1_lm1), legend = TRUE)
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-rootogram(m_df, plot = "ggplot2", legend = TRUE)
+rootogram(linear, plot = "ggplot2", legend = TRUE)
 @
 \end{frame}
 
@@ -748,22 +755,45 @@ rootogram(m_df, plot = "ggplot2", legend = TRUE)
 \begin{frame}[fragile]
 \frametitle{Graphical assessment}
 
-\vspace{-1em}
+\vspace{-0.75em}
+
+\textbf{Rootogram:} 
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_topmodels_lm_rootogram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(forest = root1_df1), legend = TRUE)
+@
+\end{center}
+
+\vspace*{-0.3cm}
+<<echo=TRUE,eval=FALSE>>=
+rootogram(forest, plot = "ggplot2", legend = TRUE)
+@
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
 
 \textbf{Q-Q residuals plot:}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_qqrplot, fig=TRUE, echo=FALSE, height=5.3, width=8.8>>=
-autoplot(c(qq1_lm1, qq1_df1), single_graph = TRUE, legend = TRUE, col = 1:2)
+<<rain_topmodels_qqrplot, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(linear = qq1_lm1, forest = qq1_df1), 
+         single_graph = TRUE, legend = TRUE, col = 1:2)
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-q_df <- qqrplot(m_df, plot = FALSE)
-q_lm <- qqrplot(m_lm, plot = FALSE)
-autoplot(c(q_lm, q_df), single_graph = TRUE, legend = TRUE, col = 1:2)
+qq_forest <- qqrplot(forest, plot = FALSE)
+qq_lm <- qqrplot(linear, plot = FALSE)
+autoplot(c(qq_lm, qq_forest), single_graph = TRUE, legend = TRUE, col = 1:2, ...)
 @
 \end{frame}
 
@@ -772,20 +802,20 @@ autoplot(c(q_lm, q_df), single_graph = TRUE, legend = TRUE, col = 1:2)
 \begin{frame}[fragile]
 \frametitle{Graphical assessment}
 
-\vspace{-1em}
+\vspace{-0.75em}
 
 \textbf{PIT histogram:}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_df_pithist, fig=TRUE, echo=FALSE, height=5.3, width=8.8>>=
-autoplot(pit1_lm1, ref = 2, confint = 2, legend = TRUE)
+<<rain_topmodels_df_pithist, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(linear = pit1_lm1), ref = 2, confint = 2, legend = TRUE, size = 0.7)
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-pithist(m_lm, plot = "ggplot2")
+pithist(linear, plot = "ggplot2")
 @
 \end{frame}
 
@@ -794,20 +824,20 @@ pithist(m_lm, plot = "ggplot2")
 \begin{frame}[fragile]
 \frametitle{Graphical assessment}
 
-\vspace{-1em}
+\vspace{-0.75em}
 
 \textbf{PIT histogram:}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_lm_pithist, fig=TRUE, echo=FALSE, height=5.3, width=8.8>>=
-autoplot(pit1_df1, ref = 2, confint = 2, legend = TRUE)
+<<rain_topmodels_lm_pithist, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(forest = pit1_df1), ref = 2, confint = 2, legend = TRUE, size = 0.7)
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-pithist(m_df, plot = "ggplot2", legend = TRUE)
+pithist(forest, plot = "ggplot2", legend = TRUE)
 @
 \end{frame}
 
@@ -816,22 +846,22 @@ pithist(m_df, plot = "ggplot2", legend = TRUE)
 \begin{frame}[fragile]
 \frametitle{Graphical assessment}
 
-\vspace{-1em}
+\vspace{-0.75em}
 
 \textbf{Reliability diagram:}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_reliagram, fig=TRUE, echo=FALSE, height=5.3, width=8.8>>=
-autoplot(c(m_lm = rel1_lm1, m_df = rel1_df1), single_graph = TRUE, legend = TRUE, col = 1:2, confint = 1:2)
+<<rain_topmodels_reliagram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(linear = rel1_lm1, forest = rel1_df1), single_graph = TRUE, legend = TRUE, col = 1:2, confint = 1:2)
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-r_df <- reliagram(m_df, plot = FALSE)
-r_lm <- reliagram(m_lm, plot = FALSE)
-autoplot(c(r_lm, r_df), single_graph = TRUE, legend = TRUE, ...)
+rel_forest <- reliagram(forest, thresholds = 0, plot = FALSE)
+rel_lm <- reliagram(linear, thresholds = 0, plot = FALSE)
+autoplot(c(rel_lm, rel_forest), single_graph = TRUE, legend = TRUE, ...)
 @
 \end{frame}
 
@@ -843,15 +873,17 @@ autoplot(c(r_lm, r_df), single_graph = TRUE, legend = TRUE, ...)
 %% SLIDE
 \begin{frame}
 \frametitle{Software}
-\vspace{-1em}
-\textbf{Software:} \emph{disttree} and \emph{circtree} 
-available on R-Forge at\\
+\vspace{-0.75em}
+\textbf{disttree:} available on R-Forge at\\
 
 \medskip
 
-\small{\url{https://R-Forge.R-project.org/projects/partykit/}}\\ 
-%and\\
-%\url{https://R-Forge.R-project.org/projects/uibk-rprog-2018/}}\\
+\small{\url{https://R-Forge.R-project.org/projects/partykit/pkg/disttree/}}
+
+\bigskip
+\medskip
+
+\textbf{Concept:} Fusion of tree-based models with distributional modeling.
 
 \bigskip
 \medskip
@@ -869,13 +901,44 @@ available on R-Forge at\\
 & Covariates as partitioning variables.
 \end{tabular}
 
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}
+\frametitle{Software}
+\vspace{-0.75em}
+\textbf{topmodels}: available on R-Forge at\\
+
+\medskip
+
+\small{\url{https://topmodels.r-forge.r-project.org}}\\ 
+
 \bigskip
 \medskip
 
-\textbf{Correspondingly:} \code{circtree}, \code{circforest}
+\textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
+
+\bigskip
+\medskip
+
+\textbf{Main functions:}
+
+\medskip
+
+\begin{tabular}{ll}
+\code{procast}    & Probabilistic forecasts (\code{(g)lm}, \code{crch}, \code{disttree}, more to come).\\
+& Computation of probabilities, densities, scores, and Hessians. \\
+\code{rootogram}, \code{pithist},  & Plotting rootograms, PIT histograms,\\
+\code{reliagram}, \code{qqrplot}, \dots   & reliability diagrams, (randomized) Q-Q plots, \dots.\\
+\code{plot, autoplot}   & Generic \code{plot}, \code{autoplot} function.\\
+\code{c}   & Generic \code{concatenate} function to plot combined objects.
+\end{tabular}
+
+\bigskip
+\medskip
 
 \end{frame}
-
 
 %-------------------------------------------------------------------
 \subsection{References}
@@ -888,29 +951,36 @@ available on R-Forge at\\
 \vspace{-0.2cm}
 
 \footnotesize
+
+% Lang MN, Schlosser L, Hothorn T, Georg JM, Stauffer R, and Zeileis A (2020).
+% \dquote{Circular Regression Trees and Forests with an Application to Probabilistic Wind Direction Forecasting.}
+% \emph{Journal of the Royal Statistical Society C}, \textbf{69}(5), 1357--1374.
+%  \doi{10.1111/rssc.12437}
+%  
+% \medskip
+
 Schlosser L, Hothorn T, Stauffer R, Zeileis A (2019).
 \dquote{Distributional Regression Forests for Probabilistic Precipitation Forecasting in Complex Terrain.}
 \emph{The Annals of Applied Statistics}, \textbf{13}(3), 1564--1589.
 \doi{10.1214/19-AOAS1247}
- 
-\medskip
-
-Schlosser L, Lang MN, Hothorn T, Mayr GJ, Stauffer R, Zeileis A (2019).
-\dquote{Distributional Trees for Circular Data.}
-\emph{Proceedings of the 34th International Workshop on Statistical Modelling}, 
-\textbf{1}, 226--231.
-\url{https://eeecon.uibk.ac.at/~zeileis/papers/Schlosser+Lang+Hothorn-2019.pdf}
 
 \medskip
 
-Hothorn T, Zeileis A (2017).
-  \dquote{Transformation Forests.}
-  \emph{arXiv 1701.02110}, arXiv.org E-Print Archive.
-  \url{http://arxiv.org/abs/1701.02110}
-  
+Lang MN and Zeileis A (2021).
+\dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models}
+\emph{R package version 0.1-0}.
+\url{https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/}
+
 \bigskip
 \bigskip
-  
+
+Dunn PK, Smyth GK (1996).
+\dquote{Randomized Quantile Residuals.}
+\emph{Journal of Computational and Graphical Statistics}, \textbf{5}(3), 236--244.
+\doi{10.2307/1390802}
+
+\medskip
+
 Hothorn T, Hornik K, Zeileis A (2006).
  \dquote{Unbiased Recursive Partitioning: A Conditional Inference Framework.}
  \emph{Journal of Computational and Graphical Statistics},
@@ -919,21 +989,30 @@ Hothorn T, Hornik K, Zeileis A (2006).
  
 \medskip
 
+Kleiber C, Zeileis A (2016).  
+\dQuote{Visualizing Count Data Regressions Using Rootograms.} 
+\emph{The American Statistician}, 
+\textbf{70}(3), 296--303.
+\doi{10.1080/00031305.2016.1173590}
+
+\medskip
+
 Zeileis A, Hothorn T, Hornik K (2008).
  \dquote{Model-Based Recursive Partitioning.}
   \emph{Journal of Computational and Graphical Statistics},
   \textbf{17}(2), 492--514.
   \doi{10.1198/106186008X319331}
 
-\medskip
-
-Hothorn T, Zeileis A (2015).
- \dquote{{partykit}: A Modular Toolkit for Recursive Partytioning in \textsf{R}.}
- \emph{Journal of Machine Learning Research},
- \textbf{16}, 3905--3909.
- \url{http://www.jmlr.org/papers/v16/hothorn15a}
-
 \end{frame}
+
+
+%% SLIDE
+%%%
+\title[]{}
+\author[]{\footnotesize \faEnvelope\,\,\href{mailto:moritz.lang@uibk.ac.at}{moritz.lang@uibk.ac.at} \hspace{1em} \faTwitter\,\href{https://twitter.com/MoritzNLang}{MoritzNLang}}
+
+
+\section{Thank you}
 
 
 %-------------------------------------------------------------------
