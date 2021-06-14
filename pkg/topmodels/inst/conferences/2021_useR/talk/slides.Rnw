@@ -15,21 +15,21 @@
 
 %% Adapt URL font and set URL
 \setbeamerfont{url}{size*={11.5pt}{13pt},series=\mdseries}
-\URL{https://topmodels.R-Forge.R-project.org}
+\URL{http://topmodels.R-Forge.R-project.org}
 
 %% Adapt headerimage
-\renewcommand{\headerimage}[1]{%
-   \IfStrEqCase{#1}{%
-      {1}{%
-         \gdef\myheaderimageid{#1}%
-         \gdef\myheaderimageposition{nw}%
-         \gdef\myheaderimage{forest.jpg}%
-      }}[%
-         \gdef\myheaderimageid{1}%
-         \gdef\myheaderimageposition{nw}%
-         \gdef\myheaderimage{forest.jpg}%
-      ]%
-}
+% \renewcommand{\headerimage}[1]{%
+%    \IfStrEqCase{#1}{%
+%       {1}{%
+%          \gdef\myheaderimageid{#1}%
+%          \gdef\myheaderimageposition{nw}%
+%          \gdef\myheaderimage{forest.jpg}%
+%       }}[%
+%          \gdef\myheaderimageid{1}%
+%          \gdef\myheaderimageposition{nw}%
+%          \gdef\myheaderimage{forest.jpg}%
+%       ]%
+% }
 \headerimage{1}
 
 %% Add graphics path
@@ -427,9 +427,17 @@ based on \code{partykit}\\
       \item<10-> Repeat steps 1--4 recursively in the subgroups
         until some stopping criterion is met.
       \end{enumerate}
+    \vspace{0.1cm}
+      \visible<13->{
+      {\bf Forest:} Ensemble of $T$ trees.
+      \begin{itemize}
+      \item Bootstrap or subsamples.
+      \item Random input variable sampling.
+      \end{itemize}
+      }
       \end{minipage}
       \begin{minipage}{0.23\textwidth}
-      \vspace{-1.5cm}
+      \vspace{-3.45cm}
       \begin{tikzpicture}
       \visible<2-3>{
       \node[ellipse, fill=HighlightBlue!70, align=center, scale = 0.7, minimum width=71pt, minimum height = 30pt] (n0) at (0.8, 1.7) {$Y$};
@@ -475,80 +483,80 @@ based on \code{partykit}\\
 \end{frame}
 
 
-%% SLIDE
-\begin{frame}
-\frametitle{Learning distributional trees and forests}
-      \begin{minipage}{1\textwidth}
-   \vspace{-0.45em}
-      {\bf Forests:}
-      \begin{enumerate}
-      \item Learn an ensemble of $T$ trees:\\
-       Each tree is built on a bootstrap or subsample of the data, with
-      random input variable sampling.
-      \item<2-> Aggregate / average over estimated $T$ trees:\\
-      To stabilize and regularize the model.
-      %\item<3-> Only observations $\bold{x}_i$ in the same subgroup as a 
-      %(new) observation $\bold{x}$ enter the parameter estimation.
-      \item<2-> Weighted parameter estimation:\\The weight of observation $i$ for the parameter 
-        estimation for a 
-        (new) observation $j$ is the mean of assignments to the same node.
-      \end{enumerate}
-      \end{minipage}
-\begin{center}
-\minipage{0.38\textwidth}
-\vspace{0.5em}
-\resizebox{0.94\textwidth}{!}{
-\begin{tikzpicture}
-  \visible<3->{
-  \draw (11.1,5) node{\phantom{.}};
-  \draw (18.5,9) node{\phantom{.}};
-
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n0) at (12, 9) {};
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n1) at (11.5, 8) {\only<4->{$i, j$}};
-  \draw[-, line width=1pt] (n0) -- (n1);
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n2) at (12.5, 8) {};
-  \draw[-, line width=1pt] (n0) -- (n2);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n3) at (12, 7) {};
-  \draw[-, line width=1pt] (n2) -- (n3);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n4) at (13, 7) {};
-  \draw[-, line width=1pt] (n2) -- (n4);
-  }
-
-  \visible<5->{
-
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n1_0) at (12+3.25, 9) {};
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n1_1) at (11.5+3.25, 8) {};
-  \draw[-, line width=1pt] (n1_0) -- (n1_1);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n1_2) at (12.5+3.25, 8) {\only<6->{$i, j$}};
-  \draw[-, line width=1pt] (n1_0) -- (n1_2);
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n1_3) at (11+3.25, 7) {};
-  \draw[-, line width=1pt] (n1_1) -- (n1_3);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n1_4) at (12+3.25, 7) {};
-  \draw[-, line width=1pt] (n1_1) -- (n1_4);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n1_5) at (10.5+3.25, 6) {};
-  \draw[-, line width=1pt] (n1_3) -- (n1_5);
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n1_6) at (11.5+3.25, 6) {};
-  \draw[-, line width=1pt] (n1_3) -- (n1_6);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n1_7) at (11+3.25, 5) {};
-  \draw[-, line width=1pt] (n1_6) -- (n1_7);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n1_8) at (12+3.25, 5) {};
-  \draw[-, line width=1pt] (n1_6) -- (n1_8);
-
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n2_0) at (12+6, 9) {};
-  \node[ellipse, fill=HighlightBlue!70, align=center] (n2_1) at (11.5+6, 8) {};
-  \draw[-, line width=1pt] (n2_0) -- (n2_1);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n2_2) at (12.5+6, 8) {};
-  \draw[-, line width=1pt] (n2_0) -- (n2_2);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n2_3) at (11+6, 7) {\only<6->{$i\vphantom{j}$}};
-  \draw[-, line width=1pt] (n2_1) -- (n2_3);
-  \node[rectangle, fill=HighlightOrange!70, align=center] (n2_4) at (12+6, 7) {\only<6->{$j$}};
-  \draw[-, line width=1pt] (n2_1) -- (n2_4);
-  }
-\end{tikzpicture}
-}
-\endminipage
-\end{center}
-\end{frame}
+% %% SLIDE
+% \begin{frame}
+% \frametitle{Learning distributional trees and forests}
+%       \begin{minipage}{1\textwidth}
+%    \vspace{-0.45em}
+%       {\bf Forests:}
+%       \begin{enumerate}
+%       \item Learn an ensemble of $T$ trees:\\
+%        Each tree is built on a bootstrap or subsample of the data, with
+%       random input variable sampling.
+%       \item<2-> Aggregate / average over estimated $T$ trees:\\
+%       To stabilize and regularize the model.
+%       %\item<3-> Only observations $\bold{x}_i$ in the same subgroup as a 
+%       %(new) observation $\bold{x}$ enter the parameter estimation.
+%       \item<2-> Weighted parameter estimation:\\The weight of observation $i$ for the parameter 
+%         estimation for a 
+%         (new) observation $j$ is the mean of assignments to the same node.
+%       \end{enumerate}
+%       \end{minipage}
+% \begin{center}
+% \minipage{0.38\textwidth}
+% \vspace{0.5em}
+% \resizebox{0.94\textwidth}{!}{
+% \begin{tikzpicture}
+%   \visible<3->{
+%   \draw (11.1,5) node{\phantom{.}};
+%   \draw (18.5,9) node{\phantom{.}};
+% 
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n0) at (12, 9) {};
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n1) at (11.5, 8) {\only<4->{$i, j$}};
+%   \draw[-, line width=1pt] (n0) -- (n1);
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n2) at (12.5, 8) {};
+%   \draw[-, line width=1pt] (n0) -- (n2);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n3) at (12, 7) {};
+%   \draw[-, line width=1pt] (n2) -- (n3);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n4) at (13, 7) {};
+%   \draw[-, line width=1pt] (n2) -- (n4);
+%   }
+% 
+%   \visible<5->{
+% 
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n1_0) at (12+3.25, 9) {};
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n1_1) at (11.5+3.25, 8) {};
+%   \draw[-, line width=1pt] (n1_0) -- (n1_1);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n1_2) at (12.5+3.25, 8) {\only<6->{$i, j$}};
+%   \draw[-, line width=1pt] (n1_0) -- (n1_2);
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n1_3) at (11+3.25, 7) {};
+%   \draw[-, line width=1pt] (n1_1) -- (n1_3);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n1_4) at (12+3.25, 7) {};
+%   \draw[-, line width=1pt] (n1_1) -- (n1_4);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n1_5) at (10.5+3.25, 6) {};
+%   \draw[-, line width=1pt] (n1_3) -- (n1_5);
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n1_6) at (11.5+3.25, 6) {};
+%   \draw[-, line width=1pt] (n1_3) -- (n1_6);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n1_7) at (11+3.25, 5) {};
+%   \draw[-, line width=1pt] (n1_6) -- (n1_7);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n1_8) at (12+3.25, 5) {};
+%   \draw[-, line width=1pt] (n1_6) -- (n1_8);
+% 
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n2_0) at (12+6, 9) {};
+%   \node[ellipse, fill=HighlightBlue!70, align=center] (n2_1) at (11.5+6, 8) {};
+%   \draw[-, line width=1pt] (n2_0) -- (n2_1);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n2_2) at (12.5+6, 8) {};
+%   \draw[-, line width=1pt] (n2_0) -- (n2_2);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n2_3) at (11+6, 7) {\only<6->{$i\vphantom{j}$}};
+%   \draw[-, line width=1pt] (n2_1) -- (n2_3);
+%   \node[rectangle, fill=HighlightOrange!70, align=center] (n2_4) at (12+6, 7) {\only<6->{$j$}};
+%   \draw[-, line width=1pt] (n2_1) -- (n2_4);
+%   }
+% \end{tikzpicture}
+% }
+% \endminipage
+% \end{center}
+% \end{frame}
 
 
 %-------------------------------------------------------------------
@@ -569,7 +577,7 @@ based on \code{partykit}\\
 \textbf{Observation data:}
 \begin{itemize}
 \item Daily 24h precipitation sums from July over 28 years (1985--2012).
-\item 95 observation stations in Tyrol, Austria.
+\item Observation station ``Axams'' in Tyrol, Austria.
 \end{itemize}
 
 \bigskip
@@ -660,20 +668,29 @@ if(file.exists("Data/crps_cross.rda")){
 \begin{frame}[fragile]
 \frametitle{Application}
 
+\vspace{-0.75em}
+
+\textbf{Predictive performance:} Distributional forests improve CRPS skill score compared to heteroscedastic linear model (EMOS) and competing GAMLSS. 
+
 \begin{center}
 \vspace{-0.6cm}
-\setkeys{Gin}{width=0.7\textwidth}
+\setkeys{Gin}{width=0.575\textwidth}
 <<rain_cross_axams_crps_skills_score, fig=TRUE, echo=FALSE, height=5.6, width=6.8>>=
 #par(mar = c(2.5,2,1,2))
 boxplot(1 - crps_cross[,c(2,3,4)] / crps_cross[,6], ylim = c(-0.005, 0.065),
         names = c("Distributional forest", "Prespecified GAMLSS", "Boosted GAMLSS"),
-        main = "Cross validation (with reference model EMOS)",
         cex.main=1.4,
         cex.lab=1.2,
         ylab = "CRPS skill score", col = "lightgray") 
 abline(h = 0, col = pal["EMOS"], lwd = 2)
 @
 \end{center}
+
+\vspace{-2.5em}
+
+\pause
+\textbf{However:} Is the distributional fit calibrated? 
+
 \end{frame}
 
 
@@ -699,6 +716,34 @@ if(file.exists("Data/topmodels_axams.rda")){
 
 \vspace{-0.75em}
 
+\textbf{Graphical assessments:} Various possibilities suggested in different parts of the literature.
+
+\begin{itemize}
+  \item (Randomized) quantile-quantile residuals plot.
+  \item Probability integral transform (PIT) histogram.
+  \item Rootogram.
+  \item Reliability diagram at prespecified thresholds.
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{In R:} Different bits in various packages but no unifying and flexible infrastructure.
+
+\vspace{2.5em}
+
+\pause
+\textbf{Now:} \code{topmodels} (on R-Forge). 
+
+
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
+
 \textbf{Packages and data:} 
 
 <<echo=TRUE,eval=FALSE>>=
@@ -715,17 +760,133 @@ data("RainAxams", package = "disttree")
 
 \vspace*{1em}
 
-\textbf{Model fitting:} 
+\textbf{Random forest:} 
 
 <<echo=TRUE,eval=FALSE>>=
 forest <- distforest(robs ~ ., 
                      family = dist_list_cens_normal, 
                      data = RainAxams, ...)
-
 @
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
+
+\textbf{Q-Q residuals plot:} \code{qqrplot(forest)} 
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_topmodels_df_qqrplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+autoplot(qq1_df1)
+@
+\end{center}
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
+
+\textbf{PIT histogram:} \code{pithist(forest)} 
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_topmodels_df_pithist, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+autoplot(pit1_df1, ref = 2, confint = 2, size = 0.7)
+@
+\end{center}
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
+
+\textbf{Rootogram:} \code{rootogram(forest)} 
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_topmodels_df_rootogram, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+autoplot(root1_df1)
+@
+\end{center}
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
+
+\textbf{Reliability diagram:} \code{reliagram(forest)} 
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_topmodels_df_reliagram, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+autoplot(rel1_df1)
+@
+\end{center}
+\end{frame}
+
+
+% %% SLIDE
+% \begin{frame}[fragile]
+% \frametitle{Graphical assessment}
+% 
+% \vspace{-0.75em}
+% 
+% \textbf{Rootogram:} 
+% 
+% \begin{center}
+% \setkeys{Gin}{width=0.65\textwidth}
+% <<rain_topmodels_lm_rootogram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+% autoplot(c(forest = root1_df1), legend = TRUE)
+% @
+% \end{center}
+% 
+% \vspace*{-0.3cm}
+% <<echo=TRUE,eval=FALSE>>=
+% rootogram(forest, plot = "ggplot2", legend = TRUE)
+% @
+% \end{frame}
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
+
+\textbf{Linear model:} 
+
+\begin{itemize}
+  \item Homoscedastic (probability) model.
+  \item Not accounting for excess zeros.
+  \item Incorrect assumption of underlying response distribution. 
+\end{itemize}
+
+\vspace{1em}
+
 <<echo=TRUE,eval=FALSE>>=
 linear <- lm(robs ~ tppow_mean, data = RainAxams)
 @
+
 \end{frame}
 
 
@@ -735,65 +896,20 @@ linear <- lm(robs ~ tppow_mean, data = RainAxams)
 
 \vspace{-0.75em}
 
-\textbf{Rootogram:} 
+\textbf{Model comparison: Q-Q residuals plot}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_df_rootogram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
-autoplot(c(linear = root1_lm1), legend = TRUE)
-@
-\end{center}
-
-\vspace*{-0.3cm}
-<<echo=TRUE,eval=FALSE>>=
-rootogram(linear, plot = "ggplot2", legend = TRUE)
-@
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Graphical assessment}
-
-\vspace{-0.75em}
-
-\textbf{Rootogram:} 
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_lm_rootogram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
-autoplot(c(forest = root1_df1), legend = TRUE)
-@
-\end{center}
-
-\vspace*{-0.3cm}
-<<echo=TRUE,eval=FALSE>>=
-rootogram(forest, plot = "ggplot2", legend = TRUE)
-@
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Graphical assessment}
-
-\vspace{-0.75em}
-
-\textbf{Q-Q residuals plot:}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_qqrplot, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
-autoplot(c(linear = qq1_lm1, forest = qq1_df1), 
+<<rain_topmodels_lm_qqrplot, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(linear = qq1_lm1, forest = qq1_df1),
          single_graph = TRUE, legend = TRUE, col = 1:2)
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-qq_forest <- qqrplot(forest, plot = FALSE)
-qq_lm <- qqrplot(linear, plot = FALSE)
-autoplot(c(qq_lm, qq_forest), single_graph = TRUE, legend = TRUE, col = 1:2, ...)
+c(qqrplot(linear, plot = FALSE), qqrplot(forest, plot = FALSE)) |>
+  autoplot(single_graph = TRUE, legend = TRUE, col = 1:2)
 @
 \end{frame}
 
@@ -804,40 +920,20 @@ autoplot(c(qq_lm, qq_forest), single_graph = TRUE, legend = TRUE, col = 1:2, ...
 
 \vspace{-0.75em}
 
-\textbf{PIT histogram:}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_df_pithist, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
-autoplot(c(linear = pit1_lm1), ref = 2, confint = 2, legend = TRUE, size = 0.7)
-@
-\end{center}
-
-\vspace*{-0.3cm}
-<<echo=TRUE,eval=FALSE>>=
-pithist(linear, plot = "ggplot2")
-@
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Graphical assessment}
-
-\vspace{-0.75em}
-
-\textbf{PIT histogram:}
+\textbf{Model comparison: PIT histogram}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_topmodels_lm_pithist, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
-autoplot(c(forest = pit1_df1), ref = 2, confint = 2, legend = TRUE, size = 0.7)
+autoplot(c(linear = pit1_lm1, forest = pit1_df1),
+          single_graph = TRUE, legend = TRUE, col = 1:2, confint = c(TRUE, FALSE))
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-pithist(forest, plot = "ggplot2", legend = TRUE)
+c(pithist(linear, plot = FALSE), qqrplot(forest, plot = FALSE)) |>
+  autoplot(style = "lines", single_graph = TRUE, legend = TRUE, col = 1:2)
 @
 \end{frame}
 
@@ -848,23 +944,46 @@ pithist(forest, plot = "ggplot2", legend = TRUE)
 
 \vspace{-0.75em}
 
-\textbf{Reliability diagram:}
+\textbf{Model comparison: Rootogram}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_topmodels_reliagram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
-autoplot(c(linear = rel1_lm1, forest = rel1_df1), single_graph = TRUE, legend = TRUE, col = 1:2, confint = 1:2)
+<<rain_topmodels_lm_rootogram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(linear = root1_lm1, forest = root1_df1))
 @
 \end{center}
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-rel_forest <- reliagram(forest, thresholds = 0, plot = FALSE)
-rel_lm <- reliagram(linear, thresholds = 0, plot = FALSE)
-autoplot(c(rel_lm, rel_forest), single_graph = TRUE, legend = TRUE, ...)
+c(rootogram(linear, plot = FALSE), rootogram(forest, plot = FALSE)) |>
+  autoplot()
 @
 \end{frame}
 
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Graphical assessment}
+
+\vspace{-0.75em}
+
+\textbf{Model comparison: Reliability diagram}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_topmodels_lm_reliagram, fig=TRUE, echo=FALSE, height=5., width=8.8>>=
+autoplot(c(linear = rel1_lm1, forest = rel1_df1),
+          single_graph = TRUE, legend = TRUE, col = 1:2, confint = c(1:2))
+@
+\end{center}
+
+\vspace*{-0.3cm}
+<<echo=TRUE,eval=FALSE>>=
+c(reliagram(linear, plot = FALSE), reliagram(forest, plot = FALSE)) |>
+  autoplot(single_graph = TRUE, legend = TRUE, col = 1:2, confint = 1:2)
+@
+\end{frame}
+ 
 
 %-------------------------------------------------------------------
 \subsection{Software}
@@ -912,7 +1031,7 @@ autoplot(c(rel_lm, rel_forest), single_graph = TRUE, legend = TRUE, ...)
 
 \medskip
 
-\small{\url{https://topmodels.R-Forge.R-project.org/}}\\ 
+\small{\url{http://topmodels.R-Forge.R-project.org/}}\\ 
 
 \bigskip
 \medskip
@@ -948,16 +1067,15 @@ autoplot(c(rel_lm, rel_forest), single_graph = TRUE, legend = TRUE, ...)
 \begin{frame}
 \frametitle{References}
 
-\vspace{-0.2cm}
-
 \footnotesize
 
-% Lang MN, Schlosser L, Hothorn T, Georg JM, Stauffer R, and Zeileis A (2020).
-% \dquote{Circular Regression Trees and Forests with an Application to Probabilistic Wind Direction Forecasting.}
-% \emph{Journal of the Royal Statistical Society C}, \textbf{69}(5), 1357--1374.
-%  \doi{10.1111/rssc.12437}
-%  
-% \medskip
+Hothorn T, Zeileis A (2015).
+ \dquote{{partykit}: A Modular Toolkit for Recursive Partytioning in \textsf{R}.}
+ \emph{Journal of Machine Learning Research},
+ \textbf{16}, 3905--3909.
+ \url{http://www.jmlr.org/papers/v16/hothorn15a}
+
+\medskip
 
 Schlosser L, Hothorn T, Stauffer R, Zeileis A (2019).
 \dquote{Distributional Regression Forests for Probabilistic Precipitation Forecasting in Complex Terrain.}
@@ -969,39 +1087,45 @@ Schlosser L, Hothorn T, Stauffer R, Zeileis A (2019).
 Lang MN, Zeileis A \emph{et al.} (2021).
 \dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models.}
 \emph{R package version 0.1-0}.
-\url{https://topmodels.R-Forge.R-project.org/}
+\url{http://topmodels.R-Forge.R-project.org/}
 
-\bigskip
-\bigskip
-
-Dunn PK, Smyth GK (1996).
-\dquote{Randomized Quantile Residuals.}
-\emph{Journal of Computational and Graphical Statistics}, \textbf{5}(3), 236--244.
-\doi{10.2307/1390802}
-
-\medskip
-
-Hothorn T, Hornik K, Zeileis A (2006).
- \dquote{Unbiased Recursive Partitioning: A Conditional Inference Framework.}
- \emph{Journal of Computational and Graphical Statistics},
- \textbf{15}(3), 651--674.
- \doi{10.1198/106186006X133933}
- 
-\medskip
-
-Kleiber C, Zeileis A (2016).  
-\dQuote{Visualizing Count Data Regressions Using Rootograms.} 
-\emph{The American Statistician}, 
-\textbf{70}(3), 296--303.
-\doi{10.1080/00031305.2016.1173590}
-
-\medskip
-
-Zeileis A, Hothorn T, Hornik K (2008).
- \dquote{Model-Based Recursive Partitioning.}
-  \emph{Journal of Computational and Graphical Statistics},
-  \textbf{17}(2), 492--514.
-  \doi{10.1198/106186008X319331}
+% \bigskip
+% \bigskip
+% 
+% Dunn PK, Smyth GK (1996).
+% \dquote{Randomized Quantile Residuals.}
+% \emph{Journal of Computational and Graphical Statistics}, \textbf{5}(3), 236--244.
+% \doi{10.2307/1390802}
+% 
+% \medskip
+% 
+% Hothorn T, Hornik K, Zeileis A (2006).
+%  \dquote{Unbiased Recursive Partitioning: A Conditional Inference Framework.}
+%  \emph{Journal of Computational and Graphical Statistics},
+%  \textbf{15}(3), 651--674.
+%  \doi{10.1198/106186006X133933}
+%  
+% \medskip
+% 
+% Kleiber C, Zeileis A (2016).  
+% \dQuote{Visualizing Count Data Regressions Using Rootograms.} 
+% \emph{The American Statistician}, 
+% \textbf{70}(3), 296--303.
+% \doi{10.1080/00031305.2016.1173590}
+% 
+% \medskip
+% Lang MN, Schlosser L, Hothorn T, Georg JM, Stauffer R, and Zeileis A (2020).
+% \dquote{Circular Regression Trees and Forests with an Application to Probabilistic Wind Direction Forecasting.}
+% \emph{Journal of the Royal Statistical Society C}, \textbf{69}(5), 1357--1374.
+%  \doi{10.1111/rssc.12437}
+%  
+% \medskip
+% 
+% Zeileis A, Hothorn T, Hornik K (2008).
+%  \dquote{Model-Based Recursive Partitioning.}
+%   \emph{Journal of Computational and Graphical Statistics},
+%   \textbf{17}(2), 492--514.
+%   \doi{10.1198/106186008X319331}
 
 \end{frame}
 
@@ -1143,7 +1267,7 @@ if(file.exists("Data/crps_cross.rda")){
 \begin{center}
 \vspace*{-0.6cm}
 \setkeys{Gin}{width=0.7\textwidth}
-<<rain_cross_axams_crps_skills_score, fig=TRUE, echo=FALSE, height=5.6, width=6.8>>=
+<<rain_cross_axams_crps_skills_score_with_title, fig=TRUE, echo=FALSE, height=5.6, width=6.8>>=
 #par(mar = c(2.5,2,1,2))
 boxplot(1 - crps_cross[,c(2,3,4)] / crps_cross[,6], ylim = c(-0.005, 0.065),
         names = c("Distributional forest", "Prespecified GAMLSS", "Boosted GAMLSS"),
