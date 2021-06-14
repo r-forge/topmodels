@@ -15,7 +15,7 @@
 
 %% Adapt URL font and set URL
 \setbeamerfont{url}{size*={11.5pt}{13pt},series=\mdseries}
-\URL{https://topmodels.r-forge.r-project.org}
+\URL{https://topmodels.R-Forge.R-project.org}
 
 %% Adapt headerimage
 \renewcommand{\headerimage}[1]{%
@@ -699,11 +699,11 @@ if(file.exists("Data/topmodels_axams.rda")){
 
 \vspace{-0.75em}
 
-\textbf{Preliminaries:} 
+\textbf{Packages and data:} 
 
 <<echo=TRUE,eval=FALSE>>=
-install.packages("disttree", repos="http://R-Forge.R-project.org")
-install.packages("topmodels", repos="http://R-Forge.R-project.org")
+install.packages("disttree", repos = "http://R-Forge.R-project.org")
+install.packages("topmodels", repos = "http://R-Forge.R-project.org")
 @
 <<echo=TRUE,eval=FALSE>>=
 library("disttree")
@@ -912,7 +912,7 @@ autoplot(c(rel_lm, rel_forest), single_graph = TRUE, legend = TRUE, ...)
 
 \medskip
 
-\small{\url{https://topmodels.r-forge.r-project.org}}\\ 
+\small{\url{https://topmodels.R-Forge.R-project.org/}}\\ 
 
 \bigskip
 \medskip
@@ -966,10 +966,10 @@ Schlosser L, Hothorn T, Stauffer R, Zeileis A (2019).
 
 \medskip
 
-Lang MN and Zeileis A (2021).
-\dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models}
+Lang MN, Zeileis A \emph{et al.} (2021).
+\dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models.}
 \emph{R package version 0.1-0}.
-\url{https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/}
+\url{https://topmodels.R-Forge.R-project.org/}
 
 \bigskip
 \bigskip
