@@ -873,10 +873,10 @@ autoplot(rel1_df1)
 
 \vspace{-0.75em}
 
-\textbf{Linear model:} 
+\textbf{In contrast:} Linear Gaussian model.
 
 \begin{itemize}
-  \item Homoscedastic (probability) model.
+  \item Homoscedastic.
   \item Not accounting for excess zeros.
   \item Incorrect assumption of underlying response distribution. 
 \end{itemize}
@@ -932,7 +932,7 @@ autoplot(c(linear = pit1_lm1, forest = pit1_df1),
 
 \vspace*{-0.3cm}
 <<echo=TRUE,eval=FALSE>>=
-c(pithist(linear, plot = FALSE), qqrplot(forest, plot = FALSE)) |>
+c(pithist(linear, plot = FALSE), pithist(forest, plot = FALSE)) |>
   autoplot(style = "lines", single_graph = TRUE, legend = TRUE, col = 1:2)
 @
 \end{frame}
