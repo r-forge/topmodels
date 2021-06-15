@@ -15,7 +15,7 @@
 
 %% Adapt URL font and set URL
 \setbeamerfont{url}{size*={11.5pt}{13pt},series=\mdseries}
-\URL{http://topmodels.R-Forge.R-project.org}
+\URL{https://topmodels.R-Forge.R-project.org/}
 
 %% Adapt headerimage
 % \renewcommand{\headerimage}[1]{%
@@ -747,8 +747,8 @@ if(file.exists("Data/topmodels_axams.rda")){
 \textbf{Packages and data:} 
 
 <<echo=TRUE,eval=FALSE>>=
-install.packages("disttree", repos = "http://R-Forge.R-project.org")
-install.packages("topmodels", repos = "http://R-Forge.R-project.org")
+install.packages("disttree", repos = "https://R-Forge.R-project.org")
+install.packages("topmodels", repos = "https://R-Forge.R-project.org")
 @
 <<echo=TRUE,eval=FALSE>>=
 library("disttree")
@@ -1031,7 +1031,7 @@ c(reliagram(linear, plot = FALSE), reliagram(forest, plot = FALSE)) |>
 
 \medskip
 
-\small{\url{http://topmodels.R-Forge.R-project.org/}}\\ 
+\small{\url{https://topmodels.R-Forge.R-project.org/}}\\ 
 
 \bigskip
 \medskip
@@ -1087,7 +1087,7 @@ Schlosser L, Hothorn T, Stauffer R, Zeileis A (2019).
 Lang MN, Zeileis A \emph{et al.} (2021).
 \dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models.}
 \emph{R package version 0.1-0}.
-\url{http://topmodels.R-Forge.R-project.org/}
+\url{https://topmodels.R-Forge.R-project.org/}
 
 % \bigskip
 % \bigskip
