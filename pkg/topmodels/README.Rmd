@@ -4,14 +4,15 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file and run rmarkdown::render("README.Rmd") -->
 
-```{r, include = FALSE}
+```{r, echo = FALSE}
 knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
   fig.path = "man/figures/README-"
 )
-options(digits = 4)
 ```
 
-## Infrastructure for Inference and Forecasting in Probabilistic Models
+# Infrastructure for Inference and Forecasting in Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="120" />
 
 Unified infrastructure for probabilistic models and distributional regressions:
 Computations of probabilities, densities, scores, and Hessians.
