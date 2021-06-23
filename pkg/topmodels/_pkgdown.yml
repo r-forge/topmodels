@@ -7,7 +7,7 @@ template:
     image:
       src: logo.png
     twitter:
-      creator: "@MoritzNLang"
+      creator: "@AchimZeileis"
       card: summary
 
 navbar:
