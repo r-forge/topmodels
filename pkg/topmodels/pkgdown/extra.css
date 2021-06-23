@@ -14,15 +14,27 @@ body {
 
 /* The "default" hyperlinks */
 a:hover { color: #b52267;}
-a       { color: #999999;}
+a       { color: #737373;}
+
+/* Coloring of automtically generated code by pkgdown*/
+code a, pre a {
+    color: #333;
+}
+
+/* Adjusting display of figures rendered as part
+   of the examples (R examples) */
+pre.examples > div.img {
+  text-align: center;
+}
+pre.examples > div.img > img {
+  padding: 2em 0;
+}
 
 /* Font size for the content and the navigation bar (top): increase
  * font size by a factor of 1.3 (1.3 elements, global) */
 #navbar, div.contents { font-size: 1.3em; }
 
-#tocnav > ul > li > a:hover {
-    color: #b52267;
-}
+#tocnav > ul > li > a:hover { color: #b52267; }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     font-family: 'Roboto', sans-serif; 
@@ -37,8 +49,8 @@ b, strong, th {
     background-image: url('logo_wide.png');
     background-repeat: no-repeat;
     background-position: 12.5px 5px;
-    background-size: 250px auto;
-    width: 325px;
+    background-size: 195px auto;
+    width: 300px;
     height: 58px;
 }
 
@@ -49,7 +61,7 @@ b, strong, th {
     display: block;
     font-size: 1.7em;
     line-height: 1em;
-    width: 250px;
+    width: 170px;
     height: 30px;
     float: left;
 }
@@ -58,8 +70,8 @@ b, strong, th {
  * branding/logo */
 .navbar-brand > .label {
     display: block;
-    margin-left: 250px;
     margin-top: 14px;
+    padding: 0;
     font-weight: normal;
     background-color: transparent;
     /*color: #b52267;*/
@@ -71,12 +83,12 @@ b, strong, th {
 @media all and (max-width: 550px) {
     .navbar-brand {
         width: 220px;
-        background-size: 200px;
+        background-size: 155px auto;
         background-position: 10px 5px;
-        height: 39px;
+        height: 45px;
     }
-    .navbar-brand > .navbar-link { height: 25px; width: 200px; }
-    .navbar-brand > .label { margin-top: 10px; margin-left: 200px; }
+    .navbar-brand > .navbar-link { height: 25px; width: 164px; }
+    .navbar-brand > .label { margin-top: 8px; }
 }
 
 .navbar .navbar-nav > li > a {
@@ -92,37 +104,41 @@ b, strong, th {
 .dropdown-menu > li {
     background-color: white;
 }
-.dropdown-menu > li > a:hover {
+/*.dropdown-menu > li > a:hover {
     color: #b52267;
 }
 .navbar .navbar-nav > li:hover,
 .navbar .navbar-nav > li.dropdown:hover {
     background-color: #b52267;
 }
+*/
 .navbar .navbar-nav > li > a:hover, .navbar .navbar-nav > li.dropdown > a:hover,
 .navbar .navbar-nav > li:hover > a, .navbar .navbar-nav > li.dropdown:hover > a {
-    background-color: #b52267;
-    color: white;
+    color: #b52267;
 }
 .navbar .navbar-nav > .active {
     background-color: #ececec;
 }
-.navbar .navbar-nav > .active:hover {
+
+/*.navbar .navbar-nav > .active:hover {
     background-color: #b52267;
 }
+*/
 .navbar .navbar-nav > .active:hover > *,
 .navbar .navbar-nav > .active > a:hover {
-    color: white;
+    color: #b52267;
     background-color: transparent;
 }
+/*
 .navbar .navbar-nav > li.dropdown.open:hover,
 .navbar .navbar-nav > li.dropdown:hover {
     background-color: #b52267;
 }
+*/
 .navbar .navbar-nav > li.dropdown.open:hover,
 .navbar .navbar-nav > li.dropdown:hover,
 .navbar .navbar-nav > li.dropdown > *:hover {
-    color: white;
+    color: #b52267;
 }
 .navbar .navbar-nav > .active > a,
 .navbar .navbar-nav > .active > a:hover {
