@@ -1,5 +1,5 @@
 ---
-title: "topmodels"
+title: "topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models"
 author: "Moritz Lang, Achim Zeileis"
 output:
   html_document:
@@ -45,12 +45,13 @@ of probabilities, densities, scores, and Hessian values for probabilistic
 models. The unifying prediction method provides users with many different
 graphical evaluation tools, such as reliability diagrams, PIT histograms,
 rootograms [@Kleiber+Zeileis:2016], randomized Q-Q plots [@Dunn+Smyth:1996],
-and worm plots. 
+and worm plots [@Buuren+Fredriks:2001]. 
 
-To be able to use the object-oriented framework of _topmodels_, solely a
-`procast()` method must exist for the model class of interest. Currently the
-package provides generic `procast` methods the model classes `lm`, `glm`,
-`crch`, and `disttree`.
+To be able to use the object-oriented framework of
+[**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/),
+solely a `procast()` method must exist for the model class of interest.
+Currently the package provides generic `procast` methods the model classes
+`lm`, `glm`, `crch`, and `disttree`.
 
 
 ## Installation
@@ -92,5 +93,6 @@ reliagram(m)
 wormplot(m)
 ```
 
+## References
 
 
