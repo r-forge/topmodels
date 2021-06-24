@@ -453,6 +453,10 @@ plot.pithist <- function(x,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
+  ## save and reset par()
+  op <- par(no.readonly = TRUE)
+  on.exit(par(op))
+
   ## convert always to data.frame
   x <- as.data.frame(x)
 
@@ -468,7 +472,7 @@ plot.pithist <- function(x,
   }
 
   ## set lwd
-  if (is.null(lwd)) lwd <- if (style == "histogram") 1.25 else 2
+  if (is.null(lwd)) lwd <- if (style == "histogram") 1.5 else 2
 
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
@@ -568,13 +572,13 @@ plot.pithist <- function(x,
 
     ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2  # red
       abline(h = pp, col = plot_arg$ref[j], lty = 1, lwd = plot_arg$lwd[j])
     }
 
     ## plot confint lines
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- 2  # red
       abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
       abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
     }
@@ -785,7 +789,7 @@ lines.pithist <- function(x,
 
     ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2  # red
       segments(x0 = 0, y0 = pp, x1 = 1, y1 = pp, col = plot_arg$ref[j], lty = 2, lwd = 1.5)
     }
 
@@ -877,10 +881,10 @@ autoplot.pithist <- function(object,
   }
 
   ## set size
-  if (is.null(size)) size <- if (style == "histogram") 0.5 else 1
+  if (is.null(size)) size <- if (style == "histogram") 0.7 else 1
 
-  ## set color to NA for not plotting
-  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)
+  ## set color to 2 (red) or NA for not plotting
+  if (is.logical(ref)) ref <- ifelse(ref, 2, NA)
 
   ## only needed for `style == "lines"`
   ## stat helper function to get left/right points from respective mid points
@@ -909,8 +913,8 @@ autoplot.pithist <- function(object,
   ## prepare fill and confint color depending on style
   if (style == "histogram") {
 
-    ## set color to NA for not plotting
-    if (is.logical(confint)) confint <- ifelse(confint, 1, NA)
+    ## set color to 2 (red) or NA for not plotting
+    if (is.logical(confint)) confint <- ifelse(confint, 2, NA)
 
     ## check if colour and no fill is set
     if (all(fill == "darkgray") && any(colour != "black")) {

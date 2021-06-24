@@ -504,6 +504,10 @@ plot.reliagram <- function(x,
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
 
+  ## save and reset par()
+  op <- par(no.readonly = TRUE)
+  on.exit(par(op))
+
   ## convert always to data.frame
   x <- as.data.frame(x)
 

@@ -124,6 +124,10 @@ wormplot.default <- function(object,
   stopifnot(length(ylab) == 1)
   stopifnot(length(main) == 1 | length(main) == 0)
 
+  ## save and reset par()
+  op <- par(no.readonly = TRUE)
+  on.exit(par(op))
+
   ## guess plotting flavor
   if (isFALSE(plot)) {
     plot <- "none"
