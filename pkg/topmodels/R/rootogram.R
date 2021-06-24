@@ -236,6 +236,7 @@ rootogram.default <- function(object,
   response_type <- match.arg(response_type, c("discrete", "logseries", "continuous"))
 
   ## set breaks and midpoints
+  ## FIXME: (ML) Extend breaks to the left, in case still expected frequency exists
   if (is.null(breaks) && response_type == "discrete") {
     breaks <- -1L:max(y[w > 0]) + 0.5
   } else if (is.null(breaks) && response_type == "logseries") {
@@ -243,8 +244,13 @@ rootogram.default <- function(object,
   } else if (is.null(breaks)) {
     breaks <- "Sturges"
   }
+
   breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
   x <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+
+  ## fix pointmasses 
+  ## FIXME: (ML) Check if that always works or could be improved
+  breaks <- breaks - 1e-12
 
   ## set widths
   if (is.null(width) && (response_type == "discrete" || response_type == "logseries")) {
@@ -550,6 +556,10 @@ plot.rootogram <- function(x,
   stopifnot(is.logical(box))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  ## save and reset par()
+  op <- par(no.readonly = TRUE)
+  on.exit(par(op))
 
   ## convert always to data.frame
   x <- as.data.frame(x)
