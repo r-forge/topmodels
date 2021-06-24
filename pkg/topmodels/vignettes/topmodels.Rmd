@@ -42,7 +42,7 @@ The
 [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/)
 packages is designed to provide an unifiying infrastructure to gain predictions
 of probabilities, densities, scores, and Hessian values for probabilistic
-models. The unifying prediction method provides users with many different
+models. The unifying prediction method provides users with numerous
 graphical evaluation tools, such as reliability diagrams, PIT histograms,
 rootograms [@Kleiber+Zeileis:2016], randomized Q-Q plots [@Dunn+Smyth:1996],
 and worm plots [@Buuren+Fredriks:2001]. 
@@ -50,7 +50,7 @@ and worm plots [@Buuren+Fredriks:2001].
 To be able to use the object-oriented framework of
 [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/),
 solely a `procast()` method must exist for the model class of interest.
-Currently the package provides generic `procast` methods the model classes
+Currently the package provides generic `procast` methods for the model classes
 `lm`, `glm`, `crch`, and `disttree`.
 
 
