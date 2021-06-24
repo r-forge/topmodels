@@ -1,6 +1,6 @@
 <!-- index.md is generated from index.Rmd. Please edit that file and run knitr::knit("index.Rmd") -->
 
-## Infrastructure for Inference and Forecasting in Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="160px" style="padding: 0 0 0 0.5em;" />
+# Infrastructure for Inference and Forecasting in Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="160px" style="padding: 0 0 0 0.5em;" />
 
 ```{r options, include = FALSE}
 knitr::opts_chunk$set(
@@ -45,15 +45,20 @@ autoplot(qqrplot(m, plot = FALSE), fill = hex[3], alpha_min =1, col = hex[2], re
 ```
 
 
-<div class="row index-images">
-  <div class="col-xs-12 col-sm-4">
+<div class="row">
+  <div class="col-xs-12 col-sm-6">
     <img alt="Probabilistic model evaluation with topmodels: Rootogram"     src="man/figures/rootogram-1.svg" style="border:10px solid transparent" width="100%">
   </div>
-  <div class="col-xs-12 col-sm-4">
+  <div class="col-xs-12 col-sm-6">
     <img alt="Probabilistic model evaluation with topmodels: PIT Histogram" src="man/figures/pithist-1.svg"   style="border:10px solid transparent" width="100%">
   </div>
-  <div class="col-xs-12 col-sm-4">
+</div>
+<div class="row">
+  <div class="col-xs-12 col-sm-6">
     <img alt="Probabilistic model evaluation with topmodels: Reliagram"     src="man/figures/reliagram-1.svg" style="border:10px solid transparent" width="100%">
+  </div>
+  <div class="col-xs-12 col-sm-6">
+    <img alt="Probabilistic model evaluation with topmodels: Q-Q residuals plot"     src="man/figures/qqrplot-1.svg" style="border:10px solid transparent" width="100%">
   </div>
 </div>
 
