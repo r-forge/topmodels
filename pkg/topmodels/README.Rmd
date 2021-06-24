@@ -12,31 +12,57 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Infrastructure for Inference and Forecasting in Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="200px" style="padding: 0 0 0 0.5em;" />
+# Infrastructure for Inference and Forecasting in Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="160px" style="padding: 0 0 0 0.5em;" />
 
 Unified infrastructure for probabilistic models and distributional regressions:
-Computations of probabilities, densities, scores, and Hessians.
+Computation of probabilities, densities, scores, and Hessians.
 Probabilistic forecasting. Diagnostic graphics such as rootograms, PIT histograms,
-reliagrams (reliability diagrams), and (randomized) quantile residual Q-Q plots.
+reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots,
+and worm plots.
 
 Modular object-oriented implementation with support for many model objects, including
 `lm`, `glm`, `crch`, `disttree`, and more to come.
 
-```{r topmodels, echo=FALSE, results="hide"}
+```{r topmodels, include = FALSE}
 library("topmodels")
 library("ggplot2")
+
 data("CrabSatellites", package = "countreg")
 CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+m <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 
-m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-
-theme_set(theme_minimal())
-svg(filename = paste0(file.path(getwd(), "man", "figures"), "/README-topmodels.svg"),
-  width = 9, height = 7.5)
-
-topmodels(m1, plot = "ggplot2", which = 1:4, single_page = TRUE)
-
-dev.off()
+hex <- c("#b52267", "#2c2c2b", "#999999", "#f8f8f8")
 ```
 
-<img alt="Probabilistic model evaluation with topmodels" src="man/figures/README-topmodels.svg" style="border:10px solid transparent">
+```{r rootogram, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+autoplot(rootogram(m, plot = FALSE), col = hex[1], fill = hex[3]) + theme_minimal()
+```
+
+```{r pithist, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+autoplot(pithist(m, plot = FALSE), confint = hex[1], fill = hex[3], lwd = 1, ref = hex[1]) + theme_minimal()
+```
+
+```{r reliagram, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+autoplot(reliagram(m, plot = FALSE), col = hex[1], fill = hex[2], ref = FALSE) + geom_abline(intercept = 0, slope = 1, colour = hex[2], size = 1.2) + theme_minimal()
+```
+
+```{r qqrplot, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+autoplot(qqrplot(m, plot = FALSE), fill = hex[3], alpha_min =1, col = hex[2], ref = FALSE) + geom_abline(intercept = 0, slope = 1, colour = hex[1], size = 1.2) + theme_minimal()
+```
+
+<div class="row">
+  <div class="col-xs-12 col-sm-6">
+    <img alt="Probabilistic model evaluation with topmodels: Rootogram"     src="man/figures/README-rootogram-1.svg" style="border:10px solid transparent" width="100%">
+  </div>
+  <div class="col-xs-12 col-sm-6">
+    <img alt="Probabilistic model evaluation with topmodels: PIT Histogram" src="man/figures/README-pithist-1.svg"   style="border:10px solid transparent" width="100%">
+  </div>
+</div>
+<div class="row">
+  <div class="col-xs-12 col-sm-6">
+    <img alt="Probabilistic model evaluation with topmodels: Reliagram"     src="man/figures/README-reliagram-1.svg" style="border:10px solid transparent" width="100%">
+  </div>
+  <div class="col-xs-12 col-sm-6">
+    <img alt="Probabilistic model evaluation with topmodels: Q-Q residuals plot"     src="man/figures/README-qqrplot-1.svg" style="border:10px solid transparent" width="100%">
+  </div>
+</div>
