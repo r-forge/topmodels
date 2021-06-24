@@ -6,6 +6,7 @@ output:
     toc: true
     toc_float: true
     theme: flatly
+bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{topmodels}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,4 +22,75 @@ options(digits = 4)
 
 ## Overview
 
-Sorry, this section is currently under construction and will be launched within days.
+As a consequence of the growing importance of probabilistic predictions in
+various application fields due to a necessary functional risk management and
+strategy, there is an increasing demand for appropriate probabilistic model
+evaluation. Besides proper probabilistic scores [@Gneiting+Raftery:2007], which
+evaluate not only the expectation but the entire predictive distribution,
+graphical assessment methods are particularly advantageous to diagnose possible
+model misspecification problems.
+
+Probabilistic predictions are often based on distributional regression models,
+whereby the computation of predictive distributions, probabilities, and
+quantiles is generally dependent on the *R* package being used. Therefore,
+routines to graphically evaluate probabilistic models are not always available
+and if so then only for specific types of models and distributions provided by
+the corresponding package. An easy to use unified infrastructure to graphical
+assess and compare different probabilistic model types does not yet exist.
+
+The
+[**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/)
+packages is designed to provide an unifiying infrastructure to gain predictions
+of probabilities, densities, scores, and Hessian values for probabilistic
+models. The unifying prediction method provides users with many different
+graphical evaluation tools, such as reliability diagrams, PIT histograms,
+rootograms [@Kleiber+Zeileis:2016], randomized Q-Q plots [@Dunn+Smyth:1996],
+and worm plots. 
+
+To be able to use the object-oriented framework of _topmodels_, solely a
+`procast()` method must exist for the model class of interest. Currently the
+package provides generic `procast` methods the model classes `lm`, `glm`,
+`crch`, and `disttree`.
+
+
+## Installation
+
+The development version of _topmodels_ is hosted on R-Forge at <https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/> in a Subversion (SVN) repository and can be installed via
+
+```{r installation-cran, eval=FALSE}
+install.packages("topmodels", repos="http://R-Forge.R-project.org")
+```
+
+## Usage
+
+For supported model classes, _topmodels_ provides various routines to easily
+graphically assess and compare different probabilistic models and model types
+using `ggplot2` [@Wickham:2016] and base *R* graphics:
+
+```{r}
+library("topmodels")
+m <- lm(dist ~ speed, data = cars)
+```
+
+```{r}
+rootogram(m)
+```
+
+```{r}
+pithist(m)
+```
+
+```{r}
+qqrplot(m)
+```
+
+```{r}
+reliagram(m)
+````
+
+```{r}
+wormplot(m)
+```
+
+
+
