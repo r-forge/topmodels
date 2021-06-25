@@ -11,4 +11,5 @@ TODO.pdf
 ^contact.md$
 ^logo*.png$
 vignettes/topmodels.Rmd
+vignettes/ref.bib
 

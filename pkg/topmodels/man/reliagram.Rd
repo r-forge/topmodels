@@ -89,7 +89,7 @@ m1 <- lm(dist ~ speed, data = cars)
 m2 <- crch(dist ~ speed | speed, data = cars)
 m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
 
-rel1 <- reliagram(m1, quantiles = c(0.2, 0.6))
+rel1 <- reliagram(m1, quantiles = c(0.2, 0.6), plot = FALSE)
 rel2 <- reliagram(m2, plot = FALSE)
 rel3 <- reliagram(m3, plot = FALSE)
 

@@ -151,11 +151,10 @@ x <- rpois(100, lambda = 3)
 m2 <- glm(y ~ x, family = poisson)
 
 ## correctly specified Poisson model fit
-par(mfrow = c(1, 3))
-rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
-rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
-rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
-par(mfrow = c(1, 1))
+r1 <- rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing", plot = FALSE)
+r2 <- rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging", plot = FALSE)
+r3 <- rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended", plot = FALSE)
+plot(c(r1, r2, r3))
 
 #-------------------------------------------------------------------------------
 ## linear regression with normal/Gaussian response: anorexia data
