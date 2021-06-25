@@ -40,31 +40,41 @@ assess and compare different probabilistic model types does not yet exist.
 
 The
 [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/)
-packages is designed to provide an unifiying infrastructure to gain predictions
+packages is designed to provide such an unifiying infrastructure to gain predictions
 of probabilities, densities, scores, and Hessian values for probabilistic
-models. The unifying prediction method provides users with numerous
-graphical evaluation tools, such as reliability diagrams, PIT histograms,
-rootograms [@Kleiber+Zeileis:2016], randomized Q-Q plots [@Dunn+Smyth:1996],
+models. The unifying prediction method offers the user numerous
+graphical evaluation tools, such as 
+rootograms [@Kleiber+Zeileis:2016], PIT histograms, reliagrams (reliability diagrams), 
+randomized quantile Q-Q plots [@Dunn+Smyth:1996],
 and worm plots [@Buuren+Fredriks:2001]. 
 
 To be able to use the object-oriented framework of
 [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/),
 solely a `procast()` method must exist for the model class of interest.
 Currently the package provides generic `procast` methods for the model classes
-`lm`, `glm`, `crch`, and `disttree`.
+`lm`, `glm`, [`crch`](https://CRAN.R-project.org/package=crch) [@Messner+Mayr+Zeileis:2016], and [`disttree`](https://r-forge.r-project.org/projects/partykit/pkg/disttree/) [@Schlosser+Hothorn+Stauffer+Zeileis:2019].
 
 
 ## Installation
 
-The development version of _topmodels_ is hosted on R-Forge at <https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/> in a Subversion (SVN) repository and can be installed via
+The package [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/) is still in development and, therefore, the development version is hosted on R-Forge at <https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/> in a Subversion (SVN) repository and can be installed via
 
 ```{r installation-cran, eval=FALSE}
 install.packages("topmodels", repos="http://R-Forge.R-project.org")
 ```
 
+or via 
+
+```{r installation-remotes, eval=FALSE}
+remotes::install_svn("svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels")
+```
+
+whereby a specific revision can be installed by employing the optional argument `revision`.
+
+
 ## Usage
 
-For supported model classes, _topmodels_ provides various routines to easily
+For supported model classes, [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/) provides various routines to easily
 graphically assess and compare different probabilistic models and model types
 using `ggplot2` [@Wickham:2016] and base *R* graphics:
 
