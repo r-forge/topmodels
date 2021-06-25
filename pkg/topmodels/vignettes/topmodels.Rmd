@@ -40,24 +40,30 @@ assess and compare different probabilistic model types does not yet exist.
 
 The
 [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/)
-packages is designed to provide such an unifiying infrastructure to gain predictions
-of probabilities, densities, scores, and Hessian values for probabilistic
-models. The unifying prediction method offers the user numerous
-graphical evaluation tools, such as 
-rootograms [@Kleiber+Zeileis:2016], PIT histograms, reliagrams (reliability diagrams), 
-randomized quantile Q-Q plots [@Dunn+Smyth:1996],
-and worm plots [@Buuren+Fredriks:2001]. 
+packages is designed to provide such an unifiying infrastructure to gain
+predictions of probabilities, densities, scores, and Hessian values for
+probabilistic models. The unifying prediction method offers the user numerous
+graphical evaluation tools, such as rootograms [@Kleiber+Zeileis:2016], PIT
+histograms, reliagrams (reliability diagrams), randomized quantile Q-Q plots
+[@Dunn+Smyth:1996], and worm plots [@Buuren+Fredriks:2001]. 
 
 To be able to use the object-oriented framework of
 [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/),
 solely a `procast()` method must exist for the model class of interest.
 Currently the package provides generic `procast` methods for the model classes
-`lm`, `glm`, [`crch`](https://CRAN.R-project.org/package=crch) [@Messner+Mayr+Zeileis:2016], and [`disttree`](https://r-forge.r-project.org/projects/partykit/pkg/disttree/) [@Schlosser+Hothorn+Stauffer+Zeileis:2019].
+`lm`, `glm`, [`crch`](https://CRAN.R-project.org/package=crch)
+[@Messner+Mayr+Zeileis:2016], and
+[`disttree`](https://r-forge.r-project.org/projects/partykit/pkg/disttree/)
+[@Schlosser+Hothorn+Stauffer+Zeileis:2019].
 
 
 ## Installation
 
-The package [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/) is still in development and, therefore, the development version is hosted on R-Forge at <https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/> in a Subversion (SVN) repository and can be installed via
+For the package
+[**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/)
+so far only a development version is available, which is hosted on R-Forge at
+<https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/> in a
+Subversion (SVN) repository. The package can be installed via
 
 ```{r installation-cran, eval=FALSE}
 install.packages("topmodels", repos="http://R-Forge.R-project.org")
@@ -69,14 +75,16 @@ or via
 remotes::install_svn("svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels")
 ```
 
-whereby a specific revision can be installed by employing the optional argument `revision`.
+where a specific revision can be installed by setting the optional argument `revision`.
 
 
 ## Usage
 
-For supported model classes, [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/) provides various routines to easily
-graphically assess and compare different probabilistic models and model types
-using `ggplot2` [@Wickham:2016] and base *R* graphics:
+The package
+[**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/)
+provides various routines to easily graphically assess and compare different
+probabilistic models and model types using `ggplot2` [@Wickham:2016] and base
+*R* graphics:
 
 ```{r}
 library("topmodels")
