@@ -100,9 +100,7 @@
 #' 
 #' plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
 #' 
-#' plot(c(pit1, pit2, pit3), col = c(1, 2, 3), style = "lines")
-#' 
-#' plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE)
+#' plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE, style = "lines")
 #' lines(pit3, col = 3)
 #' 
 #' @export
