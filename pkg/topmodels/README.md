@@ -35,7 +35,7 @@ Modular object-oriented implementation with support for many model objects, incl
 </div>
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <b>Religram</b>
+    <b>Reliagram</b>
     <img alt="Probabilistic model evaluation with topmodels: Reliagram"     src="man/figures/README-reliagram-1.svg" style="border:10px solid transparent" width="100%">
   </div>
   <div class="col-xs-12 col-sm-6">
