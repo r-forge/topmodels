@@ -111,7 +111,7 @@ reliagram(m1_lm)
 reliagram(m1_lm, ref = "blue", lty = 2, pch = 20)
 
 ## add separate model
-if (require("crch")) {
+if (require("crch", quietly = TRUE)) {
   m1_crch <- crch(dist ~ speed | speed, data = cars)
   lines(reliagram(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
 }
@@ -140,7 +140,7 @@ if (require("crch")) {
 }
 
 
-if (require("countreg")) {
+if ("countreg" \%in\% .packages()) {
 
   ## determinants for male satellites to nesting horseshoe crabs
   data("CrabSatellites", package = "countreg")

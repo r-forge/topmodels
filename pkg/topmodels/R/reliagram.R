@@ -463,7 +463,7 @@ rbind.reliagram <- c.reliagram
 #'   lines(reliagram(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
 #' }
 #' 
-#' if (require("crch", quietly = TRUE)) {
+#' if (require("crch")) {
 #' 
 #'   ## precipitation observations and forecasts for Innsbruck
 #'   data("RainIbk", package = "crch")
@@ -487,7 +487,7 @@ rbind.reliagram <- c.reliagram
 #' }
 #' 
 #' 
-#' if (require("countreg", quietly = TRUE)) {
+#' if ("countreg" %in% .packages()) {
 #' 
 #'   ## determinants for male satellites to nesting horseshoe crabs
 #'   data("CrabSatellites", package = "countreg")
