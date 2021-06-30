@@ -140,17 +140,6 @@ if (require("crch")) {
   plot(c(rel2_lm, rel2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
 }
 
-#-------------------------------------------------------------------------------
-if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
-
-  ## determinants for male satellites to nesting horseshoe crabs
-  data("CrabSatellites", package = "countreg")
-  m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
-
-  ## compute and plot reliagram as ggplot2 graphic
-  reliagram(m3_pois, plot = "ggplot2")
-}
-
 }
 \references{
 Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability

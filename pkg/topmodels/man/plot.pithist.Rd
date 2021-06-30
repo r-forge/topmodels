@@ -141,18 +141,6 @@ if (require("crch")) {
     style = "lines", single_graph = TRUE)
 }
 
-
-#-------------------------------------------------------------------------------
-if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
-
-  ## determinants for male satellites to nesting horseshoe crabs
-  data("CrabSatellites", package = "countreg")
-  m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
-
-  ## compute and plot pithist as ggplot2 graphic
-  topmodels::pithist(m3_pois, plot = "ggplot2")
-}
-
 }
 \references{
 Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
