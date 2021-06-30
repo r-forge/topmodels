@@ -555,10 +555,6 @@ plot.rootogram <- function(x,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
-  ## save and reset par()
-  op <- par(no.readonly = TRUE)
-  on.exit(par(op))
-
   ## convert always to data.frame
   x <- as.data.frame(x)
 
@@ -644,7 +640,10 @@ plot.rootogram <- function(x,
   # DRAW PLOTS
   # -------------------------------------------------------------------
   ## set up necessary panels
-  if (n > 1L) par(mfrow = n2mfrow(n))
+  if (n > 1L){
+    old_pars <- par(mfrow = n2mfrow(n))
+    on.exit(par(old_pars), add = TRUE)
+  }
 
   ## draw rootograms
   for (i in 1L:n) rootogram_plot(x[x$group == i, ], ...)

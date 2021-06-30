@@ -124,10 +124,6 @@ wormplot.default <- function(object,
   stopifnot(length(ylab) == 1)
   stopifnot(length(main) == 1 | length(main) == 0)
 
-  ## save and reset par()
-  op <- par(no.readonly = TRUE)
-  on.exit(par(op))
-
   ## guess plotting flavor
   if (isFALSE(plot)) {
     plot <- "none"
@@ -596,7 +592,10 @@ plot.wormplot <- function(x,
   # DRAW PLOTS
   # -------------------------------------------------------------------
   ## set up necessary panels
-  if (n > 1L) par(mfrow = n2mfrow(n))
+  if (n > 1L) {
+    old_pars <- par(mfrow = n2mfrow(n))
+    on.exit(par(old_pars), add = TRUE)
+  }
 
   ## draw wormplots
   for (i in 1L:n) wormplot_plot(x[x$group == i, ], ...)
