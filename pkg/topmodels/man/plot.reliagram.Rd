@@ -116,6 +116,7 @@ if (require("crch", quietly = TRUE)) {
   lines(reliagram(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
 }
 
+#-------------------------------------------------------------------------------
 if (require("crch")) {
 
   ## precipitation observations and forecasts for Innsbruck
@@ -132,22 +133,19 @@ if (require("crch")) {
   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
 
   ## compute reliagrams
-  qq2_lm <- reliagram(m2_lm, plot = FALSE)
-  qq2_crch <- reliagram(m2_crch, plot = FALSE)
+  rel2_lm <- reliagram(m2_lm, plot = FALSE)
+  rel2_crch <- reliagram(m2_crch, plot = FALSE)
 
   ## plot in single graph
-  plot(c(qq2_lm, qq2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
+  plot(c(rel2_lm, rel2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
 }
 
-
-if ("countreg" \%in\% .packages()) {
+#-------------------------------------------------------------------------------
+if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
 
   ## determinants for male satellites to nesting horseshoe crabs
   data("CrabSatellites", package = "countreg")
   m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
-
-  ## compute and plot reliagram as base graphic
-  reliagram(m3_pois)
 
   ## compute and plot reliagram as ggplot2 graphic
   reliagram(m3_pois, plot = "ggplot2")

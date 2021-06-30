@@ -101,21 +101,57 @@ corresponding interval or distributed proportionally in the histogram
 }
 \examples{
 
-require("crch")
-m1 <- lm(dist ~ speed, data = cars)
-m2 <- crch(dist ~ speed | speed, data = cars)
-m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+## speed and stopping distances of cars
+m1_lm <- lm(dist ~ speed, data = cars)
 
-pit1 <- pithist(m1)
-pit2 <- pithist(m2, plot = FALSE)
-pit3 <- pithist(m3, plot = FALSE)
+## compute and plot pithist
+pithist(m1_lm)
 
-plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
+## customize colors and style
+pithist(m1_lm, ref = "blue", lty = 2, pch = 20, style = "lines")
 
-plot(c(pit1, pit2, pit3), col = c(1, 2, 3), style = "lines")
+## add separate model
+if (require("crch", quietly = TRUE)) {
+  m1_crch <- crch(dist ~ speed | speed, data = cars)
+  lines(pithist(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
+}
 
-plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE)
-lines(pit3, col = 3)
+#-------------------------------------------------------------------------------
+if (require("crch")) {
+
+  ## precipitation observations and forecasts for Innsbruck
+  data("RainIbk", package = "crch")
+  RainIbk <- sqrt(RainIbk)
+  RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
+  RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+  RainIbk <- subset(RainIbk, enssd > 0)
+
+  ## linear model w/ constant variance estimation
+  m2_lm <- lm(rain ~ ensmean, data = RainIbk)
+
+  ## logistic censored model 
+  m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
+
+  ## compute pithists
+  pit2_lm <- pithist(m2_lm, plot = FALSE)
+  pit2_crch <- pithist(m2_crch, plot = FALSE)
+
+  ## plot in single graph with style "lines"
+  plot(c(pit2_lm, pit2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, 
+    style = "lines", single_graph = TRUE)
+}
+
+
+#-------------------------------------------------------------------------------
+if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
+
+  ## determinants for male satellites to nesting horseshoe crabs
+  data("CrabSatellites", package = "countreg")
+  m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
+
+  ## compute and plot pithist as ggplot2 graphic
+  topmodels::pithist(m3_pois, plot = "ggplot2")
+}
 
 }
 \references{
