@@ -101,21 +101,57 @@ TODO: (ML)
 }
 \examples{
 
-require("crch")
-m1 <- lm(dist ~ speed, data = cars)
-m2 <- crch(dist ~ speed | speed, data = cars)
-m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+## speed and stopping distances of cars
+m1_lm <- lm(dist ~ speed, data = cars)
 
-rel1 <- reliagram(m1, quantiles = c(0.2, 0.6), plot = FALSE)
-rel2 <- reliagram(m2, plot = FALSE)
-rel3 <- reliagram(m3, plot = FALSE)
+## compute and plot reliagram
+reliagram(m1_lm)
 
-plot(c(rel1, rel2), single_graph = TRUE, col = c(1, 2, 3), lty = c(1, 2, 3), pch = c(1, 2, 3))
+## customize colors
+reliagram(m1_lm, ref = "blue", lty = 2, pch = 20)
 
-plot(rel1, single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
-lines(rel3, col = 3, lty = 2, confint = 3)
+## add separate model
+if (require("crch")) {
+  m1_crch <- crch(dist ~ speed | speed, data = cars)
+  lines(reliagram(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
+}
 
-reliagram(m1, quantiles = c(0.2, 0.6), minimum = c(2, 6), plot = "ggplot2")
+if (require("crch")) {
+
+  ## precipitation observations and forecasts for Innsbruck
+  data("RainIbk", package = "crch")
+  RainIbk <- sqrt(RainIbk)
+  RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
+  RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+  RainIbk <- subset(RainIbk, enssd > 0)
+
+  ## linear model w/ constant variance estimation
+  m2_lm <- lm(rain ~ ensmean, data = RainIbk)
+
+  ## logistic censored model 
+  m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
+
+  ## compute reliagrams
+  qq2_lm <- reliagram(m2_lm, plot = FALSE)
+  qq2_crch <- reliagram(m2_crch, plot = FALSE)
+
+  ## plot in single graph
+  plot(c(qq2_lm, qq2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
+}
+
+
+if (require("countreg")) {
+
+  ## determinants for male satellites to nesting horseshoe crabs
+  data("CrabSatellites", package = "countreg")
+  m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
+
+  ## compute and plot reliagram as base graphic
+  reliagram(m3_pois)
+
+  ## compute and plot reliagram as ggplot2 graphic
+  reliagram(m3_pois, plot = "ggplot2")
+}
 
 }
 \references{
