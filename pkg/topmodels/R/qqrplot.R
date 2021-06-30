@@ -473,27 +473,52 @@ plot.qqrplot <- function(x,
     ## get group index
     j <- unique(d$group)
 
-    ## get xlim and ylim conditional on confint
-    if (
-      !identical(plot_arg$confint[j], FALSE) &&
-        !is.na(attr(d, "confint_level")[j])
-    ) {
-      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
-        tmp <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
-        plot_arg[j, c("xlim1", "xlim2")] <- tmp
+    ## get xlim and ylim conditional on confint and on single_graph
+    if (single_graph) {
+      if (
+        !identical(plot_arg$confint[j], FALSE) &&
+          any(!is.na(attr(d, "confint_level")))
+      ) {
+        if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
+          tmp <- range(as.matrix(x[grepl("x", names(x))]), finite = TRUE)
+          plot_arg[j, c("xlim1", "xlim2")] <- tmp
+        }
+        if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
+          tmp <- range(as.matrix(x[grepl("y", names(x))]), finite = TRUE)
+          plot_arg[j, c("ylim1", "ylim2")] <- tmp
+        }
+      } else {
+        if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
+          tmp <- range(as.matrix(x[grepl("^x$|x_[0-9]", names(x))]), finite = TRUE)
+          plot_arg[j, c("xlim1", "xlim2")] <- tmp
+        }
+        if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
+          tmp <- range(as.matrix(x[grepl("^y$|y_[0-9]", names(x))]), finite = TRUE)
+          plot_arg[j, c("ylim1", "ylim2")] <- tmp
+        }
       }
-      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-        tmp <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
-        plot_arg[j, c("ylim1", "ylim2")] <- tmp
-      }
-    } else {
-      if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
-        tmp <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
-        plot_arg[j, c("xlim1", "xlim2")] <- tmp
-      }
-      if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-        tmp <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
-        plot_arg[j, c("ylim1", "ylim2")] <- tmp
+    } else { 
+      if (
+        !identical(plot_arg$confint[j], FALSE) &&
+          !is.na(attr(d, "confint_level")[j])
+      ) {
+        if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
+          tmp <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
+          plot_arg[j, c("xlim1", "xlim2")] <- tmp
+        }
+        if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
+          tmp <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
+          plot_arg[j, c("ylim1", "ylim2")] <- tmp
+        }
+      } else {
+        if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
+          tmp <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
+          plot_arg[j, c("xlim1", "xlim2")] <- tmp
+        }
+        if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
+          tmp <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
+          plot_arg[j, c("ylim1", "ylim2")] <- tmp
+        }
       }
     }
 
