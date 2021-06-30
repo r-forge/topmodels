@@ -479,27 +479,57 @@ c.rootogram <- function(...) {
 #' @keywords hplot
 #' @examples
 #' 
-#' ## plots and output
+#' ## speed and stopping distances of cars
+#' m1_lm <- lm(dist ~ speed, data = cars)
 #' 
-#' ## number of deaths by horsekicks in Prussian army (Von Bortkiewicz 1898)
-#' deaths <- rep(0:4, c(109, 65, 22, 3, 1))
+#' ## compute and plot rootogram
+#' rootogram(m1_lm)
 #' 
-#' ## fit glm model
-#' m1 <- glm(deaths ~ 1, family = poisson)
-#' rootogram(m1)
+#' ## customize colors
+#' rootogram(m1_lm, ref = "blue", lty = 2, pch = 20)
 #' 
-#' ## inspect output (without plotting)
-#' r1 <- rootogram(m1, plot = FALSE)
-#' r1
-#' 
-#' ## combine plots
-#' plot(c(r1, r1), col = c(1, 2), ref = 4, lty = c(1, 2))
-#' 
+#' ## add separate model
+#' if (require("crch", quietly = TRUE)) {
+#'   m1_crch <- crch(dist ~ speed | speed, data = cars)
+#'   points(rootogram(m1_crch, plot = FALSE), col = 2, lty = 2)
+#' }
 #' 
 #' #-------------------------------------------------------------------------------
+#' if (require("crch")) {
 #' 
-#' ## different styles
+#'   ## precipitation observations and forecasts for Innsbruck
+#'   data("RainIbk", package = "crch")
+#'   RainIbk <- sqrt(RainIbk)
+#'   RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
+#'   RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+#'   RainIbk <- subset(RainIbk, enssd > 0)
 #' 
+#'   ## linear model w/ constant variance estimation
+#'   m2_lm <- lm(rain ~ ensmean, data = RainIbk)
+#' 
+#'   ## logistic censored model 
+#'   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
+#' 
+#'   ## compute rootograms
+#'   r2_lm <- rootogram(m2_lm, plot = FALSE)
+#'   r2_crch <- rootogram(m2_crch, plot = FALSE)
+#' 
+#'   ## plot in single graph
+#'   plot(c(r2_lm, r2_crch), col = c(1, 2))
+#' }
+#' 
+#' #-------------------------------------------------------------------------------
+#' if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
+#' 
+#'   ## determinants for male satellites to nesting horseshoe crabs
+#'   data("CrabSatellites", package = "countreg")
+#'   m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
+#' 
+#'   ## compute and plot rootogram as ggplot2 graphic
+#'   topmodels::rootogram(m3_pois, plot = "ggplot2")
+#' }
+#' 
+#' #-------------------------------------------------------------------------------
 #' ## artificial data from negative binomial (mu = 3, theta = 2)
 #' ## and Poisson (mu = 3) distribution
 #' set.seed(1090)
@@ -507,22 +537,16 @@ c.rootogram <- function(...) {
 #' x <- rpois(100, lambda = 3)
 #' 
 #' ## glm method: fitted values via glm()
-#' m2 <- glm(y ~ x, family = poisson)
+#' m4_pois <- glm(y ~ x, family = poisson)
 #' 
 #' ## correctly specified Poisson model fit
-#' r1 <- rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing", plot = FALSE)
-#' r2 <- rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging", plot = FALSE)
-#' r3 <- rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended", plot = FALSE)
-#' plot(c(r1, r2, r3))
-#' 
-#' #-------------------------------------------------------------------------------
-#' ## linear regression with normal/Gaussian response: anorexia data
-#' 
-#' data("anorexia", package = "MASS")
-#' 
-#' m3 <- glm(Postwt ~ Prewt + Treat + offset(Prewt), family = gaussian, data = anorexia)
-#' rootogram(m3, ylim = c(-1, 4))
-#' abline(h = c(-1, 1), col = 4, lty = 2, lwd = 2)
+#' r4a_pois <- rootogram(m4_pois, style = "standing", ylim = c(-2.2, 4.8), 
+#'   main = "Standing", plot = FALSE)
+#' r4b_pois <- rootogram(m4_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging", 
+#'   plot = FALSE)
+#' r4c_pois <- rootogram(m4_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended", 
+#'   plot = FALSE)
+#' plot(c(r4a_pois, r4b_pois, r4c_pois))
 #' 
 #' @export
 plot.rootogram <- function(x,

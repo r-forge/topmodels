@@ -97,19 +97,55 @@ randomization of quantiles is needed.
 }
 \examples{
 
-data("CrabSatellites", package = "countreg")
-CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
+## speed and stopping distances of cars
+m1_lm <- lm(dist ~ speed, data = cars)
 
-m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
-m3 <- lm(dist ~ speed, data = cars)
+## compute and plot qqrplot
+qqrplot(m1_lm)
 
-q1 <- qqrplot(m1, nsim = 100, confint = TRUE)
-q2 <- qqrplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
-q3 <- qqrplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
+## customize colors
+qqrplot(m1_lm, ref = "blue", lty = 2, pch = 20)
 
-plot(c(q1, q2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
-points(q3, col = "lightblue")
+## add separate model
+if (require("crch", quietly = TRUE)) {
+  m1_crch <- crch(dist ~ speed | speed, data = cars)
+  points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
+}
+
+#-------------------------------------------------------------------------------
+if (require("crch")) {
+
+  ## precipitation observations and forecasts for Innsbruck
+  data("RainIbk", package = "crch")
+  RainIbk <- sqrt(RainIbk)
+  RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
+  RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+  RainIbk <- subset(RainIbk, enssd > 0)
+
+  ## linear model w/ constant variance estimation
+  m2_lm <- lm(rain ~ ensmean, data = RainIbk)
+
+  ## logistic censored model 
+  m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
+
+  ## compute qqrplots
+  qq2_lm <- qqrplot(m2_lm, plot = FALSE)
+  qq2_crch <- qqrplot(m2_crch, plot = FALSE)
+
+  ## plot in single graph
+  plot(c(qq2_lm, qq2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
+}
+
+#-------------------------------------------------------------------------------
+if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
+
+  ## determinants for male satellites to nesting horseshoe crabs
+  data("CrabSatellites", package = "countreg")
+  m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
+
+  ## compute and plot qqrplot as ggplot2 graphic
+  qqrplot(m3_pois, plot = "ggplot2")
+}
 
 }
 \references{
