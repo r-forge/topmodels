@@ -170,13 +170,11 @@ x <- rpois(100, lambda = 3)
 m3_pois <- glm(y ~ x, family = poisson)
 
 ## correctly specified Poisson model fit
-r3a_pois <- rootogram(m3_pois, style = "standing", ylim = c(-2.2, 4.8), 
-  main = "Standing", plot = FALSE)
-r3b_pois <- rootogram(m3_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging", 
-  plot = FALSE)
-r3c_pois <- rootogram(m3_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended", 
-  plot = FALSE)
-plot(c(r3a_pois, r3b_pois, r3c_pois))
+par(mfrow = c(1, 3))
+r3a_pois <- rootogram(m3_pois, style = "standing", ylim = c(-2.2, 4.8), main = "Standing")
+r3b_pois <- rootogram(m3_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging")
+r3c_pois <- rootogram(m3_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
+par(mfrow = c(1, 1))
 
 }
 \references{
