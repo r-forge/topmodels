@@ -144,7 +144,7 @@ if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
   m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
 
   ## compute and plot qqrplot as ggplot2 graphic
-  qqrplot(m3_pois, plot = "ggplot2")
+  topmodels::qqrplot(m3_pois, plot = "ggplot2")
 }
 
 }
