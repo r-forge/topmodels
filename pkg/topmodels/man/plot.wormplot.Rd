@@ -136,17 +136,6 @@ if (require("crch")) {
   plot(c(wp2_lm, wp2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
 }
 
-#-------------------------------------------------------------------------------
-if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
-
-  ## determinants for male satellites to nesting horseshoe crabs
-  data("CrabSatellites", package = "countreg")
-  m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
-
-  ## compute and plot wormplot as ggplot2 graphic
-  wormplot(m3_pois, plot = "ggplot2")
-}
-
 }
 \references{
 FIXME: Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile

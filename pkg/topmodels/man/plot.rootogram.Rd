@@ -160,17 +160,6 @@ if (require("crch")) {
 }
 
 #-------------------------------------------------------------------------------
-if (require("countreg", attach.required = FALSE, warn.conflicts = FALSE)) {
-
-  ## determinants for male satellites to nesting horseshoe crabs
-  data("CrabSatellites", package = "countreg")
-  m3_pois  <- glm(satellites ~     width + color, data = CrabSatellites, family = poisson)
-
-  ## compute and plot rootogram as ggplot2 graphic
-  topmodels::rootogram(m3_pois, plot = "ggplot2")
-}
-
-#-------------------------------------------------------------------------------
 ## artificial data from negative binomial (mu = 3, theta = 2)
 ## and Poisson (mu = 3) distribution
 set.seed(1090)
@@ -178,16 +167,16 @@ y <- rnbinom(100, mu = 3, size = 2)
 x <- rpois(100, lambda = 3)
 
 ## glm method: fitted values via glm()
-m4_pois <- glm(y ~ x, family = poisson)
+m3_pois <- glm(y ~ x, family = poisson)
 
 ## correctly specified Poisson model fit
-r4a_pois <- rootogram(m4_pois, style = "standing", ylim = c(-2.2, 4.8), 
+r3a_pois <- rootogram(m3_pois, style = "standing", ylim = c(-2.2, 4.8), 
   main = "Standing", plot = FALSE)
-r4b_pois <- rootogram(m4_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging", 
+r3b_pois <- rootogram(m3_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging", 
   plot = FALSE)
-r4c_pois <- rootogram(m4_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended", 
+r3c_pois <- rootogram(m3_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended", 
   plot = FALSE)
-plot(c(r4a_pois, r4b_pois, r4c_pois))
+plot(c(r3a_pois, r3b_pois, r3c_pois))
 
 }
 \references{
