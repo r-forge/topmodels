@@ -627,7 +627,7 @@ plot.wormplot <- function(x,
   # DRAW PLOTS
   # -------------------------------------------------------------------
   ## set up necessary panels
-  if (n > 1L) {
+  if (!single_graph && n > 1L) {
     old_pars <- par(mfrow = n2mfrow(n))
     on.exit(par(old_pars), add = TRUE)
   }
