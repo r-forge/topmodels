@@ -94,14 +94,17 @@ PIT histograms graphically compare empirical probabilities from fitted
 models with a uniform distribution.
 }
 \details{
-PIT histograms graphically the probability integral transform (PIT), i.e.,
-observed probabilities from fitted probability models, with a uniform
-distribution. It leverages the \code{\link{procast}} generic and then
-essentially draws a \code{\link[graphics]{hist}}.
+PIT histograms graphically evaluate the probability integral transform (PIT),
+i.e., the value that the predictive CDF attains at the observation, with a
+uniform distribution. For a well calibrated model fit, the observation will be
+drawn from the predictive distribution and the PIT will have a standard uniform
+distribution. \code{\link{pithist}} leverages the function
+\code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
+essentially draws a \code{\link[graphics]{hist}}. 
 
-In case of discrete distributions the PIT is either drawn randomly from the
-corresponding interval or distributed proportionally in the histogram
-(FIXME: not yet implemented).
+In case of discrete distributions the PIT can be either drawn randomly from the
+corresponding interval or distributed proportionally in the histogram, whereby
+the latter is not fully supported yet.
 }
 \examples{
 
@@ -122,11 +125,22 @@ lines(pit3, col = 3)
 }
 \references{
 Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
-Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
+Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261. 
+\doi{10.2307/2981683}.
+ 
+Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
+Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
+the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292,
+\doi{10.2307/2981683}
 
-Agresti A, Coull A B (1998). \dQuote{Approximate is Better than ``Exact''
-for Interval Estimation of Binomial Proportions.} \emph{The American
-Statistician}, \bold{52}(2), 119--126.
+Diebold FX, Gunther TA, Tay AS (1998). \dQuote{Evaluating Density Forecasts
+with Applications to Financial Risk Management}. \emph{International Economic
+Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}.
+
+Tilmann G, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
+Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
+Series B (Methodological)}. \bold{69}(2), 243--268,
+\doi{10.1111/j.1467-9868.2007.00587.x}.
 }
 \seealso{
 \code{\link{procast}}, \code{\link[graphics]{hist}}

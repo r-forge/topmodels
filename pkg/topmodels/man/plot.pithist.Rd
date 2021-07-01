@@ -4,7 +4,7 @@
 \alias{plot.pithist}
 \alias{lines.pithist}
 \alias{autoplot.pithist}
-\title{Plotting a PIT Histogram}
+\title{S3 Methods for Plotting PIT Histograms}
 \usage{
 \method{plot}{pithist}(
   x,
@@ -80,24 +80,24 @@ plot or just the histogram or just the fitted line.}
 
 \item{\dots}{further graphical parameters.}
 
-\item{object, x}{an object of class \code{pithist}.}
+\item{object, x}{an object of class \code{\link{pithist}}.}
 
 \item{colour, size, linetype, legend}{graphical parameters passed for 
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
 }
 \description{
-PIT histograms graphically compare empirical probabilities from fitted
-models with a uniform distribution.
+Generic plotting functions for PIT histograms.
 }
 \details{
-PIT histograms graphically the probability integral transform (PIT), i.e.,
-observed probabilities from fitted probability models, with a uniform
-distribution. It leverages the \code{\link{procast}} generic and then
-essentially draws a \code{\link[graphics]{hist}}.
+PIT histograms graphically evaluate the probability integral transform (PIT),
+i.e., the value that the predictive CDF attains at the observation, with a
+uniform distribution. For a well calibrated model fit, the observation will be
+drawn from the predictive distribution and the PIT will have a standard uniform
+distribution. 
 
-In case of discrete distributions the PIT is either drawn randomly from the
-corresponding interval or distributed proportionally in the histogram
-(FIXME: not yet implemented).
+PIT histograms can be rendered as \code{ggplot2} or base *R* graphics by using
+the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+For a single base *R* graphically panel, \code{\link{lines}} adds an additional PIT histogram.
 }
 \examples{
 
