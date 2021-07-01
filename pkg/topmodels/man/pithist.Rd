@@ -33,7 +33,7 @@ pithist(object, ...)
 }
 \arguments{
 \item{object}{an object from which probability integral transforms can be
-extracted with \code{\link{procast}}.}
+extracted using the generic function \code{\link{procast}}.}
 
 \item{\dots}{further graphical parameters.}
 
@@ -51,19 +51,21 @@ or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
 "tibble", or for NULL it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
-\item{style}{character specifying the syle of rootogram (see below). FIXME:
-Description}
+\item{style}{character specifying the style of pithist. For \code{style = "histogram"}
+a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
+line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
+plotted.}
 
 \item{type}{character. In case of discrete distributions should the PITs be
 drawn randomly from the corresponding interval or distributed
-proportionally?}
+proportionally? This argument is not yet fully supported.}
 
 \item{nsim}{integer. If \code{type} is \code{"random"} how many simulated
 PITs should be drawn?}
 
 \item{delta}{numeric. The minimal difference to compute the range of
 proabilities corresponding to each observation according to get (randomized)
-quantile residuals.  For \code{NULL}, the minimal observed difference in the
+quantile residuals. For \code{NULL}, the minimal observed difference in the
 resonse divided by \code{5e-6} is used.}
 
 \item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
@@ -77,34 +79,35 @@ histogram has a total area of one).}
 
 \item{confint_level}{numeric. The confidence level required.}
 
-\item{confint_type}{character. Which type of confidence interval.  According
+\item{confint_type}{character. Which type of confidence interval should be plotted. According
 to Agresti and Coull (1998) for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
 \item{single_graph}{logical. Should all computed extended reliability
-diagrams be plotted in a single graph?}
+diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"lines"}.}
 
-\item{xlim, ylim}{graphical parameters. These may pertain either to the whole
-plot or just the histogram or just the fitted line.}
-
-\item{xlab, ylab, main}{graphical parameters.}
+\item{xlim, ylim, xlab, ylab, main}{graphical parameters handed passed to
+\code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}
 }
 \description{
-PIT histograms graphically compare empirical probabilities from fitted
-models with a uniform distribution.
+PIT histograms graphically compare empirical probabilities from fitted models
+with a uniform distribution. If \code{plot = TRUE}, the resulting object of
+class \code{"pithist"} is plotted by \code{\link{plot.pithist}} or
+\code{\link{autoplot.pithist}} conditional if the package
+\code{ggplot2} is loaded, before it is returned.
 }
 \details{
 PIT histograms graphically evaluate the probability integral transform (PIT),
 i.e., the value that the predictive CDF attains at the observation, with a
 uniform distribution. For a well calibrated model fit, the observation will be
 drawn from the predictive distribution and the PIT will have a standard uniform
-distribution. \code{\link{pithist}} leverages the function
+distribution. For computation, \code{\link{pithist}} leverages the function
 \code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
 essentially draws a \code{\link[graphics]{hist}}. 
 
 In case of discrete distributions the PIT can be either drawn randomly from the
 corresponding interval or distributed proportionally in the histogram, whereby
-the latter is not fully supported yet.
+the latter is not yet fully supported.
 }
 \examples{
 
@@ -124,25 +127,29 @@ lines(pit3, col = 3)
 
 }
 \references{
+Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
+for Interval Estimation of Binomial Proportions.} \emph{The American
+Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
+
 Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
 Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261. 
-\doi{10.2307/2981683}.
+\doi{10.2307/2981683}
  
 Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
-the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292,
+the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292.
 \doi{10.2307/2981683}
 
 Diebold FX, Gunther TA, Tay AS (1998). \dQuote{Evaluating Density Forecasts
 with Applications to Financial Risk Management}. \emph{International Economic
-Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}.
+Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}
 
 Tilmann G, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
 Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
-Series B (Methodological)}. \bold{69}(2), 243--268,
-\doi{10.1111/j.1467-9868.2007.00587.x}.
+Series B (Methodological)}. \bold{69}(2), 243--268.
+\doi{10.1111/j.1467-9868.2007.00587.x}
 }
 \seealso{
-\code{\link{procast}}, \code{\link[graphics]{hist}}
+\code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
 }
 \keyword{hplot}
