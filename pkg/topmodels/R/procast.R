@@ -48,8 +48,7 @@
 #' values in \code{newdata}.  The default is to employ \code{NA}.
 #' @param type character specifying the type of probabilistic forecast to
 #' compute.  In \code{procast_setup} the \code{type} is only used for nice
-#' labels of the returned data frame. FIXME: Implement mean/expectation and
-#' variance/dispersion instead of location and scale.
+#' labels of the returned data frame. 
 #' @param at specification of values at which the forecasts should be
 #' evaluated, typically a numeric vector but possibly also a matrix or data
 #' frame.  Additionally, \code{at} can be the character string

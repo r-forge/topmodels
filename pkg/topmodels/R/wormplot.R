@@ -61,8 +61,14 @@
 #' diagrams be plotted in a single graph?
 #' @param xlab,ylab,main,\dots graphical parameters handed passed to
 #' \code{\link{plot.wormplot}} or \code{\link{autoplot.wormplot}}.
-#' @return A data.frame is returned invisibly with: \item{x}{the theoretical
-#' normal quantiles,} \item{y}{the empirical quantile residuals.}
+#' @return An object of class \code{"wormplot"} inheriting from
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+#' with the following variables: item{x}{theoretical
+#' quantiles}, \item{y}{deviations of theoretical and empirical quantiles}. 
+#' In case of randomized residuals, \code{nsim}
+#' different \code{x} and \code{y}, and a lower and upper confidence interval bound is returned.
+#' Additionally, \code{xlab}, \code{ylab}, \code{main}, and \code{confint_level}, as well as the
+#' reference function (\code{ref_fun}) are stored as attributes.
 #' @seealso \code{\link{plot.wormplot}}, \code{\link{qqrplot}}, 
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references van Buuren S and Fredriks M (2001). \dQuote{Worm plot: simple diagnostic

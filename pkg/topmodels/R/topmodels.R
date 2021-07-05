@@ -3,7 +3,10 @@
 #' Plotting methods for probabilistic (regression) model objects supported by
 #' \code{procast}.
 #' 
-#' FIXME
+#' 
+#' Render the diagnostic graphics rootograms, PIT histograms, reliagrams
+#' (reliability diagrams), (randomized) quantile residual Q-Q plots, and worm
+#' plots.
 #' 
 #' @param object An object supported by \code{"procast"}.
 #' @param plot Should the \code{plot} or \code{autoplot} method be called to
@@ -36,7 +39,6 @@
 #' @param \dots Arguments to be passed to \code{\link{rootogram}},
 #' \code{\link{pithist}}, \code{\link{reliagram}}, \code{\link{qqrplot}}, and
 #' \code{\link{wormplot}}.
-#' @return FIXME
 #' @keywords regression
 #' @examples
 #' 

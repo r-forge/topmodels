@@ -61,15 +61,14 @@ choice for \code{ggplot2} style graphics.}
 \code{\link{pithist}}, \code{\link{reliagram}}, \code{\link{qqrplot}}, and
 \code{\link{wormplot}}.}
 }
-\value{
-FIXME
-}
 \description{
 Plotting methods for probabilistic (regression) model objects supported by
 \code{procast}.
 }
 \details{
-FIXME
+Render the diagnostic graphics rootograms, PIT histograms, reliagrams
+(reliability diagrams), (randomized) quantile residual Q-Q plots, and worm
+plots.
 }
 \examples{
 

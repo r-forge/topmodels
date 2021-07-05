@@ -63,16 +63,6 @@ or just the fitted line.}
 \item{legend}{logical. Should a legend be added in the \code{ggplot2} style
 graphic?}
 }
-\value{
-An object of class \code{"rootogram"} inheriting from
-\code{"data.frame"} with the following variables: \item{observed}{observed
-frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
-interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
-histogram bars,} \item{width}{widths of the histogram bars,}
-\item{height}{height of the histogram bars,} \item{line}{y-coordinates of
-the fitted curve.} Additionally, \code{style}, \code{scale}, \code{xlab},
-\code{ylab}, and \code{main} are stored as attributes.
-}
 \description{
 Generic plotting functions for rootograms of the class \code{"rootogram"}
 computed by \code{link{rootogram}}.

@@ -26,7 +26,7 @@
 #' package \code{ggplot2} is loaded, before it is returned.
 #' 
 #' Reliagrams evaluate if a probability model is calibrated (reliable) by first
-#' partitioning the forecast probability for a binary event into a certain number
+#' partitioning the predicted probability for a binary event into a certain number
 #' of bins and then plotting (within each bin) the averaged forecast probability
 #' against the observered/empirical relative frequency.  For computation,
 #' code{\link{reliagram}} leverages the \code{\link{procast}} generic.
@@ -74,6 +74,16 @@
 #' diagrams be plotted in a single graph?
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters.
+#' @return An object of class \code{"reliagram"} inheriting from
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
+#' with the following variables: item{x}{forecast probabilities},
+#' \item{y}{observered/empirical relative frequencies}, \item{bin_lwr, bin_upr}{
+#' lower and upper bound of the binned forecast probabilities},
+#' \item{n_pred}{number of predictions within the binned forecasts probabilites},
+#' \item{ci_lwr, ci_upr}{lower and upper confidence interval bound}. Additionally,
+#' \code{xlab}, \code{ylab}, \code{main}, and \code{treshold},
+#' \code{confint_level}, brier scores (\code{bs, rel, res, unc}) are stored as
+#' attributes.
 #' @note Note that there is also a \code{\link[verification]{reliability.plot}} function in the
 #' \pkg{verification} package. However, it only works for numeric
 #' forecast probabilities and numeric observed relative frequencies, hence a function has been
