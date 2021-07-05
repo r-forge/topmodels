@@ -65,8 +65,10 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
-\item{style}{character specifying the syle of rootogram (see below). FIXME:
-Description}
+\item{style}{character specifying the style of pithist. For \code{style = "histogram"}
+a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
+line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
+plotted.}
 
 \item{confint}{logical. Should confident intervals be drawn?}
 
@@ -86,7 +88,8 @@ plot or just the histogram or just the fitted line.}
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
 }
 \description{
-Generic plotting functions for PIT histograms.
+Generic plotting functions for PIT histograms of the class \code{"pithist"}
+computed by \code{link{pithist}}.
 }
 \details{
 PIT histograms graphically evaluate the probability integral transform (PIT),
@@ -153,14 +156,29 @@ pithist(m3_pois, plot = "ggplot2")
 
 }
 \references{
-Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
-Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
-
-Agresti A, Coull A B (1998). \dQuote{Approximate is Better than ``Exact''
+Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
 for Interval Estimation of Binomial Proportions.} \emph{The American
-Statistician}, \bold{52}(2), 119--126.
+Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
+
+Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
+Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261. 
+\doi{10.2307/2981683}
+ 
+Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
+Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
+the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292.
+\doi{10.2307/2981683}
+
+Diebold FX, Gunther TA, Tay AS (1998). \dQuote{Evaluating Density Forecasts
+with Applications to Financial Risk Management}. \emph{International Economic
+Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}
+
+Tilmann G, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
+Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
+Series B (Methodological)}. \bold{69}(2), 243--268.
+\doi{10.1111/j.1467-9868.2007.00587.x}
 }
 \seealso{
-\code{\link{procast}}, \code{\link[graphics]{hist}}
+\code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 }
 \keyword{hplot}

@@ -25,21 +25,25 @@
 #' Q-Q Plots for Quantile Residuals
 #' 
 #' Visualize goodness of fit of regression models by Q-Q plots using quantile
-#' residuals.
+#' residuals. If \code{plot = TRUE}, the resulting object of
+#' class \code{"qqrplot"} is plotted by \code{\link{plot.qqrplot}} or
+#' \code{\link{autoplot.qqrplot}} conditional if the package
+#' \code{ggplot2} is loaded, before it is returned.
 #' 
-#' Q-Q residual draw quantile residuals (by default: transformed to standard
+#' Q-Q residuals plots draw quantile residuals (by default: transformed to standard
 #' normal scale) against theoretical quantiles from the same distribution.
 #' Alternatively, transformations to other distributions can also be used,
 #' specifically using no transformation at all, i.e., remaining on the uniform
 #' scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-#' \code{identity}).
+#' \code{identity}). For computation, \code{\link{qqrplot}} leverages the function
+#' \code{\link{qresiduals}} employing the \code{\link{procast}}.
 #' 
 #' Additional options are offered for models with discrete responses where
 #' randomization of quantiles is needed.
 #' 
 #' @aliases qqrplot qqrplot.default c.qqrplot
-#' @param object an object (for which a \code{\link{qresiduals}} method
-#' exists).
+#' @param object an object from which probability integral transforms can be
+#' extracted using the generic function \code{\link{procast}}.
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
 #' @param plot Should the \code{plot} or \code{autoplot} method be called to
@@ -62,12 +66,11 @@
 #' confidence interval.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param xlab,ylab,main,\dots graphical plotting parameters passed to
-#' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
-#' respectively.
-#' @return An list is returned invisibly with: \item{normal}{the theoretical
-#' normal quantiles,} \item{residuals}{the empirical quantile residuals.}
-#' @seealso \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' @param xlab,ylab,main,\dots graphical parameters handed passed to
+#' \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.
+#' @return A data.frame is returned invisibly with: \item{x}{the theoretical
+#' normal quantiles,} \item{y}{the empirical quantile residuals.}
+#' @seealso \code{\link{plot.qqrplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
 #' \bold{5}, 1--10.
@@ -348,20 +351,22 @@ c.qqrplot <- function(...) {
 rbind.qqrplot <- c.qqrplot
 
 
-#' Plotting Q-Q Plots for Quantile Residuals
+#' S3 Methods for Plotting Q-Q Residuals Plots
 #' 
-#' Visualize goodness of fit of regression models by Q-Q plots using quantile
-#' residuals.
+#' Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
+#' computed by \code{link{qqrplot}}. 
 #' 
-#' Q-Q residual draw quantile residuals (by default: transformed to standard
+#' Q-Q residuals plot draw quantile residuals (by default: transformed to standard
 #' normal scale) against theoretical quantiles from the same distribution.
 #' Alternatively, transformations to other distributions can also be used,
 #' specifically using no transformation at all, i.e., remaining on the uniform
 #' scale (via \code{trafo = NULL} or equivalently \code{qunif} or
 #' \code{identity}).
-#' 
-#' Additional options are offered for models with discrete responses where
-#' randomization of quantiles is needed.
+#'
+#' Q-Q residuals plots can be rendered as \code{ggplot2} or base *R* graphics by using
+#' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+#' For a single base *R* graphically panel, \code{\link{points}} adds an additional Q-Q
+#' residuals plot.
 #' 
 #' @aliases plot.qqrplot points.qqrplot autoplot.qqrplot
 #' @param x,object an object of class \code{qqrplot}.
@@ -374,12 +379,10 @@ rbind.qqrplot <- c.qqrplot
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
 #' @param ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
-#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
 #' @param colour,size,shape,linetype,legend graphical parameters passed for 
-#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
-#' @return An list is returned invisibly with: \item{normal}{the theoretical
-#' normal quantiles,} \item{residuals}{the empirical quantile residuals.}
-#' @seealso \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{qqrplot}.
+#' @seealso \code{\link{qqrplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
 #' \bold{5}, 1--10.
