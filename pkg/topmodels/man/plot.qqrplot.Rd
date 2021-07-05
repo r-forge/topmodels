@@ -4,7 +4,7 @@
 \alias{plot.qqrplot}
 \alias{points.qqrplot}
 \alias{autoplot.qqrplot}
-\title{Plotting Q-Q Plots for Quantile Residuals}
+\title{S3 Methods for Plotting Q-Q Residuals Plots}
 \usage{
 \method{plot}{qqrplot}(
   x,
@@ -67,33 +67,31 @@ quantiles of the randomized quantile residuals be visualized? If
 \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.}
 
 \item{ref, xlim, ylim, col, fill, alpha_min, pch, axes, box}{additional graphical
-parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
+parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.}
 
 \item{xlab, ylab, main, \dots}{graphical plotting parameters passed to
 \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 respectively.}
 
 \item{colour, size, shape, linetype, legend}{graphical parameters passed for 
-\code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
-}
-\value{
-An list is returned invisibly with: \item{normal}{the theoretical
-normal quantiles,} \item{residuals}{the empirical quantile residuals.}
+\code{ggplot2} style plots, whereby \code{object} is a object of class \code{qqrplot}.}
 }
 \description{
-Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals.
+Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
+computed by \code{link{qqrplot}}.
 }
 \details{
-Q-Q residual draw quantile residuals (by default: transformed to standard
+Q-Q residuals plot draw quantile residuals (by default: transformed to standard
 normal scale) against theoretical quantiles from the same distribution.
 Alternatively, transformations to other distributions can also be used,
 specifically using no transformation at all, i.e., remaining on the uniform
 scale (via \code{trafo = NULL} or equivalently \code{qunif} or
 \code{identity}).
 
-Additional options are offered for models with discrete responses where
-randomization of quantiles is needed.
+Q-Q residuals plots can be rendered as \code{ggplot2} or base *R* graphics by using
+the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+For a single base *R* graphically panel, \code{\link{points}} adds an additional Q-Q
+residuals plot.
 }
 \examples{
 
@@ -153,6 +151,6 @@ Residuals.} \emph{Journal of Computational and Graphical Statistics},
 \bold{5}, 1--10.
 }
 \seealso{
-\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+\code{\link{qqrplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}

@@ -89,6 +89,10 @@ diagrams be plotted in a single graph? If yes, \code{style} must be set to \code
 \item{xlim, ylim, xlab, ylab, main}{graphical parameters handed passed to
 \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}
 }
+\value{
+A data.frame is returned invisibly with: \item{x}{PIT,} \item{y}{Density,}
+\item{...}{and further information needed for creating the plot.}
+}
 \description{
 PIT histograms graphically compare empirical probabilities from fitted models
 with a uniform distribution. If \code{plot = TRUE}, the resulting object of
@@ -107,7 +111,7 @@ essentially draws a \code{\link[graphics]{hist}}.
 
 In case of discrete distributions the PIT can be either drawn randomly from the
 corresponding interval or distributed proportionally in the histogram, whereby
-the latter is not yet fully supported.
+the latter is not yet supported.
 }
 \examples{
 

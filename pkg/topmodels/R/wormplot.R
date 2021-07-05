@@ -14,26 +14,28 @@
 
 #' Worm Plots for Quantile Residuals
 #' 
-#' Visualize goodness of fit of regression models by Worm plots using quantile
-#' residuals.
+#' Visualize goodness of fit of regression models by worm plots using quantile
+#' residuals. If \code{plot = TRUE}, the resulting object of
+#' class \code{"wormplot"} is plotted by \code{\link{plot.pithist}} or
+#' \code{\link{autoplot.pithist}} conditional if the package
+#' \code{ggplot2} is loaded, before it is returned.
 #' 
-#' FIXME: Q-Q residual draw quantile residuals (by default: transformed to
-#' standard normal scale) against theoretical quantiles from the same
-#' distribution. Alternatively, transformations to other distributions can also
-#' be used, specifically using no transformation at all, i.e., remaining on the
-#' uniform scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-#' \code{identity}).
+#' Worm plots (de-trended Q-Q plots) draw deviations of quantile residuals (by
+#' default: transformed to standard normal scale) and theoretical quantiles from
+#' the same distribution against the same theoretical quantiles. For computation,
+#' \code{\link{wormplot}} leverages the function \code{\link{qresiduals}}
+#' employing the \code{\link{procast}}.
 #' 
 #' Additional options are offered for models with discrete responses where
 #' randomization of quantiles is needed.
 #' 
 #' @aliases wormplot wormplot.default c.wormplot
-#' @param object an object (for which a \code{\link{qresiduals}} method
-#' exists).
+#' @param object an object from which probability integral transforms can be
+#' extracted using the generic function \code{\link{procast}}.
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
 #' @param plot Should the \code{plot} or \code{autoplot} method be called to
-#' draw the computed worm plot? Either set \code{plot} expicitly to "base" vs.
+#' draw the computed Q-Q plot? Either set \code{plot} expicitly to "base" vs.
 #' "ggplot2" to choose the type of plot, or for a logical \code{plot} argument
 #' it's chosen conditional if the package \code{ggplot2} is loaded.
 #' @param class Should the invisible return value be either a \code{data.frame}
@@ -52,15 +54,15 @@
 #' confidence interval.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param xlab,ylab,main,\dots graphical plotting parameters passed to
-#' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
-#' respectively.
-#' @return An list is returned invisibly with: \item{normal}{the theoretical
-#' normal quantiles,} \item{residuals}{the empirical quantile residuals.}
-#' @seealso \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
-#' @references FIXME: Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
-#' Residuals.} \emph{Journal of Computational and Graphical Statistics},
-#' \bold{5}, 1--10.
+#' @param xlab,ylab,main,\dots graphical parameters handed passed to
+#' \code{\link{plot.wormplot}} or \code{\link{autoplot.wormplot}}.
+#' @return A data.frame is returned invisibly with: \item{x}{the theoretical
+#' normal quantiles,} \item{y}{the empirical quantile residuals.}
+#' @seealso \code{\link{plot.wormplot}}, \code{\link{qqrplot}}, 
+#' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' @references van Buuren S and Fredriks M (2001). \dQuote{Worm plot: simple diagnostic
+#' device for modelling growth reference curves}. \emph{Statistics in
+#' Medicine}, \bold{20}, 1259--1277. \doi{10.1002/sim.746}
 #' @keywords hplot
 #' @examples
 #' 
@@ -357,24 +359,22 @@ c.wormplot <- function(...) {
 #' @export
 rbind.wormplot <- c.wormplot
 
-
-#' Plotting Worm Plots for Quantile Residuals
+#' S3 Methods for Plotting Worm Plots
 #' 
-#' Visualize goodness of fit of regression models by Worm plots using quantile
-#' residuals.
+#' Generic plotting functions for worm plot of the class \code{"wormplot"}
+#' computed by \code{link{wormplot}}. 
 #' 
-#' FIXME: Q-Q residual draw quantile residuals (by default: transformed to
-#' standard normal scale) against theoretical quantiles from the same
-#' distribution. Alternatively, transformations to other distributions can also
-#' be used, specifically using no transformation at all, i.e., remaining on the
-#' uniform scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-#' \code{identity}).
-#' 
-#' Additional options are offered for models with discrete responses where
-#' randomization of quantiles is needed.
+#' Worm plots (de-trended Q-Q plots) draw deviations of quantile residuals (by
+#' default: transformed to standard normal scale) and theoretical quantiles from
+#' the same distribution against the same theoretical quantiles.
+#'
+#' Worm plots can be rendered as \code{ggplot2} or base *R* graphics by using
+#' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+#' For a single base *R* graphically panel, \code{\link{points}} adds an additional 
+#' worm plot.
 #' 
 #' @aliases plot.wormplot points.wormplot autoplot.wormplot
-#' @param x,object an object of class \code{reliagram}.
+#' @param x,object an object of class \code{wormplot}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
 #' @param confint logical or quantile specification. Should the range of
@@ -384,13 +384,11 @@ rbind.wormplot <- c.wormplot
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
 #' @param ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
-#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' parameters for base plots, whereby \code{x} is a object of class \code{wormplot}.
 #' @param colour,size,shape,linetype,legend graphical parameters passed for 
-#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
-#' @return An list is returned invisibly with: \item{normal}{the theoretical
-#' normal quantiles,} \item{residuals}{the empirical quantile residuals.}
-#' @seealso \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
-#' @references FIXME: Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{wormplot}.
+#' @seealso \code{\link{wormplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
 #' \bold{5}, 1--10.
 #' @keywords hplot

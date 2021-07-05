@@ -28,8 +28,8 @@ qqrplot(object, ...)
 )
 }
 \arguments{
-\item{object}{an object (for which a \code{\link{qresiduals}} method
-exists).}
+\item{object}{an object from which probability integral transforms can be
+extracted using the generic function \code{\link{procast}}.}
 
 \item{newdata}{optionally, a data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.}
@@ -63,25 +63,28 @@ confidence interval.}
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
-\item{xlab, ylab, main, \dots}{graphical plotting parameters passed to
-\code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
-respectively.}
+\item{xlab, ylab, main, \dots}{graphical parameters handed passed to
+\code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}
 }
 \value{
-An list is returned invisibly with: \item{normal}{the theoretical
-normal quantiles,} \item{residuals}{the empirical quantile residuals.}
+A data.frame is returned invisibly with: \item{x}{the theoretical
+normal quantiles,} \item{y}{the empirical quantile residuals.}
 }
 \description{
 Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals.
+residuals. If \code{plot = TRUE}, the resulting object of
+class \code{"qqrplot"} is plotted by \code{\link{plot.qqrplot}} or
+\code{\link{autoplot.qqrplot}} conditional if the package
+\code{ggplot2} is loaded, before it is returned.
 }
 \details{
-Q-Q residual draw quantile residuals (by default: transformed to standard
+Q-Q residuals plots draw quantile residuals (by default: transformed to standard
 normal scale) against theoretical quantiles from the same distribution.
 Alternatively, transformations to other distributions can also be used,
 specifically using no transformation at all, i.e., remaining on the uniform
 scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-\code{identity}).
+\code{identity}). For computation, \code{\link{qqrplot}} leverages the function
+\code{\link{qresiduals}} employing the \code{\link{procast}}.
 
 Additional options are offered for models with discrete responses where
 randomization of quantiles is needed.
@@ -109,6 +112,6 @@ Residuals.} \emph{Journal of Computational and Graphical Statistics},
 \bold{5}, 1--10.
 }
 \seealso{
-\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+\code{\link{plot.qqrplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}
