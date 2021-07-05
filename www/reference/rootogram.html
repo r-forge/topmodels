@@ -50,7 +50,10 @@
 
 <meta property="og:title" content="Rootograms for Assessing Goodness of Fit of Probability Models — rootogram" />
 <meta property="og:description" content="Rootograms graphically compare (square roots) of empirical frequencies with
-fitted frequencies from a probability model." />
+fitted frequencies from a probability model. If plot = TRUE, the
+resulting object of class &quot;pithist&quot; is plotted by
+plot.pithist or autoplot.pithist conditional if the
+package ggplot2 is loaded, before it is returned." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -127,7 +130,10 @@ fitted frequencies from a probability model." />
 
     <div class="ref-description">
     <p>Rootograms graphically compare (square roots) of empirical frequencies with
-fitted frequencies from a probability model.</p>
+fitted frequencies from a probability model. If <code>plot = TRUE</code>, the
+resulting object of class <code>"pithist"</code> is plotted by
+<code><a href='plot.pithist.html'>plot.pithist</a></code> or <code><a href='plot.pithist.html'>autoplot.pithist</a></code> conditional if the
+package <code>ggplot2</code> is loaded, before it is returned.</p>
     </div>
 
     <pre class="usage"><span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
@@ -214,7 +220,8 @@ response distribution.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>An object of class <code>"rootogram"</code> inheriting from
-<code>"data.frame"</code> with the following variables:</p>
+<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code> 
+with the following variables:</p>
 <dt>observed</dt><dd><p>observed
 frequencies,</p></dd> <dt>expected</dt><dd><p>fitted frequencies,</p></dd> <dt>x</dt><dd><p>histogram
 interval midpoints on the x-axis,</p></dd> <dt>y</dt><dd><p>bottom coordinate of the
@@ -231,31 +238,16 @@ drawn on a square root scale (hence the name) and superimposed with a line
 for the fitted frequencies. The histogram can be <code>"standing"</code> on the
 x-axis (as usual), or <code>"hanging"</code> from the fitted curve, or a
 <code>"suspended"</code> histogram of deviations can be drawn.</p>
-<p><code>rootogram</code> is the generic function for generating rootograms from data
-or fitted model objects. The workhorse function is the default method (that
-computes all necessary coordinates based on observed and fitted frequencies
-and the breaks for the histogram intervals) and the associating <code>plot</code>
-method that carries out the actual drawing (using base graphics).</p>
-<p>There is a wide range of further <code>rootogram</code> methods that all take the
-following approach: based on a fitted probability model observed and
-expected frequencies are computed and then the default method is called.
-Currently, there is a method for <code><a href='https://rdrr.io/r/stats/glm.html'>glm</a></code>.</p>
-<p>Furthermore, there is a <code>numeric</code> method that uses
-<code>link[MASS]{fitdistr}</code> to obtain a fitted (by maximum likelihood)
-probability model for a univariate variable.  For this method, <code>fitted</code>
-can either be a character string or a density function that is passed to
-<code>fitdistr</code>. In the latter case, a <code>start</code> list also has to be
-supplied.</p>
-<p>In addition to the <code>plot</code> method for rootogram objects, there are also
-two methods that combine two (or more) rootograms: <code>c</code>/<code>rbind</code>
-creates a set of rootograms that can then be plotted in one go. The <code><a href='https://rdrr.io/r/base/Arithmetic.html'>+</a></code>
-method adds up the observed and fitted frequencies from two rootograms (if
-these use the same intervals).</p>
-<p>The <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method creates a
-<code><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></code> version of the rootogram.</p>
+<p>The function <code><a href='pithist.html'>pithist</a></code> leverages the <code><a href='procast.html'>procast</a></code>
+generic in order to compute all necessary coordinates based on observed and
+fitted frequencies and the breaks for the histogram intervals.</p>
+<p>In addition to the <code>plot</code> and <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method for
+rootogram objects, it is also possible to combine two (or more) rootograms by
+<code>c</code>/<code>rbind</code>, which creates a set of rootograms that can then be
+plotted in one go.</p>
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p>Note that there is also a <code><a href='https://rdrr.io/pkg/vcd/man/rootogram.html'>rootogram</a></code> function in the
+    <p>Note that there is also a <code>rootogram</code> function in the
 <span class="pkg">vcd</span> package that is similar to the <code>numeric</code> method provided
 here. However, it is much more limited in scope, hence a function has been
 created here.</p>
@@ -271,7 +263,7 @@ c("\Sexpr[results=rd,stage=build]tools:::Rd_expr_doi(\"#1\")",
 <p>Tukey JW (1977). <em>Exploratory Data Analysis</em>. Addison-Wesley, Reading.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='https://rdrr.io/r/stats/glm.html'>glm</a></code></p></div>
+    <div class='dont-index'><p><code><a href='plot.rootogram.html'>plot.rootogram</a></code>, <code><a href='procast.html'>procast</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -298,7 +290,6 @@ c("\Sexpr[results=rd,stage=build]tools:::Rd_expr_doi(\"#1\")",
 </div><div class='img'><img src='rootogram-2.png' alt='' width='700' height='433' /></div><div class='input'>
 
 <span class='co'>#-------------------------------------------------------------------------------</span>
-
 <span class='co'>## different styles</span>
 
 <span class='co'>## artificial data from negative binomial (mu = 3, theta = 2)</span>
@@ -311,11 +302,12 @@ c("\Sexpr[results=rd,stage=build]tools:::Rd_expr_doi(\"#1\")",
 <span class='va'>m2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x</span>, family <span class='op'>=</span> <span class='va'>poisson</span><span class='op'>)</span>
 
 <span class='co'>## correctly specified Poisson model fit</span>
-<span class='va'>r1</span> <span class='op'>&lt;-</span> <span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>m2</span>, style <span class='op'>=</span> <span class='st'>"standing"</span>,  ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>2.2</span>, <span class='fl'>4.8</span><span class='op'>)</span>, main <span class='op'>=</span> <span class='st'>"Standing"</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='va'>r2</span> <span class='op'>&lt;-</span> <span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>m2</span>, style <span class='op'>=</span> <span class='st'>"hanging"</span>,   ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>2.2</span>, <span class='fl'>4.8</span><span class='op'>)</span>, main <span class='op'>=</span> <span class='st'>"Hanging"</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='va'>r3</span> <span class='op'>&lt;-</span> <span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>m2</span>, style <span class='op'>=</span> <span class='st'>"suspended"</span>, ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>2.2</span>, <span class='fl'>4.8</span><span class='op'>)</span>, main <span class='op'>=</span> <span class='st'>"Suspended"</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>r1</span>, <span class='va'>r2</span>, <span class='va'>r3</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='img'><img src='rootogram-3.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/graphics/par.html'>par</a></span><span class='op'>(</span>mfrow <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>r1</span> <span class='op'>&lt;-</span> <span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>m2</span>, style <span class='op'>=</span> <span class='st'>"standing"</span>,  ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>2.2</span>, <span class='fl'>4.8</span><span class='op'>)</span>, main <span class='op'>=</span> <span class='st'>"Standing"</span><span class='op'>)</span>
+<span class='va'>r2</span> <span class='op'>&lt;-</span> <span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>m2</span>, style <span class='op'>=</span> <span class='st'>"hanging"</span>,   ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>2.2</span>, <span class='fl'>4.8</span><span class='op'>)</span>, main <span class='op'>=</span> <span class='st'>"Hanging"</span><span class='op'>)</span>
+<span class='va'>r3</span> <span class='op'>&lt;-</span> <span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>m2</span>, style <span class='op'>=</span> <span class='st'>"suspended"</span>, ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>2.2</span>, <span class='fl'>4.8</span><span class='op'>)</span>, main <span class='op'>=</span> <span class='st'>"Suspended"</span><span class='op'>)</span>
+</div><div class='img'><img src='rootogram-3.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/par.html'>par</a></span><span class='op'>(</span>mfrow <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
+
 <span class='co'>#-------------------------------------------------------------------------------</span>
 <span class='co'>## linear regression with normal/Gaussian response: anorexia data</span>
 

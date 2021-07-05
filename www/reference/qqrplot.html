@@ -50,7 +50,10 @@
 
 <meta property="og:title" content="Q-Q Plots for Quantile Residuals — qqrplot" />
 <meta property="og:description" content="Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals." />
+residuals. If plot = TRUE, the resulting object of
+class &quot;qqrplot&quot; is plotted by plot.qqrplot or
+autoplot.qqrplot conditional if the package
+ggplot2 is loaded, before it is returned." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -127,7 +130,10 @@ residuals." />
 
     <div class="ref-description">
     <p>Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals.</p>
+residuals. If <code>plot = TRUE</code>, the resulting object of
+class <code>"qqrplot"</code> is plotted by <code><a href='plot.qqrplot.html'>plot.qqrplot</a></code> or
+<code><a href='plot.qqrplot.html'>autoplot.qqrplot</a></code> conditional if the package
+<code>ggplot2</code> is loaded, before it is returned.</p>
     </div>
 
     <pre class="usage"><span class='fu'>qqrplot</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
@@ -157,8 +163,8 @@ residuals.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>object</th>
-      <td><p>an object (for which a <code><a href='qresiduals.html'>qresiduals</a></code> method
-exists).</p></td>
+      <td><p>an object from which probability integral transforms can be
+extracted using the generic function <code><a href='procast.html'>procast</a></code>.</p></td>
     </tr>
     <tr>
       <th>newdata</th>
@@ -214,28 +220,37 @@ diagrams be plotted in a single graph?</p></td>
     </tr>
     <tr>
       <th>xlab, ylab, main, ...</th>
-      <td><p>graphical plotting parameters passed to
-<code><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></code> or <code><a href='https://rdrr.io/r/graphics/points.html'>points</a></code>,
-respectively.</p></td>
+      <td><p>graphical parameters handed passed to
+<code><a href='plot.qqrplot.html'>plot.qqrplot</a></code> or <code><a href='plot.qqrplot.html'>autoplot.qqrplot</a></code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An list is returned invisibly with:</p>
-<dt>normal</dt><dd><p>the theoretical
-normal quantiles,</p></dd> <dt>residuals</dt><dd><p>the empirical quantile residuals.</p></dd>
+    <p>An object of class <code>"qqrplot"</code> inheriting from
+<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code> 
+with the following variables:</p>
+<dt>x</dt><dd><p>theoretical
+quantiles,</p></dd> <dt>y</dt><dd><p>empirical quantile residuals.</p></dd> In case of randomized residuals, nsim
+different x and y, and a lower and upper confidence interval bound is returned.
+Additionally, xlab, ylab, main, and confint_level 
+are stored as attributes.
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Q-Q residual draw quantile residuals (by default: transformed to standard
+    <p>Q-Q residuals plots draw quantile residuals (by default: transformed to standard
 normal scale) against theoretical quantiles from the same distribution.
 Alternatively, transformations to other distributions can also be used,
 specifically using no transformation at all, i.e., remaining on the uniform
 scale (via <code>trafo = NULL</code> or equivalently <code>qunif</code> or
-<code>identity</code>).</p>
+<code>identity</code>). For computation, <code>qqrplot</code> leverages the function
+<code><a href='qresiduals.html'>qresiduals</a></code> employing the <code><a href='procast.html'>procast</a></code>.</p>
 <p>Additional options are offered for models with discrete responses where
 randomization of quantiles is needed.</p>
+<p>In addition to the <code>plot</code> and <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method for
+qqrplot objects, it is also possible to combine two (or more) Q-Q residuals plots by
+<code>c</code>/<code>rbind</code>, which creates a set of Q-Q residuals plots that can then be
+plotted in one go.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Dunn KP, Smyth GK (1996). &#8220;Randomized Quantile
@@ -243,7 +258,7 @@ Residuals.&#8221; <em>Journal of Computational and Graphical Statistics</em>,
 <b>5</b>, 1--10.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='qresiduals.html'>qresiduals</a></code>, <code><a href='https://rdrr.io/r/stats/qqnorm.html'>qqnorm</a></code></p></div>
+    <div class='dont-index'><p><code><a href='plot.qqrplot.html'>plot.qqrplot</a></code>, <code><a href='qresiduals.html'>qresiduals</a></code>, <code><a href='https://rdrr.io/r/stats/qqnorm.html'>qqnorm</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>

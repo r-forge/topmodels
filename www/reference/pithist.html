@@ -49,8 +49,11 @@
   
 
 <meta property="og:title" content="PIT Histograms for Assessing Goodness of Fit of Probability Models — pithist" />
-<meta property="og:description" content="PIT histograms graphically compare empirical probabilities from fitted
-models with a uniform distribution." />
+<meta property="og:description" content="PIT histograms graphically compare empirical probabilities from fitted models
+with a uniform distribution. If plot = TRUE, the resulting object of
+class &quot;pithist&quot; is plotted by plot.pithist or
+autoplot.pithist conditional if the package
+ggplot2 is loaded, before it is returned." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -126,8 +129,11 @@ models with a uniform distribution." />
     </div>
 
     <div class="ref-description">
-    <p>PIT histograms graphically compare empirical probabilities from fitted
-models with a uniform distribution.</p>
+    <p>PIT histograms graphically compare empirical probabilities from fitted models
+with a uniform distribution. If <code>plot = TRUE</code>, the resulting object of
+class <code>"pithist"</code> is plotted by <code><a href='plot.pithist.html'>plot.pithist</a></code> or
+<code><a href='plot.pithist.html'>autoplot.pithist</a></code> conditional if the package
+<code>ggplot2</code> is loaded, before it is returned.</p>
     </div>
 
     <pre class="usage"><span class='fu'>pithist</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
@@ -162,7 +168,7 @@ models with a uniform distribution.</p>
     <tr>
       <th>object</th>
       <td><p>an object from which probability integral transforms can be
-extracted with <code><a href='procast.html'>procast</a></code>.</p></td>
+extracted using the generic function <code><a href='procast.html'>procast</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -190,14 +196,16 @@ or a <code>tibble</code>. Either set <code>class</code> expicitly to "data.frame
     </tr>
     <tr>
       <th>style</th>
-      <td><p>character specifying the syle of rootogram (see below). FIXME:
-Description</p></td>
+      <td><p>character specifying the style of pithist. For <code>style = "histogram"</code>
+a traditional PIT hisogram is drawn, for <code>style = "lines"</code> solely the upper border 
+line is plotted. For <code>single_graph = TRUE</code>, always line-style PIT histograms are 
+plotted.</p></td>
     </tr>
     <tr>
       <th>type</th>
       <td><p>character. In case of discrete distributions should the PITs be
 drawn randomly from the corresponding interval or distributed
-proportionally?</p></td>
+proportionally? This argument is not yet fully supported.</p></td>
     </tr>
     <tr>
       <th>nsim</th>
@@ -208,7 +216,7 @@ PITs should be drawn?</p></td>
       <th>delta</th>
       <td><p>numeric. The minimal difference to compute the range of
 proabilities corresponding to each observation according to get (randomized)
-quantile residuals.  For <code>NULL</code>, the minimal observed difference in the
+quantile residuals. For <code>NULL</code>, the minimal observed difference in the
 resonse divided by <code>5e-6</code> is used.</p></td>
     </tr>
     <tr>
@@ -232,45 +240,72 @@ histogram has a total area of one).</p></td>
     </tr>
     <tr>
       <th>confint_type</th>
-      <td><p>character. Which type of confidence interval.  According
+      <td><p>character. Which type of confidence interval should be plotted. According
 to Agresti and Coull (1998) for interval estimation of binomial proportions
 an approximation can be better than exact.</p></td>
     </tr>
     <tr>
       <th>single_graph</th>
       <td><p>logical. Should all computed extended reliability
-diagrams be plotted in a single graph?</p></td>
+diagrams be plotted in a single graph? If yes, <code>style</code> must be set to <code>"lines"</code>.</p></td>
     </tr>
     <tr>
-      <th>xlim, ylim</th>
-      <td><p>graphical parameters. These may pertain either to the whole
-plot or just the histogram or just the fitted line.</p></td>
-    </tr>
-    <tr>
-      <th>xlab, ylab, main</th>
-      <td><p>graphical parameters.</p></td>
+      <th>xlim, ylim, xlab, ylab, main</th>
+      <td><p>graphical parameters handed passed to
+<code><a href='plot.pithist.html'>plot.pithist</a></code> or <code><a href='plot.pithist.html'>autoplot.pithist</a></code>.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>An object of class <code>"pithist"</code> inheriting from
+<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code> 
+with the following variables:</p>
+<dt>x</dt><dd><p>histogram
+interval midpoints on the x-axis,</p></dd> <dt>y</dt><dd><p>bottom coordinate of the
+histogram bars,</p></dd> <dt>width</dt><dd><p>widths of the histogram bars,</p></dd>
+<dt>ci_lwr, ci_upr</dt><dd><p>lower and upper confidence interval bound,</p></dd> <dt>ref</dt><dd><p>y-coordinates of
+the reference curve.</p></dd> Additionally, freq, xlab,
+ylab, main, and confint_level are stored as attributes.
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>PIT histograms graphically the probability integral transform (PIT), i.e.,
-observed probabilities from fitted probability models, with a uniform
-distribution. It leverages the <code><a href='procast.html'>procast</a></code> generic and then
+    <p>PIT histograms graphically evaluate the probability integral transform (PIT),
+i.e., the value that the predictive CDF attains at the observation, with a
+uniform distribution. For a well calibrated model fit, the observation will be
+drawn from the predictive distribution and the PIT will have a standard uniform
+distribution. For computation, <code>pithist</code> leverages the function
+<code><a href='qresiduals.html'>qresiduals</a></code> employing the <code><a href='procast.html'>procast</a></code> generic and then
 essentially draws a <code><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></code>.</p>
-<p>In case of discrete distributions the PIT is either drawn randomly from the
-corresponding interval or distributed proportionally in the histogram
-(FIXME: not yet implemented).</p>
+<p>In case of discrete distributions the PIT can be either drawn randomly from the
+corresponding interval or distributed proportionally in the histogram, whereby
+the latter is not yet supported.</p>
+<p>In addition to the <code>plot</code> and <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method for
+pithist objects, it is also possible to combine two (or more) PIT histograms by
+<code>c</code>/<code>rbind</code>, which creates a set of PIT histograms that can then be
+plotted in one go.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Czado C, Gneiting T, Held L (2009). &#8220;Predictive Model
-Assessment for Count Data.&#8221; <em>Biometrics</em>, <b>65</b>(4), 1254--1261.</p>
-<p>Agresti A, Coull A B (1998). &#8220;Approximate is Better than ``Exact''
+    <p>Agresti A, Coull AB (1998). &#8220;Approximate is Better than ``Exact''
 for Interval Estimation of Binomial Proportions.&#8221; <em>The American
-Statistician</em>, <b>52</b>(2), 119--126.</p>
+Statistician</em>, <b>52</b>(2), 119--126. doi: <a href='https://doi.org/10.1080/00031305.1998.10480550'>10.1080/00031305.1998.10480550</a></p>
+<p>Czado C, Gneiting T, Held L (2009). &#8220;Predictive Model
+Assessment for Count Data.&#8221; <em>Biometrics</em>, <b>65</b>(4), 1254--1261. 
+doi: <a href='https://doi.org/10.2307/2981683'>10.2307/2981683</a></p> 
+<p>Dawid AP (1984). &#8220;Present Position and Potential Developments: Some
+Personal Views: Statistical Theory: The Prequential Approach&#8221;, <em>Journal of
+the Royal Statistical Society: Series A (General)</em>, <b>147</b>(2), 278--292.
+doi: <a href='https://doi.org/10.2307/2981683'>10.2307/2981683</a></p>
+<p>Diebold FX, Gunther TA, Tay AS (1998). &#8220;Evaluating Density Forecasts
+with Applications to Financial Risk Management&#8221;. <em>International Economic
+Review</em>, <b>39</b>(4), 863--883. doi: <a href='https://doi.org/10.2307/2527342'>10.2307/2527342</a></p>
+<p>Tilmann G, Balabdaoui F, Raftery AE (2007). &#8220;Probabilistic Forecasts,
+Calibration and Sharpness&#8221;.  <em>Journal of the Royal Statistical Society:
+Series B (Methodological)</em>. <b>69</b>(2), 243--268.
+doi: <a href='https://doi.org/10.1111/j.1467-9868.2007.00587.x'>10.1111/j.1467-9868.2007.00587.x</a></p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='procast.html'>procast</a></code>, <code><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></code></p></div>
+    <div class='dont-index'><p><code><a href='plot.pithist.html'>plot.pithist</a></code>, <code><a href='qresiduals.html'>qresiduals</a></code>, <code><a href='procast.html'>procast</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>

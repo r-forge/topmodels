@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plotting Q-Q Plots for Quantile Residuals — plot.qqrplot • topmodels</title>
+<title>S3 Methods for Plotting Q-Q Residuals Plots — plot.qqrplot • topmodels</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -48,9 +48,9 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Plotting Q-Q Plots for Quantile Residuals — plot.qqrplot" />
-<meta property="og:description" content="Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals." />
+<meta property="og:title" content="S3 Methods for Plotting Q-Q Residuals Plots — plot.qqrplot" />
+<meta property="og:description" content="Generic plotting functions for Q-Q residuals plots of the class &quot;qqrplot&quot;
+computed by link{qqrplot}." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -120,14 +120,14 @@ residuals." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plotting Q-Q Plots for Quantile Residuals</h1>
+    <h1>S3 Methods for Plotting Q-Q Residuals Plots</h1>
     
     <div class="hidden name"><code>plot.qqrplot.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals.</p>
+    <p>Generic plotting functions for Q-Q residuals plots of the class <code>"qqrplot"</code>
+computed by <code>link{qqrplot}</code>.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for qqrplot</span>
@@ -204,7 +204,7 @@ quantiles of the randomized quantile residuals be visualized? If
     <tr>
       <th>ref, xlim, ylim, col, fill, alpha_min, pch, axes, box</th>
       <td><p>additional graphical
-parameters for base plots, whereby <code>x</code> is a object of class <code>pithist</code>.</p></td>
+parameters for base plots, whereby <code>x</code> is a object of class <code>qqrplot</code>.</p></td>
     </tr>
     <tr>
       <th>xlab, ylab, main, ...</th>
@@ -215,26 +215,22 @@ respectively.</p></td>
     <tr>
       <th>colour, size, shape, linetype, legend</th>
       <td><p>graphical parameters passed for 
-<code>ggplot2</code> style plots, whereby <code>object</code> is a object of class <code>pithist</code>.</p></td>
+<code>ggplot2</code> style plots, whereby <code>object</code> is a object of class <code>qqrplot</code>.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>An list is returned invisibly with:</p>
-<dt>normal</dt><dd><p>the theoretical
-normal quantiles,</p></dd> <dt>residuals</dt><dd><p>the empirical quantile residuals.</p></dd>
-
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Q-Q residual draw quantile residuals (by default: transformed to standard
+    <p>Q-Q residuals plot draw quantile residuals (by default: transformed to standard
 normal scale) against theoretical quantiles from the same distribution.
 Alternatively, transformations to other distributions can also be used,
 specifically using no transformation at all, i.e., remaining on the uniform
 scale (via <code>trafo = NULL</code> or equivalently <code>qunif</code> or
 <code>identity</code>).</p>
-<p>Additional options are offered for models with discrete responses where
-randomization of quantiles is needed.</p>
+<p>Q-Q residuals plots can be rendered as <code>ggplot2</code> or base *R* graphics by using
+the generics <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> or <code><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></code>. 
+For a single base *R* graphically panel, <code><a href='https://rdrr.io/r/graphics/points.html'>points</a></code> adds an additional Q-Q
+residuals plot.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Dunn KP, Smyth GK (1996). &#8220;Randomized Quantile
@@ -242,24 +238,59 @@ Residuals.&#8221; <em>Journal of Computational and Graphical Statistics</em>,
 <b>5</b>, 1--10.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='qresiduals.html'>qresiduals</a></code>, <code><a href='https://rdrr.io/r/stats/qqnorm.html'>qqnorm</a></code></p></div>
+    <div class='dont-index'><p><code><a href='qqrplot.html'>qqrplot</a></code>, <code><a href='qresiduals.html'>qresiduals</a></code>, <code><a href='https://rdrr.io/r/stats/qqnorm.html'>qqnorm</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"CrabSatellites"</span>, package <span class='op'>=</span> <span class='st'>"countreg"</span><span class='op'>)</span>
-<span class='va'>CrabSatellites2</span> <span class='op'>&lt;-</span> <span class='va'>CrabSatellites</span><span class='op'>[</span><span class='va'>CrabSatellites</span><span class='op'>$</span><span class='va'>satellites</span> <span class='op'>&lt;=</span> <span class='fl'>1</span>, <span class='op'>]</span>
+<span class='co'>## speed and stopping distances of cars</span>
+<span class='va'>m1_lm</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
 
-<span class='va'>m1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>satellites</span> <span class='op'>~</span> <span class='va'>width</span> <span class='op'>+</span> <span class='va'>color</span>, data <span class='op'>=</span> <span class='va'>CrabSatellites</span>, family <span class='op'>=</span> <span class='va'>poisson</span><span class='op'>)</span>
-<span class='va'>m2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>satellites</span> <span class='op'>~</span> <span class='va'>width</span> <span class='op'>+</span> <span class='va'>color</span>, data <span class='op'>=</span> <span class='va'>CrabSatellites2</span>, family <span class='op'>=</span> <span class='va'>binomial</span><span class='op'>)</span>
-<span class='va'>m3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
-
-<span class='va'>q1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m1</span>, nsim <span class='op'>=</span> <span class='fl'>100</span>, confint <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='img'><img src='plot.qqrplot-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='va'>q2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m2</span>, nsim <span class='op'>=</span> <span class='fl'>100</span>, confint <span class='op'>=</span> <span class='cn'>TRUE</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='va'>q3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m3</span>, nsim <span class='op'>=</span> <span class='fl'>100</span>, confint <span class='op'>=</span> <span class='cn'>TRUE</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>q1</span>, <span class='va'>q2</span><span class='op'>)</span>, single_graph <span class='op'>=</span> <span class='cn'>FALSE</span>, fill <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>3</span><span class='op'>)</span>, ref <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span><span class='op'>(</span><span class='va'>q3</span>, col <span class='op'>=</span> <span class='st'>"lightblue"</span><span class='op'>)</span>
+<span class='co'>## compute and plot qqrplot</span>
+<span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m1_lm</span><span class='op'>)</span>
+</div><div class='img'><img src='plot.qqrplot-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'>## customize colors</span>
+<span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m1_lm</span>, ref <span class='op'>=</span> <span class='st'>"blue"</span>, lty <span class='op'>=</span> <span class='fl'>2</span>, pch <span class='op'>=</span> <span class='fl'>20</span><span class='op'>)</span>
+</div><div class='input'>
+<span class='co'>## add separate model</span>
+<span class='kw'>if</span> <span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'>"crch"</span>, quietly <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='va'>m1_crch</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/crch/man/crch.html'>crch</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span> <span class='op'>|</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
+  <span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span><span class='op'>(</span><span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m1_crch</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fl'>2</span>, lty <span class='op'>=</span> <span class='fl'>2</span>, confint <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+<span class='op'>}</span>
 </div><div class='img'><img src='plot.qqrplot-2.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'>#-------------------------------------------------------------------------------</span>
+<span class='kw'>if</span> <span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'>"crch"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
+
+  <span class='co'>## precipitation observations and forecasts for Innsbruck</span>
+  <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"RainIbk"</span>, package <span class='op'>=</span> <span class='st'>"crch"</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span><span class='op'>$</span><span class='va'>ensmean</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/apply.html'>apply</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>[</span>,<span class='fu'><a href='https://rdrr.io/r/base/grep.html'>grep</a></span><span class='op'>(</span><span class='st'>'^rainfc'</span>,<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span>, <span class='fl'>1</span>, <span class='va'>mean</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span><span class='op'>$</span><span class='va'>enssd</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/apply.html'>apply</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>[</span>,<span class='fu'><a href='https://rdrr.io/r/base/grep.html'>grep</a></span><span class='op'>(</span><span class='st'>'^rainfc'</span>,<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span>, <span class='fl'>1</span>, <span class='va'>sd</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>RainIbk</span>, <span class='va'>enssd</span> <span class='op'>&gt;</span> <span class='fl'>0</span><span class='op'>)</span>
+
+  <span class='co'>## linear model w/ constant variance estimation</span>
+  <span class='va'>m2_lm</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>rain</span> <span class='op'>~</span> <span class='va'>ensmean</span>, data <span class='op'>=</span> <span class='va'>RainIbk</span><span class='op'>)</span>
+
+  <span class='co'>## logistic censored model </span>
+  <span class='va'>m2_crch</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/crch/man/crch.html'>crch</a></span><span class='op'>(</span><span class='va'>rain</span> <span class='op'>~</span> <span class='va'>ensmean</span> <span class='op'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>enssd</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>RainIbk</span>, left <span class='op'>=</span> <span class='fl'>0</span>, dist <span class='op'>=</span> <span class='st'>"logistic"</span><span class='op'>)</span>
+
+  <span class='co'>## compute qqrplots</span>
+  <span class='va'>qq2_lm</span> <span class='op'>&lt;-</span> <span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m2_lm</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+  <span class='va'>qq2_crch</span> <span class='op'>&lt;-</span> <span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m2_crch</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+
+  <span class='co'>## plot in single graph</span>
+  <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>qq2_lm</span>, <span class='va'>qq2_crch</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>, confint <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>, ref <span class='op'>=</span> <span class='fl'>3</span>, single_graph <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='op'>}</span>
+</div><div class='img'><img src='plot.qqrplot-3.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'>#-------------------------------------------------------------------------------</span>
+<span class='co'>## determinants for male satellites to nesting horseshoe crabs</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"CrabSatellites"</span>, package <span class='op'>=</span> <span class='st'>"countreg"</span><span class='op'>)</span>
+
+<span class='co'>## linear poisson model</span>
+<span class='va'>m3_pois</span>  <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>satellites</span> <span class='op'>~</span> <span class='va'>width</span> <span class='op'>+</span> <span class='va'>color</span>, data <span class='op'>=</span> <span class='va'>CrabSatellites</span>, family <span class='op'>=</span> <span class='va'>poisson</span><span class='op'>)</span>
+
+<span class='co'>## compute and plot rootogram as ggplot2 graphic</span>
+<span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m3_pois</span>, plot <span class='op'>=</span> <span class='st'>"ggplot2"</span><span class='op'>)</span>
+</div><div class='img'><img src='plot.qqrplot-4.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
