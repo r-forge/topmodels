@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plotting a PIT Histogram — plot.pithist • topmodels</title>
+<title>S3 Methods for Plotting PIT Histograms — plot.pithist • topmodels</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -48,9 +48,9 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Plotting a PIT Histogram — plot.pithist" />
-<meta property="og:description" content="PIT histograms graphically compare empirical probabilities from fitted
-models with a uniform distribution." />
+<meta property="og:title" content="S3 Methods for Plotting PIT Histograms — plot.pithist" />
+<meta property="og:description" content="Generic plotting functions for PIT histograms of the class &quot;pithist&quot;
+computed by link{pithist}." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -120,14 +120,14 @@ models with a uniform distribution." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plotting a PIT Histogram</h1>
+    <h1>S3 Methods for Plotting PIT Histograms</h1>
     
     <div class="hidden name"><code>plot.pithist.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>PIT histograms graphically compare empirical probabilities from fitted
-models with a uniform distribution.</p>
+    <p>Generic plotting functions for PIT histograms of the class <code>"pithist"</code>
+computed by <code>link{pithist}</code>.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for pithist</span>
@@ -198,8 +198,10 @@ diagrams be plotted in a single graph?</p></td>
     </tr>
     <tr>
       <th>style</th>
-      <td><p>character specifying the syle of rootogram (see below). FIXME:
-Description</p></td>
+      <td><p>character specifying the style of pithist. For <code>style = "histogram"</code>
+a traditional PIT hisogram is drawn, for <code>style = "lines"</code> solely the upper border 
+line is plotted. For <code>single_graph = TRUE</code>, always line-style PIT histograms are 
+plotted.</p></td>
     </tr>
     <tr>
       <th>confint</th>
@@ -225,7 +227,7 @@ plot or just the histogram or just the fitted line.</p></td>
     </tr>
     <tr>
       <th>object, x</th>
-      <td><p>an object of class <code>pithist</code>.</p></td>
+      <td><p>an object of class <code><a href='pithist.html'>pithist</a></code>.</p></td>
     </tr>
     <tr>
       <th>colour, size, linetype, legend</th>
@@ -236,42 +238,88 @@ plot or just the histogram or just the fitted line.</p></td>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>PIT histograms graphically the probability integral transform (PIT), i.e.,
-observed probabilities from fitted probability models, with a uniform
-distribution. It leverages the <code><a href='procast.html'>procast</a></code> generic and then
-essentially draws a <code><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></code>.</p>
-<p>In case of discrete distributions the PIT is either drawn randomly from the
-corresponding interval or distributed proportionally in the histogram
-(FIXME: not yet implemented).</p>
+    <p>PIT histograms graphically evaluate the probability integral transform (PIT),
+i.e., the value that the predictive CDF attains at the observation, with a
+uniform distribution. For a well calibrated model fit, the observation will be
+drawn from the predictive distribution and the PIT will have a standard uniform
+distribution.</p>
+<p>PIT histograms can be rendered as <code>ggplot2</code> or base *R* graphics by using
+the generics <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> or <code><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></code>. 
+For a single base *R* graphically panel, <code><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></code> adds an additional PIT histogram.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Czado C, Gneiting T, Held L (2009). &#8220;Predictive Model
-Assessment for Count Data.&#8221; <em>Biometrics</em>, <b>65</b>(4), 1254--1261.</p>
-<p>Agresti A, Coull A B (1998). &#8220;Approximate is Better than ``Exact''
+    <p>Agresti A, Coull AB (1998). &#8220;Approximate is Better than ``Exact''
 for Interval Estimation of Binomial Proportions.&#8221; <em>The American
-Statistician</em>, <b>52</b>(2), 119--126.</p>
+Statistician</em>, <b>52</b>(2), 119--126. doi: <a href='https://doi.org/10.1080/00031305.1998.10480550'>10.1080/00031305.1998.10480550</a></p>
+<p>Czado C, Gneiting T, Held L (2009). &#8220;Predictive Model
+Assessment for Count Data.&#8221; <em>Biometrics</em>, <b>65</b>(4), 1254--1261. 
+doi: <a href='https://doi.org/10.2307/2981683'>10.2307/2981683</a></p> 
+<p>Dawid AP (1984). &#8220;Present Position and Potential Developments: Some
+Personal Views: Statistical Theory: The Prequential Approach&#8221;, <em>Journal of
+the Royal Statistical Society: Series A (General)</em>, <b>147</b>(2), 278--292.
+doi: <a href='https://doi.org/10.2307/2981683'>10.2307/2981683</a></p>
+<p>Diebold FX, Gunther TA, Tay AS (1998). &#8220;Evaluating Density Forecasts
+with Applications to Financial Risk Management&#8221;. <em>International Economic
+Review</em>, <b>39</b>(4), 863--883. doi: <a href='https://doi.org/10.2307/2527342'>10.2307/2527342</a></p>
+<p>Tilmann G, Balabdaoui F, Raftery AE (2007). &#8220;Probabilistic Forecasts,
+Calibration and Sharpness&#8221;.  <em>Journal of the Royal Statistical Society:
+Series B (Methodological)</em>. <b>69</b>(2), 243--268.
+doi: <a href='https://doi.org/10.1111/j.1467-9868.2007.00587.x'>10.1111/j.1467-9868.2007.00587.x</a></p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='procast.html'>procast</a></code>, <code><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></code></p></div>
+    <div class='dont-index'><p><code><a href='pithist.html'>pithist</a></code>, <code><a href='procast.html'>procast</a></code>, <code><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'>"crch"</span><span class='op'>)</span>
-<span class='va'>m1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
-<span class='va'>m2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/crch/man/crch.html'>crch</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span> <span class='op'>|</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
-<span class='va'>m3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/crch/man/crch.html'>crch</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span> <span class='op'>|</span> <span class='va'>speed</span>, left <span class='op'>=</span> <span class='fl'>30</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
+<span class='co'>## speed and stopping distances of cars</span>
+<span class='va'>m1_lm</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
 
-<span class='va'>pit1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m1</span><span class='op'>)</span>
-</div><div class='img'><img src='plot.pithist-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='va'>pit2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m2</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='va'>pit3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m3</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>pit1</span>, confint <span class='op'>=</span> <span class='st'>"red"</span>, ref <span class='op'>=</span> <span class='st'>"blue"</span>, fill <span class='op'>=</span> <span class='st'>"lightblue"</span><span class='op'>)</span>
+<span class='co'>## compute and plot pithist</span>
+<span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m1_lm</span><span class='op'>)</span>
+</div><div class='img'><img src='plot.pithist-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'>## customize colors and style</span>
+<span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m1_lm</span>, ref <span class='op'>=</span> <span class='st'>"blue"</span>, lty <span class='op'>=</span> <span class='fl'>2</span>, pch <span class='op'>=</span> <span class='fl'>20</span>, style <span class='op'>=</span> <span class='st'>"lines"</span><span class='op'>)</span>
+</div><div class='input'>
+<span class='co'>## add separate model</span>
+<span class='kw'>if</span> <span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'>"crch"</span>, quietly <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='va'>m1_crch</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/crch/man/crch.html'>crch</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span> <span class='op'>|</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
+  <span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m1_crch</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fl'>2</span>, lty <span class='op'>=</span> <span class='fl'>2</span>, confint <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+<span class='op'>}</span>
 </div><div class='img'><img src='plot.pithist-2.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>pit1</span>, <span class='va'>pit2</span>, <span class='va'>pit3</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>3</span><span class='op'>)</span>, style <span class='op'>=</span> <span class='st'>"lines"</span><span class='op'>)</span>
+<span class='co'>#-------------------------------------------------------------------------------</span>
+<span class='kw'>if</span> <span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'>"crch"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
+
+  <span class='co'>## precipitation observations and forecasts for Innsbruck</span>
+  <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"RainIbk"</span>, package <span class='op'>=</span> <span class='st'>"crch"</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span><span class='op'>$</span><span class='va'>ensmean</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/apply.html'>apply</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>[</span>,<span class='fu'><a href='https://rdrr.io/r/base/grep.html'>grep</a></span><span class='op'>(</span><span class='st'>'^rainfc'</span>,<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span>, <span class='fl'>1</span>, <span class='va'>mean</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span><span class='op'>$</span><span class='va'>enssd</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/apply.html'>apply</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>[</span>,<span class='fu'><a href='https://rdrr.io/r/base/grep.html'>grep</a></span><span class='op'>(</span><span class='st'>'^rainfc'</span>,<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>RainIbk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span>, <span class='fl'>1</span>, <span class='va'>sd</span><span class='op'>)</span>
+  <span class='va'>RainIbk</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>RainIbk</span>, <span class='va'>enssd</span> <span class='op'>&gt;</span> <span class='fl'>0</span><span class='op'>)</span>
+
+  <span class='co'>## linear model w/ constant variance estimation</span>
+  <span class='va'>m2_lm</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>rain</span> <span class='op'>~</span> <span class='va'>ensmean</span>, data <span class='op'>=</span> <span class='va'>RainIbk</span><span class='op'>)</span>
+
+  <span class='co'>## logistic censored model </span>
+  <span class='va'>m2_crch</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/crch/man/crch.html'>crch</a></span><span class='op'>(</span><span class='va'>rain</span> <span class='op'>~</span> <span class='va'>ensmean</span> <span class='op'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>enssd</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>RainIbk</span>, left <span class='op'>=</span> <span class='fl'>0</span>, dist <span class='op'>=</span> <span class='st'>"logistic"</span><span class='op'>)</span>
+
+  <span class='co'>## compute pithists</span>
+  <span class='va'>pit2_lm</span> <span class='op'>&lt;-</span> <span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m2_lm</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+  <span class='va'>pit2_crch</span> <span class='op'>&lt;-</span> <span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m2_crch</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+
+  <span class='co'>## plot in single graph with style "lines"</span>
+  <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>pit2_lm</span>, <span class='va'>pit2_crch</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>, confint <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>, ref <span class='op'>=</span> <span class='fl'>3</span>, 
+    style <span class='op'>=</span> <span class='st'>"lines"</span>, single_graph <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='op'>}</span>
 </div><div class='img'><img src='plot.pithist-3.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>pit1</span>, <span class='va'>pit2</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>, single_graph <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'> * For several histograms in a single graph solely line style histograms can be plotted. </span>
-#&gt; <span class='message'> * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>pit3</span>, col <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<span class='co'>#-------------------------------------------------------------------------------</span>
+<span class='co'>## determinants for male satellites to nesting horseshoe crabs</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"CrabSatellites"</span>, package <span class='op'>=</span> <span class='st'>"countreg"</span><span class='op'>)</span>
+
+<span class='co'>## linear poisson model</span>
+<span class='va'>m3_pois</span>  <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>satellites</span> <span class='op'>~</span> <span class='va'>width</span> <span class='op'>+</span> <span class='va'>color</span>, data <span class='op'>=</span> <span class='va'>CrabSatellites</span>, family <span class='op'>=</span> <span class='va'>poisson</span><span class='op'>)</span>
+
+<span class='co'>## compute and plot rootogram as ggplot2 graphic</span>
+<span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m3_pois</span>, plot <span class='op'>=</span> <span class='st'>"ggplot2"</span><span class='op'>)</span>
 </div><div class='img'><img src='plot.pithist-4.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>

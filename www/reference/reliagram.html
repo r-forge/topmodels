@@ -49,8 +49,11 @@
   
 
 <meta property="og:title" content="Reliagram (Extended Reliability Diagram) — reliagram" />
-<meta property="og:description" content="Reliagram (extended reliability diagram) for assessing the reliability of a
-fitted probabilistic distributional forecast." />
+<meta property="og:description" content="Reliagram (extended reliability diagram) assess the reliability of a fitted
+probabilistic distributional forecast for a binary event. If plot =
+TRUE, the resulting object of class &quot;pithist&quot; is plotted by
+plot.pithist or autoplot.pithist conditional if the
+package ggplot2 is loaded, before it is returned." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -126,8 +129,11 @@ fitted probabilistic distributional forecast." />
     </div>
 
     <div class="ref-description">
-    <p>Reliagram (extended reliability diagram) for assessing the reliability of a
-fitted probabilistic distributional forecast.</p>
+    <p>Reliagram (extended reliability diagram) assess the reliability of a fitted
+probabilistic distributional forecast for a binary event. If <code>plot =
+TRUE</code>, the resulting object of class <code>"pithist"</code> is plotted by
+<code><a href='plot.pithist.html'>plot.pithist</a></code> or <code><a href='plot.pithist.html'>autoplot.pithist</a></code> conditional if the
+package <code>ggplot2</code> is loaded, before it is returned.</p>
     </div>
 
     <pre class="usage"><span class='fu'>reliagram</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
@@ -232,14 +238,43 @@ diagrams be plotted in a single graph?</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>An object of class <code>"reliagram"</code> inheriting from
+<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code>
+with the following variables:</p>
+<dt>x</dt><dd><p>forecast probabilities,</p></dd>
+<dt>y</dt><dd><p>observered/empirical relative frequencies,</p></dd> <dt>bin_lwr, bin_upr</dt><dd><p>lower and upper bound of the binned forecast probabilities,</p></dd>
+<dt>n_pred</dt><dd><p>number of predictions within the binned forecasts probabilites,</p></dd>
+<dt>ci_lwr, ci_upr</dt><dd><p>lower and upper confidence interval bound.</p></dd> Additionally,
+xlab, ylab, main, and treshold,
+confint_level, brier scores (bs, rel, res, unc) are stored as
+attributes.
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>TODO: (ML)</p>
+    <p>Reliagrams evaluate if a probability model is calibrated (reliable) by first
+partitioning the predicted probability for a binary event into a certain number
+of bins and then plotting (within each bin) the averaged forecast probability
+against the observered/empirical relative frequency.  For computation,
+codereliagram leverages the <code><a href='procast.html'>procast</a></code> generic.</p>
+<p>For continous probability forecasts, reliability diagrams can be plotted either
+for a pre-specified threshold or for a specific quantile probability of the
+response values.</p>
+<p>In addition to the <code>plot</code> and <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method for
+reliagram objects, it is also possible to combine two (or more) reliability
+diagrams by <code>c</code>/<code>rbind</code>, which creates a set of reliability diagrams
+that can then be plotted in one go.</p>
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+
+    <p>Note that there is also a <code>reliability.plot</code> function in the
+<span class="pkg">verification</span> package. However, it only works for numeric
+forecast probabilities and numeric observed relative frequencies, hence a function has been
+created here.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Br\''ocker J, Smith L (2007). &#8220;Increasing the Reliability
-of Reliability Diagrams&#8221;.  <em>Weather and Forecasting</em>, <b>22</b>(3),
-651--661. doi:10.1175/WAF993.1.</p>
+    <p>Wilks DS (2011) <em>Statistical Methods in the Atmospheric
+Sciences</em>, 3rd ed., Academic Press, 704 pp.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='procast.html'>procast</a></code></p></div>
