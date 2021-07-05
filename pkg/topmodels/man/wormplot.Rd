@@ -86,6 +86,11 @@ employing the \code{\link{procast}}.
 
 Additional options are offered for models with discrete responses where
 randomization of quantiles is needed.
+
+In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+wormplot objects, it is also possible to combine two (or more) worm plots by
+\code{c}/\code{rbind}, which creates a set of worm plots that can then be
+plotted in one go.
 }
 \examples{
 

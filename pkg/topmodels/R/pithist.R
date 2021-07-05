@@ -43,8 +43,13 @@
 #' In case of discrete distributions the PIT can be either drawn randomly from the
 #' corresponding interval or distributed proportionally in the histogram, whereby
 #' the latter is not yet supported.
+#'
+#' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+#' pithist objects, it is also possible to combine two (or more) PIT histograms by
+#' \code{c}/\code{rbind}, which creates a set of PIT histograms that can then be
+#' plotted in one go. 
 #' 
-#' @aliases pithist pithist.default c.pithist
+#' @aliases pithist pithist.default c.pithist rbind.pithist
 #' @param object an object from which probability integral transforms can be
 #' extracted using the generic function \code{\link{procast}}.
 #' @param newdata optionally, a data frame in which to look for variables with

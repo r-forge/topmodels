@@ -4,6 +4,7 @@
 \alias{pithist}
 \alias{pithist.default}
 \alias{c.pithist}
+\alias{rbind.pithist}
 \title{PIT Histograms for Assessing Goodness of Fit of Probability Models}
 \usage{
 pithist(object, ...)
@@ -112,6 +113,11 @@ essentially draws a \code{\link[graphics]{hist}}.
 In case of discrete distributions the PIT can be either drawn randomly from the
 corresponding interval or distributed proportionally in the histogram, whereby
 the latter is not yet supported.
+
+In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+pithist objects, it is also possible to combine two (or more) PIT histograms by
+\code{c}/\code{rbind}, which creates a set of PIT histograms that can then be
+plotted in one go.
 }
 \examples{
 

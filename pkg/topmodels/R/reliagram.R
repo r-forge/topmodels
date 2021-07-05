@@ -19,10 +19,26 @@
 
 #' Reliagram (Extended Reliability Diagram)
 #' 
-#' Reliagram (extended reliability diagram) for assessing the reliability of a
-#' fitted probabilistic distributional forecast.
+#' Reliagram (extended reliability diagram) assess the reliability of a fitted
+#' probabilistic distributional forecast for a binary event. If \code{plot =
+#' TRUE}, the resulting object of class \code{"pithist"} is plotted by
+#' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} conditional if the
+#' package \code{ggplot2} is loaded, before it is returned.
 #' 
-#' TODO: (ML)
+#' Reliagrams evaluate if a probability model is calibrated (reliable) by first
+#' partitioning the forecast probability for a binary event into a certain number
+#' of bins and then plotting (within each bin) the averaged forecast probability
+#' against the observered/empirical relative frequency.  For computation,
+#' code{\link{reliagram}} leverages the \code{\link{procast}} generic.
+#' 
+#' For continous probability forecasts, reliability diagrams can be plotted either
+#' for a pre-specified threshold or for a specific quantile probability of the
+#' response values.
+#' 
+#' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+#' reliagram objects, it is also possible to combine two (or more) reliability
+#' diagrams by \code{c}/\code{rbind}, which creates a set of reliability diagrams
+#' that can then be plotted in one go. 
 #' 
 #' @aliases reliagram reliagram.default c.reliagram 
 #' @param object an object from which an extended reliability diagram can be
@@ -58,10 +74,13 @@
 #' diagrams be plotted in a single graph?
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters.
+#' @note Note that there is also a \code{\link[verification]{reliability.plot}} function in the
+#' \pkg{verification} package. However, it only works for numeric
+#' forecast probabilities and numeric observed relative frequencies, hence a function has been
+#' created here.
 #' @seealso \code{\link{procast}}
-#' @references Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability
-#' of Reliability Diagrams}.  \emph{Weather and Forecasting}, \bold{22}(3),
-#' 651--661. doi:10.1175/WAF993.1.
+#' @references Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
+#' Sciences}, 3rd ed., Academic Press, 704 pp.
 #' @examples
 #' 
 #' require("crch")
@@ -424,12 +443,24 @@ c.reliagram <- function(...) {
 rbind.reliagram <- c.reliagram
 
 
-#' Plotting a Reliagram (Extended Reliability Diagram)
+#' S3 Methods for a Reliagram (Extended Reliability Diagram)
 #' 
-#' Reliagram (extended reliability diagram) for assessing the reliability of a
-#' fitted probabilistic distributional forecast.
+#' Generic plotting functions for reliability diagrams of the class \code{"reliagram"}
+#' computed by \code{link{reliagram}}. 
 #' 
-#' TODO: (ML)
+#' Reliagrams evaluate if a probability model is calibrated (reliable) by first
+#' partitioning the forecast probability for a binary event into a certain number
+#' of bins and then plotting (within each bin) the averaged forecast probability
+#' against the observered/empirical relative frequency. 
+#' 
+#' For continous probability forecasts, reliability diagrams can be plotted either
+#' for a pre-specified threshold or for a specific quantile probability of the
+#' response values.
+#' 
+#' Reliagrams can be rendered as \code{ggplot2} or base *R* graphics by using
+#' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+#' For a single base *R* graphically panel, \code{\link{points}} adds an additional 
+#' reliagram.
 #' 
 #' @aliases plot.reliagram lines.reliagram autoplot.reliagram
 #' @param object,x an object of class \code{reliagram}.
@@ -442,10 +473,9 @@ rbind.reliagram <- c.reliagram
 #' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 #' @param colour,size,shape,linetype,legend graphical parameters passed for 
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
-#' @seealso \code{\link{procast}}
-#' @references Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability
-#' of Reliability Diagrams}.  \emph{Weather and Forecasting}, \bold{22}(3),
-#' 651--661. doi:10.1175/WAF993.1.
+#' @seealso \code{link{reliagram}}, \code{\link{procast}}
+#' @references Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
+#' Sciences}, 3rd ed., Academic Press, 704 pp.
 #' @examples
 #' 
 #' ## speed and stopping distances of cars

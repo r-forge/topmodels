@@ -4,7 +4,7 @@
 \alias{plot.reliagram}
 \alias{lines.reliagram}
 \alias{autoplot.reliagram}
-\title{Plotting a Reliagram (Extended Reliability Diagram)}
+\title{S3 Methods for a Reliagram (Extended Reliability Diagram)}
 \usage{
 \method{plot}{reliagram}(
   x,
@@ -93,11 +93,23 @@ parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
 }
 \description{
-Reliagram (extended reliability diagram) for assessing the reliability of a
-fitted probabilistic distributional forecast.
+Generic plotting functions for reliability diagrams of the class \code{"reliagram"}
+computed by \code{link{reliagram}}.
 }
 \details{
-TODO: (ML)
+Reliagrams evaluate if a probability model is calibrated (reliable) by first
+partitioning the forecast probability for a binary event into a certain number
+of bins and then plotting (within each bin) the averaged forecast probability
+against the observered/empirical relative frequency. 
+
+For continous probability forecasts, reliability diagrams can be plotted either
+for a pre-specified threshold or for a specific quantile probability of the
+response values.
+
+Reliagrams can be rendered as \code{ggplot2} or base *R* graphics by using
+the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+For a single base *R* graphically panel, \code{\link{points}} adds an additional 
+reliagram.
 }
 \examples{
 
@@ -152,10 +164,9 @@ reliagram(m3_pois, plot = "ggplot2")
 
 }
 \references{
-Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability
-of Reliability Diagrams}.  \emph{Weather and Forecasting}, \bold{22}(3),
-651--661. doi:10.1175/WAF993.1.
+Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
+Sciences}, 3rd ed., Academic Press, 704 pp.
 }
 \seealso{
-\code{\link{procast}}
+\code{link{reliagram}}, \code{\link{procast}}
 }
