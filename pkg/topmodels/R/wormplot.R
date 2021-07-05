@@ -28,6 +28,11 @@
 #' 
 #' Additional options are offered for models with discrete responses where
 #' randomization of quantiles is needed.
+#'
+#' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+#' wormplot objects, it is also possible to combine two (or more) worm plots by
+#' \code{c}/\code{rbind}, which creates a set of worm plots that can then be
+#' plotted in one go. 
 #' 
 #' @aliases wormplot wormplot.default c.wormplot
 #' @param object an object from which probability integral transforms can be

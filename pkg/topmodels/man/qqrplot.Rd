@@ -88,6 +88,11 @@ scale (via \code{trafo = NULL} or equivalently \code{qunif} or
 
 Additional options are offered for models with discrete responses where
 randomization of quantiles is needed.
+
+In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+qqrplot objects, it is also possible to combine two (or more) Q-Q residuals plots by
+\code{c}/\code{rbind}, which creates a set of Q-Q residuals plots that can then be
+plotted in one go.
 }
 \examples{
 

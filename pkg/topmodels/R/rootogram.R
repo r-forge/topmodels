@@ -20,7 +20,10 @@
 #' Rootograms for Assessing Goodness of Fit of Probability Models
 #' 
 #' Rootograms graphically compare (square roots) of empirical frequencies with
-#' fitted frequencies from a probability model.
+#' fitted frequencies from a probability model. If \code{plot = TRUE}, the
+#' resulting object of class \code{"pithist"} is plotted by
+#' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} conditional if the
+#' package \code{ggplot2} is loaded, before it is returned.
 #' 
 #' Rootograms graphically compare frequencies of empirical distributions and
 #' fitted probability models. For the observed distribution the histogram is
@@ -29,32 +32,14 @@
 #' x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
 #' \code{"suspended"} histogram of deviations can be drawn.
 #' 
-#' \code{rootogram} is the generic function for generating rootograms from data
-#' or fitted model objects. The workhorse function is the default method (that
-#' computes all necessary coordinates based on observed and fitted frequencies
-#' and the breaks for the histogram intervals) and the associating \code{plot}
-#' method that carries out the actual drawing (using base graphics).
+#' The function \code{\link{pithist}} leverages the \code{\link{procast}}
+#' generic in order to compute all necessary coordinates based on observed and
+#' fitted frequencies and the breaks for the histogram intervals. 
 #' 
-#' There is a wide range of further \code{rootogram} methods that all take the
-#' following approach: based on a fitted probability model observed and
-#' expected frequencies are computed and then the default method is called.
-#' Currently, there is a method for \code{\link[stats]{glm}}.
-#' 
-#' Furthermore, there is a \code{numeric} method that uses
-#' \code{link[MASS]{fitdistr}} to obtain a fitted (by maximum likelihood)
-#' probability model for a univariate variable.  For this method, \code{fitted}
-#' can either be a character string or a density function that is passed to
-#' \code{fitdistr}. In the latter case, a \code{start} list also has to be
-#' supplied.
-#' 
-#' In addition to the \code{plot} method for rootogram objects, there are also
-#' two methods that combine two (or more) rootograms: \code{c}/\code{rbind}
-#' creates a set of rootograms that can then be plotted in one go. The \code{+}
-#' method adds up the observed and fitted frequencies from two rootograms (if
-#' these use the same intervals).
-#' 
-#' The \code{\link[ggplot2]{autoplot}} method creates a
-#' \code{\link[ggplot2]{ggplot}} version of the rootogram.
+#' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+#' rootogram objects, it is also possible to combine two (or more) rootograms by
+#' \code{c}/\code{rbind}, which creates a set of rootograms that can then be
+#' plotted in one go. 
 #' 
 #' @aliases rootogram rootogram.default c.rootogram rbind.rootogram
 #' @param object an object from which an rootogram can be extracted with
@@ -93,7 +78,7 @@
 #' \pkg{vcd} package that is similar to the \code{numeric} method provided
 #' here. However, it is much more limited in scope, hence a function has been
 #' created here.
-#' @seealso \code{\link[stats]{glm}}
+#' @seealso \code{\link{plot.rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
 #' Institute, Cary.
 #' 
@@ -124,7 +109,6 @@
 #' 
 #' 
 #' #-------------------------------------------------------------------------------
-#' 
 #' ## different styles
 #' 
 #' ## artificial data from negative binomial (mu = 3, theta = 2)
@@ -403,9 +387,11 @@ c.rootogram <- function(...) {
   return(rval)
 }
 
-
-#' Plotting Rootograms for Assessing Goodness of Fit of Probability Models
+#' S3 Methods for Plotting Rootograms
 #' 
+#' Generic plotting functions for rootograms of the class \code{"rootogram"}
+#' computed by \code{link{rootogram}}. 
+#'
 #' Rootograms graphically compare (square roots) of empirical frequencies with
 #' fitted frequencies from a probability model.
 #' 
@@ -415,33 +401,6 @@ c.rootogram <- function(...) {
 #' for the fitted frequencies. The histogram can be \code{"standing"} on the
 #' x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
 #' \code{"suspended"} histogram of deviations can be drawn.
-#' 
-#' \code{rootogram} is the generic function for generating rootograms from data
-#' or fitted model objects. The workhorse function is the default method (that
-#' computes all necessary coordinates based on observed and fitted frequencies
-#' and the breaks for the histogram intervals) and the associating \code{plot}
-#' method that carries out the actual drawing (using base graphics).
-#' 
-#' There is a wide range of further \code{rootogram} methods that all take the
-#' following approach: based on a fitted probability model observed and
-#' expected frequencies are computed and then the default method is called.
-#' Currently, there is a method for \code{\link[stats]{glm}}.
-#' 
-#' Furthermore, there is a \code{numeric} method that uses
-#' \code{link[MASS]{fitdistr}} to obtain a fitted (by maximum likelihood)
-#' probability model for a univariate variable.  For this method, \code{fitted}
-#' can either be a character string or a density function that is passed to
-#' \code{fitdistr}. In the latter case, a \code{start} list also has to be
-#' supplied.
-#' 
-#' In addition to the \code{plot} method for rootogram objects, there are also
-#' two methods that combine two (or more) rootograms: \code{c}/\code{rbind}
-#' creates a set of rootograms that can then be plotted in one go. The \code{+}
-#' method adds up the observed and fitted frequencies from two rootograms (if
-#' these use the same intervals).
-#' 
-#' The \code{\link[ggplot2]{autoplot}} method creates a
-#' \code{\link[ggplot2]{ggplot}} version of the rootogram.
 #' 
 #' @aliases plot.rootogram autoplot.rootogram
 #' @param x,object an object of class \code{\link{rootogram}}.
@@ -467,7 +426,7 @@ c.rootogram <- function(...) {
 #' \pkg{vcd} package that is similar to the \code{numeric} method provided
 #' here. However, it is much more limited in scope, hence a function has been
 #' created here.
-#' @seealso \code{\link[stats]{glm}}
+#' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
 #' Institute, Cary.
 #' 

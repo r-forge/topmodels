@@ -76,11 +76,33 @@ diagrams be plotted in a single graph?}
 \item{xlab, ylab, main}{graphical parameters.}
 }
 \description{
-Reliagram (extended reliability diagram) for assessing the reliability of a
-fitted probabilistic distributional forecast.
+Reliagram (extended reliability diagram) assess the reliability of a fitted
+probabilistic distributional forecast for a binary event. If \code{plot =
+TRUE}, the resulting object of class \code{"pithist"} is plotted by
+\code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} conditional if the
+package \code{ggplot2} is loaded, before it is returned.
 }
 \details{
-TODO: (ML)
+Reliagrams evaluate if a probability model is calibrated (reliable) by first
+partitioning the forecast probability for a binary event into a certain number
+of bins and then plotting (within each bin) the averaged forecast probability
+against the observered/empirical relative frequency.  For computation,
+code{\link{reliagram}} leverages the \code{\link{procast}} generic.
+
+For continous probability forecasts, reliability diagrams can be plotted either
+for a pre-specified threshold or for a specific quantile probability of the
+response values.
+
+In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
+reliagram objects, it is also possible to combine two (or more) reliability
+diagrams by \code{c}/\code{rbind}, which creates a set of reliability diagrams
+that can then be plotted in one go.
+}
+\note{
+Note that there is also a \code{\link[verification]{reliability.plot}} function in the
+\pkg{verification} package. However, it only works for numeric
+forecast probabilities and numeric observed relative frequencies, hence a function has been
+created here.
 }
 \examples{
 
@@ -102,9 +124,8 @@ reliagram(m1, quantiles = c(0.2, 0.6), minimum = c(2, 6), plot = "ggplot2")
 
 }
 \references{
-Br\''ocker J, Smith L (2007). \dQuote{Increasing the Reliability
-of Reliability Diagrams}.  \emph{Weather and Forecasting}, \bold{22}(3),
-651--661. doi:10.1175/WAF993.1.
+Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
+Sciences}, 3rd ed., Academic Press, 704 pp.
 }
 \seealso{
 \code{\link{procast}}
