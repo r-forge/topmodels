@@ -63,7 +63,8 @@ response distribution.}
 }
 \value{
 An object of class \code{"rootogram"} inheriting from
-\code{"data.frame"} with the following variables: \item{observed}{observed
+\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+with the following variables: \item{observed}{observed
 frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 histogram bars,} \item{width}{widths of the histogram bars,}
@@ -121,7 +122,6 @@ plot(c(r1, r1), col = c(1, 2), ref = 4, lty = c(1, 2))
 
 
 #-------------------------------------------------------------------------------
-
 ## different styles
 
 ## artificial data from negative binomial (mu = 3, theta = 2)

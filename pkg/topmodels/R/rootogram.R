@@ -67,7 +67,8 @@
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @return An object of class \code{"rootogram"} inheriting from
-#' \code{"data.frame"} with the following variables: \item{observed}{observed
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+#' with the following variables: \item{observed}{observed
 #' frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
 #' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 #' histogram bars,} \item{width}{widths of the histogram bars,}
@@ -414,14 +415,6 @@ c.rootogram <- function(...) {
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param \dots further graphical parameters passed to the plotting function.
-#' @return An object of class \code{"rootogram"} inheriting from
-#' \code{"data.frame"} with the following variables: \item{observed}{observed
-#' frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
-#' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
-#' histogram bars,} \item{width}{widths of the histogram bars,}
-#' \item{height}{height of the histogram bars,} \item{line}{y-coordinates of
-#' the fitted curve.} Additionally, \code{style}, \code{scale}, \code{xlab},
-#' \code{ylab}, and \code{main} are stored as attributes.
 #' @note Note that there is also a \code{\link[vcd]{rootogram}} function in the
 #' \pkg{vcd} package that is similar to the \code{numeric} method provided
 #' here. However, it is much more limited in scope, hence a function has been

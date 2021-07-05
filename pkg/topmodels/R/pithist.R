@@ -91,8 +91,14 @@
 #' @param xlim,ylim,xlab,ylab,main graphical parameters handed passed to
 #' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.  
 #' @param \dots further graphical parameters.
-#' @return A data.frame is returned invisibly with: \item{x}{PIT,} \item{y}{Density,}
-#' \item{...}{and further information needed for creating the plot.}
+#' @return An object of class \code{"pithist"} inheriting from
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+#' with the following variables: item{x}{histogram
+#' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
+#' histogram bars,} \item{width}{widths of the histogram bars,}
+#' \item{ci_lwr, ci_upr}{lower and upper confidence interval bound} \item{ref}{y-coordinates of
+#' the reference curve.} Additionally, \code{freq}, \code{xlab},
+#' \code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
 #' @seealso \code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
 #' @references 
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
