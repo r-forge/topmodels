@@ -415,10 +415,6 @@ c.rootogram <- function(...) {
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param \dots further graphical parameters passed to the plotting function.
-#' @note Note that there is also a \code{\link[vcd]{rootogram}} function in the
-#' \pkg{vcd} package that is similar to the \code{numeric} method provided
-#' here. However, it is much more limited in scope, hence a function has been
-#' created here.
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
 #' Institute, Cary.
