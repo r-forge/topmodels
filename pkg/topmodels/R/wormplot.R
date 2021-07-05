@@ -63,7 +63,7 @@
 #' \code{\link{plot.wormplot}} or \code{\link{autoplot.wormplot}}.
 #' @return An object of class \code{"wormplot"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
-#' with the following variables: item{x}{theoretical
+#' with the following variables: \item{x}{theoretical
 #' quantiles}, \item{y}{deviations of theoretical and empirical quantiles}. 
 #' In case of randomized residuals, \code{nsim}
 #' different \code{x} and \code{y}, and a lower and upper confidence interval bound is returned.

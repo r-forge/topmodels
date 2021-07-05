@@ -76,7 +76,7 @@
 #' @param \dots further graphical parameters.
 #' @return An object of class \code{"reliagram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
-#' with the following variables: item{x}{forecast probabilities},
+#' with the following variables: \item{x}{forecast probabilities},
 #' \item{y}{observered/empirical relative frequencies}, \item{bin_lwr, bin_upr}{
 #' lower and upper bound of the binned forecast probabilities},
 #' \item{n_pred}{number of predictions within the binned forecasts probabilites},

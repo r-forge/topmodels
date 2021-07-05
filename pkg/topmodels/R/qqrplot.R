@@ -75,8 +75,8 @@
 #' \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.
 #' @return An object of class \code{"qqrplot"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
-#' with the following variables: item{x}{theoretical
-#' quantiles}, \item{y}{empirical quantile residuals}. In case of randomized residuals, \code{nsim}
+#' with the following variables: \item{x}{theoretical
+#' quantiles}, \item{y}{empirical quantile residuals.} In case of randomized residuals, \code{nsim}
 #' different \code{x} and \code{y}, and a lower and upper confidence interval bound is returned.
 #' Additionally, \code{xlab}, \code{ylab}, \code{main}, and \code{confint_level} 
 #' are stored as attributes.
