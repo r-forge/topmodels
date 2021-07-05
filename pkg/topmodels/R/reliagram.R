@@ -76,11 +76,11 @@
 #' @param \dots further graphical parameters.
 #' @return An object of class \code{"reliagram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
-#' with the following variables: \item{x}{forecast probabilities},
-#' \item{y}{observered/empirical relative frequencies}, \item{bin_lwr, bin_upr}{
-#' lower and upper bound of the binned forecast probabilities},
-#' \item{n_pred}{number of predictions within the binned forecasts probabilites},
-#' \item{ci_lwr, ci_upr}{lower and upper confidence interval bound}. Additionally,
+#' with the following variables: \item{x}{forecast probabilities,}
+#' \item{y}{observered/empirical relative frequencies,} \item{bin_lwr, bin_upr}{
+#' lower and upper bound of the binned forecast probabilities,}
+#' \item{n_pred}{number of predictions within the binned forecasts probabilites,}
+#' \item{ci_lwr, ci_upr}{lower and upper confidence interval bound.} Additionally,
 #' \code{xlab}, \code{ylab}, \code{main}, and \code{treshold},
 #' \code{confint_level}, brier scores (\code{bs, rel, res, unc}) are stored as
 #' attributes.
