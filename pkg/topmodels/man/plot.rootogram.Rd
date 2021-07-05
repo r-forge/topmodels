@@ -78,12 +78,6 @@ for the fitted frequencies. The histogram can be \code{"standing"} on the
 x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
 \code{"suspended"} histogram of deviations can be drawn.
 }
-\note{
-Note that there is also a \code{\link[vcd]{rootogram}} function in the
-\pkg{vcd} package that is similar to the \code{numeric} method provided
-here. However, it is much more limited in scope, hence a function has been
-created here.
-}
 \examples{
 
 ## speed and stopping distances of cars
