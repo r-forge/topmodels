@@ -93,7 +93,7 @@ diagrams be plotted in a single graph? If yes, \code{style} must be set to \code
 \value{
 An object of class \code{"pithist"} inheriting from
 \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
-with the following variables: item{x}{histogram
+with the following variables: \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 histogram bars,} \item{width}{widths of the histogram bars,}
 \item{ci_lwr, ci_upr}{lower and upper confidence interval bound} \item{ref}{y-coordinates of
