@@ -96,7 +96,7 @@ An object of class \code{"pithist"} inheriting from
 with the following variables: \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 histogram bars,} \item{width}{widths of the histogram bars,}
-\item{ci_lwr, ci_upr}{lower and upper confidence interval bound} \item{ref}{y-coordinates of
+\item{ci_lwr, ci_upr}{lower and upper confidence interval bound,} \item{ref}{y-coordinates of
 the reference curve.} Additionally, \code{freq}, \code{xlab},
 \code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
 }
