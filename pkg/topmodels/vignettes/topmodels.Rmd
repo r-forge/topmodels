@@ -44,8 +44,9 @@ packages is designed to provide such an unifiying infrastructure to gain
 predictions of probabilities, densities, scores, and Hessian values for
 probabilistic models. The unifying prediction method offers the user numerous
 graphical evaluation tools, such as rootograms [@Kleiber+Zeileis:2016], PIT
-histograms, reliagrams (reliability diagrams), randomized quantile Q-Q plots
-[@Dunn+Smyth:1996], and worm plots [@Buuren+Fredriks:2001]. 
+histograms [@Gneiting+Balabdaoui+Raftery:2007], reliagrams (reliability
+diagrams, @Wilks:2011), randomized quantile Q-Q plots [@Dunn+Smyth:1996], and
+worm plots [@Buuren+Fredriks:2001]. 
 
 To be able to use the object-oriented framework of
 [**topmodels**](https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/),

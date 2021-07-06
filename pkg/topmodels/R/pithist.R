@@ -118,7 +118,7 @@
 #' with Applications to Financial Risk Management}. \emph{International Economic
 #' Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}
 #' 
-#' Tilmann G, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
+#' Gneiting T, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
 #' Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
 #' Series B (Methodological)}. \bold{69}(2), 243--268.
 #' \doi{10.1111/j.1467-9868.2007.00587.x}
@@ -444,7 +444,7 @@ rbind.pithist <- c.pithist
 #' with Applications to Financial Risk Management}. \emph{International Economic
 #' Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}
 #' 
-#' Tilmann G, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
+#' Gneiting T, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
 #' Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
 #' Series B (Methodological)}. \bold{69}(2), 243--268.
 #' \doi{10.1111/j.1467-9868.2007.00587.x}
