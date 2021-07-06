@@ -36,13 +36,13 @@ which to predict. If omitted, the original observations are used.}
 
 \item{plot}{Should the \code{plot} or \code{autoplot} method be called to
 draw the computed extended reliability diagram? Either set \code{plot}
-expicitly to "base" vs. "ggplot2" to choose the type of plot, or for a
+expicitly to \code{"base"} vs. \code{"ggplot2"} to choose the type of plot, or for a
 logical \code{plot} argument it's chosen conditional if the package
 \code{ggplot2} is loaded.}
 
 \item{class}{Should the invisible return value be either a \code{data.frame}
-or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
-"tibble", or for NULL it's chosen automatically conditional if the package
+or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
+\code{"tibble"}, or for NULL it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
 \item{style}{character specifying the syle of rootogram (see below).}
@@ -55,8 +55,8 @@ roots (default) should be drawn.}
 \item{width}{numeric. Widths of the histogram bars.}
 
 \item{response_type}{To set the default values for \code{breaks} and
-\code{widths}.  Currently different defaults are available for "discrete"
-and "continous" responses, as well as for the special case of a "logseries"
+\code{widths}.  Currently different defaults are available for \code{"discrete"}
+and \code{"continous"} responses, as well as for the special case of a \code{"logseries"}
 response distribution.}
 
 \item{xlab, ylab, main}{graphical parameters.}
@@ -76,8 +76,8 @@ the fitted curve.} Additionally, \code{style}, \code{scale}, \code{xlab},
 Rootograms graphically compare (square roots) of empirical frequencies with
 fitted frequencies from a probability model. If \code{plot = TRUE}, the
 resulting object of class \code{"pithist"} is plotted by
-\code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} conditional if the
-package \code{ggplot2} is loaded, before it is returned.
+\code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} before it is
+returned, depending on whether the package \code{ggplot2} is loaded.
 }
 \details{
 Rootograms graphically compare frequencies of empirical distributions and
