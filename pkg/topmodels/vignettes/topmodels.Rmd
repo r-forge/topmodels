@@ -105,6 +105,7 @@ qqrplot(m)
 ```
 
 ```{r example-reliagram}
+set.seed(123)
 reliagram(m)
 ````
 
