@@ -90,7 +90,7 @@
 <a href="#overview" class="anchor"></a>Overview</h2>
 <p>As a consequence of the growing importance of probabilistic predictions in various application fields due to a necessary functional risk management and strategy, there is an increasing demand for appropriate probabilistic model evaluation. Besides proper probabilistic scores <span class="citation">(Gneiting and Raftery 2007)</span>, which evaluate not only the expectation but the entire predictive distribution, graphical assessment methods are particularly advantageous to diagnose possible model misspecification problems.</p>
 <p>Probabilistic predictions are often based on distributional regression models, whereby the computation of predictive distributions, probabilities, and quantiles is generally dependent on the <em>R</em> package being used. Therefore, routines to graphically evaluate probabilistic models are not always available and if so then only for specific types of models and distributions provided by the corresponding package. An easy to use unified infrastructure to graphical assess and compare different probabilistic model types does not yet exist.</p>
-<p>The <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/"><strong>topmodels</strong></a> packages is designed to provide such an unifiying infrastructure to gain predictions of probabilities, densities, scores, and Hessian values for probabilistic models. The unifying prediction method offers the user numerous graphical evaluation tools, such as rootograms <span class="citation">(Kleiber and Zeileis 2016)</span>, PIT histograms, reliagrams (reliability diagrams), randomized quantile Q-Q plots <span class="citation">(Dunn and Smyth 1996)</span>, and worm plots <span class="citation">(Buuren and Fredriks 2001)</span>.</p>
+<p>The <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/"><strong>topmodels</strong></a> packages is designed to provide such an unifiying infrastructure to gain predictions of probabilities, densities, scores, and Hessian values for probabilistic models. The unifying prediction method offers the user numerous graphical evaluation tools, such as rootograms <span class="citation">(Kleiber and Zeileis 2016)</span>, PIT histograms <span class="citation">(Gneiting, Balabdaoui, and Raftery 2007)</span>, reliagrams <span class="citation">(reliability diagrams, Wilks 2011)</span>, randomized quantile Q-Q plots <span class="citation">(Dunn and Smyth 1996)</span>, and worm plots <span class="citation">(Buuren and Fredriks 2001)</span>.</p>
 <p>To be able to use the object-oriented framework of <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/"><strong>topmodels</strong></a>, solely a <code><a href="../reference/procast.html">procast()</a></code> method must exist for the model class of interest. Currently the package provides generic <code>procast</code> methods for the model classes <code>lm</code>, <code>glm</code>, <a href="https://CRAN.R-project.org/package=crch"><code>crch</code></a> <span class="citation">(Messner, Mayr, and Zeileis 2016)</span>, and <a href="https://r-forge.r-project.org/projects/partykit/pkg/disttree/"><code>disttree</code></a> <span class="citation">(Schlosser et al. 2019)</span>.</p>
 </div>
 <div id="installation" class="section level2">
@@ -137,6 +137,9 @@
 <div id="ref-Dunn+Smyth:1996">
 <p>Dunn, Peter K., and Gordon K. Smyth. 1996. “Randomized Quantile Residuals.” <em>Journal of Computational and Graphical Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802">https://doi.org/10.2307/1390802</a>.</p>
 </div>
+<div id="ref-Gneiting+Balabdaoui+Raftery:2007">
+<p>Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007. “Probabilistic Forecasts, Calibration and Sharpness.” <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.</p>
+</div>
 <div id="ref-Gneiting+Raftery:2007">
 <p>Gneiting, Tilmann, and Adrian E. Raftery. 2007. “Strictly Proper Scoring Rules, Prediction, and Estimation.” <em>Journal of the American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437">https://doi.org/10.1198/016214506000001437</a>.</p>
 </div>
@@ -151,6 +154,9 @@
 </div>
 <div id="ref-Wickham:2016">
 <p>Wickham, Hadley. 2016. <em>ggplot2: Elegant Graphics for Data Analysis</em>. New York: Springer-Verlag. <a href="https://ggplot2.tidyverse.org/">https://ggplot2.tidyverse.org/</a>.</p>
+</div>
+<div id="ref-Wilks:2011">
+<p>Wilks, Daniel. 2011. <em>Statistical Methods in the Atmospheric Sciences</em>. 3rd ed. Academic Press.</p>
 </div>
 </div>
 </div>
