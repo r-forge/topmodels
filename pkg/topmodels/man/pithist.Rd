@@ -126,20 +126,27 @@ pithist objects, it is also possible to combine two (or more) PIT histograms by
 plotted in one go.
 }
 \examples{
+## speed and stopping distances of cars
+m1_lm <- lm(dist ~ speed, data = cars)
 
-require("crch")
-m1 <- lm(dist ~ speed, data = cars)
-m2 <- crch(dist ~ speed | speed, data = cars)
-m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+## compute and plot pithist
+pithist(m1_lm)
 
-pit1 <- pithist(m1)
-pit2 <- pithist(m2, plot = FALSE)
-pit3 <- pithist(m3, plot = FALSE)
+#-------------------------------------------------------------------------------
+## determinants for male satellites to nesting horseshoe crabs
+data("CrabSatellites", package = "countreg")
 
-plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
+## linear poisson model
+m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 
-plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE, style = "lines")
-lines(pit3, col = 3)
+## compute and plot pithist as base graphic
+p1 <- pithist(m1_pois, plot = FALSE)
+p2 <- pithist(m2_pois, plot = FALSE)
+
+## plot combined pithist as "ggplot2" graphic
+require("ggplot2")
+autoplot(c(p1, p2), single_graph = TRUE, style = "lines", col = c(1, 2))
 
 }
 \references{

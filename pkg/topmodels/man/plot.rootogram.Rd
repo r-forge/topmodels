@@ -126,7 +126,7 @@ data("CrabSatellites", package = "countreg")
 ## linear poisson model
 m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 
-## compute and plot rootogram as ggplot2 graphic
+## compute and plot rootogram as "ggplot2" graphic
 rootogram(m3_pois, plot = "ggplot2")
 
 #-------------------------------------------------------------------------------

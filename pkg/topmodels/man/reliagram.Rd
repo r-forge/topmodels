@@ -118,21 +118,27 @@ created here.
 }
 \examples{
 
-require("crch")
-m1 <- lm(dist ~ speed, data = cars)
-m2 <- crch(dist ~ speed | speed, data = cars)
-m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+## speed and stopping distances of cars
+m1_lm <- lm(dist ~ speed, data = cars)
 
-rel1 <- reliagram(m1, quantiles = c(0.2, 0.6), plot = FALSE)
-rel2 <- reliagram(m2, plot = FALSE)
-rel3 <- reliagram(m3, plot = FALSE)
+## compute and plot reliagram
+reliagram(m1_lm)
 
-plot(c(rel1, rel2), single_graph = TRUE, col = c(1, 2, 3), lty = c(1, 2, 3), pch = c(1, 2, 3))
+#-------------------------------------------------------------------------------
+## determinants for male satellites to nesting horseshoe crabs
+data("CrabSatellites", package = "countreg")
 
-plot(rel1, single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
-lines(rel3, col = 3, lty = 2, confint = 3)
+## linear poisson model
+m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 
-reliagram(m1, quantiles = c(0.2, 0.6), minimum = c(2, 6), plot = "ggplot2")
+## compute and plot reliagram as base graphic
+r1 <- reliagram(m1_pois, plot = FALSE)
+r2 <- reliagram(m2_pois, plot = FALSE)
+
+## plot combined reliagram as "ggplot2" graphic
+require("ggplot2")
+autoplot(c(r1, r2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 
 }
 \references{

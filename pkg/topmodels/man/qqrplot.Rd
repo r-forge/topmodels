@@ -101,19 +101,27 @@ plotted in one go.
 }
 \examples{
 
+## speed and stopping distances of cars
+m1_lm <- lm(dist ~ speed, data = cars)
+
+## compute and plot qqrplot
+qqrplot(m1_lm)
+
+#-------------------------------------------------------------------------------
+## determinants for male satellites to nesting horseshoe crabs
 data("CrabSatellites", package = "countreg")
-CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 
-m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
-m3 <- lm(dist ~ speed, data = cars)
+## linear poisson model
+m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 
-q1 <- qqrplot(m1, nsim = 100, confint = TRUE)
-q2 <- qqrplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
-q3 <- qqrplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
+## compute and plot qqrplot as base graphic
+q1 <- qqrplot(m1_pois, plot = FALSE)
+q2 <- qqrplot(m2_pois, plot = FALSE)
 
-plot(c(q1, q2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
-points(q3, col = "lightblue")
+## plot combined qqrplot as "ggplot2" graphic
+require("ggplot2")
+autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 
 }
 \references{

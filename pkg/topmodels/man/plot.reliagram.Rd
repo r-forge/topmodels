@@ -106,9 +106,9 @@ For continous probability forecasts, reliability diagrams can be plotted either
 for a pre-specified threshold or for a specific quantile probability of the
 response values.
 
-Reliagrams can be rendered as \code{ggplot2} or base *R* graphics by using
+Reliagrams can be rendered as \code{ggplot2} or base **R** graphics by using
 the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-For a single base *R* graphically panel, \code{\link{points}} adds an additional 
+For a single base **R** graphically panel, \code{\link{points}} adds an additional 
 reliagram.
 }
 \examples{
@@ -159,7 +159,7 @@ data("CrabSatellites", package = "countreg")
 ## linear poisson model
 m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 
-## compute and plot rootogram as ggplot2 graphic
+## compute and plot reliagram as "ggplot2" graphic
 reliagram(m3_pois, plot = "ggplot2")
 
 }

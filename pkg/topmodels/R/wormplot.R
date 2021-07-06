@@ -77,19 +77,27 @@
 #' @keywords hplot
 #' @examples
 #' 
+#' ## speed and stopping distances of cars
+#' m1_lm <- lm(dist ~ speed, data = cars)
+#' 
+#' ## compute and plot wormplot
+#' wormplot(m1_lm)
+#' 
+#' #-------------------------------------------------------------------------------
+#' ## determinants for male satellites to nesting horseshoe crabs
 #' data("CrabSatellites", package = "countreg")
-#' CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 #' 
-#' m1 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-#' m2 <- glm(satellites ~ width + color, data = CrabSatellites2, family = binomial)
-#' m3 <- lm(dist ~ speed, data = cars)
+#' ## linear poisson model
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 #' 
-#' w1 <- wormplot(m1, nsim = 100, confint = TRUE)
-#' w2 <- wormplot(m2, nsim = 100, confint = TRUE, plot = FALSE)
-#' w3 <- wormplot(m3, nsim = 100, confint = TRUE, plot = FALSE)
+#' ## compute and plot wormplot as base graphic
+#' w1 <- wormplot(m1_pois, plot = FALSE)
+#' w2 <- wormplot(m2_pois, plot = FALSE)
 #' 
-#' plot(c(w1, w2), single_graph = FALSE, fill = c(1, 3), ref = c(2, 2))
-#' points(w3, col = "lightblue")
+#' ## plot combined wormplot as "ggplot2" graphic
+#' require("ggplot2")
+#' autoplot(c(w1, w2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 #' 
 #' @export
 wormplot <- function(object, ...) {
@@ -379,9 +387,9 @@ rbind.wormplot <- c.wormplot
 #' default: transformed to standard normal scale) and theoretical quantiles from
 #' the same distribution against the same theoretical quantiles.
 #'
-#' Worm plots can be rendered as \code{ggplot2} or base *R* graphics by using
+#' Worm plots can be rendered as \code{ggplot2} or base **R** graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base *R* graphically panel, \code{\link{points}} adds an additional 
+#' For a single base **R** graphically panel, \code{\link{points}} adds an additional 
 #' worm plot.
 #' 
 #' @aliases plot.wormplot points.wormplot autoplot.wormplot
@@ -451,7 +459,7 @@ rbind.wormplot <- c.wormplot
 #' ## linear poisson model
 #' m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 #' 
-#' ## compute and plot rootogram as ggplot2 graphic
+#' ## compute and plot wormplot as "ggplot2" graphic
 #' wormplot(m3_pois, plot = "ggplot2")
 #'
 #' @export
