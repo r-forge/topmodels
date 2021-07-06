@@ -136,7 +136,7 @@
 #' m3_gauss <- glm(Postwt ~ Prewt + Treat + offset(Prewt), family = gaussian, data = anorexia)
 #' 
 #' ## plot rootogram as "ggplot2" graphic
-#' rootogram(m3_gauss, ylim = c(-1, 5), plot = "ggplot2")
+#' rootogram(m3_gauss, plot = "ggplot2")
 #' 
 #' @export
 rootogram <- function(object, ...) {
