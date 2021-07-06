@@ -52,8 +52,8 @@
 <meta property="og:description" content="PIT histograms graphically compare empirical probabilities from fitted models
 with a uniform distribution. If plot = TRUE, the resulting object of
 class &quot;pithist&quot; is plotted by plot.pithist or
-autoplot.pithist conditional if the package
-ggplot2 is loaded, before it is returned." />
+autoplot.pithist before it is returned, depending on whether the
+package ggplot2 is loaded." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -132,8 +132,8 @@ ggplot2 is loaded, before it is returned." />
     <p>PIT histograms graphically compare empirical probabilities from fitted models
 with a uniform distribution. If <code>plot = TRUE</code>, the resulting object of
 class <code>"pithist"</code> is plotted by <code><a href='plot.pithist.html'>plot.pithist</a></code> or
-<code><a href='plot.pithist.html'>autoplot.pithist</a></code> conditional if the package
-<code>ggplot2</code> is loaded, before it is returned.</p>
+<code><a href='plot.pithist.html'>autoplot.pithist</a></code> before it is returned, depending on whether the
+package <code>ggplot2</code> is loaded.</p>
     </div>
 
     <pre class="usage"><span class='fu'>pithist</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
@@ -183,15 +183,15 @@ which to predict. If omitted, the original observations are used.</p></td>
       <th>plot</th>
       <td><p>Should the <code>plot</code> or <code>autoplot</code> method be called to
 draw the computed extended reliability diagram? Either set <code>plot</code>
-expicitly to "base" vs. "ggplot2" to choose the type of plot, or for a
+expicitly to <code>"base"</code> vs. <code>"ggplot2"</code> to choose the type of plot, or for a
 logical <code>plot</code> argument it's chosen conditional if the package
 <code>ggplot2</code> is loaded.</p></td>
     </tr>
     <tr>
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
-or a <code>tibble</code>. Either set <code>class</code> expicitly to "data.frame" vs.
-"tibble", or for NULL it's chosen automatically conditional if the package
+or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
+<code>"tibble"</code>, or for NULL it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>
@@ -299,7 +299,7 @@ doi: <a href='https://doi.org/10.2307/2981683'>10.2307/2981683</a></p>
 <p>Diebold FX, Gunther TA, Tay AS (1998). &#8220;Evaluating Density Forecasts
 with Applications to Financial Risk Management&#8221;. <em>International Economic
 Review</em>, <b>39</b>(4), 863--883. doi: <a href='https://doi.org/10.2307/2527342'>10.2307/2527342</a></p>
-<p>Tilmann G, Balabdaoui F, Raftery AE (2007). &#8220;Probabilistic Forecasts,
+<p>Gneiting T, Balabdaoui F, Raftery AE (2007). &#8220;Probabilistic Forecasts,
 Calibration and Sharpness&#8221;.  <em>Journal of the Royal Statistical Society:
 Series B (Methodological)</em>. <b>69</b>(2), 243--268.
 doi: <a href='https://doi.org/10.1111/j.1467-9868.2007.00587.x'>10.1111/j.1467-9868.2007.00587.x</a></p>

@@ -50,10 +50,10 @@
 
 <meta property="og:title" content="Q-Q Plots for Quantile Residuals — qqrplot" />
 <meta property="og:description" content="Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals. If plot = TRUE, the resulting object of
-class &quot;qqrplot&quot; is plotted by plot.qqrplot or
-autoplot.qqrplot conditional if the package
-ggplot2 is loaded, before it is returned." />
+residuals. If plot = TRUE, the resulting object of class
+&quot;pithist&quot; is plotted by plot.pithist or
+autoplot.pithist before it is returned, depending on whether the
+package ggplot2 is loaded." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -130,10 +130,10 @@ ggplot2 is loaded, before it is returned." />
 
     <div class="ref-description">
     <p>Visualize goodness of fit of regression models by Q-Q plots using quantile
-residuals. If <code>plot = TRUE</code>, the resulting object of
-class <code>"qqrplot"</code> is plotted by <code><a href='plot.qqrplot.html'>plot.qqrplot</a></code> or
-<code><a href='plot.qqrplot.html'>autoplot.qqrplot</a></code> conditional if the package
-<code>ggplot2</code> is loaded, before it is returned.</p>
+residuals. If <code>plot = TRUE</code>, the resulting object of class
+<code>"pithist"</code> is plotted by <code><a href='plot.pithist.html'>plot.pithist</a></code> or
+<code><a href='plot.pithist.html'>autoplot.pithist</a></code> before it is returned, depending on whether the
+package <code>ggplot2</code> is loaded.</p>
     </div>
 
     <pre class="usage"><span class='fu'>qqrplot</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
@@ -174,15 +174,15 @@ which to predict. If omitted, the original observations are used.</p></td>
     <tr>
       <th>plot</th>
       <td><p>Should the <code>plot</code> or <code>autoplot</code> method be called to
-draw the computed Q-Q plot? Either set <code>plot</code> expicitly to "base" vs.
-"ggplot2" to choose the type of plot, or for a logical <code>plot</code> argument
+draw the computed Q-Q plot? Either set <code>plot</code> expicitly to <code>"base"</code> vs.
+<code>"ggplot2"</code> to choose the type of plot, or for a logical <code>plot</code> argument
 it's chosen conditional if the package <code>ggplot2</code> is loaded.</p></td>
     </tr>
     <tr>
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
-or a <code>tibble</code>. Either set <code>class</code> expicitly to "data.frame" vs.
-"tibble", or for NULL it's chosen automatically conditional if the package
+or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
+<code>"tibble"</code>, or for NULL it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>

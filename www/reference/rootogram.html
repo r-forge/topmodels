@@ -52,8 +52,8 @@
 <meta property="og:description" content="Rootograms graphically compare (square roots) of empirical frequencies with
 fitted frequencies from a probability model. If plot = TRUE, the
 resulting object of class &quot;pithist&quot; is plotted by
-plot.pithist or autoplot.pithist conditional if the
-package ggplot2 is loaded, before it is returned." />
+plot.pithist or autoplot.pithist before it is
+returned, depending on whether the package ggplot2 is loaded." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -132,8 +132,8 @@ package ggplot2 is loaded, before it is returned." />
     <p>Rootograms graphically compare (square roots) of empirical frequencies with
 fitted frequencies from a probability model. If <code>plot = TRUE</code>, the
 resulting object of class <code>"pithist"</code> is plotted by
-<code><a href='plot.pithist.html'>plot.pithist</a></code> or <code><a href='plot.pithist.html'>autoplot.pithist</a></code> conditional if the
-package <code>ggplot2</code> is loaded, before it is returned.</p>
+<code><a href='plot.pithist.html'>plot.pithist</a></code> or <code><a href='plot.pithist.html'>autoplot.pithist</a></code> before it is
+returned, depending on whether the package <code>ggplot2</code> is loaded.</p>
     </div>
 
     <pre class="usage"><span class='fu'>rootogram</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
@@ -176,15 +176,15 @@ which to predict. If omitted, the original observations are used.</p></td>
       <th>plot</th>
       <td><p>Should the <code>plot</code> or <code>autoplot</code> method be called to
 draw the computed extended reliability diagram? Either set <code>plot</code>
-expicitly to "base" vs. "ggplot2" to choose the type of plot, or for a
+expicitly to <code>"base"</code> vs. <code>"ggplot2"</code> to choose the type of plot, or for a
 logical <code>plot</code> argument it's chosen conditional if the package
 <code>ggplot2</code> is loaded.</p></td>
     </tr>
     <tr>
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
-or a <code>tibble</code>. Either set <code>class</code> expicitly to "data.frame" vs.
-"tibble", or for NULL it's chosen automatically conditional if the package
+or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
+<code>"tibble"</code>, or for NULL it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>
@@ -207,8 +207,8 @@ roots (default) should be drawn.</p></td>
     <tr>
       <th>response_type</th>
       <td><p>To set the default values for <code>breaks</code> and
-<code>widths</code>.  Currently different defaults are available for "discrete"
-and "continous" responses, as well as for the special case of a "logseries"
+<code>widths</code>.  Currently different defaults are available for <code>"discrete"</code>
+and <code>"continous"</code> responses, as well as for the special case of a <code>"logseries"</code>
 response distribution.</p></td>
     </tr>
     <tr>
