@@ -106,9 +106,9 @@ For continous probability forecasts, reliability diagrams can be plotted either
 for a pre-specified threshold or for a specific quantile probability of the
 response values.
 
-Reliagrams can be rendered as \code{ggplot2} or base **R** graphics by using
+Reliagrams can be rendered as \code{ggplot2} or base R graphics by using
 the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-For a single base **R** graphically panel, \code{\link{points}} adds an additional 
+For a single base R graphically panel, \code{\link{points}} adds an additional 
 reliagram.
 }
 \examples{
