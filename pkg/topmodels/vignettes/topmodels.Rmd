@@ -87,28 +87,28 @@ provides various routines to easily graphically assess and compare different
 probabilistic models and model types using `ggplot2` [@Wickham:2016] and base
 *R* graphics:
 
-```{r}
+```{r example-model}
 library("topmodels")
 m <- lm(dist ~ speed, data = cars)
 ```
 
-```{r}
+```{r example-rootogram}
 rootogram(m)
 ```
 
-```{r}
+```{r example-pithist}
 pithist(m)
 ```
 
-```{r}
+```{r example-qqrplot}
 qqrplot(m)
 ```
 
-```{r}
+```{r example-reliagram}
 reliagram(m)
 ````
 
-```{r}
+```{r example-wormplot}
 wormplot(m)
 ```
 
