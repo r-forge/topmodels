@@ -3,7 +3,7 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   topmodels: topmodels.html
-last_built: 2021-07-06T13:46Z
+last_built: 2021-07-06T16:50Z
 urls:
   reference: https://topmodels.R-Forge.R-project.org//reference
   article: https://topmodels.R-Forge.R-project.org//articles
