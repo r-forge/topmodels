@@ -88,9 +88,9 @@ specifically using no transformation at all, i.e., remaining on the uniform
 scale (via \code{trafo = NULL} or equivalently \code{qunif} or
 \code{identity}).
 
-Q-Q residuals plots can be rendered as \code{ggplot2} or base **R** graphics by using
+Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by using
 the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-For a single base **R** graphically panel, \code{\link{points}} adds an additional Q-Q
+For a single base R graphically panel, \code{\link{points}} adds an additional Q-Q
 residuals plot.
 }
 \examples{

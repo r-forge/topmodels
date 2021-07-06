@@ -98,9 +98,9 @@ uniform distribution. For a well calibrated model fit, the observation will be
 drawn from the predictive distribution and the PIT will have a standard uniform
 distribution. 
 
-PIT histograms can be rendered as \code{ggplot2} or base **R** graphics by using
+PIT histograms can be rendered as \code{ggplot2} or base R graphics by using
 the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-For a single base **R** graphically panel, \code{\link{lines}} adds an additional PIT histogram.
+For a single base R graphically panel, \code{\link{lines}} adds an additional PIT histogram.
 }
 \examples{
 
