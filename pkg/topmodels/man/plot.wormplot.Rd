@@ -85,9 +85,9 @@ Worm plots (de-trended Q-Q plots) draw deviations of quantile residuals (by
 default: transformed to standard normal scale) and theoretical quantiles from
 the same distribution against the same theoretical quantiles.
 
-Worm plots can be rendered as \code{ggplot2} or base *R* graphics by using
+Worm plots can be rendered as \code{ggplot2} or base **R** graphics by using
 the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-For a single base *R* graphically panel, \code{\link{points}} adds an additional 
+For a single base **R** graphically panel, \code{\link{points}} adds an additional 
 worm plot.
 }
 \examples{
@@ -138,7 +138,7 @@ data("CrabSatellites", package = "countreg")
 ## linear poisson model
 m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 
-## compute and plot rootogram as ggplot2 graphic
+## compute and plot wormplot as "ggplot2" graphic
 wormplot(m3_pois, plot = "ggplot2")
 
 }

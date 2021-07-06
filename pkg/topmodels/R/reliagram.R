@@ -92,23 +92,29 @@
 #' @references Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
 #' Sciences}, 3rd ed., Academic Press, 704 pp.
 #' @examples
+#'
+#' ## speed and stopping distances of cars
+#' m1_lm <- lm(dist ~ speed, data = cars)
 #' 
-#' require("crch")
-#' m1 <- lm(dist ~ speed, data = cars)
-#' m2 <- crch(dist ~ speed | speed, data = cars)
-#' m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+#' ## compute and plot reliagram
+#' reliagram(m1_lm)
 #' 
-#' rel1 <- reliagram(m1, quantiles = c(0.2, 0.6), plot = FALSE)
-#' rel2 <- reliagram(m2, plot = FALSE)
-#' rel3 <- reliagram(m3, plot = FALSE)
+#' #-------------------------------------------------------------------------------
+#' ## determinants for male satellites to nesting horseshoe crabs
+#' data("CrabSatellites", package = "countreg")
 #' 
-#' plot(c(rel1, rel2), single_graph = TRUE, col = c(1, 2, 3), lty = c(1, 2, 3), pch = c(1, 2, 3))
+#' ## linear poisson model
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 #' 
-#' plot(rel1, single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
-#' lines(rel3, col = 3, lty = 2, confint = 3)
+#' ## compute and plot reliagram as base graphic
+#' r1 <- reliagram(m1_pois, plot = FALSE)
+#' r2 <- reliagram(m2_pois, plot = FALSE)
 #' 
-#' reliagram(m1, quantiles = c(0.2, 0.6), minimum = c(2, 6), plot = "ggplot2")
-#' 
+#' ## plot combined reliagram as "ggplot2" graphic
+#' require("ggplot2")
+#' autoplot(c(r1, r2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+#'
 #' @export
 reliagram <- function(object, ...) {
   UseMethod("reliagram")
@@ -467,9 +473,9 @@ rbind.reliagram <- c.reliagram
 #' for a pre-specified threshold or for a specific quantile probability of the
 #' response values.
 #' 
-#' Reliagrams can be rendered as \code{ggplot2} or base *R* graphics by using
+#' Reliagrams can be rendered as \code{ggplot2} or base **R** graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base *R* graphically panel, \code{\link{points}} adds an additional 
+#' For a single base **R** graphically panel, \code{\link{points}} adds an additional 
 #' reliagram.
 #' 
 #' @aliases plot.reliagram lines.reliagram autoplot.reliagram
@@ -534,7 +540,7 @@ rbind.reliagram <- c.reliagram
 #' ## linear poisson model
 #' m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 #' 
-#' ## compute and plot rootogram as ggplot2 graphic
+#' ## compute and plot reliagram as "ggplot2" graphic
 #' reliagram(m3_pois, plot = "ggplot2")
 #'
 #' @export

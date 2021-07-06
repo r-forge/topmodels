@@ -125,20 +125,27 @@
 #' 
 #' @keywords hplot
 #' @examples
+#' ## speed and stopping distances of cars
+#' m1_lm <- lm(dist ~ speed, data = cars)
 #' 
-#' require("crch")
-#' m1 <- lm(dist ~ speed, data = cars)
-#' m2 <- crch(dist ~ speed | speed, data = cars)
-#' m3 <- crch(dist ~ speed | speed, left = 30, data = cars)
+#' ## compute and plot pithist
+#' pithist(m1_lm)
 #' 
-#' pit1 <- pithist(m1)
-#' pit2 <- pithist(m2, plot = FALSE)
-#' pit3 <- pithist(m3, plot = FALSE)
+#' #-------------------------------------------------------------------------------
+#' ## determinants for male satellites to nesting horseshoe crabs
+#' data("CrabSatellites", package = "countreg")
 #' 
-#' plot(pit1, confint = "red", ref = "blue", fill = "lightblue")
+#' ## linear poisson model
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 #' 
-#' plot(c(pit1, pit2), col = c(1, 2), single_graph = TRUE, style = "lines")
-#' lines(pit3, col = 3)
+#' ## compute and plot pithist as base graphic
+#' p1 <- pithist(m1_pois, plot = FALSE)
+#' p2 <- pithist(m2_pois, plot = FALSE)
+#' 
+#' ## plot combined pithist as "ggplot2" graphic
+#' require("ggplot2")
+#' autoplot(c(p1, p2), single_graph = TRUE, style = "lines", col = c(1, 2))
 #' 
 #' @export
 pithist <- function(object, ...) {
@@ -404,9 +411,9 @@ rbind.pithist <- c.pithist
 #' drawn from the predictive distribution and the PIT will have a standard uniform
 #' distribution. 
 #'
-#' PIT histograms can be rendered as \code{ggplot2} or base *R* graphics by using
+#' PIT histograms can be rendered as \code{ggplot2} or base **R** graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base *R* graphically panel, \code{\link{lines}} adds an additional PIT histogram.
+#' For a single base **R** graphically panel, \code{\link{lines}} adds an additional PIT histogram.
 #' 
 #' @aliases plot.pithist lines.pithist autoplot.pithist
 #' @param object,x an object of class \code{\link{pithist}}.
@@ -499,7 +506,7 @@ rbind.pithist <- c.pithist
 #' ## linear poisson model
 #' m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 #' 
-#' ## compute and plot rootogram as ggplot2 graphic
+#' ## compute and plot pithist as "ggplot2" graphic
 #' pithist(m3_pois, plot = "ggplot2")
 #'
 #' @export

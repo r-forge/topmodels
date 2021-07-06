@@ -110,11 +110,11 @@ created here.
 deaths <- rep(0:4, c(109, 65, 22, 3, 1))
 
 ## fit glm model
-m1 <- glm(deaths ~ 1, family = poisson)
-rootogram(m1)
+m1_pois <- glm(deaths ~ 1, family = poisson)
+rootogram(m1_pois)
 
 ## inspect output (without plotting)
-r1 <- rootogram(m1, plot = FALSE)
+r1 <- rootogram(m1_pois, plot = FALSE)
 r1
 
 ## combine plots
@@ -131,23 +131,25 @@ y <- rnbinom(100, mu = 3, size = 2)
 x <- rpois(100, lambda = 3)
 
 ## glm method: fitted values via glm()
-m2 <- glm(y ~ x, family = poisson)
+m2_pois <- glm(y ~ x, family = poisson)
 
 ## correctly specified Poisson model fit
 par(mfrow = c(1, 3))
-r1 <- rootogram(m2, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
-r2 <- rootogram(m2, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
-r3 <- rootogram(m2, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
+r1 <- rootogram(m2_pois, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
+r2 <- rootogram(m2_pois, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
+r3 <- rootogram(m2_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
 par(mfrow = c(1, 1))
 
 #-------------------------------------------------------------------------------
-## linear regression with normal/Gaussian response: anorexia data
+## linear regression with normal/Gaussian response: anorexia data 
 
 data("anorexia", package = "MASS")
 
-m3 <- glm(Postwt ~ Prewt + Treat + offset(Prewt), family = gaussian, data = anorexia)
-rootogram(m3, ylim = c(-1, 4))
-abline(h = c(-1, 1), col = 4, lty = 2, lwd = 2)
+m3_gauss <- glm(Postwt ~ Prewt + Treat + offset(Prewt), family = gaussian, data = anorexia)
+
+## plot rootogram as "ggplot2" graphic
+require("ggplot2")
+rootogram(m3_gauss, ylim = c(-1, 4))
 
 }
 \references{
