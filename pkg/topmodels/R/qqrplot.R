@@ -106,8 +106,7 @@
 #' q2 <- qqrplot(m2_pois, plot = FALSE)
 #' 
 #' ## plot combined qqrplot as "ggplot2" graphic
-#' require("ggplot2")
-#' autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+#' ggplot2::autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 #' 
 #' @export
 qqrplot <- function(object, ...) {
@@ -381,9 +380,9 @@ rbind.qqrplot <- c.qqrplot
 #' scale (via \code{trafo = NULL} or equivalently \code{qunif} or
 #' \code{identity}).
 #'
-#' Q-Q residuals plots can be rendered as \code{ggplot2} or base **R** graphics by using
+#' Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base **R** graphically panel, \code{\link{points}} adds an additional Q-Q
+#' For a single base R graphically panel, \code{\link{points}} adds an additional Q-Q
 #' residuals plot.
 #' 
 #' @aliases plot.qqrplot points.qqrplot autoplot.qqrplot

@@ -144,8 +144,7 @@
 #' p2 <- pithist(m2_pois, plot = FALSE)
 #' 
 #' ## plot combined pithist as "ggplot2" graphic
-#' require("ggplot2")
-#' autoplot(c(p1, p2), single_graph = TRUE, style = "lines", col = c(1, 2))
+#' ggplot2::autoplot(c(p1, p2), single_graph = TRUE, style = "lines", col = c(1, 2))
 #' 
 #' @export
 pithist <- function(object, ...) {
@@ -411,9 +410,9 @@ rbind.pithist <- c.pithist
 #' drawn from the predictive distribution and the PIT will have a standard uniform
 #' distribution. 
 #'
-#' PIT histograms can be rendered as \code{ggplot2} or base **R** graphics by using
+#' PIT histograms can be rendered as \code{ggplot2} or base R graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base **R** graphically panel, \code{\link{lines}} adds an additional PIT histogram.
+#' For a single base R graphically panel, \code{\link{lines}} adds an additional PIT histogram.
 #' 
 #' @aliases plot.pithist lines.pithist autoplot.pithist
 #' @param object,x an object of class \code{\link{pithist}}.

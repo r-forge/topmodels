@@ -120,8 +120,7 @@ q1 <- qqrplot(m1_pois, plot = FALSE)
 q2 <- qqrplot(m2_pois, plot = FALSE)
 
 ## plot combined qqrplot as "ggplot2" graphic
-require("ggplot2")
-autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+ggplot2::autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 
 }
 \references{

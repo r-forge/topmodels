@@ -119,8 +119,7 @@ w1 <- wormplot(m1_pois, plot = FALSE)
 w2 <- wormplot(m2_pois, plot = FALSE)
 
 ## plot combined wormplot as "ggplot2" graphic
-require("ggplot2")
-autoplot(c(w1, w2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+ggplot2::autoplot(c(w1, w2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 
 }
 \references{

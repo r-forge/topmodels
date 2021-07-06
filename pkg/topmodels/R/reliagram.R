@@ -112,8 +112,7 @@
 #' r2 <- reliagram(m2_pois, plot = FALSE)
 #' 
 #' ## plot combined reliagram as "ggplot2" graphic
-#' require("ggplot2")
-#' autoplot(c(r1, r2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+#' ggplot2::autoplot(c(r1, r2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 #'
 #' @export
 reliagram <- function(object, ...) {
@@ -473,9 +472,9 @@ rbind.reliagram <- c.reliagram
 #' for a pre-specified threshold or for a specific quantile probability of the
 #' response values.
 #' 
-#' Reliagrams can be rendered as \code{ggplot2} or base **R** graphics by using
+#' Reliagrams can be rendered as \code{ggplot2} or base R graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base **R** graphically panel, \code{\link{points}} adds an additional 
+#' For a single base R graphically panel, \code{\link{points}} adds an additional 
 #' reliagram.
 #' 
 #' @aliases plot.reliagram lines.reliagram autoplot.reliagram
