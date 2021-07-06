@@ -96,8 +96,7 @@
 #' w2 <- wormplot(m2_pois, plot = FALSE)
 #' 
 #' ## plot combined wormplot as "ggplot2" graphic
-#' require("ggplot2")
-#' autoplot(c(w1, w2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+#' ggplot2::autoplot(c(w1, w2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 #' 
 #' @export
 wormplot <- function(object, ...) {
@@ -387,9 +386,9 @@ rbind.wormplot <- c.wormplot
 #' default: transformed to standard normal scale) and theoretical quantiles from
 #' the same distribution against the same theoretical quantiles.
 #'
-#' Worm plots can be rendered as \code{ggplot2} or base **R** graphics by using
+#' Worm plots can be rendered as \code{ggplot2} or base R graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base **R** graphically panel, \code{\link{points}} adds an additional 
+#' For a single base R graphically panel, \code{\link{points}} adds an additional 
 #' worm plot.
 #' 
 #' @aliases plot.wormplot points.wormplot autoplot.wormplot

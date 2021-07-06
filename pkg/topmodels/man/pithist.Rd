@@ -145,8 +145,7 @@ p1 <- pithist(m1_pois, plot = FALSE)
 p2 <- pithist(m2_pois, plot = FALSE)
 
 ## plot combined pithist as "ggplot2" graphic
-require("ggplot2")
-autoplot(c(p1, p2), single_graph = TRUE, style = "lines", col = c(1, 2))
+ggplot2::autoplot(c(p1, p2), single_graph = TRUE, style = "lines", col = c(1, 2))
 
 }
 \references{

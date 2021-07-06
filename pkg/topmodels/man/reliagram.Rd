@@ -137,8 +137,7 @@ r1 <- reliagram(m1_pois, plot = FALSE)
 r2 <- reliagram(m2_pois, plot = FALSE)
 
 ## plot combined reliagram as "ggplot2" graphic
-require("ggplot2")
-autoplot(c(r1, r2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+ggplot2::autoplot(c(r1, r2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 
 }
 \references{
