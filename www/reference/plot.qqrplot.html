@@ -227,9 +227,9 @@ Alternatively, transformations to other distributions can also be used,
 specifically using no transformation at all, i.e., remaining on the uniform
 scale (via <code>trafo = NULL</code> or equivalently <code>qunif</code> or
 <code>identity</code>).</p>
-<p>Q-Q residuals plots can be rendered as <code>ggplot2</code> or base *R* graphics by using
+<p>Q-Q residuals plots can be rendered as <code>ggplot2</code> or base R graphics by using
 the generics <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> or <code><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></code>. 
-For a single base *R* graphically panel, <code><a href='https://rdrr.io/r/graphics/points.html'>points</a></code> adds an additional Q-Q
+For a single base R graphically panel, <code><a href='https://rdrr.io/r/graphics/points.html'>points</a></code> adds an additional Q-Q
 residuals plot.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
@@ -288,7 +288,7 @@ Residuals.&#8221; <em>Journal of Computational and Graphical Statistics</em>,
 <span class='co'>## linear poisson model</span>
 <span class='va'>m3_pois</span>  <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>satellites</span> <span class='op'>~</span> <span class='va'>width</span> <span class='op'>+</span> <span class='va'>color</span>, data <span class='op'>=</span> <span class='va'>CrabSatellites</span>, family <span class='op'>=</span> <span class='va'>poisson</span><span class='op'>)</span>
 
-<span class='co'>## compute and plot rootogram as ggplot2 graphic</span>
+<span class='co'>## compute and plot qqrplot as "ggplot2" graphic</span>
 <span class='fu'><a href='qqrplot.html'>qqrplot</a></span><span class='op'>(</span><span class='va'>m3_pois</span>, plot <span class='op'>=</span> <span class='st'>"ggplot2"</span><span class='op'>)</span>
 </div><div class='img'><img src='plot.qqrplot-4.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>

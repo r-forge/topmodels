@@ -243,9 +243,9 @@ i.e., the value that the predictive CDF attains at the observation, with a
 uniform distribution. For a well calibrated model fit, the observation will be
 drawn from the predictive distribution and the PIT will have a standard uniform
 distribution.</p>
-<p>PIT histograms can be rendered as <code>ggplot2</code> or base *R* graphics by using
+<p>PIT histograms can be rendered as <code>ggplot2</code> or base R graphics by using
 the generics <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> or <code><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></code>. 
-For a single base *R* graphically panel, <code><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></code> adds an additional PIT histogram.</p>
+For a single base R graphically panel, <code><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></code> adds an additional PIT histogram.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Agresti A, Coull AB (1998). &#8220;Approximate is Better than ``Exact''
@@ -318,7 +318,7 @@ doi: <a href='https://doi.org/10.1111/j.1467-9868.2007.00587.x'>10.1111/j.1467-9
 <span class='co'>## linear poisson model</span>
 <span class='va'>m3_pois</span>  <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>satellites</span> <span class='op'>~</span> <span class='va'>width</span> <span class='op'>+</span> <span class='va'>color</span>, data <span class='op'>=</span> <span class='va'>CrabSatellites</span>, family <span class='op'>=</span> <span class='va'>poisson</span><span class='op'>)</span>
 
-<span class='co'>## compute and plot rootogram as ggplot2 graphic</span>
+<span class='co'>## compute and plot pithist as "ggplot2" graphic</span>
 <span class='fu'><a href='pithist.html'>pithist</a></span><span class='op'>(</span><span class='va'>m3_pois</span>, plot <span class='op'>=</span> <span class='st'>"ggplot2"</span><span class='op'>)</span>
 </div><div class='img'><img src='plot.pithist-4.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
