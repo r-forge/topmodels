@@ -35,13 +35,13 @@ extracted using the generic function \code{\link{procast}}.}
 which to predict. If omitted, the original observations are used.}
 
 \item{plot}{Should the \code{plot} or \code{autoplot} method be called to
-draw the computed Q-Q plot? Either set \code{plot} expicitly to "base" vs.
-"ggplot2" to choose the type of plot, or for a logical \code{plot} argument
+draw the computed Q-Q plot? Either set \code{plot} expicitly to \code{"base"} vs.
+\code{"ggplot2"} to choose the type of plot, or for a logical \code{plot} argument
 it's chosen conditional if the package \code{ggplot2} is loaded.}
 
 \item{class}{Should the invisible return value be either a \code{data.frame}
-or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
-"tibble", or for NULL it's chosen automatically conditional if the package
+or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
+\code{"tibble"}, or for NULL it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
 \item{trafo}{function for tranforming residuals from probability scale to a
@@ -70,7 +70,7 @@ diagrams be plotted in a single graph?}
 An object of class \code{"wormplot"} inheriting from
 \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
 with the following variables: \item{x}{theoretical
-quantiles,} \item{y}{deviations of theoretical and empirical quantiles}. 
+quantiles,} \item{y}{deviations of theoretical and empirical quantiles.} 
 In case of randomized residuals, \code{nsim}
 different \code{x} and \code{y}, and a lower and upper confidence interval bound is returned.
 Additionally, \code{xlab}, \code{ylab}, \code{main}, and \code{confint_level}, as well as the
@@ -78,10 +78,10 @@ reference function (\code{ref_fun}) are stored as attributes.
 }
 \description{
 Visualize goodness of fit of regression models by worm plots using quantile
-residuals. If \code{plot = TRUE}, the resulting object of
-class \code{"wormplot"} is plotted by \code{\link{plot.pithist}} or
-\code{\link{autoplot.pithist}} conditional if the package
-\code{ggplot2} is loaded, before it is returned.
+residuals. If \code{plot = TRUE}, the resulting object of class
+\code{"pithist"} is plotted by \code{\link{plot.pithist}} or
+\code{\link{autoplot.pithist}} before it is returned, depending on whether the
+package \code{ggplot2} is loaded.
 }
 \details{
 Worm plots (de-trended Q-Q plots) draw deviations of quantile residuals (by

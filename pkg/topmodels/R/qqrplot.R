@@ -25,10 +25,10 @@
 #' Q-Q Plots for Quantile Residuals
 #' 
 #' Visualize goodness of fit of regression models by Q-Q plots using quantile
-#' residuals. If \code{plot = TRUE}, the resulting object of
-#' class \code{"qqrplot"} is plotted by \code{\link{plot.qqrplot}} or
-#' \code{\link{autoplot.qqrplot}} conditional if the package
-#' \code{ggplot2} is loaded, before it is returned.
+#' residuals. If \code{plot = TRUE}, the resulting object of class
+#' \code{"pithist"} is plotted by \code{\link{plot.pithist}} or
+#' \code{\link{autoplot.pithist}} before it is returned, depending on whether the
+#' package \code{ggplot2} is loaded.
 #' 
 #' Q-Q residuals plots draw quantile residuals (by default: transformed to standard
 #' normal scale) against theoretical quantiles from the same distribution.
@@ -52,12 +52,12 @@
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
 #' @param plot Should the \code{plot} or \code{autoplot} method be called to
-#' draw the computed Q-Q plot? Either set \code{plot} expicitly to "base" vs.
-#' "ggplot2" to choose the type of plot, or for a logical \code{plot} argument
+#' draw the computed Q-Q plot? Either set \code{plot} expicitly to \code{"base"} vs.
+#' \code{"ggplot2"} to choose the type of plot, or for a logical \code{plot} argument
 #' it's chosen conditional if the package \code{ggplot2} is loaded.
 #' @param class Should the invisible return value be either a \code{data.frame}
-#' or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
-#' "tibble", or for NULL it's chosen automatically conditional if the package
+#' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
+#' \code{"tibble"}, or for NULL it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale (default: Gaussian).

@@ -22,8 +22,8 @@
 #' Reliagram (extended reliability diagram) assess the reliability of a fitted
 #' probabilistic distributional forecast for a binary event. If \code{plot =
 #' TRUE}, the resulting object of class \code{"pithist"} is plotted by
-#' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} conditional if the
-#' package \code{ggplot2} is loaded, before it is returned.
+#' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} before it is
+#' returned, depending on whether the package \code{ggplot2} is loaded.
 #' 
 #' Reliagrams evaluate if a probability model is calibrated (reliable) by first
 #' partitioning the predicted probability for a binary event into a certain number
@@ -47,12 +47,12 @@
 #' which to predict. If omitted, the original observations are used.
 #' @param plot Should the \code{plot} or \code{autoplot} method be called to
 #' draw the computed extended reliability diagram? Either set \code{plot}
-#' expicitly to "base" vs. "ggplot2" to choose the type of plot, or for a
+#' expicitly to \code{"base"} vs. \code{"ggplot2"} to choose the type of plot, or for a
 #' logical \code{plot} argument it's chosen conditional if the package
 #' \code{ggplot2} is loaded.
 #' @param class Should the invisible return value be either a \code{data.frame}
-#' or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
-#' "tibble", or for NULL it's chosen automatically conditional if the package
+#' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
+#' \code{"tibble"}, or for NULL it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param breaks numeric vector passed on to \code{\link{cut}} in order to bin
 #' the observations and the predicted probabilities or a function applied to
