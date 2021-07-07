@@ -18,6 +18,7 @@ vignette: >
 ```{r preliminaries, echo=FALSE, message=FALSE}
 library("topmodels")
 options(digits = 4)
+set.seed(123)
 ```
 
 ## Overview
@@ -105,7 +106,6 @@ qqrplot(m)
 ```
 
 ```{r example-reliagram}
-set.seed(123)
 reliagram(m)
 ````
 

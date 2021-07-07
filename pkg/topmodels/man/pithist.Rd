@@ -49,17 +49,18 @@ logical \code{plot} argument it's chosen conditional if the package
 
 \item{class}{Should the invisible return value be either a \code{data.frame}
 or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-\code{"tibble"}, or for NULL it's chosen automatically conditional if the package
+\code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
 \item{style}{character specifying the style of pithist. For \code{style = "histogram"}
 a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
-plotted.}
+drawn.}
 
 \item{type}{character. In case of discrete distributions should the PITs be
 drawn randomly from the corresponding interval or distributed
-proportionally? This argument is not yet fully supported.}
+proportionally? This argument is not fully supported yet, please keep to the default 
+\code{"random"} for now.}
 
 \item{nsim}{integer. If \code{type} is \code{"random"} how many simulated
 PITs should be drawn?}
@@ -81,7 +82,7 @@ histogram has a total area of one).}
 \item{confint_level}{numeric. The confidence level required.}
 
 \item{confint_type}{character. Which type of confidence interval should be plotted. According
-to Agresti and Coull (1998) for interval estimation of binomial proportions
+to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
 \item{single_graph}{logical. Should all computed extended reliability

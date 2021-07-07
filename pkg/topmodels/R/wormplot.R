@@ -16,8 +16,8 @@
 #' 
 #' Visualize goodness of fit of regression models by worm plots using quantile
 #' residuals. If \code{plot = TRUE}, the resulting object of class
-#' \code{"pithist"} is plotted by \code{\link{plot.pithist}} or
-#' \code{\link{autoplot.pithist}} before it is returned, depending on whether the
+#' \code{"wormplot"} is plotted by \code{\link{plot.wormplot}} or
+#' \code{\link{autoplot.wormplot}} before it is returned, depending on whether the
 #' package \code{ggplot2} is loaded.
 #' 
 #' Worm plots (de-trended Q-Q plots) draw deviations of quantile residuals (by
@@ -45,7 +45,7 @@
 #' it's chosen conditional if the package \code{ggplot2} is loaded.
 #' @param class Should the invisible return value be either a \code{data.frame}
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-#' \code{"tibble"}, or for NULL it's chosen automatically conditional if the package
+#' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale (default: Gaussian).
@@ -62,13 +62,14 @@
 #' @param xlab,ylab,main,\dots graphical parameters handed passed to
 #' \code{\link{plot.wormplot}} or \code{\link{autoplot.wormplot}}.
 #' @return An object of class \code{"wormplot"} inheriting from
-#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
-#' with the following variables: \item{x}{theoretical
-#' quantiles,} \item{y}{deviations of theoretical and empirical quantiles.} 
-#' In case of randomized residuals, \code{nsim}
-#' different \code{x} and \code{y}, and a lower and upper confidence interval bound is returned.
-#' Additionally, \code{xlab}, \code{ylab}, \code{main}, and \code{confint_level}, as well as the
-#' reference function (\code{ref_fun}) are stored as attributes.
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
+#' with the following variables: \item{x}{theoretical quantiles,}
+#' \item{y}{deviations between theoretical and empirical quantiles.} In case of
+#' randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
+#' lower and upper confidence interval bounds (\code{x_ci_lwr}, \code{y_ci_lwr},
+#' \code{x_ci_upr}, \code{y_ci_upr}) can optionally be returned.  Additionally,
+#' \code{xlab}, \code{ylab}, \code{main}, and \code{confint_level}, as well as the
+#' reference function (\code{ref_fun}) to add confidence intervals are stored as attributes.
 #' @seealso \code{\link{plot.wormplot}}, \code{\link{qqrplot}}, 
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references van Buuren S and Fredriks M (2001). \dQuote{Worm plot: simple diagnostic
@@ -405,7 +406,8 @@ rbind.wormplot <- c.wormplot
 #' parameters for base plots, whereby \code{x} is a object of class \code{wormplot}.
 #' @param colour,size,shape,linetype,legend graphical parameters passed for 
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{wormplot}.
-#' @seealso \code{\link{wormplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' @seealso \code{\link{wormplot}}, \code{\link{qqrplot}}, 
+#' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
 #' \bold{5}, 1--10.

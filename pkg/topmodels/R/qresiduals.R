@@ -47,7 +47,7 @@
 #' @seealso \code{\link[stats]{qnorm}}, \code{\link{qqrplot}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
-#' \bold{5}, 1--10.
+#' \bold{5}, 1--10. \doi{10.2307/1390802}
 #' @keywords regression
 #' @examples
 #' 

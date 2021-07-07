@@ -21,19 +21,21 @@
 #' 
 #' Reliagram (extended reliability diagram) assess the reliability of a fitted
 #' probabilistic distributional forecast for a binary event. If \code{plot =
-#' TRUE}, the resulting object of class \code{"pithist"} is plotted by
-#' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} before it is
+#' TRUE}, the resulting object of class \code{"reliagram"} is plotted by
+#' \code{\link{plot.reliagram}} or \code{\link{autoplot.reliagram}} before it is
 #' returned, depending on whether the package \code{ggplot2} is loaded.
 #' 
 #' Reliagrams evaluate if a probability model is calibrated (reliable) by first
 #' partitioning the predicted probability for a binary event into a certain number
 #' of bins and then plotting (within each bin) the averaged forecast probability
 #' against the observered/empirical relative frequency.  For computation,
-#' code{\link{reliagram}} leverages the \code{\link{procast}} generic.
+#' \code{\link{reliagram}} leverages the \code{\link{procast}} generic to 
+#' forecast the respective predictive probabilities.
 #' 
-#' For continous probability forecasts, reliability diagrams can be plotted either
+#' For continous probability forecasts, reliability diagrams can be computed either
 #' for a pre-specified threshold or for a specific quantile probability of the
-#' response values.
+#' response values. Per default, reliagrams are computed for the 50%-quantile of the
+#' reponse. 
 #' 
 #' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 #' reliagram objects, it is also possible to combine two (or more) reliability
@@ -52,7 +54,7 @@
 #' \code{ggplot2} is loaded.
 #' @param class Should the invisible return value be either a \code{data.frame}
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-#' \code{"tibble"}, or for NULL it's chosen automatically conditional if the package
+#' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param breaks numeric vector passed on to \code{\link{cut}} in order to bin
 #' the observations and the predicted probabilities or a function applied to
@@ -82,13 +84,13 @@
 #' \item{n_pred}{number of predictions within the binned forecasts probabilites,}
 #' \item{ci_lwr, ci_upr}{lower and upper confidence interval bound.} Additionally,
 #' \code{xlab}, \code{ylab}, \code{main}, and \code{treshold},
-#' \code{confint_level}, brier scores (\code{bs, rel, res, unc}) are stored as
-#' attributes.
+#' \code{confint_level}, as well as the total and the decomposed Brier Score 
+#' (\code{bs, rel, res, unc}) are stored as attributes.
 #' @note Note that there is also a \code{\link[verification]{reliability.plot}} function in the
 #' \pkg{verification} package. However, it only works for numeric
 #' forecast probabilities and numeric observed relative frequencies, hence a function has been
 #' created here.
-#' @seealso \code{\link{procast}}
+#' @seealso \code{link{plot.reliagram}}, \code{\link{procast}}
 #' @references Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
 #' Sciences}, 3rd ed., Academic Press, 704 pp.
 #' @examples
@@ -485,9 +487,9 @@ rbind.reliagram <- c.reliagram
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters.
 #' @param minimum,ref,xlim,ylim,col,fill,alpha_min,lwd,pch,lty,type,add_hist,add_info,add_rug,add_min,axes,box additional graphical
-#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
+#' parameters for base plots, whereby \code{x} is a object of class \code{reliagram}.
 #' @param colour,size,shape,linetype,legend graphical parameters passed for 
-#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
+#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{reliagram}.
 #' @seealso \code{link{reliagram}}, \code{\link{procast}}
 #' @references Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
 #' Sciences}, 3rd ed., Academic Press, 704 pp.
