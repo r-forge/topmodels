@@ -51,8 +51,8 @@
 <meta property="og:title" content="Q-Q Plots for Quantile Residuals — qqrplot" />
 <meta property="og:description" content="Visualize goodness of fit of regression models by Q-Q plots using quantile
 residuals. If plot = TRUE, the resulting object of class
-&quot;pithist&quot; is plotted by plot.pithist or
-autoplot.pithist before it is returned, depending on whether the
+&quot;qqrplot&quot; is plotted by plot.qqrplot or
+autoplot.qqrplot before it is returned, depending on whether the
 package ggplot2 is loaded." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
@@ -131,8 +131,8 @@ package ggplot2 is loaded." />
     <div class="ref-description">
     <p>Visualize goodness of fit of regression models by Q-Q plots using quantile
 residuals. If <code>plot = TRUE</code>, the resulting object of class
-<code>"pithist"</code> is plotted by <code><a href='plot.pithist.html'>plot.pithist</a></code> or
-<code><a href='plot.pithist.html'>autoplot.pithist</a></code> before it is returned, depending on whether the
+<code>"qqrplot"</code> is plotted by <code><a href='plot.qqrplot.html'>plot.qqrplot</a></code> or
+<code><a href='plot.qqrplot.html'>autoplot.qqrplot</a></code> before it is returned, depending on whether the
 package <code>ggplot2</code> is loaded.</p>
     </div>
 
@@ -182,7 +182,7 @@ it's chosen conditional if the package <code>ggplot2</code> is loaded.</p></td>
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
 or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
-<code>"tibble"</code>, or for NULL it's chosen automatically conditional if the package
+<code>"tibble"</code>, or for <code>NULL</code> it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>
@@ -227,14 +227,15 @@ diagrams be plotted in a single graph?</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of class <code>"qqrplot"</code> inheriting from
-<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code> 
-with the following variables:</p>
-<dt>x</dt><dd><p>theoretical
-quantiles,</p></dd> <dt>y</dt><dd><p>empirical quantile residuals.</p></dd> In case of randomized residuals, nsim
-different x and y, and a lower and upper confidence interval bound is returned.
-Additionally, xlab, ylab, main, and confint_level 
-are stored as attributes.
+    <p>An object of class <code>"qqrplot"</code> inheriting from <code>"data.frame"</code>
+or <code>"tibble"</code> conditional on the argument <code>class</code> with the following
+variables:</p>
+<dt>x</dt><dd><p>theoretical quantiles,</p></dd> <dt>y</dt><dd><p>empirical quantile
+residuals.</p></dd> In case of randomized residuals, nsim different x and
+y values, and lower and upper confidence interval bounds
+(x_ci_lwr, y_ci_lwr, x_ci_upr, y_ci_upr) can
+optionally be returned.  Additionally, xlab, ylab, main,
+and confint_level are stored as attributes.
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -244,7 +245,7 @@ Alternatively, transformations to other distributions can also be used,
 specifically using no transformation at all, i.e., remaining on the uniform
 scale (via <code>trafo = NULL</code> or equivalently <code>qunif</code> or
 <code>identity</code>). For computation, <code>qqrplot</code> leverages the function
-<code><a href='qresiduals.html'>qresiduals</a></code> employing the <code><a href='procast.html'>procast</a></code>.</p>
+<code><a href='qresiduals.html'>qresiduals</a></code> employing the <code><a href='procast.html'>procast</a></code> generic.</p>
 <p>Additional options are offered for models with discrete responses where
 randomization of quantiles is needed.</p>
 <p>In addition to the <code>plot</code> and <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method for
@@ -255,10 +256,11 @@ plotted in one go.</p>
 
     <p>Dunn KP, Smyth GK (1996). &#8220;Randomized Quantile
 Residuals.&#8221; <em>Journal of Computational and Graphical Statistics</em>,
-<b>5</b>, 1--10.</p>
+<b>5</b>, 1--10. doi: <a href='https://doi.org/10.2307/1390802'>10.2307/1390802</a></p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='plot.qqrplot.html'>plot.qqrplot</a></code>, <code><a href='qresiduals.html'>qresiduals</a></code>, <code><a href='https://rdrr.io/r/stats/qqnorm.html'>qqnorm</a></code></p></div>
+    <div class='dont-index'><p><code><a href='plot.qqrplot.html'>plot.qqrplot</a></code>, <code><a href='wormplot.html'>wormplot</a></code>,
+<code><a href='qresiduals.html'>qresiduals</a></code>, <code><a href='https://rdrr.io/r/stats/qqnorm.html'>qqnorm</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>

@@ -51,8 +51,8 @@
 <meta property="og:title" content="Rootograms for Assessing Goodness of Fit of Probability Models — rootogram" />
 <meta property="og:description" content="Rootograms graphically compare (square roots) of empirical frequencies with
 fitted frequencies from a probability model. If plot = TRUE, the
-resulting object of class &quot;pithist&quot; is plotted by
-plot.pithist or autoplot.pithist before it is
+resulting object of class &quot;rootogram&quot; is plotted by
+plot.rootogram or autoplot.rootogram before it is
 returned, depending on whether the package ggplot2 is loaded." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
@@ -131,8 +131,8 @@ returned, depending on whether the package ggplot2 is loaded." />
     <div class="ref-description">
     <p>Rootograms graphically compare (square roots) of empirical frequencies with
 fitted frequencies from a probability model. If <code>plot = TRUE</code>, the
-resulting object of class <code>"pithist"</code> is plotted by
-<code><a href='plot.pithist.html'>plot.pithist</a></code> or <code><a href='plot.pithist.html'>autoplot.pithist</a></code> before it is
+resulting object of class <code>"rootogram"</code> is plotted by
+<code><a href='plot.rootogram.html'>plot.rootogram</a></code> or <code><a href='plot.rootogram.html'>autoplot.rootogram</a></code> before it is
 returned, depending on whether the package <code>ggplot2</code> is loaded.</p>
     </div>
 
@@ -184,7 +184,7 @@ logical <code>plot</code> argument it's chosen conditional if the package
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
 or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
-<code>"tibble"</code>, or for NULL it's chosen automatically conditional if the package
+<code>"tibble"</code>, or for <code>NULL</code> it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>
@@ -206,10 +206,10 @@ roots (default) should be drawn.</p></td>
     </tr>
     <tr>
       <th>response_type</th>
-      <td><p>To set the default values for <code>breaks</code> and
+      <td><p>character. To set the default values for <code>breaks</code> and
 <code>widths</code>.  Currently different defaults are available for <code>"discrete"</code>
-and <code>"continous"</code> responses, as well as for the special case of a <code>"logseries"</code>
-response distribution.</p></td>
+and <code>"continous"</code> response distribution, as well as for the special case of a 
+<code>"logseries"</code> response.</p></td>
     </tr>
     <tr>
       <th>xlab, ylab, main</th>
@@ -238,9 +238,9 @@ drawn on a square root scale (hence the name) and superimposed with a line
 for the fitted frequencies. The histogram can be <code>"standing"</code> on the
 x-axis (as usual), or <code>"hanging"</code> from the fitted curve, or a
 <code>"suspended"</code> histogram of deviations can be drawn.</p>
-<p>The function <code><a href='pithist.html'>pithist</a></code> leverages the <code><a href='procast.html'>procast</a></code>
+<p>The function <code>rootogram</code> leverages the <code><a href='procast.html'>procast</a></code>
 generic in order to compute all necessary coordinates based on observed and
-fitted frequencies and the breaks for the histogram intervals.</p>
+fitted frequencies.</p>
 <p>In addition to the <code>plot</code> and <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method for
 rootogram objects, it is also possible to combine two (or more) rootograms by
 <code>c</code>/<code>rbind</code>, which creates a set of rootograms that can then be
