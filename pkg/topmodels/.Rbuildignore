@@ -10,7 +10,7 @@ TODO.pdf
 ^README\.html$
 ^contact.md$
 ^logo*.png$
-^logo_with_margin.png$
+^logo_squared.png$
 vignettes/topmodels.Rmd
 vignettes/ref.bib
 
