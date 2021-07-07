@@ -42,7 +42,7 @@ logical \code{plot} argument it's chosen conditional if the package
 
 \item{class}{Should the invisible return value be either a \code{data.frame}
 or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-\code{"tibble"}, or for NULL it's chosen automatically conditional if the package
+\code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
 \item{style}{character specifying the syle of rootogram (see below).}
@@ -54,10 +54,10 @@ roots (default) should be drawn.}
 
 \item{width}{numeric. Widths of the histogram bars.}
 
-\item{response_type}{To set the default values for \code{breaks} and
+\item{response_type}{character. To set the default values for \code{breaks} and
 \code{widths}.  Currently different defaults are available for \code{"discrete"}
-and \code{"continous"} responses, as well as for the special case of a \code{"logseries"}
-response distribution.}
+and \code{"continous"} response distribution, as well as for the special case of a 
+\code{"logseries"} response.}
 
 \item{xlab, ylab, main}{graphical parameters.}
 }
@@ -75,8 +75,8 @@ the fitted curve.} Additionally, \code{style}, \code{scale}, \code{xlab},
 \description{
 Rootograms graphically compare (square roots) of empirical frequencies with
 fitted frequencies from a probability model. If \code{plot = TRUE}, the
-resulting object of class \code{"pithist"} is plotted by
-\code{\link{plot.pithist}} or \code{\link{autoplot.pithist}} before it is
+resulting object of class \code{"rootogram"} is plotted by
+\code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}} before it is
 returned, depending on whether the package \code{ggplot2} is loaded.
 }
 \details{
@@ -87,9 +87,9 @@ for the fitted frequencies. The histogram can be \code{"standing"} on the
 x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
 \code{"suspended"} histogram of deviations can be drawn.
 
-The function \code{\link{pithist}} leverages the \code{\link{procast}}
+The function \code{\link{rootogram}} leverages the \code{\link{procast}}
 generic in order to compute all necessary coordinates based on observed and
-fitted frequencies and the breaks for the histogram intervals. 
+fitted frequencies.
 
 In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 rootogram objects, it is also possible to combine two (or more) rootograms by

@@ -61,15 +61,16 @@
 #' \code{ggplot2} is loaded.
 #' @param class Should the invisible return value be either a \code{data.frame}
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-#' \code{"tibble"}, or for NULL it's chosen automatically conditional if the package
+#' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param style character specifying the style of pithist. For \code{style = "histogram"}
 #' a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
-#' plotted.
+#' drawn.
 #' @param type character. In case of discrete distributions should the PITs be
 #' drawn randomly from the corresponding interval or distributed
-#' proportionally? This argument is not yet fully supported.
+#' proportionally? This argument is not fully supported yet, please keep to the default 
+#' \code{"random"} for now.
 #' @param nsim integer. If \code{type} is \code{"random"} how many simulated
 #' PITs should be drawn?
 #' @param delta numeric. The minimal difference to compute the range of
@@ -84,7 +85,7 @@
 #' @param confint logical. Should confident intervals be drawn?
 #' @param confint_level numeric. The confidence level required.
 #' @param confint_type character. Which type of confidence interval should be plotted. According
-#' to Agresti and Coull (1998) for interval estimation of binomial proportions
+#' to Agresti and Coull (1998), for interval estimation of binomial proportions
 #' an approximation can be better than exact.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"lines"}.

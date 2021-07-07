@@ -41,7 +41,7 @@ it's chosen conditional if the package \code{ggplot2} is loaded.}
 
 \item{class}{Should the invisible return value be either a \code{data.frame}
 or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-\code{"tibble"}, or for NULL it's chosen automatically conditional if the package
+\code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
 \item{trafo}{function for tranforming residuals from probability scale to a
@@ -67,19 +67,20 @@ diagrams be plotted in a single graph?}
 \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}
 }
 \value{
-An object of class \code{"qqrplot"} inheriting from
-\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
-with the following variables: \item{x}{theoretical
-quantiles,} \item{y}{empirical quantile residuals.} In case of randomized residuals, \code{nsim}
-different \code{x} and \code{y}, and a lower and upper confidence interval bound is returned.
-Additionally, \code{xlab}, \code{ylab}, \code{main}, and \code{confint_level} 
-are stored as attributes.
+An object of class \code{"qqrplot"} inheriting from \code{"data.frame"}
+or \code{"tibble"} conditional on the argument \code{class} with the following
+variables: \item{x}{theoretical quantiles,} \item{y}{empirical quantile
+residuals.} In case of randomized residuals, \code{nsim} different \code{x} and
+\code{y} values, and lower and upper confidence interval bounds
+(\code{x_ci_lwr}, \code{y_ci_lwr}, \code{x_ci_upr}, \code{y_ci_upr}) can
+optionally be returned.  Additionally, \code{xlab}, \code{ylab}, \code{main},
+and \code{confint_level} are stored as attributes.
 }
 \description{
 Visualize goodness of fit of regression models by Q-Q plots using quantile
 residuals. If \code{plot = TRUE}, the resulting object of class
-\code{"pithist"} is plotted by \code{\link{plot.pithist}} or
-\code{\link{autoplot.pithist}} before it is returned, depending on whether the
+\code{"qqrplot"} is plotted by \code{\link{plot.qqrplot}} or
+\code{\link{autoplot.qqrplot}} before it is returned, depending on whether the
 package \code{ggplot2} is loaded.
 }
 \details{
@@ -89,7 +90,7 @@ Alternatively, transformations to other distributions can also be used,
 specifically using no transformation at all, i.e., remaining on the uniform
 scale (via \code{trafo = NULL} or equivalently \code{qunif} or
 \code{identity}). For computation, \code{\link{qqrplot}} leverages the function
-\code{\link{qresiduals}} employing the \code{\link{procast}}.
+\code{\link{qresiduals}} employing the \code{\link{procast}} generic.
 
 Additional options are offered for models with discrete responses where
 randomization of quantiles is needed.
@@ -126,9 +127,10 @@ ggplot2::autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 \references{
 Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 Residuals.} \emph{Journal of Computational and Graphical Statistics},
-\bold{5}, 1--10.
+\bold{5}, 1--10. \doi{10.2307/1390802}
 }
 \seealso{
-\code{\link{plot.qqrplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+\code{\link{plot.qqrplot}}, \code{\link{wormplot}},
+\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}

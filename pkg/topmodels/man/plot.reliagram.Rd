@@ -79,7 +79,7 @@
 diagrams be plotted in a single graph?}
 
 \item{minimum, ref, xlim, ylim, col, fill, alpha_min, lwd, pch, lty, type, add_hist, add_info, add_rug, add_min, axes, box}{additional graphical
-parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
+parameters for base plots, whereby \code{x} is a object of class \code{reliagram}.}
 
 \item{confint}{logical. Should confident intervals be calculated and drawn?}
 
@@ -90,7 +90,7 @@ parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 \item{object, x}{an object of class \code{reliagram}.}
 
 \item{colour, size, shape, linetype, legend}{graphical parameters passed for 
-\code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
+\code{ggplot2} style plots, whereby \code{object} is a object of class \code{reliagram}.}
 }
 \description{
 Generic plotting functions for reliability diagrams of the class \code{"reliagram"}

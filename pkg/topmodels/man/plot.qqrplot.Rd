@@ -148,9 +148,10 @@ qqrplot(m3_pois, plot = "ggplot2")
 \references{
 Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 Residuals.} \emph{Journal of Computational and Graphical Statistics},
-\bold{5}, 1--10.
+\bold{5}, 1--10. \doi{10.2307/1390802}
 }
 \seealso{
-\code{\link{qqrplot}}, \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+\code{\link{qqrplot}}, \code{\link{wormplot}},
+\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}

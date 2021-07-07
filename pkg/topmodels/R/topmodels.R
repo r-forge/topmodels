@@ -1,21 +1,22 @@
 #' Plotting Graphical Evaluation Tools for Probabilistic Models
 #' 
-#' Plotting methods for probabilistic (regression) model objects supported by
-#' \code{procast}.
+#' A quick overview plot with panels for all graphical evaluation methods provided
+#' for probabilistic (regression) model objects. If \code{plot = TRUE}, the
+#' resulting objects are plotted by \code{\link{plot}} or \code{\link[ggplot2]{autoplot}}
+#' before they are returned within a single list, depending on whether the package
+#' \code{ggplot2} is loaded.
 #' 
-#' 
-#' Render the diagnostic graphics rootograms, PIT histograms, reliagrams
-#' (reliability diagrams), (randomized) quantile residual Q-Q plots, and worm
-#' plots.
+#' Render the diagnostic graphics \code{\link{rootogram}}, \code{\link{pithist}}, \code{\link{reliagram}}
+#' \code{\link{qqrplot}}, and \code{\link{wormplot}}.
 #' 
 #' @param object An object supported by \code{"procast"}.
 #' @param plot Should the \code{plot} or \code{autoplot} method be called to
-#' draw all chosen plots? Either set \code{plot} expicitly to "base" vs.
-#' "ggplot2" to choose the type of plot, or for a logical \code{plot} argument
+#' draw all chosen plots? Either set \code{plot} expicitly to \code{"base"} vs.
+#' \code{"ggplot2"} to choose the type of plot, or for a logical \code{plot} argument
 #' it's chosen conditional if the package \code{ggplot2} is loaded.
 #' @param class Should the invisible return value be either a \code{data.frame}
-#' or a \code{tibble}. Either set \code{class} expicitly to "data.frame" vs.
-#' "tibble", or for NULL it's chosen automatically conditional if the package
+#' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
+#' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
@@ -25,12 +26,12 @@
 #' \code{"rootogram"} graphically compares (square roots) of empirical
 #' frequencies with fitted frequencies from a probability model,
 #' \code{"pithist"} compares empirical probabilities from fitted models with a
-#' uniform distribution, \code{"reliagram"} shows reliability diagram for
+#' uniform distribution, \code{"reliagram"} shows a reliability diagram for
 #' assessing the reliability of a fitted probabilistic distributional forecast,
-#' \code{"qqrplot"} shows a quantile-quantile plot of quantile residuals,
-#' \code{"wormplot"} shows a worm plot again using quantile resiudals.
-#' @param ask For multiple plots, the user is asked to show the next plot. Will
-#' be ignored for \code{ggplot2} style graphics.
+#' \code{"qqrplot"} shows a quantile-quantile plot of quantile residuals, and
+#' \code{"wormplot"} shows a worm plot using quantile resiudals.
+#' @param ask For multiple plots, the user is asked to show the next plot. Argument is
+#' ignored for \code{ggplot2} style graphics.
 #' @param spar Should graphical parameters be set? Will be ignored for
 #' \code{ggplot2} style graphics.
 #' @param single_page Logical. Should all plots be shown on a single page? Only
@@ -39,6 +40,9 @@
 #' @param \dots Arguments to be passed to \code{\link{rootogram}},
 #' \code{\link{pithist}}, \code{\link{reliagram}}, \code{\link{qqrplot}}, and
 #' \code{\link{wormplot}}.
+#' @return A list containing the objects plotted conditional on the arguemnt \code{which}.
+#' @seealso  \code{\link{rootogram}}, \code{\link{pithist}}, \code{\link{reliagram}}
+#' \code{\link{qqrplot}}, \code{\link{wormplot}}
 #' @keywords regression
 #' @examples
 #' 
