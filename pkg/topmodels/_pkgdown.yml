@@ -5,7 +5,7 @@ template:
   assets: "pkgdown/assets/"
   opengraph:
     image:
-      src: logo.png
+      src: logo_squared.png
     twitter:
       creator: "@MoritzNLang"
       card: summary
