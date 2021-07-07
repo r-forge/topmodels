@@ -49,8 +49,11 @@
   
 
 <meta property="og:title" content="Plotting Graphical Evaluation Tools for Probabilistic Models — topmodels" />
-<meta property="og:description" content="Plotting methods for probabilistic (regression) model objects supported by
-procast." />
+<meta property="og:description" content="A quick overview plot with panels for all graphical evaluation methods provided
+for probabilistic (regression) model objects. If plot = TRUE, the
+resulting objects are plotted by plot or autoplot
+before they are returned within a single list, depending on whether the package
+ggplot2 is loaded." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@MoritzNLang" />
@@ -126,8 +129,11 @@ procast." />
     </div>
 
     <div class="ref-description">
-    <p>Plotting methods for probabilistic (regression) model objects supported by
-<code>procast</code>.</p>
+    <p>A quick overview plot with panels for all graphical evaluation methods provided
+for probabilistic (regression) model objects. If <code>plot = TRUE</code>, the
+resulting objects are plotted by <code><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></code> or <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code>
+before they are returned within a single list, depending on whether the package
+<code>ggplot2</code> is loaded.</p>
     </div>
 
     <pre class="usage"><span class='fu'>topmodels</span><span class='op'>(</span>
@@ -154,15 +160,15 @@ procast." />
     <tr>
       <th>plot</th>
       <td><p>Should the <code>plot</code> or <code>autoplot</code> method be called to
-draw all chosen plots? Either set <code>plot</code> expicitly to "base" vs.
-"ggplot2" to choose the type of plot, or for a logical <code>plot</code> argument
+draw all chosen plots? Either set <code>plot</code> expicitly to <code>"base"</code> vs.
+<code>"ggplot2"</code> to choose the type of plot, or for a logical <code>plot</code> argument
 it's chosen conditional if the package <code>ggplot2</code> is loaded.</p></td>
     </tr>
     <tr>
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
-or a <code>tibble</code>. Either set <code>class</code> expicitly to "data.frame" vs.
-"tibble", or for NULL it's chosen automatically conditional if the package
+or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
+<code>"tibble"</code>, or for <code>NULL</code> it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>
@@ -181,15 +187,15 @@ values in <code>newdata</code>.  The default is to employ <code>NA</code>.</p></
 <code>"rootogram"</code> graphically compares (square roots) of empirical
 frequencies with fitted frequencies from a probability model,
 <code>"pithist"</code> compares empirical probabilities from fitted models with a
-uniform distribution, <code>"reliagram"</code> shows reliability diagram for
+uniform distribution, <code>"reliagram"</code> shows a reliability diagram for
 assessing the reliability of a fitted probabilistic distributional forecast,
-<code>"qqrplot"</code> shows a quantile-quantile plot of quantile residuals,
-<code>"wormplot"</code> shows a worm plot again using quantile resiudals.</p></td>
+<code>"qqrplot"</code> shows a quantile-quantile plot of quantile residuals, and
+<code>"wormplot"</code> shows a worm plot using quantile resiudals.</p></td>
     </tr>
     <tr>
       <th>ask</th>
-      <td><p>For multiple plots, the user is asked to show the next plot. Will
-be ignored for <code>ggplot2</code> style graphics.</p></td>
+      <td><p>For multiple plots, the user is asked to show the next plot. Argument is
+ignored for <code>ggplot2</code> style graphics.</p></td>
     </tr>
     <tr>
       <th>spar</th>
@@ -213,11 +219,17 @@ choice for <code>ggplot2</code> style graphics.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A list containing the objects plotted conditional on the arguemnt <code>which</code>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Render the diagnostic graphics rootograms, PIT histograms, reliagrams
-(reliability diagrams), (randomized) quantile residual Q-Q plots, and worm
-plots.</p>
+    <p>Render the diagnostic graphics <code><a href='rootogram.html'>rootogram</a></code>, <code><a href='pithist.html'>pithist</a></code>, <code><a href='reliagram.html'>reliagram</a></code>
+<code><a href='qqrplot.html'>qqrplot</a></code>, and <code><a href='wormplot.html'>wormplot</a></code>.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='rootogram.html'>rootogram</a></code>, <code><a href='pithist.html'>pithist</a></code>, <code><a href='reliagram.html'>reliagram</a></code>
+<code><a href='qqrplot.html'>qqrplot</a></code>, <code><a href='wormplot.html'>wormplot</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>

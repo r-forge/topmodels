@@ -51,8 +51,8 @@
 <meta property="og:title" content="Reliagram (Extended Reliability Diagram) — reliagram" />
 <meta property="og:description" content="Reliagram (extended reliability diagram) assess the reliability of a fitted
 probabilistic distributional forecast for a binary event. If plot =
-TRUE, the resulting object of class &quot;pithist&quot; is plotted by
-plot.pithist or autoplot.pithist before it is
+TRUE, the resulting object of class &quot;reliagram&quot; is plotted by
+plot.reliagram or autoplot.reliagram before it is
 returned, depending on whether the package ggplot2 is loaded." />
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/logo.png" />
 <meta name="twitter:card" content="summary" />
@@ -131,8 +131,8 @@ returned, depending on whether the package ggplot2 is loaded." />
     <div class="ref-description">
     <p>Reliagram (extended reliability diagram) assess the reliability of a fitted
 probabilistic distributional forecast for a binary event. If <code>plot =
-TRUE</code>, the resulting object of class <code>"pithist"</code> is plotted by
-<code><a href='plot.pithist.html'>plot.pithist</a></code> or <code><a href='plot.pithist.html'>autoplot.pithist</a></code> before it is
+TRUE</code>, the resulting object of class <code>"reliagram"</code> is plotted by
+<code><a href='plot.reliagram.html'>plot.reliagram</a></code> or <code><a href='plot.reliagram.html'>autoplot.reliagram</a></code> before it is
 returned, depending on whether the package <code>ggplot2</code> is loaded.</p>
     </div>
 
@@ -187,7 +187,7 @@ logical <code>plot</code> argument it's chosen conditional if the package
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
 or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
-<code>"tibble"</code>, or for NULL it's chosen automatically conditional if the package
+<code>"tibble"</code>, or for <code>NULL</code> it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>
@@ -248,8 +248,8 @@ with the following variables:</p>
 <dt>n_pred</dt><dd><p>number of predictions within the binned forecasts probabilites,</p></dd>
 <dt>ci_lwr, ci_upr</dt><dd><p>lower and upper confidence interval bound.</p></dd> Additionally,
 xlab, ylab, main, and treshold,
-confint_level, brier scores (bs, rel, res, unc) are stored as
-attributes.
+confint_level, as well as the total and the decomposed Brier Score 
+(bs, rel, res, unc) are stored as attributes.
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -257,10 +257,12 @@ attributes.
 partitioning the predicted probability for a binary event into a certain number
 of bins and then plotting (within each bin) the averaged forecast probability
 against the observered/empirical relative frequency.  For computation,
-codereliagram leverages the <code><a href='procast.html'>procast</a></code> generic.</p>
-<p>For continous probability forecasts, reliability diagrams can be plotted either
+<code>reliagram</code> leverages the <code><a href='procast.html'>procast</a></code> generic to 
+forecast the respective predictive probabilities.</p>
+<p>For continous probability forecasts, reliability diagrams can be computed either
 for a pre-specified threshold or for a specific quantile probability of the
-response values.</p>
+response values. Per default, reliagrams are computed for the 50<!-- %-quantile of the -->
+reponse.</p>
 <p>In addition to the <code>plot</code> and <code><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></code> method for
 reliagram objects, it is also possible to combine two (or more) reliability
 diagrams by <code>c</code>/<code>rbind</code>, which creates a set of reliability diagrams
@@ -277,7 +279,7 @@ created here.</p>
 Sciences</em>, 3rd ed., Academic Press, 704 pp.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='procast.html'>procast</a></code></p></div>
+    <div class='dont-index'><p><code>link{plot.reliagram}</code>, <code><a href='procast.html'>procast</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>

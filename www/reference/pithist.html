@@ -191,7 +191,7 @@ logical <code>plot</code> argument it's chosen conditional if the package
       <th>class</th>
       <td><p>Should the invisible return value be either a <code>data.frame</code>
 or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
-<code>"tibble"</code>, or for NULL it's chosen automatically conditional if the package
+<code>"tibble"</code>, or for <code>NULL</code> it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></td>
     </tr>
     <tr>
@@ -199,13 +199,14 @@ or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data
       <td><p>character specifying the style of pithist. For <code>style = "histogram"</code>
 a traditional PIT hisogram is drawn, for <code>style = "lines"</code> solely the upper border 
 line is plotted. For <code>single_graph = TRUE</code>, always line-style PIT histograms are 
-plotted.</p></td>
+drawn.</p></td>
     </tr>
     <tr>
       <th>type</th>
       <td><p>character. In case of discrete distributions should the PITs be
 drawn randomly from the corresponding interval or distributed
-proportionally? This argument is not yet fully supported.</p></td>
+proportionally? This argument is not fully supported yet, please keep to the default 
+<code>"random"</code> for now.</p></td>
     </tr>
     <tr>
       <th>nsim</th>
@@ -241,7 +242,7 @@ histogram has a total area of one).</p></td>
     <tr>
       <th>confint_type</th>
       <td><p>character. Which type of confidence interval should be plotted. According
-to Agresti and Coull (1998) for interval estimation of binomial proportions
+to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.</p></td>
     </tr>
     <tr>
