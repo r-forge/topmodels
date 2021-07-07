@@ -71,7 +71,7 @@
 #' confidence interval.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param xlab,ylab,main,\dots graphical parameters handed passed to
+#' @param xlab,ylab,main,\dots graphical parameters passed to
 #' \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.
 #' @return An object of class \code{"qqrplot"} inheriting from \code{"data.frame"}
 #' or \code{"tibble"} conditional on the argument \code{class} with the following

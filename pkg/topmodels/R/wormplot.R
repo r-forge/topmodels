@@ -59,7 +59,7 @@
 #' confidence interval.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param xlab,ylab,main,\dots graphical parameters handed passed to
+#' @param xlab,ylab,main,\dots graphical parameters passed to
 #' \code{\link{plot.wormplot}} or \code{\link{autoplot.wormplot}}.
 #' @return An object of class \code{"wormplot"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
