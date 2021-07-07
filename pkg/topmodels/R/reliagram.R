@@ -34,8 +34,8 @@
 #' 
 #' For continous probability forecasts, reliability diagrams can be computed either
 #' for a pre-specified threshold or for a specific quantile probability of the
-#' response values. Per default, reliagrams are computed for the 50%-quantile of the
-#' reponse. 
+#' response values. Per default, reliagrams are computed for the 50\%-quantile
+#' of the reponse. 
 #' 
 #' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 #' reliagram objects, it is also possible to combine two (or more) reliability

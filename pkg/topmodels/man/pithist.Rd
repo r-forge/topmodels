@@ -88,7 +88,7 @@ an approximation can be better than exact.}
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"lines"}.}
 
-\item{xlim, ylim, xlab, ylab, main}{graphical parameters handed passed to
+\item{xlim, ylim, xlab, ylab, main}{graphical parameters passed to
 \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}
 }
 \value{

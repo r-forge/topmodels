@@ -89,7 +89,7 @@
 #' an approximation can be better than exact.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"lines"}.
-#' @param xlim,ylim,xlab,ylab,main graphical parameters handed passed to
+#' @param xlim,ylim,xlab,ylab,main graphical parameters passed to
 #' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.  
 #' @param \dots further graphical parameters.
 #' @return An object of class \code{"pithist"} inheriting from

@@ -63,7 +63,7 @@ confidence interval.}
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
-\item{xlab, ylab, main, \dots}{graphical parameters handed passed to
+\item{xlab, ylab, main, \dots}{graphical parameters passed to
 \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}
 }
 \value{
