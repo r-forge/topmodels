@@ -504,10 +504,13 @@ procast.glm <- function(object,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES AND NECESSARY ARGUMENTS
   # -------------------------------------------------------------------
+  ## Get family
+  family <- substr(family(object)$family, 1L, 17L)
+
+  ## Get weight, nobs, n if available
   weights <- if (is.null(attr(at, "weights"))) weights(object) else attr(at, "weights")
   nobs <- if (is.null(attr(at, "nobs"))) nobs(object) else attr(at, "nobs")
   n <- if (is.null(attr(at, "n"))) NULL else attr(at, "n")
-
 
   if (is.null(n)) {
     ## FIXME: (ML) This is probably not correct, as we need initializing for `at`
@@ -533,7 +536,7 @@ procast.glm <- function(object,
   type <- match.arg(type)
 
   ## FIXME: (ML) Implement score (estfun)
-  if (object$family$family == "gaussian") {
+  if (family == "gaussian") {
 
     ## Add maximum likelihood estimator of constant varians
     ## FIXME: (ML) do we need second part (compare countreg)
@@ -548,7 +551,7 @@ procast.glm <- function(object,
       "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
       "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
     )
-  } else if (object$family$family == "poisson") {
+  } else if (family == "poisson") {
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qpois(at, lambda = pars$mu, ...),
       "location" = stop("not yet implemented"),
@@ -558,7 +561,21 @@ procast.glm <- function(object,
       "probability" = function(at, pars, ...) ppois(at, lambda = pars$mu, ...),
       "score" =  stop("not yet implemented")
     )
-  } else if (object$family$family == "binomial") {
+  } else if (family == "Negative Binomial") {
+    ## FIXME: (ML) check implementation and compare w/ countreg -> different number of bins
+    pars$theta <- object$theta
+    if(is.null(pars$theta)) pars$theta <- get(".Theta", environment(family(object)$variance))
+
+    FUN <- switch(type,
+      "quantile" = function(at, pars, ...) qnbinom(at, mu = pars$mu, size = pars$theta, ...),
+      "location" = stop("not yet implemented"),
+      "scale" = stop("not yet implemented"),
+      "parameter" = stop("not yet implemented"),
+      "density" = function(at, pars, ...) dnbinom(at, mu = pars$mu,, size = pars$theta, ...),
+      "probability" = function(at, pars, ...) pnbinom(at, mu = pars$mu,, size = pars$theta, ...),
+      "score" =  stop("not yet implemented")
+    )
+  } else if (family == "binomial") {
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qbinom(at, size = n, prob = pars$mu, ...),
       "location" = stop("not yet implemented"),
@@ -585,7 +602,7 @@ procast.glm <- function(object,
       "score" = stop("not yet implemented"),
     )
   } else {
-    stop(sprintf("family %s not implemented yet", object$family$family))
+    stop(sprintf("family %s not implemented yet", family))
   }
 
   # -------------------------------------------------------------------
