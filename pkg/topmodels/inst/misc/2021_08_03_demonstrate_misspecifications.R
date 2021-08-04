@@ -5,11 +5,12 @@
 # -------------------------------------------------------------------
 # - PURPOSE:
 # -------------------------------------------------------------------
-# - L@ST MODIFIED: 2021-08-03 on thinkmoritz
+# - L@ST MODIFIED: 2021-08-04 on thinkmoritz
 # -------------------------------------------------------------------
 library("topmodels")
 library("crch")
-library("rmutil")
+library("rmutil")  # for laplace dist
+library("sn") # for skewed N dist
 
 # -------------------------------------------------------------------
 # (1) MISSPECIFIED RESPONSE: POISSON vs NEGBIN
@@ -23,6 +24,16 @@ x <- rpois(100, lambda = 3)
 plot(dpois(seq(1, 10), lambda = 3), type = "l")
 lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "l", col = 2)
 legend("topright", c("y ~ nbinom", "x ~ rpois"), lty = 1, col = c(1, 2))
+
+## NEW
+d <- data.frame(x = runif(500))
+d$mu <- 0.5 + 1 * d$x
+d$yp <- rpois(500, lambda = d$mu)
+d$ynb <- rnbinom(500, mu = d$mu, size = 1)
+m1 <- glm(yp ~ x, data = d, family = poisson)
+m2 <- glm(ynb ~ x, data = d, family = poisson)
+m3 <- glm.nb(ynb ~ x, data = d)
+##
 
 ## correctly specified Poisson model fit (mu = 3.34)
 m1_corr <- glm(x ~ 1, family = poisson)
@@ -41,6 +52,12 @@ m1_missp <- glm(y ~ 1, family = poisson)
 par(mfrow = c(2, 5))
 topmodels(m1_corr, single_page = TRUE, spar = FALSE)
 topmodels(m1_missp, single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(3, 5))
+topmodels(m1, single_page = TRUE, spar = FALSE)
+topmodels(m2, single_page = TRUE, spar = FALSE)
+topmodels(m3, single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
 
 
@@ -91,11 +108,11 @@ legend("topleft", c("y1 ~ norm", "y2 ~ unif", "y3 ~ laplace"), lty = 1, col = c(
 m3_corr <- crch(y1 ~ 1, dist = "gaussian")
 
 ## incorrect fit (underdispersive model fit)
-## [U-shaped PIT, S-shaped QQ-plot]
+## [U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot]
 m3_missp_u <- crch(y2 ~ 1, dist = "gaussian")
 
 ## incorrect fit (overdispersive model fit)
-## [inverse U-shaped PIT, inverse S-shaped QQ-plot]
+## [inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot]
 m3_missp_lp <- crch(y3 ~ 1, dist = "gaussian")
 
 par(mfrow = c(3, 5))
@@ -111,31 +128,66 @@ par(mfrow = c(1, 1))
 ## artificial data from a Gaussian, Exponential and Negative Exponential
 ## distribution
 set.seed(1090)
-y1 <- rnorm(1000, mean = 3)
-y2 <- rweibull(1000, shape = 1.5)
-y3 <- rweibull(1000, shape = 12)
+#y1 <- rnorm(1000, mean = 3)
+#y2 <- rweibull(1000, shape = 1.5)
+#y3 <- rweibull(1000, shape = 12)
+d4 <- data.frame(yn = rnorm(1000, mean = 0))
+d4$yn_rs <- rsn(1000, dp = cp2dp(c(0, 1, 0.9), family = "SN"))
+d4$yn_ls <- rsn(1000, dp = cp2dp(c(0, 1, -0.9), family = "SN"))
 
-curve(dnorm(x, mean = 2.5), from = -2, to = 8, ylim = c(0, 1))
-curve(dweibull(x, shape = 1.5), from = -2, to = 8, col = 2, add = TRUE)
-curve(dweibull(x, shape = 12, scale = 6), from = -2, to = 8, col = 3, add = TRUE)
-legend("topleft", c("y1 ~ norm", "y2 ~ weibull_1.5", "y3 ~ weibull_12"), lty = 1, col = c(1, 2, 3))
+#curve(dnorm(x, mean = 2.5), from = -2, to = 8, ylim = c(0, 1))
+#curve(dweibull(x, shape = 1.5), from = -2, to = 8, col = 2, add = TRUE)
+#curve(dweibull(x, shape = 12, scale = 6), from = -2, to = 8, col = 3, add = TRUE)
+#legend("topleft", c("y1 ~ norm", "y2 ~ weibull_1.5", "y3 ~ weibull_12"), lty = 1, col = c(1, 2, 3))
+
+curve(dnorm(x, mean = 0), from = -8, to = 8, ylim = c(0, 1), col = 1)
+curve(dsn(x, dp = cp2dp(c(0, 1, 0.9), family = "SN")), from = -8, to = 8, add = TRUE, col = 2)
+curve(dsn(x, dp = cp2dp(c(0, 1, -0.9), family = "SN")), from = -8, to = 8, add = TRUE, col = 3)
+legend("topleft", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3))
 
 ## correct gaussian fit
-m4_corr <- crch(y1 ~ 1, dist = "gaussian")
+m4_corr <- crch(yn ~ 1, data = d4, dist = "gaussian")
 
 ## incorrect fit: right-skewed residuals
-## [curved (positive skewed) QQ-Plot]
-m4_missp1 <- crch(y2 ~ 1, dist = "gaussian")
+## [curved (positive skewed) QQ-Plot, U-shape wormplot]
+m4_missp1 <- crch(yn_rs ~ 1, data = d4, dist = "gaussian")
 
 ## incorrect fit: left-skewed residuals
-## [curved (negative skewed) QQ-Plot]
-m4_missp2 <- crch(y3 ~ 1, dist = "gaussian")
+## [curved (negative skewed) QQ-Plot, inverse U-shape wormplot]
+m4_missp2 <- crch(yn_ls ~ 1, data = d4, dist = "gaussian")
 
-par(mfrow = c(3, 5))
-topmodels(m4_corr, single_page = TRUE, spar = FALSE)
-topmodels(m4_missp1, single_page = TRUE, spar = FALSE)
-topmodels(m4_missp2, single_page = TRUE, spar = FALSE)
+par(mfrow = c(3, 4))
+topmodels(m4_corr, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4_missp1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4_missp2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
+
+# -------------------------------------------------------------------
+# (4b) MISSPECIFIED RESPONSE: SKEWED DISTRIBUTION
+# -------------------------------------------------------------------
+library("topmodels")
+library("crch")
+library("sn")
+set.seed(1090)
+d4 <- data.frame(yn = rnorm(1000, mean = 0))
+d4$yn_rs <- rsn(1000, dp = cp2dp(c(0, 1, 0.9), family = "SN"))
+d4$yn_ls <- rsn(1000, dp = cp2dp(c(0, 1, -0.9), family = "SN"))
+
+curve(dnorm(x, mean = 0), from = -8, to = 8, ylim = c(0, 1), col = 1)
+curve(dsn(x, dp = cp2dp(c(0, 1, 0.9), family = "SN")), from = -8, to = 8, add = TRUE, col = 2)
+curve(dsn(x, dp = cp2dp(c(0, 1, -0.9), family = "SN")), from = -8, to = 8, add = TRUE, col = 3)
+legend("topleft", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3))
+
+m4_corr <- crch(yn ~ 1, data = d4, dist = "gaussian")
+m4_missp1 <- crch(yn_rs ~ 1, data = d4, dist = "gaussian")
+m4_missp2 <- crch(yn_ls ~ 1, data = d4, dist = "gaussian")
+
+par(mfrow = c(3, 4))
+topmodels(m4_corr, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4_missp1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4_missp2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+
 
 
 # -------------------------------------------------------------------
@@ -149,6 +201,11 @@ logsd <- 0.9 + 1.3 * ens_logsd
 y <- rlogis(5000, mean, exp(logsd))
 
 d <- data.frame(y = y, x1 = ens_mean, z1 = ens_logsd)
+
+curve(dnorm, from = -5, to = 5)
+curve(dlogis, from = -5, to = 5, col = 2, add = TRUE)
+curve(dt(x, df = 2), from = -5, to = 5, col = 3, add = TRUE)
+legend("topleft", c("dnorm", "dlogis", "dt_2"), lty = 1, col = c(1, 2, 3))
 
 ## wrong assumption of underlying distribution: tails too light -> overdispersive model fit (residuals)
 m5_gauss <- crch(y ~ x1 | z1, dist = "gaussian", data = d)
@@ -168,23 +225,23 @@ par(mfrow = c(1, 1))
 # -------------------------------------------------------------------
 # (6) LEAVING OUT RELEVANT REGRESSORS: MISSPECIFIED MEAN AND VARIANCE
 # -------------------------------------------------------------------
-ens_mean <- rnorm(5000, 0.35, 6.91)
+ens_mean <- rnorm(5000, 10, 6.91)
 ens_logsd <- rnorm(5000, -0.56, 0.43)
 
-mean <- 6.5 + 1 * ens_mean
+mean <- 6.5 + 4 * ens_mean
 logsd <- 0.9 + 1.3 * ens_logsd
-y <- rlogis(5000, mean, exp(logsd))
+y <- rnorm(5000, mean, exp(logsd))
 
 d <- data.frame(y = y, x1 = ens_mean, z1 = ens_logsd)
 
 ## correct model fit
-m6_corr <- crch(y ~ x1 | z1, dist = "logistic", data = d)
+m6_corr <- crch(y ~ x1 | z1, dist = "gaussian", data = d)
 
 ## misspecified mean
-m6_missp1 <- crch(y ~ 1 | z1, dist = "logistic", data = d)
+m6_missp1 <- crch(y ~ 1 | z1, dist = "gaussian", data = d)
 
 ## misspecified variance
-m6_missp2 <- crch(y ~ x1 | 1, dist = "logistic", data = d)
+m6_missp2 <- crch(y ~ x1 | 1, dist = "gaussian", data = d)
 
 par(mfrow = c(3, 5))
 topmodels(m6_corr, single_page = TRUE, spar = FALSE)
