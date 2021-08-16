@@ -1,0 +1,350 @@
+---
+title: "Graphical Model Assessment"
+author: "Moritz Lang, Achim Zeileis"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+bibliography: ref.bib
+vignette: >
+  %\VignetteIndexEntry{topmodels}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
+  %\VignetteKeywords{FIXME}
+  %\VignettePackage{topmodels}
+---
+
+```{r preliminaries, echo = FALSE, message = FALSE}
+library("topmodels")
+library("crch")
+library("MASS")
+library("rmutil")  # for laplace dist
+library("sn") # for skewed N dist
+options(digits = 4)
+knitr::opts_chunk$set(fig.aling = "center")
+```
+
+## 1a Misspecified response: Poisson vs. Negbin w/o regressors
+
+Artificial data from negative binomial `(mu = 3, theta = 2)`
+and Poisson `(mu = 3)` distribution:
+
+```{r dgp_1a}
+d1a <- data.frame(
+  yp = rpois(100, lambda = 3),
+  ynb = rnbinom(100, mu = 3, size = 2)
+)
+```
+
+```{r curves_1a, echo = FALSE, out.width = "60%", fig.align = "center"}
+plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
+lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
+legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2))
+```
+
+```{r fit_1a}
+## correctly specified Poisson model fit (mu = 3.34)
+m1a_p <- glm(yp ~ 1, family = poisson, data = d1a)
+
+## misspecified Poisson model fit (mu = 3.32):
+m1a_nb1 <- glm(ynb ~ 1, family = poisson, data = d1a)
+
+## correctly specified Negbin model fit
+m1a_nb2 <- glm.nb(ynb ~ 1, data = d1a)
+```
+
+```{r qresiduals_1a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
+par(mfrow = c(1, 3))
+hist(qresiduals(m1a_p), breaks = 12, main = "")
+hist(qresiduals(m1a_nb1), breaks = 12, main = "")
+hist(qresiduals(m1a_nb2), breaks = 12, main = "")
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels_1a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
+par(mfrow = c(3, 4))
+topmodels(m1a_p, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m1a_nb1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m1a_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+Wrong assumption of the underlying distribution, Poisson instead of Negbin,
+leads to an underdispersive model fit (shown in the 2nd line): 
+
+* “Wave-like” pattern around the horizontal reference line: the data exhibit too
+many small counts, notably zeros, as well as too many large counts for a
+Poisson model to provide an adequate fit [@Kleiber+Zeileis:2016].
+* Substantial amount of overdispersion that is not captured by the fitted Poisson distribution.
+* **U-shaped PIT**, **S-shaped QQ-plot**.
+
+## 1b Misspecified response: Poisson vs. Negbin w/ regressors
+
+Artificial data from negative binomial and Poisson distribution with regressors: 
+
+```{r dgp_1b}
+d1b <- data.frame(
+  x = runif(500, 0, 2)
+)
+d1b$mu <- 1 + 2 * d1b$x
+d1b$yp <- rpois(500, lambda = d1b$mu)
+d1b$ynb <- rnbinom(500, mu = d1b$mu, size = 2)
+```
+
+```{r curves_1b, echo = FALSE, out.width = "60%", fig.align = "center"}
+plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
+lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
+legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2))
+```
+
+```{r fit_1b}
+## correctly specified Poisson model fit
+m1b_p <- glm(yp ~ x, data = d1b, family = poisson)
+
+## misspecified Poisson model fit
+m1b_nb1 <- glm(ynb ~ x, data = d1b, family = poisson)
+
+## correctly specified Negbin model fit
+m1b_nb2 <- glm.nb(ynb ~ x, data = d1b)
+```
+
+```{r qresiduals_1b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
+par(mfrow = c(1, 3))
+hist(qresiduals(m1b_p), main = "", breaks = 12)
+hist(qresiduals(m1b_nb1), main = "", breaks = 12)
+hist(qresiduals(m1b_nb2), main = "", breaks = 12)
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels_1b, echo = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
+par(mfrow = c(3, 4))
+topmodels(m1b_p, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m1b_nb1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m1b_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+
+As for 1a, wrong assumption of the underlying distribution, Poisson instead of Negbin,
+leads to an underdispersive model fit (shown in the 2nd line): 
+
+* “Wave-like” pattern around the horizontal reference line: the data exhibit too
+many small counts, notably zeros, as well as too many large counts for a
+Poisson model to provide an adequate fit [@Kleiber+Zeileis:2016].
+* Substantial amount of overdispersion that is not captured by the fitted Poisson distribution.
+* **U-shaped PIT**, **S-shaped QQ-plot**.
+
+## 2. Misspecified response: Heavy tails (N vs t_4)
+
+Artificial data from a student distribution with 4 degrees of freedom:
+
+```{r dgp_2}
+d2 <- data.frame(
+  yt = rt(1000, 4)
+)
+```
+
+```{r curves_2, echo = FALSE, out.width = "60%", fig.align = "center"}
+curve(dt(x, df = 4), from = -6, to = 6, ylim = c(0, 0.5), xlab = "Random Variable", ylab = "Probability")
+curve(dnorm, from = -6, to = 6, add = TRUE, col = 2)
+legend("topright", c("y ~ t_4", "y ~ norm"), lty = 1, col = c(1, 2))
+```
+
+```{r fit_2}
+## correct student-t fit
+m2_t4 <- crch(yt ~ 1, dist = "student", data = d2)
+
+## incorrect normal fit
+m2_n <- crch(yt ~ 1, dist = "gaussian", data = d2)
+```
+
+```{r qresiduals_2, echo = FALSE, fig.height = 4, out.width = "60%", fig.align = "center"}
+par(mfrow = c(1, 2))
+hist(qresiduals(m2_t4), , main = "", breaks = 12)
+hist(qresiduals(m2_n), , main = "", breaks = 12)
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels_2, echo = FALSE, out.width = "100%", fit.align = "center"}
+
+par(mfrow = c(2, 4))
+topmodels(m2_t4, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m2_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+Wrong assumption of underlying distribution, Normal instead of t4, leads to an overdispersive model fit (shown in the 2nd line):
+
+* Tails too light -> overdispersive model fit.
+* **inverse U-shaped PIT**, **inverse S-shaped QQ-plot**.
+
+
+## 3 Misspecified response: over-/underdispersion
+
+Artificial data from a Gaussian, Uniform
+and Laplace (mu = 0, s = 0.4) distribution:
+
+```{r dgp_3}
+d3 <- data.frame(
+  yn = rnorm(1000),
+  yu = runif(1000, min = -6, max = 6),
+  yl = rlaplace(1000, m = 0, s = 0.4)
+)
+```
+
+```{r curves_3, echo = FALSE, out.width = "60%", fig.align = "center"}
+curve(dnorm, from = -6, to = 6, ylim = c(0, 1),  xlab = "Random Variable", ylab = "Probability")
+curve(dunif(x, min = -6, max = 6), from = -6, to = 6, add = TRUE, col = 2)
+curve(dlaplace, from = -6, to = 6, add = TRUE, col = 3)
+legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 3))
+```
+
+```{r fit_3}
+## correct gaussian fit
+m3_n <- crch(yn ~ 1, dist = "gaussian", data = d3)
+
+## incorrect fit (underdispersive model fit)
+## [U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot]
+m3_u <- crch(yu ~ 1, dist = "gaussian", data = d3)
+
+## incorrect fit (overdispersive model fit)
+## [inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot]
+m3_l <- crch(yl ~ 1, dist = "gaussian", data = d3)
+```
+
+```{r qresiduals_3, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
+par(mfrow = c(1, 3))
+hist(qresiduals(m3_n), main = "", breaks = 12)
+hist(qresiduals(m3_u), main = "", breaks = 12)
+hist(qresiduals(m3_l), main = "", breaks = 12)
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels_3, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
+par(mfrow = c(3, 4))
+topmodels(m3_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m3_u, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m3_l, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+Wrong assumption of underlying distribution, Uniform and Laplace instead of Normal, leads to an underdispersive and overdispersive model fit (shown in the 2nd and 3rd lines):
+
+* Underdispersive model fit: **U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot**
+* Overdispersive model fit: **inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot**
+
+## 4a Misspecified response: Skewed distribution w/o regressors
+
+Artificial data from Normal distribution: no skewness, right skewed, and left skewed without regressors:
+
+```{r dgp_4a}
+d4a <- data.frame(
+  yn = rsn(n = 100, xi = 0, omega = 1, alpha = 0, tau = 0),
+  yrs = rsn(n = 100, xi = 0, omega = 1, alpha = 5, tau = 0),
+  yls = rsn(n = 100, xi = 0, omega = 1, alpha = -5, tau = 0)
+)
+```
+
+```{r curves_4a, echo = FALSE, out.width = "60%", fig.align = "center"}
+curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1, ylim = c(0, 1),
+   xlab = "Random Variable", ylab = "Probability")
+curve(dsn(x, xi = 0, omega = 1, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
+curve(dsn(x, xi = 0, omega = 1, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 3)
+legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3))
+```
+
+```{r fit_4a}
+## correct gaussian fit
+m4a_n <- crch(yn ~ 1, data = d4a, dist = "gaussian")
+
+## incorrect fit: right-skewed residuals
+m4a_rs <- crch(yrs ~ 1, data = d4a, dist = "gaussian")
+
+## incorrect fit: left-skewed residuals
+m4a_ls <- crch(yls ~ 1, data = d4a, dist = "gaussian")
+```
+
+```{r qresiduals_4a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
+par(mfrow = c(1, 3))
+hist(qresiduals(m4a_n), main = "", breaks = 12)
+hist(qresiduals(m4a_rs), main = "", breaks = 12)
+hist(qresiduals(m4a_ls), main = "", breaks = 12)
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels_4a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
+par(mfrow = c(3, 4))
+topmodels(m4a_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4a_rs, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4a_ls, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+Wrong assumption of underlying distribution, Normal instead of rigth and  left skewed Normal, leads misspecified model fits (shown in the 2nd and 3rd lines):
+
+* Right-skewed residuals: **curved (positive skewed) QQ-Plot, U-shape wormplot**
+* Left-skewed residuals: **curved (negative skewed) QQ-Plot, inverse U-shape wormplot**
+
+
+## 4b Misspecified response: Skewed distribution w/ regressors
+
+Artificial data from Normal distribution: no skewness, right skewed, and left skewed with regressors:
+```{r dgp_4b}
+d4b <- data.frame(
+  x = rnorm(1000, 15, 1.2),
+  z <- rnorm(1000, -0.5, 0.4)
+)
+d4b$mu <- 0.4 + 0.9 * d4b$x
+d4b$sigma <- exp(0.3 + 0.6 * exp(d4b$z))
+
+d4b$yn <- rsn(n = 1000, xi = d4b$mu, omega = d4b$sigma, alpha = 0, tau = 0)
+d4b$yrs <- rsn(n = 1000, xi = d4b$mu, omega = d4b$sigma, alpha = 5, tau = 0)
+d4b$yls <- rsn(n = 1000, xi = d4b$mu, omega = d4b$sigma, alpha = -5, tau = 0)
+```
+
+```{r curves_4b, echo = FALSE, out.width = "60%", fig.align = "center"}
+curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1, ylim = c(0, 1),
+   xlab = "Random Variable", ylab = "Probability")
+curve(dsn(x, xi = 0, omega = 1.8, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
+curve(dsn(x, xi = 0, omega = 1.8, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 3)
+legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3))
+```
+
+```{r fit_4b}
+## correct gaussian fit
+m4b_n <- crch(yn ~ x | z, data = d4b, dist = "gaussian")
+
+## incorrect fit: right-skewed residuals
+## [curved (positive skewed) QQ-Plot, U-shape wormplot]
+m4b_rs <- crch(yrs ~ x | z, data = d4b, dist = "gaussian")
+
+## incorrect fit: left-skewed residuals
+## [curved (negative skewed) QQ-Plot, inverse U-shape wormplot]
+m4b_ls <- crch(yls ~ x | z, data = d4b, dist = "gaussian")
+```
+
+```{r qresiduals_4b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
+par(mfrow = c(1, 3))
+hist(qresiduals(m4b_n), main = "", breaks = 12)
+hist(qresiduals(m4b_rs), main = "", breaks = 12)
+hist(qresiduals(m4b_ls), main = "", breaks = 12)
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels_4b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
+par(mfrow = c(3, 4))
+topmodels(m4b_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4b_rs, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4b_ls, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+As for 4a, wrong assumption of underlying distribution, Normal instead of rigth and  left skewed Normal, leads misspecified model fits (shown in the 2nd and 3rd lines):
+
+* Right-skewed residuals: **curved (positive skewed) QQ-Plot, U-shape wormplot**
+* Left-skewed residuals: **curved (negative skewed) QQ-Plot, inverse U-shape wormplot**
+
+## References
+
+
