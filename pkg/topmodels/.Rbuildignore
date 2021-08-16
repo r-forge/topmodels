@@ -11,5 +11,6 @@ TODO.pdf
 ^contact.md$
 ^logo*.png$
 vignettes/topmodels.Rmd
+vignettes/graphical_model_assessment.Rmd
 vignettes/ref.bib
 

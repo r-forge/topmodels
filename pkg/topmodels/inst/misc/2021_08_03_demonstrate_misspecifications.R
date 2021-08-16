@@ -5,7 +5,7 @@
 # -------------------------------------------------------------------
 # - PURPOSE:
 # -------------------------------------------------------------------
-# - L@ST MODIFIED: 2021-08-04 on thinkmoritz
+# - L@ST MODIFIED: 2021-08-16 on thinkmoritz
 # -------------------------------------------------------------------
 library("topmodels")
 library("crch")
@@ -188,7 +188,47 @@ topmodels(m4_missp1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m4_missp2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
 
+# -------------------------------------------------------------------
+# (4c) MISSPECIFIED RESPONSE: SKEWED DISTRIBUTION
+# -------------------------------------------------------------------
+library("topmodels")
+library("crch")
+library("sn")
 
+## artificial data from Normal distribution: no skewness, right skewed, and left skewed
+set.seed(1090)
+d4 <- data.frame(
+  x = runif(1000),
+  z <- runif(1000)
+)
+d4$mu <- 0.1 + 0.85 * d4$x
+d4$sigma <- exp(0.7 + 0.1 * d4$z)
+
+d4$yn <- rsn(n = 1000, xi = d4$mu, omega = d4$sigma, alpha = 0, tau = 0)
+d4$yn_rs <- rsn(n = 1000, xi = d4$mu, omega = d4$sigma, alpha = 3, tau = 0)
+d4$yn_ls <- rsn(n = 1000, xi = d4$mu, omega = d4$sigma, alpha = -3, tau = 0)
+
+curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1, ylim = c(0, 1))
+curve(dsn(x, xi = 0, omega = 1.6, alpha = 3, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
+curve(dsn(x, xi = 0, omega = 1.6, alpha = -3, tau = 0), from = -8, to = 8, add = TRUE, col = 3)
+legend("topleft", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3))
+
+## correct gaussian fit
+m4_corr <- crch(yn ~ x | z, data = d4, dist = "gaussian")
+
+## incorrect fit: right-skewed residuals
+## [curved (positive skewed) QQ-Plot, U-shape wormplot]
+m4_missp1 <- crch(yn_rs ~ x | z, data = d4, dist = "gaussian")
+
+## incorrect fit: left-skewed residuals
+## [curved (negative skewed) QQ-Plot, inverse U-shape wormplot]
+m4_missp2 <- crch(yn_ls ~ x | z, data = d4, dist = "gaussian")
+
+par(mfrow = c(3, 4))
+topmodels(m4_corr, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4_missp1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m4_missp2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
 
 # -------------------------------------------------------------------
 # (5) MANUS'S EXAMPLE
