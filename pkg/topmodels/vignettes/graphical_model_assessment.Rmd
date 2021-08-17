@@ -40,7 +40,7 @@ d1a <- data.frame(
 ```{r curves_1a, echo = FALSE, out.width = "60%", fig.align = "center"}
 plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
 lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
-legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2))
+legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2), bty = "n")
 ```
 
 ```{r fit_1a}
@@ -95,7 +95,7 @@ d1b$ynb <- rnbinom(500, mu = d1b$mu, size = 2)
 ```{r curves_1b, echo = FALSE, out.width = "60%", fig.align = "center"}
 plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
 lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
-legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2))
+legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2), bty = "n")
 ```
 
 ```{r fit_1b}
@@ -148,7 +148,7 @@ d2 <- data.frame(
 ```{r curves_2, echo = FALSE, out.width = "60%", fig.align = "center"}
 curve(dt(x, df = 4), from = -6, to = 6, ylim = c(0, 0.5), xlab = "Random Variable", ylab = "Probability")
 curve(dnorm, from = -6, to = 6, add = TRUE, col = 2)
-legend("topright", c("y ~ t_4", "y ~ norm"), lty = 1, col = c(1, 2))
+legend("topright", c("y ~ t_4", "y ~ norm"), lty = 1, col = c(1, 2), bty = "n")
 ```
 
 ```{r fit_2}
@@ -197,7 +197,7 @@ d3 <- data.frame(
 curve(dnorm, from = -6, to = 6, ylim = c(0, 1),  xlab = "Random Variable", ylab = "Probability")
 curve(dunif(x, min = -6, max = 6), from = -6, to = 6, add = TRUE, col = 2)
 curve(dlaplace, from = -6, to = 6, add = TRUE, col = 3)
-legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 3))
+legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 3), bty = "n")
 ```
 
 ```{r fit_3}
@@ -251,7 +251,7 @@ curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1,
    xlab = "Random Variable", ylab = "Probability")
 curve(dsn(x, xi = 0, omega = 1, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
 curve(dsn(x, xi = 0, omega = 1, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 3)
-legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3))
+legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3), bty = "n")
 ```
 
 ```{r fit_4a}
@@ -308,7 +308,7 @@ curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1,
    xlab = "Random Variable", ylab = "Probability")
 curve(dsn(x, xi = 0, omega = 1.8, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
 curve(dsn(x, xi = 0, omega = 1.8, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 3)
-legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3))
+legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3), bty = "n")
 ```
 
 ```{r fit_4b}
