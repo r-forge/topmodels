@@ -112,9 +112,12 @@ topmodels(m1a_nb1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m1a_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
 ```
-In line one and three, a Poisson model and a neg. binomial model is correctly fitted to simulated data from
-a Poisson an a neg. binomial distribution, respectively. In line three, the underlying response distribution 
-is incorrectly assumed, whereby a Poisson model is fitted to simulated data from a neg. binomial model. 
+
+In the first and third line, a Poisson model and negative binomial model is fitted to
+simulated data from a Poisson and negative binomial distribution, respectively.
+In the second line, a false response distribution is assumed by fitting a Poisson
+model to simulated data from a negative binomial model. The following
+characteristics can be seen in the model assessment graphs for the misspecified model (2nd line):
 
 * **Wave-like pattern in the rootogram** around the horizontal reference line:
 The data exhibit too many small counts, notably zeros, as well as too many
@@ -180,15 +183,11 @@ topmodels(m1b_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
 ```
 
+As for the example 1a, a false response distribution is assumed for the 2nd
+model by fitting a Poisson model to simulated data from a negative binomial
+model. Hence, similar characteristics can be seen in the model assessment
+graphs for the misspecified model (2nd line).
 
-As for 1a, wrong assumption of the underlying distribution, Poisson instead of Negbin,
-leads to an underdispersive model fit (shown in the 2nd line): 
-
-* “Wave-like” pattern around the horizontal reference line: the data exhibit too
-many small counts, notably zeros, as well as too many large counts for a
-Poisson model to provide an adequate fit [@Kleiber+Zeileis:2016].
-* Substantial amount of overdispersion that is not captured by the fitted Poisson distribution.
-* **U-shaped PIT**, **S-shaped QQ-plot**.
 
 ## 2a Underestimating the tails of the distribution w/o regressors
 
