@@ -15,6 +15,25 @@ vignette: >
   %\VignettePackage{topmodels}
 ---
 
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
 ```{r preliminaries, echo = FALSE, message = FALSE}
 library("topmodels")
 library("crch")
@@ -23,6 +42,30 @@ library("rmutil")  # for laplace dist
 library("sn") # for skewed N dist
 options(digits = 4)
 knitr::opts_chunk$set(fig.aling = "center")
+
+set.seed(123)
+
+## helper function for plotting residuals
+make_residuals_plot <- function(model, xlim = c(-4, 4), ylim = c(0, 0.5)) {
+
+  ### residuals
+  #qres <- qresiduals(model)
+
+  ## histogram
+  hist(qresiduals(model), breaks = 15, main = "", freq = FALSE, xlim = xlim, ylim = ylim)
+
+  ## curves
+  #fit_estimate <- density(qres)
+  #fit_normal <- crch(qres ~ 1)
+  curve(dnorm, col = 2, from = -4, to = 4, add = TRUE)
+  #curve(dnorm(x, mean = coef(fit_normal)[1], sd = exp(coef(fit_normal)[2])), 
+  #  col = 2, from = -4, to = 4, add = TRUE)
+  #lines(fit_estimate, col = 4)
+
+  ## legend
+  #legend("topright", c("std. norm", "fit normal", "fit estimate"), lty = 1, col = c(1, 2, 4), bty = "n")
+  legend("topright", "std. norm", lty = 1, col = 2, bty = "n")
+}
 ```
 
 ## 1a Wrong distributional assumption w/o regressors
@@ -37,6 +80,7 @@ d1a <- data.frame(
 ```
 
 ```{r curves-1a, echo = FALSE, out.width = "60%", fig.align = "center", fig.cap = "lala"}
+par(bg = "#f7f7f7")
 plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
 lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
 legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2), bty = "n")
@@ -54,18 +98,15 @@ m1a_nb2 <- glm.nb(ynb ~ 1, data = d1a)
 ```
 
 ```{r qresiduals-1a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-
-mres_1a_p <- crch(qresiduals(m1a_p) ~ 1)
-par(mfrow = c(1, 3))
-hist(qresiduals(m1a_p), breaks = 12, main = "", freq = FALSE)
-curve(dnorm(x, mean = coef(mres_1a_p)[1], sd = exp(coef(mres_1a_p)[2])), from = -3, to = 3, add = TRUE)
-hist(qresiduals(m1a_nb1), breaks = 12, main = "")
-hist(qresiduals(m1a_nb2), breaks = 12, main = "")
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m1a_p)
+make_residuals_plot(m1a_nb1)
+make_residuals_plot(m1a_nb2)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-1a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4))
+par(mfrow = c(3, 4), bg = "#f7f7f7")
 topmodels(m1a_p, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m1a_nb1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m1a_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
@@ -73,16 +114,23 @@ par(mfrow = c(1, 1))
 ```
 In line one and three, a Poisson model and a neg. binomial model is correctly fitted to simulated data from
 a Poisson an a neg. binomial distribution, respectively. In line three, the underlying response distribution 
-is incorrectly assumed, whereby a Poisson model is fitted to simulated data from a neg. binomial model. This
-leads to a misspecified model fit reflecting a substantial amount of overdispersion that is not captured by the fitted Poisson distribution (underdispersive model fit) [@Kleiber+Zeileis:2016].
+is incorrectly assumed, whereby a Poisson model is fitted to simulated data from a neg. binomial model. 
 
-* **Wave-like pattern in the rootogram** around the horizontal reference line: The data exhibit too
-many small counts, notably zeros, as well as too many large counts for a
-Poisson model to provide an adequate fit [@Kleiber+Zeileis:2016].
-* **U-shaped PIT**: The values that the predictive CDF attains at the oberveration are located at the borders of the CDF, hence, the observations lie often outside the predictive distribution indicating an underdispersive model fit. 
-* **S-shaped QQ-plot**: WRONG Indicating underdispersed data relative to the assumed distribution. The largest/smallest values are not as large/small as expected or under-dispersed data has a reduced number of outliers (i.e. the true underlying distribution has thinner tails).
-
-
+* **Wave-like pattern in the rootogram** around the horizontal reference line:
+The data exhibit too many small counts, notably zeros, as well as too many
+large counts for a Poisson model to provide an adequate fit. This leads to a
+misspecified model fit reflecting a substantial amount of overdispersion that
+is not captured by the fitted Poisson distribution (underdispersive model fit)
+[@Kleiber+Zeileis:2016].
+* **U-shaped PIT**: The values attained by the predictive CDF at the observations
+are located with increased frequency at both ends of the CDF, indicating an
+underdispersed predictive distribution (model fit).
+* **Inverse S-shaped QQ-plot**: Quantile residuals are over-dispersed relative to
+the normal distribution, i.e., we experience an increased number of outliers or
+the underlying distribution of the residuals has fatter tails than a normal
+distribution [@Love:2018;@Yearsley:2021]. In terms of quantiles this means that the first quantile is
+much less than the first theoretical quantile and the last quantile is greater than the last theoretical 
+quantile. This is reflected in the corresponding Q-Q plot [@Kross:2016].
 
 
 ## 1b Wrong distributional assumption w/ regressors
@@ -99,6 +147,7 @@ d1b$ynb <- rnbinom(500, mu = d1b$mu, size = 2)
 ```
 
 ```{r curves-1b, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
 plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
 lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
 legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2), bty = "n")
@@ -116,15 +165,15 @@ m1b_nb2 <- glm.nb(ynb ~ x, data = d1b)
 ```
 
 ```{r qresiduals-1b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m1b_p), main = "", breaks = 12)
-hist(qresiduals(m1b_nb1), main = "", breaks = 12)
-hist(qresiduals(m1b_nb2), main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m1b_p)
+make_residuals_plot(m1b_nb1)
+make_residuals_plot(m1b_nb2)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-1b, echo = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
-par(mfrow = c(3, 4))
+par(mfrow = c(3, 4), bg = "#f7f7f7")
 topmodels(m1b_p, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m1b_nb1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m1b_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
@@ -152,6 +201,7 @@ d2a <- data.frame(
 ```
 
 ```{r curves-2a, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
 curve(dt(x, df = 4), from = -6, to = 6, ylim = c(0, 0.5), xlab = "Random Variable", ylab = "Probability")
 curve(dnorm, from = -6, to = 6, add = TRUE, col = 2)
 legend("topright", c("y ~ t_4", "y ~ norm"), lty = 1, col = c(1, 2), bty = "n")
@@ -166,15 +216,15 @@ m2a_n <- crch(yt ~ 1, dist = "gaussian", data = d2a)
 ```
 
 ```{r qresiduals-2a, echo = FALSE, fig.height = 4, out.width = "60%", fig.align = "center"}
-par(mfrow = c(1, 2))
-hist(qresiduals(m2a_t), , main = "", breaks = 12)
-hist(qresiduals(m2a_n), , main = "", breaks = 12)
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(m2a_t)
+make_residuals_plot(m2a_n)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-2a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
 
-par(mfrow = c(2, 4))
+par(mfrow = c(2, 4), bg = "#f7f7f7")
 topmodels(m2a_t, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m2a_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
@@ -200,6 +250,7 @@ d2b$yn <- d2b$x + 1 * rnorm(1000)
 ```
 
 ```{r curves-2b, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
 curve(dt(x, df = 4), from = -6, to = 6, ylim = c(0, 0.5), xlab = "Random Variable", ylab = "Probability")
 curve(dnorm, from = -6, to = 6, add = TRUE, col = 2)
 legend("topright", c("y ~ t_4", "y ~ norm"), lty = 1, col = c(1, 2), bty = "n")
@@ -217,16 +268,16 @@ m2b_n2 <- crch(yn ~ x, dist = "gaussian", data = d2b)
 ```
 
 ```{r qresiduals-2b, echo = FALSE, fig.height = 4, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m2b_t), , main = "", breaks = 12)
-hist(qresiduals(m2b_n1), , main = "", breaks = 12)
-hist(qresiduals(m2b_n2), , main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m2b_t)
+make_residuals_plot(m2b_n1)
+make_residuals_plot(m2b_n2)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-2b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
 
-par(mfrow = c(3, 4))
+par(mfrow = c(3, 4), bg = "#f7f7f7")
 topmodels(m2b_t, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m2b_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m2b_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
@@ -253,10 +304,11 @@ d3a <- data.frame(
 ```
 
 ```{r curves-3a, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
 curve(dnorm, from = -6, to = 6, ylim = c(0, 1),  xlab = "Random Variable", ylab = "Probability")
 curve(dunif(x, min = -6, max = 6), from = -6, to = 6, add = TRUE, col = 2)
-curve(dlaplace, from = -6, to = 6, add = TRUE, col = 3)
-legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 3), bty = "n")
+curve(dlaplace, from = -6, to = 6, add = TRUE, col = 4)
+legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 4), bty = "n")
 ```
 
 ```{r fit-3a}
@@ -273,15 +325,15 @@ m3a_l <- crch(yl ~ 1, dist = "gaussian", data = d3a)
 ```
 
 ```{r qresiduals-3a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m3a_n), main = "", breaks = 12)
-hist(qresiduals(m3a_u), main = "", breaks = 12)
-hist(qresiduals(m3a_l), main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m3a_n)
+make_residuals_plot(m3a_u)
+make_residuals_plot(m3a_l)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-3a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4))
+par(mfrow = c(3, 4), bg = "#f7f7f7")
 topmodels(m3a_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m3a_u, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m3a_l, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
@@ -293,13 +345,16 @@ Wrong assumption of underlying distribution, Uniform or Laplace distribution ins
 * Underdispersive model fit: **U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot**
 * Overdispersive model fit: **inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot**
 
+The largest/smallest values are not as large/small as
+expected or under-dispersed data has a reduced number of outliers (i.e. the
+true underlying distribution has thinner tails).
+
 
 ## 3b Over-/underdispersive model fits w/ regressors
 
 Artificial data from a Gaussian, Uniform and Laplace distribution with regressors:
 
 ```{r dgp_3b}
-set.seed(1090)
 d3b <- data.frame(
   x = runif(1000, 0, 1)
 )
@@ -309,10 +364,11 @@ d3b$yl <- 0 + 1 * rlaplace(1000, m = d3b$x, s = 0.4)
 ```
 
 ```{r curves-3b, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
 curve(dnorm, from = -6, to = 6, ylim = c(0, 1),  xlab = "Random Variable", ylab = "Probability")
 curve(dunif(x, min = -6, max = 6), from = -6, to = 6, add = TRUE, col = 2)
-curve(dlaplace, from = -6, to = 6, add = TRUE, col = 3)
-legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 3), bty = "n")
+curve(dlaplace, from = -6, to = 6, add = TRUE, col = 4)
+legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 4), bty = "n")
 ```
 
 ```{r fit-3b}
@@ -329,15 +385,15 @@ m3b_l <- crch(yl ~ x, dist = "gaussian", data = d3b)
 ```
 
 ```{r qresiduals-3b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m3b_n), main = "", breaks = 12)
-hist(qresiduals(m3b_u), main = "", breaks = 12)
-hist(qresiduals(m3b_l), main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m3b_n)
+make_residuals_plot(m3b_u)
+make_residuals_plot(m3b_l)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-3b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4))
+par(mfrow = c(3, 4), bg = "#f7f7f7")
 topmodels(m3b_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m3b_u, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m3b_l, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
@@ -363,11 +419,12 @@ d4a <- data.frame(
 ```
 
 ```{r curves-4a, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
 curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1, ylim = c(0, 1),
    xlab = "Random Variable", ylab = "Probability")
 curve(dsn(x, xi = 0, omega = 1, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
-curve(dsn(x, xi = 0, omega = 1, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 3)
-legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3), bty = "n")
+curve(dsn(x, xi = 0, omega = 1, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 4)
+legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 4), bty = "n")
 ```
 
 ```{r fit-4a}
@@ -382,15 +439,15 @@ m4a_ls <- crch(yls ~ 1, data = d4a, dist = "gaussian")
 ```
 
 ```{r qresiduals-4a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m4a_n), main = "", breaks = 12)
-hist(qresiduals(m4a_rs), main = "", breaks = 12)
-hist(qresiduals(m4a_ls), main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m4a_n)
+make_residuals_plot(m4a_rs)
+make_residuals_plot(m4a_ls)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-4a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4))
+par(mfrow = c(3, 4), bg = "#f7f7f7")
 topmodels(m4a_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m4a_rs, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m4a_ls, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
@@ -421,11 +478,12 @@ d4b$yls <- rsn(n = 1000, xi = d4b$mu, omega = d4b$sigma, alpha = -5, tau = 0)
 ```
 
 ```{r curves-4b, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
 curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1, ylim = c(0, 1),
    xlab = "Random Variable", ylab = "Probability")
 curve(dsn(x, xi = 0, omega = 1.8, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
-curve(dsn(x, xi = 0, omega = 1.8, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 3)
-legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 3), bty = "n")
+curve(dsn(x, xi = 0, omega = 1.8, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 4)
+legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 4), bty = "n")
 ```
 
 ```{r fit-4b}
@@ -442,15 +500,15 @@ m4b_ls <- crch(yls ~ x | z, data = d4b, dist = "gaussian")
 ```
 
 ```{r qresiduals-4b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m4b_n), main = "", breaks = 12)
-hist(qresiduals(m4b_rs), main = "", breaks = 12)
-hist(qresiduals(m4b_ls), main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m4b_n)
+make_residuals_plot(m4b_rs)
+make_residuals_plot(m4b_ls)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-4b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4))
+par(mfrow = c(3, 4), bg = "#f7f7f7")
 topmodels(m4b_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m4b_rs, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 topmodels(m4b_ls, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
@@ -469,47 +527,48 @@ As for 4a, wrong assumption of underlying distribution, Normal distribution inst
 Artificial data from Logistic distribution with and without truncation at zero. Data generating process without regressors:
 ```{r dgp_5a}
 d5a <- data.frame(
-  ycl = rtlogis(1000, 1.7, 0.6, left = 0),
-  yl = rtlogis(1000, 1.7, 0.6, left = -Inf)
+  ytn = rtnorm(1000, 0.3, 0.6, left = 0),
+  yn = rtnorm(1000, 0.3, 0.6, left = -Inf)
 )
 ```
 
 ```{r curves-5a, echo = FALSE, out.width = "60%", fig.align = "center"}
-curve(dtlogis(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
-curve(dtlogis(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
-legend("topright", c("y1 ~ cens. logistic", "y2 ~ logistic"), lty = 1, col = c(1, 2), bty = "n")
+par(bg = "#f7f7f7")
+curve(dtnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
+curve(dtnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
+legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
 ```
 
 ```{r fit-5a}
-## correct censored logistic fit
-m5a_cl <- crch(ycl ~ 1, data = d5a, dist = "logistic", truncated = TRUE, left = 0)
+## correct truncated normal fit
+m5a_tn <- crch(ytn ~ 1, data = d5a, dist = "gaussian", truncated = TRUE, left = 0)
 
-## incorrect logistic fit
-m5a_l1 <- crch(ycl ~ 1, data = d5a, dist = "logistic", truncated = TRUE, left = -Inf)
+## incorrect normal fit
+m5a_n1 <- crch(ytn ~ 1, data = d5a, dist = "gaussian", truncated = TRUE, left = -Inf)
 
-## correct logistic fit
-m5a_l2 <- crch(yl ~ 1, data = d5a, dist = "logistic", truncated = TRUE, left = -Inf)
+## correct normal fit
+m5a_n2 <- crch(yn ~ 1, data = d5a, dist = "gaussian", truncated = TRUE, left = -Inf)
 ```
 
 ```{r qresiduals-5a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m5a_cl), main = "", breaks = 12)
-hist(qresiduals(m5a_l1), main = "", breaks = 12)
-hist(qresiduals(m5a_l2), main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m5a_tn)
+make_residuals_plot(m5a_n1)
+make_residuals_plot(m5a_n2)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-5a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4))
-topmodels(m5a_cl, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5a_l1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5a_l2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(3, 4), bg = "#f7f7f7")
+topmodels(m5a_tn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m5a_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m5a_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
 ```
 
 Wrong assumption of underlying distribution, not considering truncation at zero, leads to misspecified model fit in the 2nd line:
 
-* \dots
+* $\dots$
 
 
 ## 5b Not Accounting for Truncation w/ regressors
@@ -518,53 +577,164 @@ Artificial data from Logistic distribution with and without truncation at zero. 
 
 ```{r dgp_5b}
 d5b <- data.frame(
-  x = rtlogis(1000, 1.7, 0.6, left = 0),
+  x = rtnorm(1000, 0.4, 0.6, left = 0),
   z <- rnorm(1000, -0.6, 0.2)
 )
 d5b$mu <- 0.2 + 1.8 * d5b$x
 d5b$sigma <- exp(0.1 + 0.6 * exp(d5b$z))
 
-d5b$ycl <- rtlogis(1000, location = d5b$mu, scale = d5b$sigma, left = 0)
-d5b$yl <- rtlogis(1000, location = d5b$mu, scale = d5b$sigma)
+d5b$ytn <- rtnorm(1000, mean = d5b$mu, sd = d5b$sigma, left = 0)
+d5b$yn <- rtnorm(1000, mean = d5b$mu, sd = d5b$sigma)
 ```
 
 ```{r curves-5b, echo = FALSE, out.width = "60%", fig.align = "center"}
-curve(dtlogis(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
-curve(dtlogis(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
-legend("topright", c("y1 ~ cens. logistic", "y2 ~ logistic"), lty = 1, col = c(1, 2), bty = "n")
+par(bg = "#f7f7f7")
+curve(dtnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
+curve(dtnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
+legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
 ```
 
 ```{r fit-5b}
-## correct censored logistic fit
-m5b_cl <- crch(ycl ~ x | z, data = d5b, dist = "logistic", truncated = TRUE, left = 0)
+## correct truncated normal fit
+m5b_tn <- crch(ytn ~ x | z, data = d5b, dist = "gaussian", truncated = TRUE, left = 0)
 
-## incorrect logistic fit
-m5b_l1 <- crch(ycl ~ x | z, data = d5b, dist = "logistic", truncated = TRUE, left = -Inf)
+## incorrect normal fit
+m5b_n1 <- crch(ytn ~ x | z, data = d5b, dist = "gaussian", truncated = TRUE, left = -Inf)
 
-## correct logistic fit
-m5b_l2 <- crch(yl ~ x | z, data = d5b, dist = "logistic", truncated = TRUE, left = -Inf)
+## correct normal fit
+m5b_n2 <- crch(yn ~ x | z, data = d5b, dist = "gaussian", truncated = TRUE, left = -Inf)
 ```
 
 ```{r qresiduals-5b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3))
-hist(qresiduals(m5b_cl), main = "", breaks = 12)
-hist(qresiduals(m5b_l1), main = "", breaks = 12)
-hist(qresiduals(m5b_l2), main = "", breaks = 12)
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m5b_tn)
+make_residuals_plot(m5b_n1)
+make_residuals_plot(m5b_n2)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-5b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4))
-topmodels(m5b_cl, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5b_l1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5b_l2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(3, 4), bg = "#f7f7f7")
+topmodels(m5b_tn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m5b_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m5b_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
 par(mfrow = c(1, 1))
 ```
 
 Wrong assumption of underlying distribution, not considering truncation at zero, leads to misspecified model fit in the 2nd line:
 
 
-* \dots
+* $\dots$
+
+
+## 6a Not Accounting for Censoring w/o regressors
+
+Artificial data from Logistic distribution with and without censoring at zero. Data generating process without regressors:
+```{r dgp_6a}
+d6a <- data.frame(
+  ycn = rcnorm(1000, 0.4, 0.6, left = 0),
+  yn = rcnorm(1000, 0.4, 0.6, left = -Inf)
+)
+```
+
+```{r curves-6a, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
+curve(dcnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
+curve(dcnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
+legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
+```
+
+```{r fit-6a}
+## correct censored normal fit
+m6a_cn <- crch(ycn ~ 1, data = d6a, dist = "gaussian", truncated = FALSE, left = 0)
+
+## incorrect normal fit
+m6a_n1 <- crch(ycn ~ 1, data = d6a, dist = "gaussian", truncated = FALSE, left = -Inf)
+
+## correct normal fit
+m6a_n2 <- crch(yn ~ 1, data = d6a, dist = "gaussian", truncated = FALSE, left = -Inf)
+```
+
+```{r qresiduals-6a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m6a_cn)
+make_residuals_plot(m6a_n1)
+make_residuals_plot(m6a_n2)
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels-6a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
+par(mfrow = c(3, 4), bg = "#f7f7f7")
+topmodels(m6a_cn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m6a_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m6a_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+Wrong assumption of underlying distribution, not considering censoring at zero, leads to misspecified model fit in the 2nd line:
+
+* $\dots$
+
+
+## 6b Not Accounting for Censoring w/ regressors
+
+Artificial data from Logistic distribution with and without censoring at zero. Data generating process with regressors:
+
+```{r dgp_6b}
+d6b <- data.frame(
+  x = rcnorm(1000, 0.4, 0.6, left = 0),
+  z <- rnorm(1000, -0.6, 0.2)
+)
+d6b$mu <- 0.2 + 1.8 * d6b$x
+d6b$sigma <- exp(0.1 + 0.6 * exp(d6b$z))
+
+d6b$ycn <- rcnorm(1000, mean = d6b$mu, sd = d6b$sigma, left = 0)
+d6b$yn <- rcnorm(1000, mean = d6b$mu, sd = d6b$sigma)
+```
+
+```{r curves-6b, echo = FALSE, out.width = "60%", fig.align = "center"}
+par(bg = "#f7f7f7")
+curve(dcnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
+curve(dcnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
+legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
+```
+
+```{r fit-6b}
+## correct censored normal fit
+m6b_cn <- crch(ycn ~ x | z, data = d6b, dist = "gaussian", truncated = FALSE, left = 0)
+
+## incorrect normal fit
+m6b_n1 <- crch(ycn ~ x | z, data = d6b, dist = "gaussian", truncated = FALSE, left = -Inf)
+
+## correct normal fit
+m6b_n2 <- crch(yn ~ x | z, data = d6b, dist = "gaussian", truncated = FALSE, left = -Inf)
+```
+
+```{r qresiduals-6b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
+par(mfrow = c(1, 3), bg = "#f7f7f7")
+make_residuals_plot(m6b_cn)
+make_residuals_plot(m6b_n1)
+make_residuals_plot(m6b_n2)
+par(mfrow = c(1, 1))
+```
+
+```{r topmodels-6b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
+par(mfrow = c(3, 4), bg = "#f7f7f7")
+topmodels(m6b_cn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m6b_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+topmodels(m6b_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+par(mfrow = c(1, 1))
+```
+
+Wrong assumption of underlying distribution, not considering censoring at zero, leads to misspecified model fit in the 2nd line:
+
+
+* $\dots$
+
+
+# Summary
+
+* U-shaped histograms indicate underdispersed predictive distributions, hump or inverse-U shaped histograms point at overdispersion, and skewed histograms occur when central tendencies are biased [@Czado+Gneiting+Held:2009].
 
 ## References
 
