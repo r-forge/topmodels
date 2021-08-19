@@ -1,5 +1,5 @@
 ---
-title: "Graphical Model Assessment under Different Model Misspecifications"
+title: "Graphical Model Assessment"
 author: "Moritz Lang, Achim Zeileis"
 output:
   html_document:
@@ -43,697 +43,279 @@ library("sn") # for skewed N dist
 options(digits = 4)
 knitr::opts_chunk$set(fig.aling = "center")
 
-set.seed(123)
-
 ## helper function for plotting residuals
-make_residuals_plot <- function(model, xlim = c(-4, 4), ylim = c(0, 0.5)) {
-
-  ### residuals
-  #qres <- qresiduals(model)
+make_residuals_plot <- function(object, xlim = c(-4, 4), ylim = c(0, 0.5)) {
 
   ## histogram
-  hist(qresiduals(model), breaks = 15, main = "", freq = FALSE, xlim = xlim, ylim = ylim)
+  hist(qresiduals(object), breaks = 15, main = "", freq = FALSE, xlim = xlim, ylim = ylim)
 
-  ## curves
-  #fit_estimate <- density(qres)
-  #fit_normal <- crch(qres ~ 1)
+  ## standard normal distribution
   curve(dnorm, col = 2, from = -4, to = 4, add = TRUE)
-  #curve(dnorm(x, mean = coef(fit_normal)[1], sd = exp(coef(fit_normal)[2])), 
-  #  col = 2, from = -4, to = 4, add = TRUE)
-  #lines(fit_estimate, col = 4)
 
   ## legend
-  #legend("topright", c("std. norm", "fit normal", "fit estimate"), lty = 1, col = c(1, 2, 4), bty = "n")
   legend("topright", "std. norm", lty = 1, col = 2, bty = "n")
+}
+
+make_topmodels_plot <- function(object) {
+  topmodels(object, which = c(1:2, 4:5), ask = FALSE, spar = FALSE)
 }
 ```
 
-## 1a Wrong distributional assumption w/o regressors
+## Artifical data
 
-A Poisson model without regressors is fitted to two simulated datasets from a Poisson and a negative binomial distribution; both distributions have a mean $\mu = 3$, the negative binomal has a shape parameter $\Theta = 2$:
+```{r dgp}
+set.seed(0)
 
-```{r dgp_1a}
-d1a <- data.frame(
-  yp = rpois(100, lambda = 3),
-  ynb = rnbinom(100, mu = 3, size = 2)
+## regressors
+d <- data.frame( 
+  x = runif(500, -1, 1),
+  z = runif(500, -1, 1)
+)
+
+## parameters
+d <- transform(d,
+  lambda = exp(1 + 0.5 * x),
+  theta = 2,
+  mu = 50 + 22 * x,
+  sigma = 22,
+  sigmaz = exp(3 + 1 * z)
+)
+
+## responses
+d <- transform(d,
+  ynorm = rnorm(500, mean = mu, sd = sigma),
+
+  yhnorm = rnorm(500, mean = mu, sd = sigmaz),
+  ytnorm = crch::rtnorm(500, mean = mu, sd = sigma, left = 0),
+  ycnorm = crch::rcnorm(500, mean = mu, sd = sigma, left = 0, right = 100),
+
+  yt = mu + sigma * rt(500, df = 4),
+  ylaplace = mu + rmutil::rlaplace(500, s = sigma),
+  yrskew = sn::rsn(500, xi = mu, omega = sigma, alpha = 5, tau = 0),
+  ylskew = sn::rsn(500, xi = mu, omega = sigma, alpha = -5, tau = 0),
+  yunif = mu + sigma * runif(500, min = -1, max = 1),
+
+  ypois = rpois(500, lambda = lambda),
+  ynegbin = rnbinom(500, mu = lambda, size = theta),
+  yzip = ifelse(runif(500) < 0.25, 0, rpois(500, lambda = lambda))
 )
 ```
 
-```{r curves-1a, echo = FALSE, out.width = "60%", fig.align = "center", fig.cap = "lala"}
-par(bg = "#f7f7f7")
-plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
-lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
-legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2), bty = "n")
+## Continuous data 
+
+### Homoscedastic normal
+
+```{r fit-1}
+## correct model fit
+m1 <- lm(ynorm ~ x, data = d)
 ```
 
-```{r fit-1a}
-## correct Poisson model fit (DGP: Poisson)
-m1a_p <- glm(yp ~ 1, family = poisson, data = d1a)
-
-## incorrect Poisson model fit (DGP: neg. binomial)
-m1a_nb1 <- glm(ynb ~ 1, family = poisson, data = d1a)
-
-## correct neg. binomial model fit  (DGP: Neg. binomial)
-m1a_nb2 <- glm.nb(ynb ~ 1, data = d1a)
-```
-
-```{r qresiduals-1a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m1a_p)
-make_residuals_plot(m1a_nb1)
-make_residuals_plot(m1a_nb2)
+```{r topmodels-1, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(1, 4), bg = "#f7f7f7")
+make_topmodels_plot(m1)
 par(mfrow = c(1, 1))
 ```
 
-```{r topmodels-1a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m1a_p, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m1a_nb1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m1a_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
+### Conditional heteroscedasticity
+
+```{r fit-2}
+## not accounting for heteroscedasticity
+m2 <- lm(yhnorm ~ x, data = d)
+
+### accounting for heteroscedasticity
+m3 <- crch(yhnorm ~ x | z, data = d)
 ```
 
-In the first and third line, a Poisson model and negative binomial model is fitted to
-simulated data from a Poisson and negative binomial distribution, respectively.
-In the second line, a false response distribution is assumed by fitting a Poisson
-model to simulated data from a negative binomial model. The following
-characteristics can be seen in the model assessment graphs for the misspecified model (2nd line):
-
-* **Wave-like pattern in the rootogram** around the horizontal reference line:
-The data exhibit too many small counts, notably zeros, as well as too many
-large counts for a Poisson model to provide an adequate fit. This leads to a
-misspecified model fit reflecting a substantial amount of overdispersion that
-is not captured by the fitted Poisson distribution (underdispersive model fit)
-[@Kleiber+Zeileis:2016].
-* **U-shaped PIT**: The values attained by the predictive CDF at the observations
-are located with increased frequency at both ends of the CDF, indicating an
-underdispersed predictive distribution (model fit).
-* **Inverse S-shaped QQ-plot**: Quantile residuals are over-dispersed relative to
-the normal distribution, i.e., we experience an increased number of outliers or
-the underlying distribution of the residuals has fatter tails than a normal
-distribution [@Love:2018;@Yearsley:2021]. In terms of quantiles this means that the first quantile is
-much less than the first theoretical quantile and the last quantile is greater than the last theoretical 
-quantile. This is reflected in the corresponding Q-Q plot [@Kross:2016].
-
-
-## 1b Wrong distributional assumption w/ regressors
-
-Artificial data from negative binomial and Poisson distribution with regressors: 
-
-```{r dgp_1b}
-d1b <- data.frame(
-  x = runif(500, 0, 2)
-)
-d1b$mu <- 1 + 2 * d1b$x
-d1b$yp <- rpois(500, lambda = d1b$mu)
-d1b$ynb <- rnbinom(500, mu = d1b$mu, size = 2)
-```
-
-```{r curves-1b, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-plot(dpois(seq(1, 10), lambda = 3), type = "b", xlab = "Random Variable", ylab = "Probability")
-lines(dnbinom(seq(1, 10), mu = 3, size = 2), type = "b", col = 2)
-legend("topright", c("y ~ Poisson distribution", "y ~ Negative binomial distribution"), lty = 1, col = c(1, 2), bty = "n")
-```
-
-```{r fit-1b}
-## correctly specified Poisson model fit
-m1b_p <- glm(yp ~ x, data = d1b, family = poisson)
-
-## misspecified Poisson model fit
-m1b_nb1 <- glm(ynb ~ x, data = d1b, family = poisson)
-
-## correctly specified Negbin model fit
-m1b_nb2 <- glm.nb(ynb ~ x, data = d1b)
-```
-
-```{r qresiduals-1b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m1b_p)
-make_residuals_plot(m1b_nb1)
-make_residuals_plot(m1b_nb2)
-par(mfrow = c(1, 1))
-```
-
-```{r topmodels-1b, echo = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m1b_p, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m1b_nb1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m1b_nb2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
-```
-
-As for the example 1a, a false response distribution is assumed for the 2nd
-model by fitting a Poisson model to simulated data from a negative binomial
-model. Hence, similar characteristics can be seen in the model assessment
-graphs for the misspecified model (2nd line).
-
-
-## 2a Underestimating the tails of the distribution w/o regressors
-
-Artificial data from a Student t distribution with four degrees of freedom without regressors:
-
-```{r dgp_2a}
-d2a <- data.frame(
-  yt = rt(1000, 4)
-)
-```
-
-```{r curves-2a, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dt(x, df = 4), from = -6, to = 6, ylim = c(0, 0.5), xlab = "Random Variable", ylab = "Probability")
-curve(dnorm, from = -6, to = 6, add = TRUE, col = 2)
-legend("topright", c("y ~ t_4", "y ~ norm"), lty = 1, col = c(1, 2), bty = "n")
-```
-
-```{r fit-2a}
-## correct student-t fit
-m2a_t <- crch(yt ~ 1, dist = "student", data = d2a)
-
-## incorrect normal fit
-m2a_n <- crch(yt ~ 1, dist = "gaussian", data = d2a)
-```
-
-```{r qresiduals-2a, echo = FALSE, fig.height = 4, out.width = "60%", fig.align = "center"}
+```{r qresiduals-2, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
 par(mfrow = c(1, 2), bg = "#f7f7f7")
-make_residuals_plot(m2a_t)
-make_residuals_plot(m2a_n)
+make_residuals_plot(m2)
+make_residuals_plot(m3)
 par(mfrow = c(1, 1))
 ```
 
-```{r topmodels-2a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-
+```{r topmodels-2, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
 par(mfrow = c(2, 4), bg = "#f7f7f7")
-topmodels(m2a_t, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m2a_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+make_topmodels_plot(m2)
+make_topmodels_plot(m3)
+```
+
+### Censoring (0, 100)
+
+```{r fit-3}
+## not accounting for censoring
+m4 <- lm(ycnorm ~ x, data = d)
+
+## accounting for censoring
+m5 <- crch(ycnorm ~ x | 1, data = d, left = 0, right = 100)
+```
+
+```{r qresiduals-3, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(m4)
+make_residuals_plot(m5)
 par(mfrow = c(1, 1))
 ```
 
-Wrong assumption of the underlying response distribution, estimating a Normal distribution instead of a Student t distribution with four degrees of freedom, leads to an underestimting of the heavy tails and an underdispersive model fit (shown in the 2nd line): 
-
-* Tails too light -> overdispersive model fit.
-* **inverse U-shaped PIT**, **inverse S-shaped QQ-plot**.
-
-
-## 2b Underestimating the tails of the distribution w/ regressors
-
-Artificial data from a Student t distribution with four degrees of freedom with regressors:
-
-```{r dgp_2b}
-d2b <- data.frame(
-  x = runif(1000, 0, 1)
-)
-
-d2b$yt <- d2b$x + 1 * rt(1000, 4)
-d2b$yn <- d2b$x + 1 * rnorm(1000)
+```{r topmodels-3, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(2, 4), bg = "#f7f7f7")
+make_topmodels_plot(m4)
+make_topmodels_plot(m5)
 ```
 
-```{r curves-2b, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dt(x, df = 4), from = -6, to = 6, ylim = c(0, 0.5), xlab = "Random Variable", ylab = "Probability")
-curve(dnorm, from = -6, to = 6, add = TRUE, col = 2)
-legend("topright", c("y ~ t_4", "y ~ norm"), lty = 1, col = c(1, 2), bty = "n")
+### Truncation (> 0)
+
+```{r fit-4}
+## not accounting for truncation
+m6 <- lm(ytnorm ~ x, data = d)
+
+# not accounting for truncation
+m7 <- trch(ytnorm ~ x | 1, data = d, left = 0)
 ```
 
-```{r fit-2b}
-## correct student-t fit
-m2b_t <- crch(yt ~ x, dist = "student", data = d2b)
-
-## incorrect normal fit
-m2b_n1 <- crch(yt ~ x, dist = "gaussian", data = d2b)
-
-## correct normal fit
-m2b_n2 <- crch(yn ~ x, dist = "gaussian", data = d2b)
-```
-
-```{r qresiduals-2b, echo = FALSE, fig.height = 4, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m2b_t)
-make_residuals_plot(m2b_n1)
-make_residuals_plot(m2b_n2)
+```{r qresiduals-4, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(m6)
+make_residuals_plot(m7)
 par(mfrow = c(1, 1))
 ```
 
-```{r topmodels-2b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
+```{r topmodels-4, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(2, 4), bg = "#f7f7f7")
+make_topmodels_plot(m6)
+make_topmodels_plot(m7)
+```
 
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m2b_t, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m2b_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m2b_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+### Heavy tails (t_4)
+
+```{r fit-5}
+## not accounting for heavy tails
+m8 <- lm(yt ~ x, data = d)
+
+## accounting for heavy tails
+m9 <- crch(yt ~ x | 1, data = d, dist = "student")
+```
+
+```{r qresiduals-5, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(m8)
+make_residuals_plot(m9)
 par(mfrow = c(1, 1))
 ```
 
-Wrong assumption of the underlying response distribution, estimating a Normal distribution instead of a Student t distribution with four degrees of freedom, leads to an underestimting of the heavy tails and an underdispersive model fit (shown in the 2nd line): 
-
-* Tails too light -> overdispersive model fit.
-* **inverse U-shaped PIT**, **inverse S-shaped QQ-plot**.
-
-
-## 3a Over-/underdispersive model fits w/o regressors
-
-Artificial data from a Gaussian, Uniform
-and Laplace (mu = 0, s = 0.4) distribution without regressors:
-
-```{r dgp_3a}
-d3a <- data.frame(
-  yn = rnorm(1000),
-  yu = runif(1000, min = -6, max = 6),
-  yl = rlaplace(1000, m = 0, s = 0.4)
-)
+```{r topmodels-5, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(2, 4), bg = "#f7f7f7")
+make_topmodels_plot(m8)
+make_topmodels_plot(m9)
 ```
 
-```{r curves-3a, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dnorm, from = -6, to = 6, ylim = c(0, 1),  xlab = "Random Variable", ylab = "Probability")
-curve(dunif(x, min = -6, max = 6), from = -6, to = 6, add = TRUE, col = 2)
-curve(dlaplace, from = -6, to = 6, add = TRUE, col = 4)
-legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 4), bty = "n")
+### Skewness
+```{r fit-6}
+## not accounting for right skewed residuals
+m10 <- lm(yrskew ~ x, data = d)
+
+## not accounting for left skewed residuals
+m11 <- lm(ylskew ~ x, data = d)
 ```
 
-```{r fit-3a}
-## correct gaussian fit
-m3a_n <- crch(yn ~ 1, dist = "gaussian", data = d3a)
-
-## incorrect fit (underdispersive model fit)
-## [U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot]
-m3a_u <- crch(yu ~ 1, dist = "gaussian", data = d3a)
-
-## incorrect fit (overdispersive model fit)
-## [inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot]
-m3a_l <- crch(yl ~ 1, dist = "gaussian", data = d3a)
-```
-
-```{r qresiduals-3a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m3a_n)
-make_residuals_plot(m3a_u)
-make_residuals_plot(m3a_l)
+```{r qresiduals-6, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(m10)
+make_residuals_plot(m11)
 par(mfrow = c(1, 1))
 ```
 
-```{r topmodels-3a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m3a_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m3a_u, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m3a_l, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+```{r topmodels-6, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(2, 4), bg = "#f7f7f7")
+make_topmodels_plot(m10)
+make_topmodels_plot(m11)
+```
+
+### Over-/Underdispersion
+Other misspecified distribution: uniform, laplace
+
+```{r fit-7}
+## misspecified distribution leading to an underdispersed predictive distribution
+m12 <- lm(yunif ~ x, data = d)
+
+## misspecified distribution leading to an overdispersed predictive distribution
+m13 <- lm(ylaplace ~ x, data = d)
+```
+
+```{r qresiduals-7, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(m12)
+make_residuals_plot(m13)
 par(mfrow = c(1, 1))
 ```
 
-Wrong assumption of underlying distribution, Uniform or Laplace distribution instead of a Normal distribution, leads to an underdispersive and overdispersive model fit (shown in the 2nd and 3rd lines):
-
-* Underdispersive model fit: **U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot**
-* Overdispersive model fit: **inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot**
-
-The largest/smallest values are not as large/small as
-expected or under-dispersed data has a reduced number of outliers (i.e. the
-true underlying distribution has thinner tails).
-
-
-## 3b Over-/underdispersive model fits w/ regressors
-
-Artificial data from a Gaussian, Uniform and Laplace distribution with regressors:
-
-```{r dgp_3b}
-d3b <- data.frame(
-  x = runif(1000, 0, 1)
-)
-d3b$yn <- 0 + 1 * rnorm(1000, mean = d3b$x)
-d3b$yu <- 0 + 1 * runif(1000, min = d3b$x - 1, max = d3b$x + 1)
-d3b$yl <- 0 + 1 * rlaplace(1000, m = d3b$x, s = 0.4)
+```{r topmodels-7, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(2, 4), bg = "#f7f7f7")
+make_topmodels_plot(m12)
+make_topmodels_plot(m13)
 ```
 
-```{r curves-3b, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dnorm, from = -6, to = 6, ylim = c(0, 1),  xlab = "Random Variable", ylab = "Probability")
-curve(dunif(x, min = -6, max = 6), from = -6, to = 6, add = TRUE, col = 2)
-curve(dlaplace, from = -6, to = 6, add = TRUE, col = 4)
-legend("topright", c("y ~ norm", "y ~ unif", "y ~ laplace"), lty = 1, col = c(1, 2, 4), bty = "n")
+## Count data 
+
+### Poisson
+```{r fit-8}
+## correct model fit
+cm1 <- glm(ypois ~ x, data = d, family = poisson)
 ```
 
-```{r fit-3b}
-## correct gaussian fit
-m3b_n <- crch(yn ~ x, dist = "gaussian", data = d3b)
-
-## incorrect fit (underdispersive model fit)
-## [U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot]
-m3b_u <- crch(yu ~ x, dist = "gaussian", data = d3b)
-
-## incorrect fit (overdispersive model fit)
-## [inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot]
-m3b_l <- crch(yl ~ x, dist = "gaussian", data = d3b)
-```
-
-```{r qresiduals-3b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m3b_n)
-make_residuals_plot(m3b_u)
-make_residuals_plot(m3b_l)
+```{r topmodels-8, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(1, 4), bg = "#f7f7f7")
+make_topmodels_plot(cm1)
 par(mfrow = c(1, 1))
 ```
 
-```{r topmodels-3b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m3b_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m3b_u, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m3b_l, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
+### Overdispersion (negative binomial)
+```{r fit-9}
+## misspecified distribution leading to an overdispersed predictive distribution
+cm2 <- glm(ynegbin ~ x, data = d, family = poisson)
+
+## correct distributional assumption
+cm3 <- MASS::glm.nb(ynegbin ~ x, data = d)
+```
+
+```{r qresiduals-9, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(cm2)
+make_residuals_plot(cm3)
 par(mfrow = c(1, 1))
 ```
 
-Wrong assumption of underlying distribution, Uniform or Laplace distribution instead of a Normal distribution, leads to an underdispersive and overdispersive model fit (shown in the 2nd and 3rd lines):
-
-* Underdispersive model fit: **U-shaped PIT, S-shaped QQ-plot, "thin tails" worm plot**
-* Overdispersive model fit: **inverse U-shaped PIT, inverse S-shaped QQ-plot, "fat tails" worm plot**
-
-
-## 4a Not Accounting for Skewness w/o regressors
-
-Artificial data from a Normal distribution with no skewness, as well as from a right skewed, and left skewed Normal distribution without regressors:
-
-```{r dgp_4a}
-d4a <- data.frame(
-  yn = rsn(n = 100, xi = 0, omega = 1, alpha = 0, tau = 0),
-  yrs = rsn(n = 100, xi = 0, omega = 1, alpha = 5, tau = 0),
-  yls = rsn(n = 100, xi = 0, omega = 1, alpha = -5, tau = 0)
-)
+```{r topmodels-9, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(2, 4), bg = "#f7f7f7")
+make_topmodels_plot(cm2)
+make_topmodels_plot(cm3)
 ```
 
-```{r curves-4a, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1, ylim = c(0, 1),
-   xlab = "Random Variable", ylab = "Probability")
-curve(dsn(x, xi = 0, omega = 1, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
-curve(dsn(x, xi = 0, omega = 1, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 4)
-legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 4), bty = "n")
+### Zero-inflation
+
+```{r fit-10}
+## not accouting for zero inflation
+cm4 <- glm(yzip ~ x, data = d, family = poisson)
+
+## accouting for zero inflation
+cm5 <- pscl::zeroinfl(yzip ~ x | 1, data = d, dist = "poisson")
 ```
 
-```{r fit-4a}
-## correct gaussian fit
-m4a_n <- crch(yn ~ 1, data = d4a, dist = "gaussian")
-
-## incorrect fit: right-skewed residuals
-m4a_rs <- crch(yrs ~ 1, data = d4a, dist = "gaussian")
-
-## incorrect fit: left-skewed residuals
-m4a_ls <- crch(yls ~ 1, data = d4a, dist = "gaussian")
-```
-
-```{r qresiduals-4a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m4a_n)
-make_residuals_plot(m4a_rs)
-make_residuals_plot(m4a_ls)
+```{r qresiduals-10, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
+par(mfrow = c(1, 2), bg = "#f7f7f7")
+make_residuals_plot(cm4)
+#make_residuals_plot(cm5)
 par(mfrow = c(1, 1))
 ```
 
-```{r topmodels-4a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m4a_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m4a_rs, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m4a_ls, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
+```{r topmodels-10, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
+par(mfrow = c(2, 4), bg = "#f7f7f7")
+make_topmodels_plot(cm4)
+#make_topmodels_plot(cm5)
 ```
 
-Wrong assumption of underlying distribution, Normal distribution instead of rigth and left skewed Normal distriubtion, leads to a misspecified model fits (shown in the 2nd and 3rd lines):
+## Summary
 
-* Right-skewed residuals: **curved (positive skewed) QQ-Plot, U-shape wormplot**
-* Left-skewed residuals: **curved (negative skewed) QQ-Plot, inverse U-shape wormplot**
 
-
-## 4b Not Accounting for Skewness w/o regressors
-
-Artificial data from a Normal distribution with no skewness, as well as from a right skewed, and left skewed Normal distribution with regressors:
-
-```{r dgp_4b}
-d4b <- data.frame(
-  x = rnorm(1000, 15, 1.2),
-  z <- rnorm(1000, -0.5, 0.4)
-)
-d4b$mu <- 0.4 + 0.9 * d4b$x
-d4b$sigma <- exp(0.3 + 0.6 * exp(d4b$z))
-
-d4b$yn <- rsn(n = 1000, xi = d4b$mu, omega = d4b$sigma, alpha = 0, tau = 0)
-d4b$yrs <- rsn(n = 1000, xi = d4b$mu, omega = d4b$sigma, alpha = 5, tau = 0)
-d4b$yls <- rsn(n = 1000, xi = d4b$mu, omega = d4b$sigma, alpha = -5, tau = 0)
-```
-
-```{r curves-4b, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dsn(x, xi = 0, omega = 1, alpha = 0, tau = 0), from = -8, to = 8, col = 1, ylim = c(0, 1),
-   xlab = "Random Variable", ylab = "Probability")
-curve(dsn(x, xi = 0, omega = 1.8, alpha = 5, tau = 0), from = -8, to = 8, add = TRUE, col = 2)
-curve(dsn(x, xi = 0, omega = 1.8, alpha = -5, tau = 0), from = -8, to = 8, add = TRUE, col = 4)
-legend("topright", c("y1 ~ norm", "y2 ~ right skewed", "y3 ~ left skewed"), lty = 1, col = c(1, 2, 4), bty = "n")
-```
-
-```{r fit-4b}
-## correct gaussian fit
-m4b_n <- crch(yn ~ x | z, data = d4b, dist = "gaussian")
-
-## incorrect fit: right-skewed residuals
-## [curved (positive skewed) QQ-Plot, U-shape wormplot]
-m4b_rs <- crch(yrs ~ x | z, data = d4b, dist = "gaussian")
-
-## incorrect fit: left-skewed residuals
-## [curved (negative skewed) QQ-Plot, inverse U-shape wormplot]
-m4b_ls <- crch(yls ~ x | z, data = d4b, dist = "gaussian")
-```
-
-```{r qresiduals-4b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m4b_n)
-make_residuals_plot(m4b_rs)
-make_residuals_plot(m4b_ls)
-par(mfrow = c(1, 1))
-```
-
-```{r topmodels-4b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m4b_n, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m4b_rs, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m4b_ls, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
-```
-
-As for 4a, wrong assumption of underlying distribution, Normal distribution instead of rigth and left skewed Normal distriubtion, leads to a misspecified model fits (shown in the 2nd and 3rd lines):
-
-
-* Right-skewed residuals: **curved (positive skewed) QQ-Plot, U-shape wormplot**
-* Left-skewed residuals: **curved (negative skewed) QQ-Plot, inverse U-shape wormplot**
-
-
-## 5a Not Accounting for Truncation w/o regressors
-
-Artificial data from Logistic distribution with and without truncation at zero. Data generating process without regressors:
-```{r dgp_5a}
-d5a <- data.frame(
-  ytn = rtnorm(1000, 0.3, 0.6, left = 0),
-  yn = rtnorm(1000, 0.3, 0.6, left = -Inf)
-)
-```
-
-```{r curves-5a, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dtnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
-curve(dtnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
-legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
-```
-
-```{r fit-5a}
-## correct truncated normal fit
-m5a_tn <- crch(ytn ~ 1, data = d5a, dist = "gaussian", truncated = TRUE, left = 0)
-
-## incorrect normal fit
-m5a_n1 <- crch(ytn ~ 1, data = d5a, dist = "gaussian", truncated = TRUE, left = -Inf)
-
-## correct normal fit
-m5a_n2 <- crch(yn ~ 1, data = d5a, dist = "gaussian", truncated = TRUE, left = -Inf)
-```
-
-```{r qresiduals-5a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m5a_tn)
-make_residuals_plot(m5a_n1)
-make_residuals_plot(m5a_n2)
-par(mfrow = c(1, 1))
-```
-
-```{r topmodels-5a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m5a_tn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5a_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5a_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
-```
-
-Wrong assumption of underlying distribution, not considering truncation at zero, leads to misspecified model fit in the 2nd line:
-
-* $\dots$
-
-
-## 5b Not Accounting for Truncation w/ regressors
-
-Artificial data from Logistic distribution with and without truncation at zero. Data generating process with regressors:
-
-```{r dgp_5b}
-d5b <- data.frame(
-  x = rtnorm(1000, 0.4, 0.6, left = 0),
-  z <- rnorm(1000, -0.6, 0.2)
-)
-d5b$mu <- 0.2 + 1.8 * d5b$x
-d5b$sigma <- exp(0.1 + 0.6 * exp(d5b$z))
-
-d5b$ytn <- rtnorm(1000, mean = d5b$mu, sd = d5b$sigma, left = 0)
-d5b$yn <- rtnorm(1000, mean = d5b$mu, sd = d5b$sigma)
-```
-
-```{r curves-5b, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dtnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
-curve(dtnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
-legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
-```
-
-```{r fit-5b}
-## correct truncated normal fit
-m5b_tn <- crch(ytn ~ x | z, data = d5b, dist = "gaussian", truncated = TRUE, left = 0)
-
-## incorrect normal fit
-m5b_n1 <- crch(ytn ~ x | z, data = d5b, dist = "gaussian", truncated = TRUE, left = -Inf)
-
-## correct normal fit
-m5b_n2 <- crch(yn ~ x | z, data = d5b, dist = "gaussian", truncated = TRUE, left = -Inf)
-```
-
-```{r qresiduals-5b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m5b_tn)
-make_residuals_plot(m5b_n1)
-make_residuals_plot(m5b_n2)
-par(mfrow = c(1, 1))
-```
-
-```{r topmodels-5b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m5b_tn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5b_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m5b_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
-```
-
-Wrong assumption of underlying distribution, not considering truncation at zero, leads to misspecified model fit in the 2nd line:
-
-
-* $\dots$
-
-
-## 6a Not Accounting for Censoring w/o regressors
-
-Artificial data from Logistic distribution with and without censoring at zero. Data generating process without regressors:
-```{r dgp_6a}
-d6a <- data.frame(
-  ycn = rcnorm(1000, 0.4, 0.6, left = 0),
-  yn = rcnorm(1000, 0.4, 0.6, left = -Inf)
-)
-```
-
-```{r curves-6a, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dcnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
-curve(dcnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
-legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
-```
-
-```{r fit-6a}
-## correct censored normal fit
-m6a_cn <- crch(ycn ~ 1, data = d6a, dist = "gaussian", truncated = FALSE, left = 0)
-
-## incorrect normal fit
-m6a_n1 <- crch(ycn ~ 1, data = d6a, dist = "gaussian", truncated = FALSE, left = -Inf)
-
-## correct normal fit
-m6a_n2 <- crch(yn ~ 1, data = d6a, dist = "gaussian", truncated = FALSE, left = -Inf)
-```
-
-```{r qresiduals-6a, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m6a_cn)
-make_residuals_plot(m6a_n1)
-make_residuals_plot(m6a_n2)
-par(mfrow = c(1, 1))
-```
-
-```{r topmodels-6a, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m6a_cn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m6a_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m6a_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
-```
-
-Wrong assumption of underlying distribution, not considering censoring at zero, leads to misspecified model fit in the 2nd line:
-
-* $\dots$
-
-
-## 6b Not Accounting for Censoring w/ regressors
-
-Artificial data from Logistic distribution with and without censoring at zero. Data generating process with regressors:
-
-```{r dgp_6b}
-d6b <- data.frame(
-  x = rcnorm(1000, 0.4, 0.6, left = 0),
-  z <- rnorm(1000, -0.6, 0.2)
-)
-d6b$mu <- 0.2 + 1.8 * d6b$x
-d6b$sigma <- exp(0.1 + 0.6 * exp(d6b$z))
-
-d6b$ycn <- rcnorm(1000, mean = d6b$mu, sd = d6b$sigma, left = 0)
-d6b$yn <- rcnorm(1000, mean = d6b$mu, sd = d6b$sigma)
-```
-
-```{r curves-6b, echo = FALSE, out.width = "60%", fig.align = "center"}
-par(bg = "#f7f7f7")
-curve(dcnorm(x, left = 0), from = -8, to = 8, col = 1, ylim = c(0, 0.6))
-curve(dcnorm(x, left = -Inf), from = -8, to = 8, add = TRUE, col = 2)
-legend("topright", c("y1 ~ cens. normal", "y2 ~ normal"), lty = 1, col = c(1, 2), bty = "n")
-```
-
-```{r fit-6b}
-## correct censored normal fit
-m6b_cn <- crch(ycn ~ x | z, data = d6b, dist = "gaussian", truncated = FALSE, left = 0)
-
-## incorrect normal fit
-m6b_n1 <- crch(ycn ~ x | z, data = d6b, dist = "gaussian", truncated = FALSE, left = -Inf)
-
-## correct normal fit
-m6b_n2 <- crch(yn ~ x | z, data = d6b, dist = "gaussian", truncated = FALSE, left = -Inf)
-```
-
-```{r qresiduals-6b, echo = FALSE, fig.height = 3, out.width = "80%", fig.align = "center"}
-par(mfrow = c(1, 3), bg = "#f7f7f7")
-make_residuals_plot(m6b_cn)
-make_residuals_plot(m6b_n1)
-make_residuals_plot(m6b_n2)
-par(mfrow = c(1, 1))
-```
-
-```{r topmodels-6b, echo = FALSE, fig.height = 6, out.width = "100%", fit.align = "center"}
-par(mfrow = c(3, 4), bg = "#f7f7f7")
-topmodels(m6b_cn, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m6b_n1, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-topmodels(m6b_n2, which = c(1, 2, 4, 5), single_page = TRUE, spar = FALSE)
-par(mfrow = c(1, 1))
-```
-
-Wrong assumption of underlying distribution, not considering censoring at zero, leads to misspecified model fit in the 2nd line:
-
-
-* $\dots$
-
-
-# Summary
-
-* U-shaped histograms indicate underdispersed predictive distributions, hump or inverse-U shaped histograms point at overdispersion, and skewed histograms occur when central tendencies are biased [@Czado+Gneiting+Held:2009].
 
 ## References
 
