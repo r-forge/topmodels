@@ -1,5 +1,5 @@
 ---
-title: "Graphical Model Assessment"
+title: "Graphical Evaluation: Simulations"
 author: "Moritz Lang, Achim Zeileis"
 output:
   html_document:
@@ -8,7 +8,7 @@ output:
     theme: flatly
 bibliography: ref.bib
 vignette: >
-  %\VignetteIndexEntry{Graphical Model Assessment under Different Model Misspecifications}
+  %\VignetteIndexEntry{Graphical Evaluation: Simulations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
   %\VignetteKeywords{FIXME}
@@ -43,17 +43,33 @@ library("sn") # for skewed N dist
 options(digits = 4)
 knitr::opts_chunk$set(fig.aling = "center")
 
-## helper function for plotting residuals
-make_residuals_plot <- function(object, xlim = c(-4, 4), ylim = c(0, 0.5)) {
+#make_residuals_plot <- function(object, xlim = c(-4, 4), ylim = c(0, 0.5)) {
+#
+#  ## histogram
+#  hist(qresiduals(object), breaks = 15, main = "", freq = FALSE, xlim = xlim, ylim = ylim)
+#
+#  ## standard normal distribution
+#  curve(dnorm, col = 2, from = -4, to = 4, add = TRUE)
+#
+#  ## legend
+#  legend("topright", "std. norm", lty = 1, col = 2, bty = "n")
+#}
 
-  ## histogram
-  hist(qresiduals(object), breaks = 15, main = "", freq = FALSE, xlim = xlim, ylim = ylim)
+make_residuals_plot <- function(object, breaks = breaks) {
 
-  ## standard normal distribution
-  curve(dnorm, col = 2, from = -4, to = 4, add = TRUE)
+  name <- deparse(substitute(object))
 
-  ## legend
+  set.seed(1)
+  pithist(object, breaks = c(0, 0.01, 1:9 / 10, 0.99, 1), main = name)
+
+  set.seed(1)
+  hist(qq <- qresiduals(object), freq = FALSE,
+    main = sprintf("Histogram of qresiduals(%s)", name), xlab = "Q-Q residuals")
+  curve(dnorm, from = min(qq), to = max(qq), col = 2, add = TRUE)
   legend("topright", "std. norm", lty = 1, col = 2, bty = "n")
+
+  set.seed(1)
+  boxplot(data.frame("Q-Q residuals" = qresiduals(object), "std. norm" = rnorm(length(qresiduals(object)))))
 }
 
 make_topmodels_plot <- function(object) {
@@ -126,8 +142,8 @@ m2 <- lm(yhnorm ~ x, data = d)
 m3 <- crch(yhnorm ~ x | z, data = d)
 ```
 
-```{r qresiduals-2, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-2, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m2)
 make_residuals_plot(m3)
 par(mfrow = c(1, 1))
@@ -149,8 +165,8 @@ m4 <- lm(ycnorm ~ x, data = d)
 m5 <- crch(ycnorm ~ x | 1, data = d, left = 0, right = 100)
 ```
 
-```{r qresiduals-3, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-3, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m4)
 make_residuals_plot(m5)
 par(mfrow = c(1, 1))
@@ -172,8 +188,8 @@ m6 <- lm(ytnorm ~ x, data = d)
 m7 <- trch(ytnorm ~ x | 1, data = d, left = 0)
 ```
 
-```{r qresiduals-4, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-4, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m6)
 make_residuals_plot(m7)
 par(mfrow = c(1, 1))
@@ -195,8 +211,8 @@ m8 <- lm(yt ~ x, data = d)
 m9 <- crch(yt ~ x | 1, data = d, dist = "student")
 ```
 
-```{r qresiduals-5, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-5, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m8)
 make_residuals_plot(m9)
 par(mfrow = c(1, 1))
@@ -217,8 +233,8 @@ m10 <- lm(yrskew ~ x, data = d)
 m11 <- lm(ylskew ~ x, data = d)
 ```
 
-```{r qresiduals-6, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-6, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m10)
 make_residuals_plot(m11)
 par(mfrow = c(1, 1))
@@ -241,8 +257,8 @@ m12 <- lm(yunif ~ x, data = d)
 m13 <- lm(ylaplace ~ x, data = d)
 ```
 
-```{r qresiduals-7, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-7, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m12)
 make_residuals_plot(m13)
 par(mfrow = c(1, 1))
@@ -277,8 +293,8 @@ cm2 <- glm(ynegbin ~ x, data = d, family = poisson)
 cm3 <- MASS::glm.nb(ynegbin ~ x, data = d)
 ```
 
-```{r qresiduals-9, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-9, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(cm2)
 make_residuals_plot(cm3)
 par(mfrow = c(1, 1))
@@ -300,8 +316,8 @@ cm4 <- glm(yzip ~ x, data = d, family = poisson)
 cm5 <- pscl::zeroinfl(yzip ~ x | 1, data = d, dist = "poisson")
 ```
 
-```{r qresiduals-10, echo = FALSE, fig.height = 3, out.width = "50%", fig.align = "center"}
-par(mfrow = c(1, 2), bg = "#f7f7f7")
+```{r qresiduals-10, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(cm4)
 #make_residuals_plot(cm5)
 par(mfrow = c(1, 1))
@@ -312,10 +328,6 @@ par(mfrow = c(2, 4), bg = "#f7f7f7")
 make_topmodels_plot(cm4)
 #make_topmodels_plot(cm5)
 ```
-
-## Summary
-
-
 
 ## References
 

@@ -1,0 +1,115 @@
+---
+title: "Graphical Evaluation: Methodology"
+author: "Moritz Lang, Achim Zeileis"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+bibliography: ref.bib
+vignette: >
+  %\VignetteIndexEntry{Graphical Model Assessment under Different Model Misspecifications}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
+  %\VignetteKeywords{FIXME}
+  %\VignettePackage{topmodels}
+---
+
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+```{r preliminaries, echo = FALSE, message = FALSE}
+library("topmodels")
+library("crch")
+library("MASS")
+library("rmutil")  # for laplace dist
+library("sn") # for skewed N dist
+options(digits = 4)
+knitr::opts_chunk$set(fig.aling = "center")
+
+make_residuals_plot <- function(object, breaks = "Sturges", main = "") {
+  name <- deparse(substitute(object))
+
+  set.seed(1)
+  hist(qresiduals(object), breaks = breaks, freq = FALSE,
+    main = main,
+    xlab = "Q-Q residuals", xlim = c(-5, 5), ylim = c(0, 0.6)
+  )
+  curve(dnorm, from = -5, to = 5, col = 2, lwd = 2, add = TRUE)
+  legend("topright", "std. norm", lty = 1, col = 2, lwd = 2, bty = "n")
+  box()
+}
+```
+
+## Q-Q residuals plot and worm plot
+
+```{r dgp-qq, echo = FALSE}
+set.seed(0)
+
+d <- data.frame(
+  y_norm = rnorm(500),
+  y_rskew = sn::rsn(500, xi = 0, omega = 1, alpha = 5, tau = 0),
+  y_lskew = sn::rsn(500, xi = 0, omega = 1, alpha = -5, tau = 0),
+
+  y_htail = rt(500, df = 4),
+  y_ltail = c(rnorm(100), runif(400, min = -1.5, max = 1.5))
+)
+```
+
+```{r fit-qq, echo = FALSE}
+m_norm <- lm(y_norm ~ 1, data = d)
+m_rskew <- lm(y_rskew ~ 1, data = d)
+m_lskew <- lm(y_lskew ~ 1, data = d)
+m_htail <- lm(y_htail ~ 1, data = d)
+m_ltail <- lm(y_ltail ~ 1, data = d)
+```
+
+```{r plot-qq, echo = FALSE, results = "hide"}
+grDevices::svg(file = "figures/graph_eval_meth_qq.svg", width = 12, height = 10)
+par(mfrow = c(3, 5), bg = "#f7f7f7")
+make_residuals_plot(m_norm, breaks = 20, main = "Normal Residuals")
+make_residuals_plot(m_rskew, breaks = 20, main = "Right skewed residuals")
+make_residuals_plot(m_lskew, breaks = 20, main = "Left skewed residuals")
+make_residuals_plot(m_htail, breaks = 20, main = "Heavy tailed residuals")
+make_residuals_plot(m_ltail, breaks = 20, main = "Light tailed residuals")
+qqrplot(m_norm, main = "Q-Q residuals plot")
+qqrplot(m_rskew, main = "Q-Q resiudals plot")
+qqrplot(m_lskew, main = "Q-Q resiudals plot")
+qqrplot(m_htail, main = "Q-Q resiudals plot")
+qqrplot(m_ltail, main = "Q-Q resiudals plot")
+wormplot(m_norm, main = "Worm plot")
+wormplot(m_rskew, main = "Worm plot")
+wormplot(m_lskew, main = "Worm plot")
+wormplot(m_htail, main = "Worm plot")
+wormplot(m_ltail, main = "Worm plot")
+par(mfrow = c(1, 1))
+dev.off()
+```
+
+![](figures/graph_eval_meth_qq.svg){width=100%}
+
+Methodology | Normal | Right skewed | Left skewed | Heavy tailed | Light tailed 
+--- | --- | --- | --- | --- | ---
+**Q-Q plot** | Identity line | Positive curvature | Negative curvature | Reverse S-shape | S-shape
+**Worm plot** | Horizontal line | U-shape | Inverse U-Shape | S-shape on the left bent down | S-shape on the left bent up
+**Interpretation** | Perfect fit | ... | ... |  Values more extrem as expected/predicted |  Values less extrem as expected/predicted
+
+
+## References
+
