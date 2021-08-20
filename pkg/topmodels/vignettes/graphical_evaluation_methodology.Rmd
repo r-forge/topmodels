@@ -56,8 +56,12 @@ make_residuals_plot <- function(object, breaks = "Sturges", main = "") {
   box()
 }
 ```
+## PIT histogram
+Methodology | Normal | Underdispersion | Overdispersion | Central tendencies biased
+--- | --- | --- | --- | --- 
+**PIT histogram** | Uniform | U-shape | Inverse U-shape | Skewed 
 
-## Q-Q residuals plot and worm plot
+## Q-Q residuals plot, worm plot
 
 ```{r dgp-qq, echo = FALSE}
 set.seed(0)
