@@ -16,8 +16,10 @@ navbar:
       href: articles/topmodels.html
     - text: "Articles"
       menu:
-        - text: "Graphical Model Assessment"
-          href: articles/graphical_model_assessment.html
+        - text: "Graphical Evaluation: Methodology"
+          href: articles/graphical_evaluation_methodology.html
+        - text: "Graphical Evaluation: Simulations"
+          href: articles/graphical_evaluation_simulations.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"

@@ -49,71 +49,115 @@ make_residuals_plot <- function(object, breaks = "Sturges", main = "") {
   set.seed(1)
   hist(qresiduals(object), breaks = breaks, freq = FALSE,
     main = main,
-    xlab = "Q-Q residuals", xlim = c(-5, 5), ylim = c(0, 0.6)
+    xlab = "Q-Q residuals", xlim = c(-5, 5), ylim = c(0, 1)
   )
   curve(dnorm, from = -5, to = 5, col = 2, lwd = 2, add = TRUE)
   legend("topright", "std. norm", lty = 1, col = 2, lwd = 2, bty = "n")
   box()
 }
 ```
-## PIT histogram
-Methodology | Normal | Underdispersion | Overdispersion | Central tendencies biased
---- | --- | --- | --- | --- 
-**PIT histogram** | Uniform | U-shape | Inverse U-shape | Skewed 
 
-## Q-Q residuals plot, worm plot
-
-```{r dgp-qq, echo = FALSE}
+```{r dgp, echo = FALSE}
 set.seed(0)
 
+## regressors
 d <- data.frame(
+  x = runif(500, -1, 1),
+  z = runif(500, -1, 1)
+)
+
+d <- transform(d,
   y_norm = rnorm(500),
   y_rskew = sn::rsn(500, xi = 0, omega = 1, alpha = 5, tau = 0),
   y_lskew = sn::rsn(500, xi = 0, omega = 1, alpha = -5, tau = 0),
 
   y_htail = rt(500, df = 4),
-  y_ltail = c(rnorm(100), runif(400, min = -1.5, max = 1.5))
+  y_ltail = c(rnorm(100), runif(400, min = -1.5, max = 1.5)),
+
+  y_odisp = rpois(500, lambda = exp(0 + 2 * x + rnorm(500, mean = 0, sd = 1.5))),
+  y_udisp = round(rnorm(n = 500, mean = exp(0 + 2 * x), sd = 0.001))
+
 )
 ```
 
-```{r fit-qq, echo = FALSE}
+```{r fit, echo = FALSE}
 m_norm <- lm(y_norm ~ 1, data = d)
 m_rskew <- lm(y_rskew ~ 1, data = d)
 m_lskew <- lm(y_lskew ~ 1, data = d)
 m_htail <- lm(y_htail ~ 1, data = d)
 m_ltail <- lm(y_ltail ~ 1, data = d)
+
+m_odisp <- glm(y_odisp ~ x, family = "poisson", data = d)
+m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 ```
 
+## Summary plot
 ```{r plot-qq, echo = FALSE, results = "hide"}
-grDevices::svg(file = "figures/graph_eval_meth_qq.svg", width = 12, height = 10)
-par(mfrow = c(3, 5), bg = "#f7f7f7")
-make_residuals_plot(m_norm, breaks = 20, main = "Normal Residuals")
-make_residuals_plot(m_rskew, breaks = 20, main = "Right skewed residuals")
-make_residuals_plot(m_lskew, breaks = 20, main = "Left skewed residuals")
-make_residuals_plot(m_htail, breaks = 20, main = "Heavy tailed residuals")
-make_residuals_plot(m_ltail, breaks = 20, main = "Light tailed residuals")
+grDevices::svg(file = "figures/graph_eval_meth_qq.svg", width = 14, height = 14)
+par(mfrow = c(6, 7), bg = "#f7f7f7")
+make_residuals_plot(m_norm, breaks = 20, main = "Well calibrated")
+make_residuals_plot(m_rskew, breaks = 20, main = "Too skew to the left")
+make_residuals_plot(m_lskew, breaks = 20, main = "Too skew to the right")
+make_residuals_plot(m_htail, breaks = 20, main = "Tails too light")
+make_residuals_plot(m_ltail, breaks = 20, main = "Tails too heavy")
+make_residuals_plot(m_odisp, main = "Underdispersed")
+make_residuals_plot(m_udisp, main = "Overdispersed")
 qqrplot(m_norm, main = "Q-Q residuals plot")
 qqrplot(m_rskew, main = "Q-Q resiudals plot")
 qqrplot(m_lskew, main = "Q-Q resiudals plot")
 qqrplot(m_htail, main = "Q-Q resiudals plot")
 qqrplot(m_ltail, main = "Q-Q resiudals plot")
+qqrplot(m_odisp, main = "Q-Q resiudals plot")
+qqrplot(m_udisp, main = "Q-Q resiudals plot")
 wormplot(m_norm, main = "Worm plot")
 wormplot(m_rskew, main = "Worm plot")
 wormplot(m_lskew, main = "Worm plot")
 wormplot(m_htail, main = "Worm plot")
 wormplot(m_ltail, main = "Worm plot")
+wormplot(m_odisp, main = "Worm plot")
+wormplot(m_udisp, main = "Worm plot")
+pithist(m_norm, main = "PIT histogram")
+pithist(m_rskew, main = "PIT histogram")
+pithist(m_lskew, main = "PIT histogram")
+pithist(m_htail, main = "PIT histogram") 
+pithist(m_ltail, main = "PIT histogram") 
+pithist(m_odisp, main = "PIT histogram")
+pithist(m_udisp, main = "PIT histogram")
+pithist(m_norm, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_rskew, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_lskew, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_htail, main = "Customized PIT histogram", 
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_ltail, main = "Customized PIT histogram", 
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1))
+pithist(m_odisp, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_udisp, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+rootogram(m_norm, main = "Rootogram")
+rootogram(m_rskew, main = "Rootogram")
+rootogram(m_lskew, main = "Rootogram")
+rootogram(m_htail, main = "Rootogram")
+rootogram(m_ltail, main = "Rootogram")
+rootogram(m_odisp, main = "Rootogram")
+rootogram(m_udisp, main = "Rootogram")
 par(mfrow = c(1, 1))
 dev.off()
 ```
 
 ![](figures/graph_eval_meth_qq.svg){width=100%}
 
-Methodology | Normal | Right skewed | Left skewed | Heavy tailed | Light tailed 
---- | --- | --- | --- | --- | ---
-**Q-Q plot** | Identity line | Positive curvature | Negative curvature | Reverse S-shape | S-shape
-**Worm plot** | Horizontal line | U-shape | Inverse U-Shape | S-shape on the left bent down | S-shape on the left bent up
-**Interpretation** | Perfect fit | ... | ... |  Values more extrem as expected/predicted |  Values less extrem as expected/predicted
-
+Predictive distribution | well calibrated | too skew to the left | too skew to the right | tails too light | tails too heavy | underdispersed (variance too small) | overdispersed (variance too large)
+--- | --- | --- | --- | --- | --- | --- | ---
+**Resdiuals** | normal | right skewed | left skewed | heavy tailed | light tailed | overdispersed | underdispersed
+**Q-Q plot** | identity line | positive curvature | negative curvature | reverse S-shape | S-shape | ? | ?
+**Worm plot** | horizontal line | U-shape | inverse U-shape | S-shape on the left bent down | S-shape on the left bent up | positive slope | negative slope
+**PIT histogram** | uniform | skewed | skewed | superimposed U-shape | superimposed inverse U-shape" | U-shape | inverse U-shape 
+**Rootogram** | ? | ? | ? | wave-like (underfitting in the tails and the center) | ? | ? | ?
+**Interpretation** | no misspecifications | ? | ? |  values more extrem as expected |  values less extrem as expected | ? | ?
 
 ## References
 
