@@ -275,6 +275,9 @@ rootogram.default <- function(object,
   ## expected frequencies (part2)
   expctd <- colSums(p * w)
 
+  ## FIXME: (ML) This must be fixed. Problem of neg. expctd occured in example for underdispersed model fit
+  expctd[expctd < 0] <- 0
+
   ## raw vs. sqrt scale
   if (scale == "sqrt") {
     y <- if (style == "hanging") sqrt(expctd) - sqrt(obsrvd) else 0
