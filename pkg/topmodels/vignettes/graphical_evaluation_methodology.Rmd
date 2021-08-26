@@ -93,8 +93,8 @@ m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 
 ## Summary plot
 ```{r plot-qq, echo = FALSE, results = "hide"}
-grDevices::svg(file = "figures/graph_eval_meth_qq.svg", width = 14, height = 14)
-par(mfrow = c(6, 7), bg = "#f7f7f7")
+grDevices::svg(file = "figures/graph_eval_meth_qq.svg", width = 14, height = 16)
+par(mfrow = c(7, 7), bg = "#f7f7f7")
 make_residuals_plot(m_norm, breaks = 20, main = "Well calibrated")
 make_residuals_plot(m_rskew, breaks = 20, main = "Too skew to the left")
 make_residuals_plot(m_lskew, breaks = 20, main = "Too skew to the right")
@@ -109,6 +109,13 @@ qqrplot(m_htail, main = "Q-Q resiudals plot")
 qqrplot(m_ltail, main = "Q-Q resiudals plot")
 qqrplot(m_odisp, main = "Q-Q resiudals plot")
 qqrplot(m_udisp, main = "Q-Q resiudals plot")
+qqrplot(m_norm, trafo = identity, main = "Uniform Q-Q residuals plot")
+qqrplot(m_rskew, trafo = identity, main = "Uniform Q-Q resiudals plot")
+qqrplot(m_lskew, trafo = identity, main = "Uniform Q-Q resiudals plot")
+qqrplot(m_htail, trafo = identity, main = "Uniform Q-Q resiudals plot")
+qqrplot(m_ltail, trafo = identity, main = "Uniform Q-Q resiudals plot")
+qqrplot(m_odisp, trafo = identity, main = "Uniform Q-Q resiudals plot")
+qqrplot(m_udisp, trafo = identity, main = "Uniform Q-Q resiudals plot")
 wormplot(m_norm, main = "Worm plot")
 wormplot(m_rskew, main = "Worm plot")
 wormplot(m_lskew, main = "Worm plot")
@@ -150,13 +157,13 @@ dev.off()
 
 ![](figures/graph_eval_meth_qq.svg){width=100%}
 
-Predictive distribution | well calibrated | too skew to the left | too skew to the right | tails too light | tails too heavy | underdispersed (variance too small) | overdispersed (variance too large)
+Predictive distribution | well calibrated | too skew to the left | too skew to the right | tails too light | tails too heavy | underdispersed (underestimated variance) | overdispersed (overestimated variance)
 --- | --- | --- | --- | --- | --- | --- | ---
 **Resdiuals** | normal | right skewed | left skewed | heavy tailed | light tailed | overdispersed | underdispersed
-**Q-Q plot** | identity line | positive curvature | negative curvature | reverse S-shape | S-shape | ? | ?
+**Q-Q plot** | bisecting line | positive curvature | negative curvature | reverse S-shape | S-shape | crossing qqline from below (?) | crossing qqline from above ?
 **Worm plot** | horizontal line | U-shape | inverse U-shape | S-shape on the left bent down | S-shape on the left bent up | positive slope | negative slope
 **PIT histogram** | uniform | skewed | skewed | superimposed U-shape | superimposed inverse U-shape" | U-shape | inverse U-shape 
-**Rootogram** | ? | ? | ? | wave-like (underfitting in the tails and the center) | ? | ? | ?
+**Rootogram** | no deviations | ? | ? | wave-like (underfitting in the tails and the center) | ? | ? | ?
 **Interpretation** | no misspecifications | ? | ? |  values more extrem as expected |  values less extrem as expected | ? | ?
 
 ## References
