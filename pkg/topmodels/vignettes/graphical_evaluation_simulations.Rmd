@@ -148,7 +148,7 @@ of [Graphical Evaluation: Methodology](graphical_evaluation_methodology.html)):
   observed and predicted frequences are very small for most values.
 * The PIT histogram is uniform, corresponding to a well calibrated predicitve
   distribution.
-* The Q-Q residuals plot shows most points are located along the identity line.
+* The Q-Q residuals plot shows most points are located along the bisecting line.
 * The worm plot is within its confidence intervals and shows only slight
   deviations from a horizontal line (FIXME: why not completely horizontal).
 
@@ -517,7 +517,7 @@ of [Graphical Evaluation: Methodology](graphical_evaluation_methodology.html)):
   well, without any clear patterns of departure indicating a rather good fit.
 * The PIT histogram is uniform, correspoding to a well calibrated predicitve
   distribution.
-* The Q-Q residuals plot shows most points are located along the identity line.
+* The Q-Q residuals plot shows most points are located along the bisecting line.
 * The worm plot is within its confidence intervals and shows only slight
   deviations from a horizontal line (FIXME: why not completely horizontal).
 
@@ -554,12 +554,14 @@ overdispersion in the data, which corresponds to an underdispersed predictive
 disitriubtion (compare the case "underdispersed" in the summary plot of
 [Graphical Evaluation: Methodology](graphical_evaluation_methodology.html)):
 
-* In the rootogram, the wave-like pattern indicates that low and higher values
-  are clearly underfitted, while the values in between are overfitted. This is
-  in agreement with an uderdispersed model, underestimating the underlying
-  variance. The significant lack of fit for 0 could be an additional indication
-  of excess zeros.
-* The typical U-shape in the PIT histogram supports that the model is underdispersed.
+* In the rootogram, the wave-like pattern around the horizontal reference line
+  indicates that low and higher values are clearly underfitted, while the values
+  in between are overfitted. This is in agreement with an uderdispersed model,
+  underestimating the underlying variance. The significant lack of fit for 0
+  could be an additional indication of excess zeros.
+* The typical U-shape in the PIT histogram supports that the model is
+  underdispersed: The values attained by the predictive CDF at the observations
+  are located with increased frequency at both ends of the CDF.
 * The Q-Q residuals plot shows that many observed values are more extreme than
   expected, i.e., the data exhibit considerable overdispersion that is not
   accounted for in the model fit. Probably due to using positive count data,
@@ -567,6 +569,7 @@ disitriubtion (compare the case "underdispersed" in the summary plot of
   right part of the Q-Q plot.
 * In the worm plot, the positive slope corresponds to the underdispersed
   predictive distribution.
+
 
 
 ### Zero-inflation
@@ -605,13 +608,16 @@ underdispersive predictive distribution (compare the previous example with
 of [Graphical Evaluation: Methodology](graphical_evaluation_methodology.html)):
 
 * In the rootogram, the wave-like pattern indicates that excess zeros
-  are clearly underfitted, high values are slightly underfitted and values in between are overfitted. The significant lack of fit for 0 corresponds well with the excess zeros.
+  are clearly underfitted, high values are slightly underfitted and values in
+  between are overfitted. The significant lack of fit for 0 corresponds well with
+  the excess zeros.
 * The typical U-shape in the PIT histogram supports that the model is underdispersed.
-* The Q-Q residuals plot indicates that some observed values are more extreme than
-  expected, i.e., the data exhibit overdispersion that is not
-  accounted for in the model fit. 
+* The Q-Q residuals plot indicates that some observed values are more extreme
+  than expected, i.e., the data exhibit overdispersion that is not accounted for
+  in the model fit. 
 * In the worm plot, the positive slope corresponds to the underdispersed
-  predictive distribution. The reverse trends at the outer tails of the wormplot are due to (FIXME: why?).
+  predictive distribution. The reverse trends at the outer tails of the
+  wormplot are due to (FIXME: why?).
 
 
 ## References
