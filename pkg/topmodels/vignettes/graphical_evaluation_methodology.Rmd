@@ -91,6 +91,109 @@ m_odisp <- glm(y_odisp ~ x, family = "poisson", data = d)
 m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 ```
 
+## Rootogram
+
+[FIXME: Rewrite whole section "rootogram", just tried to transfer terminology of other
+methods to rootograms.] To assess the goodness of fit of a modeled distribution
+$\mathcal{D}( \cdot )$ with estimated parameters $\hat{\boldsymbol{\theta}}_{i}
+= (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top$, @Kleiber+Zeileis:2016
+proposes so called rootograms.  Rootograms check whether observed frequencies
+$\text{obs}_j$ match the expected frequencies $\text{exp}_j$; for a discrete
+random variable $y_i$, the observed and expected frequency for each integer $j$
+are given by
+
+$$\text{obs}_j = \sum_{i=1}^{n}I(y_i - j),$$
+$$\text{exp}_j = \sum_{i=1}^{n}\mathcal{D}(j | \hat{\boldsymbol{\theta}}_{i}),$$
+
+where $I( \cdot )$ is an indicator variable and $\mathcal{D}( \cdot )$ the
+density function (probability mass function).
+
+In case of a discrete random variable $y_i$, one can use a set of breaks $b_0,
+b_1, b_2, \dots~$ that span a suitable subset of $y_i$. Here, the observed and
+expected frequencies are given by
+
+$$\text{obs}_j = \sum_{i=1}^{n}w_{i} I(y_i \in (b_j, b_{j+1}]),$$
+$$\text{exp}_j = \sum_{i=1}^{n}w{\mathbf{\mathcal{F}}(b_{j+1} | \hat{\boldsymbol{\theta}}_{i}) - \mathbf{\mathcal{F}}(b_{j} | \hat{\boldsymbol{\theta}}_{i})},$$
+
+with $\mathbf{\mathcal{F}}( \cdot )$ being the CDF of the modeled distribution
+and $w_i (i= 1, \dots, n)$ being optional observation-specific weights.
+According to @Kleiber+Zeileis:2016, the weights are needed for survey data and
+also for situations with model-based weights.
+
+## PIT Histogram
+
+To check the calibration of a regression model, @Dawid:1984 proposed the use of
+the probability integral transform (PIT) which is simply the predictive
+cumulative distribution function (CDF) evaluated at the observations. For a
+continuous random variable $y_i$, it is defined as 
+
+$$u_i = \mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_i)$$
+
+ where
+$\mathbf{\mathcal{F}}( \cdot )$ denotes the CDF of the modeled distribution
+$\mathcal{D}( \cdot )$ with estimated parameters $\hat{\boldsymbol{\theta}}_{i}
+= (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top$. If the estimated model
+is a good approximation to the true data generating process, the observation
+will be drawn from the predictive distribution and the PIT values $u_i$ are
+approximately uniformly distributed on $[0, 1]$. Plotting the histogram of the
+PIT values and checking for uniformity is therefore a common empirical way of
+checking for calibration [@Diebold+Gunther+Tay:1998;
+@Gneiting+Balabdaoui+Raftery:2007].  Whereas, deviations from uniformity point
+to underlying forecast errors and model deficiencies: U-shaped histograms refer
+to underdispersed predictive distributions, inverted U-shaped histograms to
+overdispersion, and skewed histograms suggest that central tendencies must be
+biased [@Czado+Gneiting+Held:2009].
+
+When considering discrete response distributions or distributions with a
+discrete component, e.g., in case of censoring, for a random discrete variable
+$y_i$ the PIT $u_i$ is generated as a random draw from the interval
+$\mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_i)$. Even if this
+leads to some randomness in the graphical representation of PIT values, in most
+cases the impact on the graphical evaluation when repeating the calculations
+(i.e. drawing new values $u_i$) is rather small. (FIXME: Compare with
+@Czado+Gneiting+Held:2009 and their references to random PITs).
+
+
+## Q-Q Residuals Plot
+
+Quantile residuals are simply the inverse cumulative distribution function of a
+standard normal distribution $\Phi^{-1}$ evaluated at the values $u_i$, hence,
+they can be defined as 
+
+$$\hat{r}_i = \Phi^{-1}(\mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_{i})) = u_i,$$ 
+
+where $\mathbf{\mathcal{F}}( \cdot )$ again denotes the cumulative distribution
+function (CDF) of the modeled distribution $\mathcal{D}( \cdot )$ with
+estimated parameters $\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1},
+\ldots, \hat{\theta}_{iK})^\top$ [@Dunn+Smyth:1996].  As before, for discrete
+or partly discrete responses, the approach includes some randomization to
+achieve continuous $u_i$ values; quantile residuals are therefore often
+referred to as randomized quantile residuals in the literature
+[@Dunn+Smyth:1996]. 
+
+In case of a correct model fit, the values $u_i$ are uniformly distributed on
+the unit interval and the Q-Q residuals should at least approximately be
+standard normally distributed. Hence, to check for normality, quantile residuals
+can be graphically compared to theoretical quantiles of the standard normal distribution,
+ where strong deviations from the
+bisecting line indicate a misspecified model fit.
+This graphical evaluation is well known as normal probability plot or normal Q-Q plot [@Hoaglin:2006].
+
+But Q-Q plots can also be applied to check if residuals follow any other known 
+distribution, by employing any inverse cumulative distribution function of interest in the 
+computation of quantile residuals and comparing these to the respective theoretical
+quantiles. This is called than a theoretical quantile-quantile plot or Q-Q plot for short [@Friendly:1991].
+
+
+## Worm plot
+
+As in Q-Q plots, small too medium deviations can be quite hard to detect,
+untilting the plot by subtracting the theoretical quantiles, makes detecting
+pattern of departure from a now horizontal line much easier. This so-called
+de-trended Q-Q plot [@Friendly:1991] is best known due to the application in
+@Buuren+Fredriks:2001, and therefore mostly referred to their introduced version
+called worm plot. 
+
 ## Summary plot
 ```{r plot-qq, echo = FALSE, results = "hide"}
 grDevices::svg(file = "figures/graph_eval_meth_qq.svg", width = 14, height = 16)
@@ -160,7 +263,7 @@ dev.off()
 Predictive distribution | well calibrated | too skew to the left | too skew to the right | tails too light | tails too heavy | underdispersed (underestimated variance) | overdispersed (overestimated variance)
 --- | --- | --- | --- | --- | --- | --- | ---
 **Resdiuals** | normal | right skewed | left skewed | heavy tailed | light tailed | overdispersed | underdispersed
-**Q-Q plot** | bisecting line | positive curvature | negative curvature | reverse S-shape | S-shape | crossing qqline from below (?) | crossing qqline from above ?
+**Q-Q plot** | bisecting line | positive curvature (bends above the line at both ends) | negative curvature (bends down at both ends) | reverse S-shape (dips below the line at the low end and rises above it at the high end) | S-shape | crossing qqline from below (?) | crossing qqline from above ?
 **Worm plot** | horizontal line | U-shape | inverse U-shape | S-shape on the left bent down | S-shape on the left bent up | positive slope | negative slope
 **PIT histogram** | uniform | skewed | skewed | superimposed U-shape | superimposed inverse U-shape" | U-shape | inverse U-shape 
 **Rootogram** | no deviations | ? | ? | wave-like (underfitting in the tails and the center) | ? | ? | ?
