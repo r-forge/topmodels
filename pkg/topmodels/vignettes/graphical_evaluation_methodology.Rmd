@@ -100,10 +100,10 @@ estimated parameters $\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1},
 density or probability mass function. In the form presented, it was first
 introduced by @Kleiber+Zeileis:2016 building on work of @Tukey:1977. 
 
-Given an observational vector of a discrete random variable $y_i$, rootograms
-check whether observed frequencies $\text{obs}_j$ match the expected
-frequencies $\text{exp}_j$; hence, the observed and expected frequency are
-given for for each integer $j$ by
+Given an observational vector of a discrete random variable $y_i (i= 1, \dots,
+n)$, rootograms check whether observed frequencies $\text{obs}_j$ match the
+expected frequencies $\text{exp}_j$; hence, the observed and expected frequency
+are given for each integer $j$ by
 
 $$\text{obs}_j = \sum_{i=1}^{n}I(y_i - j),$$
 $$\text{exp}_j = \sum_{i=1}^{n}\mathcal{D}(j | \hat{\boldsymbol{\theta}}_{i}),$$
