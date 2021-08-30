@@ -14,7 +14,7 @@
 #' 
 #' The default \code{qresiduals} method can compute randomized quantile
 #' residuals from a vector (which essentially just calls
-#' \code{\link[stats]{qnorm}}) or a 2-column matrix of probabilities. The
+#' \code{\link[stats:Normal]{qnorm}}) or a 2-column matrix of probabilities. The
 #' latter offers to either draw \code{"random"} samples from the distribution
 #' or compute corresponding \code{"quantile"}s such as the median etc.
 #' 
