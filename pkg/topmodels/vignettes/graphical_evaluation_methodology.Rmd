@@ -93,32 +93,36 @@ m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 
 ## Rootogram
 
-[FIXME: Rewrite whole section "rootogram", just tried to transfer terminology of other
-methods to rootograms.] To assess the goodness of fit of a modeled distribution
-$\mathcal{D}( \cdot )$ with estimated parameters $\hat{\boldsymbol{\theta}}_{i}
-= (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top$, @Kleiber+Zeileis:2016
-proposes so called rootograms.  Rootograms check whether observed frequencies
-$\text{obs}_j$ match the expected frequencies $\text{exp}_j$; for a discrete
-random variable $y_i$, the observed and expected frequency for each integer $j$
-are given by
+The rootogram is a graphical tool for assessing the goodness of fit of a
+parametric univariate distributional model $\mathcal{D}( \cdot )$, with
+estimated parameters $\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1},
+\ldots, \hat{\theta}_{iK})^\top$ and $\mathcal{D}( \cdot )$ desribing the
+density or probability mass function. In the form presented, it was first
+introduced by @Kleiber+Zeileis:2016 building on work of @Tukey:1977. 
+
+Given an observational vector of a discrete random variable $y_i$, rootograms
+check whether observed frequencies $\text{obs}_j$ match the expected
+frequencies $\text{exp}_j$; hence, the observed and expected frequency are
+given for for each integer $j$ by
 
 $$\text{obs}_j = \sum_{i=1}^{n}I(y_i - j),$$
 $$\text{exp}_j = \sum_{i=1}^{n}\mathcal{D}(j | \hat{\boldsymbol{\theta}}_{i}),$$
 
-where $I( \cdot )$ is an indicator variable and $\mathcal{D}( \cdot )$ the
-density function (probability mass function).
+with the indicator variable $I( \cdot )$.
 
-In case of a discrete random variable $y_i$, one can use a set of breaks $b_0,
-b_1, b_2, \dots~$ that span a suitable subset of $y_i$. Here, the observed and
-expected frequencies are given by
+More generally or for a continuous random variable $y_i$, one can use a set of
+breaks $b_0, b_1, b_2, \dots~$ that span a suitable subset of $y_i$. Here, the
+observed and expected frequencies are given by
 
 $$\text{obs}_j = \sum_{i=1}^{n}w_{i} I(y_i \in (b_j, b_{j+1}]),$$
-$$\text{exp}_j = \sum_{i=1}^{n}w{\mathbf{\mathcal{F}}(b_{j+1} | \hat{\boldsymbol{\theta}}_{i}) - \mathbf{\mathcal{F}}(b_{j} | \hat{\boldsymbol{\theta}}_{i})},$$
+$$\text{exp}_j = \sum_{i=1}^{n}w\{\mathbf{\mathcal{F}}(b_{j+1} | 
+  \hat{\boldsymbol{\theta}}_{i}) - \mathbf{\mathcal{F}}(b_{j} | \hat{\boldsymbol{\theta}}_{i})\},$$
 
-with $\mathbf{\mathcal{F}}( \cdot )$ being the CDF of the modeled distribution
-and $w_i (i= 1, \dots, n)$ being optional observation-specific weights.
-According to @Kleiber+Zeileis:2016, the weights are needed for survey data and
-also for situations with model-based weights.
+with $\mathbf{\mathcal{F}}( \cdot )$ being the CDF of the modeled
+distributional model $\mathcal{D}( \cdot )$ and $w_i (i= 1, \dots, n)$ being
+additional introduced observation-specific weights.  The weights are typically
+needed either for survey data or for situations with model-based weights
+[@Kleiber+Zeileis:2016].
 
 ## PIT Histogram
 
