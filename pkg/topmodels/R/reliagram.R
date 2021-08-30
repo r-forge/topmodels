@@ -56,10 +56,10 @@
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
-#' @param breaks numeric vector passed on to \code{\link{cut}} in order to bin
+#' @param breaks numeric vector passed on to \code{\link[base]{cut}} in order to bin
 #' the observations and the predicted probabilities or a function applied to
 #' the predicted probabilities to calculate a numeric value for
-#' \code{\link{cut}}. Typically quantiles to ensure equal number of predictions
+#' \code{\link[base]{cut}}. Typically quantiles to ensure equal number of predictions
 #' per bin, e.g., by \code{breaks = function(x) quantile(x)}.
 #' @param quantiles numeric vector of quantile probabilities with values in
 #' [0,1] to calculate single or several thresholds. Only used if
