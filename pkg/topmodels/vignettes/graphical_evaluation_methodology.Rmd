@@ -94,9 +94,9 @@ m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 ## Rootogram
 
 The rootogram is a graphical tool for assessing the goodness of fit of a
-parametric univariate distributional model $\mathcal{D}( \cdot )$, with
+parametric univariate distributional model, with
 estimated parameters $\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1},
-\ldots, \hat{\theta}_{iK})^\top$ and $\mathcal{D}( \cdot )$ desribing the
+\ldots, \hat{\theta}_{iK})^\top$ and $\mathcal{f}( \cdot )$ desribing the
 density or probability mass function. In the form presented, it was first
 introduced by @Kleiber+Zeileis:2016 building on work of @Tukey:1977. 
 
@@ -106,7 +106,7 @@ expected frequencies $\text{exp}_j$; hence, the observed and expected frequency
 are given for each integer $j$ by
 
 $$\text{obs}_j = \sum_{i=1}^{n}I(y_i - j),$$
-$$\text{exp}_j = \sum_{i=1}^{n}\mathcal{D}(j | \hat{\boldsymbol{\theta}}_{i}),$$
+$$\text{exp}_j = \sum_{i=1}^{n}\mathcal{f}(j | \hat{\boldsymbol{\theta}}_{i}),$$
 
 with the indicator variable $I( \cdot )$.
 
@@ -119,7 +119,7 @@ $$\text{exp}_j = \sum_{i=1}^{n}w\{\mathbf{\mathcal{F}}(b_{j+1} |
   \hat{\boldsymbol{\theta}}_{i}) - \mathbf{\mathcal{F}}(b_{j} | \hat{\boldsymbol{\theta}}_{i})\},$$
 
 with $\mathbf{\mathcal{F}}( \cdot )$ being the CDF of the modeled
-distributional model $\mathcal{D}( \cdot )$ and $w_i (i= 1, \dots, n)$ being
+distributional model $\mathcal{f}( \cdot )$ and $w_i (i= 1, \dots, n)$ being
 additional introduced observation-specific weights.  The weights are typically
 needed either for survey data or for situations with model-based weights
 [@Kleiber+Zeileis:2016].
@@ -135,7 +135,7 @@ $$u_i = \mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_i)$$
 
  where
 $\mathbf{\mathcal{F}}( \cdot )$ denotes the CDF of the modeled distribution
-$\mathcal{D}( \cdot )$ with estimated parameters $\hat{\boldsymbol{\theta}}_{i}
+$\mathcal{f}( \cdot )$ with estimated parameters $\hat{\boldsymbol{\theta}}_{i}
 = (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top$. If the estimated model
 is a good approximation to the true data generating process, the observation
 will be drawn from the predictive distribution and the PIT values $u_i$ are
@@ -168,7 +168,7 @@ $$\hat{r}_i = \Phi^{-1}(\mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_
   \Phi^{-1}(u_i),$$ 
 
 where $\mathbf{\mathcal{F}}( \cdot )$ again denotes the cumulative distribution
-function (CDF) of the modeled distribution $\mathcal{D}( \cdot )$ with
+function (CDF) of the modeled distribution $\mathcal{f}( \cdot )$ with
 estimated parameters $\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1},
 \ldots, \hat{\theta}_{iK})^\top$ [@Dunn+Smyth:1996]. As before, for discrete
 or partly discrete responses, the approach includes some randomization to
