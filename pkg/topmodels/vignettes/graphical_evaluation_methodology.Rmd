@@ -185,7 +185,7 @@ misspecified model fit. This graphical evaluation is well known as normal
 probability plot or normal Q-Q plot [@Hoaglin:2006]. Due to the transformation
 of the PIT values $u_i$ to the normal scale, their extreme values are more
 widely spread, so that normal Q-Q diagrams are better suited than, for example,
-PIT histograms to detect violations of the distribution assumption D within its
+PIT histograms to detect violations of the distribution assumption within its
 tails. An additional possible advantage of Q-Q plots is that they avoid the
 necessity of defining breakpoints as typically needed for histogram style
 evaluations [@Klein+Kneib+Lang+Sohn:2015].
