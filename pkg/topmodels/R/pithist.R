@@ -70,7 +70,8 @@
 #' @param type character. In case of discrete distributions should the PITs be
 #' drawn randomly from the corresponding interval or distributed
 #' proportionally? This argument is not fully supported yet, please keep to the default 
-#' \code{"random"} for now.
+#' \code{"random"} for now. Additionally, nonrandom PIT histograms according to
+#' Czado et al. (2009) can be chosen by setting the type to \code{"nonrandom"}.
 #' @param nsim integer. If \code{type} is \code{"random"} how many simulated
 #' PITs should be drawn?
 #' @param delta numeric. The minimal difference to compute the range of
@@ -161,7 +162,7 @@ pithist.default <- function(object,
                             plot = TRUE,
                             class = NULL,
                             style = c("histogram", "lines"),
-                            type = c("random", "proportional"), # FIXME: (ML) not yet implemented
+                            type = c("random", "nonrandom", "proportional"), # FIXME: (ML) not yet implemented
                             nsim = 1L,
                             delta = NULL,
                             freq = FALSE,
@@ -232,26 +233,64 @@ pithist.default <- function(object,
   # -------------------------------------------------------------------
   # COMPUTATION OF PIT
   # -------------------------------------------------------------------
-  ## either compute proportion exactly (to do...) or approximate by simulation
+  ## get breaks (due to nonrandom must be done before)
+  n <- NROW(newresponse(object, newdata = newdata))  # solely to get n to compute number of breaks
+  if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(n, c(0, 50, 5000, 1000000, Inf))]
+  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
+  ## FIXME: (ML) maybe use xlim instead or `0` and `1`
+
+  ## either compute proportion exactly (to do...), nonrandom according to Czado et al. (2009) 
+  ## or approximate by simulation
   if (type == "proportional") {
     ## FIXME: (ML)
-    ## * Implement proportional over the inteverals (e.g., below censoring point)
+    ## * implement proportional over the inteverals (e.g., below censoring point)
     ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
     stop("not yet implemented")
-  } else {
+  } else if (type == "random") {
     p <- qresiduals.default(object,
       newdata = newdata, trafo = NULL, type = "random",
       nsim = nsim, delta = delta
     )
+
+    ## collect everything as data.frame
+    tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
+    ## TODO: (ML) Maybe get rid of `hist()`
+
+  } else if (type == "nonrandom") {
+    ## compare Czado et al. (2009) 
+
+    ## P_x-1 and P_x
+    p <- qresiduals(object, 
+      newdata = newdata, trafo = NULL, type = "quantile", 
+      prob = c(0, 1)
+    )
+
+    ## equation 2 (continuous vs. discrete)
+    F <- if (all(abs(p[, 2L] - p[, 1L]) < sqrt(.Machine$double.eps))) {
+      function(u) as.numeric(u >= p[, 1L]) 
+      ## FIXME: (Z) check inequality sign to cover include.lowest/right options
+    } else {
+      function(u) pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))
+    }
+
+    ## equation 3 and computation of f_j
+    f <- diff(colMeans(sapply(breaks, F)))
+
+    ## collect everything as data.frame
+    tmp_hist <- list(
+      breaks = breaks,
+      counts = f * n,
+      density  = f / diff(breaks),
+      mids = 0.5 * (breaks[-1L] + breaks[-length(breaks)])
+    )
   }
 
-  ## get breaks
-  if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(NROW(p), c(0, 50, 5000, 1000000, Inf))]
-  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
-  ## FIXME: (ML) Maybe use xlim instead or `0` and `1`
-
   ## compute ci interval
-  if (confint_type == "exact") {
+  ## FIXME: (Z) confidence interval really only valid for equidistant breaks
+  if (length(unique(round(diff(breaks), 10))) > 1) {
+    ci <- c(NA, NA)
+    warning("confint is not yet implemented for non equidistant breaks")
+  } else if (confint_type == "exact") {
     ci <- get_confint(NROW(p), length(breaks) - 1, confint_level, freq)
   } else {
     ci <- get_confint_agresti(
@@ -272,13 +311,10 @@ pithist.default <- function(object,
   # -------------------------------------------------------------------
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
-  ## collect everything as data.frame
-  tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
-  ## TODO: (ML) Maybe get rid of `hist()`
   if (freq) {
     rval <- data.frame(
       x = tmp_hist$mids,
-      y = tmp_hist$counts,
+      y = tmp_hist$counts / nsim,  ## FIXME: (ML) Double check if correct even for point masses
       width = diff(tmp_hist$breaks),
       ci_lwr = ci[1],
       ci_upr = ci[2],
@@ -613,6 +649,12 @@ plot.pithist <- function(x,
           length(ci_lwr) == 1 & length(ci_upr) == 1
       )
     } else {
+      ci_lwr <- NULL
+      ci_upr <- NULL
+    }
+
+    ## FIXME: (ML) Tempory workaround for non equidistant breaks
+    if(is.na(ci_lwr) | is.na(ci_upr)) {
       ci_lwr <- NULL
       ci_upr <- NULL
     }
