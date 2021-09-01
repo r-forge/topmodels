@@ -248,8 +248,8 @@ pithist.default <- function(object,
     stop("not yet implemented")
   } else if (type == "random") {
     p <- qresiduals.default(object,
-      newdata = newdata, trafo = NULL, type = "random",
-      nsim = nsim, delta = delta
+      newdata = newdata, trafo = NULL, delta = delta,
+      type = "random", nsim = nsim
     )
 
     ## collect everything as data.frame
@@ -261,8 +261,8 @@ pithist.default <- function(object,
 
     ## P_x-1 and P_x
     p <- qresiduals(object, 
-      newdata = newdata, trafo = NULL, type = "quantile", 
-      prob = c(0, 1)
+      newdata = newdata, trafo = NULL, delta = delta,
+      type = "quantile", prob = c(0, 1)
     )
 
     ## equation 2 (continuous vs. discrete)
@@ -270,7 +270,7 @@ pithist.default <- function(object,
       function(u) as.numeric(u >= p[, 1L]) 
       ## FIXME: (Z) check inequality sign to cover include.lowest/right options
     } else {
-      function(u) pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))
+      function(u) punif(u, min = p[, 1L], max = p[, 2L]) ## pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))
     }
 
     ## equation 3 and computation of f_j
