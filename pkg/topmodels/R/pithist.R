@@ -70,8 +70,8 @@
 #' @param type character. In case of discrete distributions should the PITs be
 #' drawn randomly from the corresponding interval or distributed
 #' proportionally? This argument is not fully supported yet, please keep to the default 
-#' \code{"random"} for now. Additionally, nonrandom PIT histograms according to
-#' Czado et al. (2009) can be chosen by setting the type to \code{"nonrandom"}.
+#' \code{"random"} for now. Additionally, expected (nonnormal) PIT histograms according to
+#' Czado et al. (2009) can be chosen by setting the type to \code{"expected"}.
 #' @param nsim integer. If \code{type} is \code{"random"} how many simulated
 #' PITs should be drawn?
 #' @param delta numeric. The minimal difference to compute the range of
@@ -162,7 +162,7 @@ pithist.default <- function(object,
                             plot = TRUE,
                             class = NULL,
                             style = c("histogram", "lines"),
-                            type = c("random", "nonrandom", "proportional"), # FIXME: (ML) not yet implemented
+                            type = c("random", "expected", "proportional"), # FIXME: (ML) not yet implemented
                             nsim = 1L,
                             delta = NULL,
                             freq = FALSE,
@@ -233,13 +233,13 @@ pithist.default <- function(object,
   # -------------------------------------------------------------------
   # COMPUTATION OF PIT
   # -------------------------------------------------------------------
-  ## get breaks (due to nonrandom must be done before)
+  ## get breaks (due to "type = expected" must be done before)
   n <- NROW(newresponse(object, newdata = newdata))  # solely to get n to compute number of breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(n, c(0, 50, 5000, 1000000, Inf))]
   if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
   ## FIXME: (ML) maybe use xlim instead or `0` and `1`
 
-  ## either compute proportion exactly (to do...), nonrandom according to Czado et al. (2009) 
+  ## either compute proportion exactly (to do...), "expected" (nonnormal) according to Czado et al. (2009) 
   ## or approximate by simulation
   if (type == "proportional") {
     ## FIXME: (ML)
@@ -256,8 +256,8 @@ pithist.default <- function(object,
     tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
     ## TODO: (ML) Maybe get rid of `hist()`
 
-  } else if (type == "nonrandom") {
-    ## compare Czado et al. (2009) 
+  } else if (type == "expected") {
+    ## compare "nonnormal" in Czado et al. (2009) 
 
     ## P_x-1 and P_x
     p <- qresiduals(object, 
