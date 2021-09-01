@@ -127,7 +127,7 @@ $$\text{exp}_j = \sum_{i=1}^{n}\mathcal{f}(j | \hat{\boldsymbol{\theta}}_{i}),$$
 with the indicator variable $I( \cdot )$ [@Kleiber+Zeileis:2016]. As rootograms are
 best known for count data, the latter form is quite common. 
 
-Different styles of rootograms have been proposed as extensively discussed in
+Different styles of rootograms  have been proposed and are extensively discussed in
 @Kleiber+Zeileis:2016. As default, they propose a so called "hanging"
 rootogram, which aligns all deviations along the horizontal axis, as the
 rectangles are drawn from $\sqrt{exp_j}$ to $\sqrt{exp_j} - \sqrt{obs_j}$, so
@@ -169,13 +169,27 @@ histograms suggest that central tendencies must be biased
 
 When considering discrete response distributions or distributions with a
 discrete component, e.g., in case of censoring, for a random discrete variable
-$y_i$ the PIT $u_i$ is generated as a random draw from the interval
-$\mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_i)$. Even if this
-leads to some randomness in the graphical representation of PIT values, in most
-cases the impact on the graphical evaluation when repeating the calculations
-(i.e. drawing new values $u_i$) is rather small. (FIXME: Compare with
-@Czado+Gneiting+Held:2009 and their references to random PITs).
+$y_i$ the PIT $u_i$ can be generated as a random draw from the interval
+$[\mathbf{\mathcal{F}}(y_i - 1 | \, \hat{\boldsymbol{\theta}}_i),
+\mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_i)]$. Even if this
+leads to some randomness in the graphical representation of PIT values, for
+cases with a high number of observations the impact on the graphical evaluation
+when repeating the calculations (i.e. drawing new values $u_i$) is typically
+rather small. For small data sets, we recommend to increase the number of random draws
+which significantly reduces the randomness in the graphical display.
 
+Alternatively, a nonrandom PIT histogram was introduced by
+@Czado+Gneiting+Held:2009, where rather than building on randomized pointwise
+PIT values $u_i$ the expected fraction of the CDF along the interval
+$[\mathbf{\mathcal{F}}(y_i - 1 | \, \hat{\boldsymbol{\theta}}_i),
+\mathbf{\mathcal{F}}(y_i | \, \hat{\boldsymbol{\theta}}_i)]$ is used. (FIXME: Probably wrong!) In more detail,
+calibration is assessed by aggregating over the observtions $y_i$  and comparing the mean 
+PIT,
+
+
+$$\bar{u}_i = \bar{\mathbf{\mathcal{F}}}(y_i | \, \hat{\boldsymbol{\theta}}_i)$$
+
+$\dots$ 
 
 ## Q-Q Residuals Plot
 
