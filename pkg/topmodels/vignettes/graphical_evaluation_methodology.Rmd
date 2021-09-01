@@ -94,35 +94,54 @@ m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 ## Rootogram
 
 The rootogram is a graphical tool for assessing the goodness of fit of a
-parametric univariate distributional model, with
-estimated parameters $\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1},
-\ldots, \hat{\theta}_{iK})^\top$ and $\mathcal{f}( \cdot )$ desribing the
-density or probability mass function. In the form presented, it was first
-introduced by @Kleiber+Zeileis:2016 building on work of @Tukey:1977. 
+parametric univariate distributional model, with estimated parameters
+$\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1}, \ldots,
+\hat{\theta}_{iK})^\top$ and $\mathcal{f}( \cdot )$ desribing the density or
+probability mass function. 
+Rootograms evaluate graphically whether observed frequencies
+$\text{obs}_j$ match the expected frequencies $\text{exp}_j$ by plotting 
+histogram-like rectangles or bars for the observed frequencies 
+and a curve for the fitted frequencies, both on a square-root scale. In the form
+presented here, it was implemented by @Kleiber+Zeileis:2016 building on work of @Tukey:1977. 
 
-Given an observational vector of a discrete random variable $y_i (i = 1, \ldots,
-n)$, rootograms check whether observed frequencies $\text{obs}_j$ match the
-expected frequencies $\text{exp}_j$; hence, the observed and expected frequency
-are given for each integer $j$ by
+In the most general form, given an observational vector of a random variable
+$y_i (i = 1, \ldots, n)$ which is divided into subsets by a set of breakpoints $b_0,
+b_1, b_2, \dots~$, the observed and expected frequencies are given by
+
+$$\text{obs}_j = \sum_{i=1}^{n}w_{i} I(y_i \in (b_j, b_{j+1}]),$$
+$$\text{exp}_j = \sum_{i=1}^{n}w\{\mathbf{\mathcal{F}}(b_{j+1} |
+  \hat{\boldsymbol{\theta}}_{i}) - \mathbf{\mathcal{F}}(b_{j} | \hat{\boldsymbol{\theta}}_{i})\},$$
+
+with $\mathbf{\mathcal{F}}( \cdot )$ being the CDF of the modeled
+distributional model $\mathcal{f}( \cdot )$ and $w_i$ being optional
+observation-specific weights. Whereby, the weights are typically needed either
+for survey data or for situations with model-based weights
+[@Kleiber+Zeileis:2016].
+
+For a discrete variable $y_i$, the observed and expected frequencies can be
+simplified and are given for each integer $j$ by
 
 $$\text{obs}_j = \sum_{i=1}^{n}I(y_i - j),$$
 $$\text{exp}_j = \sum_{i=1}^{n}\mathcal{f}(j | \hat{\boldsymbol{\theta}}_{i}),$$
 
-with the indicator variable $I( \cdot )$.
+with the indicator variable $I( \cdot )$ [@Kleiber+Zeileis:2016]. As rootograms are
+best known for count data, the latter form is quite common. 
 
-More generally or for a continuous random variable $y_i$, one can use a set of
-breaks $b_0, b_1, b_2, \dots~$ that span a suitable subset of $y_i$. Here, the
-observed and expected frequencies are given by
+Different styles of rootograms have been proposed as extensively discussed in
+@Kleiber+Zeileis:2016. As default, they propose a so called "hanging"
+rootogram, which aligns all deviations along the horizontal axis, as the
+rectangles are drawn from $\sqrt{exp_j}$ to $\sqrt{exp_j} - \sqrt{obs_j}$, so
+that they "hang" from the curve with the expected frequencies $\sqrt{exp_j}$.
 
-$$\text{obs}_j = \sum_{i=1}^{n}w_{i} I(y_i \in (b_j, b_{j+1}]),$$
-$$\text{exp}_j = \sum_{i=1}^{n}w\{\mathbf{\mathcal{F}}(b_{j+1} | 
-  \hat{\boldsymbol{\theta}}_{i}) - \mathbf{\mathcal{F}}(b_{j} | \hat{\boldsymbol{\theta}}_{i})\},$$
+The concept of comparing observed and expected frequencies graphically was also
+introduced in the seminal work on assessing calibration and sharpness for a
+predictive probalilty model by @Gneiting+Balabdaoui+Raftery:2007 and, building
+on this, applied to count data by @Czado+Gneiting+Held:2009.  However, since in
+both cases either the deviations or the expected and observed frequencies are
+presented only as lines connecting the respective frequencies, deviations are
+more difficult to detect compared to the rootograms introduced by @Tukey:1977
+and further enhanced by @Kleiber+Zeileis:2016.
 
-with $\mathbf{\mathcal{F}}( \cdot )$ being the CDF of the modeled
-distributional model $\mathcal{f}( \cdot )$ and $w_i being
-additional introduced observation-specific weights.  The weights are typically
-needed either for survey data or for situations with model-based weights
-[@Kleiber+Zeileis:2016].
 
 ## PIT Histogram
 
