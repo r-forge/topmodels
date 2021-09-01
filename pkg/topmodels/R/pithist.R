@@ -259,13 +259,13 @@ pithist.default <- function(object,
   } else if (type == "expected") {
     ## compare "nonnormal" in Czado et al. (2009) 
 
-    ## P_x-1 and P_x
+    ## minimum and maximum PIT for each observation (P_x-1 and P_x)
     p <- qresiduals(object, 
       newdata = newdata, trafo = NULL, delta = delta,
       type = "quantile", prob = c(0, 1)
     )
 
-    ## equation 2 (continuous vs. discrete)
+    ## equation 2: CDF for each PIT (continuous vs. discrete)
     F <- if (all(abs(p[, 2L] - p[, 1L]) < sqrt(.Machine$double.eps))) {
       function(u) as.numeric(u >= p[, 1L]) 
       ## FIXME: (Z) check inequality sign to cover include.lowest/right options
@@ -273,7 +273,7 @@ pithist.default <- function(object,
       function(u) punif(u, min = p[, 1L], max = p[, 2L]) ## pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))
     }
 
-    ## equation 3 and computation of f_j
+    ## equation 3 and computation of probability for each interval (f_j)
     f <- diff(colMeans(sapply(breaks, F)))
 
     ## collect everything as data.frame
