@@ -94,22 +94,23 @@ m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 ## Introduction
 
 Before discussing the various graphical evaluation methods in more detail, we
-try to outline the underlying motivation and identify similarities and
-differences in the evaluation methods. According to the seminal work of
+want to outline the underlying motivation and identify similarities and
+differences in the methodologies. According to the seminal work of
 @Gneiting+Balabdaoui+Raftery:2007, probabilistic forecasts aim to *maximize the
 sharpness of the predictive distributions subject to calibration*. Calibration
 here refers to the statistical concordance between the forecast and the
-observation, and is thus a joint property of the forecasts and observations.
+observation, and is thus a joint property of the forecast and observation.
 Sharpness, on the other hand, is a property of the forecast only and indicates
 how concentrated a predictive distribution is. In general, the more
 concentrated the sharper the forecast.
 
-We focus on several graphical diagnostic tools to assess the calibration of a
-probabilistic forecast $F( \cdot | \boldsymbol{\theta}_{i})$, issued in form
-of a predictive distribution $f( \cdot | \boldsymbol{\theta}_{i})$. Given
-observations $y_i (1 = \ldots, n)$, we assume a set of observation-specific
-fitted parameters $\hat{\boldsymbol{\theta}}_{i}$, where the estimation may
-have been performed on the same observations $i = 1, \ldots, n$ (i.e.,
+In this article, we focus on several graphical diagnostic tools to assess the
+calibration of a probabilistic forecast $F( \cdot | \boldsymbol{\theta}_{i})$,
+issued in form of a predictive distribution $f( \cdot |
+\boldsymbol{\theta}_{i})$. Given observations $y_i (1 = \ldots, n)$, we assume
+a set of observation-specific fitted parameters $\hat{\boldsymbol{\theta}}_{i}
+= (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top$, where the estimation
+may have been performed on the same observations $i = 1, \ldots, n$ (i.e.,
 corresponding to an in-sample assessment) or on a different data set (i.e.,
 corresponding to an out-of-sample evaluation). The estimation procedure itself
 can be either fully parametric or semi-parametric, as long as fitted parameters
@@ -121,32 +122,29 @@ apparent in all graphical displays due to some sampling variation.
 
 ### Probabilistic calibration: PIT residuals
 
-According to @Gneiting+Balabdaoui+Raftery:2007, calibration can be further
-distinguished between probabilistic calibration and marginal calibration.
-Probabilistic calibration is usually assessed using probability integral
-transform (PIT) values
+According to @Gneiting+Balabdaoui+Raftery:2007, model calibration can be
+further distinguished between probabilistic calibration and marginal
+calibration.  Probabilistic calibration is usually assessed using probability
+integral transform (PIT) values
 [@Dawid:1984;@Diebold+Gunther+Tay:1998;@Gneiting+Balabdaoui+Raftery:2007] or
-so-called PIT residuals [@Warton:2017]:
+so-called PIT residuals [@Warton:2017]. These are simply the predictive
+cumulative distribution function (CDF) evaluated at the observations
 
-$$u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i).$$
+$$u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i),$$
 
-Here $F( \cdot )$ denotes the cumulative distribution function (CDF) of the
-modeled distribution $f( \cdot )$ with estimated parameters
-$\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1}, \ldots,
-\hat{\theta}_{iK})^\top$. 
+where $F( \cdot )$ denotes the CDF of the modeled distribution $f( \cdot )$
+with estimated parameters $\hat{\boldsymbol{\theta}}_{i}$.  PIT residuals have
+the desirable property, that if the model is a good approximation to the true
+data-generating process, i.e., the observation is drawn from the predictive
+distribution, the PIT residuals $u_i$ are approximately uniformly distributed
+on $[0, 1]$ for continous predictive distributions $F( \cdot )$.  PIT residuals
+or variants have therefore been used extensively for model diagnosis and
+depending on their implementation are known under various names, among them
+forecast distribution transformed residuals [@Smith:1985], randomized quantile
+residuals [@Dunn+Smyth:1996], and universal residuals [@Brockwell:2007].
 
-PIT residuals have the desirable property, that if the model is a good
-approximation to the true data-generating process, i.e., the observation is
-drawn from the predictive distribution, the PIT residuals $u_i$ are
-approximately uniformly distributed on $[0, 1]$ for continous predictive
-distributions $F( \cdot )$.  PIT residuals or variants are therefore have been
-used extensively for model diagnosis and depending on their implementation are
-named various names, among them forecast distribution transformed residuals
-[@Smith:1985], randomized quantile residuals [@Dunn+Smyth:1996], universal
-residuals [@Brockwell:2007].
-
-In case of discrete predictive distributions or distributions with a discrete
-component, e.g., in case of censoring, $u_i$ can be generated as a random draw U
+In case of a discrete predictive distribution or a distribution with a discrete
+component, e.g., in case of censoring, $u_i$ can be generated as a random draw $\text{U}$
 from the interval:
 
 $$u_i = \text{U}[F(y_i - 1 | \, \hat{\boldsymbol{\theta}}_i), F(y_i | \,
@@ -160,13 +158,13 @@ Since the PIT residuals are an iid sample from the standard uniform
 distribution, the PIT residuals can also be mapped to other distribution
 scales, e.g. to the standard normal scale, and should follow a standard normal
 distribution here. In the simplest case, the PIT residuals $u_i$ can be plotted
-in so-called P-P plots against the probabilities of a uniform distribution
-[@Wilk:1968;@Handcock+Morris:1999]. However, it is far more common to
-transform the PIT residuals to the normal scale and compare them to the
-standard normal quantiles in a normal Q-Q plot [@Hoaglin:2006].  Alternatively,
-in a PIT histogram, the uniformally distributed PIT residuals are divided into
-intervals by a certain number of breakpoints and plotted in a histogram-style
-plot. Regardless of the graphical display, the PIT residuals are always on the
+against the probabilities of a uniform distribution in so-called P-P plots
+[@Wilk:1968;@Handcock+Morris:1999]. However, it is far more common to transform
+the PIT residuals to the normal scale and compare them to the standard normal
+quantiles in a normal Q-Q plot [@Hoaglin:2006].  Alternatively, in a PIT
+histogram, the uniformally distributed PIT residuals are divided into intervals
+by a certain number of breakpoints and plotted in a histogram-style plot.
+Regardless of the graphical display, the PIT residuals are always on the
 probability scale, which might be transformed to the normal scale or another
 scale if preferred.
 
@@ -181,12 +179,21 @@ observations are being used. Here, the expected frequencies are computed by
 differences between the predictive CDFs $F( \cdot )$, evaluated at the interval
 breaks. Hence, mariginal calibration is always obtained on the observation
 scale compared to the probabilistic calibration performed on the probability
-scale.
+scale.  Although there are some previous studies that display observation
+points rather than intervals [e.g., @Gneiting+Balabdaoui+Raftery:2007], here we
+stick to the former and discuss only the so-called rootograms which are
+histogram-style plots [@Kleiber+Zeileis:2016]. 
 
-Although there are some previous studies that display observation points rather
-than intervals [e.g., @Gneiting+Balabdaoui+Raftery:2007], here we stick to the
-former and discuss only the so-called rootograms which are histogram-style plots
-[@Kleiber+Zeileis:2016].
+For the special case of a binary event, the observed event frequency is
+typically plotted against the predictive probability in a so-called reliability
+diagram [@Wilks:2011;@Broecker+Smith:2007]. Here, the predicted probability for
+a binary event is partitioned into a certain number of bins and the averaged
+forecast probability within each bin is plotted against the observerd relative
+frequency. Typically, equidistant binning is employed, but here the rather
+arbitrary number of bins can be quite sensible. A simple and common enhancement
+is therefore to use evenly populated bins, though even here instabilities can
+be a major issue [@Dimitriadis+Gneiting+Jordan:2021]. 
+
 
 ### Similarities and differences
 
@@ -194,27 +201,30 @@ In the graphical displays for assessing the goodness of fit, several recurring
 elements can be seen:
 
 * PIT residuals are asymptotically uniformly distributed or transformed to
-  another probability scale: There is the PIT histogram on the uniform
-  probability scale and the Q-Q plot traditionally employing the standard normal
-  quantiles. Whereas, the transformation to the normals scale spreads the values
-  in the tails further apart and thus better highlights possible discrepancies in
-  the distribuional tails.
-  
-* To check the marginal calibration, one usually stays on the observation scale
-  and evaluates whether observed and expected frequencies match. The rootogram
-  thus evaluates on the observation scale, which is especially useful for count
+  another probability scale: The PIT histogram is on the uniform probability
+  scale versus the normal Q-Q plot on the normal scale.  Whereas, the
+  transformation to the normals scale spreads the values in the tails further
+  apart and thus better highlights possible discrepancies in the distribuional
+  tails.
+
+* The marginal calibration is usually evaluated on the observation scale
+  by checking whether observed and expected frequencies match. The rootogram,
+  on the observation scale, is therefore especially useful for count
   data with values close to zero.
-  
+
 * Discretization: Instead of plotting the raw values, e.g. PIT residuals, often
   some discretization improves readability of the graphical displays. The
-  disadvantage here is that the breakpoint are kind of arbitrary and certain
-  misspecification might be masked by plotting intervals. For example,
-  misscpecifications in the outer tails of the distribution are often not visible
-  in PIT histograms, as the intervals are averaving over many data points. Here,
-  Q-Q plots are clearly superior.
-  
+  disadvantage here is that the breakpoint are often kind of arbitrary and
+  certain misspecification might therefore be masked by plotting the values as
+  intervals. For example, misscpecifications in the outer tails of the
+  distribution are often not visible in PIT histograms, as the intervals are
+  averaving over many data points; here, Q-Q plots are clearly superior. Another
+  example is the reliabitiliy diagram, which can be quite instable when using
+  equidistant binning.
+
 * The uncertainty due to the estimation of the parameters is not taken into
-  account. Therefore, some sampling variation is seen in all graphical displays.
+  account. Therefore, some sampling variation is seen in all graphical
+  displays.
 
 ## Methodology
 
@@ -278,8 +288,10 @@ transform (PIT) which is simply the predictive cumulative distribution function
 (CDF) evaluated at the observations. PIT values have been used under various
 names [e.g., @Smith:1985;@Dunn+Smyth:1996;@Brockwell:2007] , to emphasize their
 similar properties to residuals we follow @Warton:2017 and refer to them as PIT
-residuals from now on. For a continuous random variable $y_i (i = 1, \ldots,
-n)$, PIT residuals are defined as 
+residuals from now on. 
+
+For a continuous random variable $y_i (i = 1, \ldots, n)$, PIT residuals are
+defined as 
 
 $$u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i)$$
 
@@ -295,7 +307,7 @@ of checking for calibration [@Diebold+Gunther+Tay:1998;
 to underlying forecast errors and model deficiencies: U-shaped histograms refer
 to underdispersed predictive distributions, inverted U-shaped histograms to
 overdispersion, and skewed histograms suggest that central tendencies must be
-biased [@Czado+Gneiting+Held:2009].
+biased [@Gneiting+Balabdaoui+Raftery:2007;@Czado+Gneiting+Held:2009].
 
 When considering discrete response distributions or distributions with a
 discrete component, e.g., in case of censoring, for a random discrete variable
