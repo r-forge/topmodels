@@ -36,8 +36,8 @@ probabilities corresponding to each observation, hence quantile residuals must
 be random as well.
 
 The default \code{qresiduals} method calls \code{\link{pitresiduals}} with
-\code{trafo} equal \code{\link[stats:Normal]{qnorm}}, which is used in
-\code{qqrplot} for normal Q-Q plots.
+\code{trafo} equal \code{\link[stats:Normal]{qnorm}}, as employed in normal Q-Q
+plots (\code{\link{qqrplot}}).
 }
 \note{
 Note that there is also a \code{\link[statmod]{qresiduals}} function

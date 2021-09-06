@@ -63,6 +63,8 @@
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
+#' @param trafo function for tranforming residuals from probability scale to a
+#' different distribution scale.
 #' @param style character specifying the style of pithist. For \code{style = "histogram"}
 #' a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
@@ -161,6 +163,7 @@ pithist.default <- function(object,
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
+                            trafo = NULL,
                             style = c("histogram", "lines"),
                             type = c("random", "expected", "proportional"), # FIXME: (ML) not yet implemented
                             nsim = 1L,
@@ -171,7 +174,7 @@ pithist.default <- function(object,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
                             single_graph = FALSE,
-                            xlim = c(0, 1),
+                            xlim = c(NA, NA),
                             ylim = c(0, NA),
                             xlab = "PIT",
                             ylab = if (freq) "Frequency" else "Density",
@@ -233,11 +236,9 @@ pithist.default <- function(object,
   # -------------------------------------------------------------------
   # COMPUTATION OF PIT
   # -------------------------------------------------------------------
-  ## get breaks (due to "type = expected" must be done before)
+  ## get breaks: part 1 (due to "type = expected" must be done before)
   n <- NROW(newresponse(object, newdata = newdata))  # solely to get n to compute number of breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(n, c(0, 50, 5000, 1000000, Inf))]
-  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
-  ## FIXME: (ML) maybe use xlim instead or `0` and `1`
 
   ## either compute proportion exactly (to do...), "expected" (nonrandom) according to Czado et al. (2009) 
   ## or approximate by simulation
@@ -248,9 +249,18 @@ pithist.default <- function(object,
     stop("not yet implemented")
   } else if (type == "random") {
     p <- qresiduals(object,
-      newdata = newdata, trafo = NULL, delta = delta,
+      newdata = newdata, trafo = trafo, delta = delta,
       type = "random", nsim = nsim
     )
+
+    ## get breaks: part 2
+    ## FIXME: (ML) maybe use xlim instead or `0` and `1`
+    if (is.null(trafo)) {
+      if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
+    } else {
+      tmp_range <- max(abs(p))
+      if (length(breaks) == 1L) breaks <- seq(-tmp_range, tmp_range, length.out = breaks + 1L)
+    }
 
     ## collect everything as data.frame
     tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
@@ -261,7 +271,7 @@ pithist.default <- function(object,
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
     p <- qresiduals(object, 
-      newdata = newdata, trafo = NULL, delta = delta,
+      newdata = newdata, trafo = trafo, delta = delta,
       type = "quantile", prob = c(0, 1)
     )
 
@@ -271,6 +281,15 @@ pithist.default <- function(object,
       ## FIXME: (Z) check inequality sign to cover include.lowest/right options
     } else {
       function(u) punif(u, min = p[, 1L], max = p[, 2L]) ## pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))
+    }
+
+    ## get breaks: part 2
+    ## FIXME: (ML) maybe use xlim instead or `0` and `1`
+    if (is.null(trafo)) {
+      if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
+    } else {
+      tmp_range <- max(abs(p))
+      if (length(breaks) == 1L) breaks <- seq(-tmp_range, tmp_range, length.out = breaks + 1L)
     }
 
     ## equation 3 and computation of probability for each interval (f_j)
@@ -290,6 +309,9 @@ pithist.default <- function(object,
   if (length(unique(round(diff(breaks), 10))) > 1) {
     ci <- c(NA, NA)
     warning("confint is not yet implemented for non equidistant breaks")
+  } else if (!is.null(trafo)) {
+    ci <- c(NA, NA)
+    warning("confint is not yet implemented when employing a `trafo`")
   } else if (confint_type == "exact") {
     ci <- get_confint(NROW(p), length(breaks) - 1, confint_level, freq)
   } else {

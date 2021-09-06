@@ -30,7 +30,7 @@ probabilities) or an object from which the these can be obtained with
 which to predict. If omitted, the original observations are used.}
 
 \item{trafo}{function for tranforming residuals from probability scale to a
-different distribution scale (default: Gaussian).}
+different distribution scale.}
 
 \item{type}{character specifying whether - in the case of discrete response
 distributions - randomized quantile residuals or their corresponding
@@ -49,7 +49,7 @@ computed (for \code{type = "quantile"}), defaulting to the median
 (\code{0.5}).}
 }
 \value{
-A vector or matrix of quantile residuals.
+A vector or matrix of PIT residuals.
 }
 \description{
 Generic function and methods for computing PIT residuals.

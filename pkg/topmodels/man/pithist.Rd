@@ -14,6 +14,7 @@ pithist(object, ...)
   newdata = NULL,
   plot = TRUE,
   class = NULL,
+  trafo = NULL,
   style = c("histogram", "lines"),
   type = c("random", "expected", "proportional"),
   nsim = 1L,
@@ -24,7 +25,7 @@ pithist(object, ...)
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
   single_graph = FALSE,
-  xlim = c(0, 1),
+  xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = "PIT",
   ylab = if (freq) "Frequency" else "Density",
@@ -51,6 +52,9 @@ logical \code{plot} argument it's chosen conditional if the package
 or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
+
+\item{trafo}{function for tranforming residuals from probability scale to a
+different distribution scale.}
 
 \item{style}{character specifying the style of pithist. For \code{style = "histogram"}
 a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
