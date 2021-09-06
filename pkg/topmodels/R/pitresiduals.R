@@ -29,7 +29,7 @@
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
 #' @param trafo function for tranforming residuals from probability scale to a
-#' different distribution scale (default: Gaussian).
+#' different distribution scale.
 #' @param type character specifying whether - in the case of discrete response
 #' distributions - randomized quantile residuals or their corresponding
 #' quantiles should be computed.
@@ -43,7 +43,7 @@
 #' computed (for \code{type = "quantile"}), defaulting to the median
 #' (\code{0.5}).
 #' @param \dots further parameters passed to methods.
-#' @return A vector or matrix of quantile residuals.
+#' @return A vector or matrix of PIT residuals.
 #' @seealso \code{\link[stats]{qnorm}}, \code{\link{qqrplot}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
