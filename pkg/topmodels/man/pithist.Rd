@@ -15,7 +15,7 @@ pithist(object, ...)
   plot = TRUE,
   class = NULL,
   style = c("histogram", "lines"),
-  type = c("random", "nonrandom", "proportional"),
+  type = c("random", "expected", "proportional"),
   nsim = 1L,
   delta = NULL,
   freq = FALSE,
@@ -60,8 +60,8 @@ drawn.}
 \item{type}{character. In case of discrete distributions should the PITs be
 drawn randomly from the corresponding interval or distributed
 proportionally? This argument is not fully supported yet, please keep to the default 
-\code{"random"} for now. Additionally, nonrandom PIT histograms according to
-Czado et al. (2009) can be chosen by setting the type to \code{"nonrandom"}.}
+\code{"random"} for now. Additionally, expected (nonnormal) PIT histograms according to
+Czado et al. (2009) can be chosen by setting the type to \code{"expected"}.}
 
 \item{nsim}{integer. If \code{type} is \code{"random"} how many simulated
 PITs should be drawn?}
