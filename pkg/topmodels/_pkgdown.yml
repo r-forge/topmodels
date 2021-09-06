@@ -46,5 +46,6 @@ reference:
   - title: "Procast infrastructure"
     contents: 
       - procast
+      - pitresiduals
       - qresiduals
       - newresponse
