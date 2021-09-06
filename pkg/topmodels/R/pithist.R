@@ -239,7 +239,7 @@ pithist.default <- function(object,
   if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
   ## FIXME: (ML) maybe use xlim instead or `0` and `1`
 
-  ## either compute proportion exactly (to do...), "expected" (nonnormal) according to Czado et al. (2009) 
+  ## either compute proportion exactly (to do...), "expected" (nonrandom) according to Czado et al. (2009) 
   ## or approximate by simulation
   if (type == "proportional") {
     ## FIXME: (ML)
@@ -247,7 +247,7 @@ pithist.default <- function(object,
     ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
     stop("not yet implemented")
   } else if (type == "random") {
-    p <- qresiduals.default(object,
+    p <- qresiduals(object,
       newdata = newdata, trafo = NULL, delta = delta,
       type = "random", nsim = nsim
     )
@@ -257,7 +257,7 @@ pithist.default <- function(object,
     ## TODO: (ML) Maybe get rid of `hist()`
 
   } else if (type == "expected") {
-    ## compare "nonnormal" in Czado et al. (2009) 
+    ## compare "nonrandom" in Czado et al. (2009) 
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
     p <- qresiduals(object, 

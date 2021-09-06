@@ -85,8 +85,7 @@
 #' 
 #' Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
 #' Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
-#' c("\\Sexpr[results=rd,stage=build]{tools:::Rd_expr_doi(\"#1\")}",
-#' "10.1080/00031305.2016.1173590")\Sexpr{tools:::Rd_expr_doi("10.1080/00031305.2016.1173590")}.
+#' \doi{10.1080/00031305.2016.1173590}.
 #' 
 #' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
 #' @keywords hplot
