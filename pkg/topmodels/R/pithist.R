@@ -307,12 +307,12 @@ pithist.default <- function(object,
   ## compute ci interval
   ## FIXME: (Z) confidence interval really only valid for equidistant breaks
   if (!is.null(trafo)) {
-    ci <- c(NA, NA)
+    ci <- c(NA_real_, NA_real_)  # must be numeric for ggplot2
     warning("confint is not yet implemented when employing a `trafo`")
   } else if (confint_type == "approximation") {
     if (length(unique(round(diff(breaks), 10))) > 1) {
       warning("confint is not yet implemented for non equidistant breaks for argument `type = 'approximation'`")
-      ci <- c(NA, NA)
+      ci <- c(NA_real_, NA_real_)  # must be numeric for ggplot2
     } else {
       ci <- get_confint_agresti(
         NROW(p) / (length(breaks) - 1),
@@ -332,7 +332,7 @@ pithist.default <- function(object,
   ## * Is this correct?
   ## * This is not the same as uncommented above and for small n qbinom(0.5, ...) is not equal 1 
   if (!is.null(trafo)) {
-    pp <- NA
+    pp <- NA_real_  # must be numeric for ggplot2
     warning("ref is not yet implemented when employing a `trafo`")
   } else {
     pp <- get_pp(NROW(p), breaks, freq)
@@ -1019,7 +1019,11 @@ autoplot.pithist <- function(object,
   if (is.null(size)) size <- if (style == "histogram") 0.7 else 1
 
   ## set color to 2 (red) or NA for not plotting
-  if (is.logical(ref)) ref <- ifelse(ref, 2, NA)
+  if (is.logical(ref) & style == "histogram") {
+    ref <- ifelse(ref, 2, NA)
+  } else if (is.logical(ref) & style == "lines") {
+    ref <- ifelse(ref, 1, NA)
+  }
 
   ## only needed for `style == "lines"`
   ## stat helper function to get left/right points from respective mid points
@@ -1038,6 +1042,19 @@ autoplot.pithist <- function(object,
     # tells us what we need
     required_aes = c("x", "y")
   )
+
+  ## helper function to get right number of indices after using `stat = calc_pit_points`
+  ## TODO: (ML) This must (!) be done smoother (UPDATE: at the moment not needed)
+  #calc_pit_points_index <- function(group) {
+  #  idx <- cumsum(rle(as.numeric(group))$lengths)
+  #  idx2 <- lapply(1:length(idx), function(i) c(seq(1, idx[i]), idx[i]))
+  #  if (length(idx2) > 1) {
+  #    idx3 <- unlist(c(idx2[[1]], sapply(2:length(idx2), function(j) idx2[[j]][idx2[[j]] > max(idx2[[j-1]])])))
+  #  } else {
+  #    idx3 <- idx2[[1]]
+  #  }
+  #  return(idx3)
+  #}
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
@@ -1074,15 +1091,18 @@ autoplot.pithist <- function(object,
     }
   }
 
+  ## FIXME: (ML) Decide if plot_arg2 or plot_arg3 should be used
   ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
   plot_arg2 <- data.frame(1:n, border, colour, ref, confint)[, -1]
   plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, table(object$group)))
+
+  ## new approach, maybe plot (ref, confint) same for all plots?!
+  plot_arg3 <- list("ref" = ref, "confint" = confint)
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   if (style == "histogram") {
-
     ## actual plotting
     rval <- ggplot2::ggplot(
       object,
@@ -1090,16 +1110,39 @@ autoplot.pithist <- function(object,
     ) +
       ggplot2::geom_tile(ggplot2::aes_string(fill = "group"),
         colour = plot_arg2$border
-      ) +
-      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ref", size = "group"),
-        colour = plot_arg2$ref
-      ) +
-      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_lwr", size = "group"),
-        colour = plot_arg2$confint, linetype = 2
-      ) +
-      ggplot2::geom_hline(ggplot2::aes_string(yintercept = "ci_upr", size = "group"),
-        colour = plot_arg2$confint, linetype = 2
-      )
+      ) 
+
+    ## FIXME: (ML) Does not work for object w/ and w/o "ref" (NA)
+    if (!all(is.na(object$ref))) {
+      rval <- rval + 
+        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ref", size = "group"),
+          colour = plot_arg3$ref, #plot_arg2$ref[calc_pit_points_index(object$group)],
+          stat = calc_pit_points,
+          na.rm = TRUE
+        ) 
+    }
+
+    ## FIXME: (ML) Does not work for object w/ and w/o "ci_lwr" (NA)
+    if (!all(is.na(object$ci_lwr))) {
+      rval <- rval +
+        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ci_lwr", size = "group"),
+          colour = plot_arg3$confint, #plot_arg2$confint[calc_pit_points_index(object$group)],
+          linetype = 2,
+          stat = calc_pit_points,
+          na.rm = TRUE
+        )
+    }
+
+    ## FIXME: (ML) Does not work for object w/ and w/o "ci_upr" (NA)
+    if (!all(is.na(object$ci_upr))) {
+      rval <- rval + 
+        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ci_upr", size = "group"),
+          colour = plot_arg3$confint, #plot_arg2$confint[calc_pit_points_index(object$group)],
+          linetype = 2,
+          stat = calc_pit_points,
+          na.rm = TRUE
+        ) 
+    }
 
     ## set the colors, shapes, etc. for the groups
     rval <- rval +
@@ -1124,12 +1167,31 @@ autoplot.pithist <- function(object,
 
     ## actual plotting
     rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
-      ggplot2::geom_rect(ggplot2::aes_string(ymin = "ci_lwr", ymax = "ci_upr", fill = "group"),
-        xmin = 0, xmax = 1, colour = NA, show.legend = FALSE
+      ggplot2::geom_tile(
+        ggplot2::aes_string(
+          x = "x", 
+          y = "(ci_upr + ci_lwr) / 2", 
+          width = "width", 
+          height = "ci_upr - ci_lwr", 
+          fill = "group"
+        ),
+        colour = NA, show.legend = FALSE, na.rm = TRUE
       ) +
       ggplot2::geom_step(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"),
         stat = calc_pit_points
       )
+
+    ## FIXME: (ML) Does not work for object w/ and w/o "ref" (NA)
+    if (!all(is.na(object$ref))) {
+      rval <- rval + 
+        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ref"),
+          colour = plot_arg3$ref, #plot_arg2$ref[calc_pit_points_index(object$group)],
+          linetype = 2,
+          size = 1,
+          stat = calc_pit_points,
+          na.rm = TRUE
+        ) 
+    }
 
     ## set the colors, shapes, etc.
     rval <- rval +
