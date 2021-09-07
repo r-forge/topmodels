@@ -306,26 +306,37 @@ pithist.default <- function(object,
 
   ## compute ci interval
   ## FIXME: (Z) confidence interval really only valid for equidistant breaks
-  if (length(unique(round(diff(breaks), 10))) > 1) {
-    ci <- c(NA, NA)
-    warning("confint is not yet implemented for non equidistant breaks")
-  } else if (!is.null(trafo)) {
+  if (!is.null(trafo)) {
     ci <- c(NA, NA)
     warning("confint is not yet implemented when employing a `trafo`")
-  } else if (confint_type == "exact") {
-    ci <- get_confint(NROW(p), length(breaks) - 1, confint_level, freq)
+  } else if (confint_type == "approximation") {
+    if (length(unique(round(diff(breaks), 10))) > 1) {
+      warning("confint is not yet implemented for non equidistant breaks for argument `type = 'approximation'`")
+      ci <- c(NA, NA)
+    } else {
+      ci <- get_confint_agresti(
+        NROW(p) / (length(breaks) - 1),
+        NROW(p),
+        confint_level,
+        length(breaks) - 1,
+        freq
+      )
+    }
   } else {
-    ci <- get_confint_agresti(
-      NROW(p) / (length(breaks) - 1),
-      NROW(p),
-      confint_level,
-      length(breaks) - 1,
-      freq
-    )
+    ci <- get_confint(NROW(p), breaks, confint_level, freq)
   }
 
   ## perfect prediction
-  pp <- ifelse(freq, NROW(p) / (length(breaks) - 1), 1)
+  #pp <- ifelse(freq, NROW(p) / (length(breaks) - 1), 1)
+  ## FIXME: (ML) 
+  ## * Is this correct?
+  ## * This is not the same as uncommented above and for small n qbinom(0.5, ...) is not equal 1 
+  if (!is.null(trafo)) {
+    pp <- NA
+    warning("ref is not yet implemented when employing a `trafo`")
+  } else {
+    pp <- get_pp(NROW(p), breaks, freq)
+  }
 
   ## labels
   if (is.null(main)) main <- deparse(substitute(object))
@@ -338,8 +349,8 @@ pithist.default <- function(object,
       x = tmp_hist$mids,
       y = tmp_hist$counts / nsim,  ## FIXME: (ML) Double check if correct even for point masses
       width = diff(tmp_hist$breaks),
-      ci_lwr = ci[1],
-      ci_upr = ci[2],
+      ci_lwr = ci[[1]],
+      ci_upr = ci[[2]],
       ref = pp
     )
   } else {
@@ -347,8 +358,8 @@ pithist.default <- function(object,
       x = tmp_hist$mids,
       y = tmp_hist$density,
       width = diff(tmp_hist$breaks),
-      ci_lwr = ci[1],
-      ci_upr = ci[2],
+      ci_lwr = ci[[1]],
+      ci_upr = ci[[2]],
       ref = pp
     )
   }
@@ -662,32 +673,6 @@ plot.pithist <- function(x,
     xright <- d$x + d$width / 2
     y <- d$y
 
-    ## prepare confint lines and check if they consist of unique values
-    if (!identical(plot_arg$confint[j], FALSE)) {
-      ci_lwr <- unique(d$ci_lwr)
-      ci_upr <- unique(d$ci_upr)
-      stopifnot(
-        "`ci_lwr` and `ci_upr` in attr of object `x` must consist of unique values per group index" =
-          length(ci_lwr) == 1 & length(ci_upr) == 1
-      )
-    } else {
-      ci_lwr <- NULL
-      ci_upr <- NULL
-    }
-
-    ## FIXME: (ML) Tempory workaround for non equidistant breaks
-    if(is.na(ci_lwr) | is.na(ci_upr)) {
-      ci_lwr <- NULL
-      ci_upr <- NULL
-    }
-
-    ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$ref)
-    stopifnot(
-      "`ref` in attr of object `x` must consist of unique values per group index" =
-        length(pp) == 1
-    )
-
     ## get xlim and ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
@@ -695,7 +680,7 @@ plot.pithist <- function(x,
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(c(xleft, xright))[xlim_idx]
     }
     if (any(ylim_idx)) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(0, y, ci_lwr, ci_upr))[ylim_idx]
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(0, y, d$ci_lwr, d$ci_upr), na.rm = TRUE)[ylim_idx]
     }
 
     ## trigger plot
@@ -729,14 +714,25 @@ plot.pithist <- function(x,
     ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2  # red
-      abline(h = pp, col = plot_arg$ref[j], lty = 1, lwd = plot_arg$lwd[j])
+
+      ref_z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+      ref_y <- c(d$ref, d$ref[NROW(d)])
+      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 1, lwd = plot_arg$lwd[j])
     }
 
     ## plot confint lines
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- 2  # red
-      abline(h = ci_lwr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
-      abline(h = ci_upr, col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
+
+      ## lower confint line
+      ci_lwr_z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+      ci_lwr_y <- c(d$ci_lwr, d$ci_lwr[NROW(d)])
+      lines(ci_lwr_y ~ ci_lwr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
+
+      ## upper confint line
+      ci_upr_z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+      ci_upr_y <- c(d$ci_upr, d$ci_upr[NROW(d)])
+      lines(ci_upr_y ~ ci_upr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
     }
   }
 
@@ -753,19 +749,6 @@ plot.pithist <- function(x,
     z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
     y <- c(d$y, d$y[NROW(d)])
 
-    ## prepare confint lines and check if they consist of unique values
-    if (!identical(plot_arg$confint[j], FALSE)) {
-      ci_lwr <- unique(d$ci_lwr)
-      ci_upr <- unique(d$ci_upr)
-      stopifnot(
-        "`ci_lwr` and `ci_upr` in attr of object `x` must consist of unique values per group index" =
-          length(ci_lwr) == 1 & length(ci_upr) == 1
-      )
-    } else {
-      ci_lwr <- NULL
-      ci_upr <- NULL
-    }
-
     ## get xlim and ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
@@ -773,10 +756,10 @@ plot.pithist <- function(x,
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(z)[xlim_idx]
     }
     if (any(ylim_idx) && !single_graph) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(y, ci_lwr, ci_upr))[ylim_idx]
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(y, d$ci_lwr, d$ci_upr), na.rm = TRUE)[ylim_idx]
     }
     if (any(ylim_idx) && single_graph) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(x$y, x$ci_lwr, x$ci_upr))[ylim_idx]
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(x$y, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
     }
 
     ## trigger plot
@@ -798,9 +781,16 @@ plot.pithist <- function(x,
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
+      ref_z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
       polygon(
-        c(0, 1, 1, 0),
-        c(ci_lwr, ci_lwr, ci_upr, ci_upr),
+        c(
+          rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)],
+          rev(rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)])
+        ),
+        c(
+          rep(d$ci_lwr, each = 2),
+          rev(rep(d$ci_upr, each = 2))
+        ), 
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
@@ -819,17 +809,13 @@ plot.pithist <- function(x,
     z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
     y <- c(d$y, d$y[NROW(d)])
 
-    ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$ref)
-    stopifnot(
-      "`ref` in attr of object `x` must consist of unique values per group index" =
-        length(pp) == 1
-    )
-
     ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-      segments(x0 = 0, y0 = pp, x1 = 1, y1 = pp, col = plot_arg$ref[j], lty = 2, lwd = 1)
+
+      ref_z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+      ref_y <- c(d$ref, d$ref[NROW(d)])
+      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 2, lwd = 1)
     }
 
     ## plot stepfun
@@ -912,35 +898,22 @@ lines.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    x <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+    z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
     y <- c(d$y, d$y[NROW(d)])
-
-    ## prepare confint lines and check if they consist of unique values
-    if (!identical(plot_arg$confint[j], FALSE)) {
-      ci_lwr <- unique(d$ci_lwr)
-      ci_upr <- unique(d$ci_upr)
-      stopifnot(
-        "`ci_lwr` and `ci_upr` in attr of object `x` must consist of unique values per group index" =
-          length(ci_lwr) == 1 & length(ci_upr) == 1
-      )
-    } else {
-      ci_lwr <- NULL
-      ci_upr <- NULL
-    }
-
-    ## prepare ref line and check if it consists of unique values
-    pp <- unique(d$ref)
-    stopifnot(
-      "`ref` in attr of object `x` must consist of unique values per group index" =
-        length(pp) == 1
-    )
 
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
-      polygon(
-        c(0, 1, 1, 0),
-        c(ci_lwr, ci_lwr, ci_upr, ci_upr),
+     ref_z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+      polygon( 
+        c(
+          rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)],
+          rev(rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)])
+        ),
+        c(
+          rep(d$ci_lwr, each = 2),
+          rev(rep(d$ci_upr, each = 2))
+        ), 
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
@@ -948,12 +921,15 @@ lines.pithist <- function(x,
 
     ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2  # red
-      segments(x0 = 0, y0 = pp, x1 = 1, y1 = pp, col = plot_arg$ref[j], lty = 2, lwd = 1.5)
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
+
+      ref_z <- c(d$x - d$width / 2, d$x[NROW(d)] + d$width[NROW(d)] / 2)
+      ref_y <- c(d$ref, d$ref[NROW(d)])
+      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 2, lwd = 1)
     }
 
     ## plot stepfun
-    lines.default(y ~ x, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
+    lines.default(y ~ z, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
   }
 
   # -------------------------------------------------------------------
@@ -1192,13 +1168,32 @@ autoplot.pithist <- function(object,
   rval
 }
 
+get_pp <- function(n, breaks, freq) {
+  ## helper function to calculate perfect prediciton employing `qbinom()`
 
-get_confint <- function(n, bins, level, freq) {
+  
+  ## calc bin specific confidence levels
+  rval <- qbinom(0.5, size = n, prob = diff(breaks))
+
+  ## transform counts to frequency
+  if (!freq) rval <- rval / (n / (length(breaks) - 1))
+  rval
+}
+
+get_confint <- function(n, breaks, level, freq) {
   ## helper function to calculate CI employing `qbinom()`
+
+  ## get confidence level
   a <- (1 - level) / 2
-  a <- c(a, 1 - a)
-  rval <- qbinom(a, size = n, prob = 1 / bins)
-  if (!freq) rval <- rval / (n / bins)
+  
+  ## calc bin specific confidence levels
+  rval <- list(
+    qbinom(a, size = n, prob = diff(breaks)),
+    qbinom(1 - a, size = n, prob = diff(breaks))
+  )
+
+  ## transform counts to frequency
+  if (!freq) rval <- lapply(rval, function(x) x / (n / (length(breaks) - 1)))
   rval
 }
 
