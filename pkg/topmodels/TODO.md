@@ -1,4 +1,5 @@
 # TODOs: Status quo and wishlist for `topmodels`
+## (Updated 9/9/21 by M. N. Lang)
 
 ## 1. General
 ### 1.1 Description file
@@ -11,8 +12,14 @@
 * One vignette 'technical specifications/framework'
 * One vignette per each graphical evaluation method
 
+or as currently implemented and as planned for 1. publication:
+
+* One vignette for 'methodology': Add reliagram and improve
+* One vignette for 'simulations': Improve
+* One vignette for 'real case application': Write
+
 ### 1.3 Long term outlook
-* Provide `geom_()` for `ggplot2` instead/additionally to `autoplot()`
+* Provide `geom_()` for `ggplot2` instead or additionally to `autoplot()`
 * Provide infrastucture for `scoringRules`: in-sample vs. out-of-sample  and aggregated vs. observation-wise contributions
 * Implement discretized log-score
 * S3 methods for topmodels: plot, autoplot?
@@ -33,6 +40,7 @@ Function name | S3 classes supported | S3 classes planned | TODOs
 * In general
     * Correctly support `na.action`
 * `procast()` 
+    * Implement soon `countreg` and maybe `pscl`
     * Which `type`s should be supported
     * Improve S3 method for `crch`: Use functions instead of `eval()`
     * Improve S3 method for `disttree`: Check compatability w/ forests and other families, and make usage of (not yet implemented) vectorized family functions
@@ -50,10 +58,10 @@ Function name | S3 classes supported | S3 classes planned | TODOs
 
 Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TODOs
 --- | --- | --- | --- | --- | --- | ---
+`rootogram` | `default`| yes | yes | - | yes | few
 `reliagram` | `default` | yes | yes | yes | yes | few
 `pithist` | `default` | yes | yes | yes | yes | few
 `qqrplot` | `default` | yes | yes | yes | yes | few 
-`rootogram` | `default`| yes | yes | - | yes | few
 `wormplot` | `default` | yes | yes | yes | yes | few
 
 ### 2.4 Functions for graphical model assessment: TODOs
@@ -61,16 +69,25 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
     * Check order of different layers
     * Check consistency of `xlim` and `ylim`
     * Check names and consistency of all (plotting) arguments
+    * Should the layers of the background in the plot (e.g., CI and reference lines, etc.) be allowed to vary
+      between plots? This is not how ggplot2 is intended to work!
 * In detail
     * Check again initilization for `glm` objects?
     * How should we handle values outside (truncation)/censoring points - these can lead to skewed PIT histograms.
+* `rootogram()`
+    * Improve breaks: currently do not really work for right-censoring
+    * Fix bug of negative expecteded frequencies: For extreme values (see example 'underdispersed' in summary plot) there are very small negative expected frequencies?!
 * `reliagram()`
     * Implement additionally to absolute histogram a frquency histogram (for base and ggplot2).
 * `pithist()`
     * Implement proportional method (`type = "proportional"`)
     * Check again if we need two different CI computations
+    * Allow CI and ref to vary for non-equidstant breaks [**done**] -> improve for autoplot()
+    * Allow addititonal trafo [**done**]
+    * Implement CI and ref for trafo
 * `wormplot()`
     * ciplot (Burren and Frederiks) for other `trafo`: Compare order statistics!! 
+    * Fix CI polygon: CI polygon seems sometimes to be mirrored?!
 
 ## 3. Random notes
 * Errors in countreg
@@ -96,22 +113,12 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
     * rootogram: breaks no special options, `+.rootogram()`
     * procast: named data.frames as rval, scores (estfun), support which types
 * Check layers in plots
-* Check naming of arguments
-* Organization of manuals
-* Help to setup pkgdown 
-* Content of presentation use-R
-    * Kurz distributional modeling motivieren
-    * Idee mit Baeumen und Waeldern anreissen, verfuegbar in disttree
-    * Beispiel auf Datensatz zeigen
-    * Frage: Wie weiss man, ob das Modell ok funktioniert oder nicht?
-    * Scoring rules aber zugehoerige Grafiken
-    * An Beispiel herzeigen
-    * Ausblick: Allgemeine Toolbox fuer generelle Modelle mit Base-Grafiken und ggplot2.
 
 ## 5. Next steps
+* Write vignettes
 * Streamline `procast()`
 * Check naming of in/out arguments
-* Adapt manuals (also for plotting funs)
-* Implement simple homepage
+* Adapt manuals (also for plotting funs) [**partly done**]
+* Implement simple homepage [**done**]
 * Some testing by working group (Reto)
 
