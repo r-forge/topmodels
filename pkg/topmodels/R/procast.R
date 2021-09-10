@@ -262,7 +262,6 @@ procast.lm <- function(object,
 
   ## Types of predictions
   type <- match.arg(type)
-
   ## Set up function that computes prediction from model parameters
   FUN <- switch(type,
     "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
@@ -271,8 +270,18 @@ procast.lm <- function(object,
     "parameter" = function(pars) pars,
     "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
     "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
+    "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x#,
+# FIXME: (ML) Decide if random is needed, if yes, implement for all S3 classes
+#    "random" = function(n, pars) t(sapply(1:NROW(pars), function(i) 
+#      rnorm(n, mean = pars[i, "mu"], sd = pars[i, "sigma"])))
   )
+
+#  ## FIXME: (ML) Quick workaround not using `procast_setup()`
+#  if (type == "random") {
+#    rval <- data.frame(FUN(n, pars))
+#    colnames(rval) <- paste0("n_", 1:NCOL(rval))
+#    return(rval)
+#  }
 
   # -------------------------------------------------------------------
   # CALL WOKRHORSE AND RETURN

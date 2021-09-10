@@ -205,8 +205,8 @@ qqrplot.default <- function(object,
     )
     confint_prob <- (1 - confint_level) / 2
     confint_prob <- c(confint_prob, 1 - confint_prob)
-    qres_ci_lwr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[1], na.rm = TRUE)
-    qres_ci_upr <- apply(apply(tmp, 2, sort), 1, quantile, prob = confint_prob[2], na.rm = TRUE)
+    qres_ci_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = confint_prob[1], na.rm = TRUE)
+    qres_ci_upr <- apply(apply(tmp, 2, sort), 1, quantile, probs = confint_prob[2], na.rm = TRUE)
     qthe_ci_lwr <- q2q(qres_ci_lwr)
     qthe_ci_upr <- q2q(qres_ci_upr)
 
@@ -600,8 +600,10 @@ plot.qqrplot <- function(x,
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
 
-      x_pol <- c(sort(d$x_ci_lwr), sort(d$x_ci_upr, decreasing = TRUE))
-      y_pol <- c(sort(d$y_ci_lwr), sort(d$y_ci_upr, decreasing = TRUE))
+      idx_upr <- order(d$x_ci_upr)
+      idx_lwr <- order(d$x_ci_lwr)
+      x_pol <- c(d$x_ci_lwr[idx_lwr], d$x_ci_upr[rev(idx_upr)])
+      y_pol <- c(d$y_ci_lwr[idx_lwr], d$y_ci_upr[rev(idx_upr)])
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
@@ -688,8 +690,10 @@ points.qqrplot <- function(x,
     if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
 
-      x_pol <- c(sort(d$x_ci_lwr), sort(d$x_ci_upr, decreasing = TRUE))
-      y_pol <- c(sort(d$y_ci_lwr), sort(d$y_ci_upr, decreasing = TRUE))
+      idx_upr <- order(d$x_ci_upr)
+      idx_lwr <- order(d$x_ci_lwr)
+      x_pol <- c(d$x_ci_lwr[idx_lwr], d$x_ci_upr[rev(idx_upr)])
+      y_pol <- c(d$y_ci_lwr[idx_lwr], d$y_ci_upr[rev(idx_upr)])
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
