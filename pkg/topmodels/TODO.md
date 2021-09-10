@@ -40,7 +40,7 @@ Function name | S3 classes supported | S3 classes planned | TODOs
 * In general
     * Correctly support `na.action`
 * `procast()` 
-    * Implement soon `countreg` and maybe `pscl`
+    * Implement `countreg` and maybe `pscl` soon (update: tried, not that easy)
     * Which `type`s should be supported
     * Improve S3 method for `crch`: Use functions instead of `eval()`
     * Improve S3 method for `disttree`: Check compatability w/ forests and other families, and make usage of (not yet implemented) vectorized family functions
