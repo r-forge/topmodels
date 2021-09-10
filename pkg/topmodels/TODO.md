@@ -75,8 +75,8 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
     * Check again initilization for `glm` objects?
     * How should we handle values outside (truncation)/censoring points - these can lead to skewed PIT histograms.
 * `rootogram()`
-    * Improve breaks: currently do not really work for right-censoring
-    * Fix bug of negative expecteded frequencies: For extreme values (see example 'underdispersed' in summary plot) there are very small negative expected frequencies?!
+    * Improve breaks: currently do not really work for right-censoring [**done**, maybe to be improved]
+    * Fix bug of negative expecteded frequencies: For extreme values (see example 'underdispersed' in summary plot) there are very small negative expected frequencies?! [**done**, i.e., improved workaround `[abs(p) < sqrt(.Machine$double.eps)] <- 0`]
 * `reliagram()`
     * Implement additionally to absolute histogram a frquency histogram (for base and ggplot2).
 * `pithist()`
@@ -85,9 +85,11 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
     * Allow CI and ref to vary for non-equidstant breaks [**done**] -> improve for autoplot()
     * Allow addititonal trafo [**done**]
     * Implement CI and ref for trafo
+* `qqrplot()`
+    * Implement additional CI intervals (same for wormplot)? Compare R package **qqplotr** and Aldor-Noiman et al. (2013)
 * `wormplot()`
     * ciplot (Burren and Frederiks) for other `trafo`: Compare order statistics!! 
-    * Fix CI polygon: CI polygon seems sometimes to be mirrored?!
+    * Fix CI polygon: CI polygon seems sometimes to be mirrored?! [**done**]
 
 ## 3. Random notes
 * Errors in countreg

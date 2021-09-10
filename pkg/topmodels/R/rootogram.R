@@ -235,7 +235,8 @@ rootogram.default <- function(object,
 
   ## fix pointmasses 
   ## FIXME: (ML) Check if that always works or could be improved
-  breaks <- breaks - 1e-12
+  breaks[1] <- breaks[1] - 1e-12
+  breaks[length(breaks)] <- breaks[length(breaks)] + 1e-12
 
   ## set widths
   if (is.null(width) && (response_type == "discrete" || response_type == "logseries")) {
@@ -261,6 +262,9 @@ rootogram.default <- function(object,
       )
   }
 
+  ## FIXME: (ML) Sometime neg. expctd occured (see example for underdispersed model fit)
+  p[abs(p) < sqrt(.Machine$double.eps)] <- 0
+
   ## handle NAs
   ## TODO: (ML) Maybe allow arg `na.action` in the future
   idx_not_na <- as.logical(complete.cases(y) * complete.cases(p))
@@ -273,9 +277,6 @@ rootogram.default <- function(object,
 
   ## expected frequencies (part2)
   expctd <- colSums(p * w)
-
-  ## FIXME: (ML) This must be fixed. Problem of neg. expctd occured in example for underdispersed model fit
-  expctd[expctd < 0] <- 0
 
   ## raw vs. sqrt scale
   if (scale == "sqrt") {
