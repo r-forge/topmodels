@@ -563,9 +563,9 @@ procast.glm <- function(object,
   } else if (family == "poisson") {
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) qpois(at, lambda = pars$mu, ...),
-      "location" = stop("not yet implemented"),
+      "location" = function(pars) pars$mu,
       "scale" = stop("not yet implemented"),
-      "parameter" = stop("not yet implemented"),
+      "parameter" = function(pars) pars,
       "density" = function(at, pars, ...) dpois(at, lambda = pars$mu, ...),
       "probability" = function(at, pars, ...) ppois(at, lambda = pars$mu, ...),
       "score" =  stop("not yet implemented")
