@@ -913,3 +913,144 @@ autoplot.qqrplot <- function(object,
   ## return ggplot object
   rval
 }
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
+  required_aes = c("x", "y"),
+  non_missing_aes = c("size", "shape", "colour"), # TODO: (ML) what is that for?
+  default_aes = ggplot2::aes(
+    shape = 19, colour = "black", size = 2,
+    fill = NA, alpha = 0.2, stroke = 0.5
+  ),
+
+  draw_panel = function(data, panel_scales, coord) {
+    if (is.character(data$shape)) {
+      data$shape <- translate_shape_string(data$shape)
+    }
+
+    ## Transform the data first
+    coords <- coord$transform(data, panel_scales)
+    
+    ## Construct a grid grob
+    grid::pointsGrob(
+      x = coords$x,
+      y = coords$y,
+      pch = coords$shape,
+      gp = grid::gpar(
+        col = alpha(coords$colour, coords$alpha),
+        fill = alpha(coords$fill, coords$alpha),
+        # Stroke is added around the outside of the point
+        fontsize = coords$size * .pt + coords$stroke * .stroke / 2,
+        lwd = coords$stroke * .stroke / 2
+      )
+    )
+  },
+
+  draw_key = ggplot2::draw_key_point
+)
+
+#' geom_* for qqr plots 
+#' 
+#' Some geoms implemented for testing
+#' 
+#' @inheritParams ggplot2::layer
+#' @inheritParams ggplot2::geom_point
+#' @param alpha alpha value
+#' @examples
+#' require("ggplot2")
+#' ## Fit model
+#' data("CrabSatellites", package = "countreg")
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
+#' 
+#' ## Compute qqrplot
+#' q1 <- qqrplot(m1_pois, plot = FALSE)
+#' q2 <- qqrplot(m2_pois, plot = FALSE)
+#' 
+#' d <- c(q1, q2) 
+#' 
+#' ## Get label names
+#' xlab <- unique(attr(d, "xlab"))
+#' ylab <- unique(attr(d, "ylab"))
+#' main <- attr(d, "main")
+#' main <- make.names(main, unique = TRUE)
+#' d$group <- factor(d$group, labels = main)
+#' 
+#' ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'   geom_qqr_points() + 
+#'   geom_qqr_confint(
+#'     aes(
+#'       x_lwr = x_ci_lwr, 
+#'       x_upr = x_ci_upr, 
+#'       y_lwr = y_ci_lwr, 
+#'       y_upr = y_ci_upr
+#'     )
+#'   ) + 
+#'   geom_abline(aes(intercept = 0, slope = 1), linetype = 2) + 
+#'   facet_wrap(~group) +
+#'   xlab(xlab) + ylab(ylab)
+#' 
+#' @export
+geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
+                         position = "identity", na.rm = FALSE, 
+                         show.legend = NA, inherit.aes = TRUE, ...) {
+        ggplot2::layer(
+                geom = GeomQqrPoints, mapping = mapping,  
+                data = data, stat = stat, position = position, 
+                show.legend = show.legend, inherit.aes = inherit.aes,
+                params = list(na.rm = na.rm, ...)
+        )
+}
+
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+StatConfint <- ggplot2::ggproto("StatConfint", ggplot2::Stat,
+
+  compute_group = function(data, scales) {
+    ## Manipulate object
+    nd <- data.frame(
+      x = c(data$x_lwr, rev(data$x_upr)),
+      y = c(data$y_lwr, rev(data$y_upr))
+    )
+    nd
+  },
+
+  # Tells us what we need
+  required_aes = c("x_lwr", "x_upr", "y_lwr", "y_upr")
+)
+
+#' @rdname geom_qqr_points
+#' @export
+stat_confint <- function(mapping = NULL, data = NULL, geom = "polygon",
+                           position = "identity", na.rm = FALSE, 
+                           show.legend = NA, inherit.aes = TRUE, ...) {
+        ggplot2::layer(
+                stat = StatConfint, 
+                data = data, 
+                mapping = mapping, 
+                geom = geom, 
+                position = position, 
+                show.legend = show.legend, 
+                inherit.aes = inherit.aes,
+                params = list(na.rm = na.rm, ...)
+        )
+}
+
+#' @rdname geom_qqr_points
+#' @export
+geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "confint",
+                         position = "identity", na.rm = FALSE, 
+                         show.legend = NA, inherit.aes = TRUE, alpha = 0.2, ...) {
+        ggplot2::layer(
+                geom = ggplot2::GeomPolygon, mapping = mapping,  
+                data = data, stat = stat, position = position, 
+                show.legend = show.legend, inherit.aes = inherit.aes,
+                params = list(na.rm = na.rm, alpha = alpha, ...)
+        )
+}
