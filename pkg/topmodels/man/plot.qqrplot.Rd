@@ -46,12 +46,16 @@
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  colour = adjustcolor("black", alpha.f = 0.4),
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
+  colour = "black",
+  fill = "black",
+  alpha_colour = NA,
+  alpha_fill = 0.2,
   size = 2,
   shape = 19,
-  linetype = 1,
+  linetype = 2,
+  identity = TRUE,
+  probs = c(0.25, 0.75),
+  trafo = qnorm,
   legend = FALSE,
   ...
 )
@@ -73,8 +77,8 @@ parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
 \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 respectively.}
 
-\item{colour, size, shape, linetype, legend}{graphical parameters passed for 
-\code{ggplot2} style plots, whereby \code{object} is a object of class \code{qqrplot}.}
+\item{colour, alpha_colour, alpha_fill, size, shape, linetype, legend, identity, trafo, probs}{graphical parameters passed for #' \code{ggplot2} style plots, whereby
+\code{object} is a object of class \code{qqrplot}.}
 }
 \description{
 Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
