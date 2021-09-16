@@ -258,6 +258,7 @@ qqrplot.default <- function(object,
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
+  attr(rval, "trafo") <- trafo
 
   ## add class
   if (class == "data.frame") {
@@ -316,6 +317,7 @@ c.qqrplot <- function(...) {
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
   confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
+  trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
     as.vector(sapply(rval, function(r) attr(r, "main")))
@@ -352,6 +354,7 @@ c.qqrplot <- function(...) {
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
   attr(rval, "confint_level") <- confint_level
+  attr(rval, "trafo") <- trafo
 
   ## set class to data.frame or tibble
   if (class == "data.frame") {
@@ -958,7 +961,13 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #' 
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
-#' @param alpha alpha value
+#' @param identity logical, should the identity line be plotted or a theoretical line
+#' which passes through \code{probs} quantiles computed by \code{trafo}. 
+#' @param trafo function for calculating reference line through first and third
+#' quartile of theoretical distribution (default: Gaussian).
+#' @param probs numeric vector of length two, representing probabilities of reference
+#' line used in \code{trafo}.
+#' @param linetype,alpha additional graphical parameters for \code{\link{ggplot2}}.
 #' @examples
 #' require("ggplot2")
 #' ## Fit model
@@ -989,19 +998,19 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #'       y_upr = y_ci_upr
 #'     )
 #'   ) + 
-#'   geom_abline(aes(intercept = 0, slope = 1), linetype = 2) + 
+#'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
 #'   facet_wrap(~group) +
 #'   xlab(xlab) + ylab(ylab)
 #' 
 #' @export
 geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
-                         position = "identity", na.rm = FALSE, 
-                         show.legend = NA, inherit.aes = TRUE, ...) {
+                            position = "identity", na.rm = FALSE, 
+                            show.legend = NA, inherit.aes = TRUE, ...) {
         ggplot2::layer(
-                geom = GeomQqrPoints, mapping = mapping,  
-                data = data, stat = stat, position = position, 
-                show.legend = show.legend, inherit.aes = inherit.aes,
-                params = list(na.rm = na.rm, ...)
+          geom = GeomQqrPoints, mapping = mapping,  
+          data = data, stat = stat, position = position, 
+          show.legend = show.legend, inherit.aes = inherit.aes,
+          params = list(na.rm = na.rm, ...)
         )
 }
 
@@ -1010,7 +1019,7 @@ geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
 #' @format NULL
 #' @usage NULL
 #' @export
-StatConfint <- ggplot2::ggproto("StatConfint", ggplot2::Stat,
+StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
 
   compute_group = function(data, scales) {
     ## Manipulate object
@@ -1027,30 +1036,114 @@ StatConfint <- ggplot2::ggproto("StatConfint", ggplot2::Stat,
 
 #' @rdname geom_qqr_points
 #' @export
-stat_confint <- function(mapping = NULL, data = NULL, geom = "polygon",
-                           position = "identity", na.rm = FALSE, 
-                           show.legend = NA, inherit.aes = TRUE, ...) {
+stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "polygon",
+                         position = "identity", na.rm = FALSE, 
+                         show.legend = NA, inherit.aes = TRUE, ...) {
         ggplot2::layer(
-                stat = StatConfint, 
-                data = data, 
-                mapping = mapping, 
-                geom = geom, 
-                position = position, 
-                show.legend = show.legend, 
-                inherit.aes = inherit.aes,
-                params = list(na.rm = na.rm, ...)
+          stat = StatQqrConfint, 
+          data = data, 
+          mapping = mapping, 
+          geom = geom, 
+          position = position, 
+          show.legend = show.legend, 
+          inherit.aes = inherit.aes,
+          params = list(na.rm = na.rm, ...)
         )
 }
 
 #' @rdname geom_qqr_points
 #' @export
-geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "confint",
+geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
                          position = "identity", na.rm = FALSE, 
                          show.legend = NA, inherit.aes = TRUE, alpha = 0.2, ...) {
         ggplot2::layer(
-                geom = ggplot2::GeomPolygon, mapping = mapping,  
-                data = data, stat = stat, position = position, 
-                show.legend = show.legend, inherit.aes = inherit.aes,
-                params = list(na.rm = na.rm, alpha = alpha, ...)
+          geom = ggplot2::GeomPolygon, mapping = mapping,  
+          data = data, stat = stat, position = position, 
+          show.legend = show.legend, inherit.aes = inherit.aes,
+          params = list(na.rm = na.rm, alpha = alpha, ...)
+        )
+}
+
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+StatQqrRef <- ggplot2::ggproto("StatQqrRef", ggplot2::Stat,
+
+  compute_group = function(data, scales, identity, probs, trafo) {
+    ## Manipulate object
+    if (!identity) {
+      stopifnot(is.numeric(probs), length(probs) == 2)
+      stopifnot(is.function(trafo))
+
+      y_tmp <- quantile(data$y, probs, names = FALSE, na.rm = TRUE)
+      x_tmp <- trafo(probs)
+      slope <- diff(y_tmp) / diff(x_tmp)
+      intercept <- y_tmp[1L] - slope * x_tmp[1L]
+      nd <- data.frame(
+        slope = slope,
+        intercept = intercept
+      )
+
+    } else { 
+      nd <- data.frame(
+        slope = 1,
+        intercept = 0
+      )
+    }
+    nd
+  },
+
+  # Tells us what we need
+  required_aes = c("x", "y")
+)
+
+#' @rdname geom_qqr_points
+#' @export
+stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "abline",
+                         position = "identity", na.rm = FALSE, 
+                         show.legend = NA, inherit.aes = TRUE, 
+                         identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, ...) {
+        ggplot2::layer(
+          stat = StatQqrRef, 
+          data = data, 
+          mapping = mapping, 
+          geom = geom, 
+          position = position, 
+          show.legend = show.legend, 
+          inherit.aes = inherit.aes,
+          params = list(
+            na.rm = na.rm, 
+            identity = identity,
+            probs = probs,
+            trafo = trafo,
+            ...
+          )
+        )
+}
+
+#' @rdname geom_qqr_points
+#' @export
+geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
+                         position = "identity", na.rm = FALSE, 
+                         show.legend = NA, inherit.aes = TRUE, identity = TRUE,
+                         probs = c(0.25, 0.75), trafo = qnorm, linetype = 2, ...) {
+        ggplot2::layer(
+          geom = ggplot2::GeomAbline, 
+          mapping = mapping, 
+          data = data, 
+          stat = stat, 
+          position = position, 
+          show.legend = show.legend, 
+          inherit.aes = inherit.aes,
+          params = list(
+            na.rm = na.rm, 
+            identity = identity,
+            probs = probs,
+            trafo = trafo,
+            linetype = linetype,
+            ...
+          )
         )
 }
