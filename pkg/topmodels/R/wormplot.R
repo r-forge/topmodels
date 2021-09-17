@@ -970,3 +970,303 @@ autoplot.wormplot <- function(object,
   ## return ggplot object
   rval
 }
+
+
+#' @rdname geom_worm_points
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomWormPoints <- ggplot2::ggproto("GeomWormPoints", ggplot2::Geom,
+  required_aes = c("x", "y"),
+  non_missing_aes = c("size", "shape", "colour"), # TODO: (ML) what is that for?
+  default_aes = ggplot2::aes(
+    shape = 19, colour = "black", size = 2,
+    fill = NA, alpha = NA, stroke = 0.5
+  ),
+
+  draw_panel = function(data, panel_scales, coord) {
+    if (is.character(data$shape)) {
+      data$shape <- translate_shape_string(data$shape)
+    }
+
+    ## Transform the data first
+    coords <- coord$transform(data, panel_scales)
+
+    ## Get alpha conditional on number of data points
+    n <- nrow(data)
+    if (any(is.na(coords$alpha))) {
+      if (n > 100 && n <= 200) {
+        coords$alpha <- 0.3
+      } else if (n > 200) {
+        coords$alpha <- 0.15
+      } else {
+        coords$alpha <- 1
+      }
+    }
+
+    ## Construct a grid grob
+    grid::pointsGrob(
+      x = coords$x,
+      y = coords$y,
+      pch = coords$shape,
+      gp = grid::gpar(
+        col = colorspace::adjust_transparency(coords$colour, coords$alpha),
+        fill = colorspace::adjust_transparency(coords$fill, coords$alpha),
+        # Stroke is added around the outside of the point
+        fontsize = coords$size * ggplot2::.pt + coords$stroke * ggplot2::.stroke / 2,
+        lwd = coords$stroke * ggplot2::.stroke / 2
+      )
+    )
+  },
+
+  draw_key = ggplot2::draw_key_point
+)
+
+#' \code{geom_*} and \code{stat_*} for Producing Quantile Residual Q-Q Plots with `ggplot2`
+
+#' 
+#' Various \code{geom_*} and \code{stat_*} used within
+#' \code{\link[ggplot2]{autoplot}} for producing quantile residual Q-Q plots.
+#' 
+#' @inheritParams ggplot2::layer
+#' @inheritParams ggplot2::geom_point
+#' @examples
+#' require("ggplot2")
+#' ## Fit model
+#' data("CrabSatellites", package = "countreg")
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
+#' 
+#' ## Compute wormplot
+#' w1 <- wormplot(m1_pois, plot = FALSE)
+#' w2 <- wormplot(m2_pois, plot = FALSE)
+#' 
+#' d <- c(w1, w2) 
+#' 
+#' ## Get label names
+#' xlab <- unique(attr(d, "xlab"))
+#' ylab <- unique(attr(d, "ylab"))
+#' main <- attr(d, "main")
+#' main <- make.names(main, unique = TRUE)
+#' d$group <- factor(d$group, labels = main)
+#' 
+#' ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'   geom_worm_points() + 
+#'   geom_worm_confint(
+#'     aes(
+#'       x_lwr = x_ci_lwr, 
+#'       x_upr = x_ci_upr, 
+#'       y_lwr = y_ci_lwr, 
+#'       y_upr = y_ci_upr
+#'     )
+#'   ) + 
+#'   geom_worm_ref() + 
+#'   facet_wrap(~group) +
+#'   xlab(xlab) + ylab(ylab)
+#' 
+#' @export
+geom_worm_points <- function(mapping = NULL, data = NULL, stat = "identity",
+                            position = "identity", na.rm = FALSE, 
+                            show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomWormPoints, mapping = mapping,  
+    data = data, stat = stat, position = position, 
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_worm_points
+#' @format NULL
+#' @usage NULL
+#' @export
+StatWormConfint <- ggplot2::ggproto("StatWormConfint", ggplot2::Stat,
+
+  compute_group = function(data, scales) {
+    ## Manipulate object
+    nd <- data.frame(
+      x = c(data$x_lwr, rev(data$x_upr)),
+      y = c(data$y_lwr, rev(data$y_upr))
+    )
+    nd
+  },
+
+  # Tells us what we need
+  required_aes = c("x_lwr", "x_upr", "y_lwr", "y_upr")
+)
+
+
+#' @rdname geom_worm_points
+#' @export
+stat_worm_confint <- function(mapping = NULL, data = NULL, geom = "worm_confint",
+                             position = "identity", na.rm = FALSE, 
+                             show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    stat = StatWormConfint, 
+    data = data, 
+    mapping = mapping, 
+    geom = geom, 
+    position = position, 
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_worm_points
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomWormConfint <- ggplot2::ggproto("GeomWormConfint", ggplot2::GeomPolygon,
+  default_aes = ggplot2::aes(colour = "NA", fill = "black", size = 0.5, linetype = 1,
+  alpha = 0.2, subgroup = NULL)
+)
+
+
+#' @rdname geom_worm_points
+#' @export
+geom_worm_confint <- function(mapping = NULL, data = NULL, stat = "worm_confint",
+                             position = "identity", na.rm = FALSE, 
+                             show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomWormConfint, mapping = mapping,  
+    data = data, stat = stat, position = position, 
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_worm_points
+#' @format NULL
+#' @usage NULL
+#' @export
+StatWormRef <- ggplot2::ggproto("StatWormRef", ggplot2::Stat,
+  default_aes = ggplot2::aes(y = after_scale(y)),
+
+  compute_group = function(data, scales, xlim = NULL, n = 101) {
+
+    fun <- function(x, n, level = 0.95, which = c("lower", "upper")) {
+      stopifnot(is.numeric(n), length(n) == 1)
+      stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+      which <- match.arg(which)
+
+      p <- pnorm(x)
+      se <- (1 / dnorm(x)) * (sqrt(p * (1 - p) / n))
+      rval <- as.numeric(qnorm((1 - level) / 2) * se)
+
+      if (which == "lower") {
+        rval
+      } else {
+        -rval
+      }
+    }
+
+    if (is.null(scales$x)) {
+      range <- if(is.null(xlim)) c(0, 1) else xlim
+      xseq <- seq(range[1], range[2], length.out = n)
+      x_trans <- xseq
+    } else {
+      range <- if(is.null(xlim)) scales$x$dimension() else xlim
+      xseq <- seq(range[1], range[2], length.out = n)
+
+      if (scales$x$is_discrete()) {
+        x_trans <- xseq
+      } else {
+        # For continuous scales, need to back transform from transformed range
+        # to original values
+        x_trans <- scales$x$trans$inverse(xseq)
+      }
+    }
+
+    y_out1 <- do.call(fun, c(list(quote(x_trans)), list(n = length(data$x), level = 0.95, which = "upper")))
+    if (!is.null(scales$y) && !scales$y$is_discrete()) {
+      # For continuous scales, need to apply transform
+      y_out1 <- scales$y$trans$transform(y_out1)
+    }
+    y_out2 <- do.call(fun, c(list(quote(x_trans)), list(n = length(data$x), level = 0.95, which = "lower")))
+    if (!is.null(scales$y) && !scales$y$is_discrete()) {
+      # For continuous scales, need to apply transform
+      y_out2 <- scales$y$trans$transform(y_out2)
+    }
+
+    as.data.frame(tidyr::pivot_longer(
+      data.frame(
+        x = xseq, 
+        y1 = y_out1, 
+        y2 = y_out2,
+        y3 = 0
+      ), 
+      cols = c(y1, y2, y3), 
+      names_to = "group", 
+      values_to = "y"
+    ))
+  }, 
+
+  # Tells us what we need
+  required_aes = c("x")
+)
+
+
+#' @rdname geom_worm_points
+#' @format NULL
+#' @usage NULL
+#' @export
+stat_worm_ref <- function(mapping = NULL, data = NULL,
+                          geom = "path", position = "identity",
+                          ...,
+                          xlim = NULL,
+                          n = 101,
+                          na.rm = FALSE,
+                          show.legend = NA,
+                          inherit.aes = TRUE) {
+  ggplot2::layer(
+    data = data,
+    mapping = mapping,
+    stat = StatWormRef,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      n = n,
+      na.rm = na.rm,
+      xlim = xlim,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_worm_points
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomWormRef <- ggplot2::ggproto("GeomWormRef", ggplot2::GeomPath,
+  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 2,
+  alpha = NA)
+)
+
+
+#' @rdname geom_worm_points
+#' @export
+geom_worm_ref <- function(mapping = NULL, data = NULL, stat = "worm_ref",
+                         position = "identity", na.rm = FALSE,
+                         show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomWormRef,
+    mapping = mapping,
+    data = data,
+    stat = stat,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      ...
+    )
+  )
+}
+
