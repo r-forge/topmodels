@@ -1137,9 +1137,11 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
   draw_key = ggplot2::draw_key_point
 )
 
-#' geom_* for qqr plots 
+#' \code{geom_*} and \code{stat_*} for Producing Quantile Residual Q-Q Plots with `ggplot2`
+
 #' 
-#' Some geoms implemented for testing
+#' Various \code{geom_*} and \code{stat_*} used within
+#' \code{\link[ggplot2]{autoplot}} for producing quantile residual Q-Q plots.
 #' 
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
@@ -1149,7 +1151,6 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #' quartile of theoretical distribution (default: Gaussian).
 #' @param probs numeric vector of length two, representing probabilities of reference
 #' line used in \code{trafo}.
-#' @param linetype additional graphical parameters for \code{\link{ggplot2}}.
 #' @examples
 #' require("ggplot2")
 #' ## Fit model
@@ -1216,9 +1217,10 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
   required_aes = c("x_lwr", "x_upr", "y_lwr", "y_upr")
 )
 
+
 #' @rdname geom_qqr_points
 #' @export
-stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "QqrConfint",
+stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
                              position = "identity", na.rm = FALSE, 
                              show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
@@ -1292,9 +1294,10 @@ StatQqrRef <- ggplot2::ggproto("StatQqrRef", ggplot2::Stat,
   required_aes = c("x", "y")
 )
 
+
 #' @rdname geom_qqr_points
 #' @export
-stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "abline",
+stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
                          position = "identity", na.rm = FALSE, 
                          show.legend = NA, inherit.aes = TRUE, 
                          identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, ...) {
@@ -1316,14 +1319,25 @@ stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "abline",
   )
 }
 
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomQqrRef <- ggplot2::ggproto("GeomQqrRef", ggplot2::GeomAbline,
+  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 2,
+  alpha = NA)
+)
+
+
 #' @rdname geom_qqr_points
 #' @export
 geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
                          position = "identity", na.rm = FALSE, 
                          show.legend = NA, inherit.aes = TRUE, identity = TRUE,
-                         probs = c(0.25, 0.75), trafo = qnorm, linetype = 2, ...) {
+                         probs = c(0.25, 0.75), trafo = qnorm, ...) {
   ggplot2::layer(
-    geom = ggplot2::GeomAbline, 
+    geom = GeomQqrRef, 
     mapping = mapping, 
     data = data, 
     stat = stat, 
@@ -1335,7 +1349,6 @@ geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
       identity = identity,
       probs = probs,
       trafo = trafo,
-      linetype = linetype,
       ...
     )
   )
