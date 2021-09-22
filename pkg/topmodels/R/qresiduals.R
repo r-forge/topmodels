@@ -48,5 +48,5 @@ qresiduals <- function(object, ...) {
 qresiduals.default <- function(object, 
                                trafo = qnorm, 
                                ...) {
-  pitresiduals.default(object, trafo = trafo, ...)
+  pitresiduals(object, trafo = trafo, ...)
 }
