@@ -62,13 +62,18 @@
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale (default: Gaussian).
 #' @param nsim,delta arguments passed to \code{qresiduals}.
-#' @param confint logical or quantile specification. Should the range of
-#' quantiles of the randomized quantile residuals be visualized? If
-#' \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.
-#' @param confint_level numeric. The confidence level required.
-#' @param confint_nsim numeric. The number of simulated quantiles.
-#' @param confint_seed numeric. The seed to be set for calculating the
-#' confidence interval.
+#' @param confint logical or quantile specification. Should the pointwise confidence interval 
+#' of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
+#' then \code{range = c(0.01, 0.99)} is used.
+#' @param range logical or quantile specification. In case of discrete distributions, should the range 
+#' (confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 
+#' then \code{range = c(0.01, 0.99)} is used.
+#' @param range_level numeric. The confidence level required for calculating the range of values 
+#' due to the randomization. 
+#' @param range_nsim numeric. The number of simulated quantiles for calculating the range of values
+#' due to the randomization. 
+#' @param range_seed numeric. The seed to be set for calculating the range of values
+#' due to the randomization. 
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
 #' @param xlab,ylab,main,\dots graphical parameters passed to
@@ -78,9 +83,9 @@
 #' variables: \item{x}{theoretical quantiles,} \item{y}{empirical quantile
 #' residuals.} In case of randomized residuals, \code{nsim} different \code{x} and
 #' \code{y} values, and lower and upper confidence interval bounds
-#' (\code{x_ci_lwr}, \code{y_ci_lwr}, \code{x_ci_upr}, \code{y_ci_upr}) can
+#' (\code{x_rg_lwr}, \code{y_rg_lwr}, \code{x_rg_upr}, \code{y_rg_upr}) can
 #' optionally be returned.  Additionally, \code{xlab}, \code{ylab}, \code{main},
-#' and \code{confint_level} are stored as attributes.
+#' and \code{range_level} are stored as attributes.
 #' @seealso \code{\link{plot.qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
@@ -126,10 +131,11 @@ qqrplot.default <- function(object,
                             trafo = qnorm,
                             nsim = 1L,
                             delta = NULL,
-                            confint = TRUE,
-                            confint_level = 0.95,
-                            confint_nsim = 250,
-                            confint_seed = 1,
+                            confint = TRUE,  # FIXME: (ML) Implement confint!
+                            range = TRUE,
+                            range_level = 0.95,
+                            range_nsim = 250,
+                            range_seed = 1,
                             single_graph = FALSE,
                             xlab = "Theoretical quantiles",
                             ylab = "Quantile residuals",
@@ -140,19 +146,19 @@ qqrplot.default <- function(object,
   # -------------------------------------------------------------------
   ## sanity checks
   ## * `object`, `newdata`, `delta w/i `qresiduals()`
-  ## * `confint` w/i `polygon()`
+  ## * `range` w/i `polygon()`
   ## * `delta` w/i `qresiduals()`
   ## * `...` in `plot()` and `autoplot()`
   stopifnot(is.null(trafo) | is.function(trafo))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(
-    is.numeric(confint_level),
-    length(confint_level) == 1,
-    confint_level >= 0,
-    confint_level <= 1
+    is.numeric(range_level),
+    length(range_level) == 1,
+    range_level >= 0,
+    range_level <= 1
   )
-  stopifnot(is.numeric(confint_nsim), length(confint_nsim) == 1)
-  stopifnot(is.numeric(confint_seed), length(confint_seed) == 1)
+  stopifnot(is.numeric(range_nsim), length(range_nsim) == 1)
+  stopifnot(is.numeric(range_seed), length(range_seed) == 1)
   stopifnot(is.logical(single_graph))
   stopifnot(length(xlab) == 1)
   stopifnot(length(ylab) == 1)
@@ -195,34 +201,34 @@ qqrplot.default <- function(object,
   q2q <- function(y) trafo(ppoints(length(y)))[order(order(y))]
   qthe <- apply(qres, 2L, q2q)
 
-  ## compute ci interval
+  ## compute rg interval
   ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
-  if (!identical(confint, FALSE)) {
-    set.seed(confint_seed)
+  if (!identical(range, FALSE)) {
+    set.seed(range_seed)
     tmp <- qresiduals(object,
-      newdata = newdata, trafo = trafo, type = "random", nsim = confint_nsim,
+      newdata = newdata, trafo = trafo, type = "random", nsim = range_nsim,
       delta = delta
     )
-    confint_prob <- (1 - confint_level) / 2
-    confint_prob <- c(confint_prob, 1 - confint_prob)
-    qres_ci_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = confint_prob[1], na.rm = TRUE)
-    qres_ci_upr <- apply(apply(tmp, 2, sort), 1, quantile, probs = confint_prob[2], na.rm = TRUE)
-    qthe_ci_lwr <- q2q(qres_ci_lwr)
-    qthe_ci_upr <- q2q(qres_ci_upr)
+    range_prob <- (1 - range_level) / 2
+    range_prob <- c(range_prob, 1 - range_prob)
+    qres_rg_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = range_prob[1], na.rm = TRUE)
+    qres_rg_upr <- apply(apply(tmp, 2, sort), 1, quantile, probs = range_prob[2], na.rm = TRUE)
+    qthe_rg_lwr <- q2q(qres_rg_lwr)
+    qthe_rg_upr <- q2q(qres_rg_upr)
 
     ## FIXME: (ML) Improve workaround to get CI only for discrete values
-    if (isTRUE(all.equal(qres_ci_lwr, qres_ci_upr, tol = .Machine$double.eps^0.4))) {
-      qres_ci_lwr <- NULL
-      qres_ci_upr <- NULL
-      qthe_ci_lwr <- NULL
-      qthe_ci_upr <- NULL
-      confint <- FALSE
+    if (isTRUE(all.equal(qres_rg_lwr, qres_rg_upr, tol = .Machine$double.eps^0.4))) {
+      qres_rg_lwr <- NULL
+      qres_rg_upr <- NULL
+      qthe_rg_lwr <- NULL
+      qthe_rg_upr <- NULL
+      range <- FALSE
     }
   } else {
-    qres_ci_lwr <- NULL
-    qres_ci_upr <- NULL
-    qthe_ci_lwr <- NULL
-    qthe_ci_upr <- NULL
+    qres_rg_lwr <- NULL
+    qres_rg_upr <- NULL
+    qthe_rg_lwr <- NULL
+    qthe_rg_upr <- NULL
   }
 
   ## labels
@@ -233,7 +239,7 @@ qqrplot.default <- function(object,
   # -------------------------------------------------------------------
   ## collect everything as data.frame
   if (any(vapply(
-    list(qres_ci_lwr, qres_ci_upr, qthe_ci_lwr, 1),
+    list(qres_rg_lwr, qres_rg_upr, qthe_rg_lwr, 1),
     FUN = is.null,
     FUN.VALUE = FALSE
   ))) {
@@ -245,10 +251,10 @@ qqrplot.default <- function(object,
     rval <- data.frame(
       x = qthe,
       y = qres,
-      y_ci_lwr = qres_ci_lwr,
-      y_ci_upr = qres_ci_upr,
-      x_ci_lwr = qthe_ci_lwr,
-      x_ci_upr = qthe_ci_upr
+      y_rg_lwr = qres_rg_lwr,
+      y_rg_upr = qres_rg_upr,
+      x_rg_lwr = qthe_rg_lwr,
+      x_rg_upr = qthe_rg_upr
     )
   }
   names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
@@ -257,7 +263,7 @@ qqrplot.default <- function(object,
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
+  attr(rval, "range_level") <- ifelse(range, range_level, NA)
   attr(rval, "trafo") <- trafo
 
   ## add class
@@ -270,9 +276,9 @@ qqrplot.default <- function(object,
 
   ## plot by default
   if (plot == "ggplot2") {
-    try(print(ggplot2::autoplot(rval, confint = confint, ...)))
+    try(print(ggplot2::autoplot(rval, range = range, ...)))
   } else if (plot == "base") {
-    try(plot(rval, confint = confint, ...))
+    try(plot(rval, range = range, ...))
   }
 
   ## return invisibly
@@ -316,7 +322,7 @@ c.qqrplot <- function(...) {
   ## labels
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
-  confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
+  range_level <- unlist(lapply(rval, function(r) attr(r, "range_level")))
   trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
@@ -353,7 +359,7 @@ c.qqrplot <- function(...) {
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "confint_level") <- confint_level
+  attr(rval, "range_level") <- range_level
   attr(rval, "trafo") <- trafo
 
   ## set class to data.frame or tibble
@@ -394,7 +400,10 @@ rbind.qqrplot <- c.qqrplot
 #' @param x,object an object of class \code{qqrplot}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param confint logical or quantile specification. Should the range of
+#' @param confint logical or quantile specification. Should the pointwise confidence interval 
+#' of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
+#' then \code{range = c(0.01, 0.99)} is used.
+#' @param range logical or quantile specification. Should the range of
 #' quantiles of the randomized quantile residuals be visualized? If
 #' \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.
 #' @param xlab,ylab,main,\dots graphical plotting parameters passed to
@@ -425,7 +434,7 @@ rbind.qqrplot <- c.qqrplot
 #' ## add separate model
 #' if (require("crch", quietly = TRUE)) {
 #'   m1_crch <- crch(dist ~ speed | speed, data = cars)
-#'   points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
+#'   points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, range = 2)
 #' }
 #' 
 #' #-------------------------------------------------------------------------------
@@ -449,7 +458,7 @@ rbind.qqrplot <- c.qqrplot
 #'   qq2_crch <- qqrplot(m2_crch, plot = FALSE)
 #' 
 #'   ## plot in single graph
-#'   plot(c(qq2_lm, qq2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
+#'   plot(c(qq2_lm, qq2_crch), col = c(1, 2), range = c(1, 2), ref = 3, single_graph = TRUE)
 #' }
 #' 
 #' #-------------------------------------------------------------------------------
@@ -465,7 +474,7 @@ rbind.qqrplot <- c.qqrplot
 #' @export
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
-                         confint = TRUE,
+                         range = TRUE,
                          ref = TRUE,
                          xlim = c(NA, NA),
                          ylim = c(NA, NA),
@@ -487,7 +496,7 @@ plot.qqrplot <- function(x,
   ## * `ref` w/i `abline()`
   ## * `xlab`, `ylab`, `main` and `....` w/i `plot()`
   ## * `col`, `pch` w/i `lines()`
-  ## * `confint`, `fill` in `polygon()`
+  ## * `range`, `fill` in `polygon()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(axes))
@@ -505,7 +514,7 @@ plot.qqrplot <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
-  plot_arg <- data.frame(1:n, confint, ref,
+  plot_arg <- data.frame(1:n, range, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     col, fill, alpha_min, pch, axes, box
   )[, -1]
@@ -535,11 +544,11 @@ plot.qqrplot <- function(x,
     ## get group index
     j <- unique(d$group)
 
-    ## get xlim and ylim conditional on confint and on single_graph
+    ## get xlim and ylim conditional on range and on single_graph
     if (single_graph) {
       if (
-        !identical(plot_arg$confint[j], FALSE) &&
-          any(!is.na(attr(d, "confint_level")))
+        !identical(plot_arg$range[j], FALSE) &&
+          any(!is.na(attr(d, "range_level")))
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
           tmp <- range(as.matrix(x[grepl("x", names(x))]), finite = TRUE)
@@ -561,8 +570,8 @@ plot.qqrplot <- function(x,
       }
     } else { 
       if (
-        !identical(plot_arg$confint[j], FALSE) &&
-          !is.na(attr(d, "confint_level")[j])
+        !identical(plot_arg$range[j], FALSE) &&
+          !is.na(attr(d, "range_level")[j])
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
           tmp <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
@@ -600,21 +609,21 @@ plot.qqrplot <- function(x,
       }
     }
 
-    ## plot confint polygon
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
+    ## plot range polygon
+    if (!identical(plot_arg$range[j], FALSE) && !is.na(attr(d, "range_level")[j])) {
+      if (isTRUE(plot_arg$range[j])) plot_arg$range[j] <- plot_arg$fill[j]
 
-      idx_upr <- order(d$x_ci_upr)
-      idx_lwr <- order(d$x_ci_lwr)
-      x_pol <- c(d$x_ci_lwr[idx_lwr], d$x_ci_upr[rev(idx_upr)])
-      y_pol <- c(d$y_ci_lwr[idx_lwr], d$y_ci_upr[rev(idx_upr)])
+      idx_upr <- order(d$x_rg_upr)
+      idx_lwr <- order(d$x_rg_lwr)
+      x_pol <- c(d$x_rg_lwr[idx_lwr], d$x_rg_upr[rev(idx_upr)])
+      y_pol <- c(d$y_rg_lwr[idx_lwr], d$y_rg_upr[rev(idx_upr)])
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
       polygon(
         x_pol,
         y_pol,
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
+        col = set_minimum_transparency(plot_arg$range[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -655,7 +664,7 @@ plot.qqrplot <- function(x,
 #' @method points qqrplot
 #' @export
 points.qqrplot <- function(x,
-                           confint = FALSE,
+                           range = FALSE,
                            ref = FALSE,
                            col = adjustcolor("black", alpha.f = 0.4),
                            fill = adjustcolor("black", alpha.f = 0.2),
@@ -669,7 +678,7 @@ points.qqrplot <- function(x,
   ## * lengths of all arguments are checked by recycling
   ## * `ref` w/i `abline()`
   ## * `col`, `pch` w/i `lines()`
-  ## * `confint`, `fill` in `polygon()`
+  ## * `range`, `fill` in `polygon()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
 
   ## convert always to data.frame
@@ -680,7 +689,7 @@ points.qqrplot <- function(x,
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, confint, ref, col, fill, alpha_min, pch)[, -1]
+  plot_arg <- data.frame(1:n, range, ref, col, fill, alpha_min, pch)[, -1]
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR POINTS
@@ -690,21 +699,21 @@ points.qqrplot <- function(x,
     ## get group index
     j <- unique(d$group)
 
-    ## plot confint polygon
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
+    ## plot range polygon
+    if (!identical(plot_arg$range[j], FALSE) && !is.na(attr(d, "range_level")[j])) {
+      if (isTRUE(plot_arg$range[j])) plot_arg$range[j] <- plot_arg$fill[j]
 
-      idx_upr <- order(d$x_ci_upr)
-      idx_lwr <- order(d$x_ci_lwr)
-      x_pol <- c(d$x_ci_lwr[idx_lwr], d$x_ci_upr[rev(idx_upr)])
-      y_pol <- c(d$y_ci_lwr[idx_lwr], d$y_ci_upr[rev(idx_upr)])
+      idx_upr <- order(d$x_rg_upr)
+      idx_lwr <- order(d$x_rg_lwr)
+      x_pol <- c(d$x_rg_lwr[idx_lwr], d$x_rg_upr[rev(idx_upr)])
+      y_pol <- c(d$y_rg_lwr[idx_lwr], d$y_rg_upr[rev(idx_upr)])
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
       polygon(
         x_pol,
         y_pol,
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
+        col = set_minimum_transparency(plot_arg$range[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -733,12 +742,13 @@ points.qqrplot <- function(x,
   }
 }
 
+
 # -------------------------------------------------------------------
 # START: OLD VERSION NOT USING `geom_*()`s
 # -------------------------------------------------------------------
 #autoplot.qqrplot <- function(object,
 #                             single_graph = FALSE,
-#                             confint = TRUE,
+#                             range = TRUE,
 #                             ref = TRUE,
 #                             xlim = c(NA, NA),
 #                             ylim = c(NA, NA),
@@ -811,31 +821,31 @@ points.qqrplot <- function(x,
 #  ## set color to NA for not plotting
 #  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)
 #
-#  ## stat helper function to get ci polygon
-#  calc_confint_polygon <- ggplot2::ggproto("calc_confint_polygon", ggplot2::Stat,
+#  ## stat helper function to get rg polygon
+#  calc_range_polygon <- ggplot2::ggproto("calc_range_polygon", ggplot2::Stat,
 #
 #    # Required as we operate on groups (facetting)
 #    compute_group = function(data, scales) {
 #      ## Manipulate object
 #      nd <- data.frame(
-#        x = c(data$x_ci_lwr, rev(data$x_ci_upr)),
-#        y = c(data$y_ci_lwr, rev(data$y_ci_upr))
+#        x = c(data$x_rg_lwr, rev(data$x_rg_upr)),
+#        y = c(data$y_rg_lwr, rev(data$y_rg_upr))
 #      )
 #      nd
 #    },
 #
 #    # Tells us what we need
-#    required_aes = c("x_ci_lwr", "x_ci_upr", "y_ci_lwr", "y_ci_upr")
+#    required_aes = c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr")
 #  )
 #
 #  ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
 #  plot_arg <- data.frame(
 #    1:n,
-#    fill, colour, size, ref, linetype, confint, alpha_min, shape
+#    fill, colour, size, ref, linetype, range, alpha_min, shape
 #  )[, -1]
 #
-#  ## prepare fill color for confint (must be done on vector to match args)
-#  if (is.logical(plot_arg$confint)) {
+#  ## prepare fill color for range (must be done on vector to match args)
+#  if (is.logical(plot_arg$range)) {
 #
 #    ## use fill and set alpha
 #    plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx) {
@@ -843,12 +853,12 @@ points.qqrplot <- function(x,
 #    })
 #
 #    ## set color to NA for not plotting
-#    plot_arg$fill[!plot_arg$confint] <- NA
+#    plot_arg$fill[!plot_arg$range] <- NA
 #  } else {
 #
-#    ## use confint and set alpha
-#    plot_arg$fill <- sapply(seq_along(plot_arg$confint), function(idx) {
-#      set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx])
+#    ## use range and set alpha
+#    plot_arg$fill <- sapply(seq_along(plot_arg$range), function(idx) {
+#      set_minimum_transparency(plot_arg$range[idx], alpha_min = plot_arg$alpha_min[idx])
 #    })
 #  }
 #
@@ -865,14 +875,14 @@ points.qqrplot <- function(x,
 #      linetype = 2, colour = plot_arg2$ref
 #  )
 #
-#  ## add conf
-#  if (all(c("x_ci_lwr", "x_ci_upr", "y_ci_lwr", "y_ci_upr") %in% names(object))) {
+#  ## add range
+#  if (all(c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr") %in% names(object))) {
 #    rval <- rval +
 #      ggplot2::geom_polygon(ggplot2::aes_string(
-#        x_ci_lwr = "x_ci_lwr", x_ci_upr = "x_ci_upr",
-#        y_ci_lwr = "y_ci_lwr", y_ci_upr = "y_ci_upr", fill = "group"
+#        x_rg_lwr = "x_rg_lwr", x_rg_upr = "x_rg_upr",
+#        y_rg_lwr = "y_rg_lwr", y_rg_upr = "y_rg_upr", fill = "group"
 #      ),
-#      stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE
+#      stat = calc_range_polygon, show.legend = FALSE, na.rm = TRUE
 #      )
 #  }
 #
@@ -920,12 +930,14 @@ points.qqrplot <- function(x,
 # END: OLD VERSION NOT USING `geom_*()`s
 # -------------------------------------------------------------------
 
+
 #' @rdname plot.qqrplot
 #' @method autoplot qqrplot
 #' @exportS3Method ggplot2::autoplot
 autoplot.qqrplot <- function(object,
                              single_graph = FALSE,
                              confint = TRUE,
+                             range = TRUE,
                              ref = TRUE,
                              xlim = c(NA, NA),
                              ylim = c(NA, NA),
@@ -1002,14 +1014,14 @@ autoplot.qqrplot <- function(object,
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
-    fill, colour, size, confint, alpha_colour, shape
+    fill, colour, size, confint, range, alpha_colour, shape
   )[, -1]
 
-  ## prepare fill color for confint (set to NA for not plotting)
-  if (is.logical(plot_arg$confint)) {
-    plot_arg$fill[!plot_arg$confint] <- NA
+  ## prepare fill color for range (set to NA for not plotting)
+  if (is.logical(plot_arg$range)) {
+    plot_arg$fill[!plot_arg$range] <- NA
   } else {
-    plot_arg$fill <- plot_arg$confint
+    plot_arg$fill <- plot_arg$range
   }
 
   # -------------------------------------------------------------------
@@ -1031,14 +1043,26 @@ autoplot.qqrplot <- function(object,
   }
 
   ## add conf
-  if (all(c("x_ci_lwr", "x_ci_upr", "y_ci_lwr", "y_ci_upr") %in% names(object))) {
+  if (confint) {
     rval <- rval +
       geom_qqr_confint(
+        linetype = linetype, 
+        identity = identity, 
+        probs = probs, 
+        trafo = trafo,
+        na.rm = TRUE  ## TODO: (ML) This really necessary, compare tinytest topmodels w/ disttree
+      )
+  }
+
+  ## add range
+  if (all(c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr") %in% names(object))) {
+    rval <- rval +
+      geom_qqr_range(
         ggplot2::aes_string(
-          x_lwr = "x_ci_lwr", 
-          x_upr = "x_ci_upr", 
-          y_lwr = "y_ci_lwr", 
-          y_upr = "y_ci_upr",
+          x_lwr = "x_rg_lwr", 
+          x_upr = "x_rg_upr", 
+          y_lwr = "y_rg_lwr", 
+          y_upr = "y_rg_upr",
           fill = "group"
         ),
          alpha = alpha_fill,
@@ -1086,6 +1110,7 @@ autoplot.qqrplot <- function(object,
   ## return ggplot object
   rval
 }
+
 
 #' @rdname geom_qqr_points
 #' @format NULL
@@ -1137,8 +1162,8 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
   draw_key = ggplot2::draw_key_point
 )
 
-#' \code{geom_*} and \code{stat_*} for Producing Quantile Residual Q-Q Plots with `ggplot2`
 
+#' \code{geom_*} and \code{stat_*} for Producing Quantile Residual Q-Q Plots with `ggplot2`
 #' 
 #' Various \code{geom_*} and \code{stat_*} used within
 #' \code{\link[ggplot2]{autoplot}} for producing quantile residual Q-Q plots.
@@ -1151,6 +1176,9 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #' quartile of theoretical distribution (default: Gaussian).
 #' @param probs numeric vector of length two, representing probabilities of reference
 #' line used in \code{trafo}.
+#' @param xlim description.
+#' @param n Fix description.
+#' @param style Fix description.
 #' @examples
 #' require("ggplot2")
 #' ## Fit model
@@ -1171,19 +1199,21 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #' main <- make.names(main, unique = TRUE)
 #' d$group <- factor(d$group, labels = main)
 #' 
-#' ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#' gg <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
 #'   geom_qqr_points() + 
-#'   geom_qqr_confint(
+#'   geom_qqr_range(
 #'     aes(
-#'       x_lwr = x_ci_lwr, 
-#'       x_upr = x_ci_upr, 
-#'       y_lwr = y_ci_lwr, 
-#'       y_upr = y_ci_upr
+#'       x_lwr = x_rg_lwr, 
+#'       x_upr = x_rg_upr, 
+#'       y_lwr = y_rg_lwr, 
+#'       y_upr = y_rg_upr
 #'     )
 #'   ) + 
 #'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
+#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], style = "lines") + 
 #'   facet_wrap(~group) +
 #'   xlab(xlab) + ylab(ylab)
+#' gg
 #' 
 #' @export
 geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
@@ -1202,7 +1232,7 @@ geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
 #' @format NULL
 #' @usage NULL
 #' @export
-StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
+StatQqrRange <- ggplot2::ggproto("StatQqrRange", ggplot2::Stat,
 
   compute_group = function(data, scales) {
     ## Manipulate object
@@ -1220,11 +1250,11 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
 
 #' @rdname geom_qqr_points
 #' @export
-stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
+stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
                              position = "identity", na.rm = FALSE, 
                              show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    stat = StatQqrConfint, 
+    stat = StatQqrRange, 
     data = data, 
     mapping = mapping, 
     geom = geom, 
@@ -1240,7 +1270,7 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::GeomPolygon,
+GeomQqrRange <- ggplot2::ggproto("GeomQqrRange", ggplot2::GeomPolygon,
   default_aes = ggplot2::aes(colour = "NA", fill = "black", size = 0.5, linetype = 1,
   alpha = 0.2, subgroup = NULL)
 )
@@ -1248,11 +1278,11 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::GeomPolygon,
 
 #' @rdname geom_qqr_points
 #' @export
-geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
+geom_qqr_range <- function(mapping = NULL, data = NULL, stat = "qqr_range",
                              position = "identity", na.rm = FALSE, 
                              show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    geom = GeomQqrConfint, mapping = mapping,  
+    geom = GeomQqrRange, mapping = mapping,  
     data = data, stat = stat, position = position, 
     show.legend = show.legend, inherit.aes = inherit.aes,
     params = list(na.rm = na.rm, ...)
@@ -1353,3 +1383,197 @@ geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
     )
   )
 }
+
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", StatQqrRef,
+  default_aes = ggplot2::aes(y = after_scale(y)),
+
+  compute_group = function(data, 
+                           self,
+                           scales, 
+                           xlim = NULL, 
+                           n = 101, 
+                           identity = TRUE, 
+                           probs = c(0.25, 0.75), 
+                           trafo = qnorm,
+                           style = "lines") {
+
+    fun <- function(x, n, level = 0.95, which = c("lower", "upper")) {
+      stopifnot(is.numeric(n), length(n) == 1)
+      stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+      which <- match.arg(which)
+
+      p <- pnorm(x)
+      se <- (1 / dnorm(x)) * (sqrt(p * (1 - p) / n))
+      rval <- as.numeric(trafo((1 - level) / 2) * se)
+
+      if (which == "lower") {
+        rval
+      } else {
+        -rval
+      }
+    }
+
+    if (is.null(scales$x)) {
+      range <- if(is.null(xlim)) c(0, 1) else xlim
+      xseq <- seq(range[1], range[2], length.out = n)
+      x_trans <- xseq
+    } else {
+      range <- if(is.null(xlim)) scales$x$dimension() else xlim
+      xseq <- seq(range[1], range[2], length.out = n)
+
+      if (scales$x$is_discrete()) {
+        x_trans <- xseq
+      } else {
+        # For continuous scales, need to back transform from transformed range
+        # to original values
+        x_trans <- scales$x$trans$inverse(xseq)
+      }
+    }
+
+    y_out1 <- do.call(fun, c(list(quote(x_trans)), list(n = length(data$x), level = 0.95, which = "upper")))
+    if (!is.null(scales$y) && !scales$y$is_discrete()) {
+      # For continuous scales, need to apply transform
+      y_out1 <- scales$y$trans$transform(y_out1)
+    }
+    y_out2 <- do.call(fun, c(list(quote(x_trans)), list(n = length(data$x), level = 0.95, which = "lower")))
+    if (!is.null(scales$y) && !scales$y$is_discrete()) {
+      # For continuous scales, need to apply transform
+      y_out2 <- scales$y$trans$transform(y_out2)
+    }
+
+    ## Inherit from StatQqrRef
+    intercept <- self$super()$compute_group(data = data,
+                                            scales = scales,
+                                            identity = identity,
+                                            probs = probs,
+                                            trafo = trafo)$intercept
+    slope <- self$super()$compute_group(data = data,
+                                        scales = scales,
+                                        identity = identity,
+                                        probs = probs,
+                                        trafo = trafo)$slope
+
+    if (style == "lines") {
+      ## prepare long format with group variable
+      as.data.frame(tidyr::pivot_longer(
+        data.frame(
+          x = xseq,
+          y1 = (intercept + slope * xseq) + y_out1,
+          y2 = (intercept + slope * xseq) + y_out2
+        ),
+        cols = c(y1, y2),
+        names_to = "group",
+        values_to = "y",
+        names_prefix = "y"
+      ))
+
+    } else {
+      ## prepare short format
+      data.frame(
+        x = c(xseq, rev(xseq)),
+        y = c(
+          (intercept + slope * xseq) + y_out2,
+          rev((intercept + slope * xseq) + y_out1)
+        )
+      )
+    }
+     
+  },
+
+  # Tells us what we need
+  required_aes = c("x", "y")
+)
+
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint", 
+                             position = "identity", na.rm = FALSE,
+                             show.legend = NA, inherit.aes = TRUE,
+                             xlim = NULL, n = 101, 
+                             identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                             style = c("polygon", "lines"), ...) {
+
+  style <- match.arg(style)
+
+  ggplot2::layer(
+    #geom = geom, ## FIXME: (ML) Why is this not working as it should be?
+    geom = if (style == "lines") GeomQqrConfintLines else GeomQqrConfintPolygon,
+    stat = StatQqrConfint,
+    data = data,
+    mapping = mapping,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      xlim = xlim,
+      n = n,
+      identity = identity,
+      probs = probs,
+      trafo = trafo,
+      style = style,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomQqrConfintLines <- ggplot2::ggproto("GeomQqrConfintLines", ggplot2::GeomPath,
+  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 2,
+  alpha = NA)
+)
+
+
+#' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomQqrConfintPolygon <- ggplot2::ggproto("GeomQqrConfintPolygon", ggplot2::GeomPolygon,
+  default_aes = ggplot2::aes(colour = "NA", fill = "black", size = 0.5, linetype = 1,
+  alpha = 0.2, subgroup = NULL) ## FIXME: (ML) SUBGROUP??!
+)
+
+
+#' @rdname geom_qqr_points
+#' @export
+geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
+                             position = "identity", na.rm = FALSE,
+                             show.legend = NA, inherit.aes = TRUE, 
+                             xlim = NULL, n = 101, 
+                             identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                             style = c("polygon", "lines"), ...) {
+  style <- match.arg(style)
+
+  ggplot2::layer(
+    geom = if (style == "lines") GeomQqrConfintLines else GeomQqrConfintPolygon,
+    mapping = mapping,
+    data = data,
+    stat = stat,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      xlim = xlim,
+      n = n,
+      identity = identity,
+      probs = probs,
+      trafo = trafo,
+      style = style,
+      ...
+    )
+  )
+}
+
