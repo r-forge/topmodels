@@ -17,9 +17,10 @@ qqrplot(object, ...)
   nsim = 1L,
   delta = NULL,
   confint = TRUE,
-  confint_level = 0.95,
-  confint_nsim = 250,
-  confint_seed = 1,
+  range = TRUE,
+  range_level = 0.95,
+  range_nsim = 250,
+  range_seed = 1,
   single_graph = FALSE,
   xlab = "Theoretical quantiles",
   ylab = "Quantile residuals",
@@ -49,16 +50,22 @@ different distribution scale (default: Gaussian).}
 
 \item{nsim, delta}{arguments passed to \code{qresiduals}.}
 
-\item{confint}{logical or quantile specification. Should the range of
-quantiles of the randomized quantile residuals be visualized? If
-\code{TRUE}, then \code{range = c(0.01, 0.99)} is used.}
+\item{confint}{logical or quantile specification. Should the pointwise confidence interval 
+of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
+then \code{range = c(0.01, 0.99)} is used.}
 
-\item{confint_level}{numeric. The confidence level required.}
+\item{range}{logical or quantile specification. In case of discrete distributions, should the range 
+(confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 
+then \code{range = c(0.01, 0.99)} is used.}
 
-\item{confint_nsim}{numeric. The number of simulated quantiles.}
+\item{range_level}{numeric. The confidence level required for calculating the range of values 
+due to the randomization.}
 
-\item{confint_seed}{numeric. The seed to be set for calculating the
-confidence interval.}
+\item{range_nsim}{numeric. The number of simulated quantiles for calculating the range of values
+due to the randomization.}
+
+\item{range_seed}{numeric. The seed to be set for calculating the range of values
+due to the randomization.}
 
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
@@ -72,9 +79,9 @@ or \code{"tibble"} conditional on the argument \code{class} with the following
 variables: \item{x}{theoretical quantiles,} \item{y}{empirical quantile
 residuals.} In case of randomized residuals, \code{nsim} different \code{x} and
 \code{y} values, and lower and upper confidence interval bounds
-(\code{x_ci_lwr}, \code{y_ci_lwr}, \code{x_ci_upr}, \code{y_ci_upr}) can
+(\code{x_rg_lwr}, \code{y_rg_lwr}, \code{x_rg_upr}, \code{y_rg_upr}) can
 optionally be returned.  Additionally, \code{xlab}, \code{ylab}, \code{main},
-and \code{confint_level} are stored as attributes.
+and \code{range_level} are stored as attributes.
 }
 \description{
 Visualize goodness of fit of regression models by Q-Q plots using quantile

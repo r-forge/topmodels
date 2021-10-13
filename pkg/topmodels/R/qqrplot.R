@@ -412,7 +412,7 @@ rbind.qqrplot <- c.qqrplot
 #' @param ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
 #' @param colour,alpha_colour,alpha_fill,size,shape,linetype,legend,identity,trafo,probs 
-#' graphical parameters passed for #' \code{ggplot2} style plots, whereby
+#' graphical parameters passed to \code{ggplot2} style plots, whereby
 #' \code{object} is a object of class \code{qqrplot}.
 #' @seealso \code{\link{qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
@@ -1178,7 +1178,7 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #' line used in \code{trafo}.
 #' @param xlim description.
 #' @param n Fix description.
-#' @param style Fix description.
+#' @param type Fix description.
 #' @examples
 #' require("ggplot2")
 #' ## Fit model
@@ -1210,7 +1210,7 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #'     )
 #'   ) + 
 #'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
-#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], style = "lines") + 
+#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], type = "line") + 
 #'   facet_wrap(~group) +
 #'   xlab(xlab) + ylab(ylab)
 #' gg
@@ -1389,18 +1389,17 @@ geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
 #' @format NULL
 #' @usage NULL
 #' @export
-StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", StatQqrRef,
+StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
   default_aes = ggplot2::aes(y = after_scale(y)),
 
   compute_group = function(data, 
-                           self,
                            scales, 
                            xlim = NULL, 
                            n = 101, 
                            identity = TRUE, 
                            probs = c(0.25, 0.75), 
                            trafo = qnorm,
-                           style = "lines") {
+                           type = "line") {
 
     fun <- function(x, n, level = 0.95, which = c("lower", "upper")) {
       stopifnot(is.numeric(n), length(n) == 1)
@@ -1446,19 +1445,19 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", StatQqrRef,
       y_out2 <- scales$y$trans$transform(y_out2)
     }
 
-    ## Inherit from StatQqrRef
-    intercept <- self$super()$compute_group(data = data,
-                                            scales = scales,
-                                            identity = identity,
-                                            probs = probs,
-                                            trafo = trafo)$intercept
-    slope <- self$super()$compute_group(data = data,
-                                        scales = scales,
-                                        identity = identity,
-                                        probs = probs,
-                                        trafo = trafo)$slope
+    ## Employgin StatQqrRef Method
+    intercept <- StatQqrRef$compute_group(data = data,
+                                          scales = scales,
+                                          identity = identity,
+                                          probs = probs,
+                                          trafo = trafo)$intercept
+    slope <- StatQqrRef$compute_group(data = data,
+                                      scales = scales,
+                                      identity = identity,
+                                      probs = probs,
+                                      trafo = trafo)$slope
 
-    if (style == "lines") {
+    if (type == "line") {
       ## prepare long format with group variable
       as.data.frame(tidyr::pivot_longer(
         data.frame(
@@ -1499,13 +1498,11 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
                              show.legend = NA, inherit.aes = TRUE,
                              xlim = NULL, n = 101, 
                              identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
-                             style = c("polygon", "lines"), ...) {
+                             type = c("polygon", "line"), ...) {
 
-  style <- match.arg(style)
-
+  type <- match.arg(type)
   ggplot2::layer(
-    #geom = geom, ## FIXME: (ML) Why is this not working as it should be?
-    geom = if (style == "lines") GeomQqrConfintLines else GeomQqrConfintPolygon,
+    geom = geom, 
     stat = StatQqrConfint,
     data = data,
     mapping = mapping,
@@ -1519,7 +1516,7 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
       identity = identity,
       probs = probs,
       trafo = trafo,
-      style = style,
+      type = type,
       ...
     )
   )
@@ -1527,37 +1524,17 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
 
 
 #' @rdname geom_qqr_points
-#' @format NULL
-#' @usage NULL
-#' @export
-GeomQqrConfintLines <- ggplot2::ggproto("GeomQqrConfintLines", ggplot2::GeomPath,
-  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 2,
-  alpha = NA)
-)
-
-
-#' @rdname geom_qqr_points
-#' @format NULL
-#' @usage NULL
-#' @export
-GeomQqrConfintPolygon <- ggplot2::ggproto("GeomQqrConfintPolygon", ggplot2::GeomPolygon,
-  default_aes = ggplot2::aes(colour = "NA", fill = "black", size = 0.5, linetype = 1,
-  alpha = 0.2, subgroup = NULL) ## FIXME: (ML) SUBGROUP??!
-)
-
-
-#' @rdname geom_qqr_points
 #' @export
 geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
-                             position = "identity", na.rm = FALSE,
-                             show.legend = NA, inherit.aes = TRUE, 
-                             xlim = NULL, n = 101, 
-                             identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
-                             style = c("polygon", "lines"), ...) {
-  style <- match.arg(style)
+                            position = "identity", na.rm = FALSE,
+                            show.legend = NA, inherit.aes = TRUE,
+                            xlim = NULL, n = 101, 
+                            identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                            type = c("polygon", "line"), ...) {
+  type <- match.arg(type)
 
   ggplot2::layer(
-    geom = if (style == "lines") GeomQqrConfintLines else GeomQqrConfintPolygon,
+    geom = GeomQqrConfint,
     mapping = mapping,
     data = data,
     stat = stat,
@@ -1571,9 +1548,76 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
       identity = identity,
       probs = probs,
       trafo = trafo,
-      style = style,
+      type = type,
       ...
     )
   )
+}
+
+
+GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
+
+  ## Setting up all defaults needed for `GeomPolygon` and `GeomPath`
+  default_aes = ggplot2::aes(
+    colour = NA,
+    fill = NA,
+    size = NA,
+    linetype = NA,
+    alpha = NA
+  ),
+
+  draw_panel = function(data, panel_params, coord,
+                        rule = "evenodd", # polygon arguments
+                        lineend = "butt", linejoin = "round", # line arguments
+                        linemitre = 10, na.rm = FALSE, arrow = NULL, # line arguments
+                        type = c("polygon", "line")) {
+    type <- match.arg(type)
+
+    ## Swap NAs in `default_aes` with own defaults 
+    data <- my_modify_list(data, my_default_aesthetics(type), force = FALSE)
+
+    if (type == "polygon") {
+      ggplot2::GeomPolygon$draw_panel(data, panel_params, coord, rule)
+    } else {
+      ggplot2::GeomPath$draw_panel(data, panel_params, coord,
+                          arrow, lineend, linejoin, linemitre, na.rm)
+    }
+
+  },
+
+  draw_key = function(data, params, size) {
+    ## Swap NAs in `default_aes` with own defaults 
+    data <- my_modify_list(data, my_default_aesthetics(params$type), force = TRUE)
+    if (params$type == "polygon") {
+      draw_key_polygon(data, params, size)
+    } else {
+      draw_key_path(data, params, size)
+    }
+  }
+)
+
+
+# Helper function inspired by internal from `ggplot2` defined in `performance.R`
+my_modify_list <- function(old, new, force = FALSE) {
+
+  if (force) {
+    for (i in names(new)) old[[i]] <- new[[i]]
+  } else {
+    for (i in names(new)) old[[i]] <- if (all(is.na(old[[i]]))) new[[i]] else old[[i]]
+  }
+
+  old
+}
+
+
+## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
+my_default_aesthetics <- function(type) {
+  if (type == "line") {
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", size = 0.5, linetype = 2, alpha = NA), 
+      force = TRUE)
+  } else {
+    my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = "NA", fill = "black", size = 0.5, 
+      linetype = 1, alpha = 0.2, subgroup = NULL), force = TRUE)
+  }
 }
 
