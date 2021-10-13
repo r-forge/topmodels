@@ -9,7 +9,7 @@
 \method{plot}{qqrplot}(
   x,
   single_graph = FALSE,
-  confint = TRUE,
+  range = TRUE,
   ref = TRUE,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -27,7 +27,7 @@
 
 \method{points}{qqrplot}(
   x,
-  confint = FALSE,
+  range = FALSE,
   ref = FALSE,
   col = adjustcolor("black", alpha.f = 0.4),
   fill = adjustcolor("black", alpha.f = 0.2),
@@ -40,6 +40,7 @@
   object,
   single_graph = FALSE,
   confint = TRUE,
+  range = TRUE,
   ref = TRUE,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -66,7 +67,7 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
-\item{confint}{logical or quantile specification. Should the range of
+\item{range}{logical or quantile specification. Should the range of
 quantiles of the randomized quantile residuals be visualized? If
 \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.}
 
@@ -77,7 +78,11 @@ parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
 \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 respectively.}
 
-\item{colour, alpha_colour, alpha_fill, size, shape, linetype, legend, identity, trafo, probs}{graphical parameters passed for #' \code{ggplot2} style plots, whereby
+\item{confint}{logical or quantile specification. Should the pointwise confidence interval 
+of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
+then \code{range = c(0.01, 0.99)} is used.}
+
+\item{colour, alpha_colour, alpha_fill, size, shape, linetype, legend, identity, trafo, probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
 \code{object} is a object of class \code{qqrplot}.}
 }
 \description{
@@ -111,7 +116,7 @@ qqrplot(m1_lm, ref = "blue", lty = 2, pch = 20)
 ## add separate model
 if (require("crch", quietly = TRUE)) {
   m1_crch <- crch(dist ~ speed | speed, data = cars)
-  points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
+  points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, range = 2)
 }
 
 #-------------------------------------------------------------------------------
@@ -135,7 +140,7 @@ if (require("crch")) {
   qq2_crch <- qqrplot(m2_crch, plot = FALSE)
 
   ## plot in single graph
-  plot(c(qq2_lm, qq2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, single_graph = TRUE)
+  plot(c(qq2_lm, qq2_crch), col = c(1, 2), range = c(1, 2), ref = 3, single_graph = TRUE)
 }
 
 #-------------------------------------------------------------------------------
