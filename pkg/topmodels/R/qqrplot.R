@@ -1199,21 +1199,43 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 #' main <- make.names(main, unique = TRUE)
 #' d$group <- factor(d$group, labels = main)
 #' 
-#' gg <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#' ## Polygon CI around identity line used as reference 
+#' gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
 #'   geom_qqr_points() + 
 #'   geom_qqr_range(
 #'     aes(
 #'       x_lwr = x_rg_lwr, 
 #'       x_upr = x_rg_upr, 
 #'       y_lwr = y_rg_lwr, 
-#'       y_upr = y_rg_upr
+#'       y_upr = y_rg_upr,
+#'       group = group
+#'     )
+#'   ) + 
+#'   geom_qqr_ref() + 
+#'   geom_qqr_confint(fill = "red") + 
+#'   xlab(xlab) + ylab(ylab)
+#'
+#' gg1
+#' gg1 + facet_wrap(~group)
+#' 
+#' ## Polygon CI around robust reference line
+#' gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'   geom_qqr_points() + 
+#'   geom_qqr_range(
+#'     aes(
+#'       x_lwr = x_rg_lwr, 
+#'       x_upr = x_rg_upr, 
+#'       y_lwr = y_rg_lwr, 
+#'       y_upr = y_rg_upr,
+#'       group = group
 #'     )
 #'   ) + 
 #'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
 #'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], type = "line") + 
-#'   facet_wrap(~group) +
 #'   xlab(xlab) + ylab(ylab)
-#' gg
+#'
+#' gg2
+#' gg2 + facet_wrap(~group)
 #' 
 #' @export
 geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
@@ -1459,17 +1481,18 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
 
     if (type == "line") {
       ## prepare long format with group variable
-      as.data.frame(tidyr::pivot_longer(
+      d <- as.data.frame(tidyr::pivot_longer(
         data.frame(
           x = xseq,
           y1 = (intercept + slope * xseq) + y_out1,
           y2 = (intercept + slope * xseq) + y_out2
         ),
         cols = c(y1, y2),
-        names_to = "group",
+        names_to = "topbottom",
         values_to = "y",
         names_prefix = "y"
       ))
+      rbind(subset(d, subset = topbottom == 1), c(NA, NA, NA), subset(d, subset = topbottom == 2))
 
     } else {
       ## prepare short format
@@ -1561,9 +1584,10 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
   default_aes = ggplot2::aes(
     colour = NA,
     fill = NA,
-    size = NA,
+    size = 0.5,
     linetype = NA,
-    alpha = NA
+    alpha = NA,
+    subgroup = NULL
   ),
 
   draw_panel = function(data, panel_params, coord,
@@ -1587,7 +1611,7 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
   draw_key = function(data, params, size) {
     ## Swap NAs in `default_aes` with own defaults 
-    data <- my_modify_list(data, my_default_aesthetics(params$type), force = TRUE)
+    data <- my_modify_list(data, my_default_aesthetics(params$type), force = FALSE)
     if (params$type == "polygon") {
       draw_key_polygon(data, params, size)
     } else {
