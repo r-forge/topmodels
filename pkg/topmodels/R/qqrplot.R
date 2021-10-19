@@ -1112,6 +1112,93 @@ autoplot.qqrplot <- function(object,
 }
 
 
+#' \code{geom_*} and \code{stat_*} for Producing Quantile Residual Q-Q Plots with `ggplot2`
+#' 
+#' Various \code{geom_*} and \code{stat_*} used within
+#' \code{\link[ggplot2]{autoplot}} for producing quantile residual Q-Q plots.
+#' 
+#' @inheritParams ggplot2::layer
+#' @inheritParams ggplot2::geom_point
+#' @param identity logical, should the identity line be plotted or a theoretical line
+#' which passes through \code{probs} quantiles computed by \code{trafo}. 
+#' @param trafo function for calculating reference line through first and third
+#' quartile of theoretical distribution (default: Gaussian).
+#' @param probs numeric vector of length two, representing probabilities of reference
+#' line used in \code{trafo}.
+#' @param xlim description.
+#' @param n Fix description.
+#' @param type Fix description.
+#' @examples
+#' require("ggplot2")
+#' ## Fit model
+#' data("CrabSatellites", package = "countreg")
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
+#' 
+#' ## Compute qqrplot
+#' q1 <- qqrplot(m1_pois, plot = FALSE)
+#' q2 <- qqrplot(m2_pois, plot = FALSE)
+#' 
+#' d <- c(q1, q2) 
+#' 
+#' ## Get label names
+#' xlab <- unique(attr(d, "xlab"))
+#' ylab <- unique(attr(d, "ylab"))
+#' main <- attr(d, "main")
+#' main <- make.names(main, unique = TRUE)
+#' d$group <- factor(d$group, labels = main)
+#' 
+#' ## Polygon CI around identity line used as reference 
+#' gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'   geom_qqr_ref() + 
+#'   geom_qqr_confint(fill = "red") + 
+#'   geom_qqr_points() + 
+#'   geom_qqr_range(
+#'     aes(
+#'       x_lwr = x_rg_lwr, 
+#'       x_upr = x_rg_upr, 
+#'       y_lwr = y_rg_lwr, 
+#'       y_upr = y_rg_upr,
+#'       group = group
+#'     )
+#'   ) + 
+#'   xlab(xlab) + ylab(ylab)
+#'
+#' gg1
+#' gg1 + facet_wrap(~group)
+#' 
+#' ## Polygon CI around robust reference line
+#' gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
+#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], type = "line") + 
+#'   geom_qqr_points() + 
+#'   geom_qqr_range(
+#'     aes(
+#'       x_lwr = x_rg_lwr, 
+#'       x_upr = x_rg_upr, 
+#'       y_lwr = y_rg_lwr, 
+#'       y_upr = y_rg_upr,
+#'       group = group
+#'     )
+#'   ) + 
+#'   xlab(xlab) + ylab(ylab)
+#'
+#' gg2
+#' gg2 + facet_wrap(~group)
+#' 
+#' @export
+geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
+                            position = "identity", na.rm = FALSE, 
+                            show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomQqrPoints, mapping = mapping,  
+    data = data, stat = stat, position = position, 
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
 #' @rdname geom_qqr_points
 #' @format NULL
 #' @usage NULL
@@ -1163,88 +1250,19 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 )
 
 
-#' \code{geom_*} and \code{stat_*} for Producing Quantile Residual Q-Q Plots with `ggplot2`
-#' 
-#' Various \code{geom_*} and \code{stat_*} used within
-#' \code{\link[ggplot2]{autoplot}} for producing quantile residual Q-Q plots.
-#' 
-#' @inheritParams ggplot2::layer
-#' @inheritParams ggplot2::geom_point
-#' @param identity logical, should the identity line be plotted or a theoretical line
-#' which passes through \code{probs} quantiles computed by \code{trafo}. 
-#' @param trafo function for calculating reference line through first and third
-#' quartile of theoretical distribution (default: Gaussian).
-#' @param probs numeric vector of length two, representing probabilities of reference
-#' line used in \code{trafo}.
-#' @param xlim description.
-#' @param n Fix description.
-#' @param type Fix description.
-#' @examples
-#' require("ggplot2")
-#' ## Fit model
-#' data("CrabSatellites", package = "countreg")
-#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-#' 
-#' ## Compute qqrplot
-#' q1 <- qqrplot(m1_pois, plot = FALSE)
-#' q2 <- qqrplot(m2_pois, plot = FALSE)
-#' 
-#' d <- c(q1, q2) 
-#' 
-#' ## Get label names
-#' xlab <- unique(attr(d, "xlab"))
-#' ylab <- unique(attr(d, "ylab"))
-#' main <- attr(d, "main")
-#' main <- make.names(main, unique = TRUE)
-#' d$group <- factor(d$group, labels = main)
-#' 
-#' ## Polygon CI around identity line used as reference 
-#' gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
-#'   geom_qqr_points() + 
-#'   geom_qqr_range(
-#'     aes(
-#'       x_lwr = x_rg_lwr, 
-#'       x_upr = x_rg_upr, 
-#'       y_lwr = y_rg_lwr, 
-#'       y_upr = y_rg_upr,
-#'       group = group
-#'     )
-#'   ) + 
-#'   geom_qqr_ref() + 
-#'   geom_qqr_confint(fill = "red") + 
-#'   xlab(xlab) + ylab(ylab)
-#'
-#' gg1
-#' gg1 + facet_wrap(~group)
-#' 
-#' ## Polygon CI around robust reference line
-#' gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
-#'   geom_qqr_points() + 
-#'   geom_qqr_range(
-#'     aes(
-#'       x_lwr = x_rg_lwr, 
-#'       x_upr = x_rg_upr, 
-#'       y_lwr = y_rg_lwr, 
-#'       y_upr = y_rg_upr,
-#'       group = group
-#'     )
-#'   ) + 
-#'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
-#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], type = "line") + 
-#'   xlab(xlab) + ylab(ylab)
-#'
-#' gg2
-#' gg2 + facet_wrap(~group)
-#' 
+#' @rdname geom_qqr_points
 #' @export
-geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
-                            position = "identity", na.rm = FALSE, 
-                            show.legend = NA, inherit.aes = TRUE, ...) {
+stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
+                             position = "identity", na.rm = FALSE, 
+                             show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    geom = GeomQqrPoints, mapping = mapping,  
-    data = data, stat = stat, position = position, 
-    show.legend = show.legend, inherit.aes = inherit.aes,
+    stat = StatQqrRange, 
+    data = data, 
+    mapping = mapping, 
+    geom = geom, 
+    position = position, 
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
     params = list(na.rm = na.rm, ...)
   )
 }
@@ -1272,17 +1290,13 @@ StatQqrRange <- ggplot2::ggproto("StatQqrRange", ggplot2::Stat,
 
 #' @rdname geom_qqr_points
 #' @export
-stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
+geom_qqr_range <- function(mapping = NULL, data = NULL, stat = "qqr_range",
                              position = "identity", na.rm = FALSE, 
                              show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    stat = StatQqrRange, 
-    data = data, 
-    mapping = mapping, 
-    geom = geom, 
-    position = position, 
-    show.legend = show.legend, 
-    inherit.aes = inherit.aes,
+    geom = GeomQqrRange, mapping = mapping,  
+    data = data, stat = stat, position = position, 
+    show.legend = show.legend, inherit.aes = inherit.aes,
     params = list(na.rm = na.rm, ...)
   )
 }
@@ -1300,14 +1314,25 @@ GeomQqrRange <- ggplot2::ggproto("GeomQqrRange", ggplot2::GeomPolygon,
 
 #' @rdname geom_qqr_points
 #' @export
-geom_qqr_range <- function(mapping = NULL, data = NULL, stat = "qqr_range",
-                             position = "identity", na.rm = FALSE, 
-                             show.legend = NA, inherit.aes = TRUE, ...) {
+stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
+                         position = "identity", na.rm = FALSE, 
+                         show.legend = NA, inherit.aes = TRUE, 
+                         identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, ...) {
   ggplot2::layer(
-    geom = GeomQqrRange, mapping = mapping,  
-    data = data, stat = stat, position = position, 
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    stat = StatQqrRef, 
+    data = data, 
+    mapping = mapping, 
+    geom = geom, 
+    position = position, 
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm, 
+      identity = identity,
+      probs = probs,
+      trafo = trafo,
+      ...
+    )
   )
 }
 
@@ -1349,15 +1374,15 @@ StatQqrRef <- ggplot2::ggproto("StatQqrRef", ggplot2::Stat,
 
 #' @rdname geom_qqr_points
 #' @export
-stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
+geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
                          position = "identity", na.rm = FALSE, 
-                         show.legend = NA, inherit.aes = TRUE, 
-                         identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, ...) {
+                         show.legend = NA, inherit.aes = TRUE, identity = TRUE,
+                         probs = c(0.25, 0.75), trafo = qnorm, ...) {
   ggplot2::layer(
-    stat = StatQqrRef, 
-    data = data, 
+    geom = GeomQqrRef, 
     mapping = mapping, 
-    geom = geom, 
+    data = data, 
+    stat = stat, 
     position = position, 
     show.legend = show.legend, 
     inherit.aes = inherit.aes,
@@ -1383,24 +1408,33 @@ GeomQqrRef <- ggplot2::ggproto("GeomQqrRef", ggplot2::GeomAbline,
 
 
 #' @rdname geom_qqr_points
+#' @format NULL
+#' @usage NULL
 #' @export
-geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
-                         position = "identity", na.rm = FALSE, 
-                         show.legend = NA, inherit.aes = TRUE, identity = TRUE,
-                         probs = c(0.25, 0.75), trafo = qnorm, ...) {
+stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint", 
+                             position = "identity", na.rm = FALSE,
+                             show.legend = NA, inherit.aes = TRUE,
+                             xlim = NULL, n = 101, 
+                             identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                             type = c("polygon", "line"), ...) {
+
+  type <- match.arg(type)
   ggplot2::layer(
-    geom = GeomQqrRef, 
-    mapping = mapping, 
-    data = data, 
-    stat = stat, 
-    position = position, 
-    show.legend = show.legend, 
+    geom = geom, 
+    stat = StatQqrConfint,
+    data = data,
+    mapping = mapping,
+    position = position,
+    show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      na.rm = na.rm, 
+      na.rm = na.rm,
+      xlim = xlim,
+      n = n,
       identity = identity,
       probs = probs,
       trafo = trafo,
+      type = type,
       ...
     )
   )
@@ -1513,40 +1547,6 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
 
 
 #' @rdname geom_qqr_points
-#' @format NULL
-#' @usage NULL
-#' @export
-stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint", 
-                             position = "identity", na.rm = FALSE,
-                             show.legend = NA, inherit.aes = TRUE,
-                             xlim = NULL, n = 101, 
-                             identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
-                             type = c("polygon", "line"), ...) {
-
-  type <- match.arg(type)
-  ggplot2::layer(
-    geom = geom, 
-    stat = StatQqrConfint,
-    data = data,
-    mapping = mapping,
-    position = position,
-    show.legend = show.legend,
-    inherit.aes = inherit.aes,
-    params = list(
-      na.rm = na.rm,
-      xlim = xlim,
-      n = n,
-      identity = identity,
-      probs = probs,
-      trafo = trafo,
-      type = type,
-      ...
-    )
-  )
-}
-
-
-#' @rdname geom_qqr_points
 #' @export
 geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
                             position = "identity", na.rm = FALSE,
@@ -1598,7 +1598,7 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
     type <- match.arg(type)
 
     ## Swap NAs in `default_aes` with own defaults 
-    data <- my_modify_list(data, my_default_aesthetics(type), force = FALSE)
+    data <- my_modify_list(data, qqr_default_aesthetics(type), force = FALSE)
 
     if (type == "polygon") {
       ggplot2::GeomPolygon$draw_panel(data, panel_params, coord, rule)
@@ -1611,7 +1611,7 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
   draw_key = function(data, params, size) {
     ## Swap NAs in `default_aes` with own defaults 
-    data <- my_modify_list(data, my_default_aesthetics(params$type), force = FALSE)
+    data <- my_modify_list(data, qqr_default_aesthetics(params$type), force = FALSE)
     if (params$type == "polygon") {
       draw_key_polygon(data, params, size)
     } else {
@@ -1635,7 +1635,7 @@ my_modify_list <- function(old, new, force = FALSE) {
 
 
 ## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
-my_default_aesthetics <- function(type) {
+qqr_default_aesthetics <- function(type) {
   if (type == "line") {
     my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", size = 0.5, linetype = 2, alpha = NA), 
       force = TRUE)
