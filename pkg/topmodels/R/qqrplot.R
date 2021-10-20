@@ -62,9 +62,9 @@
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale (default: Gaussian).
 #' @param nsim,delta arguments passed to \code{qresiduals}.
-#' @param confint logical or quantile specification. Should the pointwise confidence interval 
-#' of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
-#' then \code{range = c(0.01, 0.99)} is used.
+#' @param confint logical or character string describing the type for plotting `c("polygon", "line")`.
+#' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+#' quantile residuals are visualized.
 #' @param range logical or quantile specification. In case of discrete distributions, should the range 
 #' (confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 
 #' then \code{range = c(0.01, 0.99)} is used.
@@ -131,7 +131,7 @@ qqrplot.default <- function(object,
                             trafo = qnorm,
                             nsim = 1L,
                             delta = NULL,
-                            confint = TRUE,  # FIXME: (ML) Implement confint!
+                            confint = TRUE,
                             range = TRUE,
                             range_level = 0.95,
                             range_nsim = 250,
@@ -276,7 +276,7 @@ qqrplot.default <- function(object,
 
   ## plot by default
   if (plot == "ggplot2") {
-    try(print(ggplot2::autoplot(rval, range = range, ...)))
+    try(print(ggplot2::autoplot(rval, confint = confint, range = range, ...)))
   } else if (plot == "base") {
     try(plot(rval, range = range, ...))
   }
@@ -400,9 +400,9 @@ rbind.qqrplot <- c.qqrplot
 #' @param x,object an object of class \code{qqrplot}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param confint logical or quantile specification. Should the pointwise confidence interval 
-#' of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
-#' then \code{range = c(0.01, 0.99)} is used.
+#' @param confint logical or character string describing the type for plotting `c("polygon", "line")`.
+#' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+#' quantile residuals are visualized.
 #' @param range logical or quantile specification. Should the range of
 #' quantiles of the randomized quantile residuals be visualized? If
 #' \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.
@@ -474,8 +474,10 @@ rbind.qqrplot <- c.qqrplot
 #' @export
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
+                         confint = TRUE,  # FIXME: (ML) Implement confint!
                          range = TRUE,
                          ref = TRUE,
+                         identity = TRUE,  # FIXME: (ML) Implement identity! 
                          xlim = c(NA, NA),
                          ylim = c(NA, NA),
                          xlab = NULL,
@@ -748,7 +750,7 @@ points.qqrplot <- function(x,
 #' @exportS3Method ggplot2::autoplot
 autoplot.qqrplot <- function(object,
                              single_graph = FALSE,
-                             confint = c("polygon", "line", "none"),
+                             confint = TRUE,
                              range = TRUE,
                              ref = TRUE,
                              identity = TRUE, 
@@ -770,8 +772,6 @@ autoplot.qqrplot <- function(object,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
-  confint <- match.arg(confint)
-
   ## get base style arguments
   add_arg <- list(...)
   if (!is.null(add_arg$pch)) shape <- add_arg$pch
@@ -780,8 +780,18 @@ autoplot.qqrplot <- function(object,
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
+  stopifnot(is.logical(ref))
+  stopifnot(is.logical(identity))
+  stopifnot(is.logical(legend))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  if (isFALSE(confint)) {
+    confint <- "none"
+  } else if (isTRUE(confint)) {
+    confint <- "polygon"
+  }
+  confint <- match.arg(confint, c("polygon", "line", "none"))
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
