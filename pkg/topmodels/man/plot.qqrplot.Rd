@@ -39,24 +39,23 @@
 \method{autoplot}{qqrplot}(
   object,
   single_graph = FALSE,
-  confint = TRUE,
+  confint = c("polygon", "line", "none"),
   range = TRUE,
   ref = TRUE,
+  identity = TRUE,
+  probs = c(0.25, 0.75),
+  trafo = qnorm,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
+  alpha = NA,
   colour = "black",
-  fill = "black",
-  alpha_colour = NA,
-  alpha_fill = 0.2,
-  size = 2,
+  fill = NA,
   shape = 19,
-  linetype = 2,
-  identity = TRUE,
-  probs = c(0.25, 0.75),
-  trafo = qnorm,
+  size = 2,
+  stroke = 0.5,
   legend = FALSE,
   ...
 )
@@ -82,7 +81,7 @@ respectively.}
 of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
 then \code{range = c(0.01, 0.99)} is used.}
 
-\item{colour, alpha_colour, alpha_fill, size, shape, linetype, legend, identity, trafo, probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
+\item{alpha, colour, shape, size, stroke, legend, identity, trafo, probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
 \code{object} is a object of class \code{qqrplot}.}
 }
 \description{

@@ -411,7 +411,7 @@ rbind.qqrplot <- c.qqrplot
 #' respectively.
 #' @param ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
-#' @param colour,alpha_colour,alpha_fill,size,shape,linetype,legend,identity,trafo,probs 
+#' @param alpha,colour,shape,size,stroke,legend,identity,trafo,probs 
 #' graphical parameters passed to \code{ggplot2} style plots, whereby
 #' \code{object} is a object of class \code{qqrplot}.
 #' @seealso \code{\link{qqrplot}}, \code{\link{wormplot}},
@@ -936,34 +936,35 @@ points.qqrplot <- function(x,
 #' @exportS3Method ggplot2::autoplot
 autoplot.qqrplot <- function(object,
                              single_graph = FALSE,
-                             confint = TRUE,
+                             confint = c("polygon", "line", "none"),
                              range = TRUE,
                              ref = TRUE,
+                             identity = TRUE, 
+                             probs = c(0.25, 0.75), 
+                             trafo = qnorm,
                              xlim = c(NA, NA),
                              ylim = c(NA, NA),
                              xlab = NULL,
                              ylab = NULL,
                              main = NULL,
+                             alpha = NA,
                              colour = "black",
-                             fill = "black", 
-                             alpha_colour = NA,
-                             alpha_fill = 0.2,
-                             size = 2,
+                             fill = NA, 
                              shape = 19,
-                             linetype = 2,
-                             identity = TRUE, 
-                             probs = c(0.25, 0.75), 
-                             trafo = qnorm,
+                             size = 2,
+                             stroke = 0.5,
                              legend = FALSE,
                              ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  confint <- match.arg(confint)
+
   ## get base style arguments
   add_arg <- list(...)
   if (!is.null(add_arg$pch)) shape <- add_arg$pch
   if (!is.null(add_arg$lwd)) size <- add_arg$lwd
-  if (!is.null(add_arg$lty)) linetype <- add_arg$lty
+  #if (!is.null(add_arg$lty)) linetype <- add_arg$lty # TODO: (ML) Currently not needed as no linetype is used
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
@@ -1014,15 +1015,8 @@ autoplot.qqrplot <- function(object,
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
-    fill, colour, size, confint, range, alpha_colour, shape
+    alpha, colour, fill, shape, size
   )[, -1]
-
-  ## prepare fill color for range (set to NA for not plotting)
-  if (is.logical(plot_arg$range)) {
-    plot_arg$fill[!plot_arg$range] <- NA
-  } else {
-    plot_arg$fill <- plot_arg$range
-  }
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING
@@ -1034,68 +1028,68 @@ autoplot.qqrplot <- function(object,
   if (ref) {
     rval <- rval +
       geom_qqr_ref(
-        linetype = linetype, 
         identity = identity, 
         probs = probs, 
-        trafo = trafo,
-        na.rm = TRUE  ## TODO: (ML) This really necessary, compare tinytest topmodels w/ disttree
+        trafo = trafo
       )
   }
 
   ## add conf
-  if (confint) {
+  if (confint != "none") {
     rval <- rval +
       geom_qqr_confint(
-        linetype = linetype, 
+        type = confint,
         identity = identity, 
         probs = probs, 
-        trafo = trafo,
-        na.rm = TRUE  ## TODO: (ML) This really necessary, compare tinytest topmodels w/ disttree
+        trafo = trafo
       )
   }
 
   ## add range
-  if (all(c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr") %in% names(object))) {
+  if (range && all(c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr") %in% names(object))) {
     rval <- rval +
       geom_qqr_range(
         ggplot2::aes_string(
           x_lwr = "x_rg_lwr", 
           x_upr = "x_rg_upr", 
           y_lwr = "y_rg_lwr", 
-          y_upr = "y_rg_upr",
-          fill = "group"
-        ),
-         alpha = alpha_fill,
-         show.legend = FALSE, na.rm = TRUE
+          y_upr = "y_rg_upr"
+        )
       )
   }
 
   ## add points
   rval <- rval +
-    geom_qqr_points(ggplot2::aes_string(colour = "group", alpha = "group", shape = "group", size = "group"))
+    geom_qqr_points(ggplot2::aes_string(alpha = "group", colour = "group", fill = "group", 
+      shape = "group", size = "group"), stroke = stroke)
+  ## FIXME: (ML) alpha is not correctly represented in the legend 
+  ##  (compare: https://stackoverflow.com/q/69634268/6583972?sem=2)
 
   ## set the colors, shapes, etc.
   rval <- rval +
+    ggplot2::scale_alpha_manual(values = plot_arg$alpha) +
     ggplot2::scale_colour_manual(values = plot_arg$colour) +
-    ggplot2::scale_alpha_manual(values = plot_arg$alpha_colour) +
+    ggplot2::scale_fill_manual(values = plot_arg$fill) + 
     ggplot2::scale_shape_manual(values = plot_arg$shape) +
-    ggplot2::scale_size_manual(values = plot_arg$size) + 
-    ggplot2::scale_fill_manual(values = plot_arg$fill, na.value = NA)
+    ggplot2::scale_size_manual(values = plot_arg$size) 
 
   ## annotation
   rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
 
   ## add legend
   if (legend) {
-    rval <- rval + ggplot2::labs(colour = "Model") +
-      ggplot2::guides(colour = "legend", shape = "none", size = "none", alpha = "none")
+    rval <- rval + 
+      ggplot2::labs(alpha = "Model", colour = "Model", fill = "Model", shape = "Model", 
+        size = "Model") +
+      ggplot2::guides(alpha = "legend", colour = "legend", fill = "legend", shape = "legend", 
+        size = "legend")
   } else {
-    rval <- rval + ggplot2::guides(colour = "none", shape = "none", size = "none", alpha = "none")
+    rval <- rval + 
+      ggplot2::guides(alpha = "none", colour = "none", fill = "none", shape = "none", size = "none")
   }
 
   ## set x and y limits
-  rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
-  rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
+  rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = TRUE)
 
   # -------------------------------------------------------------------
   # GROUPING (IF ANY) AND RETURN PLOT
@@ -1211,7 +1205,19 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
     fill = NA, alpha = NA, stroke = 0.5
   ),
 
-  draw_panel = function(data, panel_scales, coord) {
+  setup_params = function(data, params) {
+    n <- nrow(data)
+    if (n > 100 && n <= 200) {
+      params$alpha <- 0.3
+    } else if (n > 200) {
+      params$alpha <- 0.15
+    } else {
+      params$alpha <- 1
+    }
+    params
+  },
+
+  draw_panel = function(data, panel_scales, coord, alpha) {
     if (is.character(data$shape)) {
       data$shape <- translate_shape_string(data$shape)
     }
@@ -1222,13 +1228,7 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
     ## Get alpha conditional on number of data points
     n <- nrow(data)
     if (any(is.na(coords$alpha))) {
-      if (n > 100 && n <= 200) {
-        coords$alpha <- 0.3
-      } else if (n > 200) {
-        coords$alpha <- 0.15
-      } else {
-        coords$alpha <- 1
-      }
+      coords$alpha <- alpha
     }
 
     ## Construct a grid grob
@@ -1246,7 +1246,12 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
     )
   },
 
-  draw_key = ggplot2::draw_key_point
+  draw_key = function(data, params, size) {
+    if (is.na(data$alpha)) { 
+      data$alpha <- params$alpha
+    } 
+    ggplot2::draw_key_point(data, params, size)
+  }
 )
 
 
@@ -1401,7 +1406,8 @@ geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomQqrRef <- ggplot2::ggproto("GeomQqrRef", ggplot2::GeomAbline,
+GeomQqrRef <- ggplot2::ggproto("GeomQqrRef", ggplot2::GeomAbline, 
+  # FIXME: (ML) Maybe change it to a GeomPath to be plotted equivalent to `geom_confint()`
   default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 2,
   alpha = NA)
 )
@@ -1579,6 +1585,13 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
 
 
 GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
+
+  required_aes = c("x", "y"),
+
+  # FIXME: (ML) Does not vary for type; this is a copy of `GeomPolygon$handle_na()`
+  handle_na = function(data, params) {
+    data
+  },
 
   ## Setting up all defaults needed for `GeomPolygon` and `GeomPath`
   default_aes = ggplot2::aes(
