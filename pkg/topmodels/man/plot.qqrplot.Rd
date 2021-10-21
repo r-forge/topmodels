@@ -9,8 +9,11 @@
 \method{plot}{qqrplot}(
   x,
   single_graph = FALSE,
+  detrend = FALSE,
+  confint = TRUE,
   range = TRUE,
   ref = TRUE,
+  identity = TRUE,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -39,7 +42,7 @@
 \method{autoplot}{qqrplot}(
   object,
   single_graph = FALSE,
-  confint = c("polygon", "line", "none"),
+  confint = TRUE,
   range = TRUE,
   ref = TRUE,
   identity = TRUE,
@@ -66,6 +69,10 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
+\item{confint}{logical or character string describing the type for plotting `c("polygon", "line")`.
+If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+quantile residuals are visualized.}
+
 \item{range}{logical or quantile specification. Should the range of
 quantiles of the randomized quantile residuals be visualized? If
 \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.}
@@ -77,11 +84,7 @@ parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
 \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 respectively.}
 
-\item{confint}{logical or quantile specification. Should the pointwise confidence interval 
-of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
-then \code{range = c(0.01, 0.99)} is used.}
-
-\item{alpha, colour, shape, size, stroke, legend, identity, trafo, probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
+\item{alpha, colour, shape, size, stroke, legend, detrend, identity, trafo, probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
 \code{object} is a object of class \code{qqrplot}.}
 }
 \description{

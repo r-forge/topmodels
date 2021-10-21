@@ -13,6 +13,7 @@ qqrplot(object, ...)
   newdata = NULL,
   plot = TRUE,
   class = NULL,
+  detrend = FALSE,
   trafo = qnorm,
   nsim = 1L,
   delta = NULL,
@@ -45,14 +46,16 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
+\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
+
 \item{trafo}{function for tranforming residuals from probability scale to a
 different distribution scale (default: Gaussian).}
 
 \item{nsim, delta}{arguments passed to \code{qresiduals}.}
 
-\item{confint}{logical or quantile specification. Should the pointwise confidence interval 
-of the (randomized) quantile residuals be visualized? If \code{TRUE}, 
-then \code{range = c(0.01, 0.99)} is used.}
+\item{confint}{logical or character string describing the type for plotting `c("polygon", "line")`.
+If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+quantile residuals are visualized.}
 
 \item{range}{logical or quantile specification. In case of discrete distributions, should the range 
 (confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 

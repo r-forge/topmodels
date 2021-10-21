@@ -59,6 +59,7 @@
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
+#' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale (default: Gaussian).
 #' @param nsim,delta arguments passed to \code{qresiduals}.
@@ -128,6 +129,7 @@ qqrplot.default <- function(object,
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
+                            detrend = FALSE,
                             trafo = qnorm,
                             nsim = 1L,
                             delta = NULL,
@@ -149,6 +151,7 @@ qqrplot.default <- function(object,
   ## * `range` w/i `polygon()`
   ## * `delta` w/i `qresiduals()`
   ## * `...` in `plot()` and `autoplot()`
+  stopifnot(is.logical(detrend))
   stopifnot(is.null(trafo) | is.function(trafo))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(
@@ -237,26 +240,49 @@ qqrplot.default <- function(object,
   # -------------------------------------------------------------------
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
-  ## collect everything as data.frame
-  if (any(vapply(
-    list(qres_rg_lwr, qres_rg_upr, qthe_rg_lwr, 1),
-    FUN = is.null,
-    FUN.VALUE = FALSE
-  ))) {
-    rval <- data.frame(
-      x = qthe,
-      y = qres
-    )
-  } else {
-    rval <- data.frame(
-      x = qthe,
-      y = qres,
-      y_rg_lwr = qres_rg_lwr,
-      y_rg_upr = qres_rg_upr,
-      x_rg_lwr = qthe_rg_lwr,
-      x_rg_upr = qthe_rg_upr
-    )
+  ## collect everything as data.frame (for detrend TRUE/FALSE)
+  if (!detrend) {
+    if (any(vapply(
+      list(qres_rg_lwr, qres_rg_upr, qthe_rg_lwr, 1),
+      FUN = is.null,
+      FUN.VALUE = FALSE
+    ))) {
+      rval <- data.frame(
+        x = qthe,
+        y = qres
+      )
+    } else {
+      rval <- data.frame(
+        x = qthe,
+        y = qres,
+        y_rg_lwr = qres_rg_lwr,
+        y_rg_upr = qres_rg_upr,
+        x_rg_lwr = qthe_rg_lwr,
+        x_rg_upr = qthe_rg_upr
+      )
+    }
+  } else { 
+    if (any(vapply(
+      list(qres_rg_lwr, qres_rg_upr, qthe_rg_lwr, 1),
+      FUN = is.null,
+      FUN.VALUE = FALSE
+    ))) {
+      rval <- data.frame(
+        x = qthe,
+        y = qres - qthe
+      )
+    } else {
+      rval <- data.frame(
+        x = qthe,
+        y = qres - qthe,
+        y_rg_lwr = qres_rg_lwr - qthe_rg_lwr,
+        y_rg_upr = qres_rg_upr - qthe_rg_upr,
+        x_rg_lwr = qthe_rg_lwr,
+        x_rg_upr = qthe_rg_lwr
+      )
+    }
   }
+
   names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
 
   ## attributes for graphical display
@@ -265,6 +291,7 @@ qqrplot.default <- function(object,
   attr(rval, "main") <- main
   attr(rval, "range_level") <- ifelse(range, range_level, NA)
   attr(rval, "trafo") <- trafo
+  attr(rval, "detrend") <- detrend
 
   ## add class
   if (class == "data.frame") {
@@ -276,7 +303,7 @@ qqrplot.default <- function(object,
 
   ## plot by default
   if (plot == "ggplot2") {
-    try(print(ggplot2::autoplot(rval, confint = confint, range = range, ...)))
+    try(print(ggplot2::autoplot(rval, detrend = detrend, confint = confint, range = range, ...)))
   } else if (plot == "base") {
     try(plot(rval, range = range, ...))
   }
@@ -411,7 +438,7 @@ rbind.qqrplot <- c.qqrplot
 #' respectively.
 #' @param ref,xlim,ylim,col,fill,alpha_min,pch,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
-#' @param alpha,colour,shape,size,stroke,legend,identity,trafo,probs 
+#' @param alpha,colour,shape,size,stroke,legend,detrend,identity,trafo,probs 
 #' graphical parameters passed to \code{ggplot2} style plots, whereby
 #' \code{object} is a object of class \code{qqrplot}.
 #' @seealso \code{\link{qqrplot}}, \code{\link{wormplot}},
@@ -474,6 +501,7 @@ rbind.qqrplot <- c.qqrplot
 #' @export
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
+                         detrend = FALSE,  # FIXME: (ML) Implement detrend! 
                          confint = TRUE,  # FIXME: (ML) Implement confint!
                          range = TRUE,
                          ref = TRUE,
@@ -793,6 +821,9 @@ autoplot.qqrplot <- function(object,
   }
   confint <- match.arg(confint, c("polygon", "line", "none"))
 
+  ## get detrend
+  detrend <- attr(object, "detrend")
+
   ## convert data always to data.frame
   object <- as.data.frame(object)
 
@@ -850,6 +881,7 @@ autoplot.qqrplot <- function(object,
   if (ref) {
     rval <- rval +
       geom_qqr_ref(
+        detrend = detrend,
         identity = identity, 
         probs = probs, 
         trafo = trafo
@@ -860,10 +892,11 @@ autoplot.qqrplot <- function(object,
   if (confint != "none") {
     rval <- rval +
       geom_qqr_confint(
-        type = confint,
+        detrend = detrend,
         identity = identity, 
         probs = probs, 
-        trafo = trafo
+        trafo = trafo,
+        type = confint
       )
   }
 
@@ -941,7 +974,8 @@ autoplot.qqrplot <- function(object,
 #' quartile of theoretical distribution (default: Gaussian).
 #' @param probs numeric vector of length two, representing probabilities of reference
 #' line used in \code{trafo}.
-#' @param xlim description.
+#' @param detrend Fix description.
+#' @param xlim Fix description.
 #' @param n Fix description.
 #' @param type Fix description.
 #' @examples
@@ -1144,7 +1178,7 @@ GeomQqrRange <- ggplot2::ggproto("GeomQqrRange", ggplot2::GeomPolygon,
 stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
                          position = "identity", na.rm = FALSE, 
                          show.legend = NA, inherit.aes = TRUE, 
-                         identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, ...) {
+                         detrend = FALSE, identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, ...) {
   ggplot2::layer(
     stat = StatQqrRef, 
     data = data, 
@@ -1155,6 +1189,7 @@ stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm, 
+      detrend = detrend,
       identity = identity,
       probs = probs,
       trafo = trafo,
@@ -1170,28 +1205,36 @@ stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
 #' @export
 StatQqrRef <- ggplot2::ggproto("StatQqrRef", ggplot2::Stat,
 
-  compute_group = function(data, scales, identity, probs, trafo) {
-    ## Manipulate object
-    if (!identity) {
-      stopifnot(is.numeric(probs), length(probs) == 2)
-      stopifnot(is.function(trafo))
+  compute_group = function(data, scales, detrend, identity, probs, trafo) {
+    ## Manipulate object depending on arguments `detrend` and `identity`
+    if (!detrend) {
+      if (!identity) {
+        stopifnot(is.numeric(probs), length(probs) == 2)
+        stopifnot(is.function(trafo))
 
-      y_tmp <- quantile(data$y, probs, names = FALSE, na.rm = TRUE)
-      x_tmp <- trafo(probs)
-      slope <- diff(y_tmp) / diff(x_tmp)
-      intercept <- y_tmp[1L] - slope * x_tmp[1L]
-      nd <- data.frame(
-        slope = slope,
-        intercept = intercept
-      )
+        y_tmp <- quantile(data$y, probs, names = FALSE, na.rm = TRUE)
+        x_tmp <- trafo(probs)
+        slope <- diff(y_tmp) / diff(x_tmp)
+        intercept <- y_tmp[1L] - slope * x_tmp[1L]
+        nd <- data.frame(
+          slope = slope,
+          intercept = intercept
+        )
 
-    } else { 
+      } else { 
+        nd <- data.frame(
+          slope = 1,
+          intercept = 0
+        )
+      }
+      nd
+    } else {
       nd <- data.frame(
-        slope = 1,
+        slope = 0,
         intercept = 0
       )
+      nd
     }
-    nd
   },
 
   # Tells us what we need
@@ -1203,7 +1246,7 @@ StatQqrRef <- ggplot2::ggproto("StatQqrRef", ggplot2::Stat,
 #' @export
 geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
                          position = "identity", na.rm = FALSE, 
-                         show.legend = NA, inherit.aes = TRUE, identity = TRUE,
+                         show.legend = NA, inherit.aes = TRUE, detrend = FALSE, identity = TRUE,
                          probs = c(0.25, 0.75), trafo = qnorm, ...) {
   ggplot2::layer(
     geom = GeomQqrRef, 
@@ -1215,6 +1258,7 @@ geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm, 
+      detrend = detrend,
       identity = identity,
       probs = probs,
       trafo = trafo,
@@ -1229,7 +1273,7 @@ geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
 #' @usage NULL
 #' @export
 GeomQqrRef <- ggplot2::ggproto("GeomQqrRef", ggplot2::GeomAbline, 
-  # FIXME: (ML) Maybe change it to a GeomPath to be plotted equivalent to `geom_confint()`
+  # FIXME: (ML) Maybe change it to a GeomPath to be plotted equivalent to `geom_qqr_confint()`
   default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 2,
   alpha = NA)
 )
@@ -1243,7 +1287,7 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
                              position = "identity", na.rm = FALSE,
                              show.legend = NA, inherit.aes = TRUE,
                              xlim = NULL, n = 101, 
-                             identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                             detrend = FALSE, identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
                              type = c("polygon", "line"), ...) {
 
   type <- match.arg(type)
@@ -1259,6 +1303,7 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
       na.rm = na.rm,
       xlim = xlim,
       n = n,
+      detrend = detrend,
       identity = identity,
       probs = probs,
       trafo = trafo,
@@ -1280,6 +1325,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
                            scales, 
                            xlim = NULL, 
                            n = 101, 
+                           detrend = FALSE,
                            identity = TRUE, 
                            probs = c(0.25, 0.75), 
                            trafo = qnorm,
@@ -1301,6 +1347,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       }
     }
 
+    ## Copied from `StatFunction$compute_group()`
     if (is.null(scales$x)) {
       range <- if(is.null(xlim)) c(0, 1) else xlim
       xseq <- seq(range[1], range[2], length.out = n)
@@ -1332,11 +1379,13 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
     ## Employgin StatQqrRef Method
     intercept <- StatQqrRef$compute_group(data = data,
                                           scales = scales,
+                                          detrend = detrend,
                                           identity = identity,
                                           probs = probs,
                                           trafo = trafo)$intercept
     slope <- StatQqrRef$compute_group(data = data,
                                       scales = scales,
+                                      detrend = detrend,
                                       identity = identity,
                                       probs = probs,
                                       trafo = trafo)$slope
@@ -1380,7 +1429,7 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
                             position = "identity", na.rm = FALSE,
                             show.legend = NA, inherit.aes = TRUE,
                             xlim = NULL, n = 101, 
-                            identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                            detrend = FALSE, identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
                             type = c("polygon", "line"), ...) {
   type <- match.arg(type)
 
@@ -1389,13 +1438,14 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
     mapping = mapping,
     data = data,
     stat = stat,
-    position = position,
+    position = ggplot2::PositionIdentity,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
       xlim = xlim,
       n = n,
+      detrend = detrend,
       identity = identity,
       probs = probs,
       trafo = trafo,
