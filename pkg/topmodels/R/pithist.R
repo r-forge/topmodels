@@ -941,6 +941,292 @@ lines.pithist <- function(x,
 }
 
 
+##autoplot.pithist <- function(object,
+##                             single_graph = FALSE,
+##                             style = c("histogram", "lines"),
+##                             confint = TRUE,
+##                             ref = TRUE,
+##                             xlim = c(0, 1),
+##                             ylim = c(0, NA),
+##                             xlab = NULL,
+##                             ylab = NULL,
+##                             main = NULL,
+##                             colour = "black",
+##                             fill = "darkgray",
+##                             border = "black",
+##                             alpha_min = 0.2,
+##                             size = NULL,
+##                             linetype = 1,
+##                             legend = FALSE,
+##                             ...) {
+##  # -------------------------------------------------------------------
+##  # SET UP PRELIMINARIES
+##  # -------------------------------------------------------------------
+##  ## get base style arguments
+##  add_arg <- list(...)
+##  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+##  if (!is.null(add_arg$lty)) linetype <- add_arg$lty
+##
+##  ## sanity checks
+##  stopifnot(is.logical(single_graph))
+##  if (single_graph) {
+##    stopifnot(
+##      "for `single_graph` all `freq` in attr of `object` must be of the same type" =
+##        length(unique(attr(object, "freq"))) == 1
+##    )
+##  }
+##  stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
+##  stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+##
+##  ## convert data always to data.frame
+##  object <- as.data.frame(object)
+##
+##  ## determine grouping
+##  if (is.null(object$group)) object$group <- 1L
+##  n <- max(object$group)
+##
+##  ## get title
+##  if (!is.null(main)) {
+##    title <- main[1]
+##    object$title <- factor(title)
+##  }
+##
+##  ## get annotations in the right lengths
+##  if (is.null(xlab)) xlab <- attr(object, "xlab")
+##  xlab <- paste(unique(xlab), collapse = "/")
+##  if (is.null(ylab)) ylab <- attr(object, "ylab")
+##  ylab <- paste(unique(ylab), collapse = "/")
+##  if (is.null(main)) main <- attr(object, "main")
+##  main <- make.names(rep_len(main, n), unique = TRUE)
+##
+##  ## prepare grouping
+##  object$group <- factor(object$group, levels = 1L:n, labels = main)
+##
+##  # -------------------------------------------------------------------
+##  # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
+##  # -------------------------------------------------------------------
+##  ## determine which style should be plotted
+##  style <- match.arg(style)
+##  if (n > 1 && single_graph && style == "histogram") {
+##    message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
+##    style <- "lines"
+##  }
+##
+##  ## set size
+##  if (is.null(size)) size <- if (style == "histogram") 0.7 else 1
+##
+##  ## set color to 2 (red) or NA for not plotting
+##  if (is.logical(ref) & style == "histogram") {
+##    ref <- ifelse(ref, 2, NA)
+##  } else if (is.logical(ref) & style == "lines") {
+##    ref <- ifelse(ref, 1, NA)
+##  }
+##
+##  ## only needed for `style == "lines"`
+##  ## stat helper function to get left/right points from respective mid points
+##  calc_pit_points <- ggplot2::ggproto("calc_pit_points", ggplot2::Stat,
+##
+##    # required as we operate on groups (facetting)
+##    compute_group = function(data, scales) {
+##      ## manipulate object
+##      nd <- data.frame(
+##        x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+##        y = c(data$y, data$y[NROW(data)])
+##      )
+##      nd
+##    },
+##
+##    # tells us what we need
+##    required_aes = c("x", "y")
+##  )
+##
+##  ## helper function to get right number of indices after using `stat = calc_pit_points`
+##  ## TODO: (ML) This must (!) be done smoother (UPDATE: at the moment not needed)
+##  #calc_pit_points_index <- function(group) {
+##  #  idx <- cumsum(rle(as.numeric(group))$lengths)
+##  #  idx2 <- lapply(1:length(idx), function(i) c(seq(1, idx[i]), idx[i]))
+##  #  if (length(idx2) > 1) {
+##  #    idx3 <- unlist(c(idx2[[1]], sapply(2:length(idx2), function(j) idx2[[j]][idx2[[j]] > max(idx2[[j-1]])])))
+##  #  } else {
+##  #    idx3 <- idx2[[1]]
+##  #  }
+##  #  return(idx3)
+##  #}
+##
+##  ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
+##  plot_arg <- data.frame(
+##    1:n,
+##    fill, colour, size, linetype, confint, alpha_min
+##  )[, -1]
+##
+##  ## prepare fill and confint color depending on style
+##  if (style == "histogram") {
+##
+##    ## set color to 2 (red) or NA for not plotting
+##    if (is.logical(confint)) confint <- ifelse(confint, 2, NA)
+##
+##    ## check if colour and no fill is set
+##    if (all(fill == "darkgray") && any(colour != "black")) {
+##      message(" * As the argument `colour` is set but no argument `fill` is specified, \n   the former is used for colorizing the PIT histogram. \n * For proper usage, solely provide `fill` for histogram style plots.")
+##      plot_arg$fill <- plot_arg$colour
+##    }
+##  } else {
+##    if (is.logical(plot_arg$confint)) {
+##
+##      ## use fill and set alpha
+##      plot_arg$fill <- sapply(seq_along(plot_arg$fill), function(idx) {
+##        set_minimum_transparency(plot_arg$fill[idx], alpha_min = plot_arg$alpha_min[idx])
+##      })
+##
+##      ## set color to NA for not plotting
+##      plot_arg$fill[!plot_arg$confint] <- NA
+##    } else {
+##      ## use confint and set alpha
+##      plot_arg$fill <- sapply(seq_along(plot_arg$confint), function(idx) {
+##        set_minimum_transparency(plot_arg$confint[idx], alpha_min = plot_arg$alpha_min[idx])
+##      })
+##    }
+##  }
+##
+##  ## FIXME: (ML) Decide if plot_arg2 or plot_arg3 should be used
+##  ## recycle arguments for plotting to match the length (rows) of the object (for geom w/ aes)
+##  plot_arg2 <- data.frame(1:n, border, colour, ref, confint)[, -1]
+##  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, table(object$group)))
+##
+##  ## new approach, maybe plot (ref, confint) same for all plots?!
+##  plot_arg3 <- list("ref" = ref, "confint" = confint)
+##
+##  # -------------------------------------------------------------------
+##  # MAIN PLOTTING
+##  # -------------------------------------------------------------------
+##  if (style == "histogram") {
+##    ## actual plotting
+##    rval <- ggplot2::ggplot(
+##      object,
+##      ggplot2::aes_string(x = "x", y = "y / 2", width = "width", height = "y")
+##    ) +
+##      ggplot2::geom_tile(ggplot2::aes_string(fill = "group"),
+##        colour = plot_arg2$border
+##      ) 
+##
+##    ## FIXME: (ML) Does not work for object w/ and w/o "ref" (NA)
+##    if (!all(is.na(object$ref))) {
+##      rval <- rval + 
+##        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ref", size = "group"),
+##          colour = plot_arg3$ref, #plot_arg2$ref[calc_pit_points_index(object$group)],
+##          stat = calc_pit_points,
+##          na.rm = TRUE
+##        ) 
+##    }
+##
+##    ## FIXME: (ML) Does not work for object w/ and w/o "ci_lwr" (NA)
+##    if (!all(is.na(object$ci_lwr))) {
+##      rval <- rval +
+##        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ci_lwr", size = "group"),
+##          colour = plot_arg3$confint, #plot_arg2$confint[calc_pit_points_index(object$group)],
+##          linetype = 2,
+##          stat = calc_pit_points,
+##          na.rm = TRUE
+##        )
+##    }
+##
+##    ## FIXME: (ML) Does not work for object w/ and w/o "ci_upr" (NA)
+##    if (!all(is.na(object$ci_upr))) {
+##      rval <- rval + 
+##        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ci_upr", size = "group"),
+##          colour = plot_arg3$confint, #plot_arg2$confint[calc_pit_points_index(object$group)],
+##          linetype = 2,
+##          stat = calc_pit_points,
+##          na.rm = TRUE
+##        ) 
+##    }
+##
+##    ## set the colors, shapes, etc. for the groups
+##    rval <- rval +
+##      ggplot2::scale_fill_manual(values = plot_arg$fill) +
+##      ggplot2::scale_size_manual(values = plot_arg$size)
+##
+##    ## annotation
+##    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+##
+##    ## add legend
+##    if (legend) {
+##      rval <- rval + ggplot2::labs(fill = "Model") +
+##        ggplot2::guides(fill = "legend", size = "none")
+##    } else {
+##      rval <- rval + ggplot2::guides(fill = "none", size = "none")
+##    }
+##
+##    ## set x and y limits
+##    rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
+##    rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
+##  } else {
+##
+##    ## actual plotting
+##    rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y", width = "width")) +
+##      ggplot2::geom_tile(
+##        ggplot2::aes_string(
+##          x = "x", 
+##          y = "(ci_upr + ci_lwr) / 2", 
+##          width = "width", 
+##          height = "ci_upr - ci_lwr", 
+##          fill = "group"
+##        ),
+##        colour = NA, show.legend = FALSE, na.rm = TRUE
+##      ) +
+##      ggplot2::geom_step(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"),
+##        stat = calc_pit_points
+##      )
+##
+##    ## FIXME: (ML) Does not work for object w/ and w/o "ref" (NA)
+##    if (!all(is.na(object$ref))) {
+##      rval <- rval + 
+##        ggplot2::geom_step(ggplot2::aes_string(x = "x", y = "ref"),
+##          colour = plot_arg3$ref, #plot_arg2$ref[calc_pit_points_index(object$group)],
+##          linetype = 2,
+##          size = 1,
+##          stat = calc_pit_points,
+##          na.rm = TRUE
+##        ) 
+##    }
+##
+##    ## set the colors, shapes, etc.
+##    rval <- rval +
+##      ggplot2::scale_colour_manual(values = plot_arg$colour) +
+##      ggplot2::scale_fill_manual(values = plot_arg$fill) +
+##      ggplot2::scale_size_manual(values = plot_arg$size) +
+##      ggplot2::scale_linetype_manual(values = plot_arg$linetype)
+##
+##    ## add annotation
+##    rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+##
+##    ## add legend
+##    if (legend) {
+##      rval <- rval + ggplot2::labs(colour = "Model") +
+##        ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+##    } else {
+##      rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
+##    }
+##
+##    ## set x and y limits
+##    rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
+##    rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
+##  }
+##
+##  # -------------------------------------------------------------------
+##  # GROUPING (IF ANY) AND RETURN PLOT
+##  # -------------------------------------------------------------------
+##  ## grouping
+##  if (!single_graph && n > 1L) {
+##    rval <- rval + ggplot2::facet_grid(group ~ .)
+##  } else if (!is.null(object$title)) {
+##    rval <- rval + ggplot2::facet_wrap(title ~ .)
+##  }
+##
+##  ## return ggplot object
+##  rval
+##}
+
 #' @rdname plot.pithist
 #' @method autoplot pithist
 #' @exportS3Method ggplot2::autoplot
@@ -1288,3 +1574,180 @@ add4ci <- function(x, n, conf.level) {
   class(rval) <- "htest"
   return(rval)
 }
+
+
+#' \code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`
+#' 
+#' Various \code{geom_*} and \code{stat_*} used within
+#' \code{\link[ggplot2]{autoplot}} for producing PIT histograms.
+#' 
+#' @inheritParams ggplot2::layer
+#' @inheritParams ggplot2::geom_point
+#' @examples
+#' require("ggplot2")
+#' ## Fit model
+#' data("CrabSatellites", package = "countreg")
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
+#' 
+#' ## Compute pithist
+#' p1 <- pithist(m1_pois, plot = FALSE)
+#' p2 <- pithist(m2_pois, plot = FALSE)
+#' 
+#' d <- c(p1, p2) 
+#' 
+#' ## Get label names
+#' xlab <- unique(attr(d, "xlab"))
+#' ylab <- unique(attr(d, "ylab"))
+#' main <- attr(d, "main")
+#' main <- make.names(main, unique = TRUE)
+#' d$group <- factor(d$group, labels = main)
+#' 
+#' gg1 <- ggplot(data = d) + 
+#'   geom_pit_line(aes(x = x, y = y, width = width, group = group)) + 
+#'   facet_grid(group~.)
+#' gg1
+#' @export
+geom_pit_line <- function(mapping = NULL, data = NULL, stat = "pit_line",
+                            position = "identity", na.rm = FALSE,
+                            show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomPitLine, mapping = mapping,
+    data = data, stat = stat, position = position,
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_pit_line
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomPitLine <- ggplot2::ggproto("GeomPitLine", ggplot2::GeomStep,
+  default_aes = ggplot2::aes(colour = "black", size = 1, linetype = 1,
+  alpha = NA),
+  required_aes = c("x", "y")
+
+)
+
+
+#' @rdname geom_pit_line
+#' @export
+stat_pit_line <- function(mapping = NULL, data = NULL, geom = "pit_line",
+                         position = "identity", na.rm = FALSE,
+                         show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    stat = StatPitLine,
+    data = data,
+    mapping = mapping,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_pit_line
+#' @format NULL
+#' @usage NULL
+#' @export
+StatPitLine <- ggplot2::ggproto("StatPitLine", ggplot2::Stat,
+
+  compute_group = function(data, scales) {
+    nd <- data.frame(
+      x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+      y = c(data$y, data$y[NROW(data)])
+    )
+    nd
+  },
+
+  required_aes = c("x", "y", "width")
+)
+
+
+###' @rdname geom_pit_line
+###' @export
+##geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
+##                            position = "identity", na.rm = FALSE,
+##                            show.legend = NA, inherit.aes = TRUE,
+##                            style = c("polygon", "line"), ...) {
+##  style <- match.arg(style)
+##
+##  ggplot2::layer(
+##    geom = GeomPitConfint,
+##    mapping = mapping,
+##    data = data,
+##    stat = stat,
+##    position = ggplot2::PositionIdentity,
+##    show.legend = show.legend,
+##    inherit.aes = inherit.aes,
+##    params = list(
+##      na.rm = na.rm,
+##      style = style,
+##      ...
+##    )
+##  )
+##}
+##
+##
+###' @rdname geom_pit_line
+###' @export
+##GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
+##
+##  required_aes = c("x", "y"),
+##
+##  # FIXME: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
+##  handle_na = function(data, params) {
+##    data
+##  },
+##
+##  ## Setting up all defaults needed for `GeomPolygon` and `GeomPath`
+##  default_aes = ggplot2::aes(
+##    colour = NA,
+##    fill = NA,
+##    size = 0.5,
+##    linetype = NA,
+##    alpha = NA,
+##    width = NA,
+##    height = NA
+##  ),
+##
+##  draw_panel = function(data, panel_params, coord,
+##                        rule = "evenodd", # polygon arguments
+##                        lineend = "butt", linejoin = "round", # line arguments
+##                        linemitre = 10, na.rm = FALSE, arrow = NULL, # line arguments
+##                        style = c("polygon", "line")) {
+##    style <- match.arg(style)
+##
+##    ## Swap NAs in `default_aes` with own defaults 
+##    data <- my_modify_list(data, qqr_default_aesthetics(style), force = FALSE)
+##    data$x <- data$x_noaes
+##    data$y <- data$y_noaes
+##
+##    if (style == "polygon") {
+##      ggplot2::GeomPolygon$draw_panel(data, panel_params, coord, rule)
+##    } else {
+##      ggplot2::GeomPath$draw_panel(data, panel_params, coord,
+##                          arrow, lineend, linejoin, linemitre, na.rm)
+##    }
+##
+##  },
+##
+##  draw_key = function(data, params, size) {
+##    ## Swap NAs in `default_aes` with own defaults 
+##    data <- my_modify_list(data, qqr_default_aesthetics(params$style), force = FALSE)
+##    if (params$style == "polygon") {
+##      draw_key_polygon(data, params, size)
+##    } else {
+##      draw_key_path(data, params, size)
+##    }
+##  }
+##)
+
+
