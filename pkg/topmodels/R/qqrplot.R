@@ -140,7 +140,7 @@ qqrplot.default <- function(object,
                             range_seed = 1,
                             single_graph = FALSE,
                             xlab = "Theoretical quantiles",
-                            ylab = "Quantile residuals",
+                            ylab = if (!detrend) "Quantile residuals" else "Deviation",
                             main = NULL,
                             ...) {
   # -------------------------------------------------------------------
@@ -349,6 +349,7 @@ c.qqrplot <- function(...) {
   ## labels
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  detrend <- unlist(lapply(rval, function(r) attr(r, "detrend")))
   range_level <- unlist(lapply(rval, function(r) attr(r, "range_level")))
   trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
   nam <- names(rval)
@@ -386,6 +387,7 @@ c.qqrplot <- function(...) {
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
+  attr(rval, "detrend") <- detrend
   attr(rval, "range_level") <- range_level
   attr(rval, "trafo") <- trafo
 
@@ -896,7 +898,8 @@ autoplot.qqrplot <- function(object,
         identity = identity, 
         probs = probs, 
         trafo = trafo,
-        type = confint
+        type = confint,
+        xlim = xlim
       )
   }
 
@@ -1319,7 +1322,6 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
 #' @usage NULL
 #' @export
 StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
-  default_aes = ggplot2::aes(y = after_scale(y)),
 
   compute_group = function(data, 
                            scales, 
@@ -1347,13 +1349,18 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       }
     }
 
-    ## Copied from `StatFunction$compute_group()`
+    ## Copied and modified from `StatFunction$compute_group()`
     if (is.null(scales$x)) {
       range <- if(is.null(xlim)) c(0, 1) else xlim
       xseq <- seq(range[1], range[2], length.out = n)
       x_trans <- xseq
     } else {
       range <- if(is.null(xlim)) scales$x$dimension() else xlim
+
+      ## Make sure range is not NA and add default ggplot2 expansion
+      range[is.na(range)] <- scales$x$dimension()[is.na(range)]
+      range <- range + c(-1, 1) * diff(range) * 0.05 
+      ## FIXME: (ML) Better idea how to get the scales of the plot?
       xseq <- seq(range[1], range[2], length.out = n)
 
       if (scales$x$is_discrete()) {
@@ -1394,13 +1401,13 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       ## prepare long format with group variable
       d <- as.data.frame(tidyr::pivot_longer(
         data.frame(
-          x = xseq,
+          x_noaes = xseq,
           y1 = (intercept + slope * xseq) + y_out1,
           y2 = (intercept + slope * xseq) + y_out2
         ),
         cols = c(y1, y2),
         names_to = "topbottom",
-        values_to = "y",
+        values_to = "y_noaes",
         names_prefix = "y"
       ))
       rbind(subset(d, subset = topbottom == 1), c(NA, NA, NA), subset(d, subset = topbottom == 2))
@@ -1408,8 +1415,8 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
     } else {
       ## prepare short format
       data.frame(
-        x = c(xseq, rev(xseq)),
-        y = c(
+        x_noaes = c(xseq, rev(xseq)),
+        y_noaes = c(
           (intercept + slope * xseq) + y_out2,
           rev((intercept + slope * xseq) + y_out1)
         )
@@ -1458,7 +1465,7 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
 
 GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
-  required_aes = c("x", "y"),
+  required_aes = c("x_noaes", "y_noaes"),
 
   # FIXME: (ML) Does not vary for type; this is a copy of `GeomPolygon$handle_na()`
   handle_na = function(data, params) {
@@ -1484,6 +1491,8 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
     ## Swap NAs in `default_aes` with own defaults 
     data <- my_modify_list(data, qqr_default_aesthetics(type), force = FALSE)
+    data$x <- data$x_noaes
+    data$y <- data$y_noaes
 
     if (type == "polygon") {
       ggplot2::GeomPolygon$draw_panel(data, panel_params, coord, rule)
