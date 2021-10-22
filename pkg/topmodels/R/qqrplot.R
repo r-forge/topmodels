@@ -63,7 +63,7 @@
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale (default: Gaussian).
 #' @param nsim,delta arguments passed to \code{qresiduals}.
-#' @param confint logical or character string describing the type for plotting `c("polygon", "line")`.
+#' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
 #' @param range logical or quantile specification. In case of discrete distributions, should the range 
@@ -452,7 +452,7 @@ rbind.qqrplot <- c.qqrplot
 #' @param x,object an object of class \code{qqrplot}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param confint logical or character string describing the type for plotting `c("polygon", "line")`.
+#' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
 #' @param range logical or quantile specification. Should the range of
@@ -527,7 +527,7 @@ rbind.qqrplot <- c.qqrplot
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
                          detrend = NULL,
-                         confint = TRUE,  # FIXME: (ML) Implement different plotting types
+                         confint = TRUE,  # FIXME: (ML) Implement different plotting styles
                          range = TRUE,
                          ref = TRUE,
                          identity = TRUE,
@@ -572,10 +572,10 @@ plot.qqrplot <- function(x,
     #confint <- "polygon"
     confint <- "line"
   }
-  ## FIXME: (ML) Implemnt type polygon
+  ## FIXME: (ML) Implemnt style polygon
   if (confint == "polygon") {
     confint <- "line"
-    warning("confint type polygon not yet implemented in base plots, set to `confint = 'line'`")
+    warning("confint style polygon not yet implemented in base plots, set to `confint = 'line'`")
   }
   confint <- match.arg(confint, c("polygon", "line", "none"))
 
@@ -1047,7 +1047,7 @@ autoplot.qqrplot <- function(object,
         identity = identity, 
         probs = probs, 
         trafo = trafo,
-        type = confint,
+        style = confint,
         xlim = xlim
       )
   }
@@ -1130,7 +1130,7 @@ autoplot.qqrplot <- function(object,
 #' @param detrend Fix description.
 #' @param xlim Fix description.
 #' @param n Fix description.
-#' @param type Fix description.
+#' @param style Fix description.
 #' @examples
 #' require("ggplot2")
 #' ## Fit model
@@ -1173,7 +1173,7 @@ autoplot.qqrplot <- function(object,
 #' ## Polygon CI around robust reference line
 #' gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
 #'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
-#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), type = "line") + 
+#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
 #'   geom_qqr_point() + 
 #'   geom_qqr_range(
 #'     aes(
@@ -1441,9 +1441,9 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
                              show.legend = NA, inherit.aes = TRUE,
                              xlim = NULL, n = 101, 
                              detrend = FALSE, identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
-                             type = c("polygon", "line"), ...) {
+                             style = c("polygon", "line"), ...) {
 
-  type <- match.arg(type)
+  style <- match.arg(style)
   ggplot2::layer(
     geom = geom, 
     stat = StatQqrConfint,
@@ -1460,7 +1460,7 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
       identity = identity,
       probs = probs,
       trafo = trafo,
-      type = type,
+      style = style,
       ...
     )
   )
@@ -1481,7 +1481,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
                            identity = TRUE, 
                            probs = c(0.25, 0.75), 
                            trafo = qnorm,
-                           type = "line") {
+                           style = "line") {
 
     fun <- function(x, n, level = 0.95, which = c("lower", "upper")) {
       stopifnot(is.numeric(n), length(n) == 1)
@@ -1547,7 +1547,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
                                       probs = probs,
                                       trafo = trafo)$slope
 
-    if (type == "line") {
+    if (style == "line") {
       ## prepare long format with group variable
       d <- as.data.frame(tidyr::pivot_longer(
         data.frame(
@@ -1587,8 +1587,8 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
                             show.legend = NA, inherit.aes = TRUE,
                             xlim = NULL, n = 101, 
                             detrend = FALSE, identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
-                            type = c("polygon", "line"), ...) {
-  type <- match.arg(type)
+                            style = c("polygon", "line"), ...) {
+  style <- match.arg(style)
 
   ggplot2::layer(
     geom = GeomQqrConfint,
@@ -1606,7 +1606,7 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
       identity = identity,
       probs = probs,
       trafo = trafo,
-      type = type,
+      style = style,
       ...
     )
   )
@@ -1617,7 +1617,7 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
   required_aes = c("x_noaes", "y_noaes"),
 
-  # FIXME: (ML) Does not vary for type; this is a copy of `GeomPolygon$handle_na()`
+  # FIXME: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
   handle_na = function(data, params) {
     data
   },
@@ -1636,15 +1636,15 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
                         rule = "evenodd", # polygon arguments
                         lineend = "butt", linejoin = "round", # line arguments
                         linemitre = 10, na.rm = FALSE, arrow = NULL, # line arguments
-                        type = c("polygon", "line")) {
-    type <- match.arg(type)
+                        style = c("polygon", "line")) {
+    style <- match.arg(style)
 
     ## Swap NAs in `default_aes` with own defaults 
-    data <- my_modify_list(data, qqr_default_aesthetics(type), force = FALSE)
+    data <- my_modify_list(data, qqr_default_aesthetics(style), force = FALSE)
     data$x <- data$x_noaes
     data$y <- data$y_noaes
 
-    if (type == "polygon") {
+    if (style == "polygon") {
       ggplot2::GeomPolygon$draw_panel(data, panel_params, coord, rule)
     } else {
       ggplot2::GeomPath$draw_panel(data, panel_params, coord,
@@ -1655,8 +1655,8 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
   draw_key = function(data, params, size) {
     ## Swap NAs in `default_aes` with own defaults 
-    data <- my_modify_list(data, qqr_default_aesthetics(params$type), force = FALSE)
-    if (params$type == "polygon") {
+    data <- my_modify_list(data, qqr_default_aesthetics(params$style), force = FALSE)
+    if (params$style == "polygon") {
       draw_key_polygon(data, params, size)
     } else {
       draw_key_path(data, params, size)
@@ -1679,8 +1679,8 @@ my_modify_list <- function(old, new, force = FALSE) {
 
 
 ## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
-qqr_default_aesthetics <- function(type) {
-  if (type == "line") {
+qqr_default_aesthetics <- function(style) {
+  if (style == "line") {
     my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", size = 0.5, linetype = 2, alpha = NA), 
       force = TRUE)
   } else {
