@@ -3,7 +3,6 @@
 \name{wormplot}
 \alias{wormplot}
 \alias{wormplot.default}
-\alias{c.wormplot}
 \title{Worm Plots for Quantile Residuals}
 \usage{
 wormplot(object, ...)
@@ -13,13 +12,15 @@ wormplot(object, ...)
   newdata = NULL,
   plot = TRUE,
   class = NULL,
+  detrend = TRUE,
   trafo = qnorm,
   nsim = 1L,
   delta = NULL,
   confint = TRUE,
-  confint_level = 0.95,
-  confint_nsim = 250,
-  confint_seed = 1,
+  range = TRUE,
+  range_level = 0.95,
+  range_nsim = 250,
+  range_seed = 1,
   single_graph = FALSE,
   xlab = "Theoretical quantiles",
   ylab = "Deviation",
@@ -44,44 +45,53 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
+\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
+
 \item{trafo}{function for tranforming residuals from probability scale to a
 different distribution scale (default: Gaussian).}
 
 \item{nsim, delta}{arguments passed to \code{qresiduals}.}
 
-\item{confint}{logical or quantile specification. Should the range of
-quantiles of the randomized quantile residuals be visualized? If
-\code{TRUE}, then \code{range = c(0.01, 0.99)} is used.}
+\item{confint}{logical or character string describing the type for plotting `c("polygon", "line")`.
+If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+quantile residuals are visualized.}
 
-\item{confint_level}{numeric. The confidence level required.}
+\item{range}{logical or quantile specification. In case of discrete distributions, should the range 
+(confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 
+then \code{range = c(0.01, 0.99)} is used.}
 
-\item{confint_nsim}{numeric. The number of simulated quantiles.}
+\item{range_level}{numeric. The confidence level required for calculating the range of values 
+due to the randomization.}
 
-\item{confint_seed}{numeric. The seed to be set for calculating the
-confidence interval.}
+\item{range_nsim}{numeric. The number of simulated quantiles for calculating the range of values
+due to the randomization.}
+
+\item{range_seed}{numeric. The seed to be set for calculating the range of values
+due to the randomization.}
 
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
 \item{xlab, ylab, main, \dots}{graphical parameters passed to
-\code{\link{plot.wormplot}} or \code{\link{autoplot.wormplot}}.}
+\code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}
 }
 \value{
-An object of class \code{"wormplot"} inheriting from
+An object of class \code{"qqrplot"} inheriting from
 \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 with the following variables: \item{x}{theoretical quantiles,}
 \item{y}{deviations between theoretical and empirical quantiles.} In case of
 randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
-lower and upper confidence interval bounds (\code{x_ci_lwr}, \code{y_ci_lwr},
-\code{x_ci_upr}, \code{y_ci_upr}) can optionally be returned.  Additionally,
-\code{xlab}, \code{ylab}, \code{main}, and \code{confint_level}, as well as the
-reference function (\code{ref_fun}) to add confidence intervals are stored as attributes.
+lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
+\code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
+\code{xlab}, \code{ylab}, \code{main}, and \code{range_level}, as well as the
+trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
+was computed are stored as attributes.
 }
 \description{
 Visualize goodness of fit of regression models by worm plots using quantile
 residuals. If \code{plot = TRUE}, the resulting object of class
-\code{"wormplot"} is plotted by \code{\link{plot.wormplot}} or
-\code{\link{autoplot.wormplot}} before it is returned, depending on whether the
+\code{"wormplot"} is plotted by \code{\link{plot.qqrplot}} or
+\code{\link{autoplot.qqrplot}} before it is returned, depending on whether the
 package \code{ggplot2} is loaded.
 }
 \details{
@@ -129,7 +139,7 @@ device for modelling growth reference curves}. \emph{Statistics in
 Medicine}, \bold{20}, 1259--1277. \doi{10.1002/sim.746}
 }
 \seealso{
-\code{\link{plot.wormplot}}, \code{\link{qqrplot}}, 
+\code{\link{qqrplot}}, \code{\link{plot.qqrplot}}, \code{\link{qqrplot}}, 
 \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}

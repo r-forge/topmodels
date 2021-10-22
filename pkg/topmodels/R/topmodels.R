@@ -163,13 +163,13 @@ topmodels <- function(object,
     arg_avail[["pithist"]] <- unique(names(c(formals(pithist.default), formals(plot.pithist))))
     arg_avail[["reliagram"]] <- unique(names(c(formals(reliagram.default), formals(plot.reliagram))))
     arg_avail[["qqrplot"]] <- unique(names(c(formals(qqrplot.default), formals(plot.qqrplot))))
-    arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(plot.wormplot))))
+    arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(plot.qqrplot))))
   } else {
     arg_avail[["rootogram"]] <- unique(names(c(formals(rootogram.default), formals(autoplot.rootogram))))
     arg_avail[["pithist"]] <- unique(names(c(formals(pithist.default), formals(autoplot.pithist))))
     arg_avail[["reliagram"]] <- unique(names(c(formals(reliagram.default), formals(autoplot.reliagram))))
     arg_avail[["qqrplot"]] <- unique(names(c(formals(qqrplot.default), formals(autoplot.qqrplot))))
-    arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(autoplot.wormplot))))
+    arg_avail[["wormplot"]] <- unique(names(c(formals(wormplot.default), formals(autoplot.qqrplot))))
   }
 
   arg_avail <- lapply(arg_avail, function(x) unique(c(x, names(par()))))
