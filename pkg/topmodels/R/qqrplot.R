@@ -303,9 +303,9 @@ qqrplot.default <- function(object,
 
   ## plot by default
   if (plot == "ggplot2") {
-    try(print(ggplot2::autoplot(rval, detrend = detrend, confint = confint, range = range, ...)))
+    try(print(ggplot2::autoplot(rval, confint = confint, range = range, ...)))
   } else if (plot == "base") {
-    try(plot(rval, range = range, ...))
+    try(plot(rval, confint = confint, range = range, ...))
   }
 
   ## return invisibly
@@ -349,16 +349,37 @@ c.qqrplot <- function(...) {
   ## labels
   xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
   ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
-  detrend <- unlist(lapply(rval, function(r) attr(r, "detrend")))
-  range_level <- unlist(lapply(rval, function(r) attr(r, "range_level")))
-  trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
   nam <- names(rval)
   main <- if (is.null(nam)) {
     as.vector(sapply(rval, function(r) attr(r, "main")))
   } else {
     make.unique(rep.int(nam, sapply(n, length)))
   }
+
+  ## parameters
+  detrend <- unlist(lapply(rval, function(r) attr(r, "detrend")))
+  range_level <- unlist(lapply(rval, function(r) attr(r, "range_level")))
+  trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
   n <- unlist(n)
+
+  # -------------------------------------------------------------------
+  # CHECK FOR COMPATIBILITY
+  # -------------------------------------------------------------------
+  if (length(trafo) > 1) {
+    if(!all(sapply(2:length(trafo), function(i) identical(trafo[[i-1]], trafo[[i]])))) {
+      stop("objects with different `trafo`s are on different scales and hence must not be combined")
+    } else {
+    trafo <- trafo[[1]]
+    }
+  }
+
+  if (length(detrend) > 1) {
+    if(!all(sapply(2:length(detrend), function(i) identical(detrend[[i-1]], detrend[[i]])))) {
+      stop("objects with different `detrend`s are on different scales and hence must not be combined")
+    } else {
+    detrend <- detrend[[1]]
+    }
+  }
 
   # -------------------------------------------------------------------
   # RETURN DATA
@@ -458,7 +479,7 @@ rbind.qqrplot <- c.qqrplot
 #' qqrplot(m1_lm)
 #' 
 #' ## customize colors
-#' qqrplot(m1_lm, ref = "blue", lty = 2, pch = 20)
+#' qqrplot(m1_lm, plot = "base", ref = "blue", lty = 2, pch = 20)
 #' 
 #' ## add separate model
 #' if (require("crch", quietly = TRUE)) {
@@ -503,11 +524,13 @@ rbind.qqrplot <- c.qqrplot
 #' @export
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
-                         detrend = FALSE,  # FIXME: (ML) Implement detrend! 
+                         detrend = NULL,  # FIXME: (ML) Implement detrend! 
                          confint = TRUE,  # FIXME: (ML) Implement confint!
                          range = TRUE,
                          ref = TRUE,
                          identity = TRUE,  # FIXME: (ML) Implement identity! 
+                         probs = c(0.25, 0.75),  # FIXME: (ML) Implement probs! 
+                         trafo = NULL,
                          xlim = c(NA, NA),
                          ylim = c(NA, NA),
                          xlab = NULL,
@@ -531,10 +554,48 @@ plot.qqrplot <- function(x,
   ## * `range`, `fill` in `polygon()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
+  stopifnot(is.logical(identity))
+  stopifnot(is.numeric(probs), length(probs) == 2)
+  stopifnot(length(trafo) <= 1, is.null(trafo) || is.function(trafo))
+  stopifnot(length(detrend) <= 1, is.null(detrend) || is.logical(detrend))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  ## get confint
+  if (isFALSE(confint)) {
+    confint <- "none"
+  } else if (isTRUE(confint)) {
+    #confint <- "polygon"
+    confint <- "line"
+  }
+  ## FIXME: (ML) Implemnt type polygon
+  if (confint == "polygon") {
+    confint <- "line"
+    warning("confint type polygon not yet implemented in base plots, set to `confint = 'line'`")
+  }
+  confint <- match.arg(confint, c("polygon", "line", "none"))
+
+  ## get detrend
+  if (!is.null(attr(x, "detrend")) && !is.null(detrend)) {
+    detrend <- attr(x, "detrend")
+    warning(paste0(
+      "argument `detrend` is overwritten by x's attribute `detrend = ",
+      detrend,
+      "`"
+    ))
+  } else if (!is.null(attr(x, "detrend")) && is.null(detrend)) {
+    detrend <- attr(x, "detrend")
+  }
+
+  ## get trafo
+  if (!is.null(attr(x, "trafo")) && !is.null(trafo)) {
+    trafo <- attr(x, "trafo")
+    warning("argument `trafo` is overwritten by x's attribute `trafo`")
+  } else if (!is.null(attr(x, "trafo")) && is.null(trafo)) {
+    trafo <- attr(x, "trafo")
+  }
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -554,8 +615,8 @@ plot.qqrplot <- function(x,
   ## annotation
   if (single_graph) {
     if (is.null(xlab)) xlab <- "Theoretical quantiles"
-    if (is.null(ylab)) ylab <- "Quantile residuals"
-    if (is.null(main)) main <- "Q-Q residuals plot" # FIXME: (ML) Achim prefers other title
+    if (is.null(ylab)) ylab <- if (!detrend) "Quantile residuals" else "Deviation"
+    if (is.null(main)) main <- if (!detrend) "Q-Q residuals plot" else "Worm plot"  # FIXME: (ML) Achim prefers other title
   } else {
     if (is.null(xlab)) xlab <- TRUE
     if (is.null(ylab)) ylab <- TRUE
@@ -660,11 +721,82 @@ plot.qqrplot <- function(x,
       )
     }
 
-    ## plot reference diagonal
+    ## helper function for plotting confint lines
+    fun <- function(x, n, level = 0.95, which = c("lower", "upper"), slope = 0, intercept = 1) {
+      stopifnot(is.numeric(n), length(n) == 1)
+      stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+      which <- match.arg(which)
+
+      p <- pnorm(x)
+      se <- (1 / dnorm(x)) * (sqrt(p * (1 - p) / n))
+      rval <- as.numeric(trafo((1 - level) / 2) * se)
+
+      if (which == "lower") {
+        (intercept + slope * x) + rval
+      } else {
+        (intercept + slope * x) - rval
+      }
+    }
+
+    ## compute intercept and slope of reference line
     if (j == 1 || (!single_graph && j > 1)) {
+      if (!detrend) {
+        if (!identity) {
+          y_tmp <- quantile(d[grepl("^y$|y_0", names(d))], probs, names = FALSE, na.rm = TRUE)
+          x_tmp <- trafo(probs)
+          slope <- diff(y_tmp) / diff(x_tmp)
+          intercept <- y_tmp[1L] - slope * x_tmp[1L]
+
+        } else { 
+          slope = 1
+          intercept = 0
+        }
+      } else {
+        slope = 0
+        intercept = 0
+      }
+      
+      ## plot reference line
       if (!identical(plot_arg$ref[j], FALSE)) {
         if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-        abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
+        abline(a = intercept, b = slope, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
+      }
+
+      ## plot confidence lines
+      if (!identical(plot_arg$confint[j], FALSE)) {
+        if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
+        curve(
+          fun(
+            x,
+            n = NROW(d),
+            level = 0.95,
+            which = "lower",
+            slope = slope,
+            intercept = intercept
+          ),
+          lty = 2,
+          lwd = 1.25,
+          col = plot_arg$ref[j],
+          from = plot_arg$xlim1[j],
+          to = plot_arg$xlim2[j],
+          add = TRUE
+        )
+        curve(
+          fun(
+            x,
+            n = NROW(d),
+            level = 0.95,
+            which = "upper",
+            slope = slope,
+            intercept = intercept
+          ),
+          lty = 2,
+          lwd = 1.25,
+          col = plot_arg$ref[j],
+          from = plot_arg$xlim1[j],
+          to = plot_arg$xlim2[j],
+          add = TRUE
+        )
       }
     }
 
@@ -697,7 +829,6 @@ plot.qqrplot <- function(x,
 #' @export
 points.qqrplot <- function(x,
                            range = FALSE,
-                           ref = FALSE,
                            col = adjustcolor("black", alpha.f = 0.4),
                            fill = adjustcolor("black", alpha.f = 0.2),
                            alpha_min = 0.2,
@@ -708,7 +839,6 @@ points.qqrplot <- function(x,
   # -------------------------------------------------------------------
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
-  ## * `ref` w/i `abline()`
   ## * `col`, `pch` w/i `lines()`
   ## * `range`, `fill` in `polygon()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
@@ -721,7 +851,7 @@ points.qqrplot <- function(x,
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, range, ref, col, fill, alpha_min, pch)[, -1]
+  plot_arg <- data.frame(1:n, range, col, fill, alpha_min, pch)[, -1]
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR POINTS
@@ -750,12 +880,6 @@ points.qqrplot <- function(x,
       )
     }
 
-    ## plot reference diagonal
-    if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-      abline(0, 1, col = plot_arg$ref[j], lty = 2, lwd = 1.25)
-    }
-
     ## add qq plot
     for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
       points(
@@ -780,12 +904,13 @@ points.qqrplot <- function(x,
 #' @exportS3Method ggplot2::autoplot
 autoplot.qqrplot <- function(object,
                              single_graph = FALSE,
+                             detrend = NULL,
                              confint = TRUE,
                              range = TRUE,
                              ref = TRUE,
                              identity = TRUE, 
                              probs = c(0.25, 0.75), 
-                             trafo = qnorm,
+                             trafo = NULL,
                              xlim = c(NA, NA),
                              ylim = c(NA, NA),
                              xlab = NULL,
@@ -810,12 +935,17 @@ autoplot.qqrplot <- function(object,
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
+  stopifnot(is.logical(range))
   stopifnot(is.logical(ref))
   stopifnot(is.logical(identity))
+  stopifnot(is.numeric(probs), length(probs) == 2)
+  stopifnot(length(trafo) <= 1, is.null(trafo) || is.function(trafo))
+  stopifnot(length(detrend) <= 1, is.null(detrend) || is.logical(detrend))
   stopifnot(is.logical(legend))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
+  ## get confint
   if (isFALSE(confint)) {
     confint <- "none"
   } else if (isTRUE(confint)) {
@@ -824,7 +954,24 @@ autoplot.qqrplot <- function(object,
   confint <- match.arg(confint, c("polygon", "line", "none"))
 
   ## get detrend
-  detrend <- attr(object, "detrend")
+  if (!is.null(attr(object, "detrend")) && !is.null(detrend)) {
+    detrend <- attr(object, "detrend")
+    warning(paste0(
+      "argument `detrend` is overwritten by object's attribute `detrend = ",
+      detrend,
+      "`"
+    ))
+  } else if (!is.null(attr(object, "detrend")) && is.null(detrend)) {
+    detrend <- attr(object, "detrend")
+  }
+
+  ## get trafo
+  if (!is.null(attr(object, "trafo")) && !is.null(trafo)) {
+    trafo <- attr(object, "trafo")
+    warning("argument `trafo` is overwritten by object's attribute `trafo`")
+  } else if (!is.null(attr(object, "trafo")) && is.null(trafo)) {
+    trafo <- attr(object, "trafo")
+  }
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -911,7 +1058,8 @@ autoplot.qqrplot <- function(object,
           x_lwr = "x_rg_lwr", 
           x_upr = "x_rg_upr", 
           y_lwr = "y_rg_lwr", 
-          y_upr = "y_rg_upr"
+          y_upr = "y_rg_upr",
+          group = "group"
         )
       )
   }
@@ -974,7 +1122,7 @@ autoplot.qqrplot <- function(object,
 #' @param identity logical, should the identity line be plotted or a theoretical line
 #' which passes through \code{probs} quantiles computed by \code{trafo}. 
 #' @param trafo function for calculating reference line through first and third
-#' quartile of theoretical distribution (default: Gaussian).
+#' quartile of theoretical distribution (default: Gaussian \code{qnorm}).
 #' @param probs numeric vector of length two, representing probabilities of reference
 #' line used in \code{trafo}.
 #' @param detrend Fix description.
@@ -1022,8 +1170,8 @@ autoplot.qqrplot <- function(object,
 #' 
 #' ## Polygon CI around robust reference line
 #' gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
-#'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
-#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], type = "line") + 
+#'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
+#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), type = "line") + 
 #'   geom_qqr_point() + 
 #'   geom_qqr_range(
 #'     aes(
