@@ -79,14 +79,16 @@
 #' diagrams be plotted in a single graph?
 #' @param xlab,ylab,main,\dots graphical parameters passed to
 #' \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.
-#' @return An object of class \code{"qqrplot"} inheriting from \code{"data.frame"}
-#' or \code{"tibble"} conditional on the argument \code{class} with the following
-#' variables: \item{x}{theoretical quantiles,} \item{y}{empirical quantile
-#' residuals.} In case of randomized residuals, \code{nsim} different \code{x} and
-#' \code{y} values, and lower and upper confidence interval bounds
-#' (\code{x_rg_lwr}, \code{y_rg_lwr}, \code{x_rg_upr}, \code{y_rg_upr}) can
-#' optionally be returned.  Additionally, \code{xlab}, \code{ylab}, \code{main},
-#' and \code{range_level} are stored as attributes.
+#' @return An object of class \code{"qqrplot"} inheriting from
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
+#' with the following variables: \item{x}{theoretical quantiles,}
+#' \item{y}{deviations between theoretical and empirical quantiles.} In case of
+#' randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
+#' lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
+#' \code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
+#' \code{xlab}, \code{ylab}, \code{main}, and \code{range_level}, as well as the
+#' trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
+#' was computed are stored as attributes.
 #' @seealso \code{\link{plot.qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
@@ -219,7 +221,7 @@ qqrplot.default <- function(object,
     qthe_rg_lwr <- q2q(qres_rg_lwr)
     qthe_rg_upr <- q2q(qres_rg_upr)
 
-    ## FIXME: (ML) Improve workaround to get CI only for discrete values
+    ## FIXME: (ML) Improve workaround to get range only for discrete values
     if (isTRUE(all.equal(qres_rg_lwr, qres_rg_upr, tol = .Machine$double.eps^0.4))) {
       qres_rg_lwr <- NULL
       qres_rg_upr <- NULL
@@ -524,12 +526,12 @@ rbind.qqrplot <- c.qqrplot
 #' @export
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
-                         detrend = NULL,  # FIXME: (ML) Implement detrend! 
-                         confint = TRUE,  # FIXME: (ML) Implement confint!
+                         detrend = NULL,
+                         confint = TRUE,  # FIXME: (ML) Implement different plotting types
                          range = TRUE,
                          ref = TRUE,
-                         identity = TRUE,  # FIXME: (ML) Implement identity! 
-                         probs = c(0.25, 0.75),  # FIXME: (ML) Implement probs! 
+                         identity = TRUE,
+                         probs = c(0.25, 0.75),
                          trafo = NULL,
                          xlim = c(NA, NA),
                          ylim = c(NA, NA),

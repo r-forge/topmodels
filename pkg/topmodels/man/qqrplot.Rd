@@ -77,14 +77,16 @@ diagrams be plotted in a single graph?}
 \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}
 }
 \value{
-An object of class \code{"qqrplot"} inheriting from \code{"data.frame"}
-or \code{"tibble"} conditional on the argument \code{class} with the following
-variables: \item{x}{theoretical quantiles,} \item{y}{empirical quantile
-residuals.} In case of randomized residuals, \code{nsim} different \code{x} and
-\code{y} values, and lower and upper confidence interval bounds
-(\code{x_rg_lwr}, \code{y_rg_lwr}, \code{x_rg_upr}, \code{y_rg_upr}) can
-optionally be returned.  Additionally, \code{xlab}, \code{ylab}, \code{main},
-and \code{range_level} are stored as attributes.
+An object of class \code{"qqrplot"} inheriting from
+\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
+with the following variables: \item{x}{theoretical quantiles,}
+\item{y}{deviations between theoretical and empirical quantiles.} In case of
+randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
+lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
+\code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
+\code{xlab}, \code{ylab}, \code{main}, and \code{range_level}, as well as the
+trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
+was computed are stored as attributes.
 }
 \description{
 Visualize goodness of fit of regression models by Q-Q plots using quantile

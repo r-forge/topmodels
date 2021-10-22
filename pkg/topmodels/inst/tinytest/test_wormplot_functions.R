@@ -19,7 +19,7 @@ nd_cars <- cars[1:10, ]
 expect_silent( 
   wormplot(m1, 
     newdata = nd_cars, class = "tibble", trafo = qnorm, nsim = 1L, delta = NULL, 
-    confint = "black", confint_level = 0.9, confint_nsim = 20, confint_seed = 3, 
+    range = "black", range_level = 0.9, range_nsim = 20, range_seed = 3, 
     xlab = "test", ylab = "test", main = "test", plot = "base"
   )
 )
@@ -27,7 +27,7 @@ expect_silent(
 expect_silent( 
   wormplot(m2, 
     newdata = nd_cars, class = "tibble", trafo = qnorm, nsim = 1L, delta = 1E-10,
-    confint = "black", confint_level = 0.9, confint_nsim = 20, confint_seed = 3, 
+    range = "black", range_level = 0.9, range_nsim = 20, range_seed = 3, 
     xlab = "test", ylab = "test", main = "test", plot = "base"
   )
 )
@@ -44,7 +44,7 @@ expect_silent(
 )
 
 expect_silent(
-  plot(c(q2, q3), single_graph = TRUE, confint = FALSE)
+  plot(c(q2, q3), single_graph = TRUE, range = FALSE)
 )
 
 expect_silent(
@@ -52,7 +52,7 @@ expect_silent(
 )
 
 expect_silent(
-  points(q3, confint = TRUE, ref = TRUE)
+  points(q3, range = TRUE)
 )
 
 
