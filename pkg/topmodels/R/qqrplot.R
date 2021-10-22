@@ -918,7 +918,7 @@ autoplot.qqrplot <- function(object,
 
   ## add points
   rval <- rval +
-    geom_qqr_points(ggplot2::aes_string(alpha = "group", colour = "group", fill = "group", 
+    geom_qqr_point(ggplot2::aes_string(alpha = "group", colour = "group", fill = "group", 
       shape = "group", size = "group"), stroke = stroke)
   ## FIXME: (ML) alpha is not correctly represented in the legend 
   ##  (compare: https://stackoverflow.com/q/69634268/6583972?sem=2)
@@ -1005,7 +1005,7 @@ autoplot.qqrplot <- function(object,
 #' gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
 #'   geom_qqr_ref() + 
 #'   geom_qqr_confint(fill = "red") + 
-#'   geom_qqr_points() + 
+#'   geom_qqr_point() + 
 #'   geom_qqr_range(
 #'     aes(
 #'       x_lwr = x_rg_lwr, 
@@ -1024,7 +1024,7 @@ autoplot.qqrplot <- function(object,
 #' gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
 #'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")[[1]]) + 
 #'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo")[[1]], type = "line") + 
-#'   geom_qqr_points() + 
+#'   geom_qqr_point() + 
 #'   geom_qqr_range(
 #'     aes(
 #'       x_lwr = x_rg_lwr, 
@@ -1040,7 +1040,7 @@ autoplot.qqrplot <- function(object,
 #' gg2 + facet_wrap(~group)
 #' 
 #' @export
-geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
+geom_qqr_point <- function(mapping = NULL, data = NULL, stat = "identity",
                             position = "identity", na.rm = FALSE, 
                             show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
@@ -1052,7 +1052,7 @@ geom_qqr_points <- function(mapping = NULL, data = NULL, stat = "identity",
 }
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1114,7 +1114,7 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 )
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @export
 stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
                              position = "identity", na.rm = FALSE, 
@@ -1132,7 +1132,7 @@ stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
 }
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1152,7 +1152,7 @@ StatQqrRange <- ggplot2::ggproto("StatQqrRange", ggplot2::Stat,
 )
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @export
 geom_qqr_range <- function(mapping = NULL, data = NULL, stat = "qqr_range",
                              position = "identity", na.rm = FALSE, 
@@ -1166,7 +1166,7 @@ geom_qqr_range <- function(mapping = NULL, data = NULL, stat = "qqr_range",
 }
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1176,7 +1176,7 @@ GeomQqrRange <- ggplot2::ggproto("GeomQqrRange", ggplot2::GeomPolygon,
 )
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @export
 stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
                          position = "identity", na.rm = FALSE, 
@@ -1202,7 +1202,7 @@ stat_qqr_ref <- function(mapping = NULL, data = NULL, geom = "qqr_ref",
 }
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1245,7 +1245,7 @@ StatQqrRef <- ggplot2::ggproto("StatQqrRef", ggplot2::Stat,
 )
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @export
 geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
                          position = "identity", na.rm = FALSE, 
@@ -1271,7 +1271,7 @@ geom_qqr_ref <- function(mapping = NULL, data = NULL, stat = "qqr_ref",
 }
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1282,7 +1282,7 @@ GeomQqrRef <- ggplot2::ggproto("GeomQqrRef", ggplot2::GeomAbline,
 )
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1317,7 +1317,7 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
 }
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1430,7 +1430,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
 )
 
 
-#' @rdname geom_qqr_points
+#' @rdname geom_qqr_point
 #' @export
 geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
                             position = "identity", na.rm = FALSE,
