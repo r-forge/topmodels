@@ -9,11 +9,13 @@
 \method{plot}{qqrplot}(
   x,
   single_graph = FALSE,
-  detrend = FALSE,
+  detrend = NULL,
   confint = TRUE,
   range = TRUE,
   ref = TRUE,
   identity = TRUE,
+  probs = c(0.25, 0.75),
+  trafo = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -31,7 +33,6 @@
 \method{points}{qqrplot}(
   x,
   range = FALSE,
-  ref = FALSE,
   col = adjustcolor("black", alpha.f = 0.4),
   fill = adjustcolor("black", alpha.f = 0.2),
   alpha_min = 0.2,
@@ -42,12 +43,13 @@
 \method{autoplot}{qqrplot}(
   object,
   single_graph = FALSE,
+  detrend = NULL,
   confint = TRUE,
   range = TRUE,
   ref = TRUE,
   identity = TRUE,
   probs = c(0.25, 0.75),
-  trafo = qnorm,
+  trafo = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -113,7 +115,7 @@ m1_lm <- lm(dist ~ speed, data = cars)
 qqrplot(m1_lm)
 
 ## customize colors
-qqrplot(m1_lm, ref = "blue", lty = 2, pch = 20)
+qqrplot(m1_lm, plot = "base", ref = "blue", lty = 2, pch = 20)
 
 ## add separate model
 if (require("crch", quietly = TRUE)) {

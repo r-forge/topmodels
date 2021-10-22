@@ -53,6 +53,6 @@ expect_silent(
 )
 
 expect_silent(
-  points(q3, range = TRUE, ref = TRUE)
+  points(q3, range = TRUE)
 )
 dev.off()
