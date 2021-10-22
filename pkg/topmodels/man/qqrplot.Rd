@@ -24,7 +24,7 @@ qqrplot(object, ...)
   range_seed = 1,
   single_graph = FALSE,
   xlab = "Theoretical quantiles",
-  ylab = "Quantile residuals",
+  ylab = if (!detrend) "Quantile residuals" else "Deviation",
   main = NULL,
   ...
 )
