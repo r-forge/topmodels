@@ -53,7 +53,7 @@ different distribution scale (default: Gaussian).}
 
 \item{nsim, delta}{arguments passed to \code{qresiduals}.}
 
-\item{confint}{logical or character string describing the type for plotting `c("polygon", "line")`.
+\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 quantile residuals are visualized.}
 

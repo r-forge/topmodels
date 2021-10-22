@@ -71,7 +71,7 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
-\item{confint}{logical or character string describing the type for plotting `c("polygon", "line")`.
+\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 quantile residuals are visualized.}
 

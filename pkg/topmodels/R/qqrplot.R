@@ -1613,6 +1613,8 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
 }
 
 
+#' @rdname geom_qqr_point
+#' @export
 GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
   required_aes = c("x_noaes", "y_noaes"),
