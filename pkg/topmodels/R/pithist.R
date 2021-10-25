@@ -1583,6 +1583,8 @@ add4ci <- function(x, n, conf.level) {
 #' 
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
+#' @param style Fix description.
+#' @param linejoin Fix description.
 #' @examples
 #' require("ggplot2")
 #' ## Fit model
@@ -1605,8 +1607,46 @@ add4ci <- function(x, n, conf.level) {
 #' 
 #' gg1 <- ggplot(data = d) + 
 #'   geom_pit_line(aes(x = x, y = y, width = width, group = group)) + 
+#'   geom_pit_confint(aes(x = x, ci_upr = ci_upr, ci_lwr = ci_lwr, width = width)) + 
 #'   facet_grid(group~.)
 #' gg1
+#' @export
+geom_pit_hist <- function(mapping = NULL, data = NULL, stat = "identity",
+                          position = "identity", na.rm = FALSE,
+                          show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomPitHist, mapping = mapping,
+    data = data, stat = stat, position = position,
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_pit_hist
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomPitHist <- ggplot2::ggproto("GeomPitHist", ggplot2::GeomTile,
+
+  default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.2, linetype = 1, 
+    alpha = NA),
+
+  required_aes = c("x", "y", "width"),
+
+  setup_data = function(data, params) {
+      data <- transform(data,
+        y = y /2,
+        height = y
+      )
+      ggplot2::GeomTile$setup_data(data, params)
+  }
+)
+
+
+#' @rdname geom_pit_hist
+#' @format NULL
+#' @usage NULL
 #' @export
 geom_pit_line <- function(mapping = NULL, data = NULL, stat = "pit_line",
                             position = "identity", na.rm = FALSE,
@@ -1620,7 +1660,7 @@ geom_pit_line <- function(mapping = NULL, data = NULL, stat = "pit_line",
 }
 
 
-#' @rdname geom_pit_line
+#' @rdname geom_pit_hist
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1628,11 +1668,10 @@ GeomPitLine <- ggplot2::ggproto("GeomPitLine", ggplot2::GeomStep,
   default_aes = ggplot2::aes(colour = "black", size = 1, linetype = 1,
   alpha = NA),
   required_aes = c("x", "y")
-
 )
 
 
-#' @rdname geom_pit_line
+#' @rdname geom_pit_hist
 #' @export
 stat_pit_line <- function(mapping = NULL, data = NULL, geom = "pit_line",
                          position = "identity", na.rm = FALSE,
@@ -1653,7 +1692,7 @@ stat_pit_line <- function(mapping = NULL, data = NULL, geom = "pit_line",
 }
 
 
-#' @rdname geom_pit_line
+#' @rdname geom_pit_hist
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1671,83 +1710,215 @@ StatPitLine <- ggplot2::ggproto("StatPitLine", ggplot2::Stat,
 )
 
 
-###' @rdname geom_pit_line
-###' @export
-##geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
-##                            position = "identity", na.rm = FALSE,
-##                            show.legend = NA, inherit.aes = TRUE,
-##                            style = c("polygon", "line"), ...) {
-##  style <- match.arg(style)
-##
-##  ggplot2::layer(
-##    geom = GeomPitConfint,
-##    mapping = mapping,
-##    data = data,
-##    stat = stat,
-##    position = ggplot2::PositionIdentity,
-##    show.legend = show.legend,
-##    inherit.aes = inherit.aes,
-##    params = list(
-##      na.rm = na.rm,
-##      style = style,
-##      ...
-##    )
-##  )
-##}
-##
-##
-###' @rdname geom_pit_line
-###' @export
-##GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
-##
-##  required_aes = c("x", "y"),
-##
-##  # FIXME: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
-##  handle_na = function(data, params) {
-##    data
-##  },
-##
-##  ## Setting up all defaults needed for `GeomPolygon` and `GeomPath`
-##  default_aes = ggplot2::aes(
-##    colour = NA,
-##    fill = NA,
-##    size = 0.5,
-##    linetype = NA,
-##    alpha = NA,
-##    width = NA,
-##    height = NA
-##  ),
-##
-##  draw_panel = function(data, panel_params, coord,
-##                        rule = "evenodd", # polygon arguments
-##                        lineend = "butt", linejoin = "round", # line arguments
-##                        linemitre = 10, na.rm = FALSE, arrow = NULL, # line arguments
-##                        style = c("polygon", "line")) {
-##    style <- match.arg(style)
-##
-##    ## Swap NAs in `default_aes` with own defaults 
-##    data <- my_modify_list(data, qqr_default_aesthetics(style), force = FALSE)
-##    data$x <- data$x_noaes
-##    data$y <- data$y_noaes
-##
-##    if (style == "polygon") {
-##      ggplot2::GeomPolygon$draw_panel(data, panel_params, coord, rule)
-##    } else {
-##      ggplot2::GeomPath$draw_panel(data, panel_params, coord,
-##                          arrow, lineend, linejoin, linemitre, na.rm)
-##    }
-##
-##  },
-##
-##  draw_key = function(data, params, size) {
-##    ## Swap NAs in `default_aes` with own defaults 
-##    data <- my_modify_list(data, qqr_default_aesthetics(params$style), force = FALSE)
-##    if (params$style == "polygon") {
-##      draw_key_polygon(data, params, size)
-##    } else {
-##      draw_key_path(data, params, size)
-##    }
-##  }
-##)
+#' @rdname geom_pit_hist
+#' @format NULL
+#' @usage NULL
+#' @export
+geom_pit_ref <- function(mapping = NULL, data = NULL, stat = "pit_line",
+                            position = "identity", na.rm = FALSE,
+                            show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomPitRef, mapping = mapping,
+    data = data, stat = stat, position = position,
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
 
 
+#' @rdname geom_pit_hist
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomPitRef <- ggplot2::ggproto("GeomPitRef", ggplot2::GeomStep,
+  default_aes = ggplot2::aes(colour = 2, size = 0.75, linetype = 1,
+  alpha = NA),
+  required_aes = c("x", "y")
+)
+
+
+#' @rdname geom_pit_hist
+#' @export
+stat_pit_ref <- function(mapping = NULL, data = NULL, geom = "pit_ref",
+                         position = "identity", na.rm = FALSE,
+                         show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    stat = StatPitLine,
+    data = data,
+    mapping = mapping,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_pit_hist
+#' @export
+stat_pit_confint <- function(mapping = NULL, data = NULL, geom = "pit_confint",
+                         position = "identity", na.rm = FALSE,
+                         show.legend = NA, inherit.aes = TRUE, 
+                         style = c("polygon", "line"), ...) {
+
+  style <- match.arg(style)
+
+  ggplot2::layer(
+    stat = StatPitConfint,
+    data = data,
+    mapping = mapping,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      style = style,
+      na.rm = na.rm,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_pit_hist
+#' @format NULL
+#' @usage NULL
+#' @export
+StatPitConfint <- ggplot2::ggproto("StatPitConfint", ggplot2::Stat,
+
+  compute_group = function(data, scales, style = "polygon") {
+
+    if (style == "polygon") {
+      nd <- data.frame(
+        xmin = data$x - data$width / 2,
+        xmax = data$x + data$width / 2,
+        ymin = data$ci_lwr,
+        ymax = data$ci_upr,
+        x = NaN,
+        ci_lwr = NaN, 
+        ci_upr = NaN
+      )
+    } else {
+      nd <- data.frame(
+        x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+        ci_lwr = c(data$ci_lwr, data$ci_lwr[NROW(data)]),
+        ci_upr = c(data$ci_upr, data$ci_upr[NROW(data)]),
+        xmin = NaN,
+        xmax = NaN, 
+        ymin = NaN, 
+        ymax = NaN
+      )
+    }
+    nd
+  },
+
+  required_aes = c("x", "ci_upr", "ci_lwr", "width")
+)
+
+
+#' @rdname geom_pit_hist
+#' @export
+geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
+                            position = "identity", na.rm = FALSE,
+                            show.legend = NA, inherit.aes = TRUE,
+                            linejoin = "mitre", style = c("polygon", "line"), ...) {
+  style <- match.arg(style)
+
+  ggplot2::layer(
+    geom = GeomPitConfint,
+    mapping = mapping,
+    data = data,
+    stat = stat,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      linejoin = linejoin,
+      na.rm = na.rm,
+      style = style,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_pit_hist
+#' @export
+GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
+
+  # FIXME: (ML) Does not vary for style
+  required_aes = c("x", "ci_lwr", "ci_upr", "xmin", "xmax", "ymin", "ymax"),
+
+  extra_params = c("na.rm", "linejoin", "style"),
+
+  # FIXME: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
+  handle_na = function(data, params) {
+    data
+  },
+
+  ## Setting up all defaults needed for `GeomPolygon` and `GeomStep`
+  default_aes = ggplot2::aes(
+    colour = NA,
+    fill = NA,
+    size = 0.5,
+    linetype = NA,
+    alpha = NA
+  ),
+
+
+  draw_panel = function(data, panel_params, coord, 
+                        linejoin = "mitre", direction = "hv",
+                        style = c("polygon", "line")) {
+
+    style <- match.arg(style)
+
+    ## Swap NAs in `default_aes` with own defaults 
+    data <- my_modify_list(data, pit_default_aesthetics(style), force = FALSE)
+
+    if (style == "polygon") {
+      ggplot2::GeomRect$draw_panel(data, panel_params, coord, linejoin)
+
+    } else { 
+      ## Join two Grobs
+      data1 <- transform(data, 
+        y = ci_upr
+      )
+      data2 <- transform(data, 
+        y = ci_lwr
+      )
+      grid::grobTree(
+        ggplot2::GeomStep$draw_panel(data1, panel_params, coord, direction),
+        ggplot2::GeomStep$draw_panel(data2, panel_params, coord, direction)
+      )
+
+    }
+  },
+
+
+  draw_key = function(data, params, size) {
+    ## Swap NAs in `default_aes` with own defaults 
+    data <- my_modify_list(data, pit_default_aesthetics(params$style), force = FALSE)
+    if (params$style == "polygon") {
+      draw_key_polygon(data, params, size)
+    } else {
+      draw_key_path(data, params, size)
+    }
+  }
+
+)
+
+
+## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
+pit_default_aesthetics <- function(style) {
+  if (style == "line") {
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, size = 0.75, linetype = 2, alpha = NA),
+      force = TRUE)
+  } else {
+    my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = "NA", fill = "black", size = 0.5, 
+      linetype = 1, alpha = 0.2, subgroup = NULL), force = TRUE)
+  }
+}
