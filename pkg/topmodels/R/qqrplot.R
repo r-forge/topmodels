@@ -1058,10 +1058,9 @@ autoplot.qqrplot <- function(object,
     rval <- rval +
       geom_qqr_range(
         ggplot2::aes_string(
-          x_lwr = "x_rg_lwr", 
-          x_upr = "x_rg_upr", 
-          y_lwr = "y_rg_lwr", 
-          y_upr = "y_rg_upr",
+          x = "x_rg_upr", 
+          ymin = "y_rg_lwr", 
+          ymax = "y_rg_upr",
           group = "group"
         )
       )
@@ -1159,10 +1158,9 @@ autoplot.qqrplot <- function(object,
 #'   geom_qqr_point() + 
 #'   geom_qqr_range(
 #'     aes(
-#'       x_lwr = x_rg_lwr, 
-#'       x_upr = x_rg_upr, 
-#'       y_lwr = y_rg_lwr, 
-#'       y_upr = y_rg_upr,
+#'       x = x_rg_lwr, 
+#'       ymin = y_rg_lwr, 
+#'       ymax = y_rg_upr,
 #'       group = group
 #'     )
 #'   ) + 
@@ -1178,10 +1176,9 @@ autoplot.qqrplot <- function(object,
 #'   geom_qqr_point() + 
 #'   geom_qqr_range(
 #'     aes(
-#'       x_lwr = x_rg_lwr, 
-#'       x_upr = x_rg_upr, 
-#'       y_lwr = y_rg_lwr, 
-#'       y_upr = y_rg_upr,
+#'       x = x_rg_lwr, 
+#'       ymin = y_rg_lwr, 
+#'       ymax = y_rg_upr,
 #'       group = group
 #'     )
 #'   ) + 
@@ -1291,16 +1288,17 @@ StatQqrRange <- ggplot2::ggproto("StatQqrRange", ggplot2::Stat,
 ## TODO: (ML) Alternative to use `stat = "identity"` in `geom_qqr_range()` and write `setup_data()`
 ##            fails as here aes `x_lwr`, ... are unknown and ignored
   compute_group = function(data, scales) {
+    
     ## Manipulate object
     nd <- data.frame(
-      x = c(data$x_lwr, rev(data$x_upr)),
-      y = c(data$y_lwr, rev(data$y_upr))
+      x = c(data$x, rev(data$x)),
+      y = c(data$ymin, rev(data$ymax))
     )
     nd
   },
 
   # Tells us what we need
-  required_aes = c("x_lwr", "x_upr", "y_lwr", "y_upr")
+  required_aes = c("x", "ymin", "ymax")
 )
 
 
