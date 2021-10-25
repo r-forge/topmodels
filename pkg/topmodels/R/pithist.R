@@ -402,10 +402,10 @@ pithist.default <- function(object,
     )
   }
 
-  rval <- transform(rval,
-    rg_upr = y + (rg_upr - rg_lwr) / 2,
-    rg_lwr = y - (rg_upr - rg_lwr) / 2
-  )
+  ## add range
+  ## FIXME: (ML) Check if range is correct
+  rval$rg_upr <- rval$y + (rg_upr - rg_lwr) / 2
+  rval$rg_lwr <- rval$y - (rg_upr - rg_lwr) / 2
 
   ## attributes for graphical display
   attr(rval, "freq") <- freq
