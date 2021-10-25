@@ -45,6 +45,7 @@
   single_graph = FALSE,
   style = c("histogram", "lines"),
   confint = TRUE,
+  range = NULL,
   ref = TRUE,
   xlim = c(0, 1),
   ylim = c(0, NA),
@@ -53,8 +54,7 @@
   main = NULL,
   colour = "black",
   fill = "darkgray",
-  border = "black",
-  alpha_min = 0.2,
+  alpha = NA,
   size = NULL,
   linetype = 1,
   legend = FALSE,
@@ -84,7 +84,9 @@ plot or just the histogram or just the fitted line.}
 
 \item{object, x}{an object of class \code{\link{pithist}}.}
 
-\item{colour, size, linetype, legend}{graphical parameters passed for 
+\item{range}{Fix description.}
+
+\item{colour, size, linetype, legend, alpha}{graphical parameters passed for 
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
 }
 \description{

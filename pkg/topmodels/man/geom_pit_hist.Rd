@@ -158,6 +158,7 @@ main <- attr(d, "main")
 main <- make.names(main, unique = TRUE)
 d$group <- factor(d$group, labels = main)
 
+## Plot bar style PIT histogram
 gg1 <- ggplot(data = d) + 
   geom_pit_hist(aes(x = x, y = y, width = width, group = group)) + 
   geom_pit_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
@@ -165,5 +166,13 @@ gg1 <- ggplot(data = d) +
   geom_pit_ref(aes(x = x, y = ref, width = width)) + 
   facet_grid(group~.)
 gg1
+
+## Plot line style PIT histogram
+gg2 <- ggplot(data = d) + 
+  geom_pit_line(aes(x = x, y = y, width = width, group = group)) + 
+  geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "polygon") + 
+  geom_pit_ref(aes(x = x, y = ref, width = width)) + 
+  facet_grid(group~.)
+gg2
 }
 \keyword{datasets}
