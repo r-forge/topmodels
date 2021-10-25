@@ -1287,7 +1287,8 @@ stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
 #' @usage NULL
 #' @export
 StatQqrRange <- ggplot2::ggproto("StatQqrRange", ggplot2::Stat,
-
+## TODO: (ML) Alternative to use `stat = "identity"` in `geom_qqr_range()` and write `setup_data()`
+##            fails as here aes `x_lwr`, ... are unknown and ignored
   compute_group = function(data, scales) {
     ## Manipulate object
     nd <- data.frame(
@@ -1444,6 +1445,7 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
                              style = c("polygon", "line"), ...) {
 
   style <- match.arg(style)
+
   ggplot2::layer(
     geom = geom, 
     stat = StatQqrConfint,
@@ -1481,7 +1483,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
                            identity = TRUE, 
                            probs = c(0.25, 0.75), 
                            trafo = qnorm,
-                           style = "line") {
+                           style = "polygon") {
 
     fun <- function(x, n, level = 0.95, which = c("lower", "upper")) {
       stopifnot(is.numeric(n), length(n) == 1)
