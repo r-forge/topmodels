@@ -90,6 +90,14 @@
 #' @param confint_type character. Which type of confidence interval should be plotted. According
 #' to Agresti and Coull (1998), for interval estimation of binomial proportions
 #' an approximation can be better than exact.
+#' @param range logical. In case of discrete distributions, should the range 
+#' (confidence interval) of values due to the randomization be visualized?
+#' @param range_level numeric. The confidence level required for calculating the range of values 
+#' due to the randomization. 
+#' @param range_nsim numeric. The number of simulated quantiles for calculating the range of values
+#' due to the randomization. 
+#' @param range_seed numeric. The seed to be set for calculating the range of values
+#' due to the randomization. 
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"lines"}.
 #' @param xlim,ylim,xlab,ylab,main graphical parameters passed to
@@ -173,6 +181,10 @@ pithist.default <- function(object,
                             confint = TRUE,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
+                            range = TRUE,
+                            range_level = 0.95,
+                            range_nsim = 250,
+                            range_seed = 1,
                             single_graph = FALSE,
                             xlim = c(NA, NA),
                             ylim = c(0, NA),
@@ -266,6 +278,30 @@ pithist.default <- function(object,
     tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
     ## TODO: (ML) Maybe get rid of `hist()`
 
+    ## calculate range
+    fun_range <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
+
+      rg_p <- qresiduals(object,
+        newdata = newdata, trafo = trafo, delta = delta,
+        type = "random", nsim = nsim
+      )
+
+      rg_hist <- hist(rg_p, breaks = breaks, plot = FALSE)
+  
+      if(freq) {
+        rg_hist$counts / nsim
+      } else {
+        rg_hist$density 
+      }
+    }
+    
+    rg_tmp <- replicate(range_nsim, fun_range(object, newdata, trafo, delta, nsim, freq, breaks))
+
+    range_prob <- (1 - range_level) / 2
+    range_prob <- c(range_prob, 1 - range_prob)
+    rg_lwr <- apply(rg_tmp, 1, quantile, probs = range_prob[1], na.rm = TRUE)
+    rg_upr <- apply(rg_tmp, 1, quantile, probs = range_prob[2], na.rm = TRUE)
+  
   } else if (type == "expected") {
     ## compare "nonrandom" in Czado et al. (2009) 
 
@@ -302,6 +338,8 @@ pithist.default <- function(object,
       density  = f / diff(breaks),
       mids = 0.5 * (breaks[-1L] + breaks[-length(breaks)])
     )
+
+    rg_lwr <- rg_upr <- 0
   }
 
   ## compute ci interval
@@ -363,6 +401,11 @@ pithist.default <- function(object,
       ref = pp
     )
   }
+
+  rval <- transform(rval,
+    rg_upr = y + (rg_upr - rg_lwr) / 2,
+    rg_lwr = y - (rg_upr - rg_lwr) / 2
+  )
 
   ## attributes for graphical display
   attr(rval, "freq") <- freq
@@ -1606,8 +1649,10 @@ add4ci <- function(x, n, conf.level) {
 #' d$group <- factor(d$group, labels = main)
 #' 
 #' gg1 <- ggplot(data = d) + 
-#'   geom_pit_line(aes(x = x, y = y, width = width, group = group)) + 
-#'   geom_pit_confint(aes(x = x, ci_upr = ci_upr, ci_lwr = ci_lwr, width = width)) + 
+#'   geom_pit_hist(aes(x = x, y = y, width = width, group = group)) + 
+#'   geom_pit_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
+#'   geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
+#'   geom_pit_ref(aes(x = x, y = ref, width = width)) + 
 #'   facet_grid(group~.)
 #' gg1
 #' @export
@@ -1796,27 +1841,23 @@ StatPitConfint <- ggplot2::ggproto("StatPitConfint", ggplot2::Stat,
       nd <- data.frame(
         xmin = data$x - data$width / 2,
         xmax = data$x + data$width / 2,
-        ymin = data$ci_lwr,
-        ymax = data$ci_upr,
-        x = NaN,
-        ci_lwr = NaN, 
-        ci_upr = NaN
+        ymin = data$ymin,
+        ymax = data$ymax,
+        x = NaN
       )
     } else {
       nd <- data.frame(
         x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
-        ci_lwr = c(data$ci_lwr, data$ci_lwr[NROW(data)]),
-        ci_upr = c(data$ci_upr, data$ci_upr[NROW(data)]),
+        ymin = c(data$ymin, data$ymin[NROW(data)]),
+        ymax = c(data$ymax, data$ymax[NROW(data)]),
         xmin = NaN,
-        xmax = NaN, 
-        ymin = NaN, 
-        ymax = NaN
+        xmax = NaN
       )
     }
     nd
   },
 
-  required_aes = c("x", "ci_upr", "ci_lwr", "width")
+  required_aes = c("x", "ymin", "ymax", "width")
 )
 
 
@@ -1851,7 +1892,7 @@ geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
 GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
 
   # FIXME: (ML) Does not vary for style
-  required_aes = c("x", "ci_lwr", "ci_upr", "xmin", "xmax", "ymin", "ymax"),
+  required_aes = c("x", "ymin", "ymax", "xmin", "xmax"),
 
   extra_params = c("na.rm", "linejoin", "style"),
 
@@ -1885,10 +1926,10 @@ GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
     } else { 
       ## Join two Grobs
       data1 <- transform(data, 
-        y = ci_upr
+        y = ymin
       )
       data2 <- transform(data, 
-        y = ci_lwr
+        y = ymax
       )
       grid::grobTree(
         ggplot2::GeomStep$draw_panel(data1, panel_params, coord, direction),
@@ -1909,6 +1950,32 @@ GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
     }
   }
 
+)
+
+
+#' @rdname geom_pit_hist
+#' @format NULL
+#' @usage NULL
+#' @export
+geom_pit_range <- function(mapping = NULL, data = NULL, stat = "identity",
+                          position = "identity", na.rm = FALSE,
+                          show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomPitRange, mapping = mapping,
+    data = data, stat = stat, position = position,
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_pit_hist
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomPitRange <- ggplot2::ggproto("GeomPitHist", ggplot2::GeomLinerange,
+  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 1, 
+    alpha = NA)
 )
 
 

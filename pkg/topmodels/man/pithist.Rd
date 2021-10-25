@@ -24,6 +24,10 @@ pithist(object, ...)
   confint = TRUE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
+  range = TRUE,
+  range_level = 0.95,
+  range_nsim = 250,
+  range_seed = 1,
   single_graph = FALSE,
   xlim = c(NA, NA),
   ylim = c(0, NA),
@@ -89,6 +93,18 @@ histogram has a total area of one).}
 \item{confint_type}{character. Which type of confidence interval should be plotted. According
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
+
+\item{range}{logical. In case of discrete distributions, should the range 
+(confidence interval) of values due to the randomization be visualized?}
+
+\item{range_level}{numeric. The confidence level required for calculating the range of values 
+due to the randomization.}
+
+\item{range_nsim}{numeric. The number of simulated quantiles for calculating the range of values
+due to the randomization.}
+
+\item{range_seed}{numeric. The seed to be set for calculating the range of values
+due to the randomization.}
 
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"lines"}.}

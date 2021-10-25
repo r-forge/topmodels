@@ -208,6 +208,7 @@ qqrplot.default <- function(object,
 
   ## compute rg interval
   ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
+  ## FIXME: (ML) Return all in the same order w/o x values (same for additional nsim) -> might be an error
   if (!identical(range, FALSE)) {
     set.seed(range_seed)
     tmp <- qresiduals(object,
