@@ -41,8 +41,9 @@ reference:
       - plot.qqrplot
       - plot.reliagram
       - plot.rootogram
-      - plot.wormplot
       - topmodels
+      - geom_qqr_point
+      - geom_pit_hist
   - title: "Procast infrastructure"
     contents: 
       - procast
