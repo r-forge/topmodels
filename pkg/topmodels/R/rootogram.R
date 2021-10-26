@@ -414,7 +414,7 @@ c.rootogram <- function(...) {
 #' @param xlim,ylim,border,fill,col,lwd,pch,lty,type,axes,box graphical
 #' parameters. These may pertain either to the whole plot or just the histogram
 #' or just the fitted line.
-#' @param colour,size,shape,linetype graphical parameters passed to
+#' @param colour,size,line,alpha,linetype graphical parameters passed to
 #' \code{geom_line} and \code{geom_point}, respectively.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
@@ -629,18 +629,17 @@ plot.rootogram <- function(x,
 #' @exportS3Method ggplot2::autoplot
 autoplot.rootogram <- function(object,
                                ref = TRUE,
+                               line = TRUE,
                                xlim = c(NA, NA),
                                ylim = c(NA, NA),
                                xlab = NULL,
                                ylab = NULL,
                                main = NULL,
-                               border = "black",
+                               colour = "black",
                                fill = "darkgray",
-                               colour = 2,
-                               size = 1,
-                               shape = 19,
+                               size = 0.5,
                                linetype = 1,
-                               type = NULL,
+                               alpha = NA,
                                legend = FALSE,
                                ...) {
   # -------------------------------------------------------------------
@@ -648,13 +647,21 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   ## get base style arguments
   add_arg <- list(...)
-  if (!is.null(add_arg$pch)) shape <- add_arg$pch
-  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  #if (!is.null(add_arg$pch)) shape <- add_arg$pch
+  #if (!is.null(add_arg$lwd)) size <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
   ## sanity checks
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  ## get line style
+  if (isFALSE(line)) {
+    line <- "none"
+  } else if (isTRUE(line)) {
+    line <- "both"
+  }
+  line <- match.arg(line, c("both", "line", "point"))
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -683,59 +690,55 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
-  ## determine if points should be plotted
-  if (is.null(type)) type <- ifelse(any(table(object$group) > 20L), "l", "b")
-
-  ## set alpha to 0 or color to NA for not plotting
-  type <- ifelse(type == "l", 0, 1)
-  if (is.logical(ref)) ref <- ifelse(ref, 1, NA)
-
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
-  plot_arg <- data.frame(1:n, fill, colour, size, shape, linetype)[, -1]
-
-  ## recycle arguments for plotting to match the object rows
-  plot_arg2 <- data.frame(1:n, border, size, type, ref)[, -1]
-  plot_arg2 <- as.data.frame(lapply(plot_arg2, rep, table(object$group)))
+  plot_arg <- data.frame(1:n, colour, fill, size, linetype, alpha)[, -1]
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   ## actual plotting
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(
-    xmin = "x - width/2", xmax = "x + width/2",
-    ymin = "y", ymax = "y + height", x = "x", y = "line"
+    x = "x", 
+    y = "y",
+    width = "width",
+    height = "height",
+    group = "group"
   )) +
-    ggplot2::geom_rect(ggplot2::aes_string(fill = "group"), colour = plot_arg2$border, show.legend = FALSE) +
-    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group")) +
-    ggplot2::geom_hline(ggplot2::aes_string(yintercept = 0),
-      colour = plot_arg2$ref, linetype = 1
-    ) +
-    ggplot2::geom_point(ggplot2::aes_string(colour = "group", shape = "group"),
-      alpha = plot_arg2$type, size = plot_arg2$size * 2, show.legend = FALSE
-    )
+    geom_rootogram_histogram(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
+      linetype = "group", alpha = "group")) + 
+    geom_rootogram_line(ggplot2::aes_string(x = "x", y = "line"), style = line) + 
+    geom_rootogram_ref(ggplot2::aes_string(yintercept = 0))
 
   ## set the colors, shapes, etc.
   rval <- rval +
     ggplot2::scale_colour_manual(values = plot_arg$colour) +
     ggplot2::scale_fill_manual(values = plot_arg$fill) +
     ggplot2::scale_size_manual(values = plot_arg$size) +
-    ggplot2::scale_shape_manual(values = plot_arg$shape) +
-    ggplot2::scale_linetype_manual(values = plot_arg$linetype)
+    ggplot2::scale_linetype_manual(values = plot_arg$linetype) + 
+    ggplot2::scale_alpha_manual(values = plot_arg$alpha)
 
   ## annotation
   rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
 
   ## add legend
   if (legend) {
-    rval <- rval + ggplot2::labs(colour = "Model") +
-      ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+    rval <- rval +
+      ggplot2::labs(colour = "Model", fill = "Model", size = "Model", 
+        linetype = "Model", alpha = "Model") +
+      ggplot2::guides(colour = "legend", fill = "legend", size = "legend", 
+        linetype = "legend", alpha = "legend")
   } else {
-    rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
+    rval <- rval +
+      ggplot2::guides(colour = "none", fill = "none", size = "none", 
+        linetype = "none", alpha = "none")
   }
 
   ## set x and y limits
-  rval <- rval + ggplot2::scale_x_continuous(limits = xlim, expand = c(0.01, 0.01))
-  rval <- rval + ggplot2::scale_y_continuous(limits = ylim, expand = c(0.01, 0.01))
+  rval <- rval + 
+    ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = TRUE) +
+    ggplot2::scale_x_continuous(expand = c(0.01, 0.01)) +
+    ggplot2::scale_y_continuous(expand = c(0.01, 0.01))
+
 
   # -------------------------------------------------------------------
   # GROUPING (IF ANY) AND RETURN PLOT
@@ -786,6 +789,7 @@ autoplot.rootogram <- function(object,
 #' 
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
+#' @param style Fix description.
 #' @examples
 #' require("ggplot2")
 #' ## Fit model
@@ -848,50 +852,61 @@ GeomRootogramHistogram <- ggplot2::ggproto("GeomRootogramHistogram", ggplot2::Ge
 
 
 #' @rdname geom_rootogram_histogram
-#' @format NULL
-#' @usage NULL
 #' @export
 geom_rootogram_line <- function(mapping = NULL, data = NULL, stat = "identity",
                             position = "identity", na.rm = FALSE,
-                            show.legend = NA, inherit.aes = TRUE, ...) {
+                            show.legend = NA, inherit.aes = TRUE, style = c("both", "line", "point"),
+                            ...) {
+
+  style <- match.arg(style)
+
   ggplot2::layer(
     geom = GeomRootogramLine, mapping = mapping,
     data = data, stat = stat, position = position,
     show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    params = list(na.rm = na.rm, style = style, ...)
   )
 }
 
 
 #' @rdname geom_rootogram_histogram
-#' @format NULL
-#' @usage NULL
 #' @export
-GeomRootogramLine <- ggplot2::ggproto("GeomRootogramLine", ggplot2::GeomLine,
+GeomRootogramLine <- ggplot2::ggproto("GeomRootogramLine", ggplot2::GeomPath,
 
   default_aes = ggplot2::aes(colour = 2, size = 1, linetype = 1,
     alpha = 1, fill = NA, stroke = 0.5, shape = 19),
 
+  extra_params = c("na.rm", "style"),
+
   draw_panel = function(data, panel_params, coord, arrow = NULL,
                         lineend = "butt", linejoin = "round", linemitre = 10,
-                        na.rm = FALSE) {
+                        na.rm = FALSE, style = c("both", "line", "point")) {
 
-    ## FIXME: (ML) Do not copy data
-    data2 <- transform(data, size = size * 2)
+    style <- match.arg(style)
 
-    grid::grobTree(
-      GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
-                          lineend = "butt", linejoin = "round", linemitre = 10,
-                          na.rm = FALSE),
-      GeomPoint$draw_panel(data2, panel_params, coord, na.rm = FALSE)
-    )
+    if (style == "both") {
+      ## TODO: (ML) Do not copy data
+      data2 <- transform(data, size = size * 2)
+
+      grid::grobTree(
+        ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
+                            lineend = "butt", linejoin = "round", linemitre = 10,
+                            na.rm = FALSE),
+        ggplot2::GeomPoint$draw_panel(data2, panel_params, coord, na.rm = FALSE)
+      )
+    } else if (style == "line") {
+        ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
+                            lineend = "butt", linejoin = "round", linemitre = 10,
+                            na.rm = FALSE)
+    } else {
+        data <- transform(data, size = size * 2)
+        ggplot2::GeomPoint$draw_panel(data, panel_params, coord, na.rm = FALSE)
+    }
   }
 )
 
 
 #' @rdname geom_rootogram_histogram
-#' @format NULL
-#' @usage NULL
 #' @export
 geom_rootogram_ref <- function(mapping = NULL, data = NULL, stat = "identity",
                             position = "identity", na.rm = FALSE,

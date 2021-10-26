@@ -9,8 +9,36 @@
 \alias{geom_rootogram_ref}
 \alias{GeomRootogramRef}
 \title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
+\format{
+An object of class \code{GeomRootogramLine} (inherits from \code{GeomPath}, \code{Geom}, \code{ggproto}, \code{gg}) of length 4.
+}
 \usage{
 geom_rootogram_histogram(
+  mapping = NULL,
+  data = NULL,
+  stat = "identity",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  ...
+)
+
+geom_rootogram_line(
+  mapping = NULL,
+  data = NULL,
+  stat = "identity",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  style = c("both", "line", "point"),
+  ...
+)
+
+GeomRootogramLine
+
+geom_rootogram_ref(
   mapping = NULL,
   data = NULL,
   stat = "identity",
@@ -66,6 +94,8 @@ the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 often aesthetics, used to set an aesthetic to a fixed value, like
 \code{colour = "red"} or \code{size = 3}. They may also be parameters
 to the paired geom/stat.}
+
+\item{style}{Fix description.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within
