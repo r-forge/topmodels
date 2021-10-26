@@ -9,7 +9,7 @@
 \method{plot}{pithist}(
   x,
   single_graph = FALSE,
-  style = c("histogram", "line"),
+  style = c("bar", "line"),
   confint = TRUE,
   ref = TRUE,
   xlim = c(0, 1),
@@ -43,7 +43,7 @@
 \method{autoplot}{pithist}(
   object,
   single_graph = FALSE,
-  style = c("histogram", "line"),
+  style = c("bar", "line"),
   confint = TRUE,
   range = NULL,
   ref = NULL,
@@ -65,7 +65,7 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
-\item{style}{character specifying the style of pithist. For \code{style = "histogram"}
+\item{style}{character specifying the style of pithist. For \code{style = "bar"}
 a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 plotted.}

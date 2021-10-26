@@ -65,7 +65,7 @@
 #' \code{tibble} is loaded.
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale.
-#' @param style character specifying the style of pithist. For \code{style = "histogram"}
+#' @param style character specifying the style of pithist. For \code{style = "bar"}
 #' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 #' drawn.
@@ -172,7 +172,7 @@ pithist.default <- function(object,
                             plot = TRUE,
                             class = NULL,
                             trafo = NULL,
-                            style = c("histogram", "line"),
+                            style = c("bar", "line"),
                             type = c("random", "expected", "proportional"), # FIXME: (ML) not yet implemented
                             nsim = 1L,
                             delta = NULL,
@@ -535,7 +535,7 @@ rbind.pithist <- c.pithist
 #' @param object,x an object of class \code{\link{pithist}}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
-#' @param style character specifying the style of pithist. For \code{style = "histogram"}
+#' @param style character specifying the style of pithist. For \code{style = "bar"}
 #' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 #' plotted.
@@ -629,7 +629,7 @@ rbind.pithist <- c.pithist
 #' @export
 plot.pithist <- function(x,
                          single_graph = FALSE,
-                         style = c("histogram", "line"),
+                         style = c("bar", "line"),
                          confint = TRUE,
                          ref = TRUE,
                          xlim = c(0, 1),
@@ -675,13 +675,13 @@ plot.pithist <- function(x,
 
   ## set style
   style <- match.arg(style)
-  if (n > 1 && single_graph && style == "histogram") {
+  if (n > 1 && single_graph && style == "bar") {
     message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "line"
   }
 
   ## set lwd
-  if (is.null(lwd)) lwd <- if (style == "histogram") 1.5 else 2
+  if (is.null(lwd)) lwd <- if (style == "bar") 1.5 else 2
 
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
@@ -881,14 +881,14 @@ plot.pithist <- function(x,
 
   ## draw polygons first
   if (single_graph || n == 1) {
-    if (style == "histogram") {
+    if (style == "bar") {
       for (i in 1L:n) pithist_plot(x[x$group == i, ], ...)
     } else {
       for (i in 1L:n) pitlines_trigger(x[x$group == i, ], ...)
       for (i in 1L:n) pitlines_plot(x[x$group == i, ], ...)
     }
   } else {
-    if (style == "histogram") {
+    if (style == "bar") {
       for (i in 1L:n) pithist_plot(x[x$group == i, ], ...)
     } else {
       for (i in 1L:n) {
@@ -994,7 +994,7 @@ lines.pithist <- function(x,
 #' @exportS3Method ggplot2::autoplot
 autoplot.pithist <- function(object,
                              single_graph = FALSE,
-                             style = c("histogram", "line"),
+                             style = c("bar", "line"),
                              confint = TRUE,
                              range = NULL,
                              ref = NULL,
@@ -1061,7 +1061,7 @@ autoplot.pithist <- function(object,
   # -------------------------------------------------------------------
   ## determine which style should be plotted
   style <- match.arg(style)
-  if (n > 1 && single_graph && style == "histogram") {
+  if (n > 1 && single_graph && style == "bar") {
     message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "line"
   }
@@ -1070,21 +1070,21 @@ autoplot.pithist <- function(object,
   if (isFALSE(confint)) {
     confint <- "none"
   } else if (isTRUE(confint)) {
-    confint <- if (style == "histogram") "line" else "polygon"
+    confint <- if (style == "bar") "line" else "polygon"
   }
   confint <- match.arg(confint, c("polygon", "line", "none"))
 
   ## determine other arguments conditional on `style`
   if (is.null(range)) {
-    range <- if (style == "histogram") TRUE else FALSE
+    range <- if (style == "bar") TRUE else FALSE
   }
 
   if (is.null(ref)) {
-    ref <- if (style == "histogram") TRUE else FALSE
+    ref <- if (style == "bar") TRUE else FALSE
   }
 
   if (is.null(size)) {
-    size <- if (style == "histogram") 0.2 else 1
+    size <- if (style == "bar") 0.2 else 1
   }
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
@@ -1108,9 +1108,9 @@ autoplot.pithist <- function(object,
   )
 
   ## add histogram
-  if (style == "histogram") {
+  if (style == "bar") {
     rval <- rval + 
-      geom_pit_histogram(
+      geom_pit_bar(
         ggplot2::aes_string(
           alpha = "group", 
           colour = "group", 
@@ -1299,7 +1299,7 @@ add4ci <- function(x, n, conf.level) {
 #' 
 #' ## Plot bar style PIT histogram
 #' gg1 <- ggplot(data = d) + 
-#'   geom_pit_histogram(aes(x = x, y = y, width = width, group = group)) + 
+#'   geom_pit_bar(aes(x = x, y = y, width = width, group = group)) + 
 #'   geom_pit_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
 #'   geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
 #'   geom_pit_ref(aes(x = x, y = ref, width = width)) + 
@@ -1314,11 +1314,11 @@ add4ci <- function(x, n, conf.level) {
 #'   facet_grid(group~.)
 #' gg2
 #' @export
-geom_pit_histogram <- function(mapping = NULL, data = NULL, stat = "identity",
+geom_pit_bar <- function(mapping = NULL, data = NULL, stat = "identity",
                                position = "identity", na.rm = FALSE,
                                show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    geom = GeomPitHistogram, mapping = mapping,
+    geom = GeomPitBar, mapping = mapping,
     data = data, stat = stat, position = position,
     show.legend = show.legend, inherit.aes = inherit.aes,
     params = list(na.rm = na.rm, ...)
@@ -1326,11 +1326,11 @@ geom_pit_histogram <- function(mapping = NULL, data = NULL, stat = "identity",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomPitHistogram <- ggplot2::ggproto("GeomPitHistogram", ggplot2::GeomTile,
+GeomPitBar <- ggplot2::ggproto("GeomPitBar", ggplot2::GeomTile,
 
   default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.2, linetype = 1, 
     alpha = NA),
@@ -1347,7 +1347,7 @@ GeomPitHistogram <- ggplot2::ggproto("GeomPitHistogram", ggplot2::GeomTile,
 )
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1363,7 +1363,7 @@ geom_pit_line <- function(mapping = NULL, data = NULL, stat = "pit_line",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1374,7 +1374,7 @@ GeomPitLine <- ggplot2::ggproto("GeomPitLine", ggplot2::GeomStep,
 )
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @export
 stat_pit_line <- function(mapping = NULL, data = NULL, geom = "pit_line",
                          position = "identity", na.rm = FALSE,
@@ -1395,7 +1395,7 @@ stat_pit_line <- function(mapping = NULL, data = NULL, geom = "pit_line",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1413,7 +1413,7 @@ StatPitLine <- ggplot2::ggproto("StatPitLine", ggplot2::Stat,
 )
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @export
 geom_pit_ref <- function(mapping = NULL, data = NULL, stat = "pit_line",
                             position = "identity", na.rm = FALSE,
@@ -1427,7 +1427,7 @@ geom_pit_ref <- function(mapping = NULL, data = NULL, stat = "pit_line",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1438,7 +1438,7 @@ GeomPitRef <- ggplot2::ggproto("GeomPitRef", ggplot2::GeomStep,
 )
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @export
 stat_pit_ref <- function(mapping = NULL, data = NULL, geom = "pit_ref",
                          position = "identity", na.rm = FALSE,
@@ -1459,7 +1459,7 @@ stat_pit_ref <- function(mapping = NULL, data = NULL, geom = "pit_ref",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @export
 stat_pit_confint <- function(mapping = NULL, data = NULL, geom = "pit_confint",
                          position = "identity", na.rm = FALSE,
@@ -1485,7 +1485,7 @@ stat_pit_confint <- function(mapping = NULL, data = NULL, geom = "pit_confint",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1517,7 +1517,7 @@ StatPitConfint <- ggplot2::ggproto("StatPitConfint", ggplot2::Stat,
 )
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @export
 geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
                             position = "identity", na.rm = FALSE,
@@ -1543,7 +1543,7 @@ geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -1611,7 +1611,7 @@ GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
 )
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @export
 geom_pit_range <- function(mapping = NULL, data = NULL, stat = "identity",
                           position = "identity", na.rm = FALSE,
@@ -1625,7 +1625,7 @@ geom_pit_range <- function(mapping = NULL, data = NULL, stat = "identity",
 }
 
 
-#' @rdname geom_pit_histogram
+#' @rdname geom_pit_bar
 #' @format NULL
 #' @usage NULL
 #' @export
