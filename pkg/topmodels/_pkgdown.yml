@@ -43,7 +43,8 @@ reference:
       - plot.rootogram
       - topmodels
       - geom_qqr_point
-      - geom_pit_hist
+      - geom_pit_bar
+      - geom_rootogram_bar
   - title: "Procast infrastructure"
     contents: 
       - procast
