@@ -704,7 +704,7 @@ autoplot.rootogram <- function(object,
     height = "height",
     group = "group"
   )) +
-    geom_rootogram_histogram(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
+    geom_rootogram_bar(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
       linetype = "group", alpha = "group")) + 
     geom_rootogram_line(ggplot2::aes_string(x = "x", y = "line"), style = line) + 
     geom_rootogram_ref(ggplot2::aes_string(yintercept = 0))
@@ -811,17 +811,17 @@ autoplot.rootogram <- function(object,
 #' d$group <- factor(d$group, labels = main)
 #' 
 #' gg1 <- ggplot(data = d) + 
-#'   geom_rootogram_histogram(aes(x = x, y = y, width = width, height = height, group = group)) + 
+#'   geom_rootogram_bar(aes(x = x, y = y, width = width, height = height, group = group)) + 
 #'   geom_rootogram_line(aes(x = x, y = line)) + 
 #'   geom_rootogram_ref(yintercept = 0) + 
 #'   facet_grid(group~.)
 #' gg1
 #' @export
-geom_rootogram_histogram <- function(mapping = NULL, data = NULL, stat = "identity",
+geom_rootogram_bar <- function(mapping = NULL, data = NULL, stat = "identity",
                                position = "identity", na.rm = FALSE,
                                show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    geom = GeomRootogramHistogram, mapping = mapping,
+    geom = GeomRootogramBar, mapping = mapping,
     data = data, stat = stat, position = position,
     show.legend = show.legend, inherit.aes = inherit.aes,
     params = list(na.rm = na.rm, ...)
@@ -829,11 +829,11 @@ geom_rootogram_histogram <- function(mapping = NULL, data = NULL, stat = "identi
 }
 
 
-#' @rdname geom_rootogram_histogram
+#' @rdname geom_rootogram_bar
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomRootogramHistogram <- ggplot2::ggproto("GeomRootogramHistogram", ggplot2::GeomRect,
+GeomRootogramBar <- ggplot2::ggproto("GeomRootogramBar", ggplot2::GeomRect,
 
   default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.5, linetype = 1,
     alpha = NA),
@@ -851,7 +851,7 @@ GeomRootogramHistogram <- ggplot2::ggproto("GeomRootogramHistogram", ggplot2::Ge
 )
 
 
-#' @rdname geom_rootogram_histogram
+#' @rdname geom_rootogram_bar
 #' @export
 geom_rootogram_line <- function(mapping = NULL, data = NULL, stat = "identity",
                             position = "identity", na.rm = FALSE,
@@ -869,7 +869,7 @@ geom_rootogram_line <- function(mapping = NULL, data = NULL, stat = "identity",
 }
 
 
-#' @rdname geom_rootogram_histogram
+#' @rdname geom_rootogram_bar
 #' @export
 GeomRootogramLine <- ggplot2::ggproto("GeomRootogramLine", ggplot2::GeomPath,
 
@@ -906,7 +906,7 @@ GeomRootogramLine <- ggplot2::ggproto("GeomRootogramLine", ggplot2::GeomPath,
 )
 
 
-#' @rdname geom_rootogram_histogram
+#' @rdname geom_rootogram_bar
 #' @export
 geom_rootogram_ref <- function(mapping = NULL, data = NULL, stat = "identity",
                             position = "identity", na.rm = FALSE,
@@ -920,7 +920,7 @@ geom_rootogram_ref <- function(mapping = NULL, data = NULL, stat = "identity",
 }
 
 
-#' @rdname geom_rootogram_histogram
+#' @rdname geom_rootogram_bar
 #' @format NULL
 #' @usage NULL
 #' @export

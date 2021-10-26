@@ -15,7 +15,7 @@ pithist(object, ...)
   plot = TRUE,
   class = NULL,
   trafo = NULL,
-  style = c("histogram", "line"),
+  style = c("bar", "line"),
   type = c("random", "expected", "proportional"),
   nsim = 1L,
   delta = NULL,
@@ -60,7 +60,7 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \item{trafo}{function for tranforming residuals from probability scale to a
 different distribution scale.}
 
-\item{style}{character specifying the style of pithist. For \code{style = "histogram"}
+\item{style}{character specifying the style of pithist. For \code{style = "bar"}
 a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 drawn.}
