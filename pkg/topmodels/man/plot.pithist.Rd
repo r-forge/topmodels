@@ -9,7 +9,7 @@
 \method{plot}{pithist}(
   x,
   single_graph = FALSE,
-  style = c("histogram", "lines"),
+  style = c("histogram", "line"),
   confint = TRUE,
   ref = TRUE,
   xlim = c(0, 1),
@@ -43,10 +43,10 @@
 \method{autoplot}{pithist}(
   object,
   single_graph = FALSE,
-  style = c("histogram", "lines"),
+  style = c("histogram", "line"),
   confint = TRUE,
   range = NULL,
-  ref = TRUE,
+  ref = NULL,
   xlim = c(0, 1),
   ylim = c(0, NA),
   xlab = NULL,
@@ -66,7 +66,7 @@
 diagrams be plotted in a single graph?}
 
 \item{style}{character specifying the style of pithist. For \code{style = "histogram"}
-a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
+a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 plotted.}
 
@@ -113,7 +113,7 @@ m1_lm <- lm(dist ~ speed, data = cars)
 pithist(m1_lm)
 
 ## customize colors and style
-pithist(m1_lm, ref = "blue", lty = 2, pch = 20, style = "lines")
+pithist(m1_lm, ref = "blue", lty = 2, pch = 20, style = "line")
 
 ## add separate model
 if (require("crch", quietly = TRUE)) {
@@ -141,9 +141,9 @@ if (require("crch")) {
   pit2_lm <- pithist(m2_lm, plot = FALSE)
   pit2_crch <- pithist(m2_crch, plot = FALSE)
 
-  ## plot in single graph with style "lines"
+  ## plot in single graph with style "line"
   plot(c(pit2_lm, pit2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, 
-    style = "lines", single_graph = TRUE)
+    style = "line", single_graph = TRUE)
 }
 
 #-------------------------------------------------------------------------------

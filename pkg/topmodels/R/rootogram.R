@@ -777,3 +777,142 @@ autoplot.rootogram <- function(object,
 #     style = style, scale = scale,
 #     main = main, xlab = xlab, ylab = ylab, plot = FALSE)
 # }
+
+
+#' \code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`
+#' 
+#' Various \code{geom_*} and \code{stat_*} used within
+#' \code{\link[ggplot2]{autoplot}} for producing PIT histograms.
+#' 
+#' @inheritParams ggplot2::layer
+#' @inheritParams ggplot2::geom_point
+#' @examples
+#' require("ggplot2")
+#' ## Fit model
+#' data("CrabSatellites", package = "countreg")
+#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
+#' 
+#' ## Compute rootogram
+#' p1 <- rootogram(m1_pois, plot = FALSE)
+#' p2 <- rootogram(m2_pois, plot = FALSE)
+#' 
+#' d <- c(p1, p2) 
+#' 
+#' ## Get label names
+#' xlab <- unique(attr(d, "xlab"))
+#' ylab <- unique(attr(d, "ylab"))
+#' main <- attr(d, "main")
+#' main <- make.names(main, unique = TRUE)
+#' d$group <- factor(d$group, labels = main)
+#' 
+#' gg1 <- ggplot(data = d) + 
+#'   geom_rootogram_histogram(aes(x = x, y = y, width = width, height = height, group = group)) + 
+#'   geom_rootogram_line(aes(x = x, y = line)) + 
+#'   geom_rootogram_ref(yintercept = 0) + 
+#'   facet_grid(group~.)
+#' gg1
+#' @export
+geom_rootogram_histogram <- function(mapping = NULL, data = NULL, stat = "identity",
+                               position = "identity", na.rm = FALSE,
+                               show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomRootogramHistogram, mapping = mapping,
+    data = data, stat = stat, position = position,
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_rootogram_histogram
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomRootogramHistogram <- ggplot2::ggproto("GeomRootogramHistogram", ggplot2::GeomRect,
+
+  default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.5, linetype = 1,
+    alpha = NA),
+
+  required_aes = c("x", "y", "width", "height"),
+
+  setup_data = function(data, params) {
+    data <- transform(data,
+      xmin = x - width/2, 
+      xmax = x + width/2,
+      ymin = y, 
+      ymax = y + height
+    ) 
+  }
+)
+
+
+#' @rdname geom_rootogram_histogram
+#' @format NULL
+#' @usage NULL
+#' @export
+geom_rootogram_line <- function(mapping = NULL, data = NULL, stat = "identity",
+                            position = "identity", na.rm = FALSE,
+                            show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomRootogramLine, mapping = mapping,
+    data = data, stat = stat, position = position,
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_rootogram_histogram
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomRootogramLine <- ggplot2::ggproto("GeomRootogramLine", ggplot2::GeomLine,
+
+  default_aes = ggplot2::aes(colour = 2, size = 1, linetype = 1,
+    alpha = 1, fill = NA, stroke = 0.5, shape = 19),
+
+  draw_panel = function(data, panel_params, coord, arrow = NULL,
+                        lineend = "butt", linejoin = "round", linemitre = 10,
+                        na.rm = FALSE) {
+
+    ## FIXME: (ML) Do not copy data
+    data2 <- transform(data, size = size * 2)
+
+    grid::grobTree(
+      GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
+                          lineend = "butt", linejoin = "round", linemitre = 10,
+                          na.rm = FALSE),
+      GeomPoint$draw_panel(data2, panel_params, coord, na.rm = FALSE)
+    )
+  }
+)
+
+
+#' @rdname geom_rootogram_histogram
+#' @format NULL
+#' @usage NULL
+#' @export
+geom_rootogram_ref <- function(mapping = NULL, data = NULL, stat = "identity",
+                            position = "identity", na.rm = FALSE,
+                            show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomRootogramRef, mapping = mapping,
+    data = data, stat = stat, position = position,
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+
+#' @rdname geom_rootogram_histogram
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
+  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 1,
+  alpha = NA)
+)
+
+
+

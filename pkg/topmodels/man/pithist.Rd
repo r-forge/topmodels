@@ -15,7 +15,7 @@ pithist(object, ...)
   plot = TRUE,
   class = NULL,
   trafo = NULL,
-  style = c("histogram", "lines"),
+  style = c("histogram", "line"),
   type = c("random", "expected", "proportional"),
   nsim = 1L,
   delta = NULL,
@@ -61,7 +61,7 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 different distribution scale.}
 
 \item{style}{character specifying the style of pithist. For \code{style = "histogram"}
-a traditional PIT hisogram is drawn, for \code{style = "lines"} solely the upper border 
+a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 drawn.}
 
@@ -107,7 +107,7 @@ due to the randomization.}
 due to the randomization.}
 
 \item{single_graph}{logical. Should all computed extended reliability
-diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"lines"}.}
+diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.}
 
 \item{xlim, ylim, xlab, ylab, main}{graphical parameters passed to
 \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}
@@ -167,7 +167,7 @@ p1 <- pithist(m1_pois, plot = FALSE)
 p2 <- pithist(m2_pois, plot = FALSE)
 
 ## plot combined pithist as "ggplot2" graphic
-ggplot2::autoplot(c(p1, p2), single_graph = TRUE, style = "lines", col = c(1, 2))
+ggplot2::autoplot(c(p1, p2), single_graph = TRUE, style = "line", col = c(1, 2))
 
 }
 \references{
