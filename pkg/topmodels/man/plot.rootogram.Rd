@@ -28,18 +28,17 @@
 \method{autoplot}{rootogram}(
   object,
   ref = TRUE,
+  line = TRUE,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  border = "black",
+  colour = "black",
   fill = "darkgray",
-  colour = 2,
-  size = 1,
-  shape = 19,
+  size = 0.5,
   linetype = 1,
-  type = NULL,
+  alpha = NA,
   legend = FALSE,
   ...
 )
@@ -57,7 +56,7 @@ or just the fitted line.}
 
 \item{\dots}{further graphical parameters passed to the plotting function.}
 
-\item{colour, size, shape, linetype}{graphical parameters passed to
+\item{colour, size, line, alpha, linetype}{graphical parameters passed to
 \code{geom_line} and \code{geom_point}, respectively.}
 
 \item{legend}{logical. Should a legend be added in the \code{ggplot2} style

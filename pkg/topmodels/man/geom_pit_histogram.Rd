@@ -18,9 +18,6 @@
 \alias{geom_pit_range}
 \alias{GeomPitRange}
 \title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
-\format{
-An object of class \code{GeomPitConfint} (inherits from \code{Geom}, \code{ggproto}, \code{gg}) of length 7.
-}
 \usage{
 geom_pit_histogram(
   mapping = NULL,
@@ -37,6 +34,17 @@ stat_pit_line(
   mapping = NULL,
   data = NULL,
   geom = "pit_line",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  ...
+)
+
+geom_pit_ref(
+  mapping = NULL,
+  data = NULL,
+  stat = "pit_line",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
@@ -80,7 +88,16 @@ geom_pit_confint(
   ...
 )
 
-GeomPitConfint
+geom_pit_range(
+  mapping = NULL,
+  data = NULL,
+  stat = "identity",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  ...
+)
 }
 \arguments{
 \item{mapping}{Set of aesthetic mappings created by \code{\link[ggplot2:aes]{aes()}} or

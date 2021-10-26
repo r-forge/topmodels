@@ -1414,8 +1414,6 @@ StatPitLine <- ggplot2::ggproto("StatPitLine", ggplot2::Stat,
 
 
 #' @rdname geom_pit_histogram
-#' @format NULL
-#' @usage NULL
 #' @export
 geom_pit_ref <- function(mapping = NULL, data = NULL, stat = "pit_line",
                             position = "identity", na.rm = FALSE,
@@ -1546,6 +1544,8 @@ geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
 
 
 #' @rdname geom_pit_histogram
+#' @format NULL
+#' @usage NULL
 #' @export
 GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
 
@@ -1612,8 +1612,6 @@ GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
 
 
 #' @rdname geom_pit_histogram
-#' @format NULL
-#' @usage NULL
 #' @export
 geom_pit_range <- function(mapping = NULL, data = NULL, stat = "identity",
                           position = "identity", na.rm = FALSE,
