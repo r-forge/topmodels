@@ -1132,61 +1132,61 @@ autoplot.qqrplot <- function(object,
 #' @param n Fix description.
 #' @param style Fix description.
 #' @examples
-#' require("ggplot2")
-#' ## Fit model
-#' data("CrabSatellites", package = "countreg")
-#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-#' 
-#' ## Compute qqrplot
-#' q1 <- qqrplot(m1_pois, plot = FALSE)
-#' q2 <- qqrplot(m2_pois, plot = FALSE)
-#' 
-#' d <- c(q1, q2) 
-#' 
-#' ## Get label names
-#' xlab <- unique(attr(d, "xlab"))
-#' ylab <- unique(attr(d, "ylab"))
-#' main <- attr(d, "main")
-#' main <- make.names(main, unique = TRUE)
-#' d$group <- factor(d$group, labels = main)
-#' 
-#' ## Polygon CI around identity line used as reference 
-#' gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
-#'   geom_qqr_ref() + 
-#'   geom_qqr_confint(fill = "red") + 
-#'   geom_qqr_point() + 
-#'   geom_qqr_range(
-#'     aes(
-#'       x = x_rg_lwr, 
-#'       ymin = y_rg_lwr, 
-#'       ymax = y_rg_upr,
-#'       group = group
-#'     )
-#'   ) + 
-#'   xlab(xlab) + ylab(ylab)
+#' if (require("ggplot2")) {
+#'   ## Fit model
+#'   data("CrabSatellites", package = "countreg")
+#'   m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#'   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
+#'   
+#'   ## Compute qqrplot
+#'   q1 <- qqrplot(m1_pois, plot = FALSE)
+#'   q2 <- qqrplot(m2_pois, plot = FALSE)
+#'   
+#'   d <- c(q1, q2) 
+#'   
+#'   ## Get label names
+#'   xlab <- unique(attr(d, "xlab"))
+#'   ylab <- unique(attr(d, "ylab"))
+#'   main <- attr(d, "main")
+#'   main <- make.names(main, unique = TRUE)
+#'   d$group <- factor(d$group, labels = main)
+#'   
+#'   ## Polygon CI around identity line used as reference 
+#'   gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'     geom_qqr_ref() + 
+#'     geom_qqr_confint(fill = "red") + 
+#'     geom_qqr_point() + 
+#'     geom_qqr_range(
+#'       aes(
+#'         x = x_rg_lwr, 
+#'         ymin = y_rg_lwr, 
+#'         ymax = y_rg_upr,
+#'         group = group
+#'       )
+#'     ) + 
+#'     xlab(xlab) + ylab(ylab)
 #'
-#' gg1
-#' gg1 + facet_wrap(~group)
-#' 
-#' ## Polygon CI around robust reference line
-#' gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
-#'   geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
-#'   geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
-#'   geom_qqr_point() + 
-#'   geom_qqr_range(
-#'     aes(
-#'       x = x_rg_lwr, 
-#'       ymin = y_rg_lwr, 
-#'       ymax = y_rg_upr,
-#'       group = group
-#'     )
-#'   ) + 
-#'   xlab(xlab) + ylab(ylab)
+#'   gg1
+#'   gg1 + facet_wrap(~group)
+#'   
+#'   ## Polygon CI around robust reference line
+#'   gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'     geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
+#'     geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
+#'     geom_qqr_point() + 
+#'     geom_qqr_range(
+#'       aes(
+#'         x = x_rg_lwr, 
+#'         ymin = y_rg_lwr, 
+#'         ymax = y_rg_upr,
+#'         group = group
+#'       )
+#'     ) + 
+#'     xlab(xlab) + ylab(ylab)
 #'
-#' gg2
-#' gg2 + facet_wrap(~group)
-#' 
+#'   gg2
+#'   gg2 + facet_wrap(~group)
+#' } 
 #' @export
 geom_qqr_point <- function(mapping = NULL, data = NULL, stat = "identity",
                             position = "identity", na.rm = FALSE, 

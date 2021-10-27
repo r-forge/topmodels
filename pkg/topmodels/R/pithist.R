@@ -1278,41 +1278,42 @@ add4ci <- function(x, n, conf.level) {
 #' @param style Fix description.
 #' @param linejoin Fix description.
 #' @examples
-#' require("ggplot2")
-#' ## Fit model
-#' data("CrabSatellites", package = "countreg")
-#' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-#' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-#' 
-#' ## Compute pithist
-#' p1 <- pithist(m1_pois, plot = FALSE)
-#' p2 <- pithist(m2_pois, plot = FALSE)
-#' 
-#' d <- c(p1, p2) 
-#' 
-#' ## Get label names
-#' xlab <- unique(attr(d, "xlab"))
-#' ylab <- unique(attr(d, "ylab"))
-#' main <- attr(d, "main")
-#' main <- make.names(main, unique = TRUE)
-#' d$group <- factor(d$group, labels = main)
-#' 
-#' ## Plot bar style PIT histogram
-#' gg1 <- ggplot(data = d) + 
-#'   geom_pit_bar(aes(x = x, y = y, width = width, group = group)) + 
-#'   geom_pit_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
-#'   geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
-#'   geom_pit_ref(aes(x = x, y = ref, width = width)) + 
-#'   facet_grid(group~.)
-#' gg1
+#' if (require("ggplot2")) {
+#'   ## Fit model
+#'   data("CrabSatellites", package = "countreg")
+#'   m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#'   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
+#'   
+#'   ## Compute pithist
+#'   p1 <- pithist(m1_pois, plot = FALSE)
+#'   p2 <- pithist(m2_pois, plot = FALSE)
+#'   
+#'   d <- c(p1, p2) 
+#'   
+#'   ## Get label names
+#'   xlab <- unique(attr(d, "xlab"))
+#'   ylab <- unique(attr(d, "ylab"))
+#'   main <- attr(d, "main")
+#'   main <- make.names(main, unique = TRUE)
+#'   d$group <- factor(d$group, labels = main)
+#'   
+#'   ## Plot bar style PIT histogram
+#'   gg1 <- ggplot(data = d) + 
+#'     geom_pit_bar(aes(x = x, y = y, width = width, group = group)) + 
+#'     geom_pit_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
+#'     geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
+#'     geom_pit_ref(aes(x = x, y = ref, width = width)) + 
+#'     facet_grid(group~.)
+#'   gg1
 #'
-#' ## Plot line style PIT histogram
-#' gg2 <- ggplot(data = d) + 
-#'   geom_pit_line(aes(x = x, y = y, width = width, group = group)) + 
-#'   geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "polygon") + 
-#'   geom_pit_ref(aes(x = x, y = ref, width = width)) + 
-#'   facet_grid(group~.)
-#' gg2
+#'   ## Plot line style PIT histogram
+#'   gg2 <- ggplot(data = d) + 
+#'     geom_pit_line(aes(x = x, y = y, width = width, group = group)) + 
+#'     geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "polygon") + 
+#'     geom_pit_ref(aes(x = x, y = ref, width = width)) + 
+#'     facet_grid(group~.)
+#'   gg2
+#' }
 #' @export
 geom_pit_bar <- function(mapping = NULL, data = NULL, stat = "identity",
                                position = "identity", na.rm = FALSE,
