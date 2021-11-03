@@ -1668,19 +1668,6 @@ GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 )
 
 
-# Helper function inspired by internal from `ggplot2` defined in `performance.R`
-my_modify_list <- function(old, new, force = FALSE) {
-
-  if (force) {
-    for (i in names(new)) old[[i]] <- new[[i]]
-  } else {
-    for (i in names(new)) old[[i]] <- if (all(is.na(old[[i]]))) new[[i]] else old[[i]]
-  }
-
-  old
-}
-
-
 ## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
 qqr_default_aesthetics <- function(style) {
   if (style == "line") {

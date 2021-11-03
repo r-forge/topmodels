@@ -163,12 +163,24 @@ convert_transparency <- function(x, mode = "numeric") {
 }
 
 
-annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) 
-  {
+annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) {
     ggplot2::layer(data = data, stat = ggplot2::StatIdentity, position = ggplot2::PositionIdentity, 
           geom = ggplot2::GeomCustomAnn,
           inherit.aes = TRUE, params = list(grob = grob, 
                                             xmin = xmin, xmax = xmax, 
                                             ymin = ymin, ymax = ymax))
+}
+
+
+# Helper function inspired by internal from `ggplot2` defined in `performance.R`
+# (needed for geom_*s to modify aesthetics for different styles)
+my_modify_list <- function(old, new, force = FALSE) {
+
+  if (force) {
+    for (i in names(new)) old[[i]] <- new[[i]]
+  } else {
+    for (i in names(new)) old[[i]] <- if (all(is.na(old[[i]]) | old[[i]] == 1.0000000001)) new[[i]] else old[[i]]
   }
 
+  old
+}
