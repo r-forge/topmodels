@@ -1108,31 +1108,21 @@ autoplot.pithist <- function(object,
   )
 
   ## add histogram
-  if (style == "bar") {
-    rval <- rval + 
-      geom_pit_bar(
-        ggplot2::aes_string(
-          alpha = "group", 
-          colour = "group", 
-          fill = "group", 
-          size = "group"
-        )
-      )
-  } else {
-    rval <- rval + 
-      geom_pit_line(
-        ggplot2::aes_string(
-          alpha = "group", 
-          colour = "group", 
-          size = "group"
-        )
-      )
-  }
+  rval <- rval + 
+    geom_pithist(
+      ggplot2::aes_string(
+        alpha = "group", 
+        colour = "group", 
+        fill = "group", 
+        size = "group"
+      ),
+      style = style
+    )
 
   ## add range
   if (range && all(c("rg_lwr", "rg_upr") %in% names(object))) {
     rval <- rval +
-      geom_pit_range(
+      geom_pithist_range(
         ggplot2::aes_string(
           x = "x",
           ymin = "rg_lwr",
@@ -1146,7 +1136,7 @@ autoplot.pithist <- function(object,
   ## add conf
   if (confint != "none") {
     rval <- rval +
-      geom_pit_confint(
+      geom_pithist_confint(
         ggplot2::aes_string(
           x = "x", 
           ymin = "ci_lwr", 
@@ -1160,7 +1150,7 @@ autoplot.pithist <- function(object,
   ## add ref
   if (ref) {
     rval <- rval +
-      geom_pit_ref(
+      geom_pithist_ref(
         ggplot2::aes_string(
           x = "x", 
           y = "ref", 
@@ -1299,89 +1289,219 @@ add4ci <- function(x, n, conf.level) {
 #'   
 #'   ## Plot bar style PIT histogram
 #'   gg1 <- ggplot(data = d) + 
-#'     geom_pit_bar(aes(x = x, y = y, width = width, group = group)) + 
-#'     geom_pit_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
-#'     geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
-#'     geom_pit_ref(aes(x = x, y = ref, width = width)) + 
+#'     geom_pithist(aes(x = x, y = y, width = width, group = group)) + 
+#'     geom_pithist_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
+#'     geom_pithist_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
+#'     geom_pithist_ref(aes(x = x, y = ref, width = width)) + 
 #'     facet_grid(group~.)
 #'   gg1
 #'
 #'   ## Plot line style PIT histogram
 #'   gg2 <- ggplot(data = d) + 
-#'     geom_pit_line(aes(x = x, y = y, width = width, group = group)) + 
-#'     geom_pit_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "polygon") + 
-#'     geom_pit_ref(aes(x = x, y = ref, width = width)) + 
+#'     geom_pithist(aes(x = x, y = y, width = width, group = group), style = "line") + 
+#'     geom_pithist_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), 
+#'       style = "polygon") + 
+#'     geom_pithist_ref(aes(x = x, y = ref, width = width)) + 
 #'     facet_grid(group~.)
 #'   gg2
 #' }
 #' @export
-geom_pit_bar <- function(mapping = NULL, data = NULL, stat = "identity",
+geom_pithist <- function(mapping = NULL, data = NULL, stat = "pithist",
                                position = "identity", na.rm = FALSE,
-                               show.legend = NA, inherit.aes = TRUE, ...) {
+                               show.legend = NA, inherit.aes = TRUE, 
+                               style = c("bar", "line"), ...) {
+
+  style <- match.arg(style)
+
   ggplot2::layer(
-    geom = GeomPitBar, mapping = mapping,
-    data = data, stat = stat, position = position,
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    geom = GeomPithist, 
+    mapping = mapping,
+    data = data, 
+    stat = stat, 
+    position = position,
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm, 
+      style = style,
+      ...
+    )
   )
 }
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomPitBar <- ggplot2::ggproto("GeomPitBar", ggplot2::GeomTile,
+GeomPithist <- ggplot2::ggproto("GeomPithist", ggplot2::Geom,
 
-  default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.2, linetype = 1, 
-    alpha = NA),
+  default_aes = ggplot2::aes(
+    colour = NA,
+    fill = NA,
+    size = 1.0000000001,  # this is a hack, as NA leads to error, even if it is modified w/i draw_panel()
+    linetype = NA,
+    alpha = NA,
+    subgroup = NULL
+  ),
 
   required_aes = c("x", "y", "width"),
 
+  extra_params = c("na.rm", "style"),
+
   setup_data = function(data, params) {
+    if (params$style == "bar") {
       data <- transform(data,
         y = y /2,
         height = y
       )
-      ggplot2::GeomTile$setup_data(data, params)
+      ggplot2::GeomTile$setup_data(data, params)  # requires x, y, width, height
+    } else {
+      transform(data,
+        width = NULL
+      )
+    }
+  },
+
+  draw_panel = function(data, panel_params, coord, linejoin = "mitre", style = c("bar", "line")) {
+    style <- match.arg(style)
+
+    data <- my_modify_list(data, pithist_default_aesthetics(style), force = FALSE)
+
+    if (style == "bar") {
+      ggplot2::GeomTile$draw_panel(
+        data = data, 
+        panel_params = panel_params, 
+        coord = coord, 
+        linejoin = linejoin
+      )
+    } else {
+      ggplot2::GeomStep$draw_panel(
+        data = data,
+        panel_params = panel_params,
+        coord = coord
+      )
+    }
+  },
+
+  draw_key = function(data, params, size) {
+    ## Swap NAs in `default_aes` with own defaults 
+    data <- my_modify_list(data, pithist_default_aesthetics(params$style), force = FALSE)
+    if (params$style == "bar") {
+      draw_key_polygon(data, params, size)
+    } else {
+      draw_key_path(data, params, size)
+    }
   }
+
 )
 
 
-#' @rdname geom_pit_bar
-#' @format NULL
-#' @usage NULL
+#' @rdname geom_pithist
 #' @export
-geom_pit_line <- function(mapping = NULL, data = NULL, stat = "pit_line",
-                            position = "identity", na.rm = FALSE,
-                            show.legend = NA, inherit.aes = TRUE, ...) {
+stat_pithist <- function(mapping = NULL, data = NULL, geom = "pithist",
+                         position = "identity", na.rm = FALSE,
+                         show.legend = NA, inherit.aes = TRUE, 
+                         style = c("bar", "line"), ...) {
+
+  style <- match.arg(style)
+
   ggplot2::layer(
-    geom = GeomPitLine, mapping = mapping,
-    data = data, stat = stat, position = position,
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    stat = StatPithist,
+    data = data,
+    mapping = mapping,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      style = style,
+      ...
+    )
   )
 }
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomPitLine <- ggplot2::ggproto("GeomPitLine", ggplot2::GeomStep,
-  default_aes = ggplot2::aes(colour = "black", size = 1, linetype = 1,
-  alpha = NA),
+StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
+
+  required_aes = c("x", "y", "width"),
+
+  compute_group = function(data, scales, style = "bar") {
+
+    if (style == "bar") {
+      data
+    } else {
+      data.frame(
+        x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+        y = c(data$y, data$y[NROW(data)]),
+        width = NA
+      )
+    }
+  }
+)
+
+
+## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
+pithist_default_aesthetics <- function(style) {
+
+  if (style == "bar") {
+    my_modify_list(ggplot2::GeomTile$default_aes, list(fill = "darkgray", colour = "black", 
+      size = 0.2, linetype = 1, alpha = NA), force = TRUE)
+  } else {
+    my_modify_list(ggplot2::GeomStep$default_aes, list(colour = "black", size = 1,
+      linetype = 1, alpha = NA), force = TRUE)
+  }
+}
+
+
+#' @rdname geom_pithist
+#' @export
+geom_pithist_ref <- function(mapping = NULL, data = NULL, stat = "pithist_ref",
+                            position = "identity", na.rm = FALSE,
+                            show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomPithistRef, 
+    mapping = mapping,
+    data = data, 
+    stat = stat, 
+    position = position,
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm, 
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_pithist
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomPithistRef <- ggplot2::ggproto("GeomPithistRef", ggplot2::GeomStep,
+  default_aes = ggplot2::aes(
+    colour = 2, 
+    size = 0.75, 
+    linetype = 1,
+    alpha = NA
+  ),
   required_aes = c("x", "y")
 )
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @export
-stat_pit_line <- function(mapping = NULL, data = NULL, geom = "pit_line",
+stat_pithist_ref <- function(mapping = NULL, data = NULL, geom = "pithist_ref",
                          position = "identity", na.rm = FALSE,
                          show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    stat = StatPitLine,
+    stat = StatPithistRef,
     data = data,
     mapping = mapping,
     geom = geom,
@@ -1395,13 +1515,12 @@ stat_pit_line <- function(mapping = NULL, data = NULL, geom = "pit_line",
   )
 }
 
-
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @format NULL
 #' @usage NULL
 #' @export
-StatPitLine <- ggplot2::ggproto("StatPitLine", ggplot2::Stat,
-
+StatPithistRef <- ggplot2::ggproto("StatPithistRef", ggplot2::Stat,
+ 
   compute_group = function(data, scales) {
     nd <- data.frame(
       x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
@@ -1409,68 +1528,22 @@ StatPitLine <- ggplot2::ggproto("StatPitLine", ggplot2::Stat,
     )
     nd
   },
-
+ 
   required_aes = c("x", "y", "width")
 )
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @export
-geom_pit_ref <- function(mapping = NULL, data = NULL, stat = "pit_line",
-                            position = "identity", na.rm = FALSE,
-                            show.legend = NA, inherit.aes = TRUE, ...) {
-  ggplot2::layer(
-    geom = GeomPitRef, mapping = mapping,
-    data = data, stat = stat, position = position,
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
-  )
-}
-
-
-#' @rdname geom_pit_bar
-#' @format NULL
-#' @usage NULL
-#' @export
-GeomPitRef <- ggplot2::ggproto("GeomPitRef", ggplot2::GeomStep,
-  default_aes = ggplot2::aes(colour = 2, size = 0.75, linetype = 1,
-  alpha = NA),
-  required_aes = c("x", "y")
-)
-
-
-#' @rdname geom_pit_bar
-#' @export
-stat_pit_ref <- function(mapping = NULL, data = NULL, geom = "pit_ref",
-                         position = "identity", na.rm = FALSE,
-                         show.legend = NA, inherit.aes = TRUE, ...) {
-  ggplot2::layer(
-    stat = StatPitLine,
-    data = data,
-    mapping = mapping,
-    geom = geom,
-    position = position,
-    show.legend = show.legend,
-    inherit.aes = inherit.aes,
-    params = list(
-      na.rm = na.rm,
-      ...
-    )
-  )
-}
-
-
-#' @rdname geom_pit_bar
-#' @export
-stat_pit_confint <- function(mapping = NULL, data = NULL, geom = "pit_confint",
-                         position = "identity", na.rm = FALSE,
-                         show.legend = NA, inherit.aes = TRUE, 
-                         style = c("polygon", "line"), ...) {
+stat_pithist_confint <- function(mapping = NULL, data = NULL, geom = "pithist_confint",
+                                 position = "identity", na.rm = FALSE,
+                                 show.legend = NA, inherit.aes = TRUE, 
+                                 style = c("polygon", "line"), ...) {
 
   style <- match.arg(style)
 
   ggplot2::layer(
-    stat = StatPitConfint,
+    stat = StatPithistConfint,
     data = data,
     mapping = mapping,
     geom = geom,
@@ -1486,11 +1559,11 @@ stat_pit_confint <- function(mapping = NULL, data = NULL, geom = "pit_confint",
 }
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @format NULL
 #' @usage NULL
 #' @export
-StatPitConfint <- ggplot2::ggproto("StatPitConfint", ggplot2::Stat,
+StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
 
   compute_group = function(data, scales, style = "polygon") {
 
@@ -1518,16 +1591,16 @@ StatPitConfint <- ggplot2::ggproto("StatPitConfint", ggplot2::Stat,
 )
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @export
-geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
-                            position = "identity", na.rm = FALSE,
-                            show.legend = NA, inherit.aes = TRUE,
-                            linejoin = "mitre", style = c("polygon", "line"), ...) {
+geom_pithist_confint <- function(mapping = NULL, data = NULL, stat = "pithist_confint",
+                                 position = "identity", na.rm = FALSE,
+                                 show.legend = NA, inherit.aes = TRUE,
+                                 linejoin = "mitre", style = c("polygon", "line"), ...) {
   style <- match.arg(style)
 
   ggplot2::layer(
-    geom = GeomPitConfint,
+    geom = GeomPithistConfint,
     mapping = mapping,
     data = data,
     stat = stat,
@@ -1544,11 +1617,11 @@ geom_pit_confint <- function(mapping = NULL, data = NULL, stat = "pit_confint",
 }
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
+GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
 
   # FIXME: (ML) Does not vary for style
   required_aes = c("x", "ymin", "ymax", "xmin", "xmax"),
@@ -1577,7 +1650,7 @@ GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
     style <- match.arg(style)
 
     ## Swap NAs in `default_aes` with own defaults 
-    data <- my_modify_list(data, pit_default_aesthetics(style), force = FALSE)
+    data <- my_modify_list(data, pithist_default_aesthetics(style), force = FALSE)
 
     if (style == "polygon") {
       ggplot2::GeomRect$draw_panel(data, panel_params, coord, linejoin)
@@ -1601,7 +1674,7 @@ GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
 
   draw_key = function(data, params, size) {
     ## Swap NAs in `default_aes` with own defaults 
-    data <- my_modify_list(data, pit_default_aesthetics(params$style), force = FALSE)
+    data <- my_modify_list(data, pithist_default_aesthetics(params$style), force = FALSE)
     if (params$style == "polygon") {
       draw_key_polygon(data, params, size)
     } else {
@@ -1612,32 +1685,43 @@ GeomPitConfint <- ggplot2::ggproto("GeomPitConfint", ggplot2::Geom,
 )
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @export
-geom_pit_range <- function(mapping = NULL, data = NULL, stat = "identity",
-                          position = "identity", na.rm = FALSE,
-                          show.legend = NA, inherit.aes = TRUE, ...) {
+geom_pithist_range <- function(mapping = NULL, data = NULL, stat = "identity",
+                               position = "identity", na.rm = FALSE,
+                               show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    geom = GeomPitRange, mapping = mapping,
-    data = data, stat = stat, position = position,
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    geom = GeomPithistRange, 
+    mapping = mapping,
+    data = data, 
+    stat = stat, 
+    position = position,
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm, 
+      ...
+    )
   )
 }
 
 
-#' @rdname geom_pit_bar
+#' @rdname geom_pithist
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomPitRange <- ggplot2::ggproto("GeomPitRange", ggplot2::GeomLinerange,
-  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 1, 
-    alpha = NA)
+GeomPithistRange <- ggplot2::ggproto("GeomPithistRange", ggplot2::GeomLinerange,
+  default_aes = ggplot2::aes(
+    colour = "black", 
+    size = 0.5, 
+    linetype = 1, 
+    alpha = NA
+  )
 )
 
 
 ## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
-pit_default_aesthetics <- function(style) {
+pithist_default_aesthetics <- function(style) {
   if (style == "line") {
     my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, size = 0.75, linetype = 2, alpha = NA),
       force = TRUE)
