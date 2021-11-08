@@ -10,10 +10,10 @@
 \alias{GeomPithistRef}
 \alias{stat_pithist_ref}
 \alias{StatPithistRef}
-\alias{stat_pithist_confint}
-\alias{StatPithistConfint}
 \alias{geom_pithist_confint}
 \alias{GeomPithistConfint}
+\alias{stat_pithist_confint}
+\alias{StatPithistConfint}
 \alias{geom_pithist_range}
 \alias{GeomPithistRange}
 \title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
@@ -23,11 +23,11 @@ geom_pithist(
   data = NULL,
   stat = "pithist",
   position = "identity",
+  ...,
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  style = c("bar", "line"),
-  ...
+  style = c("bar", "line")
 )
 
 stat_pithist(
@@ -64,18 +64,6 @@ stat_pithist_ref(
   ...
 )
 
-stat_pithist_confint(
-  mapping = NULL,
-  data = NULL,
-  geom = "pithist_confint",
-  position = "identity",
-  na.rm = FALSE,
-  show.legend = NA,
-  inherit.aes = TRUE,
-  style = c("polygon", "line"),
-  ...
-)
-
 geom_pithist_confint(
   mapping = NULL,
   data = NULL,
@@ -84,7 +72,18 @@ geom_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  linejoin = "mitre",
+  style = c("polygon", "line"),
+  ...
+)
+
+stat_pithist_confint(
+  mapping = NULL,
+  data = NULL,
+  geom = "pithist_confint",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
   style = c("polygon", "line"),
   ...
 )
@@ -127,6 +126,11 @@ layer, as a string.}
 \item{position}{Position adjustment, either as a string, or the result of
 a call to a position adjustment function.}
 
+\item{...}{Other arguments passed on to \code{\link[ggplot2:layer]{layer()}}. These are
+often aesthetics, used to set an aesthetic to a fixed value, like
+\code{colour = "red"} or \code{size = 3}. They may also be parameters
+to the paired geom/stat.}
+
 \item{na.rm}{If \code{FALSE}, the default, missing values are removed with
 a warning. If \code{TRUE}, missing values are silently removed.}
 
@@ -143,14 +147,7 @@ the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 
 \item{style}{Fix description.}
 
-\item{...}{Other arguments passed on to \code{\link[ggplot2:layer]{layer()}}. These are
-often aesthetics, used to set an aesthetic to a fixed value, like
-\code{colour = "red"} or \code{size = 3}. They may also be parameters
-to the paired geom/stat.}
-
 \item{geom}{The geometric object to use display the data}
-
-\item{linejoin}{Fix description.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within
@@ -190,7 +187,6 @@ if (require("ggplot2")) {
     geom_pithist(aes(x = x, y = y, width = width, group = group), style = "line") + 
     geom_pithist_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), 
       style = "polygon") + 
-    geom_pithist_ref(aes(x = x, y = ref, width = width)) + 
     facet_grid(group~.)
   gg2
 }
