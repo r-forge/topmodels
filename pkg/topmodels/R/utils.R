@@ -179,7 +179,7 @@ my_modify_list <- function(old, new, force = FALSE) {
   if (force) {
     for (i in names(new)) old[[i]] <- new[[i]]
   } else {
-    for (i in names(new)) old[[i]] <- if (all(is.na(old[[i]]) | old[[i]] == 999L)) new[[i]] else old[[i]]
+    for (i in names(new)) old[[i]] <- if (all(is.na(old[[i]]) | old[[i]] == 0.999)) new[[i]] else old[[i]]
   }
 
   old

@@ -90,13 +90,13 @@
 #' @param confint_type character. Which type of confidence interval should be plotted. According
 #' to Agresti and Coull (1998), for interval estimation of binomial proportions
 #' an approximation can be better than exact.
-#' @param range logical. In case of discrete distributions, should the range 
-#' (confidence interval) of values due to the randomization be visualized?
-#' @param range_level numeric. The confidence level required for calculating the range of values 
-#' due to the randomization. 
-#' @param range_nsim numeric. The number of simulated quantiles for calculating the range of values
-#' due to the randomization. 
-#' @param range_seed numeric. The seed to be set for calculating the range of values
+#' @param simint logical. In case of discrete distributions, should the simulation 
+#' (confidence) interval due to the randomization be visualized?
+#' @param simint_level numeric. The confidence level required for calculating the simulation 
+#' (confidence) interval due to the randomization. 
+#' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the 
+#' simulation (confidence) interval due to the randomization. 
+#' @param simint_seed numeric. The seed to be set for calculating the simulation (confidece) interval 
 #' due to the randomization. 
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.
@@ -173,7 +173,7 @@ pithist.default <- function(object,
                             class = NULL,
                             trafo = NULL,
                             style = c("bar", "line"),
-                            type = c("random", "expected", "proportional"), # FIXME: (ML) not yet implemented
+                            type = c("expected", "random", "proportional"), 
                             nsim = 1L,
                             delta = NULL,
                             freq = FALSE,
@@ -181,10 +181,10 @@ pithist.default <- function(object,
                             confint = TRUE,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
-                            range = TRUE,
-                            range_level = 0.95,
-                            range_nsim = 250,
-                            range_seed = 1,
+                            simint = TRUE,
+                            simint_level = 0.95,
+                            simint_nrep = 250,
+                            simint_seed = 1,
                             single_graph = FALSE,
                             xlim = c(NA, NA),
                             ylim = c(0, NA),
@@ -278,8 +278,8 @@ pithist.default <- function(object,
     tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
     ## TODO: (ML) Maybe get rid of `hist()`
 
-    ## calculate range
-    fun_range <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
+    ## calculate simint
+    fun_simint <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
 
       rg_p <- qresiduals(object,
         newdata = newdata, trafo = trafo, delta = delta,
@@ -298,12 +298,12 @@ pithist.default <- function(object,
       }
     }
     
-    rg_tmp <- replicate(range_nsim, fun_range(object, newdata, trafo, delta, nsim, freq, breaks))
+    rg_tmp <- replicate(simint_nrep, fun_simint(object, newdata, trafo, delta, nsim, freq, breaks))
 
-    range_prob <- (1 - range_level) / 2
-    range_prob <- c(range_prob, 1 - range_prob)
-    rg_lwr <- apply(rg_tmp, 1, quantile, probs = range_prob[1], na.rm = TRUE)
-    rg_upr <- apply(rg_tmp, 1, quantile, probs = range_prob[2], na.rm = TRUE)
+    simint_prob <- (1 - simint_level) / 2
+    simint_prob <- c(simint_prob, 1 - simint_prob)
+    rg_lwr <- apply(rg_tmp, 1, quantile, probs = simint_prob[1], na.rm = TRUE)
+    rg_upr <- apply(rg_tmp, 1, quantile, probs = simint_prob[2], na.rm = TRUE)
   
   } else if (type == "expected") {
     ## compare "nonrandom" in Czado et al. (2009) 
@@ -405,8 +405,8 @@ pithist.default <- function(object,
     )
   }
 
-  ## add range
-  ## FIXME: (ML) Check if range is correct
+  ## add simint
+  ## FIXME: (ML) Check if simint is correct
   rval$rg_upr <- rval$y + (rg_upr - rg_lwr) / 2
   rval$rg_lwr <- rval$y - (rg_upr - rg_lwr) / 2
 
@@ -428,7 +428,7 @@ pithist.default <- function(object,
   ## plot by default
   if (plot == "ggplot2") {
     try(print(ggplot2::autoplot(rval,
-      style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, range = range,
+      style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, simint = simint,
       ...
     )))
   } else if (plot == "base") {
@@ -540,7 +540,7 @@ rbind.pithist <- c.pithist
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 #' plotted.
 #' @param confint logical. Should confident intervals be drawn?
-#' @param range Fix description.
+#' @param simint Fix description.
 #' @param xlim,ylim graphical parameters. These may pertain either to the whole
 #' plot or just the histogram or just the fitted line.
 #' @param xlab,ylab,main graphical parameters.
@@ -996,18 +996,18 @@ autoplot.pithist <- function(object,
                              single_graph = FALSE,
                              style = c("bar", "line"),
                              confint = TRUE,
-                             range = NULL,
+                             simint = NULL,
                              ref = NULL,
                              xlim = c(0, 1),
                              ylim = c(0, NA),
                              xlab = NULL,
                              ylab = NULL,
                              main = NULL,
-                             colour = "black",
-                             fill = "darkgray",
-                             alpha = NA,
+                             alpha = NULL,
+                             colour = NULL,
+                             fill = NULL,
                              size = NULL,
-                             linetype = 1,
+                             linetype = NULL,
                              legend = FALSE,
                              ...) {
   # -------------------------------------------------------------------
@@ -1020,7 +1020,7 @@ autoplot.pithist <- function(object,
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
-  stopifnot(is.null(range) || is.logical(range))
+  stopifnot(is.null(simint) || is.logical(simint))
   stopifnot(is.null(ref) || is.logical(ref))
   stopifnot(is.logical(legend))
   if (single_graph) {
@@ -1031,6 +1031,13 @@ autoplot.pithist <- function(object,
   }
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  ## set all aesthetics equal NULL to NA
+  alpha <- if (is.null(alpha)) NA else alpha
+  colour <- if (is.null(colour)) NA else colour
+  fill <- if (is.null(fill)) NA else fill
+  size <- if (is.null(size)) NA else size
+  linetype <- if (is.null(linetype)) NA else linetype
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -1075,22 +1082,18 @@ autoplot.pithist <- function(object,
   confint <- match.arg(confint, c("polygon", "line", "none"))
 
   ## determine other arguments conditional on `style`
-  if (is.null(range)) {
-    range <- if (style == "bar") TRUE else FALSE
+  if (is.null(simint)) {
+    simint <- if (style == "bar") TRUE else FALSE
   }
 
   if (is.null(ref)) {
     ref <- if (style == "bar") TRUE else FALSE
   }
 
-  if (is.null(size)) {
-    size <- if (style == "bar") 0.2 else 1
-  }
-
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
-    fill, colour, size, linetype, alpha
+    alpha, colour, fill, size, linetype
   )[, -1]
 
   # -------------------------------------------------------------------
@@ -1114,15 +1117,16 @@ autoplot.pithist <- function(object,
         alpha = "group", 
         colour = "group", 
         fill = "group", 
-        size = "group"
+        size = "group",
+        linetype = "group"
       ),
       style = style
     )
 
-  ## add range
-  if (range && all(c("rg_lwr", "rg_upr") %in% names(object))) {
+  ## add simint
+  if (simint && all(c("rg_lwr", "rg_upr") %in% names(object))) {
     rval <- rval +
-      geom_pithist_range(
+      geom_pithist_simint(
         ggplot2::aes_string(
           x = "x",
           ymin = "rg_lwr",
@@ -1159,12 +1163,14 @@ autoplot.pithist <- function(object,
       )
   }
 
-  ## set the colors, shapes, etc. for the groups
+  ## set the colors, shapes, etc. for the groups 
+  ## by using `my_modify_list()` all NAs are replaced by intern defaults
   rval <- rval +
     ggplot2::scale_alpha_manual(values = plot_arg$alpha) +
-    ggplot2::scale_colour_manual(values = plot_arg$colour) +
-    ggplot2::scale_fill_manual(values = plot_arg$fill) +
-    ggplot2::scale_size_manual(values = plot_arg$size)
+    ggplot2::scale_colour_manual(values = plot_arg$colour, na.value = NA) +
+    ggplot2::scale_fill_manual(values = plot_arg$fill, na.value = NA) +
+    ggplot2::scale_size_manual(values = plot_arg$size, na.value = 0.999) + 
+    ggplot2::scale_linetype_manual(values = plot_arg$linetype, na.value = NA)
 
   ## annotation
   rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
@@ -1172,11 +1178,29 @@ autoplot.pithist <- function(object,
   ## add legend
   if (legend) {
     rval <- rval +
-      ggplot2::labs(alpha = "Model", colour = "Model", fill = "Model", size = "Model") +
-      ggplot2::guides(alpha = "legend", colour = "legend", fill = "legend", size = "legend")
+      ggplot2::labs(
+        alpha = "Model", 
+        colour = "Model", 
+        fill = "Model", 
+        size = "Model", 
+        linetype = "Model"
+      ) +
+      ggplot2::guides(
+        alpha = "legend", 
+        colour = "legend", 
+        fill = "legend", 
+        size = "legend", 
+        linetype = "legend"
+      )
   } else {
     rval <- rval +
-      ggplot2::guides(alpha = "none", colour = "none", fill = "none", size = "none")
+      ggplot2::guides(
+        alpha = "none", 
+        colour = "none", 
+        fill = "none", 
+        size = "none", 
+        linetype = "none"
+      )
   }
 
   ## set x and y limits
@@ -1274,8 +1298,8 @@ add4ci <- function(x, n, conf.level) {
 #'   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 #'   
 #'   ## Compute pithist
-#'   p1 <- pithist(m1_pois, plot = FALSE)
-#'   p2 <- pithist(m2_pois, plot = FALSE)
+#'   p1 <- pithist(m1_pois, type = "random", plot = FALSE)
+#'   p2 <- pithist(m2_pois, type = "random", plot = FALSE)
 #'   
 #'   d <- c(p1, p2) 
 #'   
@@ -1289,7 +1313,7 @@ add4ci <- function(x, n, conf.level) {
 #'   ## Plot bar style PIT histogram
 #'   gg1 <- ggplot(data = d) + 
 #'     geom_pithist(aes(x = x, y = y, width = width, group = group)) + 
-#'     geom_pithist_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
+#'     geom_pithist_simint(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
 #'     geom_pithist_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
 #'     geom_pithist_ref(aes(x = x, y = ref, width = width)) + 
 #'     facet_grid(group~.)
@@ -1343,7 +1367,7 @@ GeomPithist <- ggplot2::ggproto("GeomPithist", ggplot2::Geom,
   default_aes = ggplot2::aes(
     colour = NA,
     fill = NA,
-    size = 999L,  # TODO: (ML) resolve this hack (NA leads to error, even if it is modified w/i draw_panel() -> why?)
+    size = 0.999,  # TODO: (ML) resolve this hack (NA leads to error, even if it is modified w/i draw_panel() -> why?)
     linetype = NA,
     alpha = NA,
     subgroup = NULL
@@ -1611,7 +1635,7 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
   default_aes = ggplot2::aes(
     colour = NA,
     fill = NA,
-    size = 999L,
+    size = 0.999,
     linetype = NA,
     alpha = NA
   ),
@@ -1662,9 +1686,9 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
 ## helper function inspired by internal from `ggplot2` defined in `geom-sf.r`
 set_default_aes_pithist_confint <- function(style) {
   if (style == "line") {
-    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, size = 0.75, linetype = 2, alpha = NA),
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, size = 0.5, linetype = 2, alpha = NA),
       force = TRUE)
-  } else {
+  } else {  # "polygon" style
     my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = NA, fill = "black", size = 0.5, 
       linetype = 1, alpha = 0.2, subgroup = NULL), force = TRUE)
   }
@@ -1729,11 +1753,11 @@ StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
 
 #' @rdname geom_pithist
 #' @export
-geom_pithist_range <- function(mapping = NULL, data = NULL, stat = "identity",
+geom_pithist_simint <- function(mapping = NULL, data = NULL, stat = "identity",
                                position = "identity", na.rm = FALSE,
                                show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    geom = GeomPithistRange, 
+    geom = GeomPithistSimint, 
     mapping = mapping,
     data = data, 
     stat = stat, 
@@ -1752,7 +1776,10 @@ geom_pithist_range <- function(mapping = NULL, data = NULL, stat = "identity",
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomPithistRange <- ggplot2::ggproto("GeomPithistRange", ggplot2::GeomLinerange,
+GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerange,
+
+  required_aes = c("x", "ymin", "ymax"), 
+
   default_aes = ggplot2::aes(
     colour = "black", 
     size = 0.5, 
