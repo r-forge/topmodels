@@ -258,8 +258,6 @@ pithist.default <- function(object,
   n <- NROW(newresponse(object, newdata = newdata))  # solely to get n to compute number of breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(n, c(0, 50, 5000, 1000000, Inf))]
 
-  ## either compute proportion exactly (to do...), "expected" (nonrandom) according to Czado et al. (2009) 
-  ## or approximate by simulation
   if (type == "proportional") {
     ## FIXME: (ML)
     ## * implement proportional over the inteverals (e.g., below censoring point)
@@ -281,8 +279,8 @@ pithist.default <- function(object,
     }
 
     ## collect everything as data.frame
-    tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
     ## TODO: (ML) Maybe get rid of `hist()`
+    tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
 
     ## calculate simint
     fun_simint <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
@@ -325,7 +323,8 @@ pithist.default <- function(object,
       function(u) as.numeric(u >= p[, 1L]) 
       ## FIXME: (Z) check inequality sign to cover include.lowest/right options
     } else {
-      function(u) punif(u, min = p[, 1L], max = p[, 2L]) ## pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))
+      function(u) punif(u, min = p[, 1L], max = p[, 2L]) 
+      ## equals `pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))`
     }
 
     ## get breaks: part 2
