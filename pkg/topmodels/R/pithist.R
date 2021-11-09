@@ -69,11 +69,10 @@
 #' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 #' drawn.
-#' @param type character. In case of discrete distributions should the PITs be
-#' drawn randomly from the corresponding interval or distributed
-#' proportionally? This argument is not fully supported yet, please keep to the default 
-#' \code{"random"} for now. Additionally, expected (nonnormal) PIT histograms according to
-#' Czado et al. (2009) can be chosen by setting the type to \code{"expected"}.
+#' @param type character. In case of discrete distributions, should an expected
+#' (non-normal) PIT histogram be computed according to Czado et al. (2009)
+#' (\code{"expected"}) or should the PIT be drawn randomly from the corresponding
+#' interval (\code{"random"})?
 #' @param nsim integer. If \code{type} is \code{"random"} how many simulated
 #' PITs should be drawn?
 #' @param delta numeric. The minimal difference to compute the range of
@@ -168,16 +167,20 @@ pithist <- function(object, ...) {
 #' @method pithist default
 #' @export
 pithist.default <- function(object,
+
+                            ## computation arguments
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
                             trafo = NULL,
-                            style = c("bar", "line"),
-                            type = c("expected", "random", "proportional"), 
+                            type = c("expected", "random"),
                             nsim = 1L,
                             delta = NULL,
                             freq = FALSE,
                             breaks = NULL,
+
+                            ## computation arguments needed for optional plotting styles
+                            # FIXME: (ML) confint maybe solely plot dependend (but depends on breaks)?
                             confint = TRUE,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
@@ -185,6 +188,9 @@ pithist.default <- function(object,
                             simint_level = 0.95,
                             simint_nrep = 250,
                             simint_seed = 1,
+
+                            ## plotting arguments
+                            style = c("bar", "line"),
                             single_graph = FALSE,
                             xlim = c(NA, NA),
                             ylim = c(0, NA),
@@ -281,29 +287,29 @@ pithist.default <- function(object,
     ## calculate simint
     fun_simint <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
 
-      rg_p <- qresiduals(object,
+      simint_p <- qresiduals(object,
         newdata = newdata, trafo = trafo, delta = delta,
         type = "random", nsim = nsim
       )
 
       ## TODO: (ML) Maybe nicer workaround to get not values outside breaks
-      rg_p[rg_p < min(breaks)] <- min(breaks)
-      rg_p[rg_p > max(breaks)] <- max(breaks)
-      rg_hist <- hist(rg_p, breaks = breaks, plot = FALSE)
+      simint_p[simint_p < min(breaks)] <- min(breaks)
+      simint_p[simint_p > max(breaks)] <- max(breaks)
+      simint_hist <- hist(simint_p, breaks = breaks, plot = FALSE)
   
       if(freq) {
-        rg_hist$counts / nsim
+        simint_hist$counts / nsim
       } else {
-        rg_hist$density 
+        simint_hist$density 
       }
     }
     
-    rg_tmp <- replicate(simint_nrep, fun_simint(object, newdata, trafo, delta, nsim, freq, breaks))
+    simint_tmp <- replicate(simint_nrep, fun_simint(object, newdata, trafo, delta, nsim, freq, breaks))
 
     simint_prob <- (1 - simint_level) / 2
     simint_prob <- c(simint_prob, 1 - simint_prob)
-    rg_lwr <- apply(rg_tmp, 1, quantile, probs = simint_prob[1], na.rm = TRUE)
-    rg_upr <- apply(rg_tmp, 1, quantile, probs = simint_prob[2], na.rm = TRUE)
+    simint_lwr <- apply(simint_tmp, 1, quantile, probs = simint_prob[1], na.rm = TRUE)
+    simint_upr <- apply(simint_tmp, 1, quantile, probs = simint_prob[2], na.rm = TRUE)
   
   } else if (type == "expected") {
     ## compare "nonrandom" in Czado et al. (2009) 
@@ -342,7 +348,7 @@ pithist.default <- function(object,
       mids = 0.5 * (breaks[-1L] + breaks[-length(breaks)])
     )
 
-    rg_lwr <- rg_upr <- 0
+    simint_lwr <- simint_upr <- 0
   }
 
   ## compute ci interval
@@ -407,8 +413,8 @@ pithist.default <- function(object,
 
   ## add simint
   ## FIXME: (ML) Check if simint is correct
-  rval$rg_upr <- rval$y + (rg_upr - rg_lwr) / 2
-  rval$rg_lwr <- rval$y - (rg_upr - rg_lwr) / 2
+  rval$simint_upr <- rval$y + (simint_upr - simint_lwr) / 2
+  rval$simint_lwr <- rval$y - (simint_upr - simint_lwr) / 2
 
   ## attributes for graphical display
   attr(rval, "freq") <- freq
@@ -1124,13 +1130,13 @@ autoplot.pithist <- function(object,
     )
 
   ## add simint
-  if (simint && all(c("rg_lwr", "rg_upr") %in% names(object))) {
+  if (simint && all(c("simint_lwr", "simint_upr") %in% names(object))) {
     rval <- rval +
       geom_pithist_simint(
         ggplot2::aes_string(
           x = "x",
-          ymin = "rg_lwr",
-          ymax = "rg_upr",
+          ymin = "simint_lwr",
+          ymax = "simint_upr",
           group = "group"
         ), 
         na.rm = FALSE
@@ -1313,7 +1319,7 @@ add4ci <- function(x, n, conf.level) {
 #'   ## Plot bar style PIT histogram
 #'   gg1 <- ggplot(data = d) + 
 #'     geom_pithist(aes(x = x, y = y, width = width, group = group)) + 
-#'     geom_pithist_simint(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
+#'     geom_pithist_simint(aes(x, ymin = simint_lwr, ymax = simint_upr)) + 
 #'     geom_pithist_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
 #'     geom_pithist_ref(aes(x = x, y = ref, width = width)) + 
 #'     facet_grid(group~.)
