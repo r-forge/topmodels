@@ -15,19 +15,19 @@ pithist(object, ...)
   plot = TRUE,
   class = NULL,
   trafo = NULL,
-  style = c("bar", "line"),
-  type = c("random", "expected", "proportional"),
+  type = c("expected", "random"),
   nsim = 1L,
   delta = NULL,
   freq = FALSE,
   breaks = NULL,
+  simint = TRUE,
+  simint_level = 0.95,
+  simint_nrep = 250,
+  simint_seed = 1,
   confint = TRUE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  range = TRUE,
-  range_level = 0.95,
-  range_nsim = 250,
-  range_seed = 1,
+  style = c("bar", "line"),
   single_graph = FALSE,
   xlim = c(NA, NA),
   ylim = c(0, NA),
@@ -60,16 +60,10 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \item{trafo}{function for tranforming residuals from probability scale to a
 different distribution scale.}
 
-\item{style}{character specifying the style of pithist. For \code{style = "bar"}
-a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
-line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
-drawn.}
-
-\item{type}{character. In case of discrete distributions should the PITs be
-drawn randomly from the corresponding interval or distributed
-proportionally? This argument is not fully supported yet, please keep to the default 
-\code{"random"} for now. Additionally, expected (nonnormal) PIT histograms according to
-Czado et al. (2009) can be chosen by setting the type to \code{"expected"}.}
+\item{type}{character. In case of discrete distributions, should an expected
+(non-normal) PIT histogram be computed according to Czado et al. (2009)
+(\code{"expected"}) or should the PIT be drawn randomly from the corresponding
+interval (\code{"random"})?}
 
 \item{nsim}{integer. If \code{type} is \code{"random"} how many simulated
 PITs should be drawn?}
@@ -86,6 +80,18 @@ histogram has a total area of one).}
 
 \item{breaks}{numeric. Breaks for the histogram intervals.}
 
+\item{simint}{logical. In case of discrete distributions, should the simulation 
+(confidence) interval due to the randomization be visualized?}
+
+\item{simint_level}{numeric. The confidence level required for calculating the simulation 
+(confidence) interval due to the randomization.}
+
+\item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the 
+simulation (confidence) interval due to the randomization.}
+
+\item{simint_seed}{numeric. The seed to be set for calculating the simulation (confidece) interval 
+due to the randomization.}
+
 \item{confint}{logical. Should confident intervals be drawn?}
 
 \item{confint_level}{numeric. The confidence level required.}
@@ -94,17 +100,10 @@ histogram has a total area of one).}
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
-\item{range}{logical. In case of discrete distributions, should the range 
-(confidence interval) of values due to the randomization be visualized?}
-
-\item{range_level}{numeric. The confidence level required for calculating the range of values 
-due to the randomization.}
-
-\item{range_nsim}{numeric. The number of simulated quantiles for calculating the range of values
-due to the randomization.}
-
-\item{range_seed}{numeric. The seed to be set for calculating the range of values
-due to the randomization.}
+\item{style}{character specifying the style of pithist. For \code{style = "bar"}
+a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
+line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
+drawn.}
 
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.}

@@ -117,6 +117,12 @@
 #' 
 #' ## plot combined qqrplot as "ggplot2" graphic
 #' ggplot2::autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
+#'
+#' ## Use different `trafo`s with confidence intervals
+#' qqrplot(m1_pois, trafo = qunif)
+#' qqrplot(m1_pois, trafo = qnorm)
+#' qqrplot(m1_pois, detrend = TRUE, trafo = qunif, confint = "line")
+#' qqrplot(m1_pois, detrend = TRUE, trafo = qnorm, confint = "line")
 #' 
 #' @export
 qqrplot <- function(object, ...) {
@@ -1186,6 +1192,22 @@ autoplot.qqrplot <- function(object,
 #'
 #'   gg2
 #'   gg2 + facet_wrap(~group)
+#' 
+#'   ## Use different `trafo`s with confidence intervals
+#'   q1 <- qqrplot(m1_pois, trafo = qunif, plot = FALSE)
+#'   q2 <- qqrplot(m2_pois, plot = FALSE)
+#'   
+#'   gg3 <- ggplot(data = q1, aes(x, y, na.rm = TRUE)) +
+#'     geom_qqr_ref() +
+#'     geom_qqr_confint(fill = "red", trafo = qunif) +
+#'     geom_qqr_point()
+#'   gg3
+#'   
+#'   gg4 <- ggplot(data = q2, aes(x, y, na.rm = TRUE)) +
+#'     geom_qqr_ref() +
+#'     geom_qqr_confint(fill = "red", trafo = qnorm) +
+#'     geom_qqr_point()
+#'   gg4
 #' } 
 #' @export
 geom_qqr_point <- function(mapping = NULL, data = NULL, stat = "identity",
@@ -1474,6 +1496,8 @@ stat_qqr_confint <- function(mapping = NULL, data = NULL, geom = "qqr_confint",
 #' @export
 StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
 
+  required_aes = c("x", "y"),
+
   compute_group = function(data, 
                            scales, 
                            xlim = NULL, 
@@ -1489,14 +1513,25 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
       which <- match.arg(which)
 
-      p <- pnorm(x)
-      se <- (1 / dnorm(x)) * (sqrt(p * (1 - p) / n))
-      rval <- as.numeric(trafo((1 - level) / 2) * se)
+      ## FIXME: (ML) Update once `distributions3` or alternative is working
+      if (identical(trafo, stats::qunif) | identical(trafo, base::identity)) {
+        dFun <- dunif
+        pFun <- punif
+      } else if (identical(trafo, stats::qnorm)) {
+        dFun <- dnorm
+        pFun <- pnorm
+      } else {
+        stop("Appropriate `dFun` and `pFun` are not yet supported.")
+      }
+
+      p <- pFun(x) # alternative: p <- ppoints(x)
+      se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n))
+      rval <- as.numeric(qnorm((1 - level) / 2) * se)
 
       if (which == "lower") {
-        rval
-      } else {
         -rval
+      } else {
+        rval
       }
     }
 
@@ -1512,7 +1547,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       range[is.na(range)] <- scales$x$dimension()[is.na(range)]
       range <- range + c(-1, 1) * diff(range) * 0.05 
       ## FIXME: (ML) Better idea how to get the scales of the plot?
-      xseq <- seq(range[1], range[2], length.out = n)
+      xseq <- seq(range[1], range[2], length.out = n) # alternative: xseq <- trafo(ppoints(xseq))
 
       if (scales$x$is_discrete()) {
         x_trans <- xseq
@@ -1534,7 +1569,10 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       y_out2 <- scales$y$trans$transform(y_out2)
     }
 
-    ## Employgin StatQqrRef Method
+    # Must make sure that is not NA for specific trafo (due to extension of plot range)
+    idx_na <- is.na(y_out1) | is.na(y_out2)
+
+    ## Employing StatQqrRef Method
     intercept <- StatQqrRef$compute_group(data = data,
                                           scales = scales,
                                           detrend = detrend,
@@ -1552,10 +1590,10 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       ## prepare long format with group variable
       d <- as.data.frame(tidyr::pivot_longer(
         data.frame(
-          x_noaes = xseq,
+          x_noaes = x_trans,  
           y1 = (intercept + slope * xseq) + y_out1,
           y2 = (intercept + slope * xseq) + y_out2
-        ),
+        )[!idx_na, ],
         cols = c(y1, y2),
         names_to = "topbottom",
         values_to = "y_noaes",
@@ -1566,18 +1604,15 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
     } else {
       ## prepare short format
       data.frame(
-        x_noaes = c(xseq, rev(xseq)),
+        x_noaes = c(x_trans, rev(x_trans)),
         y_noaes = c(
           (intercept + slope * xseq) + y_out2,
           rev((intercept + slope * xseq) + y_out1)
         )
-      )
+      )[!idx_na, ]
     }
      
-  },
-
-  # Tells us what we need
-  required_aes = c("x", "y")
+  }
 )
 
 
@@ -1618,7 +1653,7 @@ geom_qqr_confint <- function(mapping = NULL, data = NULL, stat = "qqr_confint",
 #' @export
 GeomQqrConfint <- ggplot2::ggproto("GeomQqrConfint", ggplot2::Geom,
 
-  required_aes = c("x_noaes", "y_noaes"),
+  required_aes = c("x_noaes", "y_noaes"),  # TODO: (ML) For ref = identity, would theoret. work w/o `x` and `y`
 
   # FIXME: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
   handle_na = function(data, params) {

@@ -135,6 +135,12 @@ q2 <- qqrplot(m2_pois, plot = FALSE)
 ## plot combined qqrplot as "ggplot2" graphic
 ggplot2::autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 
+## Use different `trafo`s with confidence intervals
+qqrplot(m1_pois, trafo = qunif)
+qqrplot(m1_pois, trafo = qnorm)
+qqrplot(m1_pois, detrend = TRUE, trafo = qunif, confint = "line")
+qqrplot(m1_pois, detrend = TRUE, trafo = qnorm, confint = "line")
+
 }
 \references{
 Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile

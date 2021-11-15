@@ -25,6 +25,7 @@
   lty = 1,
   axes = TRUE,
   box = TRUE,
+  freq = NULL,
   ...
 )
 
@@ -37,6 +38,7 @@
   alpha_min = 0.2,
   lwd = 2,
   lty = 1,
+  freq = NULL,
   ...
 )
 
@@ -45,19 +47,21 @@
   single_graph = FALSE,
   style = c("bar", "line"),
   confint = TRUE,
-  range = NULL,
+  confint_type = c("exact", "approximation"),
+  simint = NULL,
   ref = NULL,
   xlim = c(0, 1),
   ylim = c(0, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  colour = "black",
-  fill = "darkgray",
-  alpha = NA,
+  alpha = NULL,
+  colour = NULL,
+  fill = NULL,
   size = NULL,
-  linetype = 1,
+  linetype = NULL,
   legend = FALSE,
+  freq = NULL,
   ...
 )
 }
@@ -80,11 +84,15 @@ plot or just the histogram or just the fitted line.}
 
 \item{xlab, ylab, main}{graphical parameters.}
 
+\item{freq}{Fix me.}
+
 \item{\dots}{further graphical parameters.}
 
 \item{object, x}{an object of class \code{\link{pithist}}.}
 
-\item{range}{Fix description.}
+\item{confint_type}{Fix description.}
+
+\item{simint}{Fix description.}
 
 \item{colour, size, linetype, legend, alpha}{graphical parameters passed for 
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
