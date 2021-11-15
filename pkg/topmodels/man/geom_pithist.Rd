@@ -61,6 +61,8 @@ stat_pithist_ref(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  trafo = NULL,
+  freq = FALSE,
   ...
 )
 
@@ -72,8 +74,9 @@ geom_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  type = "approximation",
+  trafo = NULL,
   level = 0.95,
+  type = "approximation",
   freq = FALSE,
   style = c("polygon", "line"),
   ...
@@ -87,11 +90,9 @@ stat_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  xlim = NULL,
-  n = 101,
   trafo = NULL,
-  type = "approximation",
   level = 0.95,
+  type = "approximation",
   freq = FALSE,
   style = c("polygon", "line"),
   ...
@@ -158,17 +159,17 @@ the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 
 \item{geom}{The geometric object to use display the data}
 
-\item{type}{Fix description.}
+\item{trafo}{Fix description.}
+
+\item{freq}{Fix description.}
 
 \item{level}{Fix description.}
 
-\item{freq}{Fix description.}
+\item{type}{Fix description.}
 
 \item{xlim}{Fix description.}
 
 \item{n}{Fix description.}
-
-\item{trafo}{Fix description.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within
@@ -199,7 +200,7 @@ if (require("ggplot2")) {
     geom_pithist(aes(x = mids, y = density, width = width, group = group)) + 
     geom_pithist_simint(aes(x = mids,, ymin = simint_lwr, ymax = simint_upr)) + 
     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line") + 
-    geom_pithist_ref(aes(x = mids, y = ref, width = width)) + 
+    geom_pithist_ref(aes(x = mids, y = counts, width = width)) + 
     facet_grid(group~.)
   gg1
 

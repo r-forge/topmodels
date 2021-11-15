@@ -1276,6 +1276,34 @@ get_pp <- function(n, breaks, freq) {
   rval
 }
 
+#' Compute Reference Line for PIT Histograms
+#'
+#' Helper function for computing reference lines showing perfect prediction for PIT histograms.
+#'
+#' @noRd 
+#' @param n number of observations. 
+#' @param breaks vector with breakpoints.
+#' @param type Which kind of confindence interval should be computed? Type \code{exact} using 
+#' the quantile function of the binomial distribution or \code{approximation} uses an approximation
+#' by Agresti and Coull (1998). 
+#' @param freq Should confidence intervals returned for reported frequencies or
+#' for counts of observation.
+compute_pithist_ref <- function(n, breaks, freq) {
+
+  ## FIXME: (ML) 
+  ## * Is this correct?
+  ## * For small n qbinom(0.5, ...) is not equal 1.
+
+  ## calc bin specific reference line
+  rval <- qbinom(0.5, size = n, prob = diff(breaks))
+
+  ## transform counts to density
+  if (!freq) {
+    rval <- rval / (n / (length(breaks) - 1))
+  }
+  rval
+}
+
 
 #' Compute Confidence Interval for PIT Histograms
 #'
@@ -1306,7 +1334,7 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
   } else {
     rval <- data.frame(
       do.call(rbind, 
-        lapply(n * diff(breaks), function(x) add4ci(x, n, level)$conf.int * n)
+        lapply(n * diff(breaks), function(x) PropCIs_add4ci(x, n, level)$conf.int * n)
       )
     )
   }
@@ -1340,13 +1368,25 @@ get_confint <- function(n, breaks, level, freq) {
 get_confint_agresti <- function(x, n, level, bins, freq) {
   ## helper function to calculate an approximated CI according to Agresti & Coull (1998)
   ## doi=10.1080/00031305.1998.10480550
-  rval <- add4ci(x, n, level)$conf.int * n
+  rval <- PropCIs_add4ci(x, n, level)$conf.int * n
   if (!freq) rval <- rval / (n / bins)
   rval
 }
 
 
-add4ci <- function(x, n, conf.level) {
+#' Agresti-Coull add-4 CI for a binomial proportion
+#'
+#' Copy of \code{add4ci} package from package `PropCIs` by Ralph Scherer
+#' (licensed under GPL-2/GPL-3).
+#' Agresti-Coull add-4 CI for a binomial proportion, based on adding
+#' 2 successes and 2 failures before computing the Wald CI. The CI is
+#' truncated, when it overshoots the boundary.
+#'
+#' @param x number of successes.
+#' @param n number of trials.
+#' @param conf.level confidence coefficient.
+#' @noRd 
+PropCIs_add4ci <- function(x, n, conf.level) {
   ## copy of `add4ci` package from package `PropCIs` by Ralph Scherer (licensed under GPL-2/GPL-3)
   ptilde <- (x + 2) / (n + 4)
   z <- abs(qnorm((1 - conf.level) / 2))
@@ -1378,8 +1418,6 @@ add4ci <- function(x, n, conf.level) {
 #' @param type Fix description.
 #' @param level Fix description.
 #' @param freq Fix description.
-#' @param xlim Fix description.
-#' @param n Fix description.
 #' @param trafo Fix description.
 #' @examples
 #' if (require("ggplot2")) {
@@ -1406,7 +1444,7 @@ add4ci <- function(x, n, conf.level) {
 #'     geom_pithist(aes(x = mids, y = density, width = width, group = group)) + 
 #'     geom_pithist_simint(aes(x = mids,, ymin = simint_lwr, ymax = simint_upr)) + 
 #'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line") + 
-#'     geom_pithist_ref(aes(x = mids, y = ref, width = width)) + 
+#'     geom_pithist_ref(aes(x = mids, y = counts, width = width)) + 
 #'     facet_grid(group~.)
 #'   gg1
 #'
@@ -1640,6 +1678,8 @@ stat_pithist_ref <- function(mapping = NULL,
                              na.rm = FALSE,
                              show.legend = NA, 
                              inherit.aes = TRUE, 
+                             trafo = NULL,
+                             freq = FALSE, 
                              ...) {
   ggplot2::layer(
     stat = StatPithistRef,
@@ -1651,26 +1691,44 @@ stat_pithist_ref <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
+      trafo = trafo,
+      freq = freq,
       ...
     )
   )
 }
+
 
 #' @rdname geom_pithist
 #' @format NULL
 #' @usage NULL
 #' @export
 StatPithistRef <- ggplot2::ggproto("StatPithistRef", ggplot2::Stat,
- 
-  compute_group = function(data, scales) {
-    nd <- data.frame(
+
+  required_aes = c("x", "y", "width"),
+
+  compute_group = function(data, 
+                           scales, 
+                           trafo = NULL,
+                           freq = FALSE) {
+
+    ## compute reference line
+    if (!is.null(trafo)) {
+      ref <- c(NA_real_, NA_real_)  # must be numeric for ggplot2
+      warning("reference line for perfect prediction is not yet implemented when employing a `trafo`")
+    } else { 
+      ref <- compute_pithist_ref(
+        n = sum(data$y), 
+        breaks = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+        freq = freq
+      )
+    }
+
+    data.frame(
       x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
-      y = c(data$y, data$y[NROW(data)])
+      y = c(ref, ref[NROW(ref)])
     )
-    nd
-  },
- 
-  required_aes = c("x", "y", "width")
+  }
 )
 
 
@@ -1683,8 +1741,9 @@ geom_pithist_confint <- function(mapping = NULL,
                                  na.rm = FALSE,
                                  show.legend = NA, 
                                  inherit.aes = TRUE,
-                                 type = "approximation", 
+                                 trafo = NULL,
                                  level = 0.95,
+                                 type = "approximation", 
                                  freq = FALSE, 
                                  style = c("polygon", "line"), 
                                  ...) {
@@ -1700,10 +1759,11 @@ geom_pithist_confint <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      style = style,
-      type = type,
+      trafo = trafo,
       level = level,
+      type = type,
       freq = freq,
+      style = style,
       ...
     )
   )
@@ -1793,12 +1853,19 @@ set_default_aes_pithist_confint <- function(style) {
 
 #' @rdname geom_pithist
 #' @export
-stat_pithist_confint <- function(mapping = NULL, data = NULL, geom = "pithist_confint",
-                                 position = "identity", na.rm = FALSE,
-                                 show.legend = NA, inherit.aes = TRUE, 
-                                 xlim = NULL, n = 101, trafo = NULL,
-                                 type = "approximation", level = 0.95,
-                                 freq = FALSE, style = c("polygon", "line"), ...) {
+stat_pithist_confint <- function(mapping = NULL, 
+                                 data = NULL, 
+                                 geom = "pithist_confint",
+                                 position = "identity", 
+                                 na.rm = FALSE,
+                                 show.legend = NA, 
+                                 inherit.aes = TRUE, 
+                                 trafo = NULL, 
+                                 level = 0.95,
+                                 type = "approximation", 
+                                 freq = FALSE, 
+                                 style = c("polygon", "line"), 
+                                 ...) {
 
   style <- match.arg(style)
 
@@ -1812,11 +1879,9 @@ stat_pithist_confint <- function(mapping = NULL, data = NULL, geom = "pithist_co
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      xlim = xlim,
-      n = n,
       trafo = trafo,
-      type = type,
       level = level,
+      type = type,
       freq = freq,
       style = style,
       ...
@@ -1835,11 +1900,9 @@ StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
 
   compute_group = function(data, 
                            scales, 
-                           xlim,
-                           n,
                            trafo = NULL,
-                           type = "approximation",
                            level = 0.95,
+                           type = "approximation",
                            freq = FALSE,
                            style = "polygon") {
   ## compute ci interval
