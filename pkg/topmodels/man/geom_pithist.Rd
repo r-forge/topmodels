@@ -14,8 +14,8 @@
 \alias{GeomPithistConfint}
 \alias{stat_pithist_confint}
 \alias{StatPithistConfint}
-\alias{geom_pithist_range}
-\alias{GeomPithistRange}
+\alias{geom_pithist_simint}
+\alias{GeomPithistSimint}
 \title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
 \usage{
 geom_pithist(
@@ -72,6 +72,9 @@ geom_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  type = "approximation",
+  level = 0.95,
+  freq = FALSE,
   style = c("polygon", "line"),
   ...
 )
@@ -84,11 +87,17 @@ stat_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  xlim = NULL,
+  n = 101,
+  trafo = NULL,
+  type = "approximation",
+  level = 0.95,
+  freq = FALSE,
   style = c("polygon", "line"),
   ...
 )
 
-geom_pithist_range(
+geom_pithist_simint(
   mapping = NULL,
   data = NULL,
   stat = "identity",
@@ -148,6 +157,18 @@ the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 \item{style}{Fix description.}
 
 \item{geom}{The geometric object to use display the data}
+
+\item{type}{Fix description.}
+
+\item{level}{Fix description.}
+
+\item{freq}{Fix description.}
+
+\item{xlim}{Fix description.}
+
+\item{n}{Fix description.}
+
+\item{trafo}{Fix description.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within
@@ -161,8 +182,8 @@ if (require("ggplot2")) {
   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
   
   ## Compute pithist
-  p1 <- pithist(m1_pois, plot = FALSE)
-  p2 <- pithist(m2_pois, plot = FALSE)
+  p1 <- pithist(m1_pois, type = "random", plot = FALSE)
+  p2 <- pithist(m2_pois, type = "random", plot = FALSE)
   
   d <- c(p1, p2) 
   
@@ -175,18 +196,17 @@ if (require("ggplot2")) {
   
   ## Plot bar style PIT histogram
   gg1 <- ggplot(data = d) + 
-    geom_pithist(aes(x = x, y = y, width = width, group = group)) + 
-    geom_pithist_range(aes(x, ymin = rg_lwr, ymax = rg_upr)) + 
-    geom_pithist_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), style = "line") + 
-    geom_pithist_ref(aes(x = x, y = ref, width = width)) + 
+    geom_pithist(aes(x = mids, y = density, width = width, group = group)) + 
+    geom_pithist_simint(aes(x = mids,, ymin = simint_lwr, ymax = simint_upr)) + 
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line") + 
+    geom_pithist_ref(aes(x = mids, y = ref, width = width)) + 
     facet_grid(group~.)
   gg1
 
   ## Plot line style PIT histogram
   gg2 <- ggplot(data = d) + 
-    geom_pithist(aes(x = x, y = y, width = width, group = group), style = "line") + 
-    geom_pithist_confint(aes(x = x, ymin = ci_lwr, ymax = ci_upr, width = width), 
-      style = "polygon") + 
+    geom_pithist(aes(x = mids, y = density, width = width, group = group), style = "line") + 
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") + 
     facet_grid(group~.)
   gg2
 }

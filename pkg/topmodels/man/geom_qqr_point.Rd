@@ -228,6 +228,22 @@ if (require("ggplot2")) {
 
   gg2
   gg2 + facet_wrap(~group)
+
+  ## Use different `trafo`s with confidence intervals
+  q1 <- qqrplot(m1_pois, trafo = qunif, plot = FALSE)
+  q2 <- qqrplot(m2_pois, plot = FALSE)
+  
+  gg3 <- ggplot(data = q1, aes(x, y, na.rm = TRUE)) +
+    geom_qqr_ref() +
+    geom_qqr_confint(fill = "red", trafo = qunif) +
+    geom_qqr_point()
+  gg3
+  
+  gg4 <- ggplot(data = q2, aes(x, y, na.rm = TRUE)) +
+    geom_qqr_ref() +
+    geom_qqr_confint(fill = "red", trafo = qnorm) +
+    geom_qqr_point()
+  gg4
 } 
 }
 \keyword{datasets}
