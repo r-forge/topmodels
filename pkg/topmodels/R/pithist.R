@@ -378,11 +378,6 @@ pithist.default <- function(
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
 
-  add_arg <- list(...)
-  add_arg <- add_arg[add_arg %in% unique(names(c(formals(plot.pithist), formals(autoplot.pithist))))]
-  add_arg <- add_arg[add_arg != "..."]
-  attr(rval, "add_arg") <- list(...)
-
   ## add class
   if (class == "data.frame") {
     class(rval) <- c("pithist", "data.frame")
