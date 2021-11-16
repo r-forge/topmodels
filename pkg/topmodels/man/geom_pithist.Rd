@@ -196,7 +196,7 @@ if (require("ggplot2")) {
   ## Plot bar style PIT histogram
   gg1 <- ggplot(data = d) + 
     geom_pithist(aes(x = mids, y = density, width = width, group = group)) + 
-    geom_pithist_simint(aes(x = mids,, ymin = simint_lwr, ymax = simint_upr)) + 
+    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr)) + 
     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line") + 
     geom_pithist_ref(aes(x = mids, y = counts, width = width)) + 
     facet_grid(group~.)

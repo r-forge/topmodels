@@ -279,6 +279,7 @@ pithist.default <- function(object,
     ## collect everything as data.frame
     ## TODO: (ML) Maybe get rid of `hist()`
     tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
+    tmp_hist$counts <- tmp_hist$counts / nsim
 
     ## calculate simint
     fun_simint <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
@@ -348,40 +349,6 @@ pithist.default <- function(object,
     simint_lwr <- simint_upr <- 0
   }
 
-  ## compute ci interval
-  ## FIXME: (Z) confidence interval really only valid for equidistant breaks
-  if (!is.null(trafo)) {
-    ci <- c(NA_real_, NA_real_)  # must be numeric for ggplot2
-    warning("confint is not yet implemented when employing a `trafo`")
-  } else if (confint_type == "approximation") {
-    if (length(unique(round(diff(breaks), 10))) > 1) {
-      warning("confint is not yet implemented for non equidistant breaks for argument `type = 'approximation'`")
-      ci <- c(NA_real_, NA_real_)  # must be numeric for ggplot2
-    } else {
-      ci <- get_confint_agresti(
-        NROW(p) / (length(breaks) - 1),
-        NROW(p),
-        confint_level,
-        length(breaks) - 1,
-        freq
-      )
-    }
-  } else {
-    ci <- get_confint(NROW(p), breaks, confint_level, freq)
-  }
-
-  ## perfect prediction
-  #pp <- ifelse(freq, NROW(p) / (length(breaks) - 1), 1)
-  ## FIXME: (ML) 
-  ## * Is this correct?
-  ## * This is not the same as uncommented above and for small n qbinom(0.5, ...) is not equal 1 
-  if (!is.null(trafo)) {
-    pp <- NA_real_  # must be numeric for ggplot2
-    warning("ref is not yet implemented when employing a `trafo`")
-  } else {
-    pp <- get_pp(NROW(p), breaks, freq)
-  }
-
   ## labels
   if (is.null(main)) main <- deparse(substitute(object))
 
@@ -389,13 +356,10 @@ pithist.default <- function(object,
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
   rval <- data.frame(
-    mids = tmp_hist$mids,
+    counts = tmp_hist$counts,
     density = tmp_hist$density,
-    counts = tmp_hist$counts / nsim,
-    width = diff(tmp_hist$breaks),
-    ci_lwr = ci[[1]],
-    ci_upr = ci[[2]],
-    ref = pp
+    mids = tmp_hist$mids,
+    width = diff(tmp_hist$breaks)
   )
 
   ## add simint
@@ -565,6 +529,8 @@ rbind.pithist <- c.pithist
 #' @param colour,size,linetype,legend,alpha graphical parameters passed for 
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @param freq Fix me.
+#' @param level Fix me.
+#' @param type Fix me.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references 
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -661,6 +627,8 @@ plot.pithist <- function(x,
                          lty = 1,
                          axes = TRUE,
                          box = TRUE,
+                         level = 0.95,
+                         type = "exact", 
                          freq = NULL,
                          ...) {
   # -------------------------------------------------------------------
@@ -728,6 +696,33 @@ plot.pithist <- function(x,
     if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
   }
 
+  ## compute confidence intervals for all groups
+  ci <- lapply(1:n, function(i) {
+    d <- x[x$group == i, ] 
+    compute_pithist_confint(
+      n = sum(d$counts), 
+      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      level = level, 
+      type = type,
+      freq = freq
+    )
+  })
+  ci <- do.call("rbind", ci)
+  x <- cbind(x, ci)  # careful: loses all attributes of x
+
+  ## compute reference lines (perfect prediction) for all groups
+  ref <- lapply(1:n, function(i) {
+    d <- x[x$group == i, ]
+    rval <- compute_pithist_ref(
+      n = sum(d$counts),
+      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      freq = freq
+    )
+    rval <- data.frame("ref" = rval)
+  })
+  ref <- do.call("rbind", ref)
+  x <- cbind(x, ref)  # careful: loses all attributes of x
+
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR 'HISTOGRAM-STYLE PITHIST'
   # -------------------------------------------------------------------
@@ -789,7 +784,7 @@ plot.pithist <- function(x,
     }
 
     ## plot confint lines
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
+    if (!identical(plot_arg$confint[j], FALSE)) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- 2  # red
 
       ## lower confint line
@@ -847,13 +842,14 @@ plot.pithist <- function(x,
     }
 
     ## plot confint polygon
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
+    if (!identical(plot_arg$confint[j], FALSE)) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
-      ref_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
+
+      ci_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       polygon(
         c(
-          rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)],
-          rev(rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)])
+          rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)],
+          rev(rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)])
         ),
         c(
           rep(d$ci_lwr, each = 2),
@@ -932,6 +928,8 @@ lines.pithist <- function(x,
                           lwd = 2,
                           lty = 1,
                           freq = NULL,
+                          level = 0.95,
+                          type = "exact", 
                           ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -956,6 +954,33 @@ lines.pithist <- function(x,
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
+  ## compute confidence intervals for all groups
+  ci <- lapply(1:n, function(i) {
+    d <- x[x$group == i, ] 
+    compute_pithist_confint(
+      n = sum(d$counts), 
+      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      level = level, 
+      type = type,
+      freq = freq
+    )
+  })
+  ci <- do.call("rbind", ci)
+  x <- cbind(x, ci)  # careful: loses all attributes of x
+
+  ## compute reference lines (perfect prediction) for all groups
+  ref <- lapply(1:n, function(i) {
+    d <- x[x$group == i, ]
+    rval <- compute_pithist_ref(
+      n = sum(d$counts),
+      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      freq = freq
+    )
+    rval <- data.frame("ref" = rval)
+  })
+  ref <- do.call("rbind", ref)
+  x <- cbind(x, ref)  # careful: loses all attributes of x
+
   ## recycle arguments for plotting to match the number of groups
   plot_arg <- data.frame(
     1:n, confint, ref, col, fill, alpha_min, lwd, lty
@@ -973,13 +998,13 @@ lines.pithist <- function(x,
     y <- if (freq) c(d$counts, d$counts[NROW(d)]) else c(d$density, d$density[NROW(d)])
 
     ## plot confint polygon
-    if (!identical(plot_arg$confint[j], FALSE) && !is.na(attr(d, "confint_level")[j])) {
+    if (!identical(plot_arg$confint[j], FALSE)) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
-     ref_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
+     ci_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       polygon( 
         c(
-          rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)],
-          rev(rep(ref_z, each = 2)[-c(1, length(ref_z) * 2)])
+          rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)],
+          rev(rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)])
         ),
         c(
           rep(d$ci_lwr, each = 2),
@@ -1199,7 +1224,7 @@ autoplot.pithist <- function(object,
       geom_pithist_ref(
         ggplot2::aes_string(
           x = "mids", 
-          y = "ref", 
+          y = "counts", 
           width = "width"
         )
       )
@@ -1360,7 +1385,7 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #'   ## Plot bar style PIT histogram
 #'   gg1 <- ggplot(data = d) + 
 #'     geom_pithist(aes(x = mids, y = density, width = width, group = group)) + 
-#'     geom_pithist_simint(aes(x = mids,, ymin = simint_lwr, ymax = simint_upr)) + 
+#'     geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr)) + 
 #'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line") + 
 #'     geom_pithist_ref(aes(x = mids, y = counts, width = width)) + 
 #'     facet_grid(group~.)
@@ -1936,7 +1961,7 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
   if (!freq) {
     rval <- data.frame(sapply(rval, function(x) x / (n / (length(breaks) - 1)), simplify = FALSE))
   }
-  colnames(rval) <- NULL
+  colnames(rval) <- c("ci_lwr", "ci_upr")
   rval
 }
 
