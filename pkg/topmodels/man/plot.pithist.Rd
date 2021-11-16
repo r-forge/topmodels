@@ -25,6 +25,8 @@
   lty = 1,
   axes = TRUE,
   box = TRUE,
+  level = 0.95,
+  type = "exact",
   freq = NULL,
   ...
 )
@@ -39,6 +41,8 @@
   lwd = 2,
   lty = 1,
   freq = NULL,
+  level = 0.95,
+  type = "exact",
   ...
 )
 
@@ -83,6 +87,10 @@ parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 plot or just the histogram or just the fitted line.}
 
 \item{xlab, ylab, main}{graphical parameters.}
+
+\item{level}{Fix me.}
+
+\item{type}{Fix me.}
 
 \item{freq}{Fix me.}
 
