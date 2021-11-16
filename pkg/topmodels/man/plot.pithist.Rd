@@ -10,8 +10,13 @@
   x,
   single_graph = FALSE,
   style = c("bar", "line"),
-  confint = TRUE,
+  freq = FALSE,
   ref = TRUE,
+  confint = TRUE,
+  confint_level = 0.95,
+  confint_type = c("exact", "approximation"),
+  simint = TRUE,
+  trafo = NULL,
   xlim = c(0, 1),
   ylim = c(0, NA),
   xlab = NULL,
@@ -25,9 +30,6 @@
   lty = 1,
   axes = TRUE,
   box = TRUE,
-  level = 0.95,
-  type = "exact",
-  freq = NULL,
   ...
 )
 
@@ -71,36 +73,42 @@
 }
 \arguments{
 \item{single_graph}{logical. Should all computed extended reliability
-diagrams be plotted in a single graph?}
+diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.}
 
 \item{style}{character specifying the style of pithist. For \code{style = "bar"}
 a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 plotted.}
 
-\item{confint}{logical. Should confident intervals be drawn?}
+\item{freq}{Fix me.}
 
 \item{ref, col, fill, border, alpha_min, lwd, lty, axes, box}{additional graphical
 parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
+
+\item{confint}{logical. Should confident intervals be drawn? Fix. can be colour}
+
+\item{confint_level}{numeric. The confidence level required.}
+
+\item{confint_type}{character. Which type of confidence interval should be plotted. According
+to Agresti and Coull (1998), for interval estimation of binomial proportions
+an approximation can be better than exact.}
+
+\item{simint}{Fix description.}
+
+\item{trafo}{FIX describtion.}
 
 \item{xlim, ylim}{graphical parameters. These may pertain either to the whole
 plot or just the histogram or just the fitted line.}
 
 \item{xlab, ylab, main}{graphical parameters.}
 
+\item{\dots}{further graphical parameters.}
+
 \item{level}{Fix me.}
 
 \item{type}{Fix me.}
 
-\item{freq}{Fix me.}
-
-\item{\dots}{further graphical parameters.}
-
 \item{object, x}{an object of class \code{\link{pithist}}.}
-
-\item{confint_type}{Fix description.}
-
-\item{simint}{Fix description.}
 
 \item{colour, size, linetype, legend, alpha}{graphical parameters passed for 
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}

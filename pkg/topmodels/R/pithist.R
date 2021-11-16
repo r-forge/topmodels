@@ -84,22 +84,15 @@
 #' probability densities, component \code{density}, are plotted (so that the
 #' histogram has a total area of one).
 #' @param breaks numeric. Breaks for the histogram intervals.
+#' @param ref to be fixed.
 #' @param confint logical. Should confident intervals be drawn?
-#' @param confint_level numeric. The confidence level required.
-#' @param confint_type character. Which type of confidence interval should be plotted. According
-#' to Agresti and Coull (1998), for interval estimation of binomial proportions
-#' an approximation can be better than exact.
 #' @param simint logical. In case of discrete distributions, should the simulation 
 #' (confidence) interval due to the randomization be visualized?
 #' @param simint_level numeric. The confidence level required for calculating the simulation 
 #' (confidence) interval due to the randomization. 
 #' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the 
 #' simulation (confidence) interval due to the randomization. 
-#' @param simint_seed numeric. The seed to be set for calculating the simulation (confidece) interval 
-#' due to the randomization. 
-#' @param single_graph logical. Should all computed extended reliability
-#' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.
-#' @param xlim,ylim,xlab,ylab,main graphical parameters passed to
+#' @param xlab,ylab,main graphical parameters passed to
 #' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.  
 #' @param \dots further graphical parameters.
 #' @return An object of class \code{"pithist"} inheriting from
@@ -166,31 +159,26 @@ pithist <- function(object, ...) {
 #' @rdname pithist
 #' @method pithist default
 #' @export
-pithist.default <- function(object,
-
+pithist.default <- function(
                             ## computation arguments
+                            object,
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
-                            trafo = NULL,
+                            trafo = NULL,  # needed also for plotting
+                            breaks = NULL,
+                            freq = FALSE,  # needed also for plotting
                             type = c("expected", "random"),
                             nsim = 1L,
                             delta = NULL,
-                            freq = FALSE,
-                            breaks = NULL,
-                            simint = TRUE,
+                            simint = TRUE,  # needed also for plotting
                             simint_level = 0.95,
                             simint_nrep = 250,
-                            simint_seed = 1,
 
                             ## plotting arguments
-                            confint = TRUE,
-                            confint_level = 0.95,
-                            confint_type = c("exact", "approximation"),
                             style = c("bar", "line"),
-                            single_graph = FALSE,
-                            xlim = c(NA, NA),
-                            ylim = c(0, NA),
+                            confint = TRUE,
+                            ref = NULL,
                             xlab = "PIT",
                             ylab = if (freq) "Frequency" else "Density",
                             main = NULL,
@@ -201,28 +189,29 @@ pithist.default <- function(object,
   ## sanity checks
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `delta w/i `qresiduals()`
-  ## * `confint` w/i `abline()`
-  ## * `...` w/i `plot()` and `autoplot()`
-  stopifnot(is.null(trafo) | is.function(trafo))
-  stopifnot(is.numeric(nsim), length(nsim) == 1)
-  stopifnot(is.logical(freq))
+  ## * `...` w/i 
+  stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
+  stopifnot(is.logical(freq))
+  stopifnot(is.numeric(nsim), length(nsim) == 1)
+  stopifnot(is.logical(simint))
   stopifnot(
-    is.numeric(confint_level),
-    length(confint_level) == 1,
-    confint_level >= 0,
-    confint_level <= 1
+    is.numeric(simint_level),
+    length(simint_level) == 1,
+    simint_level >= 0,
+    simint_level <= 1
   )
-  stopifnot(is.logical(single_graph))
-  stopifnot(length(xlim) == 2 && (all(is.na(xlim)) || is.numeric(xlim)))
-  stopifnot(length(ylim) == 2 && (all(is.na(ylim)) || is.numeric(ylim)))
+  stopifnot(is.numeric(simint_nrep), length(simint_nrep) == 1, simint_nrep >= 1)
+  stopifnot(is.logical(simint))
+  # FIXME: (ML) Both confint and ref can be actually also a colour. maybe not good?
+  #stopifnot(is.logical(confint) || confint %in% c("polygon", "line", "none"))
+  #stopifnot(is.null(ref) || is.logical(ref)) 
   stopifnot(length(xlab) == 1)
   stopifnot(length(ylab) == 1)
-  stopifnot(length(main) == 1 | length(main) == 0)
+  stopifnot(is.null(main) || length(main) == 1)
 
   ## match arguments
   style <- match.arg(style)
-  confint_type <- match.arg(confint_type)
   type <- match.arg(type)
 
   ## guess plotting flavor
@@ -253,22 +242,27 @@ pithist.default <- function(object,
   # COMPUTATION OF PIT
   # -------------------------------------------------------------------
   ## get breaks: part 1 (due to "type = expected" must be done before)
-  n <- NROW(newresponse(object, newdata = newdata))  # solely to get n to compute number of breaks
+  n <- NROW(newresponse(object, newdata = newdata))  # solely to get n for computing breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(n, c(0, 50, 5000, 1000000, Inf))]
 
+  # -------------------------------------------------------------------
   if (type == "proportional") {
-    ## FIXME: (ML)
+  # -------------------------------------------------------------------
+    ## TODO: (ML)
     ## * implement proportional over the inteverals (e.g., below censoring point)
     ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
     stop("not yet implemented")
+
+  # -------------------------------------------------------------------
   } else if (type == "random") {
+  # -------------------------------------------------------------------
     p <- qresiduals(object,
       newdata = newdata, trafo = trafo, delta = delta,
       type = "random", nsim = nsim
     )
 
     ## get breaks: part 2
-    ## FIXME: (ML) maybe use xlim instead or `0` and `1`
+    ## TODO: (ML) maybe use xlim instead or `0` and `1`
     if (is.null(trafo)) {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
@@ -281,8 +275,8 @@ pithist.default <- function(object,
     tmp_hist <- hist(p, breaks = breaks, plot = FALSE)
     tmp_hist$counts <- tmp_hist$counts / nsim
 
-    ## calculate simint
-    fun_simint <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
+    ## helper function for calculating simulation interval
+    compute_simint <- function(object, newdata, trafo, delta, nsim, freq, breaks) {
 
       simint_p <- qresiduals(object,
         newdata = newdata, trafo = trafo, delta = delta,
@@ -300,15 +294,21 @@ pithist.default <- function(object,
         simint_hist$density 
       }
     }
-    
-    simint_tmp <- replicate(simint_nrep, fun_simint(object, newdata, trafo, delta, nsim, freq, breaks))
+   
+    ## compute simulation interval bases on quantiles
+    simint_tmp <- replicate(
+      simint_nrep, 
+      compute_simint(object, newdata, trafo, delta, nsim, freq, breaks)
+    )
 
     simint_prob <- (1 - simint_level) / 2
     simint_prob <- c(simint_prob, 1 - simint_prob)
     simint_lwr <- apply(simint_tmp, 1, quantile, probs = simint_prob[1], na.rm = TRUE)
     simint_upr <- apply(simint_tmp, 1, quantile, probs = simint_prob[2], na.rm = TRUE)
   
+  # -------------------------------------------------------------------
   } else if (type == "expected") {
+  # -------------------------------------------------------------------
     ## compare "nonrandom" in Czado et al. (2009) 
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
@@ -368,12 +368,20 @@ pithist.default <- function(object,
   rval$simint_lwr <- rval$density - (simint_upr - simint_lwr) / 2
 
   ## attributes for graphical display
+  attr(rval, "trafo") <- trafo
   attr(rval, "freq") <- freq
+  attr(rval, "simint") <- simint
+  attr(rval, "style") <- style
+  attr(rval, "confint") <- confint
+  attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "confint_level") <- ifelse(confint, confint_level, NA)
-  attr(rval, "trafo") <- trafo
+
+  add_arg <- list(...)
+  add_arg <- add_arg[add_arg %in% unique(names(c(formals(plot.pithist), formals(autoplot.pithist))))]
+  add_arg <- add_arg[add_arg != "..."]
+  attr(rval, "add_arg") <- list(...)
 
   ## add class
   if (class == "data.frame") {
@@ -385,14 +393,9 @@ pithist.default <- function(object,
 
   ## plot by default
   if (plot == "ggplot2") {
-    try(print(ggplot2::autoplot(rval,
-      style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, simint = simint,
-      ...
-    )))
+    try(print(ggplot2::autoplot(rval, ...)))
   } else if (plot == "base") {
-    try(plot(rval,
-      style = style, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, confint = confint, ...
-    ))
+    try(plot(rval, ...))
   }
 
   ## return invisibly
@@ -440,9 +443,12 @@ c.pithist <- function(...) {
   }
 
   ## parameters
-  freq <- unlist(lapply(rval, function(r) attr(r, "freq")))
-  confint_level <- unlist(lapply(rval, function(r) attr(r, "confint_level")))
   trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
+  freq <- unlist(lapply(rval, function(r) attr(r, "freq")))
+  simint <- unlist(lapply(rval, function(r) attr(r, "simint")))
+  style <- unlist(lapply(rval, function(r) attr(r, "style")))
+  confint <- unlist(lapply(rval, function(r) attr(r, "confint")))
+  ref <- unlist(lapply(rval, function(r) attr(r, "ref")))
   n <- unlist(n)
 
   # -------------------------------------------------------------------
@@ -464,18 +470,31 @@ c.pithist <- function(...) {
     }
   }
 
+  if (length(style) > 1) {
+    if(!all(sapply(2:length(style), function(i) identical(style[[i-1]], style[[i]])))) {
+      stop("objects with different `style`s are on different scales and hence must not be combined")
+    } else {
+    style <- style[[1]]
+    }
+  }
+
   # -------------------------------------------------------------------
   # RETURN DATA
   # -------------------------------------------------------------------
-  ## combine and return
+  ## combine
   rval <- do.call("rbind.data.frame", rval)
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
+
+  ## add attributes
+  attr(rval, "trafo") <- trafo
   attr(rval, "freq") <- freq
+  attr(rval, "simint") <- simint
+  attr(rval, "style") <- style
+  attr(rval, "confint") <- confint
+  attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "confint_level") <- confint_level
-  attr(rval, "trafo") <- trafo
 
   ## set class to data.frame or tibble
   if (class == "data.frame") {
@@ -512,14 +531,19 @@ rbind.pithist <- c.pithist
 #' @aliases plot.pithist lines.pithist autoplot.pithist
 #' @param object,x an object of class \code{\link{pithist}}.
 #' @param single_graph logical. Should all computed extended reliability
-#' diagrams be plotted in a single graph?
+#' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.
 #' @param style character specifying the style of pithist. For \code{style = "bar"}
 #' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 #' plotted.
-#' @param confint logical. Should confident intervals be drawn?
+#' @param confint logical. Should confident intervals be drawn? Fix. can be colour
 #' @param simint Fix description.
+#' @param trafo FIX describtion.
 #' @param confint_type Fix description.
+#' @param confint_level numeric. The confidence level required.
+#' @param confint_type character. Which type of confidence interval should be plotted. According
+#' to Agresti and Coull (1998), for interval estimation of binomial proportions
+#' an approximation can be better than exact.
 #' @param xlim,ylim graphical parameters. These may pertain either to the whole
 #' plot or just the histogram or just the fitted line.
 #' @param xlab,ylab,main graphical parameters.
@@ -612,8 +636,13 @@ rbind.pithist <- c.pithist
 plot.pithist <- function(x,
                          single_graph = FALSE,
                          style = c("bar", "line"),
-                         confint = TRUE,
+                         freq = FALSE,
                          ref = TRUE,
+                         confint = TRUE,
+                         confint_level = 0.95,
+                         confint_type = c("exact", "approximation"),
+                         simint = TRUE,
+                         trafo = NULL,
                          xlim = c(0, 1),
                          ylim = c(0, NA),
                          xlab = NULL,
@@ -627,9 +656,6 @@ plot.pithist <- function(x,
                          lty = 1,
                          axes = TRUE,
                          box = TRUE,
-                         level = 0.95,
-                         type = "exact", 
-                         freq = NULL,
                          ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -650,9 +676,6 @@ plot.pithist <- function(x,
   }
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
-
-  # FIXME: (ML) Improve
-  freq <- if (!is.null(freq)) freq else attr(x, "freq")
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -679,6 +702,17 @@ plot.pithist <- function(x,
     border, col, fill, alpha_min, lwd, lty, axes, box
   )[, -1]
 
+  ## set arguments to values defined w/i attributes
+  trafo <- use_arg_from_attributes(x, "trafo")
+  freq <- use_arg_from_attributes(x, "freq")
+  simint <- use_arg_from_attributes(x, "simint")
+  style <- use_arg_from_attributes(x, "style")
+  confint <- use_arg_from_attributes(x, "confint")
+  ref <- use_arg_from_attributes(x, "ref")
+  xlab <- use_arg_from_attributes(x, "xlab")
+  ylab <- use_arg_from_attributes(x, "ylab")
+  main <- use_arg_from_attributes(x, "main")
+
   ## annotation
   if (single_graph) {
     if (is.null(xlab)) xlab <- "PIT"
@@ -702,8 +736,8 @@ plot.pithist <- function(x,
     compute_pithist_confint(
       n = sum(d$counts), 
       breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
-      level = level, 
-      type = type,
+      level = confint_level, 
+      type = confint_type,
       freq = freq
     )
   })

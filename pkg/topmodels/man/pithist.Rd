@@ -15,22 +15,17 @@ pithist(object, ...)
   plot = TRUE,
   class = NULL,
   trafo = NULL,
+  breaks = NULL,
+  freq = FALSE,
   type = c("expected", "random"),
   nsim = 1L,
   delta = NULL,
-  freq = FALSE,
-  breaks = NULL,
   simint = TRUE,
   simint_level = 0.95,
   simint_nrep = 250,
-  simint_seed = 1,
-  confint = TRUE,
-  confint_level = 0.95,
-  confint_type = c("exact", "approximation"),
   style = c("bar", "line"),
-  single_graph = FALSE,
-  xlim = c(NA, NA),
-  ylim = c(0, NA),
+  confint = TRUE,
+  ref = NULL,
   xlab = "PIT",
   ylab = if (freq) "Frequency" else "Density",
   main = NULL,
@@ -60,6 +55,13 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \item{trafo}{function for tranforming residuals from probability scale to a
 different distribution scale.}
 
+\item{breaks}{numeric. Breaks for the histogram intervals.}
+
+\item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
+frequencies, the \code{counts} component of the result; if \code{FALSE},
+probability densities, component \code{density}, are plotted (so that the
+histogram has a total area of one).}
+
 \item{type}{character. In case of discrete distributions, should an expected
 (non-normal) PIT histogram be computed according to Czado et al. (2009)
 (\code{"expected"}) or should the PIT be drawn randomly from the corresponding
@@ -73,13 +75,6 @@ proabilities corresponding to each observation according to get (randomized)
 quantile residuals. For \code{NULL}, the minimal observed difference in the
 resonse divided by \code{5e-6} is used.}
 
-\item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
-frequencies, the \code{counts} component of the result; if \code{FALSE},
-probability densities, component \code{density}, are plotted (so that the
-histogram has a total area of one).}
-
-\item{breaks}{numeric. Breaks for the histogram intervals.}
-
 \item{simint}{logical. In case of discrete distributions, should the simulation 
 (confidence) interval due to the randomization be visualized?}
 
@@ -89,26 +84,16 @@ histogram has a total area of one).}
 \item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the 
 simulation (confidence) interval due to the randomization.}
 
-\item{simint_seed}{numeric. The seed to be set for calculating the simulation (confidece) interval 
-due to the randomization.}
-
-\item{confint}{logical. Should confident intervals be drawn?}
-
-\item{confint_level}{numeric. The confidence level required.}
-
-\item{confint_type}{character. Which type of confidence interval should be plotted. According
-to Agresti and Coull (1998), for interval estimation of binomial proportions
-an approximation can be better than exact.}
-
 \item{style}{character specifying the style of pithist. For \code{style = "bar"}
 a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 drawn.}
 
-\item{single_graph}{logical. Should all computed extended reliability
-diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.}
+\item{confint}{logical. Should confident intervals be drawn?}
 
-\item{xlim, ylim, xlab, ylab, main}{graphical parameters passed to
+\item{ref}{to be fixed.}
+
+\item{xlab, ylab, main}{graphical parameters passed to
 \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}
 }
 \value{
