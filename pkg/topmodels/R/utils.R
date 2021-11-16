@@ -184,3 +184,33 @@ my_modify_list <- function(old, new, force = FALSE) {
 
   old
 }
+
+
+## Helper function for setting arguments to values w/i attributes
+use_arg_from_attributes <- function(object, arg_name, envir = parent.frame()) {
+
+  ## check input     
+  stopifnot(is.character(arg_name), length(arg_name) == 1)
+
+  ## get arg value from function
+  arg_fun <- try(eval(parse(text = arg_name), envir))
+  if (inherits(arg_fun, "try-error")) stop(sprintf("arg %s is not defined", arg_name))
+
+  ## get arg from attributes
+  arg_attr <- attr(object, arg_name)
+
+  if (is.null(arg_attr)) {
+    return(arg_fun)
+  } else {
+    if (!is.null(arg_fun) && !isTRUE(all.equal(arg_fun, arg_attr))) {
+      message(
+        sprintf(
+          "arg `%s` is overwritten by argument defined w/i attributes' object",
+          arg_name
+        )
+      )
+    }
+    return(arg_attr)
+  }
+}
+
