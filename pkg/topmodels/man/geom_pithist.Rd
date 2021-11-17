@@ -14,6 +14,8 @@
 \alias{StatPithistConfint}
 \alias{geom_pithist_confint}
 \alias{GeomPithistConfint}
+\alias{stat_pithist_simint}
+\alias{StatPithistSimint}
 \alias{geom_pithist_simint}
 \alias{GeomPithistSimint}
 \title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
@@ -26,6 +28,7 @@ stat_pithist(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  freq = FALSE,
   style = c("bar", "line"),
   ...
 )
@@ -38,6 +41,7 @@ geom_pithist(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  freq = FALSE,
   style = c("bar", "line"),
   ...
 )
@@ -100,14 +104,27 @@ geom_pithist_confint(
   ...
 )
 
-geom_pithist_simint(
+stat_pithist_simint(
   mapping = NULL,
   data = NULL,
-  stat = "identity",
+  geom = "pithist_simint",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  freq = FALSE,
+  ...
+)
+
+geom_pithist_simint(
+  mapping = NULL,
+  data = NULL,
+  stat = "pithist_simint",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  freq = FALSE,
   ...
 )
 }
@@ -151,6 +168,8 @@ rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 
+\item{freq}{Fix description.}
+
 \item{style}{Fix description.}
 
 \item{...}{Other arguments passed on to \code{\link[ggplot2:layer]{layer()}}. These are
@@ -162,8 +181,6 @@ to the paired geom/stat.}
 layer, as a string.}
 
 \item{trafo}{Fix description.}
-
-\item{freq}{Fix description.}
 
 \item{level}{Fix description.}
 
@@ -186,28 +203,35 @@ if (require("ggplot2")) {
   
   d <- c(p1, p2) 
   
-  ## Get label names
-  xlab <- unique(attr(d, "xlab"))
-  ylab <- unique(attr(d, "ylab"))
+  ## Create factor
   main <- attr(d, "main")
   main <- make.names(main, unique = TRUE)
   d$group <- factor(d$group, labels = main)
   
   ## Plot bar style PIT histogram
   gg1 <- ggplot(data = d) + 
-    geom_pithist(aes(x = mids, y = density, width = width, group = group)) + 
-    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr)) + 
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line") + 
-    geom_pithist_ref(aes(x = mids, y = counts, width = width)) + 
-    facet_grid(group~.)
+    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = TRUE) + 
+    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) + 
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = TRUE) + 
+    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = TRUE) + 
+    facet_grid(group~.) + xlab("PIT") + ylab("Frequency")
   gg1
 
-  ## Plot line style PIT histogram
   gg2 <- ggplot(data = d) + 
-    geom_pithist(aes(x = mids, y = density, width = width, group = group), style = "line") + 
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") + 
-    facet_grid(group~.)
+    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = FALSE) + 
+    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr, y = counts, 
+      width = width), freq = FALSE) + 
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = FALSE) + 
+    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = FALSE) + 
+    facet_grid(group~.) + xlab("PIT") + ylab("Density")
   gg2
+
+  ## Plot line style PIT histogram
+  gg3 <- ggplot(data = d) + 
+    geom_pithist(aes(x = mids, y = counts, width = width, group = group), style = "line") + 
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") + 
+    facet_grid(group~.) + xlab("PIT") + ylab("Density")
+  gg3
 }
 }
 \keyword{datasets}

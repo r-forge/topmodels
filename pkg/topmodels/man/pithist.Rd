@@ -16,14 +16,14 @@ pithist(object, ...)
   class = NULL,
   trafo = NULL,
   breaks = NULL,
-  freq = FALSE,
   type = c("expected", "random"),
   nsim = 1L,
   delta = NULL,
-  simint = TRUE,
+  simint = NULL,
   simint_level = 0.95,
   simint_nrep = 250,
   style = c("bar", "line"),
+  freq = FALSE,
   confint = TRUE,
   ref = NULL,
   xlab = "PIT",
@@ -57,11 +57,6 @@ different distribution scale.}
 
 \item{breaks}{numeric. Breaks for the histogram intervals.}
 
-\item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
-frequencies, the \code{counts} component of the result; if \code{FALSE},
-probability densities, component \code{density}, are plotted (so that the
-histogram has a total area of one).}
-
 \item{type}{character. In case of discrete distributions, should an expected
 (non-normal) PIT histogram be computed according to Czado et al. (2009)
 (\code{"expected"}) or should the PIT be drawn randomly from the corresponding
@@ -88,6 +83,11 @@ simulation (confidence) interval due to the randomization.}
 a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
 drawn.}
+
+\item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
+frequencies, the \code{counts} component of the result; if \code{FALSE},
+probability densities, component \code{density}, are plotted (so that the
+histogram has a total area of one).}
 
 \item{confint}{logical. Should confident intervals be drawn?}
 
