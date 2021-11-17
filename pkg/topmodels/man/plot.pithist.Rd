@@ -10,26 +10,27 @@
   x,
   single_graph = FALSE,
   style = c("bar", "line"),
-  freq = FALSE,
-  ref = TRUE,
+  freq = NULL,
+  trafo = NULL,
+  simint = NULL,
   confint = TRUE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  simint = TRUE,
-  trafo = NULL,
+  ref = NULL,
   xlim = c(0, 1),
   ylim = c(0, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
+  alpha_min = 0.2,
   col = "black",
   fill = adjustcolor("black", alpha.f = 0.2),
   border = "black",
-  alpha_min = 0.2,
   lwd = NULL,
   lty = 1,
   axes = TRUE,
   box = TRUE,
+  legend = FALSE,
   ...
 )
 
@@ -51,10 +52,13 @@
 \method{autoplot}{pithist}(
   object,
   single_graph = FALSE,
-  style = c("bar", "line"),
-  confint = TRUE,
-  confint_type = c("exact", "approximation"),
+  style = NULL,
+  freq = NULL,
+  trafo = NULL,
   simint = NULL,
+  confint = TRUE,
+  confint_level = 0.95,
+  confint_type = c("exact", "approximation"),
   ref = NULL,
   xlim = c(0, 1),
   ylim = c(0, NA),
@@ -67,7 +71,6 @@
   size = NULL,
   linetype = NULL,
   legend = FALSE,
-  freq = NULL,
   ...
 )
 }
@@ -82,8 +85,9 @@ plotted.}
 
 \item{freq}{Fix me.}
 
-\item{ref, col, fill, border, alpha_min, lwd, lty, axes, box}{additional graphical
-parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
+\item{trafo}{FIX describtion.}
+
+\item{simint}{Fix description.}
 
 \item{confint}{logical. Should confident intervals be drawn? Fix. can be colour}
 
@@ -93,9 +97,8 @@ parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
-\item{simint}{Fix description.}
-
-\item{trafo}{FIX describtion.}
+\item{ref, col, fill, border, alpha_min, lwd, lty, axes, box}{additional graphical
+parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
 
 \item{xlim, ylim}{graphical parameters. These may pertain either to the whole
 plot or just the histogram or just the fitted line.}

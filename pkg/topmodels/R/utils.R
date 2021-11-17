@@ -187,30 +187,50 @@ my_modify_list <- function(old, new, force = FALSE) {
 
 
 ## Helper function for setting arguments to values w/i attributes
-use_arg_from_attributes <- function(object, arg_name, envir = parent.frame()) {
+use_arg_from_attributes <- function(object, 
+                                    arg_name, 
+                                    default = NULL, 
+                                    force_single = FALSE, 
+                                    envir = parent.frame()) {
 
   ## check input     
   stopifnot(is.character(arg_name), length(arg_name) == 1)
 
   ## get arg value from function
   arg_fun <- try(eval(parse(text = arg_name), envir))
-  if (inherits(arg_fun, "try-error")) stop(sprintf("arg %s is not defined", arg_name))
+  if (inherits(arg_fun, "try-error")) stop(sprintf("arg `%s` is not defined", arg_name))
 
-  ## get arg from attributes
+  ## get arg value from attributes
   arg_attr <- attr(object, arg_name)
 
-  if (is.null(arg_attr)) {
-    return(arg_fun)
+  ## conditional return 
+  if (is.null(arg_fun) && force_single && length(unique(arg_attr)) > 1) {
+    message(sprintf(
+      " * as arg `%s`'s definition is not unique w/i object's attributes, using the default", arg_name
+    ))
+    rval <- default
+  } else if (is.null(arg_fun) && is.null(arg_attr)) {
+    rval <- default
+  } else if (is.null(arg_fun)){
+    rval <- arg_attr
   } else {
-    if (!is.null(arg_fun) && !isTRUE(all.equal(arg_fun, arg_attr))) {
-      message(
-        sprintf(
-          "arg `%s` is overwritten by argument defined w/i attributes' object",
-          arg_name
-        )
-      )
-    }
-    return(arg_attr)
+    rval <- arg_fun
   }
+
+  if (force_single) {
+    return(rval[1])
+  } else {
+    return(rval)
+  }
+}
+
+
+duplicate_last_value <- function(x) {
+  
+  ## sanity checks
+  stopifnot(is.null(dim(x)))
+ 
+  ## repeat last value and return  
+  c(x, x[NROW(x)])
 }
 
