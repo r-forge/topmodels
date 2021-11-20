@@ -371,9 +371,9 @@ pithist.default <- function(
 
   ## attributes for graphical display
   attr(rval, "trafo") <- trafo
-  attr(rval, "freq") <- freq
   attr(rval, "simint") <- simint
   attr(rval, "style") <- style
+  attr(rval, "freq") <- freq
   attr(rval, "confint") <- confint
   attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
@@ -431,7 +431,7 @@ c.pithist <- function(...) {
   # -------------------------------------------------------------------
   ## labels
   ## FIXME: (ML) 
-  ## * Should actually be changed everywhere to being able to handle NAs
+  ## * Should actually be changed in all other `c.*()` to being able to handle NAs
   ## * But how to handle arg which can be NULL (e.g., trafo, ref, simint) 
   xlab <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "xlab")), NA, attr(r, "xlab"))))
   ylab <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "ylab")), NA, attr(r, "ylab"))))
@@ -443,11 +443,11 @@ c.pithist <- function(...) {
   }
 
   ## parameters
-  trafo <- unlist(lapply(rval, function(r)  attr(r, "trafo")))
   freq <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "freq")), NA, attr(r, "freq"))))
-  simint <- unlist(lapply(rval, function(r) attr(r, "simint")))
   style <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "style")), NA, attr(r, "style"))))
   confint <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "confint")), NA, attr(r, "confint"))))
+  trafo <- unlist(lapply(rval, function(r)  attr(r, "trafo")))
+  simint <- unlist(lapply(rval, function(r) attr(r, "simint")))
   ref <- unlist(lapply(rval, function(r) attr(r, "ref")))
   n <- unlist(n)
 
@@ -471,9 +471,9 @@ c.pithist <- function(...) {
 
   ## add attributes
   attr(rval, "trafo") <- trafo
-  attr(rval, "freq") <- freq
   attr(rval, "simint") <- simint
   attr(rval, "style") <- style
+  attr(rval, "freq") <- freq
   attr(rval, "confint") <- confint
   attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
@@ -532,13 +532,11 @@ rbind.pithist <- c.pithist
 #' plot or just the histogram or just the fitted line.
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters.
-#' @param ref,col,fill,border,alpha_min,lwd,lty,axes,box additional graphical
+#' @param ref,col,fill,alpha_min,lwd,lty,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 #' @param colour,size,linetype,legend,alpha graphical parameters passed for 
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @param freq Fix me.
-#' @param level Fix me.
-#' @param type Fix me.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references 
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -622,8 +620,8 @@ plot.pithist <- function(x,
                          style = c("bar", "line"),
                          freq = NULL,
                          trafo = NULL,  # FIXME: (ML) not yet supported (needed for confint and ref)
-                         simint = NULL,  # FIXME: (ML) not yet supported
-                         confint = TRUE,  # confint_style can't be changed but depended on style 
+                         simint = NULL,
+                         confint = TRUE,  # confint_style can't be changed but depends on style 
                          confint_level = 0.95,
                          confint_type = c("exact", "approximation"),
                          ref = NULL,
@@ -634,29 +632,34 @@ plot.pithist <- function(x,
                          main = NULL,
                          alpha_min = 0.2,
                          col = "black",
-                         fill = adjustcolor("black", alpha.f = 0.2),
-                         border = "black",
+                         fill = "black",
                          lwd = NULL,
                          lty = 1,
                          axes = TRUE,
                          box = TRUE,
                          legend = FALSE,
                          ...) {
+  ## TODO: (ML) several arg are implemented differently than in ggplot2:
+  ## * confint, ref support colour(s)
+  ## * xlim, ylim work for different panels by a list of vectors
+  ## * xlab, ylab, xlim, ylim, ref, confint work for different panels by vectors
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## get default arguments
+  style <- match.arg(style)
+  confint_type <- match.arg(confint_type)
   style <- use_arg_from_attributes(x, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
   trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
-  simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = TRUE)
-  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = TRUE)
-  ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = TRUE)
+  simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
+  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
+  ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
 
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
   ## * `ref` and `confint` w/i `abline()`
-  ## * `border`, `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
+  ## * `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(freq))
@@ -676,8 +679,6 @@ plot.pithist <- function(x,
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
   stopifnot(is.logical(legend))
-  style <- match.arg(style, c("bar", "line"))
-  confint_type <- match.arg(confint_type)
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -691,23 +692,27 @@ plot.pithist <- function(x,
   # -------------------------------------------------------------------
   ## determine which style should be plotted
   if (n > 1 && single_graph && style == "bar") {
-    message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
+    message(" * for several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "line"
   }
 
   ## determine other arguments conditional on `style`
-  if (is.null(lwd)) lwd <- if (style == "bar") 1.5 else 2
+  if (is.null(lwd)) lwd <- if (style == "bar") 1 else 2
 
   if (is.null(ref)) {
     ref <- if (style == "bar") TRUE else FALSE
   }
 
+  if (is.null(simint)) {
+    simint <- if (style == "bar") TRUE else FALSE
+  }
+
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
-  plot_arg <- data.frame(1:n, confint, ref,
+  plot_arg <- data.frame(1:n, confint, ref, simint,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    border, col, fill, alpha_min, lwd, lty, axes, box
+    col, fill, alpha_min, lwd, lty, axes, box
   )[, -1]
 
   ## annotation
@@ -717,7 +722,7 @@ plot.pithist <- function(x,
       force_single = TRUE)
     if (is.null(main)) main <- "PIT histogram"
 
-  # TODO: (ML) Might be to be improved - remove arg `xlab` in `pithist()`?
+  # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
     if (freq && ylab == "Density") ylab <- "Frequency"
     if (!freq && ylab == "Frequency") ylab <- "Density"
 
@@ -727,11 +732,14 @@ plot.pithist <- function(x,
       force_single = FALSE)
     main <- use_arg_from_attributes(x, "main", default = "model", force_single = FALSE)
 
-  # TODO: (ML) Might be to be improved - remove arg `xlab` in `pithist()`?
+  # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
     ylab[(!freq & ylab == "Frequency")] <- "Density"
     ylab[(freq & ylab == "Density")] <- "Frequency"
   }
 
+  # -------------------------------------------------------------------
+  # PREPARE DATA FOR PLOTTING
+  # -------------------------------------------------------------------
   ## compute confidence intervals for all groups
   ci <- lapply(1:n, function(i) {
     d <- x[x$group == i, ] 
@@ -762,7 +770,7 @@ plot.pithist <- function(x,
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR 'HISTOGRAM-STYLE PITHIST'
   # -------------------------------------------------------------------
-  pithist_plot <- function(d, ...) {
+  pitbar_plot <- function(d, ...) {
 
     ## get group index
     j <- unique(d$group)
@@ -772,6 +780,12 @@ plot.pithist <- function(x,
     xright <- d$mids + d$width / 2
     y <- if (freq) d$counts else d$counts / sum(d$counts * d$width)
 
+    ## simulation intervals
+    if (!freq) {
+      d$simint_lwr <-d$simint_lwr / sum(d$counts * d$width)
+      d$simint_upr <-d$simint_upr / sum(d$counts * d$width)
+    }
+
     ## get xlim and ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
@@ -779,7 +793,8 @@ plot.pithist <- function(x,
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(c(xleft, xright))[xlim_idx]
     }
     if (any(ylim_idx)) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(0, y, d$ci_lwr, d$ci_upr), na.rm = TRUE)[ylim_idx]
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+        range(c(0, y, d$ref, d$ci_lwr, d$ci_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
     }
 
     ## trigger plot
@@ -798,17 +813,20 @@ plot.pithist <- function(x,
       }
     }
 
-    if (plot_arg$fill[j] == adjustcolor("black", alpha.f = 0.2) &&
-      plot_arg$col[j] != "black") {
-      message(" * As the argument `col` is set but no argument `fill` is specified, \n   the former is used for colorizing the PIT histogram. \n * For proper usage, solely provide `fill` for histogram style plots.")
-      plot_arg$fill[j] <- plot_arg$col[j]
-    }
-
     ## plot pithist
     rect(xleft, 0, xright, y,
-      border = plot_arg$border[j], col = plot_arg$fill[j],
-      lty = plot_arg$lty[j]
+      border = plot_arg$col[j], 
+      col = set_minimum_transparency(plot_arg$fill[j], alpha_min = plot_arg$alpha_min[j]),
+      lty = plot_arg$lty[j],
+      lwd = plot_arg$lwd[j]
     )
+
+    ## plot sim lines
+    if (!identical(plot_arg$simint[j], FALSE)) {
+      if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- "black"
+
+      segments(x0 = d$mids, y0 = d$simint_lwr, y1 = d$simint_upr, col = plot_arg$simint[j], lwd = 1.25)
+    }
 
     ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
@@ -816,7 +834,7 @@ plot.pithist <- function(x,
 
       ref_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       ref_y <- c(d$ref, d$ref[NROW(d)])
-      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 1, lwd = plot_arg$lwd[j])
+      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 1, lwd = 1.75)
     }
 
     ## plot confint lines
@@ -826,12 +844,12 @@ plot.pithist <- function(x,
       ## lower confint line
       ci_lwr_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       ci_lwr_y <- c(d$ci_lwr, d$ci_lwr[NROW(d)])
-      lines(ci_lwr_y ~ ci_lwr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
+      lines(ci_lwr_y ~ ci_lwr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
 
       ## upper confint line
       ci_upr_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       ci_upr_y <- c(d$ci_upr, d$ci_upr[NROW(d)])
-      lines(ci_upr_y ~ ci_upr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = plot_arg$lwd[j])
+      lines(ci_upr_y ~ ci_upr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
     }
   }
 
@@ -852,17 +870,29 @@ plot.pithist <- function(x,
       duplicate_last_value(d$counts / sum(d$counts * d$width))
     }
 
-    ## get xlim and ylim
+    ## get xlim and ylim (needs data for all groups)
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
     if (any(xlim_idx)) {
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(z)[xlim_idx]
     }
     if (any(ylim_idx) && !single_graph) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(y, d$ci_lwr, d$ci_upr), na.rm = TRUE)[ylim_idx]
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+        range(c(y, d$ci_lwr, d$ci_upr), na.rm = TRUE)[ylim_idx]
     }
     if (any(ylim_idx) && single_graph) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(c(x$y, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
+      if (freq) {
+        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+          range(c(x$counts, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
+      } else {
+        y_tmp <- lapply(1:n, function(i) { 
+          d <- x[x$group == i, ]
+          rval <- d$counts / sum(d$counts * d$width)
+        })
+        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+          range(c(y_tmp, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
+
+      }
     }
 
     ## trigger plot
@@ -883,7 +913,7 @@ plot.pithist <- function(x,
 
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE)) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
 
       ci_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       polygon(
@@ -895,7 +925,7 @@ plot.pithist <- function(x,
           rep(d$ci_lwr, each = 2),
           rev(rep(d$ci_upr, each = 2))
         ), 
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
       )
     }
@@ -942,14 +972,14 @@ plot.pithist <- function(x,
   ## draw polygons first
   if (single_graph || n == 1) {
     if (style == "bar") {
-      for (i in 1L:n) pithist_plot(x[x$group == i, ], ...)
+      for (i in 1L:n) pitbar_plot(x[x$group == i, ], ...)
     } else {
       for (i in 1L:n) pitlines_trigger(x[x$group == i, ], ...)
       for (i in 1L:n) pitlines_plot(x[x$group == i, ], ...)
     }
   } else {
     if (style == "bar") {
-      for (i in 1L:n) pithist_plot(x[x$group == i, ], ...)
+      for (i in 1L:n) pitbar_plot(x[x$group == i, ], ...)
     } else {
       for (i in 1L:n) {
         pitlines_trigger(x[x$group == i, ], ...)
@@ -964,32 +994,38 @@ plot.pithist <- function(x,
 #' @method lines pithist
 #' @export
 lines.pithist <- function(x,
-                          confint = FALSE,
+                          freq = NULL,
+                          trafo = NULL,  # FIXME: (ML) not yet supported (needed for confint and ref)
+                          confint = FALSE,  # confint_style can't be changed but depends on style 
+                          confint_level = 0.95,
+                          confint_type = c("exact", "approximation"),
                           ref = FALSE,
                           col = "black",
-                          fill = adjustcolor("black", alpha.f = 0.2),
-                          alpha_min = 0.2,
                           lwd = 2,
                           lty = 1,
-                          freq = NULL,
-                          level = 0.95,
-                          type = "exact", 
                           ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  ## get default arguments
+  confint_type <- match.arg(confint_type)
+  freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
+  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
+  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
+  ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
+
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
   ## * `ref` and `confint` w/i `abline()`
-  ## * `col`, `fill`, `lwd`, `lty` and `...` w/i `lines()`
-  ## * `alpha_min` w/i `set_minimum_transparency()`
+  ## * `col`, `lwd`, `lty` and `...` w/i `lines()`
+  stopifnot(is.logical(freq))
+  stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(
-    "all `freq` in attr of object `x` must be of the same type" =
-      length(unique(attr(x, "freq"))) == 1
+    is.numeric(confint_level),
+    length(confint_level) == 1,
+    confint_level >= 0,
+    confint_level <= 1
   )
-
-  # FIXME: (ML) Improve
-  freq <- if (!is.null(freq)) freq else attr(x, "freq")
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -998,14 +1034,25 @@ lines.pithist <- function(x,
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
+  # -------------------------------------------------------------------
+  # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
+  # -------------------------------------------------------------------
+  ## recycle arguments for plotting to match the number of groups
+  plot_arg <- data.frame(
+    1:n, confint, ref, col, lwd, lty
+  )[, -1]
+
+  # -------------------------------------------------------------------
+  # PREPARE DATA FOR PLOTTING
+  # -------------------------------------------------------------------
   ## compute confidence intervals for all groups
   ci <- lapply(1:n, function(i) {
     d <- x[x$group == i, ] 
     compute_pithist_confint(
-      n = sum(d$counts), 
+      n = sum(d$counts),  
       breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
-      level = level, 
-      type = type,
+      level = confint_level,
+      type = confint_type,
       freq = freq
     )
   })
@@ -1025,11 +1072,6 @@ lines.pithist <- function(x,
   ref <- do.call("rbind", ref)
   x <- cbind(x, ref)  # careful: loses all attributes of x
 
-  ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(
-    1:n, confint, ref, col, fill, alpha_min, lwd, lty
-  )[, -1]
-
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR LINES
   # -------------------------------------------------------------------
@@ -1047,18 +1089,19 @@ lines.pithist <- function(x,
 
     ## plot confint polygon
     if (!identical(plot_arg$confint[j], FALSE)) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- plot_arg$fill[j]
-     ci_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
-      polygon( 
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
+
+      ci_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
+      polygon(
         c(
           rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)],
           rev(rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)])
         ),
         c(
-          rep(d$ci_lwr, each = 2),
+          rep(d$ci_lwr, each = 2), 
           rev(rep(d$ci_upr, each = 2))
-        ), 
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = plot_arg$alpha_min[j]),
+        ),  
+        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
       )
     }
