@@ -24,8 +24,7 @@
   main = NULL,
   alpha_min = 0.2,
   col = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  border = "black",
+  fill = "black",
   lwd = NULL,
   lty = 1,
   axes = TRUE,
@@ -36,16 +35,15 @@
 
 \method{lines}{pithist}(
   x,
+  freq = NULL,
+  trafo = NULL,
   confint = FALSE,
+  confint_level = 0.95,
+  confint_type = c("exact", "approximation"),
   ref = FALSE,
   col = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
   lwd = 2,
   lty = 1,
-  freq = NULL,
-  level = 0.95,
-  type = "exact",
   ...
 )
 
@@ -97,7 +95,7 @@ plotted.}
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
-\item{ref, col, fill, border, alpha_min, lwd, lty, axes, box}{additional graphical
+\item{ref, col, fill, alpha_min, lwd, lty, axes, box}{additional graphical
 parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
 
 \item{xlim, ylim}{graphical parameters. These may pertain either to the whole
@@ -106,10 +104,6 @@ plot or just the histogram or just the fitted line.}
 \item{xlab, ylab, main}{graphical parameters.}
 
 \item{\dots}{further graphical parameters.}
-
-\item{level}{Fix me.}
-
-\item{type}{Fix me.}
 
 \item{object, x}{an object of class \code{\link{pithist}}.}
 
