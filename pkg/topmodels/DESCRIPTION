@@ -22,4 +22,4 @@ Description: Unified infrastructure for probabilistic models and distributional 
 	           reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots.
 License: GPL-2 | GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
