@@ -704,9 +704,9 @@ autoplot.rootogram <- function(object,
     height = "height",
     group = "group"
   )) +
-    geom_rootogram_bar(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
+    geom_rootogram(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
       linetype = "group", alpha = "group")) + 
-    geom_rootogram_line(ggplot2::aes_string(x = "x", y = "line"), style = line) + 
+    geom_rootogram_fitted(ggplot2::aes_string(x = "x", y = "line"), style = line) + 
     geom_rootogram_ref(ggplot2::aes_string(yintercept = 0))
 
   ## set the colors, shapes, etc.
@@ -782,6 +782,10 @@ autoplot.rootogram <- function(object,
 # }
 
 
+# -------------------------------------------------------------------
+# GGPLOT2 IMPLEMENTATIONS FOR `geom_rootogram()`
+# -------------------------------------------------------------------
+
 #' \code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`
 #' 
 #' Various \code{geom_*} and \code{stat_*} used within
@@ -811,30 +815,42 @@ autoplot.rootogram <- function(object,
 #'   d$group <- factor(d$group, labels = main)
 #'   
 #'   gg1 <- ggplot(data = d) + 
-#'     geom_rootogram_bar(aes(x = x, y = y, width = width, height = height, group = group)) + 
-#'     geom_rootogram_line(aes(x = x, y = line)) + 
+#'     geom_rootogram(aes(x = x, y = y, width = width, height = height, group = group)) + 
+#'     geom_rootogram_fitted(aes(x = x, y = line)) + 
 #'     geom_rootogram_ref(yintercept = 0) + 
 #'     facet_grid(group~.)
 #'   gg1
 #' }
 #' @export
-geom_rootogram_bar <- function(mapping = NULL, data = NULL, stat = "identity",
-                               position = "identity", na.rm = FALSE,
-                               show.legend = NA, inherit.aes = TRUE, ...) {
+geom_rootogram <- function(mapping = NULL, 
+                           data = NULL, 
+                           stat = "identity",
+                           position = "identity", 
+                           na.rm = FALSE,
+                           show.legend = NA, 
+                           inherit.aes = TRUE, 
+                           ...) {
   ggplot2::layer(
-    geom = GeomRootogramBar, mapping = mapping,
-    data = data, stat = stat, position = position,
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    geom = GeomRootogram, 
+    mapping = mapping,
+    data = data, 
+    stat = stat, 
+    position = position,
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm, 
+      ...
+    )
   )
 }
 
 
-#' @rdname geom_rootogram_bar
+#' @rdname geom_rootogram
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomRootogramBar <- ggplot2::ggproto("GeomRootogramBar", ggplot2::GeomRect,
+GeomRootogram <- ggplot2::ggproto("GeomRootogram", ggplot2::GeomRect,
 
   default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.5, linetype = 1,
     alpha = NA),
@@ -852,27 +868,44 @@ GeomRootogramBar <- ggplot2::ggproto("GeomRootogramBar", ggplot2::GeomRect,
 )
 
 
-#' @rdname geom_rootogram_bar
+# -------------------------------------------------------------------
+# GGPLOT2 IMPLEMENTATIONS FOR `geom_rootogram_fitted()`
+# -------------------------------------------------------------------
+
+#' @rdname geom_rootogram
 #' @export
-geom_rootogram_line <- function(mapping = NULL, data = NULL, stat = "identity",
-                            position = "identity", na.rm = FALSE,
-                            show.legend = NA, inherit.aes = TRUE, style = c("both", "line", "point"),
-                            ...) {
+geom_rootogram_fitted <- function(mapping = NULL, 
+                                  data = NULL, 
+                                  stat = "identity",
+                                  position = "identity", 
+                                  na.rm = FALSE,
+                                  show.legend = NA, 
+                                  inherit.aes = TRUE, 
+                                  style = c("both", "line", "point"),
+                                  ...) {
 
   style <- match.arg(style)
 
   ggplot2::layer(
-    geom = GeomRootogramLine, mapping = mapping,
-    data = data, stat = stat, position = position,
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, style = style, ...)
+    geom = GeomRootogramFitted, 
+    mapping = mapping,
+    data = data, 
+    stat = stat, 
+    position = position,
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm, 
+      style = style, 
+      ...
+    )
   )
 }
 
 
-#' @rdname geom_rootogram_bar
+#' @rdname geom_rootogram
 #' @export
-GeomRootogramLine <- ggplot2::ggproto("GeomRootogramLine", ggplot2::GeomPath,
+GeomRootogramFitted <- ggplot2::ggproto("GeomRootogramFitted", ggplot2::GeomPath,
 
   default_aes = ggplot2::aes(colour = 2, size = 1, linetype = 1,
     alpha = 1, fill = NA, stroke = 0.5, shape = 19),
@@ -907,21 +940,37 @@ GeomRootogramLine <- ggplot2::ggproto("GeomRootogramLine", ggplot2::GeomPath,
 )
 
 
-#' @rdname geom_rootogram_bar
+# -------------------------------------------------------------------
+# GGPLOT2 IMPLEMENTATIONS FOR `geom_rootogram_ref()`
+# -------------------------------------------------------------------
+
+#' @rdname geom_rootogram
 #' @export
-geom_rootogram_ref <- function(mapping = NULL, data = NULL, stat = "identity",
-                            position = "identity", na.rm = FALSE,
-                            show.legend = NA, inherit.aes = TRUE, ...) {
+geom_rootogram_ref <- function(mapping = NULL, 
+                               data = NULL, 
+                               stat = "identity",
+                               position = "identity", 
+                               na.rm = FALSE,
+                               show.legend = NA, 
+                               inherit.aes = TRUE, 
+                               ...) {
   ggplot2::layer(
-    geom = GeomRootogramRef, mapping = mapping,
-    data = data, stat = stat, position = position,
-    show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    geom = GeomRootogramRef, 
+    mapping = mapping,
+    data = data, 
+    stat = stat, 
+    position = position,
+    show.legend = show.legend, 
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm, 
+      ...
+    )
   )
 }
 
 
-#' @rdname geom_rootogram_bar
+#' @rdname geom_rootogram
 #' @format NULL
 #' @usage NULL
 #' @export
