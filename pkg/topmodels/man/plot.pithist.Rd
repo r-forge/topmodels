@@ -9,7 +9,7 @@
 \method{plot}{pithist}(
   x,
   single_graph = FALSE,
-  style = c("bar", "line"),
+  style = NULL,
   freq = NULL,
   trafo = NULL,
   simint = NULL,
