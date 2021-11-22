@@ -94,3 +94,16 @@ duplicate_last_value <- function(x) {
   c(x, x[NROW(x)])
 }
 
+
+compute_breaks <- function(mids, width) {
+  
+  ## sanity checks
+  stopifnot(is.numeric(mids), is.null(dim(mids)))
+  stopifnot(is.numeric(width), is.null(dim(width)))
+  stopifnot(length(mids) == length(width))
+ 
+  ## compute breaks and return  
+  n <- length(width)
+  c(mids - width / 2, mids[n] + width[n] / 2)
+}
+

@@ -617,7 +617,7 @@ rbind.pithist <- c.pithist
 #' @export
 plot.pithist <- function(x,
                          single_graph = FALSE,
-                         style = c("bar", "line"),
+                         style = NULL,
                          freq = NULL,
                          trafo = NULL,  # FIXME: (ML) not yet supported (needed for confint and ref)
                          simint = NULL,
@@ -647,8 +647,6 @@ plot.pithist <- function(x,
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## get default arguments
-  style <- match.arg(style)
-  confint_type <- match.arg(confint_type)
   style <- use_arg_from_attributes(x, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
   trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
@@ -679,6 +677,8 @@ plot.pithist <- function(x,
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
   stopifnot(is.logical(legend))
+  style <- match.arg(style, c("bar", "line"))
+  confint_type <- match.arg(confint_type)
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -745,7 +745,7 @@ plot.pithist <- function(x,
     d <- x[x$group == i, ] 
     compute_pithist_confint(
       n = sum(d$counts), 
-      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      breaks = compute_breaks(d$mids, d$width),
       level = confint_level, 
       type = confint_type,
       freq = freq
@@ -759,7 +759,7 @@ plot.pithist <- function(x,
     d <- x[x$group == i, ]
     rval <- compute_pithist_ref(
       n = sum(d$counts),
-      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      breaks = compute_breaks(d$mids, d$width),
       freq = freq
     )
     rval <- data.frame("ref" = rval)
@@ -832,8 +832,8 @@ plot.pithist <- function(x,
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2  # red
 
-      ref_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
-      ref_y <- c(d$ref, d$ref[NROW(d)])
+      ref_z <- compute_breaks(d$mids, d$width)
+      ref_y <- duplicate_last_value(d$ref) 
       lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 1, lwd = 1.75)
     }
 
@@ -841,15 +841,15 @@ plot.pithist <- function(x,
     if (!identical(plot_arg$confint[j], FALSE)) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- 2  # red
 
+      ci_z <- compute_breaks(d$mids, d$width)
+
       ## lower confint line
-      ci_lwr_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
-      ci_lwr_y <- c(d$ci_lwr, d$ci_lwr[NROW(d)])
-      lines(ci_lwr_y ~ ci_lwr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
+      ci_lwr_y <- duplicate_last_value(d$ci_lwr)
+      lines(ci_lwr_y ~ ci_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
 
       ## upper confint line
-      ci_upr_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
-      ci_upr_y <- c(d$ci_upr, d$ci_upr[NROW(d)])
-      lines(ci_upr_y ~ ci_upr_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
+      ci_upr_y <- duplicate_last_value(d$ci_upr)
+      lines(ci_upr_y ~ ci_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
     }
   }
 
@@ -863,7 +863,7 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
+    z <- compute_breaks(d$mids, d$width)
     y <- if (freq) {
       duplicate_last_value(d$counts) 
     } else {
@@ -915,11 +915,10 @@ plot.pithist <- function(x,
     if (!identical(plot_arg$confint[j], FALSE)) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
 
-      ci_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       polygon(
         c(
-          rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)],
-          rev(rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)])
+          rep(z, each = 2)[-c(1, length(z) * 2)],
+          rev(rep(z, each = 2)[-c(1, length(z) * 2)])
         ),
         c(
           rep(d$ci_lwr, each = 2),
@@ -940,7 +939,7 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
+    z <- compute_breaks(d$mids, d$width)
     y <- if (freq) {
       duplicate_last_value(d$counts) 
     } else {
@@ -951,9 +950,8 @@ plot.pithist <- function(x,
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
 
-      ref_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
-      ref_y <- c(d$ref, d$ref[NROW(d)])
-      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 2, lwd = 1)
+      ref_y <- duplicate_last_value(d$ref)
+      lines(ref_y ~ z, type = "s", col = plot_arg$ref[j], lty = 2, lwd = 1)
     }
 
     ## plot stepfun
@@ -1050,7 +1048,7 @@ lines.pithist <- function(x,
     d <- x[x$group == i, ] 
     compute_pithist_confint(
       n = sum(d$counts),  
-      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      breaks = compute_breaks(d$mids, d$width),
       level = confint_level,
       type = confint_type,
       freq = freq
@@ -1064,7 +1062,7 @@ lines.pithist <- function(x,
     d <- x[x$group == i, ]
     rval <- compute_pithist_ref(
       n = sum(d$counts),
-      breaks = c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2),
+      breaks = compute_breaks(d$mids, d$width),
       freq = freq
     )
     rval <- data.frame("ref" = rval)
@@ -1080,7 +1078,7 @@ lines.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
+    z <- compute_breaks(d$mids, d$width)
     y <- if (freq) {
       duplicate_last_value(d$counts) 
     } else {
@@ -1091,11 +1089,10 @@ lines.pithist <- function(x,
     if (!identical(plot_arg$confint[j], FALSE)) {
       if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
 
-      ci_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
       polygon(
         c(
-          rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)],
-          rev(rep(ci_z, each = 2)[-c(1, length(ci_z) * 2)])
+          rep(z, each = 2)[-c(1, length(z) * 2)],
+          rev(rep(z, each = 2)[-c(1, length(z) * 2)])
         ),
         c(
           rep(d$ci_lwr, each = 2), 
@@ -1110,9 +1107,8 @@ lines.pithist <- function(x,
     if (!identical(plot_arg$ref[j], FALSE)) {
       if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
 
-      ref_z <- c(d$mids - d$width / 2, d$mids[NROW(d)] + d$width[NROW(d)] / 2)
-      ref_y <- c(d$ref, d$ref[NROW(d)])
-      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 2, lwd = 1)
+      ref_y <- duplicate_last_value(d$ref)
+      lines(ref_y ~ z, type = "s", col = plot_arg$ref[j], lty = 2, lwd = 1)
     }
 
     ## plot stepfun
@@ -1146,11 +1142,11 @@ autoplot.pithist <- function(object,
                              xlab = NULL,
                              ylab = NULL,
                              main = NULL,
-                             alpha = NULL,
-                             colour = NULL,
-                             fill = NULL,
-                             size = NULL,
-                             linetype = NULL,
+                             alpha = NULL,  # NULL, as dependent on plot
+                             colour = NULL,  # NULL, as dependent on plot
+                             fill = NULL,  # NULL, as dependent on plot
+                             size = NULL,  # NULL, as dependent on plot
+                             linetype = NULL,  # NULL, as dependent on plot
                              legend = FALSE,
                              ...) {
   # -------------------------------------------------------------------
@@ -1252,6 +1248,14 @@ autoplot.pithist <- function(object,
     ref <- if (style == "bar") TRUE else FALSE
   }
 
+  if (style == "line") {
+    ref_colour <- "black"
+    ref_linetype <- 2
+  } else {
+    ref_colour <- 2
+    ref_linetype <- 1
+  }
+
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
@@ -1287,7 +1291,7 @@ autoplot.pithist <- function(object,
     )
 
   ## add simint
-  if (simint && all(c("simint_lwr", "simint_upr") %in% names(object))) {
+  #if (simint && all(c("simint_lwr", "simint_upr") %in% names(object))) {
     rval <- rval +
       geom_pithist_simint(
         ggplot2::aes_string(
@@ -1299,7 +1303,7 @@ autoplot.pithist <- function(object,
         na.rm = TRUE,
         freq = freq
       )
-  }
+  #}
 
   ## add conf
   if (confint != "none") {
@@ -1326,14 +1330,17 @@ autoplot.pithist <- function(object,
           y = "counts", 
           width = "width"
         ), 
-        freq = freq
+        freq = freq,
+        colour = ref_colour,
+        linetype = ref_linetype
       )
   }
 
   ## set the colors, shapes, etc. for the groups 
-  ## by using `my_modify_list()` all NAs are replaced by intern defaults
+  ## w/i `set_default_aes_pithist()` by `my_modify_list()` all NAs or 0.999 values 
+  ## are replaced with intern defaults
   rval <- rval +
-    ggplot2::scale_alpha_manual(values = plot_arg$alpha) +
+    ggplot2::scale_alpha_manual(values = plot_arg$alpha, na.value = NA) +
     ggplot2::scale_colour_manual(values = plot_arg$colour, na.value = NA) +
     ggplot2::scale_fill_manual(values = plot_arg$fill, na.value = NA) +
     ggplot2::scale_size_manual(values = plot_arg$size, na.value = 0.999) + 
@@ -1374,6 +1381,13 @@ autoplot.pithist <- function(object,
   rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = TRUE)
   rval <- rval + ggplot2::scale_x_continuous(expand = c(0.01, 0.01))
   rval <- rval + ggplot2::scale_y_continuous(expand = c(0.01, 0.01))
+
+  # -------------------------------------------------------------------
+  # ORDER LAYERS
+  # -------------------------------------------------------------------
+  #if (style == "line") {
+  #  rval$layer <- c(rval$layer[[3]], rval$layer[[4]], rval$layer[[1]], rval$layer[[2]])
+  #}
 
   # -------------------------------------------------------------------
   # GROUPING (IF ANY) AND RETURN PLOT
@@ -1452,8 +1466,8 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
       )
     } else {  # "line" style
       data.frame(
-        x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
-        y = c(data$y, data$y[NROW(data)])
+        x = compute_breaks(data$x, data$width),
+        y = duplicate_last_value(data$y)
       )
     }
   }
@@ -1685,14 +1699,14 @@ StatPithistRef <- ggplot2::ggproto("StatPithistRef", ggplot2::Stat,
     } else { 
       ref <- compute_pithist_ref(
         n = sum(data$y), 
-        breaks = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+        breaks = compute_breaks(data$x, data$width),
         freq = freq
       )
     }
 
     data.frame(
-      x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
-      y = c(ref, ref[NROW(ref)])
+      x = compute_breaks(data$x, data$width),
+      y = duplicate_last_value(ref)
     )
   }
 )
@@ -1809,7 +1823,7 @@ StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
   } else { 
     ci <- compute_pithist_confint(
       n = sum(data$y), 
-      breaks = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
+      breaks = compute_breaks(data$x, data$width),
       level = level, 
       type = type,
       freq = freq
@@ -1826,9 +1840,9 @@ StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
       )
     } else {
       nd <- data.frame(
-        x = c(data$x - data$width / 2, data$x[NROW(data)] + data$width[NROW(data)] / 2),
-        ymin = c(ci[[1]], ci[[1]][NROW(ci)]),
-        ymax = c(ci[[2]], ci[[2]][NROW(ci)])
+        x = compute_breaks(data$x, data$width),
+        ymin = duplicate_last_value(ci[[1]]),
+        ymax = duplicate_last_value(ci[[2]])
       )
     }
     nd
