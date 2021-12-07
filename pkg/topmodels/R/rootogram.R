@@ -231,7 +231,7 @@ rootogram.default <- function(object,
   }
 
   breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
-  x <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+  mids <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
 
   ## fix pointmasses 
   ## FIXME: (ML) Check if that always works or could be improved
@@ -278,15 +278,6 @@ rootogram.default <- function(object,
   ## expected frequencies (part2)
   expctd <- colSums(p * w)
 
-  ## raw vs. sqrt scale
-  if (scale == "sqrt") {
-    y <- if (style == "hanging") sqrt(expctd) - sqrt(obsrvd) else 0
-    height <- if (style == "suspended") sqrt(expctd) - sqrt(obsrvd) else sqrt(obsrvd)
-  } else {
-    y <- if (style == "hanging") expctd - obsrvd else 0
-    height <- if (style == "suspended") expctd - obsrvd else obsrvd
-  }
-
   # -------------------------------------------------------------------
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
@@ -294,11 +285,8 @@ rootogram.default <- function(object,
   rval <- data.frame(
     observed = as.vector(obsrvd),
     expected = as.vector(expctd),
-    x = x,
-    y = y,
-    width = diff(breaks) * width,
-    height = height,
-    line = if (scale == "sqrt") sqrt(expctd) else expctd
+    mids = mids,
+    width = diff(breaks) * width
   )
 
   ## attributes for graphical display
@@ -567,10 +555,11 @@ plot.rootogram <- function(x,
     j <- unique(d$group)
 
     ## rect elements
+    tmp_heigths <- compute_rootogram_heigths(d$expctd, d$obsrvd, scale = scale, style = style)
+    ybottom = tmp_heigths$ymin
+    ytop = tmp_heigths$ymax
     xleft <- d$x - d$width / 2
     xright <- d$x + d$width / 2
-    ybottom <- d$y
-    ytop <- d$y + d$height
 
     ## get xlim and ylim
     if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
@@ -698,15 +687,15 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   ## actual plotting
   rval <- ggplot2::ggplot(object, ggplot2::aes_string(
-    x = "x", 
-    y = "y",
-    width = "width",
-    height = "height",
+    obsrvd = "observed",
+    expctd = "expected", 
+    mids = "mids", 
+    width = "width", 
     group = "group"
   )) +
     geom_rootogram(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
       linetype = "group", alpha = "group")) + 
-    geom_rootogram_fitted(ggplot2::aes_string(x = "x", y = "line"), style = line) + 
+    geom_rootogram_fitted() + 
     geom_rootogram_ref(ggplot2::aes_string(yintercept = 0))
 
   ## set the colors, shapes, etc.
@@ -786,6 +775,73 @@ autoplot.rootogram <- function(object,
 # GGPLOT2 IMPLEMENTATIONS FOR `geom_rootogram()`
 # -------------------------------------------------------------------
 
+#' @rdname geom_rootogram
+#' @export
+stat_rootogram <- function(mapping = NULL,
+                           data = NULL,
+                           geom = "rootogram",
+                           position = "identity",
+                           na.rm = FALSE,
+                           show.legend = NA,
+                           inherit.aes = TRUE,
+                           scale = c("sqrt", "raw"),
+                           style = c("hanging", "standing", "suspended"),
+                           ...) {
+
+  scale <- match.arg(scale)
+  style <- match.arg(style)
+
+  ggplot2::layer(
+    stat = StatRootogram,
+    data = data,
+    mapping = mapping,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      scale = scale,
+      style = style,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_rootogram
+#' @format NULL
+#' @usage NULL
+#' @export
+StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
+
+  required_aes = c("obsrvd", "expctd", "mids", "width"),
+
+  compute_group = function(data,  
+                           scales, 
+                           scale = c("sqrt", "raw"), 
+                           style = c("hanging", "standing", "suspended")) {
+
+    scale <- match.arg(scale)
+    style <- match.arg(style)
+
+    tmp_heigths <- compute_rootogram_heigths(data$expctd, data$obsrvd, scale = scale, style = style)
+
+    data <- transform(data,
+      xmin = mids - width/2, 
+      xmax = mids + width/2,
+      ymin = tmp_heigths$ymin,
+      ymax = tmp_heigths$ymax,
+      obsrvd = NULL,
+      expctd = NULL,
+      mids = NULL,
+      width = NULL
+    )
+    data
+  }
+)
+
+
 #' \code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`
 #' 
 #' Various \code{geom_*} and \code{stat_*} used within
@@ -815,8 +871,9 @@ autoplot.rootogram <- function(object,
 #'   d$group <- factor(d$group, labels = main)
 #'   
 #'   gg1 <- ggplot(data = d) + 
-#'     geom_rootogram(aes(x = x, y = y, width = width, height = height, group = group)) + 
-#'     geom_rootogram_fitted(aes(x = x, y = line)) + 
+#'     geom_rootogram(aes(obsrvd = observed, expctd = expected, mids = mids, 
+#'       width = width, group = group)) + 
+#'     geom_rootogram_fitted(aes(expctd = expected, mids = mids)) + 
 #'     geom_rootogram_ref(yintercept = 0) + 
 #'     facet_grid(group~.)
 #'   gg1
@@ -824,12 +881,18 @@ autoplot.rootogram <- function(object,
 #' @export
 geom_rootogram <- function(mapping = NULL, 
                            data = NULL, 
-                           stat = "identity",
+                           stat = "rootogram",
                            position = "identity", 
                            na.rm = FALSE,
                            show.legend = NA, 
                            inherit.aes = TRUE, 
+                           scale = c("sqrt", "raw"),
+                           style = c("hanging", "standing", "suspended"),
                            ...) {
+
+  scale <- match.arg(scale)
+  style <- match.arg(style)
+
   ggplot2::layer(
     geom = GeomRootogram, 
     mapping = mapping,
@@ -840,6 +903,8 @@ geom_rootogram <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm, 
+      scale = scale,
+      style = style,
       ...
     )
   )
@@ -855,16 +920,8 @@ GeomRootogram <- ggplot2::ggproto("GeomRootogram", ggplot2::GeomRect,
   default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.5, linetype = 1,
     alpha = NA),
 
-  required_aes = c("x", "y", "width", "height"),
+  required_aes = c("xmin", "xmax", "ymin", "ymax")
 
-  setup_data = function(data, params) {
-    data <- transform(data,
-      xmin = x - width/2, 
-      xmax = x + width/2,
-      ymin = y, 
-      ymax = y + height
-    ) 
-  }
 )
 
 
@@ -874,17 +931,91 @@ GeomRootogram <- ggplot2::ggproto("GeomRootogram", ggplot2::GeomRect,
 
 #' @rdname geom_rootogram
 #' @export
+stat_rootogram_fitted <- function(mapping = NULL,
+                           data = NULL,
+                           geom = "rootogram_fitted",
+                           position = "identity",
+                           na.rm = FALSE,
+                           show.legend = NA,
+                           inherit.aes = TRUE,
+                           scale = c("sqrt", "raw"),
+                           style = c("hanging", "standing", "suspended"),
+                           ...) {
+
+  scale <- match.arg(scale)
+  style <- match.arg(style)
+
+  ggplot2::layer(
+    stat = StatRootogramFitted,
+    data = data,
+    mapping = mapping,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      scale = scale,
+      style = style,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_rootogram
+#' @format NULL
+#' @usage NULL
+#' @export
+StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
+
+  required_aes = c("expctd", "mids"),
+
+  compute_group = function(data, 
+                           scales, 
+                           scale = c("sqrt", "raw"),
+                           style = c("hanging", "standing", "suspended")) {
+
+    scale <- match.arg(scale)
+    style <- match.arg(style)
+
+    ## raw vs. sqrt scale
+    if (scale == "sqrt") {
+      data <- transform(data,
+        x = mids,
+        y = sqrt(expctd),
+        expctd = NULL,
+        mids = NULL
+      )
+    } else {
+      data <- transform(data,
+        x = mids,
+        y = expctd,
+        expctd = NULL,
+        mids = NULL
+      )
+    }
+    data
+  }
+)
+
+#' @rdname geom_rootogram
+#' @export
 geom_rootogram_fitted <- function(mapping = NULL, 
                                   data = NULL, 
-                                  stat = "identity",
+                                  stat = "rootogram_fitted",
                                   position = "identity", 
                                   na.rm = FALSE,
                                   show.legend = NA, 
                                   inherit.aes = TRUE, 
-                                  style = c("both", "line", "point"),
+                                  scale = c("sqrt", "raw"),
+                                  style = c("hanging", "standing", "suspended"),
+                                  linestyle = c("both", "line", "point"),
                                   ...) {
 
+  scale <- match.arg(scale)
   style <- match.arg(style)
+  linestyle <- match.arg(linestyle)
 
   ggplot2::layer(
     geom = GeomRootogramFitted, 
@@ -896,7 +1027,9 @@ geom_rootogram_fitted <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm, 
+      scale = scale,
       style = style, 
+      linestyle = linestyle,
       ...
     )
   )
@@ -910,15 +1043,14 @@ GeomRootogramFitted <- ggplot2::ggproto("GeomRootogramFitted", ggplot2::GeomPath
   default_aes = ggplot2::aes(colour = 2, size = 1, linetype = 1,
     alpha = 1, fill = NA, stroke = 0.5, shape = 19),
 
-  extra_params = c("na.rm", "style"),
-
   draw_panel = function(data, panel_params, coord, arrow = NULL,
                         lineend = "butt", linejoin = "round", linemitre = 10,
-                        na.rm = FALSE, style = c("both", "line", "point")) {
+                        na.rm = FALSE, 
+                        linestyle = c("both", "line", "point")) {
 
-    style <- match.arg(style)
+    linestyle <- match.arg(linestyle)
 
-    if (style == "both") {
+    if (linestyle == "both") {
       ## TODO: (ML) Do not copy data
       data2 <- transform(data, size = size * 2)
 
@@ -928,7 +1060,7 @@ GeomRootogramFitted <- ggplot2::ggproto("GeomRootogramFitted", ggplot2::GeomPath
                             na.rm = FALSE),
         ggplot2::GeomPoint$draw_panel(data2, panel_params, coord, na.rm = FALSE)
       )
-    } else if (style == "line") {
+    } else if (linestyle == "line") {
         ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
                             lineend = "butt", linejoin = "round", linemitre = 10,
                             na.rm = FALSE)
@@ -980,4 +1112,25 @@ GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
 )
 
 
+compute_rootogram_heigths <- function(expctd, 
+                                      obsrvd, 
+                                      scale = c("sqrt", "raw"),
+                                      style = c("hanging", "standing", "suspended")) {
 
+  scale <- match.arg(scale)
+  style <- match.arg(style)
+
+  ## raw vs. sqrt scale
+  if (scale == "sqrt") {
+    y = if (style == "hanging") sqrt(expctd) - sqrt(obsrvd) else 0
+    height = if (style == "suspended") sqrt(expctd) - sqrt(obsrvd) else sqrt(obsrvd)
+  } else {
+    y = if (style == "hanging") expctd - obsrvd else 0
+    height = if (style == "suspended") expctd - obsrvd else obsrvd
+  }
+
+  data.frame(
+    ymin = y, 
+    ymax = y + height
+  )
+}
