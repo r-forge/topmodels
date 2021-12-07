@@ -617,6 +617,8 @@ plot.rootogram <- function(x,
 #' @method autoplot rootogram
 #' @exportS3Method ggplot2::autoplot
 autoplot.rootogram <- function(object,
+                               style = NULL,
+                               scale = NULL,
                                ref = TRUE,
                                line = TRUE,
                                xlim = c(NA, NA),
@@ -634,6 +636,9 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  style <- use_arg_from_attributes(object, "style", default = "hanging", force_single = TRUE)
+  scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
+
   ## get base style arguments
   add_arg <- list(...)
   #if (!is.null(add_arg$pch)) shape <- add_arg$pch
@@ -694,8 +699,8 @@ autoplot.rootogram <- function(object,
     group = "group"
   )) +
     geom_rootogram(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
-      linetype = "group", alpha = "group")) + 
-    geom_rootogram_fitted() + 
+      linetype = "group", alpha = "group"), scale = scale, style = style) + 
+    geom_rootogram_fitted(scale = scale, style = style) + 
     geom_rootogram_ref(ggplot2::aes_string(yintercept = 0))
 
   ## set the colors, shapes, etc.
