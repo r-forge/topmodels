@@ -123,6 +123,8 @@ rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 
+\item{scale}{Fix description.}
+
 \item{style}{Fix description.}
 
 \item{...}{Other arguments passed on to \code{\link[ggplot2:layer]{layer()}}. These are
@@ -132,6 +134,8 @@ to the paired geom/stat.}
 
 \item{stat}{The statistical transformation to use on the data for this
 layer, as a string.}
+
+\item{linestyle}{Fix description.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within
