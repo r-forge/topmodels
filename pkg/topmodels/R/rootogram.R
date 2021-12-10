@@ -399,13 +399,14 @@ c.rootogram <- function(...) {
 #' @param x,object an object of class \code{\link{rootogram}}.
 #' @param ref logical. Should a reference line be plotted?
 #' @param xlab,ylab,main graphical parameters.
-#' @param xlim,ylim,border,fill,col,lwd,pch,lty,type,axes,box graphical
+#' @param xlim,ylim,fill,col,lwd,lty,axes,box graphical
 #' parameters. These may pertain either to the whole plot or just the histogram
 #' or just the fitted line.
-#' @param colour,size,line,alpha,linetype graphical parameters passed to
+#' @param colour,size,fitted,alpha,linetype graphical parameters passed to
 #' \code{geom_line} and \code{geom_point}, respectively.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
+#' @param style,scale,alpha_min Fix description.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
@@ -488,25 +489,32 @@ c.rootogram <- function(...) {
 #' 
 #' @export
 plot.rootogram <- function(x,
+                           style = NULL,
+                           scale = NULL,
+                           fitted = TRUE,
                            ref = TRUE,
                            xlim = c(NA, NA),
                            ylim = c(NA, NA),
                            xlab = NULL,
                            ylab = NULL,
                            main = NULL,
-                           border = "black",
-                           fill = adjustcolor("black", alpha.f = 0.2),
-                           col = 2,
+                           col = "black",
+                           fill = "darkgray",
                            lwd = 2,
-                           pch = 19,
                            lty = 1,
-                           type = NULL,
+                           alpha_min = 0.8,
                            axes = TRUE,
                            box = FALSE,
                            ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  ## get default arguments
+  style <- use_arg_from_attributes(x, "style", default = "hanging", force_single = TRUE)
+  scale <- use_arg_from_attributes(x, "scale", default = "sqrt", force_single = TRUE)
+  fitted <- use_arg_from_attributes(x, "fitted", default = TRUE, force_single = FALSE)
+  ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
+
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
   ## * `xlab`, `ylab`, `main` and `...` w/i `plot()`
@@ -524,27 +532,36 @@ plot.rootogram <- function(x,
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
 
-  ## arguments for plotting
-  if (is.null(type)) type <- ifelse(any(table(x$group) > 20L), "l", "b")
+  # -------------------------------------------------------------------
+  # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
+  # -------------------------------------------------------------------
+  ## get line style
+  if (isFALSE(fitted)) {
+    fitted <- "none"
+  } else if (isTRUE(fitted)) {
+    fitted <- "b"
+  } else {
+    fitted <- match.arg(fitted, c("both", "line", "point"))
+    ifelse(fitted == "both", "b", ifelse(fitted == "line", "l", "p"))
+  }
 
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    border, fill, col, lwd, pch, lty, type, axes, box
+    fill, col, lwd, lty, alpha_min, fitted, axes, box 
   )[, -1]
 
   ## annotation
-  if (is.null(xlab)) xlab <- TRUE
-  if (is.null(ylab)) ylab <- TRUE
-  if (is.null(main)) main <- TRUE
-  xlab <- rep(xlab, length.out = n)
-  ylab <- rep(ylab, length.out = n)
-  main <- rep(main, length.out = n)
-  if (is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
-  if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
-  if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
+  xlab <- use_arg_from_attributes(x, "xlab", default = "Rootogram", force_single = FALSE)
+  ylab <- use_arg_from_attributes(x, "ylab", 
+    default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = FALSE)
+  main <- use_arg_from_attributes(x, "main", default = "model", force_single = FALSE)
+
+  # -------------------------------------------------------------------
+  # PREPARE DATA FOR PLOTTING
+  # -------------------------------------------------------------------
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION
@@ -553,13 +570,16 @@ plot.rootogram <- function(x,
 
     ## get group index
     j <- unique(d$group)
-
     ## rect elements
-    tmp_heigths <- compute_rootogram_heigths(d$expctd, d$obsrvd, scale = scale, style = style)
+    tmp_heigths <- compute_rootogram_heigths(d$expected, d$observed, scale = scale, style = style)
     ybottom = tmp_heigths$ymin
     ytop = tmp_heigths$ymax
-    xleft <- d$x - d$width / 2
-    xright <- d$x + d$width / 2
+    xleft <- d$mids - d$width / 2
+    xright <- d$mids + d$width / 2
+
+    if (scale == "sqrt") {
+      d$expected = sqrt(d$expected)
+    }
 
     ## get xlim and ylim
     if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
@@ -584,7 +604,12 @@ plot.rootogram <- function(x,
     }
 
     ## plot rootogram
-    rect(xleft, ybottom, xright, ytop, border = plot_arg$border[j], col = plot_arg$fill[j])
+    rect(xleft, ybottom, xright, ytop, 
+      col = set_minimum_transparency(plot_arg$fill[j], alpha_min = plot_arg$alpha_min[j]),
+      border = plot_arg$col[j], 
+      lty = plot_arg$lty,
+      lwd = plot_arg$lwd
+    )
 
     ## add ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
@@ -592,11 +617,13 @@ plot.rootogram <- function(x,
       abline(h = 0, col = plot_arg$ref[j], lty = 1, lwd = 1.25)
     }
 
-    ## add main line
-    lines(d$x, d$line,
-      col = plot_arg$col[j], pch = plot_arg$pch[j], type = plot_arg$type[j],
-      lty = plot_arg$lty[j], lwd = plot_arg$lwd[j]
-    )
+    ## add fitted line
+    if (plot_arg$fitted[j] != "none") {
+      lines(d$mids, d$expected,
+        col = 2, pch = 19, type = plot_arg$fitted[j],
+        lty = 1, lwd = 2
+      )
+    }
   }
 
   # -------------------------------------------------------------------
@@ -620,7 +647,7 @@ autoplot.rootogram <- function(object,
                                style = NULL,
                                scale = NULL,
                                ref = TRUE,
-                               line = TRUE,
+                               fitted = TRUE,
                                xlim = c(NA, NA),
                                ylim = c(NA, NA),
                                xlab = NULL,
@@ -636,13 +663,19 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  ## get default arguments
   style <- use_arg_from_attributes(object, "style", default = "hanging", force_single = TRUE)
   scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
+  fitted <- use_arg_from_attributes(object, "fitted", default = TRUE, force_single = TRUE)
+  ref <- use_arg_from_attributes(object, "ref", default = NULL, force_single = TRUE)
+  xlab <- use_arg_from_attributes(object, "xlab", default = "Rootogram", force_single = TRUE)
+  ylab <- use_arg_from_attributes(object, "ylab", 
+    default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = TRUE)
 
   ## get base style arguments
   add_arg <- list(...)
   #if (!is.null(add_arg$pch)) shape <- add_arg$pch
-  #if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
   ## sanity checks
@@ -650,12 +683,12 @@ autoplot.rootogram <- function(object,
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
   ## get line style
-  if (isFALSE(line)) {
-    line <- "none"
-  } else if (isTRUE(line)) {
-    line <- "both"
+  if (isFALSE(fitted)) {
+    fitted <- "none"
+  } else if (isTRUE(fitted)) {
+    fitted <- "both"
   }
-  line <- match.arg(line, c("both", "line", "point"))
+  fitted <- match.arg(fitted, c("both", "line", "point"))
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -670,12 +703,9 @@ autoplot.rootogram <- function(object,
     object$title <- factor(title)
   }
 
-  ## get annotations in the right lengths
-  if (is.null(xlab)) xlab <- attr(object, "xlab")
-  xlab <- paste(unique(xlab), collapse = "/")
-  if (is.null(ylab)) ylab <- attr(object, "ylab")
-  ylab <- paste(unique(ylab), collapse = "/")
-  if (is.null(main)) main <- attr(object, "main")
+  ## get main and into the right length (must be done after handling of `title`)
+  main <- use_arg_from_attributes(object, "main", default = "model", force_single = FALSE)
+  stopifnot(is.character(main))
   main <- make.names(rep_len(main, n), unique = TRUE)
 
   ## prepare grouping
@@ -685,22 +715,45 @@ autoplot.rootogram <- function(object,
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
-  plot_arg <- data.frame(1:n, colour, fill, size, linetype, alpha)[, -1]
+  plot_arg <- data.frame(
+    1:n, 
+    colour, fill, size, linetype, alpha
+  )[, -1]
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   ## actual plotting
-  rval <- ggplot2::ggplot(object, ggplot2::aes_string(
-    obsrvd = "observed",
-    expctd = "expected", 
-    mids = "mids", 
-    width = "width", 
-    group = "group"
-  )) +
-    geom_rootogram(ggplot2::aes_string(colour = "group", fill = "group", size = "group", 
-      linetype = "group", alpha = "group"), scale = scale, style = style) + 
-    geom_rootogram_fitted(scale = scale, style = style) + 
+  rval <- ggplot2::ggplot(
+    object, 
+    ggplot2::aes_string(
+      obsrvd = "observed",
+      expctd = "expected", 
+      mids = "mids", 
+      width = "width", 
+      group = "group"
+    )
+  ) 
+
+  ## add rootogram
+  rval <- rval + 
+    geom_rootogram(
+      ggplot2::aes_string(
+        colour = "group", 
+        fill = "group", 
+        size = "group", 
+        linetype = "group", 
+        alpha = "group"), 
+      scale = scale, 
+      style = style
+    )
+
+  ## add fitted line
+  rval <- rval + 
+    geom_rootogram_fitted(scale = scale, style = style) 
+
+  ## add ref
+  rval <- rval + 
     geom_rootogram_ref(ggplot2::aes_string(yintercept = 0))
 
   ## set the colors, shapes, etc.
@@ -717,14 +770,29 @@ autoplot.rootogram <- function(object,
   ## add legend
   if (legend) {
     rval <- rval +
-      ggplot2::labs(colour = "Model", fill = "Model", size = "Model", 
-        linetype = "Model", alpha = "Model") +
-      ggplot2::guides(colour = "legend", fill = "legend", size = "legend", 
-        linetype = "legend", alpha = "legend")
+      ggplot2::labs(
+        colour = "Model",
+        fill = "Model",
+        size = "Model",
+        linetype = "Model",
+        alpha = "Model"
+      ) +
+      ggplot2::guides(
+        colour = "legend",
+        fill = "legend",
+        size = "legend",
+        linetype = "legend",
+        alpha = "legend"
+      )
   } else {
     rval <- rval +
-      ggplot2::guides(colour = "none", fill = "none", size = "none", 
-        linetype = "none", alpha = "none")
+      ggplot2::guides(
+        colour = "none",
+        fill = "none",
+        size = "none",
+        linetype = "none",
+        alpha = "none"
+      )
   }
 
   ## set x and y limits
@@ -855,6 +923,8 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
 #' @param style Fix description.
+#' @param scale Fix description.
+#' @param linestyle Fix description.
 #' @examples
 #' if (require("ggplot2")) {
 #'   ## Fit model

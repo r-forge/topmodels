@@ -630,14 +630,13 @@ plot.pithist <- function(x,
                          xlab = NULL,
                          ylab = NULL,
                          main = NULL,
-                         alpha_min = 0.2,
                          col = "black",
                          fill = "black",
                          lwd = NULL,
                          lty = 1,
+                         alpha_min = 0.2,
                          axes = TRUE,
                          box = TRUE,
-                         legend = FALSE,
                          ...) {
   ## TODO: (ML) several arg are implemented differently than in ggplot2:
   ## * confint, ref support colour(s)
@@ -676,7 +675,6 @@ plot.pithist <- function(x,
   stopifnot(is.null(main) || is.character(main))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
-  stopifnot(is.logical(legend))
   style <- match.arg(style, c("bar", "line"))
   confint_type <- match.arg(confint_type)
 
@@ -1142,11 +1140,11 @@ autoplot.pithist <- function(object,
                              xlab = NULL,
                              ylab = NULL,
                              main = NULL,
-                             alpha = NULL,  # NULL, as dependent on plot
                              colour = NULL,  # NULL, as dependent on plot
                              fill = NULL,  # NULL, as dependent on plot
                              size = NULL,  # NULL, as dependent on plot
                              linetype = NULL,  # NULL, as dependent on plot
+                             alpha = NULL,  # NULL, as dependent on plot
                              legend = FALSE,
                              ...) {
   # -------------------------------------------------------------------
@@ -1259,7 +1257,7 @@ autoplot.pithist <- function(object,
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
-    alpha, colour, fill, size, linetype
+    colour, fill, size, linetype, alpha
   )[, -1]
 
   # -------------------------------------------------------------------
@@ -1280,11 +1278,11 @@ autoplot.pithist <- function(object,
   rval <- rval + 
     geom_pithist(
       ggplot2::aes_string(
-        alpha = "group", 
         colour = "group", 
         fill = "group", 
         size = "group",
-        linetype = "group"
+        linetype = "group",
+        alpha = "group"
       ),
       freq = freq,
       style = style
@@ -1378,9 +1376,9 @@ autoplot.pithist <- function(object,
   }
 
   ## set x and y limits
-  rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = TRUE)
-  rval <- rval + ggplot2::scale_x_continuous(expand = c(0.01, 0.01))
-  rval <- rval + ggplot2::scale_y_continuous(expand = c(0.01, 0.01))
+  rval <- rval + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = TRUE) +
+    ggplot2::scale_x_continuous(expand = c(0.01, 0.01)) +
+    ggplot2::scale_y_continuous(expand = c(0.01, 0.01))
 
   # -------------------------------------------------------------------
   # ORDER LAYERS

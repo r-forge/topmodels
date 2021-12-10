@@ -7,19 +7,20 @@
 \usage{
 \method{plot}{rootogram}(
   x,
+  style = NULL,
+  scale = NULL,
+  fitted = TRUE,
   ref = TRUE,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  border = "black",
-  fill = adjustcolor("black", alpha.f = 0.2),
-  col = 2,
+  col = "black",
+  fill = "darkgray",
   lwd = 2,
-  pch = 19,
   lty = 1,
-  type = NULL,
+  alpha_min = 0.8,
   axes = TRUE,
   box = FALSE,
   ...
@@ -27,8 +28,10 @@
 
 \method{autoplot}{rootogram}(
   object,
+  style = NULL,
+  scale = NULL,
   ref = TRUE,
-  line = TRUE,
+  fitted = TRUE,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -46,9 +49,11 @@
 \arguments{
 \item{x, object}{an object of class \code{\link{rootogram}}.}
 
+\item{style, scale, alpha_min}{Fix description.}
+
 \item{ref}{logical. Should a reference line be plotted?}
 
-\item{xlim, ylim, border, fill, col, lwd, pch, lty, type, axes, box}{graphical
+\item{xlim, ylim, fill, col, lwd, lty, axes, box}{graphical
 parameters. These may pertain either to the whole plot or just the histogram
 or just the fitted line.}
 
@@ -56,7 +61,7 @@ or just the fitted line.}
 
 \item{\dots}{further graphical parameters passed to the plotting function.}
 
-\item{colour, size, line, alpha, linetype}{graphical parameters passed to
+\item{colour, size, fitted, alpha, linetype}{graphical parameters passed to
 \code{geom_line} and \code{geom_point}, respectively.}
 
 \item{legend}{logical. Should a legend be added in the \code{ggplot2} style

@@ -22,14 +22,13 @@
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  alpha_min = 0.2,
   col = "black",
   fill = "black",
   lwd = NULL,
   lty = 1,
+  alpha_min = 0.2,
   axes = TRUE,
   box = TRUE,
-  legend = FALSE,
   ...
 )
 
@@ -63,11 +62,11 @@
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  alpha = NULL,
   colour = NULL,
   fill = NULL,
   size = NULL,
   linetype = NULL,
+  alpha = NULL,
   legend = FALSE,
   ...
 )
