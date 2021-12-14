@@ -105,11 +105,11 @@ pithist(m)
 qqrplot(m)
 ```
 
-```{r example-reliagram}
-reliagram(m)
-````
-
 ```{r example-wormplot}
+#```{r example-reliagram}
+# FIXME: (ML) Produces error due to eval (something w/ enivornments not properly set?!)
+#reliagram(m)
+#````
 wormplot(m)
 ```
 
