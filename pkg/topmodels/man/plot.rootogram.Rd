@@ -18,7 +18,7 @@
   main = NULL,
   col = "black",
   fill = "darkgray",
-  lwd = 2,
+  lwd = 1,
   lty = 1,
   alpha_min = 0.8,
   axes = TRUE,

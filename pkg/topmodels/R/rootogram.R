@@ -168,9 +168,9 @@ rootogram.default <- function(object,
   ## * `...` in `plot()` and `autoplot()`
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1))
-  stopifnot(length(xlab) == 1 | length(xlab) == 0)
-  stopifnot(length(ylab) == 1 | length(ylab) == 0)
-  stopifnot(length(main) == 1 | length(main) == 0)
+  stopifnot(is.null(xlab) || (length(xlab) == 1 && is.character(xlab)))
+  stopifnot(is.null(ylab) || (length(ylab) == 1 && is.character(ylab)))
+  stopifnot(is.null(main) || (length(main) == 1 && is.character(main)))
 
   ## match arguments
   scale <- match.arg(scale)
@@ -314,6 +314,7 @@ rootogram.default <- function(object,
   invisible(rval)
 }
 
+
 #' @export
 c.rootogram <- function(...) {
   # -------------------------------------------------------------------
@@ -344,24 +345,28 @@ c.rootogram <- function(...) {
   # PREPARE DATA
   # -------------------------------------------------------------------
   ## labels
-  style <- unlist(lapply(rval, function(r) attr(r, "style")))
-  scale <- unlist(lapply(rval, function(r) attr(r, "scale")))
-  xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
-  ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  xlab <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "xlab")), NA, attr(r, "xlab"))))
+  ylab <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "ylab")), NA, attr(r, "ylab"))))
   nam <- names(rval)
   main <- if (is.null(nam)) {
-    as.vector(sapply(rval, function(r) attr(r, "main")))
+    as.vector(sapply(rval, function(r) ifelse(is.null(attr(r, "main")), NA, attr(r, "main"))))
   } else {
     make.unique(rep.int(nam, sapply(n, length)))
   }
+
+  ## parameters
+  style <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "style")), NA, attr(r, "style"))))
+  scale <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "scale")), NA, attr(r, "scale"))))
   n <- unlist(n)
 
   # -------------------------------------------------------------------
   # RETURN DATA
   # -------------------------------------------------------------------
-  ## combine and return
+  ## combine
   rval <- do.call("rbind.data.frame", rval)
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
+
+  ## add attributes
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
   attr(rval, "xlab") <- xlab
@@ -379,6 +384,11 @@ c.rootogram <- function(...) {
   ## return
   return(rval)
 }
+
+
+#' @export
+rbind.pithist <- c.pithist
+
 
 #' S3 Methods for Plotting Rootograms
 #' 
@@ -500,7 +510,7 @@ plot.rootogram <- function(x,
                            main = NULL,
                            col = "black",
                            fill = "darkgray",
-                           lwd = 2,
+                           lwd = 1,
                            lty = 1,
                            alpha_min = 0.8,
                            axes = TRUE,
@@ -524,7 +534,6 @@ plot.rootogram <- function(x,
   stopifnot(is.logical(box))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
-
  
   ## compute heights 
   x <- summary(x, scale = scale, style = style)
@@ -574,9 +583,10 @@ plot.rootogram <- function(x,
 
     ## get group index
     j <- unique(d$group)
+
     ## rect elements
-    ybottom = d$ymin
-    ytop = d$ymax
+    ybottom <- d$ymin
+    ytop <- d$ymax
     xleft <- d$mids - d$width / 2
     xright <- d$mids + d$width / 2
 
@@ -804,7 +814,6 @@ autoplot.rootogram <- function(object,
     ggplot2::scale_x_continuous(expand = c(0.01, 0.01)) +
     ggplot2::scale_y_continuous(expand = c(0.01, 0.01))
 
-
   # -------------------------------------------------------------------
   # GROUPING (IF ANY) AND RETURN PLOT
   # -------------------------------------------------------------------
@@ -820,7 +829,9 @@ autoplot.rootogram <- function(object,
 }
 
 
-## FIXME: (ML) Should this be implemented?
+# -------------------------------------------------------------------
+# FIXME: (ML) Should this be implemented?
+# -------------------------------------------------------------------
 # "+.rootogram" <- function(e1, e2) {
 #   style <- unique(c(attr(e1, "style"), attr(e2, "style")))
 #   if(length(style) > 1L) {
