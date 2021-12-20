@@ -262,7 +262,7 @@ rootogram.default <- function(object,
       )
   }
 
-  ## FIXME: (ML) Sometime neg. expctd occured (see example for underdispersed model fit)
+  ## FIXME: (ML) Sometime neg. expected occured (see example for underdispersed model fit)
   p[abs(p) < sqrt(.Machine$double.eps)] <- 0
 
   ## handle NAs
@@ -273,18 +273,18 @@ rootogram.default <- function(object,
   w <- w[idx_not_na]
 
   ## observed frequencies
-  obsrvd <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
+  observed <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
 
   ## expected frequencies (part2)
-  expctd <- colSums(p * w)
+  expected <- colSums(p * w)
 
   # -------------------------------------------------------------------
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
   ## collect everything as data.frame
   rval <- data.frame(
-    observed = as.vector(obsrvd),
-    expected = as.vector(expctd),
+    observed = as.vector(observed),
+    expected = as.vector(expected),
     mids = mids,
     width = diff(breaks) * width
   )
@@ -525,6 +525,10 @@ plot.rootogram <- function(x,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
+ 
+  ## compute heights 
+  x <- summary(x, scale = scale, style = style)
+
   ## convert always to data.frame
   x <- as.data.frame(x)
 
@@ -571,9 +575,8 @@ plot.rootogram <- function(x,
     ## get group index
     j <- unique(d$group)
     ## rect elements
-    tmp_heigths <- compute_rootogram_heigths(d$expected, d$observed, scale = scale, style = style)
-    ybottom = tmp_heigths$ymin
-    ytop = tmp_heigths$ymax
+    ybottom = d$ymin
+    ytop = d$ymax
     xleft <- d$mids - d$width / 2
     xright <- d$mids + d$width / 2
 
@@ -607,8 +610,8 @@ plot.rootogram <- function(x,
     rect(xleft, ybottom, xright, ytop, 
       col = set_minimum_transparency(plot_arg$fill[j], alpha_min = plot_arg$alpha_min[j]),
       border = plot_arg$col[j], 
-      lty = plot_arg$lty,
-      lwd = plot_arg$lwd
+      lty = plot_arg$lty[j],
+      lwd = plot_arg$lwd[j]
     )
 
     ## add ref line
@@ -727,8 +730,8 @@ autoplot.rootogram <- function(object,
   rval <- ggplot2::ggplot(
     object, 
     ggplot2::aes_string(
-      obsrvd = "observed",
-      expctd = "expected", 
+      observed = "observed",
+      expected = "expected", 
       mids = "mids", 
       width = "width", 
       group = "group"
@@ -888,7 +891,7 @@ stat_rootogram <- function(mapping = NULL,
 #' @export
 StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 
-  required_aes = c("obsrvd", "expctd", "mids", "width"),
+  required_aes = c("observed", "expected", "mids", "width"),
 
   compute_group = function(data,  
                            scales, 
@@ -898,15 +901,15 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
     scale <- match.arg(scale)
     style <- match.arg(style)
 
-    tmp_heigths <- compute_rootogram_heigths(data$expctd, data$obsrvd, scale = scale, style = style)
+    tmp_heights <- compute_rootogram_heights(data$expected, data$observed, scale = scale, style = style)
 
     data <- transform(data,
       xmin = mids - width/2, 
       xmax = mids + width/2,
-      ymin = tmp_heigths$ymin,
-      ymax = tmp_heigths$ymax,
-      obsrvd = NULL,
-      expctd = NULL,
+      ymin = tmp_heights$ymin,
+      ymax = tmp_heights$ymax,
+      observed = NULL,
+      expected = NULL,
       mids = NULL,
       width = NULL
     )
@@ -946,9 +949,9 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #'   d$group <- factor(d$group, labels = main)
 #'   
 #'   gg1 <- ggplot(data = d) + 
-#'     geom_rootogram(aes(obsrvd = observed, expctd = expected, mids = mids, 
+#'     geom_rootogram(aes(observed = observed, expected = expected, mids = mids, 
 #'       width = width, group = group)) + 
-#'     geom_rootogram_fitted(aes(expctd = expected, mids = mids)) + 
+#'     geom_rootogram_fitted(aes(expected = expected, mids = mids)) + 
 #'     geom_rootogram_ref(yintercept = 0) + 
 #'     facet_grid(group~.)
 #'   gg1
@@ -1044,7 +1047,7 @@ stat_rootogram_fitted <- function(mapping = NULL,
 #' @export
 StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
 
-  required_aes = c("expctd", "mids"),
+  required_aes = c("expected", "mids"),
 
   compute_group = function(data, 
                            scales, 
@@ -1058,15 +1061,15 @@ StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
     if (scale == "sqrt") {
       data <- transform(data,
         x = mids,
-        y = sqrt(expctd),
-        expctd = NULL,
+        y = sqrt(expected),
+        expected = NULL,
         mids = NULL
       )
     } else {
       data <- transform(data,
         x = mids,
-        y = expctd,
-        expctd = NULL,
+        y = expected,
+        expected = NULL,
         mids = NULL
       )
     }
@@ -1187,8 +1190,11 @@ GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
 )
 
 
-compute_rootogram_heigths <- function(expctd, 
-                                      obsrvd, 
+# -------------------------------------------------------------------
+# HELPER FUNCTIONS FOR GETTING AN EXTENDED ROOTOGRAM OBJECT
+# -------------------------------------------------------------------
+compute_rootogram_heights <- function(expected, 
+                                      observed, 
                                       scale = c("sqrt", "raw"),
                                       style = c("hanging", "standing", "suspended")) {
 
@@ -1197,15 +1203,83 @@ compute_rootogram_heigths <- function(expctd,
 
   ## raw vs. sqrt scale
   if (scale == "sqrt") {
-    y = if (style == "hanging") sqrt(expctd) - sqrt(obsrvd) else 0
-    height = if (style == "suspended") sqrt(expctd) - sqrt(obsrvd) else sqrt(obsrvd)
+    y <- if (style == "hanging") sqrt(expected) - sqrt(observed) else 0
+    height <- if (style == "suspended") sqrt(expected) - sqrt(observed) else sqrt(observed)
   } else {
-    y = if (style == "hanging") expctd - obsrvd else 0
-    height = if (style == "suspended") expctd - obsrvd else obsrvd
+    y <- if (style == "hanging") expected - observed else 0
+    height <- if (style == "suspended") expected - observed else observed
   }
 
   data.frame(
     ymin = y, 
     ymax = y + height
   )
+}
+
+
+#' @export
+summary.rootogram <- function(object, 
+                              scale = NULL,
+                              style = NULL,
+                              ...) { 
+
+  ## get arg `style` and `scale`
+  scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
+  style <- use_arg_from_attributes(object, "style", default = "hanging", force_single = TRUE)
+
+  ## compute heights
+  tmp <- compute_rootogram_heights(object$expected, object$observed, scale = scale, style = style)
+
+  rval <- transform(object,
+    ymin = tmp$ymin, 
+    ymax = tmp$ymax
+  )
+
+  ## set attributes
+  attr(rval, "style") <- style
+  attr(rval, "scale") <- scale
+  attr(rval, "xlab") <- attr(object, "xlab")
+  attr(rval, "ylab") <- attr(object, "ylab")
+  attr(rval, "main") <- attr(object, "main")
+
+  ## return as `data.frame` or `tibble`
+  if ("data.frame" %in% class(object)) {
+    class(rval) <- c("rootogram", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("rootogram", class(rval))
+  }
+
+  rval  
+}
+
+#' @export
+print.rootogram <- function(x, ...) {
+
+  ## get arg `style` and `scale`
+  scale <- style <- NULL  # needed for `use_arg_from_attributes()`
+  style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
+  scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
+
+  ## return custom print statement
+  if (is.null(scale) || is.null(style)) {
+    cat("A rootogram object without mandatory attributes `scale` and `style` \n\n")
+  } else if ("ymin" %in% names(x) && "ymax" %in% names(x)) {
+    cat(
+      sprintf("An extended rootogram object with `scale = '%s'` and `style = '%s'` \n\n", 
+      scale, 
+      style
+      )
+    )
+  } else {
+    cat(
+      sprintf("A rootogram object with `scale = '%s'` and `style = '%s'` \n\n", 
+      scale, 
+      style
+      )
+    )
+  }
+
+  ## call next print method
+  NextMethod()
 }
