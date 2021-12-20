@@ -162,9 +162,9 @@ if (require("ggplot2")) {
   d$group <- factor(d$group, labels = main)
   
   gg1 <- ggplot(data = d) + 
-    geom_rootogram(aes(obsrvd = observed, expctd = expected, mids = mids, 
+    geom_rootogram(aes(observed = observed, expected = expected, mids = mids, 
       width = width, group = group)) + 
-    geom_rootogram_fitted(aes(expctd = expected, mids = mids)) + 
+    geom_rootogram_fitted(aes(expected = expected, mids = mids)) + 
     geom_rootogram_ref(yintercept = 0) + 
     facet_grid(group~.)
   gg1
