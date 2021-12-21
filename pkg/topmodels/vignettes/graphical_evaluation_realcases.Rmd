@@ -10,7 +10,7 @@ bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Graphical Evaluation: Simulations}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
+  %\VignetteDepends{topmodels,crch,ggplot2,MASS,rmutil,sn}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}
 ---
@@ -37,6 +37,7 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 ```{r preliminaries, echo = FALSE, message = FALSE}
 library("topmodels")
 library("crch")
+library("ggplot2")
 options(digits = 4)
 knitr::opts_chunk$set(fig.aling = "center")
 
@@ -91,30 +92,30 @@ RainIbk <- subset(RainIbk, enssd > 0)
 ## linear model
 LM <- lm(rain ~ ensmean, data = RainIbk)
 
-## heteroscedastic truncated regression with a logistic distribution assumption
-TRCH <- crch(rain ~ ensmean | log(enssd), data = RainIbk, subset = rain > 0,
-         left = 0, dist = "logistic", truncated = TRUE)
+## heteroscedastic censored regression with a gaussian distribution assumption
+CRCH_gaus <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
+  dist = "gaussian")
 
 ## heteroscedastic censored regression with a logistic distribution assumption
-CRCH <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
+CRCH_log <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
   dist = "logistic")
 ```
 
-```{r crch validation, echo = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
+```{r crch overview-plot, echo = FALSE, eval = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
 par(mfrow = c(1, 1), bg = "#f7f7f7")
 
 plot(rain~ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
-abline(coef(LM)[1:2], col = 2, lwd = 2)
-abline(coef(CRCH)[1:2], col = 3, lwd = 2)
-abline(coef(TRCH)[1:2], col = 4, lwd = 2)
+abline(coef(LM)[1:2], col = 1, lwd = 2)
+abline(coef(CRCH_gaus)[1:2], col = 2, lwd = 2)
+abline(coef(CRCH_log)[1:2], col = 4, lwd = 2)
 
-legend("topright", lwd = c(1, 1, 1), lty = c(1, 1, 1), col = c(2, 3, 4), 
-  c("LM", "CRCH", "TRCH"), bty = "n")
+legend("topright", lwd = c(1, 1, 1), lty = c(1, 1, 1), col = c(1, 2, 4), 
+  c("LM", "CRCH gaussian", "CRCH logistic"), bty = "n")
 
 par(mfrow = c(1, 1))
 ```
 
-```{r crch simulated}
+```{r crch simulated, echo = FALSE, eval = FALSE}
 set.seed(1)
 d <- data.frame(x = runif(500, -1, 1), err = rnorm(500, sd = 1)) |>
   transform(y = x + err) |>
@@ -139,48 +140,58 @@ plot(c(
 ))
 ```
 
-#### Linear model 
-```{r topmodels-lm, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 4), bg = "#f7f7f7")
-make_topmodels_plot(LM)
-par(mfrow = c(1, 1))
+```{r topmodels-rootogram, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+r1 <- rootogram(LM, plot = FALSE)
+r2 <- rootogram(CRCH_gaus, plot = FALSE)
+
+gg1 <- autoplot(
+    c(r1, r2)
+  ) 
+gg1
 ```
 
-#### Heteroscedastic truncated regression with a logistic distribution assumption
-```{r topmodels-trch, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 4), bg = "#f7f7f7")
-make_topmodels_plot(TRCH)
-par(mfrow = c(1, 1))
+```{r topmodels-pithist, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+p1 <- pithist(LM, plot = FALSE)
+p2 <- pithist(CRCH_gaus, plot = FALSE)
+p3 <- pithist(CRCH_log, plot = FALSE)
+
+gg2 <- autoplot(
+    c(p1, p2, p3), 
+    style = "line", 
+    col = c(1, 2, 4), 
+    confint = FALSE,
+    ylim = c(0.6, 1.4), 
+    single_graph = TRUE
+  ) + 
+  geom_pithist_confint(
+    aes(x = mids, y = counts, width = width, group = group), 
+    style = "line", 
+    colour = 1
+  ) + 
+  geom_pithist_ref(
+    aes(x = mids, y = counts, width = width, group = group), 
+    style = "line", 
+    colour = 1,
+    linetype = 2,
+    size = 0.5
+  )
+gg2
 ```
 
-#### Heteroscedastic censored regression with a logistic distribution assumption
-```{r topmodels-crch, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 4), bg = "#f7f7f7")
-make_topmodels_plot(CRCH)
-par(mfrow = c(1, 1))
-```
+```{r topmodels-wormplot, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+w1 <- wormplot(LM, plot = FALSE)
+w2 <- wormplot(CRCH_gaus, plot = FALSE)
+w3 <- wormplot(CRCH_log, plot = FALSE)
 
-```{r crch models-extended}
-CRCHgau <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
-  dist = "gaussian")
-CRCHstud <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
-  dist = "student")
-
-AIC(CRCH, CRCHgau, CRCHstud)
-```
-
-#### Heteroscedastic censored regression with a gaussian distribution assumption
-```{r topmodels-crchgau, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 4), bg = "#f7f7f7")
-make_topmodels_plot(CRCHgau)
-par(mfrow = c(1, 1))
-```
-
-#### Heteroscedastic censored regression with a student-t distribution assumption
-```{r topmodels-crchstud, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 4), bg = "#f7f7f7")
-make_topmodels_plot(CRCHstud)
-par(mfrow = c(1, 1))
+gg3 <- autoplot(
+    c(w1, w2, w3), 
+    style = "line", 
+    col = c(1, 2, 4), 
+    confint = FALSE,
+    range = TRUE,
+    single_graph = TRUE
+  ) 
+gg3
 ```
 
 
