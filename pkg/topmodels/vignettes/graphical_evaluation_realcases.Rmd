@@ -140,7 +140,7 @@ plot(c(
 ))
 ```
 
-```{r topmodels-rootogram, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+```{r topmodels-rootogram, echo = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
 r1 <- rootogram(LM, plot = FALSE)
 r2 <- rootogram(CRCH_gaus, plot = FALSE)
 
@@ -150,7 +150,7 @@ gg1 <- autoplot(
 gg1
 ```
 
-```{r topmodels-pithist, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+```{r topmodels-pithist, echo = FALSE, fig.height = 4, out.width = "100%", fig.align = "center"}
 p1 <- pithist(LM, plot = FALSE)
 p2 <- pithist(CRCH_gaus, plot = FALSE)
 p3 <- pithist(CRCH_log, plot = FALSE)
@@ -178,17 +178,16 @@ gg2 <- autoplot(
 gg2
 ```
 
-```{r topmodels-wormplot, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
+```{r topmodels-wormplot, echo = FALSE, fig.height = 4, out.width = "100%", fig.align = "center"}
 w1 <- wormplot(LM, plot = FALSE)
 w2 <- wormplot(CRCH_gaus, plot = FALSE)
 w3 <- wormplot(CRCH_log, plot = FALSE)
 
 gg3 <- autoplot(
     c(w1, w2, w3), 
-    style = "line", 
     col = c(1, 2, 4), 
-    confint = FALSE,
-    range = TRUE,
+    confint = "line",
+    range = FALSE,
     single_graph = TRUE
   ) 
 gg3
