@@ -23,9 +23,10 @@ various application fields due to a necessary functional risk management and
 strategy, there is an increasing demand for appropriate probabilistic model
 evaluation. Besides proper scoring rules, which can evaluate not only the
 expectation but the entire predictive distribution, graphical assessment
-methods are particularly advantageous to diagnose possible model misspecifications.
+methods are particularly advantageous to diagnose possible model
+misspecifications.
 
-Probabilistic predictions are often based on distributional regression models,
+Probabilistic forecasts are often based on distributional regression models,
 whereby the computation of predictive distributions, probabilities, and
 quantiles is generally dependent on the software (package) being used.
 Therefore, routines to graphically evaluate probabilistic models are not always
@@ -39,11 +40,11 @@ accompanied by a flexible and object-oriented software implementation in the
 The package includes visualizations for PIT (probability integral transform)
 histograms, Q-Q (quantile-quantile) plots of (randomized) quantile residuals,
 rootograms, reliability diagrams, and worm plots. All displays can be rendered
-both in base *R* as well as in **ggplot2** and provide different settings for
-e.g.  confidence intervals, scaling and graphical parameters. Using examples of
-post-processing precipitation ensemble forecasts, we further discuss how all
-theses types of graphics can be compared to each other and which types of
-displays are particularly useful for bringing out which types of model
-deficiencies.
+in base *R* as well as in **ggplot2** and provide different options for, e.g.,
+computing confidence intervals, scaling or setting graphical parameters.
+Using examples of post-processing precipitation ensemble forecasts, we further
+discuss how all theses types of graphics can be compared to each other and
+which types of displays are particularly useful for bringing out which types of
+model deficiencies.
 
 
