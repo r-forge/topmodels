@@ -1,6 +1,6 @@
 ---
 title: |
-  Graphical Model Assessment of Probabilistic Distribution Forecasts
+  Graphical Model Assessment of Probabilistic Forecasts
 author:
 - name: Moritz N. Lang
   affiliation: Department of Statistics, Faculty of Economics and Statistics, Universität Innsbruck
@@ -21,28 +21,29 @@ bibliography: ref.bib
 As a consequence of the growing importance of probabilistic predictions in
 various application fields due to a necessary functional risk management and
 strategy, there is an increasing demand for appropriate probabilistic model
-evaluation. Besides proper probabilistic scores, which evaluate not only the
+evaluation. Besides proper scoring rules, which can evaluate not only the
 expectation but the entire predictive distribution, graphical assessment
-methods are particularly advantageous to diagnose possible model
-misspecification problems.
+methods are particularly advantageous to diagnose possible model misspecifications.
 
 Probabilistic predictions are often based on distributional regression models,
 whereby the computation of predictive distributions, probabilities, and
-quantiles is generally dependent on the *R* package being used. Therefore,
-routines to graphically evaluate probabilistic models are not always available
-and if so then only for specific types of models and distributions provided by
-the corresponding package. An easy to use unified infrastructure to graphical
-assess and compare different probabilistic model types does not yet exist.
+quantiles is generally dependent on the software (package) being used.
+Therefore, routines to graphically evaluate probabilistic models are not always
+available and if so then only for specific types of models and distributions
+provided by the corresponding package. An easy to use unified infrastructure to
+graphical assess and compare different probabilistic model types does not yet
+exist. Trying to fill that gap, we present a common conceptual framework
+accompanied by a flexible and object-oriented software implementation in the
+*R* package **topmodels** (https://topmodels.R-Forge.R-project.org/). 
 
-Trying to fill that gap, we present the *R* package **topmodels** providing various
-diagnostic graphics in a flexible and object-oriented software implementation
-(https://topmodels.R-Forge.R-project.org/). The package includes
-visualizations for PIT (probability integral transform) histograms, Q-Q
-(quantile-quantile) plots of (randomized) quantile residuals, rootograms,
-reliability diagrams, and worm plots. All displays can be rendered both in base
-*R* and **ggplot2**. Using examples of post-processing precipitation ensemble
-forecasts, we further discuss how all theses types of graphics can be compared
-to each other and which types of displays are particularly useful for bringing
-out which types of model deficiencies.
+The package includes visualizations for PIT (probability integral transform)
+histograms, Q-Q (quantile-quantile) plots of (randomized) quantile residuals,
+rootograms, reliability diagrams, and worm plots. All displays can be rendered
+both in base *R* as well as in **ggplot2** and provide different settings for
+e.g.  confidence intervals, scaling and graphical parameters. Using examples of
+post-processing precipitation ensemble forecasts, we further discuss how all
+theses types of graphics can be compared to each other and which types of
+displays are particularly useful for bringing out which types of model
+deficiencies.
 
 
