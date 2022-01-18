@@ -110,7 +110,7 @@ concentrated the sharper the forecast.
 In this article, we focus on several graphical diagnostic tools to assess the
 calibration of a probabilistic forecast $F( \cdot | \boldsymbol{\theta}_{i})$,
 issued in form of a predictive distribution $f( \cdot |
-\boldsymbol{\theta}_{i})$. Given observations $y_i (1 = \ldots, n)$, we assume
+\boldsymbol{\theta}_{i})$. Given observations $y_i (i = 1, \ldots, n)$, we assume
 a set of observation-specific fitted parameters $\hat{\boldsymbol{\theta}}_{i}
 = (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top$, where the estimation
 may have been performed on the same observations $i = 1, \ldots, n$ (i.e.,

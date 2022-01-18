@@ -20,6 +20,8 @@ navbar:
           href: articles/graphical_evaluation_methodology.html
         - text: "Graphical Evaluation: Simulations"
           href: articles/graphical_evaluation_simulations.html
+        - text: "Graphical Evaluation: Real Cases"
+          href: articles/graphical_evaluation_realcases.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"

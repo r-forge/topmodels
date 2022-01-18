@@ -169,7 +169,7 @@ m2 <- lm(yhnorm ~ x, data = d)
 m3 <- crch(yhnorm ~ x | z, data = d)
 ```
 
-```{r qresiduals-2, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-2, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m2)
 make_residuals_plot(m3)
@@ -223,7 +223,7 @@ m4 <- lm(ycnorm ~ x, data = d)
 m5 <- crch(ycnorm ~ x | 1, data = d, left = 0, right = 100)
 ```
 
-```{r qresiduals-3, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-3, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m4)
 make_residuals_plot(m5)
@@ -270,7 +270,7 @@ m6 <- lm(ytnorm ~ x, data = d)
 m7 <- trch(ytnorm ~ x | 1, data = d, left = 0)
 ```
 
-```{r qresiduals-4, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-4, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m6)
 make_residuals_plot(m7)
@@ -314,7 +314,7 @@ m8 <- lm(yt ~ x, data = d)
 m9 <- crch(yt ~ x | 1, data = d, dist = "student")
 ```
 
-```{r qresiduals-5, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-5, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m8)
 make_residuals_plot(m9)
@@ -367,7 +367,7 @@ m10 <- lm(yrskew ~ x, data = d)
 m11 <- lm(ylskew ~ x, data = d)
 ```
 
-```{r qresiduals-6, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-6, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m10)
 make_residuals_plot(m11)
@@ -423,7 +423,7 @@ m12 <- lm(yunif ~ x, data = d)
 m13 <- lm(ylaplace ~ x, data = d)
 ```
 
-```{r qresiduals-7, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-7, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m12)
 make_residuals_plot(m13)
@@ -536,7 +536,7 @@ m15 <- glm(ynegbin ~ x, data = d, family = poisson)
 m16 <- MASS::glm.nb(ynegbin ~ x, data = d)
 ```
 
-```{r qresiduals-9, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-9, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m15)
 make_residuals_plot(m16)
@@ -587,7 +587,7 @@ m17 <- glm(yzip ~ x, data = d, family = poisson)
 m18 <- pscl::zeroinfl(yzip ~ x | 1, data = d, dist = "poisson")
 ```
 
-```{r qresiduals-10, fig.show = "hide", echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
+```{r qresiduals-10, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
 par(mfrow = c(2, 3), bg = "#f7f7f7")
 make_residuals_plot(m17)
 #make_residuals_plot(m18)

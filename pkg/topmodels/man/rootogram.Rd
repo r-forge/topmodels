@@ -14,11 +14,13 @@ rootogram(object, ...)
   newdata = NULL,
   plot = TRUE,
   class = NULL,
-  style = c("hanging", "standing", "suspended"),
-  scale = c("sqrt", "raw"),
+  response_type = NULL,
   breaks = NULL,
   width = NULL,
-  response_type = NULL,
+  style = c("hanging", "standing", "suspended"),
+  scale = c("sqrt", "raw"),
+  fitted = TRUE,
+  ref = TRUE,
   xlab = NULL,
   ylab = NULL,
   main = NULL,
@@ -45,19 +47,21 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
-\item{style}{character specifying the syle of rootogram (see below).}
-
-\item{scale}{character specifying whether raw frequencies or their square
-roots (default) should be drawn.}
+\item{response_type}{character. To set the default values for \code{breaks} and
+\code{widths}.  Currently different defaults are available for \code{"discrete"}
+and \code{"continous"} response distribution, as well as for the special case of a 
+\code{"logseries"} response.}
 
 \item{breaks}{numeric. Breaks for the histogram intervals.}
 
 \item{width}{numeric. Widths of the histogram bars.}
 
-\item{response_type}{character. To set the default values for \code{breaks} and
-\code{widths}.  Currently different defaults are available for \code{"discrete"}
-and \code{"continous"} response distribution, as well as for the special case of a 
-\code{"logseries"} response.}
+\item{style}{character specifying the syle of rootogram (see below).}
+
+\item{scale}{character specifying whether raw frequencies or their square
+roots (default) should be drawn.}
+
+\item{ref, fitted}{Fix description.}
 
 \item{xlab, ylab, main}{graphical parameters.}
 }

@@ -66,6 +66,7 @@
 #' \code{"logseries"} response.
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters passed to the plotting function.
+#' @param ref,fitted Fix description.
 #' @return An object of class \code{"rootogram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
 #' with the following variables: \item{observed}{observed
@@ -146,15 +147,21 @@ rootogram <- function(object, ...) {
 #' @rdname rootogram
 #' @method rootogram default
 #' @export
-rootogram.default <- function(object,
+rootogram.default <- function(
+                              ## computation arguments
+                              object,
                               newdata = NULL,
                               plot = TRUE,
                               class = NULL,
-                              style = c("hanging", "standing", "suspended"),
-                              scale = c("sqrt", "raw"),
+                              response_type = NULL,
                               breaks = NULL,
                               width = NULL,
-                              response_type = NULL,
+
+                              ## plotting arguments
+                              style = c("hanging", "standing", "suspended"),
+                              scale = c("sqrt", "raw"),
+                              fitted = TRUE,
+                              ref = TRUE,
                               xlab = NULL,
                               ylab = NULL,
                               main = NULL,
@@ -164,8 +171,7 @@ rootogram.default <- function(object,
   # -------------------------------------------------------------------
   ## sanity checks
   ## * `object`, `newdata` w/i `newresponse()`
-  ## * `breaks` w/i `hist()`
-  ## * `...` in `plot()` and `autoplot()`
+  ## * `fitted`, `ref`, `...` in `plot()` and `autoplot()`
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1))
   stopifnot(is.null(xlab) || (length(xlab) == 1 && is.character(xlab)))
@@ -292,6 +298,8 @@ rootogram.default <- function(object,
   ## attributes for graphical display
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
+  attr(rval, "fitted") <- fitted
+  attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
@@ -357,6 +365,8 @@ c.rootogram <- function(...) {
   ## parameters
   style <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "style")), NA, attr(r, "style"))))
   scale <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "scale")), NA, attr(r, "scale"))))
+  fitted <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "fitted")), NA, attr(r, "fitted"))))
+  ref <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "ref")), NA, attr(r, "ref"))))
   n <- unlist(n)
 
   # -------------------------------------------------------------------
@@ -369,6 +379,8 @@ c.rootogram <- function(...) {
   ## add attributes
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
+  attr(rval, "fitted") <- fitted
+  attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
@@ -501,8 +513,8 @@ rbind.pithist <- c.pithist
 plot.rootogram <- function(x,
                            style = NULL,
                            scale = NULL,
-                           fitted = TRUE,
-                           ref = TRUE,
+                           fitted = NULL,
+                           ref = NULL,
                            xlim = c(NA, NA),
                            ylim = c(NA, NA),
                            xlab = NULL,
@@ -548,16 +560,6 @@ plot.rootogram <- function(x,
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
-  ## get line style
-  if (isFALSE(fitted)) {
-    fitted <- "none"
-  } else if (isTRUE(fitted)) {
-    fitted <- "b"
-  } else {
-    fitted <- match.arg(fitted, c("both", "line", "point"))
-    ifelse(fitted == "both", "b", ifelse(fitted == "line", "l", "p"))
-  }
-
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
@@ -594,12 +596,31 @@ plot.rootogram <- function(x,
       d$expected = sqrt(d$expected)
     }
 
+    ## get line style 
+    ## FIXME: (ML) Improve code
+    if (isFALSE(plot_arg$fitted[j]) || plot_arg$fitted[j] == "FALSE") {
+      plot_arg$fitted[j] <- "none"
+    } else if (isTRUE(plot_arg$fitted[j]) || plot_arg$fitted[j] == "TRUE") {
+      plot_arg$fitted[j] <- "b"
+    } else {
+      plot_arg$fitted[j] <- match.arg(plot_arg$fitted[j], c("both", "line", "point"))
+      plot_arg$fitted[j] <- ifelse(
+        plot_arg$fitted[j] == "both", 
+        "b", 
+        ifelse(
+          plot_arg$fitted[j] == "line", 
+          "l", 
+          "p"
+        )
+      )
+    }
+
     ## get xlim and ylim
     if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
       plot_arg[j, c("xlim1", "xlim2")] <- range(c(xleft, xright))
     }
     if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-      plot_arg[j, c("ylim1", "ylim2")] <- range(c(ybottom, ytop, d$line))
+      plot_arg[j, c("ylim1", "ylim2")] <- range(c(ybottom, ytop, d$expected))
     }
 
     ## trigger plot
@@ -659,8 +680,8 @@ plot.rootogram <- function(x,
 autoplot.rootogram <- function(object,
                                style = NULL,
                                scale = NULL,
-                               ref = TRUE,
-                               fitted = TRUE,
+                               fitted = NULL,
+                               ref = NULL,
                                xlim = c(NA, NA),
                                ylim = c(NA, NA),
                                xlab = NULL,
@@ -680,14 +701,13 @@ autoplot.rootogram <- function(object,
   style <- use_arg_from_attributes(object, "style", default = "hanging", force_single = TRUE)
   scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
   fitted <- use_arg_from_attributes(object, "fitted", default = TRUE, force_single = TRUE)
-  ref <- use_arg_from_attributes(object, "ref", default = NULL, force_single = TRUE)
+  ref <- use_arg_from_attributes(object, "ref", default = TRUE, force_single = TRUE)
   xlab <- use_arg_from_attributes(object, "xlab", default = "Rootogram", force_single = TRUE)
   ylab <- use_arg_from_attributes(object, "ylab", 
     default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = TRUE)
 
   ## get base style arguments
   add_arg <- list(...)
-  #if (!is.null(add_arg$pch)) shape <- add_arg$pch
   if (!is.null(add_arg$lwd)) size <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
@@ -695,13 +715,13 @@ autoplot.rootogram <- function(object,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
-  ## get line style
+  ## get line style for fitted
   if (isFALSE(fitted)) {
     fitted <- "none"
   } else if (isTRUE(fitted)) {
     fitted <- "both"
   }
-  fitted <- match.arg(fitted, c("both", "line", "point"))
+  fitted <- match.arg(fitted, c("none", "both", "line", "point"))
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -762,12 +782,16 @@ autoplot.rootogram <- function(object,
     )
 
   ## add fitted line
-  rval <- rval + 
-    geom_rootogram_fitted(scale = scale, style = style) 
+  if (fitted != "none") {
+    rval <- rval +
+      geom_rootogram_fitted(scale = scale, linestyle = fitted) 
+  }
 
   ## add ref
-  rval <- rval + 
-    geom_rootogram_ref(ggplot2::aes_string(yintercept = 0))
+  if (isTRUE(ref)) {
+    rval <- rval + 
+      geom_rootogram_ref()
+  }
 
   ## set the colors, shapes, etc.
   rval <- rval +
@@ -963,7 +987,7 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #'     geom_rootogram(aes(observed = observed, expected = expected, mids = mids, 
 #'       width = width, group = group)) + 
 #'     geom_rootogram_fitted(aes(expected = expected, mids = mids)) + 
-#'     geom_rootogram_ref(yintercept = 0) + 
+#'     geom_rootogram_ref() + 
 #'     facet_grid(group~.)
 #'   gg1
 #' }
@@ -1028,7 +1052,6 @@ stat_rootogram_fitted <- function(mapping = NULL,
                            show.legend = NA,
                            inherit.aes = TRUE,
                            scale = c("sqrt", "raw"),
-                           style = c("hanging", "standing", "suspended"),
                            ...) {
 
   scale <- match.arg(scale)
@@ -1045,7 +1068,6 @@ stat_rootogram_fitted <- function(mapping = NULL,
     params = list(
       na.rm = na.rm,
       scale = scale,
-      style = style,
       ...
     )
   )
@@ -1062,11 +1084,9 @@ StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
 
   compute_group = function(data, 
                            scales, 
-                           scale = c("sqrt", "raw"),
-                           style = c("hanging", "standing", "suspended")) {
+                           scale = c("sqrt", "raw")) {
 
     scale <- match.arg(scale)
-    style <- match.arg(style)
 
     ## raw vs. sqrt scale
     if (scale == "sqrt") {
@@ -1098,12 +1118,10 @@ geom_rootogram_fitted <- function(mapping = NULL,
                                   show.legend = NA, 
                                   inherit.aes = TRUE, 
                                   scale = c("sqrt", "raw"),
-                                  style = c("hanging", "standing", "suspended"),
                                   linestyle = c("both", "line", "point"),
                                   ...) {
 
   scale <- match.arg(scale)
-  style <- match.arg(style)
   linestyle <- match.arg(linestyle)
 
   ggplot2::layer(
@@ -1117,7 +1135,6 @@ geom_rootogram_fitted <- function(mapping = NULL,
     params = list(
       na.rm = na.rm, 
       scale = scale,
-      style = style, 
       linestyle = linestyle,
       ...
     )
@@ -1196,8 +1213,15 @@ geom_rootogram_ref <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
-  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 1,
-  alpha = NA)
+
+  default_aes = ggplot2::aes(
+    colour = "black", 
+    size = 0.5, 
+    linetype = 1,
+    alpha = NA, 
+    yintercept = 0
+  ),
+  required_aes = NULL
 )
 
 
@@ -1269,26 +1293,38 @@ print.rootogram <- function(x, ...) {
 
   ## get arg `style` and `scale`
   scale <- style <- NULL  # needed for `use_arg_from_attributes()`
-  style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
-  scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
+  style <- use_arg_from_attributes(x, "style", default = NULL, force_single = FALSE)
+  scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = FALSE)
 
   ## return custom print statement
   if (is.null(scale) || is.null(style)) {
-    cat("A rootogram object without mandatory attributes `scale` and `style` \n\n")
+    cat("A `rootogram` object without mandatory attributes `scale` and `style` \n\n")
   } else if ("ymin" %in% names(x) && "ymax" %in% names(x)) {
-    cat(
-      sprintf("An extended rootogram object with `scale = '%s'` and `style = '%s'` \n\n", 
-      scale, 
-      style
+    if (length(unique(style)) == 1L & length(unique(scale)) == 1L) {
+      cat(
+        sprintf("An extended `rootogram` object with `scale = \"%s\"` and `style = \"%s\"` \n\n", 
+        scale, 
+        style
+        )
       )
-    )
+    } else {
+      cat(
+        sprintf("An extended `rootogram` object with none unique `scale` and `style` arguments \n\n") 
+      )
+    }
   } else {
-    cat(
-      sprintf("A rootogram object with `scale = '%s'` and `style = '%s'` \n\n", 
-      scale, 
-      style
+    if (length(unique(style)) == 1L & length(unique(scale)) == 1L) {
+      cat(
+        sprintf("A `rootogram` object with `scale = '%s'` and `style = '%s'` \n\n", 
+        scale, 
+        style
+        )
       )
-    )
+    } else {
+      cat(
+        sprintf("A `rootogram` object with none unique `scale` and `style` arguments \n\n") 
+      )
+    }
   }
 
   ## call next print method
