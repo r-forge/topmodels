@@ -1,0 +1,82 @@
+---
+title: "Summary Implementatoin"
+author: "Moritz Lang, Achim Zeileis"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+bibliography: ref.bib
+vignette: >
+  %\VignetteIndexEntry{Graphical Model Assessment under Different Model Misspecifications}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
+  %\VignetteKeywords{FIXME}
+  %\VignettePackage{topmodels}
+---
+
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+```{r preliminaries, echo = FALSE, message = FALSE}
+library("topmodels")
+options(digits = 4)
+knitr::opts_chunk$set(fig.aling = "center")
+
+## create folder for graphics if does not exist
+dir.create("figures", showWarnings = FALSE)
+```
+
+## Methods
+
+method | computation arguments | plotting arguments
+--- | --- | ---
+`rootogram()` | `object`, `newdata`, `plot`, `class`, `response_type`, `breaks`, `width` | `style`<sup>[1](#myfootnote1)</sup>, `scale`<sup>[1](#myfootnote1)</sup>, `fitted`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...`
+
+<a name="myfootnote1">1</a>: Setting is saved within `attributes` of the returned object.
+
+## base: `plot()`
+
+method | argument
+--- | ---
+`plot.rootogram()` | `x`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty`, `alpha_min`, `axes`, `box`, `...`
+
+
+## ggplot2: `autoplot()`
+
+method | argument
+--- | ---
+`autoplot.rootogram()` | `object`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `colour`, `fill`, `size`, `linetype`, `alpha`, `legend`
+
+
+## ggplot2: `layers()`
+
+geom_<...> | inherits | geom aes | stat_<...> | stat aes 
+--- | --- | --- | --- | ---
+`geom_rootogram()` | `GeomRect` | `xmin`, `xmax`, `ymin`, `ymax` | `stat_rootogram()` | `observed`, `expected`, `mids`, `width`
+`geom_rootogram_fitted()` | `GeomPath` | `x`, `y` | `stat_rootogram_fitted()` |  `expected`, `mids`
+`geom_rootogram_ref()` | `GeomHline` | `yintercept = 0` | Identity | -- 
+
+
+
+
+
+
+## References
+

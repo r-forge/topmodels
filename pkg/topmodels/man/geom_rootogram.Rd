@@ -52,7 +52,6 @@ stat_rootogram_fitted(
   show.legend = NA,
   inherit.aes = TRUE,
   scale = c("sqrt", "raw"),
-  style = c("hanging", "standing", "suspended"),
   ...
 )
 
@@ -65,7 +64,6 @@ geom_rootogram_fitted(
   show.legend = NA,
   inherit.aes = TRUE,
   scale = c("sqrt", "raw"),
-  style = c("hanging", "standing", "suspended"),
   linestyle = c("both", "line", "point"),
   ...
 )
@@ -165,7 +163,7 @@ if (require("ggplot2")) {
     geom_rootogram(aes(observed = observed, expected = expected, mids = mids, 
       width = width, group = group)) + 
     geom_rootogram_fitted(aes(expected = expected, mids = mids)) + 
-    geom_rootogram_ref(yintercept = 0) + 
+    geom_rootogram_ref() + 
     facet_grid(group~.)
   gg1
 }
