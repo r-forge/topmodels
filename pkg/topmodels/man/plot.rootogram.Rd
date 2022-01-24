@@ -21,6 +21,13 @@
   lwd = 1,
   lty = 1,
   alpha_min = 0.8,
+  fitted_col = 2,
+  fitted_pch = 19,
+  fitted_lty = 1,
+  fitted_lwd = 2,
+  ref_col = "black",
+  ref_lty = 1,
+  ref_lwd = 1.25,
   axes = TRUE,
   box = FALSE,
   ...
@@ -37,19 +44,31 @@
   xlab = NULL,
   ylab = NULL,
   main = NULL,
+  legend = FALSE,
   colour = "black",
   fill = "darkgray",
   size = 0.5,
   linetype = 1,
   alpha = NA,
-  legend = FALSE,
+  theme = NULL,
+  fitted_colour = 2,
+  fitted_size = 1,
+  fitted_linetype = 1,
+  fitted_alpha = 1,
+  fitted_fill = NA,
+  fitted_stroke = 0.5,
+  fitted_shape = 19,
+  ref_colour = "black",
+  ref_size = 0.5,
+  ref_linetype = 1,
+  ref_alpha = NA,
   ...
 )
 }
 \arguments{
 \item{x, object}{an object of class \code{\link{rootogram}}.}
 
-\item{style, scale, alpha_min}{Fix description.}
+\item{style, scale, alpha_min, theme}{Fix description.}
 
 \item{ref}{logical. Should a reference line be plotted?}
 
@@ -59,13 +78,15 @@ or just the fitted line.}
 
 \item{xlab, ylab, main}{graphical parameters.}
 
-\item{\dots}{further graphical parameters passed to the plotting function.}
+\item{fitted_col, fitted_pch, fitted_lty, fitted_lwd, ref_col, ref_lty, ref_lwd, fitted_colour, fitted_size, fitted_linetype, fitted_alpha, fitted_fill, fitted_stroke, fitted_shape, ref_colour, ref_size, ref_linetype, ref_alpha}{Fix description.}
 
-\item{colour, size, fitted, alpha, linetype}{graphical parameters passed to
-\code{geom_line} and \code{geom_point}, respectively.}
+\item{\dots}{further graphical parameters passed to the plotting function.}
 
 \item{legend}{logical. Should a legend be added in the \code{ggplot2} style
 graphic?}
+
+\item{colour, size, fitted, alpha, linetype}{graphical parameters passed to
+\code{geom_line} and \code{geom_point}, respectively.}
 }
 \description{
 Generic plotting functions for rootograms of the class \code{"rootogram"}

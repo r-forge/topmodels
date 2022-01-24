@@ -1,5 +1,5 @@
 ---
-title: "Summary Implementatoin"
+title: "Summary Implementation"
 author: "Moritz Lang, Achim Zeileis"
 output:
   html_document:
@@ -51,21 +51,23 @@ method | computation arguments | plotting arguments
 
 <a name="myfootnote1">1</a>: Setting is saved within `attributes` of the returned object.
 
-## base: `plot()`
+combine | vector of attribute values | single attribute value
+--- | --- | ---
+`c.rootogram()` | `fitted`, `ref`, `xlab`, `ylab`, `main` | `style`, `scale`
 
-method | argument
+## Plotting with base R
+
+plot | argument
 --- | ---
 `plot.rootogram()` | `x`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty`, `alpha_min`, `axes`, `box`, `...`
 
 
-## ggplot2: `autoplot()`
+## Plotting with ggplot2
 
-method | argument
+autoplot | argument
 --- | ---
-`autoplot.rootogram()` | `object`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `colour`, `fill`, `size`, `linetype`, `alpha`, `legend`
+`autoplot.rootogram()` | `object`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `colour`, `fill`, `size`, `linetype`, `alpha`, `legend`, `...`
 
-
-## ggplot2: `layers()`
 
 geom_<...> | inherits | geom aes | stat_<...> | stat aes 
 --- | --- | --- | --- | ---
