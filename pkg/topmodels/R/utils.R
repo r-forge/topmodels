@@ -75,7 +75,32 @@ use_arg_from_attributes <- function(object,
   if (force_single) {
     if (length(unique(rval)) > 1) {
       message(sprintf(
-        " * as arg `%s`'s definition is not unique, using solely the first", arg_name
+        " * as arg `%s`'s definition is not unique, using solely the first (\"%s\")", arg_name, rval[1]
+      ))
+    }
+    return(rval[1])
+  } else {
+    return(rval)
+  }
+}
+
+
+prepare_arg_for_attributes <- function(object, 
+                                       arg_name, 
+                                       missing = NA, 
+                                       force_single = FALSE) { 
+
+  rval <- unlist(
+    lapply(
+      object, 
+      function(x) ifelse(is.null(attr(x, arg_name)), missing, attr(x, arg_name))
+    )
+  )
+
+  if (force_single) {
+    if (length(unique(rval)) > 1) {
+      message(sprintf(
+        " * as arg `%s`'s definition is not unique, using solely the first (\"%s\")", arg_name, rval[1]
       ))
     }
     return(rval[1])
