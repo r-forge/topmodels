@@ -165,7 +165,7 @@ pithist.default <- function(
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
-                            trafo = NULL,  # needed also for plotting
+                            trafo = identity,
                             breaks = NULL,
                             type = c("expected", "random"),
                             nsim = 1L,
@@ -210,6 +210,15 @@ pithist.default <- function(
   ## match arguments
   style <- match.arg(style)
   type <- match.arg(type)
+
+  ## determine other arguments conditional on `style` and `type`
+  if (is.null(simint)) {
+    simint <- if (style == "bar" && type == "random") TRUE else FALSE
+  }
+
+  if (is.null(ref)) {
+    ref <- if (style == "bar") TRUE else FALSE
+  }
 
   ## guess plotting flavor
   if (isFALSE(plot)) {
@@ -260,7 +269,7 @@ pithist.default <- function(
 
     ## get breaks: part 2
     ## TODO: (ML) maybe use xlim instead or `0` and `1`
-    if (is.null(trafo)) {
+    if (is.null(trafo) || all.equal(trafo, identity)) {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
       tmp_range <- max(abs(p))
@@ -324,7 +333,7 @@ pithist.default <- function(
 
     ## get breaks: part 2
     ## FIXME: (ML) maybe use xlim instead or `0` and `1`
-    if (is.null(trafo)) {
+    if (is.null(trafo) || all.equal(trafo, identity)) {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
       tmp_range <- max(abs(p))
@@ -341,10 +350,6 @@ pithist.default <- function(
       density  = f / diff(breaks),
       mids = 0.5 * (breaks[-1L] + breaks[-length(breaks)])
     )
-
-    if (!isFALSE(simint)) {
-      simint_lwr <- simint_upr <- 0
-    }
   }
 
   ## labels
@@ -360,17 +365,18 @@ pithist.default <- function(
   )
 
   ## add simint
-  if (!isFALSE(simint)) {
+  if (!isFALSE(simint) && type == "random") {
     ## FIXME: (ML) Check if simint is correct
     rval$simint_upr <- rval$counts + (simint_upr - simint_lwr) / 2
     rval$simint_lwr <- rval$counts - (simint_upr - simint_lwr) / 2
   } else {
-    rval$simint_upr <- NaN
-    rval$simint_lwr <- NaN
+    rval$simint_upr <- NA
+    rval$simint_lwr <- NA
   }
 
   ## attributes for graphical display
-  attr(rval, "trafo") <- trafo
+  attr(rval, "type") <- type
+  attr(rval, "trafo") <- list(trafo)
   attr(rval, "simint") <- simint
   attr(rval, "style") <- style
   attr(rval, "freq") <- freq
@@ -415,6 +421,10 @@ c.pithist <- function(...) {
     class <- "data.frame"
   }
 
+  ## remove temporary the class (needed below for `c()`)
+  ## FIXME: (ML) Rewrite by, e.g., employing `lapply()`
+  for (i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "pithist"]
+
   ## convert always to data.frame
   if (class == "tibble") {
     rval <- lapply(rval, as.data.frame)
@@ -430,26 +440,31 @@ c.pithist <- function(...) {
   # PREPARE DATA
   # -------------------------------------------------------------------
   ## labels
-  ## FIXME: (ML) 
-  ## * Should actually be changed in all other `c.*()` to being able to handle NAs
-  ## * But how to handle arg which can be NULL (e.g., trafo, ref, simint) 
-  xlab <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "xlab")), NA, attr(r, "xlab"))))
-  ylab <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "ylab")), NA, attr(r, "ylab"))))
+  xlab <- prepare_arg_for_attributes(rval, "xlab")
+  ylab <- prepare_arg_for_attributes(rval, "ylab")
   nam <- names(rval)
   main <- if (is.null(nam)) {
-    as.vector(sapply(rval, function(r) ifelse(is.null(attr(r, "main")), NA, attr(r, "main"))))
+    prepare_arg_for_attributes(rval, "main")
   } else {
     make.unique(rep.int(nam, sapply(n, length)))
   }
 
   ## parameters
-  freq <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "freq")), NA, attr(r, "freq"))))
-  style <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "style")), NA, attr(r, "style"))))
-  confint <- unlist(lapply(rval, function(r) ifelse(is.null(attr(r, "confint")), NA, attr(r, "confint"))))
-  trafo <- unlist(lapply(rval, function(r)  attr(r, "trafo")))
-  simint <- unlist(lapply(rval, function(r) attr(r, "simint")))
-  ref <- unlist(lapply(rval, function(r) attr(r, "ref")))
+  type <- prepare_arg_for_attributes(rval, "type", force_single = TRUE)
+  trafo <-  prepare_arg_for_attributes(rval, "trafo", force_single = FALSE) # check/force below
+  simint <- prepare_arg_for_attributes(rval, "simint")
+  style <- prepare_arg_for_attributes(rval, "style", force_single = TRUE)
+  freq <- prepare_arg_for_attributes(rval, "freq", force_single = TRUE)
+  confint <- prepare_arg_for_attributes(rval, "confint")
+  ref <-  prepare_arg_for_attributes(rval, "ref")
   n <- unlist(n)
+
+  ## fix `ylabel` according to possible new `freq`
+  if (isTRUE(freq)) {
+    ylab[grepl("^Density$", ylab)] <- "Frequency"
+  } else if (isFALSE(freq)) {
+    ylab[grepl("^Frequency$", ylab)] <- "Density"
+  }
 
   # -------------------------------------------------------------------
   # CHECK FOR COMPATIBILITY
@@ -458,18 +473,31 @@ c.pithist <- function(...) {
     if(!all(sapply(2:length(trafo), function(i) identical(trafo[[i-1]], trafo[[i]])))) {
       stop("objects with different `trafo`s are on different scales and hence must not be combined")
     } else {
-    trafo <- trafo[[1]]
+    trafo <- trafo[1]
     }
   }
 
   # -------------------------------------------------------------------
   # RETURN DATA
   # -------------------------------------------------------------------
-  ## combine
-  rval <- do.call("rbind.data.frame", rval)
+  ## combine and return (fill up missing variables with NAs)
+  all_names <- unique(unlist(lapply(rval, names)))
+  rval <- do.call(
+    "rbind.data.frame",
+    c(lapply(
+      rval,
+      function(x) {
+        data.frame(c(x, sapply(setdiff(all_names, names(x)), function(y) NA)))
+      }
+    ),
+    make.row.names = FALSE
+    )
+  )
+
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
 
   ## add attributes
+  attr(rval, "type") <- type
   attr(rval, "trafo") <- trafo
   attr(rval, "simint") <- simint
   attr(rval, "style") <- style
@@ -522,7 +550,6 @@ rbind.pithist <- c.pithist
 #' plotted.
 #' @param confint logical. Should confident intervals be drawn? Fix. can be colour
 #' @param simint Fix description.
-#' @param trafo FIX describtion.
 #' @param confint_type Fix description.
 #' @param confint_level numeric. The confidence level required.
 #' @param confint_type character. Which type of confidence interval should be plotted. According
@@ -531,12 +558,14 @@ rbind.pithist <- c.pithist
 #' @param xlim,ylim graphical parameters. These may pertain either to the whole
 #' plot or just the histogram or just the fitted line.
 #' @param xlab,ylab,main graphical parameters.
+#' @param theme Fix me.
 #' @param \dots further graphical parameters.
 #' @param ref,col,fill,alpha_min,lwd,lty,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 #' @param colour,size,linetype,legend,alpha graphical parameters passed for 
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @param freq Fix me.
+#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype,ref_alpha Fix me.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references 
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -619,7 +648,6 @@ plot.pithist <- function(x,
                          single_graph = FALSE,
                          style = NULL,
                          freq = NULL,
-                         trafo = NULL,  # FIXME: (ML) not yet supported (needed for confint and ref)
                          simint = NULL,
                          confint = TRUE,  # confint_style can't be changed but depends on style 
                          confint_level = 0.95,
@@ -646,9 +674,10 @@ plot.pithist <- function(x,
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## get default arguments
+  type <- use_arg_from_attributes(x, "type", default = NULL, force_single = TRUE)
   style <- use_arg_from_attributes(x, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
+  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)[[1]]
   simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
@@ -694,7 +723,7 @@ plot.pithist <- function(x,
     style <- "line"
   }
 
-  ## determine other arguments conditional on `style`
+  ## determine other arguments conditional on `style` and `type`
   if (is.null(lwd)) lwd <- if (style == "bar") 1 else 2
 
   if (is.null(ref)) {
@@ -702,7 +731,7 @@ plot.pithist <- function(x,
   }
 
   if (is.null(simint)) {
-    simint <- if (style == "bar") TRUE else FALSE
+    simint <- if (style == "bar" && type == "random") TRUE else FALSE
   }
 
   ## recycle arguments for plotting to match the number of groups
@@ -738,6 +767,7 @@ plot.pithist <- function(x,
   # -------------------------------------------------------------------
   # PREPARE DATA FOR PLOTTING
   # -------------------------------------------------------------------
+
   ## compute confidence intervals for all groups
   ci <- lapply(1:n, function(i) {
     d <- x[x$group == i, ] 
@@ -991,7 +1021,6 @@ plot.pithist <- function(x,
 #' @export
 lines.pithist <- function(x,
                           freq = NULL,
-                          trafo = NULL,  # FIXME: (ML) not yet supported (needed for confint and ref)
                           confint = FALSE,  # confint_style can't be changed but depends on style 
                           confint_level = 0.95,
                           confint_type = c("exact", "approximation"),
@@ -1006,7 +1035,7 @@ lines.pithist <- function(x,
   ## get default arguments
   confint_type <- match.arg(confint_type)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
+  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)[[1]]
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
 
@@ -1129,9 +1158,8 @@ autoplot.pithist <- function(object,
                              single_graph = FALSE,
                              style = NULL,
                              freq = NULL,
-                             trafo = NULL,  # FIXME: (ML) not yet supported (needed for confint and ref)
                              simint = NULL,
-                             confint = TRUE,
+                             confint = NULL,
                              confint_level = 0.95,
                              confint_type = c("exact", "approximation"),
                              ref = NULL,
@@ -1140,20 +1168,35 @@ autoplot.pithist <- function(object,
                              xlab = NULL,
                              ylab = NULL,
                              main = NULL,
-                             colour = NULL,  # NULL, as dependent on plot
-                             fill = NULL,  # NULL, as dependent on plot
-                             size = NULL,  # NULL, as dependent on plot
-                             linetype = NULL,  # NULL, as dependent on plot
-                             alpha = NULL,  # NULL, as dependent on plot
                              legend = FALSE,
+                             theme = NULL,
+                             colour = NULL,
+                             fill = NULL,
+                             size = NULL,
+                             linetype = NULL,
+                             alpha = NULL,
+                             simint_colour = "black",
+                             simint_size = 0.5,
+                             simint_linetype = 1,
+                             simint_alpha = NA,
+                             confint_colour = NULL,
+                             confint_fill = NULL,
+                             confint_size = 0.5,
+                             confint_linetype = NULL,
+                             confint_alpha = NA,
+                             ref_colour = NULL,
+                             ref_size = 0.75,
+                             ref_linetype = NULL,
+                             ref_alpha = NA,
                              ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## get default arguments
+  type <- use_arg_from_attributes(object, "type", default = NULL, force_single = TRUE)
   style <- use_arg_from_attributes(object, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(object, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(object, "trafo", default = NULL, force_single = TRUE)
+  trafo <- use_arg_from_attributes(object, "trafo", default = NULL, force_single = TRUE)[[1]]
   simint <- use_arg_from_attributes(object, "simint", default = NULL, force_single = TRUE)
   confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = NULL, force_single = TRUE)
@@ -1239,20 +1282,50 @@ autoplot.pithist <- function(object,
 
   ## determine other arguments conditional on `style`
   if (is.null(simint)) {
-    simint <- if (style == "bar") TRUE else FALSE
+    simint <- if (style == "bar" && type == "random") TRUE else FALSE
   }
 
   if (is.null(ref)) {
     ref <- if (style == "bar") TRUE else FALSE
   }
 
+  ## set plotting aes
   if (style == "line") {
-    ref_colour <- "black"
-    ref_linetype <- 2
+    aes_ref_default <- list(colour = "black", linetype = 2)
   } else {
-    ref_colour <- 2
-    ref_linetype <- 1
+    aes_ref_default <- NULL
   }
+  aes_ref <- set_aes_helper_geoms(
+    GeomPithistRef$default_aes, 
+    list(
+      colour = ref_colour,
+      size = ref_size,
+      linetype = ref_linetype,
+      alpha = ref_alpha
+    ),
+    aes_ref_default
+  )
+
+  aes_confint <- set_aes_helper_geoms(
+    set_default_aes_pithist_confint(confint), 
+    list(
+      colour = confint_colour,
+      fill = confint_fill,
+      size = confint_size,
+      linetype = confint_linetype,
+      alpha = confint_alpha
+    )
+  )
+
+  aes_simint <- set_aes_helper_geoms(
+    GeomPithistSimint$default_aes, 
+    list(
+      colour = simint_colour,
+      size = simint_size,
+      linetype = simint_linetype,
+      alpha = simint_alpha
+    )
+  )
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
@@ -1289,7 +1362,7 @@ autoplot.pithist <- function(object,
     )
 
   ## add simint
-  #if (simint && all(c("simint_lwr", "simint_upr") %in% names(object))) {
+  if (simint) {
     rval <- rval +
       geom_pithist_simint(
         ggplot2::aes_string(
@@ -1299,11 +1372,15 @@ autoplot.pithist <- function(object,
           group = "group"
         ), 
         na.rm = TRUE,
-        freq = freq
+        freq = freq,
+        colour = aes_simint$colour,
+        size = aes_simint$size,
+        linetype = aes_simint$linetype,
+        alpha = aes_simint$alpha
       )
-  #}
+  }
 
-  ## add conf
+  ## add confint
   if (confint != "none") {
     rval <- rval +
       geom_pithist_confint(
@@ -1315,7 +1392,12 @@ autoplot.pithist <- function(object,
         level = confint_level,
         type = confint_type,
         freq = freq,
-        style = confint
+        style = confint,
+        colour = aes_confint$colour,
+        fill = aes_confint$fill,
+        size = aes_confint$size,
+        linetype = aes_confint$linetype,
+        alpha = aes_confint$alpha
       )
   }
 
@@ -1329,8 +1411,10 @@ autoplot.pithist <- function(object,
           width = "width"
         ), 
         freq = freq,
-        colour = ref_colour,
-        linetype = ref_linetype
+        colour = aes_ref$colour,
+        size = aes_ref$size,
+        linetype = aes_ref$linetype,
+        alpha = aes_ref$alpha
       )
   }
 
@@ -1380,6 +1464,33 @@ autoplot.pithist <- function(object,
     ggplot2::scale_x_continuous(expand = c(0.01, 0.01)) +
     ggplot2::scale_y_continuous(expand = c(0.01, 0.01))
 
+  ## set ggplot2 theme
+  if (is.character(theme)) {
+    theme_tmp <- try(eval(parse(text = theme)), silent = TRUE)
+    if (inherits(theme_tmp, "try-error") && !grepl("^ggplot2::", theme)) {
+      theme_tmp <- try(eval(parse(text = paste0("ggplot2::", theme))), silent = TRUE)
+    }
+    theme <- theme_tmp
+    if (!is.function(theme)) {
+        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+        theme <- ggplot2::theme_bw()
+    }
+  }
+
+  if (is.function(theme)) {
+    theme <- try(theme(), silent = TRUE)
+    if (inherits(theme, "try-error") || !inherits(theme, "theme")) {
+        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+        theme <- ggplot2::theme_bw()
+    }
+  }
+
+  if (inherits(theme, "theme")) {
+    rval <- rval + theme
+  } else if (isTRUE(all.equal(ggplot2::theme_get(), ggplot2::theme_gray()))) {
+    rval <- rval + ggplot2::theme_bw()
+  }
+ 
   # -------------------------------------------------------------------
   # ORDER LAYERS
   # -------------------------------------------------------------------
@@ -1959,7 +2070,7 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
 ## helper function inspired by internal from `ggplot2` defined in `geom-sf.r`
 set_default_aes_pithist_confint <- function(style) {
   if (style == "line") {
-    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, size = 0.5, linetype = 2, alpha = NA),
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, fill = NA, size = 0.5, linetype = 2, alpha = NA),
       force = TRUE)
   } else {  # "polygon" style
     my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = NA, fill = "black", size = 0.5, 
@@ -2218,3 +2329,132 @@ PropCIs_add4ci <- function(x, n, conf.level) {
   class(rval) <- "htest"
   return(rval)
 }
+
+
+#' @export
+summary.pithist <- function(object,
+                            freq,
+                            confint_level = 0.95,
+                            confint_type = c("exact", "approximation"),
+                            ...) {
+
+  ## get arg `freq`
+  freq <- use_arg_from_attributes(object, "freq", default = FALSE, force_single = TRUE)
+
+  ## group sizes
+  if (is.null(object$group)) {
+
+    ## compute confidence intervals for all groups
+    ci <- compute_pithist_confint(
+      n = sum(object$counts), 
+      breaks = compute_breaks(object$mids, object$width),
+      level = confint_level, 
+      type = confint_type,
+      freq = freq
+    )
+
+    ## compute reference lines (perfect prediction) for all groups
+    ref <- compute_pithist_ref(
+      n = sum(object$counts),
+      breaks = compute_breaks(object$mids, object$width),
+      freq = freq
+    )
+
+  } else {
+
+    ## compute confidence intervals for all groups
+    ci <- lapply(1:max(object$group), function(i) {
+      d <- object[object$group == i, ] 
+      compute_pithist_confint(
+        n = sum(d$counts), 
+        breaks = compute_breaks(d$mids, d$width),
+        level = confint_level, 
+        type = confint_type,
+        freq = freq
+      )
+    })
+    ci <- do.call("rbind", ci)
+
+    ## compute reference lines (perfect prediction) for all groups
+    ref <- lapply(1:max(object$group), function(i) {
+      d <- object[object$group == i, ]
+      rval <- compute_pithist_ref(
+        n = sum(d$counts),
+        breaks = compute_breaks(d$mids, d$width),
+        freq = freq
+      )
+      rval <- data.frame("ref" = rval)
+    })
+    ref <- do.call("rbind", ref)
+  }
+
+  rval <- transform(object,
+    ci_lwr = ci[[1]],
+    ci_upr = ci[[2]],
+    ref = ref
+  )
+
+  ## set attributes
+  attr(rval, "freq") <- freq
+
+  attr(rval, "type") <- attr(object, "type")
+  attr(rval, "trafo") <- attr(object, "trafo")
+  attr(rval, "simint") <- attr(object, "simint")
+  attr(rval, "style") <- attr(object, "style")
+  attr(rval, "confint") <- attr(object, "confint")
+  attr(rval, "ref") <- attr(object, "ref")
+  attr(rval, "xlab") <- attr(object, "xlab")
+  attr(rval, "ylab") <- attr(object, "ylab")
+  attr(rval, "main") <- attr(object, "main")
+
+  ## return as `data.frame` or `tibble`
+  if ("data.frame" %in% class(object)) {
+    class(rval) <- c("pithist", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("pithist", class(rval))
+  }
+
+  rval
+}
+
+
+#' @export
+print.pithist <- function(x, ...) {
+
+  ## get arg `type`, `style` and `freq`
+  type <- freq <- style <- NULL # needed for `use_arg_from_attributes()`
+  style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
+  type <- use_arg_from_attributes(x, "type", default = NULL, force_single = TRUE)
+  freq <- use_arg_from_attributes(x, "freq", default = NULL, force_single = TRUE)
+
+  ## return custom print statement
+  if (is.null(type) || is.null(freq) || is.null(style)) {
+    cat("A `pithist` object without mandatory attributes `type`, `freq` and `style`\n\n")
+  } else if (all(c("ci_lwr", "ci_upr", "ref") %in% names(x))) {
+    cat(
+      paste0(
+        sprintf(
+          "A `pithist` object with `type = \"%s\"`, `freq = \"%s\"` and `style = \"%s\"`",
+          type,
+          freq,
+          style
+        ),
+        " with columns: `ci_lwr`, `ci_upr` and `ref`\n\n"
+      )
+    )
+  } else {
+    cat(
+      sprintf(
+        "A `pithist` object with `type = \"%s\"`, `freq = \"%s\"` and `style = \"%s\"`\n\n",
+        type,
+        freq,
+        style
+      )
+    )
+  }
+
+  ## call next print method
+  NextMethod()
+}
+

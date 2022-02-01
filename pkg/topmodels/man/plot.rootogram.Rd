@@ -45,12 +45,12 @@
   ylab = NULL,
   main = NULL,
   legend = FALSE,
+  theme = NULL,
   colour = "black",
   fill = "darkgray",
   size = 0.5,
   linetype = 1,
   alpha = NA,
-  theme = NULL,
   fitted_colour = 2,
   fitted_size = 1,
   fitted_linetype = 1,
@@ -126,14 +126,14 @@ if (require("crch")) {
   ## precipitation observations and forecasts for Innsbruck
   data("RainIbk", package = "crch")
   RainIbk <- sqrt(RainIbk)
-  RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
-  RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+  RainIbk$ensmean <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, mean)
+  RainIbk$enssd <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, sd)
   RainIbk <- subset(RainIbk, enssd > 0)
 
   ## linear model w/ constant variance estimation
   m2_lm <- lm(rain ~ ensmean, data = RainIbk)
 
-  ## logistic censored model 
+  ## logistic censored model
   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
 
   ## compute rootograms
@@ -149,7 +149,7 @@ if (require("crch")) {
 data("CrabSatellites", package = "countreg")
 
 ## linear poisson model
-m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m3_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 
 ## compute and plot rootogram as "ggplot2" graphic
 rootogram(m3_pois, plot = "ggplot2")
@@ -170,7 +170,6 @@ r4a_pois <- rootogram(m4_pois, style = "standing", ylim = c(-2.2, 4.8), main = "
 r4b_pois <- rootogram(m4_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging")
 r4c_pois <- rootogram(m4_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
 par(mfrow = c(1, 1))
-
 }
 \references{
 Friendly M (2000), \emph{Visualizing Categorical Data}. SAS

@@ -48,18 +48,32 @@ dir.create("figures", showWarnings = FALSE)
 method | computation arguments | plotting arguments
 --- | --- | ---
 `rootogram()` | `object`, `newdata`, `plot`, `class`, `response_type`, `breaks`, `width` | `style`<sup>[1](#myfootnote1)</sup>, `scale`<sup>[1](#myfootnote1)</sup>, `fitted`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...`
+`pithist()` | `object`, `newdata`, `plot`, `class`, `trafo`<sup>[1](#myfootnote2)</sup>, `breaks`, `type`<sup>[1](#myfootnote1)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `style`<sup>[1](#myfootnote1)</sup>, `freq`<sup>[1](#myfootnote1)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...`
 
 <a name="myfootnote1">1</a>: Setting is saved within `attributes` of the returned object.
+
+<a name="myfootnote2">2</a>: Argument is used both for computation and plotting.
 
 combine | vector of attribute values | single attribute value
 --- | --- | ---
 `c.rootogram()` | `fitted`, `ref`, `xlab`, `ylab`, `main` | `style`, `scale`
+`c.pithist()` | `simint`, `confint`, `ref`, `xlab`, `ylab`, `main` | `type`, `trafo`<sup>[3](#myfootnote3)</sup>, `style`, `freq`
+
+<a name="myfootnote3">3</a>: Non-unique attribute values can't be comined.
+
+summary | default return values | extended return values
+--- | --- | ---
+`summary.rootogram()` | `observed`, `expected`, `mids`, `width` | `ymin`, `ymax`
+`summary.pithist()` | `counts`, `mids`, width`, `simint_upr`, `simint_lwr` | `ci_lwr`, `ci_upr`, `ref`
+
 
 ## Plotting with base R
 
 plot | argument
 --- | ---
 `plot.rootogram()` | `x`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty`, `alpha_min`, `axes`, `box`, `...`
+`plot.pithist()` | `x`, `single_graph`, `style`, `freq`, `trafo`, `simint`, `confint`, `confint_level`, `confint_type`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty`, `alpha_min`, `axes`, `box`, `...`
+
 
 
 ## Plotting with ggplot2

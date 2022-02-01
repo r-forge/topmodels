@@ -11,7 +11,6 @@
   single_graph = FALSE,
   style = NULL,
   freq = NULL,
-  trafo = NULL,
   simint = NULL,
   confint = TRUE,
   confint_level = 0.95,
@@ -35,7 +34,6 @@
 \method{lines}{pithist}(
   x,
   freq = NULL,
-  trafo = NULL,
   confint = FALSE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
@@ -51,9 +49,8 @@
   single_graph = FALSE,
   style = NULL,
   freq = NULL,
-  trafo = NULL,
   simint = NULL,
-  confint = TRUE,
+  confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
   ref = NULL,
@@ -62,12 +59,26 @@
   xlab = NULL,
   ylab = NULL,
   main = NULL,
+  legend = FALSE,
+  theme = NULL,
   colour = NULL,
   fill = NULL,
   size = NULL,
   linetype = NULL,
   alpha = NULL,
-  legend = FALSE,
+  simint_colour = "black",
+  simint_size = 0.5,
+  simint_linetype = 1,
+  simint_alpha = NA,
+  confint_colour = NULL,
+  confint_fill = NULL,
+  confint_size = 0.5,
+  confint_linetype = NULL,
+  confint_alpha = NA,
+  ref_colour = NULL,
+  ref_size = 0.75,
+  ref_linetype = NULL,
+  ref_alpha = NA,
   ...
 )
 }
@@ -81,8 +92,6 @@ line is plotted. For \code{single_graph = TRUE}, always line-style PIT histogram
 plotted.}
 
 \item{freq}{Fix me.}
-
-\item{trafo}{FIX describtion.}
 
 \item{simint}{Fix description.}
 
@@ -106,8 +115,12 @@ plot or just the histogram or just the fitted line.}
 
 \item{object, x}{an object of class \code{\link{pithist}}.}
 
+\item{theme}{Fix me.}
+
 \item{colour, size, linetype, legend, alpha}{graphical parameters passed for 
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
+
+\item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype, ref_alpha}{Fix me.}
 }
 \description{
 Generic plotting functions for PIT histograms of the class \code{"pithist"}

@@ -14,7 +14,7 @@ pithist(object, ...)
   newdata = NULL,
   plot = TRUE,
   class = NULL,
-  trafo = NULL,
+  trafo = identity,
   breaks = NULL,
   type = c("expected", "random"),
   nsim = 1L,
