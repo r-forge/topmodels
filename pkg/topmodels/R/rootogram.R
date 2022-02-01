@@ -18,29 +18,29 @@
 
 
 #' Rootograms for Assessing Goodness of Fit of Probability Models
-#' 
+#'
 #' Rootograms graphically compare (square roots) of empirical frequencies with
 #' fitted frequencies from a probability model. If \code{plot = TRUE}, the
 #' resulting object of class \code{"rootogram"} is plotted by
 #' \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}} before it is
 #' returned, depending on whether the package \code{ggplot2} is loaded.
-#' 
+#'
 #' Rootograms graphically compare frequencies of empirical distributions and
 #' fitted probability models. For the observed distribution the histogram is
 #' drawn on a square root scale (hence the name) and superimposed with a line
 #' for the fitted frequencies. The histogram can be \code{"standing"} on the
 #' x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
 #' \code{"suspended"} histogram of deviations can be drawn.
-#' 
+#'
 #' The function \code{\link{rootogram}} leverages the \code{\link{procast}}
 #' generic in order to compute all necessary coordinates based on observed and
 #' fitted frequencies.
-#' 
+#'
 #' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 #' rootogram objects, it is also possible to combine two (or more) rootograms by
 #' \code{c}/\code{rbind}, which creates a set of rootograms that can then be
-#' plotted in one go. 
-#' 
+#' plotted in one go.
+#'
 #' @aliases rootogram rootogram.default c.rootogram rbind.rootogram
 #' @param object an object from which an rootogram can be extracted with
 #' \code{\link{procast}}.
@@ -62,13 +62,13 @@
 #' @param width numeric. Widths of the histogram bars.
 #' @param response_type character. To set the default values for \code{breaks} and
 #' \code{widths}.  Currently different defaults are available for \code{"discrete"}
-#' and \code{"continous"} response distribution, as well as for the special case of a 
+#' and \code{"continous"} response distribution, as well as for the special case of a
 #' \code{"logseries"} response.
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @param ref,fitted Fix description.
 #' @return An object of class \code{"rootogram"} inheriting from
-#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 #' with the following variables: \item{observed}{observed
 #' frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
 #' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
@@ -83,61 +83,60 @@
 #' @seealso \code{\link{plot.rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
 #' Institute, Cary.
-#' 
+#'
 #' Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
 #' Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
 #' \doi{10.1080/00031305.2016.1173590}.
-#' 
+#'
 #' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
 #' @keywords hplot
 #' @examples
-#' 
+#'
 #' ## plots and output
-#' 
+#'
 #' ## number of deaths by horsekicks in Prussian army (Von Bortkiewicz 1898)
 #' deaths <- rep(0:4, c(109, 65, 22, 3, 1))
-#' 
+#'
 #' ## fit glm model
 #' m1_pois <- glm(deaths ~ 1, family = poisson)
 #' rootogram(m1_pois)
-#' 
+#'
 #' ## inspect output (without plotting)
 #' r1 <- rootogram(m1_pois, plot = FALSE)
 #' r1
-#' 
+#'
 #' ## combine plots
 #' plot(c(r1, r1), col = c(1, 2), ref = 4, lty = c(1, 2))
-#' 
-#' 
+#'
+#'
 #' #-------------------------------------------------------------------------------
 #' ## different styles
-#' 
+#'
 #' ## artificial data from negative binomial (mu = 3, theta = 2)
 #' ## and Poisson (mu = 3) distribution
 #' set.seed(1090)
 #' y <- rnbinom(100, mu = 3, size = 2)
 #' x <- rpois(100, lambda = 3)
-#' 
+#'
 #' ## glm method: fitted values via glm()
 #' m2_pois <- glm(y ~ x, family = poisson)
-#' 
+#'
 #' ## correctly specified Poisson model fit
 #' par(mfrow = c(1, 3))
-#' r1 <- rootogram(m2_pois, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
-#' r2 <- rootogram(m2_pois, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
+#' r1 <- rootogram(m2_pois, style = "standing", ylim = c(-2.2, 4.8), main = "Standing")
+#' r2 <- rootogram(m2_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging")
 #' r3 <- rootogram(m2_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
 #' par(mfrow = c(1, 1))
-#' 
+#'
 #' #-------------------------------------------------------------------------------
-#' ## linear regression with normal/Gaussian response: anorexia data 
-#' 
+#' ## linear regression with normal/Gaussian response: anorexia data
+#'
 #' data("anorexia", package = "MASS")
-#' 
+#'
 #' m3_gauss <- glm(Postwt ~ Prewt + Treat + offset(Prewt), family = gaussian, data = anorexia)
-#' 
+#'
 #' ## plot rootogram as "ggplot2" graphic
 #' rootogram(m3_gauss, plot = "ggplot2")
-#' 
 #' @export
 rootogram <- function(object, ...) {
   UseMethod("rootogram")
@@ -240,7 +239,7 @@ rootogram.default <- function(
   breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
   mids <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
 
-  ## fix pointmasses 
+  ## fix pointmasses
   ## FIXME: (ML) Check if that always works or could be improved
   breaks[1] <- breaks[1] - 1e-12
   breaks[length(breaks)] <- breaks[length(breaks)] + 1e-12
@@ -399,6 +398,7 @@ c.rootogram <- function(...) {
   )
 
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
+
   ## add attributes
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
@@ -426,20 +426,20 @@ rbind.pithist <- c.pithist
 
 
 #' S3 Methods for Plotting Rootograms
-#' 
+#'
 #' Generic plotting functions for rootograms of the class \code{"rootogram"}
-#' computed by \code{link{rootogram}}. 
+#' computed by \code{link{rootogram}}.
 #'
 #' Rootograms graphically compare (square roots) of empirical frequencies with
 #' fitted frequencies from a probability model.
-#' 
+#'
 #' Rootograms graphically compare frequencies of empirical distributions and
 #' fitted probability models. For the observed distribution the histogram is
 #' drawn on a square root scale (hence the name) and superimposed with a line
 #' for the fitted frequencies. The histogram can be \code{"standing"} on the
 #' x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
 #' \code{"suspended"} histogram of deviations can be drawn.
-#' 
+#'
 #' @aliases plot.rootogram autoplot.rootogram
 #' @param x,object an object of class \code{\link{rootogram}}.
 #' @param ref logical. Should a reference line be plotted?
@@ -457,82 +457,81 @@ rbind.pithist <- c.pithist
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
 #' Institute, Cary.
-#' 
+#'
 #' Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
 #' Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
 #' c("\\Sexpr[results=rd,stage=build]{tools:::Rd_expr_doi(\"#1\")}",
 #' "10.1080/00031305.2016.1173590")\Sexpr{tools:::Rd_expr_doi("10.1080/00031305.2016.1173590")}.
-#' 
+#'
 #' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
 #' @keywords hplot
 #' @examples
-#' 
+#'
 #' ## speed and stopping distances of cars
 #' m1_lm <- lm(dist ~ speed, data = cars)
-#' 
+#'
 #' ## compute and plot rootogram
 #' rootogram(m1_lm)
-#' 
+#'
 #' ## customize colors
 #' rootogram(m1_lm, ref = "blue", lty = 2, pch = 20)
-#' 
+#'
 #' ## add separate model
 #' if (require("crch", quietly = TRUE)) {
 #'   m1_crch <- crch(dist ~ speed | speed, data = cars)
 #'   points(rootogram(m1_crch, plot = FALSE), col = 2, lty = 2)
 #' }
-#' 
+#'
 #' #-------------------------------------------------------------------------------
 #' if (require("crch")) {
-#' 
+#'
 #'   ## precipitation observations and forecasts for Innsbruck
 #'   data("RainIbk", package = "crch")
 #'   RainIbk <- sqrt(RainIbk)
-#'   RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
-#'   RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+#'   RainIbk$ensmean <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, mean)
+#'   RainIbk$enssd <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, sd)
 #'   RainIbk <- subset(RainIbk, enssd > 0)
-#' 
+#'
 #'   ## linear model w/ constant variance estimation
 #'   m2_lm <- lm(rain ~ ensmean, data = RainIbk)
-#' 
-#'   ## logistic censored model 
+#'
+#'   ## logistic censored model
 #'   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
-#' 
+#'
 #'   ## compute rootograms
 #'   r2_lm <- rootogram(m2_lm, plot = FALSE)
 #'   r2_crch <- rootogram(m2_crch, plot = FALSE)
-#' 
+#'
 #'   ## plot in single graph
 #'   plot(c(r2_lm, r2_crch), col = c(1, 2))
 #' }
-#' 
+#'
 #' #-------------------------------------------------------------------------------
 #' ## determinants for male satellites to nesting horseshoe crabs
 #' data("CrabSatellites", package = "countreg")
-#' 
+#'
 #' ## linear poisson model
-#' m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-#' 
+#' m3_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#'
 #' ## compute and plot rootogram as "ggplot2" graphic
 #' rootogram(m3_pois, plot = "ggplot2")
-#' 
+#'
 #' #-------------------------------------------------------------------------------
 #' ## artificial data from negative binomial (mu = 3, theta = 2)
 #' ## and Poisson (mu = 3) distribution
 #' set.seed(1090)
 #' y <- rnbinom(100, mu = 3, size = 2)
 #' x <- rpois(100, lambda = 3)
-#' 
+#'
 #' ## glm method: fitted values via glm()
 #' m4_pois <- glm(y ~ x, family = poisson)
-#' 
+#'
 #' ## correctly specified Poisson model fit
 #' par(mfrow = c(1, 3))
 #' r4a_pois <- rootogram(m4_pois, style = "standing", ylim = c(-2.2, 4.8), main = "Standing")
 #' r4b_pois <- rootogram(m4_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging")
 #' r4c_pois <- rootogram(m4_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
 #' par(mfrow = c(1, 1))
-#' 
 #' @export
 plot.rootogram <- function(x,
                            style = NULL,
@@ -578,13 +577,13 @@ plot.rootogram <- function(x,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
-  ## get line style 
+  ## get line style
   fitted[fitted == FALSE | fitted == "FALSE"] <- "none"
   fitted[fitted == TRUE | fitted == "TRUE"] <- "both"
   fitted <- c("none", "b", "l", "p")[match(fitted, c("none", "both", "line", "point"))]
   stopifnot(all(fitted %in% c("none", "b", "l", "p")))
- 
-  ## compute heights 
+
+  ## compute heights
   x <- summary(x, scale = scale, style = style)
 
   ## convert always to data.frame
@@ -602,16 +601,17 @@ plot.rootogram <- function(x,
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    fill, col, lwd, lty, alpha_min, 
-    fitted_col, fitted_pch, fitted_lty, fitted_lwd, fitted, 
-    ref_col, ref_lty, ref_lwd, 
-    axes, box 
+    fill, col, lwd, lty, alpha_min,
+    fitted_col, fitted_pch, fitted_lty, fitted_lwd, fitted,
+    ref_col, ref_lty, ref_lwd,
+    axes, box
   )[, -1]
 
   ## annotation
   xlab <- use_arg_from_attributes(x, "xlab", default = "Rootogram", force_single = FALSE)
-  ylab <- use_arg_from_attributes(x, "ylab", 
-    default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = FALSE)
+  ylab <- use_arg_from_attributes(x, "ylab",
+    default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = FALSE
+  )
   main <- use_arg_from_attributes(x, "main", default = "model", force_single = FALSE)
 
   ## fix `ylabel` according to possible new `scale`
@@ -640,7 +640,7 @@ plot.rootogram <- function(x,
     xright <- d$mids + d$width / 2
 
     if (scale == "sqrt") {
-      d$expected = sqrt(d$expected)
+      d$expected <- sqrt(d$expected)
     }
 
     ## get xlim and ylim
@@ -666,9 +666,9 @@ plot.rootogram <- function(x,
     }
 
     ## plot rootogram
-    rect(xleft, ybottom, xright, ytop, 
+    rect(xleft, ybottom, xright, ytop,
       col = set_minimum_transparency(plot_arg$fill[j], alpha_min = plot_arg$alpha_min[j]),
-      border = plot_arg$col[j], 
+      border = plot_arg$col[j],
       lty = plot_arg$lty[j],
       lwd = plot_arg$lwd[j]
     )
@@ -676,9 +676,9 @@ plot.rootogram <- function(x,
     ## add ref line
     if (isTRUE(plot_arg$ref[j])) {
       abline(
-        h = 0, 
-        col =  plot_arg$ref_col[j], 
-        lty = plot_arg$ref_lty[j], 
+        h = 0,
+        col = plot_arg$ref_col[j],
+        lty = plot_arg$ref_lty[j],
         lwd = plot_arg$ref_lwd[j]
       )
     }
@@ -686,13 +686,13 @@ plot.rootogram <- function(x,
     ## add fitted line
     if (plot_arg$fitted[j] != "none") {
       lines(
-        d$mids, 
+        d$mids,
         d$expected,
         col =  plot_arg$fitted_col[j],
-        pch = plot_arg$fitted_pch[j], 
+        pch = plot_arg$fitted_pch[j],
         type = plot_arg$fitted[j],
-        lty = plot_arg$fitted_lty[j], 
-        lwd = plot_arg$fitted_lwd[j] 
+        lty = plot_arg$fitted_lty[j],
+        lwd = plot_arg$fitted_lwd[j]
       )
     }
   }
@@ -701,7 +701,7 @@ plot.rootogram <- function(x,
   # DRAW PLOTS
   # -------------------------------------------------------------------
   ## set up necessary panels
-  if (n > 1L){
+  if (n > 1L) {
     old_pars <- par(mfrow = n2mfrow(n))
     on.exit(par(old_pars), add = TRUE)
   }
@@ -725,18 +725,18 @@ autoplot.rootogram <- function(object,
                                ylab = NULL,
                                main = NULL,
                                legend = FALSE,
+                               theme = NULL,
                                colour = "black",
                                fill = "darkgray",
                                size = 0.5,
                                linetype = 1,
                                alpha = NA,
-                               theme = NULL,
                                fitted_colour = 2,
                                fitted_size = 1,
                                fitted_linetype = 1,
                                fitted_alpha = 1,
                                fitted_fill = NA,
-                               fitted_stroke = 0.5, 
+                               fitted_stroke = 0.5,
                                fitted_shape = 19,
                                ref_colour = "black",
                                ref_size = 0.5,
@@ -752,8 +752,9 @@ autoplot.rootogram <- function(object,
   fitted <- use_arg_from_attributes(object, "fitted", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = TRUE, force_single = TRUE)
   xlab <- use_arg_from_attributes(object, "xlab", default = "Rootogram", force_single = TRUE)
-  ylab <- use_arg_from_attributes(object, "ylab", 
-    default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = TRUE)
+  ylab <- use_arg_from_attributes(object, "ylab",
+    default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = TRUE
+  )
 
   ## fix `ylabel` according to possible new `scale`
   if (scale == "sqrt" && grepl("^Frequency$", ylab)) {
@@ -805,7 +806,7 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
-    1:n, 
+    1:n,
     colour, fill, size, linetype, alpha
   )[, -1]
 
@@ -814,26 +815,27 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   ## actual plotting
   rval <- ggplot2::ggplot(
-    object, 
+    object,
     ggplot2::aes_string(
       observed = "observed",
-      expected = "expected", 
-      mids = "mids", 
-      width = "width", 
+      expected = "expected",
+      mids = "mids",
+      width = "width",
       group = "group"
     )
-  ) 
+  )
 
   ## add rootogram
-  rval <- rval + 
+  rval <- rval +
     geom_rootogram(
       ggplot2::aes_string(
-        colour = "group", 
-        fill = "group", 
-        size = "group", 
-        linetype = "group", 
-        alpha = "group"), 
-      scale = scale, 
+        colour = "group",
+        fill = "group",
+        size = "group",
+        linetype = "group",
+        alpha = "group"
+      ),
+      scale = scale,
       style = style
     )
 
@@ -841,8 +843,8 @@ autoplot.rootogram <- function(object,
   if (fitted != "none") {
     rval <- rval +
       geom_rootogram_fitted(
-        scale = scale, 
-        linestyle = fitted, 
+        scale = scale,
+        linestyle = fitted,
         colour = fitted_colour,
         size = fitted_size,
         linetype = fitted_linetype,
@@ -850,12 +852,12 @@ autoplot.rootogram <- function(object,
         fill = fitted_fill,
         stroke = fitted_stroke,
         shape = fitted_shape,
-      ) 
+      )
   }
 
   ## add ref
   if (isTRUE(ref)) {
-    rval <- rval + 
+    rval <- rval +
       geom_rootogram_ref(
         colour = ref_colour,
         size = ref_size,
@@ -869,7 +871,7 @@ autoplot.rootogram <- function(object,
     ggplot2::scale_colour_manual(values = plot_arg$colour) +
     ggplot2::scale_fill_manual(values = plot_arg$fill) +
     ggplot2::scale_size_manual(values = plot_arg$size) +
-    ggplot2::scale_linetype_manual(values = plot_arg$linetype) + 
+    ggplot2::scale_linetype_manual(values = plot_arg$linetype) +
     ggplot2::scale_alpha_manual(values = plot_arg$alpha)
 
   ## annotation
@@ -904,18 +906,37 @@ autoplot.rootogram <- function(object,
   }
 
   ## set x and y limits
-  rval <- rval + 
+  rval <- rval +
     ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = TRUE) +
     ggplot2::scale_x_continuous(expand = c(0.01, 0.01)) +
     ggplot2::scale_y_continuous(expand = c(0.01, 0.01))
 
   ## set ggplot2 theme
-  if (!is.null(theme) && is.list(theme)) {
+  if (is.character(theme)) {
+    theme_tmp <- try(eval(parse(text = theme)), silent = TRUE)
+    if (inherits(theme_tmp, "try-error") && !grepl("^ggplot2::", theme)) {
+      theme_tmp <- try(eval(parse(text = paste0("ggplot2::", theme))), silent = TRUE)
+    }
+    theme <- theme_tmp
+    if (!is.function(theme)) {
+        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+        theme <- ggplot2::theme_bw()
+    }
+  }
+  
+  if (is.function(theme)) {
+    theme <- try(theme(), silent = TRUE)
+    if (inherits(theme, "try-error") || !inherits(theme, "theme")) {
+        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+        theme <- ggplot2::theme_bw()
+    }
+  }
+
+  if (inherits(theme, "theme")) {
     rval <- rval + theme
   } else if (isTRUE(all.equal(ggplot2::theme_get(), ggplot2::theme_gray()))) {
     rval <- rval + ggplot2::theme_bw()
   }
-
 
   # -------------------------------------------------------------------
   # GROUPING (IF ANY) AND RETURN PLOT
@@ -977,7 +998,6 @@ stat_rootogram <- function(mapping = NULL,
                            scale = c("sqrt", "raw"),
                            style = c("hanging", "standing", "suspended"),
                            ...) {
-
   scale <- match.arg(scale)
   style <- match.arg(style)
 
@@ -1004,22 +1024,19 @@ stat_rootogram <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
-
   required_aes = c("observed", "expected", "mids", "width"),
-
-  compute_group = function(data,  
-                           scales, 
-                           scale = c("sqrt", "raw"), 
+  compute_group = function(data,
+                           scales,
+                           scale = c("sqrt", "raw"),
                            style = c("hanging", "standing", "suspended")) {
-
     scale <- match.arg(scale)
     style <- match.arg(style)
 
     tmp_heights <- compute_rootogram_heights(data$expected, data$observed, scale = scale, style = style)
 
     data <- transform(data,
-      xmin = mids - width/2, 
-      xmax = mids + width/2,
+      xmin = mids - width / 2,
+      xmax = mids + width / 2,
       ymin = tmp_heights$ymin,
       ymax = tmp_heights$ymax,
       observed = NULL,
@@ -1033,10 +1050,10 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 
 
 #' \code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`
-#' 
+#'
 #' Various \code{geom_*} and \code{stat_*} used within
 #' \code{\link[ggplot2]{autoplot}} for producing PIT histograms.
-#' 
+#'
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
 #' @param style Fix description.
@@ -1048,53 +1065,54 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #'   data("CrabSatellites", package = "countreg")
 #'   m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 #'   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-#'   
+#'
 #'   ## Compute rootogram
 #'   p1 <- rootogram(m1_pois, plot = FALSE)
 #'   p2 <- rootogram(m2_pois, plot = FALSE)
-#'   
-#'   d <- c(p1, p2) 
-#'   
+#'
+#'   d <- c(p1, p2)
+#'
 #'   ## Get label names
 #'   xlab <- unique(attr(d, "xlab"))
 #'   ylab <- unique(attr(d, "ylab"))
 #'   main <- attr(d, "main")
 #'   main <- make.names(main, unique = TRUE)
 #'   d$group <- factor(d$group, labels = main)
-#'   
-#'   gg1 <- ggplot(data = d) + 
-#'     geom_rootogram(aes(observed = observed, expected = expected, mids = mids, 
-#'       width = width, group = group)) + 
-#'     geom_rootogram_fitted(aes(expected = expected, mids = mids)) + 
-#'     geom_rootogram_ref() + 
-#'     facet_grid(group~.)
+#'
+#'   gg1 <- ggplot(data = d) +
+#'     geom_rootogram(aes(
+#'       observed = observed, expected = expected, mids = mids,
+#'       width = width, group = group
+#'     )) +
+#'     geom_rootogram_fitted(aes(expected = expected, mids = mids)) +
+#'     geom_rootogram_ref() +
+#'     facet_grid(group ~ .)
 #'   gg1
 #' }
 #' @export
-geom_rootogram <- function(mapping = NULL, 
-                           data = NULL, 
+geom_rootogram <- function(mapping = NULL,
+                           data = NULL,
                            stat = "rootogram",
-                           position = "identity", 
+                           position = "identity",
                            na.rm = FALSE,
-                           show.legend = NA, 
-                           inherit.aes = TRUE, 
+                           show.legend = NA,
+                           inherit.aes = TRUE,
                            scale = c("sqrt", "raw"),
                            style = c("hanging", "standing", "suspended"),
                            ...) {
-
   scale <- match.arg(scale)
   style <- match.arg(style)
 
   ggplot2::layer(
-    geom = GeomRootogram, 
+    geom = GeomRootogram,
     mapping = mapping,
-    data = data, 
-    stat = stat, 
+    data = data,
+    stat = stat,
     position = position,
-    show.legend = show.legend, 
+    show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      na.rm = na.rm, 
+      na.rm = na.rm,
       scale = scale,
       style = style,
       ...
@@ -1108,12 +1126,11 @@ geom_rootogram <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomRootogram <- ggplot2::ggproto("GeomRootogram", ggplot2::GeomRect,
-
-  default_aes = ggplot2::aes(colour = "black", fill = "darkgray", size = 0.5, linetype = 1,
-    alpha = NA),
-
+  default_aes = ggplot2::aes(
+    colour = "black", fill = "darkgray", size = 0.5, linetype = 1,
+    alpha = NA
+  ),
   required_aes = c("xmin", "xmax", "ymin", "ymax")
-
 )
 
 
@@ -1124,15 +1141,14 @@ GeomRootogram <- ggplot2::ggproto("GeomRootogram", ggplot2::GeomRect,
 #' @rdname geom_rootogram
 #' @export
 stat_rootogram_fitted <- function(mapping = NULL,
-                           data = NULL,
-                           geom = "rootogram_fitted",
-                           position = "identity",
-                           na.rm = FALSE,
-                           show.legend = NA,
-                           inherit.aes = TRUE,
-                           scale = c("sqrt", "raw"),
-                           ...) {
-
+                                  data = NULL,
+                                  geom = "rootogram_fitted",
+                                  position = "identity",
+                                  na.rm = FALSE,
+                                  show.legend = NA,
+                                  inherit.aes = TRUE,
+                                  scale = c("sqrt", "raw"),
+                                  ...) {
   scale <- match.arg(scale)
   style <- match.arg(style)
 
@@ -1158,13 +1174,10 @@ stat_rootogram_fitted <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
-
   required_aes = c("expected", "mids"),
-
-  compute_group = function(data, 
-                           scales, 
+  compute_group = function(data,
+                           scales,
                            scale = c("sqrt", "raw")) {
-
     scale <- match.arg(scale)
 
     ## raw vs. sqrt scale
@@ -1189,30 +1202,29 @@ StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
 
 #' @rdname geom_rootogram
 #' @export
-geom_rootogram_fitted <- function(mapping = NULL, 
-                                  data = NULL, 
+geom_rootogram_fitted <- function(mapping = NULL,
+                                  data = NULL,
                                   stat = "rootogram_fitted",
-                                  position = "identity", 
+                                  position = "identity",
                                   na.rm = FALSE,
-                                  show.legend = NA, 
-                                  inherit.aes = TRUE, 
+                                  show.legend = NA,
+                                  inherit.aes = TRUE,
                                   scale = c("sqrt", "raw"),
                                   linestyle = c("both", "line", "point"),
                                   ...) {
-
   scale <- match.arg(scale)
   linestyle <- match.arg(linestyle)
 
   ggplot2::layer(
-    geom = GeomRootogramFitted, 
+    geom = GeomRootogramFitted,
     mapping = mapping,
-    data = data, 
-    stat = stat, 
+    data = data,
+    stat = stat,
     position = position,
-    show.legend = show.legend, 
+    show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      na.rm = na.rm, 
+      na.rm = na.rm,
       scale = scale,
       linestyle = linestyle,
       ...
@@ -1224,15 +1236,14 @@ geom_rootogram_fitted <- function(mapping = NULL,
 #' @rdname geom_rootogram
 #' @export
 GeomRootogramFitted <- ggplot2::ggproto("GeomRootogramFitted", ggplot2::GeomPath,
-
-  default_aes = ggplot2::aes(colour = 2, size = 1, linetype = 1,
-    alpha = 1, fill = NA, stroke = 0.5, shape = 19),
-
+  default_aes = ggplot2::aes(
+    colour = 2, size = 1, linetype = 1,
+    alpha = 1, fill = NA, stroke = 0.5, shape = 19
+  ),
   draw_panel = function(data, panel_params, coord, arrow = NULL,
                         lineend = "butt", linejoin = "round", linemitre = 10,
-                        na.rm = FALSE, 
+                        na.rm = FALSE,
                         linestyle = c("both", "line", "point")) {
-
     linestyle <- match.arg(linestyle)
 
     if (linestyle == "both") {
@@ -1241,17 +1252,19 @@ GeomRootogramFitted <- ggplot2::ggproto("GeomRootogramFitted", ggplot2::GeomPath
 
       grid::grobTree(
         ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
-                            lineend = "butt", linejoin = "round", linemitre = 10,
-                            na.rm = FALSE),
+          lineend = "butt", linejoin = "round", linemitre = 10,
+          na.rm = FALSE
+        ),
         ggplot2::GeomPoint$draw_panel(data2, panel_params, coord, na.rm = FALSE)
       )
     } else if (linestyle == "line") {
-        ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
-                            lineend = "butt", linejoin = "round", linemitre = 10,
-                            na.rm = FALSE)
+      ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
+        lineend = "butt", linejoin = "round", linemitre = 10,
+        na.rm = FALSE
+      )
     } else {
-        data <- transform(data, size = size * 2)
-        ggplot2::GeomPoint$draw_panel(data, panel_params, coord, na.rm = FALSE)
+      data <- transform(data, size = size * 2)
+      ggplot2::GeomPoint$draw_panel(data, panel_params, coord, na.rm = FALSE)
     }
   }
 )
@@ -1263,24 +1276,24 @@ GeomRootogramFitted <- ggplot2::ggproto("GeomRootogramFitted", ggplot2::GeomPath
 
 #' @rdname geom_rootogram
 #' @export
-geom_rootogram_ref <- function(mapping = NULL, 
-                               data = NULL, 
+geom_rootogram_ref <- function(mapping = NULL,
+                               data = NULL,
                                stat = "identity",
-                               position = "identity", 
+                               position = "identity",
                                na.rm = FALSE,
-                               show.legend = NA, 
-                               inherit.aes = TRUE, 
+                               show.legend = NA,
+                               inherit.aes = TRUE,
                                ...) {
   ggplot2::layer(
-    geom = GeomRootogramRef, 
+    geom = GeomRootogramRef,
     mapping = mapping,
-    data = data, 
-    stat = stat, 
+    data = data,
+    stat = stat,
     position = position,
-    show.legend = show.legend, 
+    show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      na.rm = na.rm, 
+      na.rm = na.rm,
       ...
     )
   )
@@ -1292,12 +1305,11 @@ geom_rootogram_ref <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
-
   default_aes = ggplot2::aes(
-    colour = "black", 
-    size = 0.5, 
+    colour = "black",
+    size = 0.5,
     linetype = 1,
-    alpha = NA, 
+    alpha = NA,
     yintercept = 0
   ),
   required_aes = NULL
@@ -1307,11 +1319,10 @@ GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
 # -------------------------------------------------------------------
 # HELPER FUNCTIONS FOR GETTING AN EXTENDED ROOTOGRAM OBJECT
 # -------------------------------------------------------------------
-compute_rootogram_heights <- function(expected, 
-                                      observed, 
+compute_rootogram_heights <- function(expected,
+                                      observed,
                                       scale = c("sqrt", "raw"),
                                       style = c("hanging", "standing", "suspended")) {
-
   scale <- match.arg(scale)
   style <- match.arg(style)
 
@@ -1325,17 +1336,17 @@ compute_rootogram_heights <- function(expected,
   }
 
   data.frame(
-    ymin = y, 
+    ymin = y,
     ymax = y + height
   )
 }
 
 
 #' @export
-summary.rootogram <- function(object, 
+summary.rootogram <- function(object,
                               scale = NULL,
                               style = NULL,
-                              ...) { 
+                              ...) {
 
   ## get arg `style` and `scale`
   scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
@@ -1345,7 +1356,7 @@ summary.rootogram <- function(object,
   tmp <- compute_rootogram_heights(object$expected, object$observed, scale = scale, style = style)
 
   rval <- transform(object,
-    ymin = tmp$ymin, 
+    ymin = tmp$ymin,
     ymax = tmp$ymax
   )
 
@@ -1364,35 +1375,37 @@ summary.rootogram <- function(object,
     class(rval) <- c("rootogram", class(rval))
   }
 
-  rval  
+  rval
 }
 
 #' @export
 print.rootogram <- function(x, ...) {
 
   ## get arg `style` and `scale`
-  scale <- style <- NULL  # needed for `use_arg_from_attributes()`
+  scale <- style <- NULL # needed for `use_arg_from_attributes()`
   style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
 
   ## return custom print statement
   if (is.null(scale) || is.null(style)) {
-    cat("A `rootogram` object without mandatory attributes `scale` and `style` \n\n")
-  } else if ("ymin" %in% names(x) && "ymax" %in% names(x)) {
+    cat("A `rootogram` object without mandatory attributes `scale` and `style`\n\n")
+  } else if (all(c("ymin", "ymax") %in% names(x))) {
     cat(
       paste0(
-        sprintf("A `rootogram` object with `scale = \"%s\"` and `style = \"%s\"`", 
-        scale, 
-        style
-      ), 
-        " (w/ columns `ymin` and `ymax)`\n\n"
+        sprintf(
+          "A `rootogram` object with `scale = \"%s\"` and `style = \"%s\"`",
+          scale,
+          style
+        ),
+        " with columns: `ymin` and `ymax`\n\n"
       )
     )
   } else {
     cat(
-      sprintf("A `rootogram` object with `scale = '%s'` and `style = '%s'` \n\n", 
-      scale, 
-      style
+      sprintf(
+        "A `rootogram` object with `scale = '%s'` and `style = '%s'`\n\n",
+        scale,
+        style
       )
     )
   }

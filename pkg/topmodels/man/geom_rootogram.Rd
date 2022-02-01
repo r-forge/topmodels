@@ -145,26 +145,28 @@ if (require("ggplot2")) {
   data("CrabSatellites", package = "countreg")
   m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-  
+
   ## Compute rootogram
   p1 <- rootogram(m1_pois, plot = FALSE)
   p2 <- rootogram(m2_pois, plot = FALSE)
-  
-  d <- c(p1, p2) 
-  
+
+  d <- c(p1, p2)
+
   ## Get label names
   xlab <- unique(attr(d, "xlab"))
   ylab <- unique(attr(d, "ylab"))
   main <- attr(d, "main")
   main <- make.names(main, unique = TRUE)
   d$group <- factor(d$group, labels = main)
-  
-  gg1 <- ggplot(data = d) + 
-    geom_rootogram(aes(observed = observed, expected = expected, mids = mids, 
-      width = width, group = group)) + 
-    geom_rootogram_fitted(aes(expected = expected, mids = mids)) + 
-    geom_rootogram_ref() + 
-    facet_grid(group~.)
+
+  gg1 <- ggplot(data = d) +
+    geom_rootogram(aes(
+      observed = observed, expected = expected, mids = mids,
+      width = width, group = group
+    )) +
+    geom_rootogram_fitted(aes(expected = expected, mids = mids)) +
+    geom_rootogram_ref() +
+    facet_grid(group ~ .)
   gg1
 }
 }

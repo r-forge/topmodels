@@ -49,7 +49,7 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 
 \item{response_type}{character. To set the default values for \code{breaks} and
 \code{widths}.  Currently different defaults are available for \code{"discrete"}
-and \code{"continous"} response distribution, as well as for the special case of a 
+and \code{"continous"} response distribution, as well as for the special case of a
 \code{"logseries"} response.}
 
 \item{breaks}{numeric. Breaks for the histogram intervals.}
@@ -67,7 +67,7 @@ roots (default) should be drawn.}
 }
 \value{
 An object of class \code{"rootogram"} inheriting from
-\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 with the following variables: \item{observed}{observed
 frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
@@ -139,13 +139,13 @@ m2_pois <- glm(y ~ x, family = poisson)
 
 ## correctly specified Poisson model fit
 par(mfrow = c(1, 3))
-r1 <- rootogram(m2_pois, style = "standing",  ylim = c(-2.2, 4.8), main = "Standing")
-r2 <- rootogram(m2_pois, style = "hanging",   ylim = c(-2.2, 4.8), main = "Hanging")
+r1 <- rootogram(m2_pois, style = "standing", ylim = c(-2.2, 4.8), main = "Standing")
+r2 <- rootogram(m2_pois, style = "hanging", ylim = c(-2.2, 4.8), main = "Hanging")
 r3 <- rootogram(m2_pois, style = "suspended", ylim = c(-2.2, 4.8), main = "Suspended")
 par(mfrow = c(1, 1))
 
 #-------------------------------------------------------------------------------
-## linear regression with normal/Gaussian response: anorexia data 
+## linear regression with normal/Gaussian response: anorexia data
 
 data("anorexia", package = "MASS")
 
@@ -153,7 +153,6 @@ m3_gauss <- glm(Postwt ~ Prewt + Treat + offset(Prewt), family = gaussian, data 
 
 ## plot rootogram as "ggplot2" graphic
 rootogram(m3_gauss, plot = "ggplot2")
-
 }
 \references{
 Friendly M (2000), \emph{Visualizing Categorical Data}. SAS

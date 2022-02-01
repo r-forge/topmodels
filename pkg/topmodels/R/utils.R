@@ -6,31 +6,34 @@ set_minimum_transparency <- function(col, alpha_min) {
     length(alpha_min) == 1
   )
 
-  ## get alpha 
+  ## get alpha
   alpha <- colorspace::extract_transparency(col, mode = "numeric", default = alpha_min)
 
   ## set alpha (minimum if necessary)
   alpha <- ifelse(alpha > alpha_min, alpha_min, alpha)
 
   col <- colorspace::adjust_transparency(col, alpha = alpha)
- 
-  return(col) 
+
+  return(col)
 }
 
 
-annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) {
-    ggplot2::layer(data = data, stat = ggplot2::StatIdentity, position = ggplot2::PositionIdentity, 
-          geom = ggplot2::GeomCustomAnn,
-          inherit.aes = TRUE, params = list(grob = grob, 
-                                            xmin = xmin, xmax = xmax, 
-                                            ymin = ymin, ymax = ymax))
+annotation_custom2 <- function(grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) {
+  ggplot2::layer(
+    data = data, stat = ggplot2::StatIdentity, position = ggplot2::PositionIdentity,
+    geom = ggplot2::GeomCustomAnn,
+    inherit.aes = TRUE, params = list(
+      grob = grob,
+      xmin = xmin, xmax = xmax,
+      ymin = ymin, ymax = ymax
+    )
+  )
 }
 
 
 # Helper function inspired by internal from `ggplot2` defined in `performance.R`
 # (needed for geom_*s to modify aesthetics for different styles)
 my_modify_list <- function(old, new, force = FALSE) {
-
   if (force) {
     for (i in names(new)) old[[i]] <- new[[i]]
   } else {
@@ -42,23 +45,27 @@ my_modify_list <- function(old, new, force = FALSE) {
 
 
 ## Helper function for setting arguments to values w/i attributes
-use_arg_from_attributes <- function(object, 
-                                    arg_name, 
-                                    default = NULL, 
-                                    force_single = FALSE, 
+use_arg_from_attributes <- function(object,
+                                    arg_name,
+                                    default = NULL,
+                                    force_single = FALSE,
                                     envir = parent.frame()) {
 
-  ## check input     
+  ## check input
   stopifnot(is.character(arg_name), length(arg_name) == 1)
 
-  ## get arg value from function
-  arg_fun <- try(eval(parse(text = arg_name), envir))
-  if (inherits(arg_fun, "try-error")) stop(sprintf("arg `%s` is not defined", arg_name))
+  ## try to get arg value from function
+  arg_fun <- try(eval(parse(text = arg_name), envir), silent = TRUE)
+  if (inherits(arg_fun, "try-error")) {
+    ## TODO: (ML) Warning probably not necessary, compare `trafo` in `plot.pithist()`
+    #warning(sprintf("arg `%s` is not defined", arg_name))
+    arg_fun <- NULL
+  }
 
   ## get arg value from attributes
   arg_attr <- attr(object, arg_name)
 
-  ## conditional return 
+  ## conditional return
   if (is.null(arg_fun) && force_single && length(unique(arg_attr)) > 1) {
     message(sprintf(
       " * as arg `%s`'s definition is not unique w/i object's attributes, using the default", arg_name
@@ -66,7 +73,7 @@ use_arg_from_attributes <- function(object,
     rval <- default
   } else if (is.null(arg_fun) && is.null(arg_attr)) {
     rval <- default
-  } else if (is.null(arg_fun)){
+  } else if (is.null(arg_fun)) {
     rval <- arg_attr
   } else {
     rval <- arg_fun
@@ -78,21 +85,24 @@ use_arg_from_attributes <- function(object,
         " * as arg `%s`'s definition is not unique, using solely the first (\"%s\")", arg_name, rval[1]
       ))
     }
-    return(rval[1])
+    if (is.na(rval[1])) {
+      return(default)
+    } else {
+      return(rval[1])
+    }
   } else {
     return(rval)
   }
 }
 
 
-prepare_arg_for_attributes <- function(object, 
-                                       arg_name, 
-                                       missing = NA, 
-                                       force_single = FALSE) { 
-
+prepare_arg_for_attributes <- function(object,
+                                       arg_name,
+                                       missing = NA,
+                                       force_single = FALSE) {
   rval <- unlist(
     lapply(
-      object, 
+      object,
       function(x) ifelse(is.null(attr(x, arg_name)), missing, attr(x, arg_name))
     )
   )
@@ -111,24 +121,37 @@ prepare_arg_for_attributes <- function(object,
 
 
 duplicate_last_value <- function(x) {
-  
+
   ## sanity checks
   stopifnot(is.null(dim(x)))
- 
-  ## repeat last value and return  
+
+  ## repeat last value and return
   c(x, x[NROW(x)])
 }
 
 
 compute_breaks <- function(mids, width) {
-  
+
   ## sanity checks
   stopifnot(is.numeric(mids), is.null(dim(mids)))
   stopifnot(is.numeric(width), is.null(dim(width)))
   stopifnot(length(mids) == length(width))
- 
-  ## compute breaks and return  
+
+  ## compute breaks and return
   n <- length(width)
   c(mids - width / 2, mids[n] + width[n] / 2)
 }
 
+set_aes_helper_geoms <- function(aes_geom, aes_arg, aes_default = NULL) {
+
+  stopifnot(is.list(aes_geom), is.list(aes_arg), is.null(aes_default) || is.list(aes_default))
+
+  for (i in names(aes_geom)) {
+    if (is.null(aes_arg[[i]]) && !is.null(aes_default[[i]])) {
+      aes_geom[[i]] <- aes_default[[i]]
+    } else if (!is.null(aes_arg[[i]])) {
+      aes_geom[[i]] <- aes_arg[[i]]
+    } 
+  }
+  aes_geom
+}
