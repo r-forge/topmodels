@@ -734,6 +734,7 @@ plot.pithist <- function(x,
   )[, -1]
 
   ## annotation
+  ylab_missing <- missing(ylab)
   if (single_graph) {
     xlab <- use_arg_from_attributes(x, "xlab", default = "PIT", force_single = TRUE)
     ylab <- use_arg_from_attributes(x, "ylab",
@@ -742,9 +743,6 @@ plot.pithist <- function(x,
     )
     if (is.null(main)) main <- "PIT histogram"
 
-    # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
-    if (freq && ylab == "Density") ylab <- "Frequency"
-    if (!freq && ylab == "Frequency") ylab <- "Density"
   } else {
     xlab <- use_arg_from_attributes(x, "xlab", default = "PIT", force_single = FALSE)
     ylab <- use_arg_from_attributes(x, "ylab",
@@ -752,8 +750,10 @@ plot.pithist <- function(x,
       force_single = FALSE
     )
     main <- use_arg_from_attributes(x, "main", default = "model", force_single = FALSE)
+  }
 
-    # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
+  ## fix `ylabel` according to possible new `freq`
+  if (ylab_missing) {
     ylab[(!freq & ylab == "Frequency")] <- "Density"
     ylab[(freq & ylab == "Density")] <- "Frequency"
   }
@@ -1185,6 +1185,9 @@ autoplot.pithist <- function(object,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  ## check if ylab is defined
+  ylab_missing <- missing(ylab)
+
   ## get default arguments
   type <- use_arg_from_attributes(object, "type", default = NULL, force_single = TRUE)
   style <- use_arg_from_attributes(object, "style", default = "bar", force_single = TRUE)
@@ -1204,10 +1207,11 @@ autoplot.pithist <- function(object,
   if (!is.null(add_arg$lwd)) size <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
-  ## transform ylab in case of freq = FALSE
-  # TODO: (ML) Might be to be improved - remove arg `ylab` in `pithist()`?
-  if (freq && ylab == "Density") ylab <- "Frequency"
-  if (!freq && ylab == "Frequency") ylab <- "Density"
+  ## fix `ylabel` according to possible new `freq`
+  if (ylab_missing) {
+    if (freq && ylab == "Density") ylab <- "Frequency"
+    if (!freq && ylab == "Frequency") ylab <- "Density"
+  }
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
