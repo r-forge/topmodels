@@ -25,21 +25,21 @@
 
 
 #' PIT Histograms for Assessing Goodness of Fit of Probability Models
-#' 
+#'
 #' PIT histograms graphically compare empirical probabilities from fitted models
 #' with a uniform distribution. If \code{plot = TRUE}, the resulting object of
 #' class \code{"pithist"} is plotted by \code{\link{plot.pithist}} or
 #' \code{\link{autoplot.pithist}} before it is returned, depending on whether the
 #' package \code{ggplot2} is loaded.
-#' 
+#'
 #' PIT histograms graphically evaluate the probability integral transform (PIT),
 #' i.e., the value that the predictive CDF attains at the observation, with a
 #' uniform distribution. For a well calibrated model fit, the observation will be
 #' drawn from the predictive distribution and the PIT will have a standard uniform
 #' distribution. For computation, \code{\link{pithist}} leverages the function
 #' \code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
-#' essentially draws a \code{\link[graphics]{hist}}. 
-#' 
+#' essentially draws a \code{\link[graphics]{hist}}.
+#'
 #' In case of discrete distributions the PIT can be either drawn randomly from the
 #' corresponding interval or distributed proportionally in the histogram, whereby
 #' the latter is not yet supported.
@@ -47,8 +47,8 @@
 #' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 #' pithist objects, it is also possible to combine two (or more) PIT histograms by
 #' \code{c}/\code{rbind}, which creates a set of PIT histograms that can then be
-#' plotted in one go. 
-#' 
+#' plotted in one go.
+#'
 #' @aliases pithist pithist.default c.pithist rbind.pithist
 #' @param object an object from which probability integral transforms can be
 #' extracted using the generic function \code{\link{procast}}.
@@ -66,8 +66,8 @@
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale.
 #' @param style character specifying the style of pithist. For \code{style = "bar"}
-#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
-#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
+#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
+#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
 #' drawn.
 #' @param type character. In case of discrete distributions, should an expected
 #' (non-normal) PIT histogram be computed according to Czado et al. (2009)
@@ -86,17 +86,17 @@
 #' @param breaks numeric. Breaks for the histogram intervals.
 #' @param ref to be fixed.
 #' @param confint logical. Should confident intervals be drawn?
-#' @param simint logical. In case of discrete distributions, should the simulation 
+#' @param simint logical. In case of discrete distributions, should the simulation
 #' (confidence) interval due to the randomization be visualized?
-#' @param simint_level numeric. The confidence level required for calculating the simulation 
-#' (confidence) interval due to the randomization. 
-#' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the 
-#' simulation (confidence) interval due to the randomization. 
+#' @param simint_level numeric. The confidence level required for calculating the simulation
+#' (confidence) interval due to the randomization.
+#' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
+#' simulation (confidence) interval due to the randomization.
 #' @param xlab,ylab,main graphical parameters passed to
-#' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.  
+#' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.
 #' @param \dots further graphical parameters.
 #' @return An object of class \code{"pithist"} inheriting from
-#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 #' with the following variables: \item{x}{histogram
 #' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 #' histogram bars,} \item{width}{widths of the histogram bars,}
@@ -104,15 +104,15 @@
 #' the reference curve.} Additionally, \code{freq}, \code{xlab},
 #' \code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
 #' @seealso \code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
-#' @references 
+#' @references
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
 #' for Interval Estimation of Binomial Proportions.} \emph{The American
 #' Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
 #'
 #' Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
-#' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261. 
+#' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
 #' \doi{10.2307/2981683}
-#'  
+#'
 #' Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 #' Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
 #' the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292.
@@ -121,35 +121,34 @@
 #' Diebold FX, Gunther TA, Tay AS (1998). \dQuote{Evaluating Density Forecasts
 #' with Applications to Financial Risk Management}. \emph{International Economic
 #' Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}
-#' 
+#'
 #' Gneiting T, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
 #' Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
 #' Series B (Methodological)}. \bold{69}(2), 243--268.
 #' \doi{10.1111/j.1467-9868.2007.00587.x}
-#' 
+#'
 #' @keywords hplot
 #' @examples
 #' ## speed and stopping distances of cars
 #' m1_lm <- lm(dist ~ speed, data = cars)
-#' 
+#'
 #' ## compute and plot pithist
 #' pithist(m1_lm)
-#' 
+#'
 #' #-------------------------------------------------------------------------------
 #' ## determinants for male satellites to nesting horseshoe crabs
 #' data("CrabSatellites", package = "countreg")
-#' 
+#'
 #' ## linear poisson model
 #' m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 #' m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-#' 
+#'
 #' ## compute and plot pithist as base graphic
 #' p1 <- pithist(m1_pois, plot = FALSE)
 #' p2 <- pithist(m2_pois, plot = FALSE)
-#' 
+#'
 #' ## plot combined pithist as "ggplot2" graphic
 #' ggplot2::autoplot(c(p1, p2), single_graph = TRUE, style = "line", col = c(1, 2))
-#' 
 #' @export
 pithist <- function(object, ...) {
   UseMethod("pithist")
@@ -159,7 +158,7 @@ pithist <- function(object, ...) {
 #' @rdname pithist
 #' @method pithist default
 #' @export
-pithist.default <- function(
+pithist.default <- function( 
                             ## computation arguments
                             object,
                             newdata = NULL,
@@ -170,13 +169,13 @@ pithist.default <- function(
                             type = c("expected", "random"),
                             nsim = 1L,
                             delta = NULL,
-                            simint = NULL,  # needed also for plotting
+                            simint = NULL, # needed also for plotting
                             simint_level = 0.95,
                             simint_nrep = 250,
 
                             ## plotting arguments
                             style = c("bar", "line"),
-                            freq = FALSE, 
+                            freq = FALSE,
                             confint = TRUE,
                             ref = TRUE,
                             xlab = "PIT",
@@ -190,7 +189,7 @@ pithist.default <- function(
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `delta w/i `qresiduals()`
   ## * `confint` and `ref` w/i `plot()` and `autoplot()` (due to different implementations)
-  ## * `...` w/i 
+  ## * `...` w/i
   stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
@@ -244,20 +243,20 @@ pithist.default <- function(
   # COMPUTATION OF PIT
   # -------------------------------------------------------------------
   ## get breaks: part 1 (due to "type = expected" must be done before)
-  n <- NROW(newresponse(object, newdata = newdata))  # solely to get n for computing breaks
+  n <- NROW(newresponse(object, newdata = newdata)) # solely to get n for computing breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(n, c(0, 50, 5000, 1000000, Inf))]
 
   # -------------------------------------------------------------------
   if (type == "proportional") {
-  # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
     ## TODO: (ML)
     ## * implement proportional over the inteverals (e.g., below censoring point)
     ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
     stop("not yet implemented")
 
-  # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
   } else if (type == "random") {
-  # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
     p <- qresiduals(object,
       newdata = newdata, trafo = trafo, delta = delta,
       type = "random", nsim = nsim
@@ -281,7 +280,6 @@ pithist.default <- function(
     if (!isFALSE(simint)) {
       ## helper function for calculating simulation interval
       compute_simint <- function(object, newdata, trafo, delta, nsim, breaks) {
-
         simint_p <- qresiduals(object,
           newdata = newdata, trafo = trafo, delta = delta,
           type = "random", nsim = nsim
@@ -291,13 +289,13 @@ pithist.default <- function(
         simint_p[simint_p < min(breaks)] <- min(breaks)
         simint_p[simint_p > max(breaks)] <- max(breaks)
         simint_hist <- hist(simint_p, breaks = breaks, plot = FALSE)
-  
+
         return(simint_hist$counts / nsim)
       }
-   
+
       ## compute simulation interval bases on quantiles
       simint_tmp <- replicate(
-        simint_nrep, 
+        simint_nrep,
         compute_simint(object, newdata, trafo, delta, nsim, breaks)
       )
 
@@ -306,24 +304,24 @@ pithist.default <- function(
       simint_lwr <- apply(simint_tmp, 1, quantile, probs = simint_prob[1], na.rm = TRUE)
       simint_upr <- apply(simint_tmp, 1, quantile, probs = simint_prob[2], na.rm = TRUE)
     }
-  
-  # -------------------------------------------------------------------
+
+    # -------------------------------------------------------------------
   } else if (type == "expected") {
-  # -------------------------------------------------------------------
-    ## compare "nonrandom" in Czado et al. (2009) 
+    # -------------------------------------------------------------------
+    ## compare "nonrandom" in Czado et al. (2009)
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
-    p <- qresiduals(object, 
+    p <- qresiduals(object,
       newdata = newdata, trafo = trafo, delta = delta,
       type = "quantile", prob = c(0, 1)
     )
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
     F <- if (all(abs(p[, 2L] - p[, 1L]) < sqrt(.Machine$double.eps))) {
-      function(u) as.numeric(u >= p[, 1L]) 
+      function(u) as.numeric(u >= p[, 1L])
       ## FIXME: (Z) check inequality sign to cover include.lowest/right options
     } else {
-      function(u) punif(u, min = p[, 1L], max = p[, 2L]) 
+      function(u) punif(u, min = p[, 1L], max = p[, 2L])
       ## equals `pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))`
     }
 
@@ -343,7 +341,7 @@ pithist.default <- function(
     tmp_hist <- list(
       breaks = breaks,
       counts = f * n,
-      density  = f / diff(breaks),
+      density = f / diff(breaks),
       mids = 0.5 * (breaks[-1L] + breaks[-length(breaks)])
     )
   }
@@ -447,12 +445,12 @@ c.pithist <- function(...) {
 
   ## parameters
   type <- prepare_arg_for_attributes(rval, "type", force_single = TRUE)
-  trafo <-  prepare_arg_for_attributes(rval, "trafo", force_single = FALSE) # check/force below
+  trafo <- prepare_arg_for_attributes(rval, "trafo", force_single = FALSE) # check/force below
   simint <- prepare_arg_for_attributes(rval, "simint")
   style <- prepare_arg_for_attributes(rval, "style", force_single = TRUE)
   freq <- prepare_arg_for_attributes(rval, "freq", force_single = TRUE)
   confint <- prepare_arg_for_attributes(rval, "confint")
-  ref <-  prepare_arg_for_attributes(rval, "ref")
+  ref <- prepare_arg_for_attributes(rval, "ref")
   n <- unlist(n)
 
   ## fix `ylabel` according to possible new `freq`
@@ -466,10 +464,10 @@ c.pithist <- function(...) {
   # CHECK FOR COMPATIBILITY
   # -------------------------------------------------------------------
   if (length(trafo) > 1) {
-    if(!all(sapply(2:length(trafo), function(i) identical(trafo[[i-1]], trafo[[i]])))) {
+    if (!all(sapply(2:length(trafo), function(i) identical(trafo[[i - 1]], trafo[[i]])))) {
       stop("objects with different `trafo`s are on different scales and hence must not be combined")
     } else {
-    trafo <- trafo[1]
+      trafo <- trafo[1]
     }
   }
 
@@ -522,27 +520,27 @@ rbind.pithist <- c.pithist
 
 
 #' S3 Methods for Plotting PIT Histograms
-#' 
+#'
 #' Generic plotting functions for PIT histograms of the class \code{"pithist"}
-#' computed by \code{link{pithist}}. 
-#' 
+#' computed by \code{link{pithist}}.
+#'
 #' PIT histograms graphically evaluate the probability integral transform (PIT),
 #' i.e., the value that the predictive CDF attains at the observation, with a
 #' uniform distribution. For a well calibrated model fit, the observation will be
 #' drawn from the predictive distribution and the PIT will have a standard uniform
-#' distribution. 
+#' distribution.
 #'
 #' PIT histograms can be rendered as \code{ggplot2} or base R graphics by using
-#' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+#' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}.
 #' For a single base R graphically panel, \code{\link{lines}} adds an additional PIT histogram.
-#' 
+#'
 #' @aliases plot.pithist lines.pithist autoplot.pithist
 #' @param object,x an object of class \code{\link{pithist}}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.
 #' @param style character specifying the style of pithist. For \code{style = "bar"}
-#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
-#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
+#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
+#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
 #' plotted.
 #' @param confint logical. Should confident intervals be drawn? Fix. can be colour
 #' @param simint Fix description.
@@ -558,20 +556,20 @@ rbind.pithist <- c.pithist
 #' @param \dots further graphical parameters.
 #' @param ref,col,fill,alpha_min,lwd,lty,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
-#' @param colour,size,linetype,legend,alpha graphical parameters passed for 
+#' @param colour,size,linetype,legend,alpha graphical parameters passed for
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @param freq Fix me.
 #' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype,ref_alpha Fix me.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
-#' @references 
+#' @references
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
 #' for Interval Estimation of Binomial Proportions.} \emph{The American
 #' Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
 #'
 #' Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
-#' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261. 
+#' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
 #' \doi{10.2307/2981683}
-#'  
+#'
 #' Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 #' Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
 #' the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292.
@@ -580,72 +578,73 @@ rbind.pithist <- c.pithist
 #' Diebold FX, Gunther TA, Tay AS (1998). \dQuote{Evaluating Density Forecasts
 #' with Applications to Financial Risk Management}. \emph{International Economic
 #' Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}
-#' 
+#'
 #' Gneiting T, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
 #' Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
 #' Series B (Methodological)}. \bold{69}(2), 243--268.
 #' \doi{10.1111/j.1467-9868.2007.00587.x}
-#' 
+#'
 #' @keywords hplot
 #' @examples
-#' 
+#'
 #' ## speed and stopping distances of cars
 #' m1_lm <- lm(dist ~ speed, data = cars)
-#' 
+#'
 #' ## compute and plot pithist
 #' pithist(m1_lm)
-#' 
+#'
 #' ## customize colors and style
 #' pithist(m1_lm, ref = "blue", lty = 2, pch = 20, style = "line")
-#' 
+#'
 #' ## add separate model
 #' if (require("crch", quietly = TRUE)) {
 #'   m1_crch <- crch(dist ~ speed | speed, data = cars)
 #'   lines(pithist(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
 #' }
-#' 
+#'
 #' #-------------------------------------------------------------------------------
 #' if (require("crch")) {
-#' 
+#'
 #'   ## precipitation observations and forecasts for Innsbruck
 #'   data("RainIbk", package = "crch")
 #'   RainIbk <- sqrt(RainIbk)
-#'   RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
-#'   RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+#'   RainIbk$ensmean <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, mean)
+#'   RainIbk$enssd <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, sd)
 #'   RainIbk <- subset(RainIbk, enssd > 0)
-#' 
+#'
 #'   ## linear model w/ constant variance estimation
 #'   m2_lm <- lm(rain ~ ensmean, data = RainIbk)
-#' 
-#'   ## logistic censored model 
+#'
+#'   ## logistic censored model
 #'   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
-#' 
+#'
 #'   ## compute pithists
 #'   pit2_lm <- pithist(m2_lm, plot = FALSE)
 #'   pit2_crch <- pithist(m2_crch, plot = FALSE)
-#' 
+#'
 #'   ## plot in single graph with style "line"
-#'   plot(c(pit2_lm, pit2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, 
-#'     style = "line", single_graph = TRUE)
+#'   plot(c(pit2_lm, pit2_crch),
+#'     col = c(1, 2), confint = c(1, 2), ref = 3,
+#'     style = "line", single_graph = TRUE
+#'   )
 #' }
-#' 
+#'
 #' #-------------------------------------------------------------------------------
 #' ## determinants for male satellites to nesting horseshoe crabs
 #' data("CrabSatellites", package = "countreg")
-#' 
+#'
 #' ## linear poisson model
-#' m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
-#' 
+#' m3_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+#'
 #' ## compute and plot pithist as "ggplot2" graphic
 #' pithist(m3_pois, plot = "ggplot2")
-#'
 #' @export
 plot.pithist <- function(x,
                          single_graph = FALSE,
                          style = NULL,
                          freq = NULL,
                          simint = NULL,
-                         confint = TRUE,  # confint_style can't be changed but depends on style 
+                         confint = TRUE, # confint_style can't be changed but depends on style
                          confint_level = 0.95,
                          confint_type = c("exact", "approximation"),
                          ref = TRUE,
@@ -737,21 +736,24 @@ plot.pithist <- function(x,
   ## annotation
   if (single_graph) {
     xlab <- use_arg_from_attributes(x, "xlab", default = "PIT", force_single = TRUE)
-    ylab <- use_arg_from_attributes(x, "ylab", default = if (freq) "Frequency" else "Density",
-      force_single = TRUE)
+    ylab <- use_arg_from_attributes(x, "ylab",
+      default = if (freq) "Frequency" else "Density",
+      force_single = TRUE
+    )
     if (is.null(main)) main <- "PIT histogram"
 
-  # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
+    # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
     if (freq && ylab == "Density") ylab <- "Frequency"
     if (!freq && ylab == "Frequency") ylab <- "Density"
-
   } else {
     xlab <- use_arg_from_attributes(x, "xlab", default = "PIT", force_single = FALSE)
-    ylab <- use_arg_from_attributes(x, "ylab", default = if (freq) "Frequency" else "Density",
-      force_single = FALSE)
+    ylab <- use_arg_from_attributes(x, "ylab",
+      default = if (freq) "Frequency" else "Density",
+      force_single = FALSE
+    )
     main <- use_arg_from_attributes(x, "main", default = "model", force_single = FALSE)
 
-  # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
+    # TODO: (ML) Might be to be improved - by removing arg `xlab` in `pithist()`?
     ylab[(!freq & ylab == "Frequency")] <- "Density"
     ylab[(freq & ylab == "Density")] <- "Frequency"
   }
@@ -762,17 +764,17 @@ plot.pithist <- function(x,
 
   ## compute confidence intervals for all groups
   ci <- lapply(1:n, function(i) {
-    d <- x[x$group == i, ] 
+    d <- x[x$group == i, ]
     compute_pithist_confint(
-      n = sum(d$counts), 
+      n = sum(d$counts),
       breaks = compute_breaks(d$mids, d$width),
-      level = confint_level, 
+      level = confint_level,
       type = confint_type,
       freq = freq
     )
   })
   ci <- do.call("rbind", ci)
-  x <- cbind(x, ci)  # careful: loses all attributes of x
+  x <- cbind(x, ci) # careful: loses all attributes of x
 
   ## compute reference lines (perfect prediction) for all groups
   ref <- lapply(1:n, function(i) {
@@ -785,7 +787,7 @@ plot.pithist <- function(x,
     rval <- data.frame("ref" = rval)
   })
   ref <- do.call("rbind", ref)
-  x <- cbind(x, ref)  # careful: loses all attributes of x
+  x <- cbind(x, ref) # careful: loses all attributes of x
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR 'HISTOGRAM-STYLE PITHIST'
@@ -802,8 +804,8 @@ plot.pithist <- function(x,
 
     ## simulation intervals
     if (!freq) {
-      d$simint_lwr <-d$simint_lwr / sum(d$counts * d$width)
-      d$simint_upr <-d$simint_upr / sum(d$counts * d$width)
+      d$simint_lwr <- d$simint_lwr / sum(d$counts * d$width)
+      d$simint_upr <- d$simint_upr / sum(d$counts * d$width)
     }
 
     ## get xlim and ylim
@@ -813,7 +815,7 @@ plot.pithist <- function(x,
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(c(xleft, xright))[xlim_idx]
     }
     if (any(ylim_idx)) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
         range(c(0, y, d$ref, d$ci_lwr, d$ci_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
     }
 
@@ -835,7 +837,7 @@ plot.pithist <- function(x,
 
     ## plot pithist
     rect(xleft, 0, xright, y,
-      border = plot_arg$col[j], 
+      border = plot_arg$col[j],
       col = set_minimum_transparency(plot_arg$fill[j], alpha_min = plot_arg$alpha_min[j]),
       lty = plot_arg$lty[j],
       lwd = plot_arg$lwd[j]
@@ -850,16 +852,16 @@ plot.pithist <- function(x,
 
     ## plot ref line
     if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2  # red
+      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2 # red
 
       ref_z <- compute_breaks(d$mids, d$width)
-      ref_y <- duplicate_last_value(d$ref) 
+      ref_y <- duplicate_last_value(d$ref)
       lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 1, lwd = 1.75)
     }
 
     ## plot confint lines
     if (!identical(plot_arg$confint[j], FALSE)) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- 2  # red
+      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- 2 # red
 
       ci_z <- compute_breaks(d$mids, d$width)
 
@@ -885,7 +887,7 @@ plot.pithist <- function(x,
     ## step elements
     z <- compute_breaks(d$mids, d$width)
     y <- if (freq) {
-      duplicate_last_value(d$counts) 
+      duplicate_last_value(d$counts)
     } else {
       duplicate_last_value(d$counts / sum(d$counts * d$width))
     }
@@ -897,21 +899,20 @@ plot.pithist <- function(x,
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(z)[xlim_idx]
     }
     if (any(ylim_idx) && !single_graph) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
         range(c(y, d$ci_lwr, d$ci_upr), na.rm = TRUE)[ylim_idx]
     }
     if (any(ylim_idx) && single_graph) {
       if (freq) {
-        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
           range(c(x$counts, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
       } else {
-        y_tmp <- lapply(1:n, function(i) { 
+        y_tmp <- lapply(1:n, function(i) {
           d <- x[x$group == i, ]
           rval <- d$counts / sum(d$counts * d$width)
         })
-        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- 
+        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
           range(c(y_tmp, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
-
       }
     }
 
@@ -943,7 +944,7 @@ plot.pithist <- function(x,
         c(
           rep(d$ci_lwr, each = 2),
           rev(rep(d$ci_upr, each = 2))
-        ), 
+        ),
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
       )
@@ -961,7 +962,7 @@ plot.pithist <- function(x,
     ## step elements
     z <- compute_breaks(d$mids, d$width)
     y <- if (freq) {
-      duplicate_last_value(d$counts) 
+      duplicate_last_value(d$counts)
     } else {
       duplicate_last_value(d$counts / sum(d$counts * d$width))
     }
@@ -1013,7 +1014,7 @@ plot.pithist <- function(x,
 #' @export
 lines.pithist <- function(x,
                           freq = NULL,
-                          confint = FALSE,  # confint_style can't be changed but depends on style 
+                          confint = FALSE, # confint_style can't be changed but depends on style
                           confint_level = 0.95,
                           confint_type = c("exact", "approximation"),
                           ref = FALSE,
@@ -1064,9 +1065,9 @@ lines.pithist <- function(x,
   # -------------------------------------------------------------------
   ## compute confidence intervals for all groups
   ci <- lapply(1:n, function(i) {
-    d <- x[x$group == i, ] 
+    d <- x[x$group == i, ]
     compute_pithist_confint(
-      n = sum(d$counts),  
+      n = sum(d$counts),
       breaks = compute_breaks(d$mids, d$width),
       level = confint_level,
       type = confint_type,
@@ -1074,7 +1075,7 @@ lines.pithist <- function(x,
     )
   })
   ci <- do.call("rbind", ci)
-  x <- cbind(x, ci)  # careful: loses all attributes of x
+  x <- cbind(x, ci) # careful: loses all attributes of x
 
   ## compute reference lines (perfect prediction) for all groups
   ref <- lapply(1:n, function(i) {
@@ -1087,7 +1088,7 @@ lines.pithist <- function(x,
     rval <- data.frame("ref" = rval)
   })
   ref <- do.call("rbind", ref)
-  x <- cbind(x, ref)  # careful: loses all attributes of x
+  x <- cbind(x, ref) # careful: loses all attributes of x
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR LINES
@@ -1099,7 +1100,7 @@ lines.pithist <- function(x,
     ## step elements
     z <- compute_breaks(d$mids, d$width)
     y <- if (freq) {
-      duplicate_last_value(d$counts) 
+      duplicate_last_value(d$counts)
     } else {
       duplicate_last_value(d$counts / sum(d$counts * d$width))
     }
@@ -1114,9 +1115,9 @@ lines.pithist <- function(x,
           rev(rep(z, each = 2)[-c(1, length(z) * 2)])
         ),
         c(
-          rep(d$ci_lwr, each = 2), 
+          rep(d$ci_lwr, each = 2),
           rev(rep(d$ci_upr, each = 2))
-        ),  
+        ),
         col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
         border = NA
       )
@@ -1193,8 +1194,10 @@ autoplot.pithist <- function(object,
   confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = NULL, force_single = TRUE)
   xlab <- use_arg_from_attributes(object, "xlab", default = "PIT", force_single = TRUE)
-  ylab <- use_arg_from_attributes(object, "ylab", default = if (freq) "Frequency" else "Density", 
-    force_single = TRUE)
+  ylab <- use_arg_from_attributes(object, "ylab",
+    default = if (freq) "Frequency" else "Density",
+    force_single = TRUE
+  )
 
   ## get base style arguments
   add_arg <- list(...)
@@ -1218,7 +1221,7 @@ autoplot.pithist <- function(object,
     confint_level >= 0,
     confint_level <= 1
   )
-  stopifnot(is.null(ref) || is.logical(ref)) 
+  stopifnot(is.null(ref) || is.logical(ref))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(is.character(xlab), length(xlab) == 1)
@@ -1284,7 +1287,7 @@ autoplot.pithist <- function(object,
     aes_ref_default <- NULL
   }
   aes_ref <- set_aes_helper_geoms(
-    GeomPithistRef$default_aes, 
+    GeomPithistRef$default_aes,
     list(
       colour = ref_colour,
       size = ref_size,
@@ -1295,7 +1298,7 @@ autoplot.pithist <- function(object,
   )
 
   aes_confint <- set_aes_helper_geoms(
-    set_default_aes_pithist_confint(confint), 
+    set_default_aes_pithist_confint(confint),
     list(
       colour = confint_colour,
       fill = confint_fill,
@@ -1306,7 +1309,7 @@ autoplot.pithist <- function(object,
   )
 
   aes_simint <- set_aes_helper_geoms(
-    GeomPithistSimint$default_aes, 
+    GeomPithistSimint$default_aes,
     list(
       colour = simint_colour,
       size = simint_size,
@@ -1326,21 +1329,21 @@ autoplot.pithist <- function(object,
   # -------------------------------------------------------------------
   ## actual plotting
   rval <- ggplot2::ggplot(
-    object, 
+    object,
     ggplot2::aes_string(
-      x = "mids", 
-      y = "counts", 
-      width = "width", 
+      x = "mids",
+      y = "counts",
+      width = "width",
       group = "group"
     )
   )
 
   ## add histogram
-  rval <- rval + 
+  rval <- rval +
     geom_pithist(
       ggplot2::aes_string(
-        colour = "group", 
-        fill = "group", 
+        colour = "group",
+        fill = "group",
         size = "group",
         linetype = "group",
         alpha = "group"
@@ -1358,7 +1361,7 @@ autoplot.pithist <- function(object,
           ymin = "simint_lwr",
           ymax = "simint_upr",
           group = "group"
-        ), 
+        ),
         na.rm = TRUE,
         freq = freq,
         colour = aes_simint$colour,
@@ -1373,10 +1376,10 @@ autoplot.pithist <- function(object,
     rval <- rval +
       geom_pithist_confint(
         ggplot2::aes_string(
-          x = "mids", 
+          x = "mids",
           y = "counts",
           width = "width"
-        ), 
+        ),
         level = confint_level,
         type = confint_type,
         freq = freq,
@@ -1394,10 +1397,10 @@ autoplot.pithist <- function(object,
     rval <- rval +
       geom_pithist_ref(
         ggplot2::aes_string(
-          x = "mids", 
-          y = "counts", 
+          x = "mids",
+          y = "counts",
           width = "width"
-        ), 
+        ),
         freq = freq,
         colour = aes_ref$colour,
         size = aes_ref$size,
@@ -1406,14 +1409,14 @@ autoplot.pithist <- function(object,
       )
   }
 
-  ## set the colors, shapes, etc. for the groups 
-  ## w/i `set_default_aes_pithist()` by `my_modify_list()` all NAs or 0.999 values 
+  ## set the colors, shapes, etc. for the groups
+  ## w/i `set_default_aes_pithist()` by `my_modify_list()` all NAs or 0.999 values
   ## are replaced with intern defaults
   rval <- rval +
     ggplot2::scale_alpha_manual(values = plot_arg$alpha, na.value = NA) +
     ggplot2::scale_colour_manual(values = plot_arg$colour, na.value = NA) +
     ggplot2::scale_fill_manual(values = plot_arg$fill, na.value = NA) +
-    ggplot2::scale_size_manual(values = plot_arg$size, na.value = 0.999) + 
+    ggplot2::scale_size_manual(values = plot_arg$size, na.value = 0.999) +
     ggplot2::scale_linetype_manual(values = plot_arg$linetype, na.value = NA)
 
   ## annotation
@@ -1423,26 +1426,26 @@ autoplot.pithist <- function(object,
   if (legend) {
     rval <- rval +
       ggplot2::labs(
-        alpha = "Model", 
-        colour = "Model", 
-        fill = "Model", 
-        size = "Model", 
+        alpha = "Model",
+        colour = "Model",
+        fill = "Model",
+        size = "Model",
         linetype = "Model"
       ) +
       ggplot2::guides(
-        alpha = "legend", 
-        colour = "legend", 
-        fill = "legend", 
-        size = "legend", 
+        alpha = "legend",
+        colour = "legend",
+        fill = "legend",
+        size = "legend",
         linetype = "legend"
       )
   } else {
     rval <- rval +
       ggplot2::guides(
-        alpha = "none", 
-        colour = "none", 
-        fill = "none", 
-        size = "none", 
+        alpha = "none",
+        colour = "none",
+        fill = "none",
+        size = "none",
         linetype = "none"
       )
   }
@@ -1460,16 +1463,16 @@ autoplot.pithist <- function(object,
     }
     theme <- theme_tmp
     if (!is.function(theme)) {
-        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
-        theme <- ggplot2::theme_bw()
+      warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+      theme <- ggplot2::theme_bw()
     }
   }
 
   if (is.function(theme)) {
     theme <- try(theme(), silent = TRUE)
     if (inherits(theme, "try-error") || !inherits(theme, "theme")) {
-        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
-        theme <- ggplot2::theme_bw()
+      warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+      theme <- ggplot2::theme_bw()
     }
   }
 
@@ -1478,13 +1481,13 @@ autoplot.pithist <- function(object,
   } else if (isTRUE(all.equal(ggplot2::theme_get(), ggplot2::theme_gray()))) {
     rval <- rval + ggplot2::theme_bw()
   }
- 
+
   # -------------------------------------------------------------------
   # ORDER LAYERS
   # -------------------------------------------------------------------
-  #if (style == "line") {
+  # if (style == "line") {
   #  rval$layer <- c(rval$layer[[3]], rval$layer[[4]], rval$layer[[1]], rval$layer[[2]])
-  #}
+  # }
 
   # -------------------------------------------------------------------
   # GROUPING (IF ANY) AND RETURN PLOT
@@ -1507,17 +1510,16 @@ autoplot.pithist <- function(object,
 
 #' @rdname geom_pithist
 #' @export
-stat_pithist <- function(mapping = NULL, 
-                         data = NULL, 
+stat_pithist <- function(mapping = NULL,
+                         data = NULL,
                          geom = "pithist",
-                         position = "identity", 
+                         position = "identity",
                          na.rm = FALSE,
-                         show.legend = NA, 
-                         inherit.aes = TRUE, 
+                         show.legend = NA,
+                         inherit.aes = TRUE,
                          freq = FALSE,
-                         style = c("bar", "line"), 
+                         style = c("bar", "line"),
                          ...) {
-
   style <- match.arg(style)
 
   ggplot2::layer(
@@ -1543,15 +1545,13 @@ stat_pithist <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
-
   required_aes = c("x", "y", "width"),
-
   compute_group = function(data, scales, freq = FALSE, style = "bar") {
 
     ## transform counts to freq
-    if (!freq) { 
+    if (!freq) {
       data <- transform(data,
-        y = y / sum(y * width) 
+        y = y / sum(y * width)
       )
     }
 
@@ -1561,7 +1561,7 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
         y = y / 2,
         height = y
       )
-    } else {  # "line" style
+    } else { # "line" style
       data.frame(
         x = compute_breaks(data$x, data$width),
         y = duplicate_last_value(data$y)
@@ -1572,10 +1572,10 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 
 
 #' \code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`
-#' 
+#'
 #' Various \code{geom_*} and \code{stat_*} used within
 #' \code{\link[ggplot2]{autoplot}} for producing PIT histograms.
-#' 
+#'
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
 #' @param style Fix description.
@@ -1589,67 +1589,74 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #'   data("CrabSatellites", package = "countreg")
 #'   m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 #'   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-#'   
+#'
 #'   ## Compute pithist
 #'   p1 <- pithist(m1_pois, type = "random", plot = FALSE)
 #'   p2 <- pithist(m2_pois, type = "random", plot = FALSE)
-#'   
-#'   d <- c(p1, p2) 
-#'   
+#'
+#'   d <- c(p1, p2)
+#'
 #'   ## Create factor
 #'   main <- attr(d, "main")
 #'   main <- make.names(main, unique = TRUE)
 #'   d$group <- factor(d$group, labels = main)
-#'   
+#'
 #'   ## Plot bar style PIT histogram
-#'   gg1 <- ggplot(data = d) + 
-#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = TRUE) + 
-#'     geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) + 
-#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = TRUE) + 
-#'     geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = TRUE) + 
-#'     facet_grid(group~.) + xlab("PIT") + ylab("Frequency")
+#'   gg1 <- ggplot(data = d) +
+#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = TRUE) +
+#'     geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
+#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = TRUE) +
+#'     geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = TRUE) +
+#'     facet_grid(group ~ .) +
+#'     xlab("PIT") +
+#'     ylab("Frequency")
 #'   gg1
 #'
-#'   gg2 <- ggplot(data = d) + 
-#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = FALSE) + 
-#'     geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr, y = counts, 
-#'       width = width), freq = FALSE) + 
-#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = FALSE) + 
-#'     geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = FALSE) + 
-#'     facet_grid(group~.) + xlab("PIT") + ylab("Density")
+#'   gg2 <- ggplot(data = d) +
+#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = FALSE) +
+#'     geom_pithist_simint(aes(
+#'       x = mids, ymin = simint_lwr, ymax = simint_upr, y = counts,
+#'       width = width
+#'     ), freq = FALSE) +
+#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = FALSE) +
+#'     geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = FALSE) +
+#'     facet_grid(group ~ .) +
+#'     xlab("PIT") +
+#'     ylab("Density")
 #'   gg2
 #'
 #'   ## Plot line style PIT histogram
-#'   gg3 <- ggplot(data = d) + 
-#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), style = "line") + 
-#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") + 
-#'     facet_grid(group~.) + xlab("PIT") + ylab("Density")
+#'   gg3 <- ggplot(data = d) +
+#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), style = "line") +
+#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") +
+#'     facet_grid(group ~ .) +
+#'     xlab("PIT") +
+#'     ylab("Density")
 #'   gg3
 #' }
 #' @export
-geom_pithist <- function(mapping = NULL, 
-                         data = NULL, 
+geom_pithist <- function(mapping = NULL,
+                         data = NULL,
                          stat = "pithist",
-                         position = "identity", 
+                         position = "identity",
                          na.rm = FALSE,
-                         show.legend = NA, 
-                         inherit.aes = TRUE, 
-                         freq = FALSE,  # only needed w/i stat_*
+                         show.legend = NA,
+                         inherit.aes = TRUE,
+                         freq = FALSE, # only needed w/i stat_*
                          style = c("bar", "line"),
                          ...) {
-
   style <- match.arg(style)
 
   ggplot2::layer(
-    geom = GeomPithist, 
+    geom = GeomPithist,
     mapping = mapping,
-    data = data, 
-    stat = stat, 
+    data = data,
+    stat = stat,
     position = position,
-    show.legend = show.legend, 
+    show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      na.rm = na.rm, 
+      na.rm = na.rm,
       freq = freq,
       style = style,
       ...
@@ -1663,50 +1670,44 @@ geom_pithist <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomPithist <- ggplot2::ggproto("GeomPithist", ggplot2::Geom,
-
   default_aes = ggplot2::aes(
     colour = NA,
     fill = NA,
-    size = 0.999,  # TODO: (ML) resolve this hack (NA leads to error, even if it is modified w/i draw_panel() -> why?)
+    size = 0.999, # TODO: (ML) resolve this hack (NA leads to error, even if it is modified w/i draw_panel() -> why?)
     linetype = NA,
     alpha = NA,
     subgroup = NULL
   ),
-
-  required_aes = c("x", "y"), 
-
+  required_aes = c("x", "y"),
   optional_aes = c("width", "height"), # FIXME: (ML) "width" and "height" actually required for `style = "bar"`
 
   extra_params = c("na.rm", "style"),
-
   setup_data = function(data, params) {
     if (params$style == "bar") {
       ## uses `geom_tile()`, which uses center of tiles and its size (x, y, width, height)
-      ggplot2::GeomTile$setup_data(data, params)  
-
+      ggplot2::GeomTile$setup_data(data, params)
     } else if (params$style == "line") {
       ## uses `geom_step()`, which uses requires all x and y (including min/max, so one more than center points)
       data
     }
   },
-
   draw_panel = function(data, panel_params, coord, linejoin = "mitre", style = c("bar", "line")) {
 
     ## get style
     style <- match.arg(style)
 
-    ## swap NAs in `default_aes` with own defaults 
+    ## swap NAs in `default_aes` with own defaults
     data <- my_modify_list(data, set_default_aes_pithist(style), force = FALSE)
 
     ## create geom
     if (style == "bar") {
       ggplot2::GeomTile$draw_panel(
-        data = data, 
-        panel_params = panel_params, 
-        coord = coord, 
+        data = data,
+        panel_params = panel_params,
+        coord = coord,
         linejoin = linejoin
       )
-    } else {  # "line" style
+    } else { # "line" style
       ggplot2::GeomStep$draw_panel(
         data = data,
         panel_params = panel_params,
@@ -1714,31 +1715,32 @@ GeomPithist <- ggplot2::ggproto("GeomPithist", ggplot2::Geom,
       )
     }
   },
-
   draw_key = function(data, params, size) {
-    ## Swap NAs in `default_aes` with own defaults 
+    ## Swap NAs in `default_aes` with own defaults
     data <- my_modify_list(data, set_default_aes_pithist(params$style), force = FALSE)
 
     if (params$style == "bar") {
       draw_key_polygon(data, params, size)
-
-    } else {  # "line" style
+    } else { # "line" style
       draw_key_path(data, params, size)
     }
   }
-
 )
 
 
 ## helper function inspired by internal from `ggplot2` defined in `geom-sf.r`
 set_default_aes_pithist <- function(style) {
   if (style == "bar") {
-    my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = "darkgray", fill = "black", size = 0.5, 
-      linetype = 1, alpha = 0.2, subgroup = NULL), force = TRUE)
-  } else {  # "line" style 
+    my_modify_list(
+      ggplot2::GeomPolygon$default_aes, 
+      list(colour = "darkgray", fill = "black", size = 0.5, linetype = 1, alpha = 0.2, subgroup = NULL),
+      force = TRUE
+    )
+  } else { # "line" style
     my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 1, size = 0.75, linetype = 1, alpha = NA),
-      force = TRUE)
-  } 
+      force = TRUE
+    )
+  }
 }
 
 
@@ -1748,15 +1750,15 @@ set_default_aes_pithist <- function(style) {
 
 #' @rdname geom_pithist
 #' @export
-stat_pithist_ref <- function(mapping = NULL, 
-                             data = NULL, 
+stat_pithist_ref <- function(mapping = NULL,
+                             data = NULL,
                              geom = "pithist_ref",
-                             position = "identity", 
+                             position = "identity",
                              na.rm = FALSE,
-                             show.legend = NA, 
-                             inherit.aes = TRUE, 
+                             show.legend = NA,
+                             inherit.aes = TRUE,
                              trafo = NULL,
-                             freq = FALSE, 
+                             freq = FALSE,
                              ...) {
   ggplot2::layer(
     stat = StatPithistRef,
@@ -1781,21 +1783,19 @@ stat_pithist_ref <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatPithistRef <- ggplot2::ggproto("StatPithistRef", ggplot2::Stat,
-
   required_aes = c("x", "y", "width"),
-
-  compute_group = function(data, 
-                           scales, 
+  compute_group = function(data,
+                           scales,
                            trafo = NULL,
                            freq = FALSE) {
 
     ## compute reference line
     if (!is.null(trafo)) {
-      ref <- c(NA_real_, NA_real_)  # must be numeric for ggplot2
+      ref <- c(NA_real_, NA_real_) # must be numeric for ggplot2
       warning("reference line for perfect prediction is not yet implemented when employing a `trafo`")
-    } else { 
+    } else {
       ref <- compute_pithist_ref(
-        n = sum(data$y), 
+        n = sum(data$y),
         breaks = compute_breaks(data$x, data$width),
         freq = freq
       )
@@ -1810,27 +1810,27 @@ StatPithistRef <- ggplot2::ggproto("StatPithistRef", ggplot2::Stat,
 
 #' @rdname geom_pithist
 #' @export
-geom_pithist_ref <- function(mapping = NULL, 
-                             data = NULL, 
+geom_pithist_ref <- function(mapping = NULL,
+                             data = NULL,
                              stat = "pithist_ref",
-                             position = "identity", 
+                             position = "identity",
                              na.rm = FALSE,
-                             show.legend = NA, 
-                             inherit.aes = TRUE, 
+                             show.legend = NA,
+                             inherit.aes = TRUE,
                              trafo = NULL,
-                             freq = FALSE,  # only needed w/i stat_*
+                             freq = FALSE, # only needed w/i stat_*
                              ...) {
   ggplot2::layer(
-    geom = GeomPithistRef, 
+    geom = GeomPithistRef,
     mapping = mapping,
-    data = data, 
-    stat = stat, 
+    data = data,
+    stat = stat,
     position = position,
-    show.legend = show.legend, 
+    show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      na.rm = na.rm, 
-      trafo = NULL, 
+      na.rm = na.rm,
+      trafo = NULL,
       freq = freq,
       ...
     )
@@ -1843,14 +1843,12 @@ geom_pithist_ref <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomPithistRef <- ggplot2::ggproto("GeomPithistRef", ggplot2::GeomStep,
-
   default_aes = ggplot2::aes(
-    colour = 2, 
-    size = 0.75, 
+    colour = 2,
+    size = 0.75,
     linetype = 1,
     alpha = NA
   ),
-
   required_aes = c("x", "y")
 )
 
@@ -1861,20 +1859,19 @@ GeomPithistRef <- ggplot2::ggproto("GeomPithistRef", ggplot2::GeomStep,
 
 #' @rdname geom_pithist
 #' @export
-stat_pithist_confint <- function(mapping = NULL, 
-                                 data = NULL, 
+stat_pithist_confint <- function(mapping = NULL,
+                                 data = NULL,
                                  geom = "pithist_confint",
-                                 position = "identity", 
+                                 position = "identity",
                                  na.rm = FALSE,
-                                 show.legend = NA, 
-                                 inherit.aes = TRUE, 
-                                 trafo = NULL, 
+                                 show.legend = NA,
+                                 inherit.aes = TRUE,
+                                 trafo = NULL,
                                  level = 0.95,
-                                 type = "approximation", 
-                                 freq = FALSE, 
-                                 style = c("polygon", "line"), 
+                                 type = "approximation",
+                                 freq = FALSE,
+                                 style = c("polygon", "line"),
                                  ...) {
-
   style <- match.arg(style)
 
   ggplot2::layer(
@@ -1903,32 +1900,30 @@ stat_pithist_confint <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
-
   required_aes = c("x", "y", "width"),
-
-  compute_group = function(data, 
-                           scales, 
+  compute_group = function(data,
+                           scales,
                            trafo = NULL,
                            level = 0.95,
                            type = "approximation",
                            freq = FALSE,
                            style = "polygon") {
-  ## compute ci interval
-  if (!is.null(trafo)) {
-    ci <- c(NA_real_, NA_real_)  # must be numeric for ggplot2
-    warning("confint is not yet implemented when employing a `trafo`")
-  } else { 
-    ci <- compute_pithist_confint(
-      n = sum(data$y), 
-      breaks = compute_breaks(data$x, data$width),
-      level = level, 
-      type = type,
-      freq = freq
-    )
-  }
+    ## compute ci interval
+    if (!is.null(trafo)) {
+      ci <- c(NA_real_, NA_real_) # must be numeric for ggplot2
+      warning("confint is not yet implemented when employing a `trafo`")
+    } else {
+      ci <- compute_pithist_confint(
+        n = sum(data$y),
+        breaks = compute_breaks(data$x, data$width),
+        level = level,
+        type = type,
+        freq = freq
+      )
+    }
 
-  ## return new data.frame condition on plotting `style`
-  if (style == "polygon") {
+    ## return new data.frame condition on plotting `style`
+    if (style == "polygon") {
       nd <- data.frame(
         xmin = data$x - data$width / 2,
         xmax = data$x + data$width / 2,
@@ -1944,24 +1939,23 @@ StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
     }
     nd
   }
-
 )
 
 
 #' @rdname geom_pithist
 #' @export
-geom_pithist_confint <- function(mapping = NULL, 
-                                 data = NULL, 
+geom_pithist_confint <- function(mapping = NULL,
+                                 data = NULL,
                                  stat = "pithist_confint",
-                                 position = "identity", 
+                                 position = "identity",
                                  na.rm = FALSE,
-                                 show.legend = NA, 
+                                 show.legend = NA,
                                  inherit.aes = TRUE,
                                  trafo = NULL,
                                  level = 0.95,
-                                 type = "approximation", 
-                                 freq = FALSE,  # only needed w/i stat_*
-                                 style = c("polygon", "line"), 
+                                 type = "approximation",
+                                 freq = FALSE, # only needed w/i stat_*
+                                 style = c("polygon", "line"),
                                  ...) {
   style <- match.arg(style)
 
@@ -1991,10 +1985,8 @@ geom_pithist_confint <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
-
-  required_aes = c("x|xmin", "ymin", "ymax"), 
-  
-  optional_aes = c("xmax"),  # FIXME: (ML) "xmax" actually required for `style = "polygon"`
+  required_aes = c("x|xmin", "ymin", "ymax"),
+  optional_aes = c("xmax"), # FIXME: (ML) "xmax" actually required for `style = "polygon"`
 
   extra_params = c("na.rm", "style"),
 
@@ -2011,47 +2003,39 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
     linetype = NA,
     alpha = NA
   ),
-
-
-  draw_panel = function(data, panel_params, coord, 
+  draw_panel = function(data, panel_params, coord,
                         linejoin = "mitre", direction = "hv",
                         style = c("polygon", "line")) {
-
     style <- match.arg(style)
 
-    ## Swap NAs in `default_aes` with own defaults 
+    ## Swap NAs in `default_aes` with own defaults
     data <- my_modify_list(data, set_default_aes_pithist_confint(style), force = FALSE)
 
     if (style == "polygon") {
       ggplot2::GeomRect$draw_panel(data, panel_params, coord, linejoin)
-
-    } else {  # "line" style 
+    } else { # "line" style
       ## Join two Grobs
-      data1 <- transform(data, 
+      data1 <- transform(data,
         y = ymin
       )
-      data2 <- transform(data, 
+      data2 <- transform(data,
         y = ymax
       )
       grid::grobTree(
         ggplot2::GeomStep$draw_panel(data1, panel_params, coord, direction),
         ggplot2::GeomStep$draw_panel(data2, panel_params, coord, direction)
       )
-
     }
   },
-
-
   draw_key = function(data, params, size) {
-    ## Swap NAs in `default_aes` with own defaults 
+    ## Swap NAs in `default_aes` with own defaults
     data <- my_modify_list(data, set_default_aes_pithist_confint(params$style), force = FALSE)
     if (params$style == "polygon") {
       draw_key_polygon(data, params, size)
-    } else {  # "line" style
+    } else { # "line" style
       draw_key_path(data, params, size)
     }
   }
-
 )
 
 
@@ -2059,10 +2043,13 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
 set_default_aes_pithist_confint <- function(style) {
   if (style == "line") {
     my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, fill = NA, size = 0.5, linetype = 2, alpha = NA),
-      force = TRUE)
-  } else {  # "polygon" style
-    my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = NA, fill = "black", size = 0.5, 
-      linetype = 1, alpha = 0.2, subgroup = NULL), force = TRUE)
+      force = TRUE
+    )
+  } else { # "polygon" style
+    my_modify_list(ggplot2::GeomPolygon$default_aes, list(
+      colour = NA, fill = "black", size = 0.5,
+      linetype = 1, alpha = 0.2, subgroup = NULL
+    ), force = TRUE)
   }
 }
 
@@ -2073,16 +2060,15 @@ set_default_aes_pithist_confint <- function(style) {
 
 #' @rdname geom_pithist
 #' @export
-stat_pithist_simint <- function(mapping = NULL, 
-                         data = NULL, 
-                         geom = "pithist_simint",
-                         position = "identity", 
-                         na.rm = FALSE,
-                         show.legend = NA, 
-                         inherit.aes = TRUE, 
-                         freq = FALSE,
-                         ...) {
-
+stat_pithist_simint <- function(mapping = NULL,
+                                data = NULL,
+                                geom = "pithist_simint",
+                                position = "identity",
+                                na.rm = FALSE,
+                                show.legend = NA,
+                                inherit.aes = TRUE,
+                                freq = FALSE,
+                                ...) {
   style <- match.arg(style)
 
   ggplot2::layer(
@@ -2107,17 +2093,15 @@ stat_pithist_simint <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatPithistSimint <- ggplot2::ggproto("StatPithistSimint", ggplot2::Stat,
-
   required_aes = c("x", "ymin", "ymax"),
-
   optional_aes = c("y", "width"), # FIXME: (ML) "width" actually required for `freq = FALSE`
 
   compute_group = function(data, scales, freq = FALSE) {
 
     ## transform counts to freq
     if (!freq) {
-      if(is.null(data$width)) stop("for arg `freq = FALSE`, aesthetics `width` must be provided.") 
-      if(is.null(data$y)) stop("for arg `freq = FALSE`, aesthetics `y` must be provided.") 
+      if (is.null(data$width)) stop("for arg `freq = FALSE`, aesthetics `width` must be provided.")
+      if (is.null(data$y)) stop("for arg `freq = FALSE`, aesthetics `y` must be provided.")
       data <- transform(data,
         ymin = ymin / sum(y * width),
         ymax = ymax / sum(y * width),
@@ -2130,25 +2114,25 @@ StatPithistSimint <- ggplot2::ggproto("StatPithistSimint", ggplot2::Stat,
 
 #' @rdname geom_pithist
 #' @export
-geom_pithist_simint <- function(mapping = NULL, 
-                                data = NULL, 
+geom_pithist_simint <- function(mapping = NULL,
+                                data = NULL,
                                 stat = "pithist_simint",
-                                position = "identity", 
+                                position = "identity",
                                 na.rm = FALSE,
-                                show.legend = NA, 
-                                inherit.aes = TRUE, 
-                                freq = FALSE,  # only needed w/i stat_*
+                                show.legend = NA,
+                                inherit.aes = TRUE,
+                                freq = FALSE, # only needed w/i stat_*
                                 ...) {
   ggplot2::layer(
-    geom = GeomPithistSimint, 
+    geom = GeomPithistSimint,
     mapping = mapping,
-    data = data, 
-    stat = stat, 
+    data = data,
+    stat = stat,
     position = position,
-    show.legend = show.legend, 
+    show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      na.rm = na.rm, 
+      na.rm = na.rm,
       freq = freq,
       ...
     )
@@ -2161,13 +2145,11 @@ geom_pithist_simint <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerange,
-
-  required_aes = c("x", "ymin", "ymax"), 
-
+  required_aes = c("x", "ymin", "ymax"),
   default_aes = ggplot2::aes(
-    colour = "black", 
-    size = 0.5, 
-    linetype = 1, 
+    colour = "black",
+    size = 0.5,
+    linetype = 1,
     alpha = NA
   )
 )
@@ -2179,7 +2161,7 @@ GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerang
 get_pp <- function(n, breaks, freq) {
   ## helper function to calculate perfect prediciton employing `qbinom()`
 
-  
+
   ## calc bin specific confidence levels
   rval <- qbinom(0.5, size = n, prob = diff(breaks))
 
@@ -2192,17 +2174,17 @@ get_pp <- function(n, breaks, freq) {
 #'
 #' Helper function for computing reference lines showing perfect prediction for PIT histograms.
 #'
-#' @noRd 
-#' @param n number of observations. 
+#' @noRd
+#' @param n number of observations.
 #' @param breaks vector with breakpoints.
-#' @param type Which kind of confindence interval should be computed? Type \code{exact} using 
+#' @param type Which kind of confindence interval should be computed? Type \code{exact} using
 #' the quantile function of the binomial distribution or \code{approximation} uses an approximation
-#' by Agresti and Coull (1998). 
+#' by Agresti and Coull (1998).
 #' @param freq Should confidence intervals returned for reported frequencies or
 #' for counts of observation.
 compute_pithist_ref <- function(n, breaks, freq) {
 
-  ## FIXME: (ML) 
+  ## FIXME: (ML)
   ## * Is this correct?
   ## * For small n qbinom(0.5, ...) is not equal 1.
 
@@ -2221,23 +2203,22 @@ compute_pithist_ref <- function(n, breaks, freq) {
 #'
 #' Helper function for computing confidence intervals for PIT histograms.
 #'
-#' @noRd 
-#' @param n number of observations. 
+#' @noRd
+#' @param n number of observations.
 #' @param breaks vector with breakpoints.
 #' @param level confidence level.
-#' @param type Which kind of confindence interval should be computed? Type \code{exact} using 
+#' @param type Which kind of confindence interval should be computed? Type \code{exact} using
 #' the quantile function of the binomial distribution or \code{approximation} uses an approximation
-#' by Agresti and Coull (1998). 
+#' by Agresti and Coull (1998).
 #' @param freq Should confidence intervals returned for reported frequencies or
 #' for counts of observation.
 compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approximation"), freq) {
-
   type <- match.arg(type)
 
   ## get confidence level
   a <- (1 - level) / 2
 
-  if (type == "exact") {  
+  if (type == "exact") {
     ## calc bin specific confidence levels
     rval <- data.frame(
       qbinom(a, size = n, prob = diff(breaks)),
@@ -2245,7 +2226,8 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
     )
   } else {
     rval <- data.frame(
-      do.call(rbind, 
+      do.call(
+        rbind,
         lapply(n * diff(breaks), function(x) PropCIs_add4ci(x, n, level)$conf.int * n)
       )
     )
@@ -2264,7 +2246,7 @@ get_confint <- function(n, breaks, level, freq) {
 
   ## get confidence level
   a <- (1 - level) / 2
-  
+
   ## calc bin specific confidence levels
   rval <- list(
     qbinom(a, size = n, prob = diff(breaks)),
@@ -2297,7 +2279,7 @@ get_confint_agresti <- function(x, n, level, bins, freq) {
 #' @param x number of successes.
 #' @param n number of trials.
 #' @param conf.level confidence coefficient.
-#' @noRd 
+#' @noRd
 PropCIs_add4ci <- function(x, n, conf.level) {
   ## copy of `add4ci` package from package `PropCIs` by Ralph Scherer (licensed under GPL-2/GPL-3)
   ptilde <- (x + 2) / (n + 4)
@@ -2334,9 +2316,9 @@ summary.pithist <- function(object,
 
     ## compute confidence intervals for all groups
     ci <- compute_pithist_confint(
-      n = sum(object$counts), 
+      n = sum(object$counts),
       breaks = compute_breaks(object$mids, object$width),
-      level = confint_level, 
+      level = confint_level,
       type = confint_type,
       freq = freq
     )
@@ -2347,16 +2329,15 @@ summary.pithist <- function(object,
       breaks = compute_breaks(object$mids, object$width),
       freq = freq
     )
-
   } else {
 
     ## compute confidence intervals for all groups
     ci <- lapply(1:max(object$group), function(i) {
-      d <- object[object$group == i, ] 
+      d <- object[object$group == i, ]
       compute_pithist_confint(
-        n = sum(d$counts), 
+        n = sum(d$counts),
         breaks = compute_breaks(d$mids, d$width),
-        level = confint_level, 
+        level = confint_level,
         type = confint_type,
         freq = freq
       )
@@ -2445,4 +2426,3 @@ print.pithist <- function(x, ...) {
   ## call next print method
   NextMethod()
 }
-

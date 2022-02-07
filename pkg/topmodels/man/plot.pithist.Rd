@@ -15,8 +15,8 @@
   confint = TRUE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = NULL,
-  xlim = c(0, 1),
+  ref = TRUE,
+  xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
   ylab = NULL,
@@ -53,8 +53,8 @@
   confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = NULL,
-  xlim = c(0, 1),
+  ref = TRUE,
+  xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
   ylab = NULL,
@@ -87,8 +87,8 @@
 diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.}
 
 \item{style}{character specifying the style of pithist. For \code{style = "bar"}
-a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
-line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
+a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
+line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
 plotted.}
 
 \item{freq}{Fix me.}
@@ -117,7 +117,7 @@ plot or just the histogram or just the fitted line.}
 
 \item{theme}{Fix me.}
 
-\item{colour, size, linetype, legend, alpha}{graphical parameters passed for 
+\item{colour, size, linetype, legend, alpha}{graphical parameters passed for
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
 
 \item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype, ref_alpha}{Fix me.}
@@ -131,10 +131,10 @@ PIT histograms graphically evaluate the probability integral transform (PIT),
 i.e., the value that the predictive CDF attains at the observation, with a
 uniform distribution. For a well calibrated model fit, the observation will be
 drawn from the predictive distribution and the PIT will have a standard uniform
-distribution. 
+distribution.
 
 PIT histograms can be rendered as \code{ggplot2} or base R graphics by using
-the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
+the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}.
 For a single base R graphically panel, \code{\link{lines}} adds an additional PIT histogram.
 }
 \examples{
@@ -160,14 +160,14 @@ if (require("crch")) {
   ## precipitation observations and forecasts for Innsbruck
   data("RainIbk", package = "crch")
   RainIbk <- sqrt(RainIbk)
-  RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
-  RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
+  RainIbk$ensmean <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, mean)
+  RainIbk$enssd <- apply(RainIbk[, grep("^rainfc", names(RainIbk))], 1, sd)
   RainIbk <- subset(RainIbk, enssd > 0)
 
   ## linear model w/ constant variance estimation
   m2_lm <- lm(rain ~ ensmean, data = RainIbk)
 
-  ## logistic censored model 
+  ## logistic censored model
   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
 
   ## compute pithists
@@ -175,8 +175,10 @@ if (require("crch")) {
   pit2_crch <- pithist(m2_crch, plot = FALSE)
 
   ## plot in single graph with style "line"
-  plot(c(pit2_lm, pit2_crch), col = c(1, 2), confint = c(1, 2), ref = 3, 
-    style = "line", single_graph = TRUE)
+  plot(c(pit2_lm, pit2_crch),
+    col = c(1, 2), confint = c(1, 2), ref = 3,
+    style = "line", single_graph = TRUE
+  )
 }
 
 #-------------------------------------------------------------------------------
@@ -184,11 +186,10 @@ if (require("crch")) {
 data("CrabSatellites", package = "countreg")
 
 ## linear poisson model
-m3_pois  <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
+m3_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 
 ## compute and plot pithist as "ggplot2" graphic
 pithist(m3_pois, plot = "ggplot2")
-
 }
 \references{
 Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -196,9 +197,9 @@ for Interval Estimation of Binomial Proportions.} \emph{The American
 Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
 
 Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
-Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261. 
+Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
 \doi{10.2307/2981683}
- 
+
 Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
 the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292.
