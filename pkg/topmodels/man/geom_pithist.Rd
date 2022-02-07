@@ -196,41 +196,49 @@ if (require("ggplot2")) {
   data("CrabSatellites", package = "countreg")
   m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
-  
+
   ## Compute pithist
   p1 <- pithist(m1_pois, type = "random", plot = FALSE)
   p2 <- pithist(m2_pois, type = "random", plot = FALSE)
-  
-  d <- c(p1, p2) 
-  
+
+  d <- c(p1, p2)
+
   ## Create factor
   main <- attr(d, "main")
   main <- make.names(main, unique = TRUE)
   d$group <- factor(d$group, labels = main)
-  
+
   ## Plot bar style PIT histogram
-  gg1 <- ggplot(data = d) + 
-    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = TRUE) + 
-    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) + 
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = TRUE) + 
-    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = TRUE) + 
-    facet_grid(group~.) + xlab("PIT") + ylab("Frequency")
+  gg1 <- ggplot(data = d) +
+    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = TRUE) +
+    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = TRUE) +
+    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = TRUE) +
+    facet_grid(group ~ .) +
+    xlab("PIT") +
+    ylab("Frequency")
   gg1
 
-  gg2 <- ggplot(data = d) + 
-    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = FALSE) + 
-    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr, y = counts, 
-      width = width), freq = FALSE) + 
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = FALSE) + 
-    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = FALSE) + 
-    facet_grid(group~.) + xlab("PIT") + ylab("Density")
+  gg2 <- ggplot(data = d) +
+    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = FALSE) +
+    geom_pithist_simint(aes(
+      x = mids, ymin = simint_lwr, ymax = simint_upr, y = counts,
+      width = width
+    ), freq = FALSE) +
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = FALSE) +
+    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = FALSE) +
+    facet_grid(group ~ .) +
+    xlab("PIT") +
+    ylab("Density")
   gg2
 
   ## Plot line style PIT histogram
-  gg3 <- ggplot(data = d) + 
-    geom_pithist(aes(x = mids, y = counts, width = width, group = group), style = "line") + 
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") + 
-    facet_grid(group~.) + xlab("PIT") + ylab("Density")
+  gg3 <- ggplot(data = d) +
+    geom_pithist(aes(x = mids, y = counts, width = width, group = group), style = "line") +
+    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") +
+    facet_grid(group ~ .) +
+    xlab("PIT") +
+    ylab("Density")
   gg3
 }
 }

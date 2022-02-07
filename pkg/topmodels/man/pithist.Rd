@@ -25,7 +25,7 @@ pithist(object, ...)
   style = c("bar", "line"),
   freq = FALSE,
   confint = TRUE,
-  ref = NULL,
+  ref = TRUE,
   xlab = "PIT",
   ylab = if (freq) "Frequency" else "Density",
   main = NULL,
@@ -70,18 +70,18 @@ proabilities corresponding to each observation according to get (randomized)
 quantile residuals. For \code{NULL}, the minimal observed difference in the
 resonse divided by \code{5e-6} is used.}
 
-\item{simint}{logical. In case of discrete distributions, should the simulation 
+\item{simint}{logical. In case of discrete distributions, should the simulation
 (confidence) interval due to the randomization be visualized?}
 
-\item{simint_level}{numeric. The confidence level required for calculating the simulation 
+\item{simint_level}{numeric. The confidence level required for calculating the simulation
 (confidence) interval due to the randomization.}
 
-\item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the 
+\item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the
 simulation (confidence) interval due to the randomization.}
 
 \item{style}{character specifying the style of pithist. For \code{style = "bar"}
-a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border 
-line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are 
+a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
+line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
 drawn.}
 
 \item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
@@ -98,7 +98,7 @@ histogram has a total area of one).}
 }
 \value{
 An object of class \code{"pithist"} inheriting from
-\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class} 
+\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 with the following variables: \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 histogram bars,} \item{width}{widths of the histogram bars,}
@@ -120,7 +120,7 @@ uniform distribution. For a well calibrated model fit, the observation will be
 drawn from the predictive distribution and the PIT will have a standard uniform
 distribution. For computation, \code{\link{pithist}} leverages the function
 \code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
-essentially draws a \code{\link[graphics]{hist}}. 
+essentially draws a \code{\link[graphics]{hist}}.
 
 In case of discrete distributions the PIT can be either drawn randomly from the
 corresponding interval or distributed proportionally in the histogram, whereby
@@ -152,7 +152,6 @@ p2 <- pithist(m2_pois, plot = FALSE)
 
 ## plot combined pithist as "ggplot2" graphic
 ggplot2::autoplot(c(p1, p2), single_graph = TRUE, style = "line", col = c(1, 2))
-
 }
 \references{
 Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -160,9 +159,9 @@ for Interval Estimation of Binomial Proportions.} \emph{The American
 Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
 
 Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
-Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261. 
+Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
 \doi{10.2307/2981683}
- 
+
 Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
 the Royal Statistical Society: Series A (General)}, \bold{147}(2), 278--292.
