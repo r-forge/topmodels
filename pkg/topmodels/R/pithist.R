@@ -178,7 +178,7 @@ pithist.default <- function(
                             style = c("bar", "line"),
                             freq = FALSE, 
                             confint = TRUE,
-                            ref = NULL,
+                            ref = TRUE,
                             xlab = "PIT",
                             ylab = if (freq) "Frequency" else "Density",
                             main = NULL,
@@ -214,10 +214,6 @@ pithist.default <- function(
   ## determine other arguments conditional on `style` and `type`
   if (is.null(simint)) {
     simint <- if (style == "bar" && type == "random") TRUE else FALSE
-  }
-
-  if (is.null(ref)) {
-    ref <- if (style == "bar") TRUE else FALSE
   }
 
   ## guess plotting flavor
@@ -269,7 +265,7 @@ pithist.default <- function(
 
     ## get breaks: part 2
     ## TODO: (ML) maybe use xlim instead or `0` and `1`
-    if (is.null(trafo) || all.equal(trafo, identity)) {
+    if (is.null(trafo) || identical(trafo, identity)) {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
       tmp_range <- max(abs(p))
@@ -333,7 +329,7 @@ pithist.default <- function(
 
     ## get breaks: part 2
     ## FIXME: (ML) maybe use xlim instead or `0` and `1`
-    if (is.null(trafo) || all.equal(trafo, identity)) {
+    if (is.null(trafo) || identical(trafo, identity)) {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
       tmp_range <- max(abs(p))
@@ -652,8 +648,8 @@ plot.pithist <- function(x,
                          confint = TRUE,  # confint_style can't be changed but depends on style 
                          confint_level = 0.95,
                          confint_type = c("exact", "approximation"),
-                         ref = NULL,
-                         xlim = c(0, 1),
+                         ref = TRUE,
+                         xlim = c(NA, NA),
                          ylim = c(0, NA),
                          xlab = NULL,
                          ylab = NULL,
@@ -725,10 +721,6 @@ plot.pithist <- function(x,
 
   ## determine other arguments conditional on `style` and `type`
   if (is.null(lwd)) lwd <- if (style == "bar") 1 else 2
-
-  if (is.null(ref)) {
-    ref <- if (style == "bar") TRUE else FALSE
-  }
 
   if (is.null(simint)) {
     simint <- if (style == "bar" && type == "random") TRUE else FALSE
@@ -1162,8 +1154,8 @@ autoplot.pithist <- function(object,
                              confint = NULL,
                              confint_level = 0.95,
                              confint_type = c("exact", "approximation"),
-                             ref = NULL,
-                             xlim = c(0, 1),
+                             ref = TRUE,
+                             xlim = c(NA, NA),
                              ylim = c(0, NA),
                              xlab = NULL,
                              ylab = NULL,
@@ -1283,10 +1275,6 @@ autoplot.pithist <- function(object,
   ## determine other arguments conditional on `style`
   if (is.null(simint)) {
     simint <- if (style == "bar" && type == "random") TRUE else FALSE
-  }
-
-  if (is.null(ref)) {
-    ref <- if (style == "bar") TRUE else FALSE
   }
 
   ## set plotting aes
