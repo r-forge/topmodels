@@ -370,7 +370,7 @@ pithist.default <- function(
 
   ## attributes for graphical display
   attr(rval, "type") <- type
-  attr(rval, "trafo") <- list(trafo)
+  attr(rval, "trafo") <- trafo
   attr(rval, "simint") <- simint
   attr(rval, "style") <- style
   attr(rval, "freq") <- freq
@@ -467,7 +467,7 @@ c.pithist <- function(...) {
     if (!all(sapply(2:length(trafo), function(i) identical(trafo[[i - 1]], trafo[[i]])))) {
       stop("objects with different `trafo`s are on different scales and hence must not be combined")
     } else {
-      trafo <- trafo[1]
+      trafo <- trafo[[1]]
     }
   }
 
@@ -672,7 +672,7 @@ plot.pithist <- function(x,
   type <- use_arg_from_attributes(x, "type", default = NULL, force_single = TRUE)
   style <- use_arg_from_attributes(x, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)[[1]]
+  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
   simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
@@ -1028,7 +1028,7 @@ lines.pithist <- function(x,
   ## get default arguments
   confint_type <- match.arg(confint_type)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)[[1]]
+  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
 
@@ -1192,7 +1192,7 @@ autoplot.pithist <- function(object,
   type <- use_arg_from_attributes(object, "type", default = NULL, force_single = TRUE)
   style <- use_arg_from_attributes(object, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(object, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(object, "trafo", default = NULL, force_single = TRUE)[[1]]
+  trafo <- use_arg_from_attributes(object, "trafo", default = NULL, force_single = TRUE)
   simint <- use_arg_from_attributes(object, "simint", default = NULL, force_single = TRUE)
   confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = NULL, force_single = TRUE)
