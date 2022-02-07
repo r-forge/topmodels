@@ -54,6 +54,15 @@ use_arg_from_attributes <- function(object,
   ## check input
   stopifnot(is.character(arg_name), length(arg_name) == 1)
 
+  ## helper_function
+  check_fun_or_unique_length <- function(x, len = 1) {
+    if (is.function(x)) {
+      return(FALSE)
+    } else {
+      return(length(unique(x)) > len)
+    }
+  }
+
   ## try to get arg value from function
   arg_fun <- try(eval(parse(text = arg_name), envir), silent = TRUE)
   if (inherits(arg_fun, "try-error")) {
@@ -66,7 +75,7 @@ use_arg_from_attributes <- function(object,
   arg_attr <- attr(object, arg_name)
 
   ## conditional return
-  if (is.null(arg_fun) && force_single && length(unique(arg_attr)) > 1) {
+  if (is.null(arg_fun) && force_single && check_fun_or_unique_length(arg_attr)) {
     message(sprintf(
       " * as arg `%s`'s definition is not unique w/i object's attributes, using the default", arg_name
     ))
@@ -80,12 +89,14 @@ use_arg_from_attributes <- function(object,
   }
 
   if (force_single) {
-    if (length(unique(rval)) > 1) {
+    if (check_fun_or_unique_length(rval)) {
       message(sprintf(
         " * as arg `%s`'s definition is not unique, using solely the first (\"%s\")", arg_name, rval[1]
       ))
     }
-    if (is.na(rval[1])) {
+    if (is.function(rval)) {
+      return(rval)
+    } else if (is.na(rval[1])) {
       return(default)
     } else {
       return(rval[1])
