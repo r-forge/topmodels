@@ -554,12 +554,13 @@ rbind.pithist <- c.pithist
 #' @param xlab,ylab,main graphical parameters.
 #' @param theme Fix me.
 #' @param \dots further graphical parameters.
-#' @param ref,col,fill,alpha_min,lwd,lty,axes,box additional graphical
+#' @param ref,col,border,fill,alpha_min,lwd,lty,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
 #' @param colour,size,linetype,legend,alpha graphical parameters passed for
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
 #' @param freq Fix me.
 #' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype,ref_alpha Fix me.
+#' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Fix me.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -594,12 +595,12 @@ rbind.pithist <- c.pithist
 #' pithist(m1_lm)
 #'
 #' ## customize colors and style
-#' pithist(m1_lm, ref = "blue", lty = 2, pch = 20, style = "line")
+#' pithist(m1_lm, ref_col = "blue", lty = 2, pch = 20, style = "line")
 #'
 #' ## add separate model
 #' if (require("crch", quietly = TRUE)) {
 #'   m1_crch <- crch(dist ~ speed | speed, data = cars)
-#'   lines(pithist(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
+#'   #lines(pithist(m1_crch, plot = FALSE), col = 2, lty = 2, confint_col = 2) #FIXME
 #' }
 #'
 #' #-------------------------------------------------------------------------------
@@ -624,7 +625,7 @@ rbind.pithist <- c.pithist
 #'
 #'   ## plot in single graph with style "line"
 #'   plot(c(pit2_lm, pit2_crch),
-#'     col = c(1, 2), confint = c(1, 2), ref = 3,
+#'     col = c(1, 2), confint_col = c(1, 2), ref_col = 3,
 #'     style = "line", single_graph = TRUE
 #'   )
 #' }
@@ -644,20 +645,29 @@ plot.pithist <- function(x,
                          style = NULL,
                          freq = NULL,
                          simint = NULL,
-                         confint = TRUE, # confint_style can't be changed but depends on style
+                         confint = NULL,
                          confint_level = 0.95,
                          confint_type = c("exact", "approximation"),
-                         ref = TRUE,
+                         ref = NULL,
                          xlim = c(NA, NA),
                          ylim = c(0, NA),
                          xlab = NULL,
                          ylab = NULL,
                          main = NULL,
                          col = "black",
-                         fill = "black",
+                         border = "black",
                          lwd = NULL,
                          lty = 1,
                          alpha_min = 0.2,
+                         simint_col = "black",
+                         simint_lty = 1,
+                         simint_lwd = 1.75,
+                         confint_col = NULL,
+                         confint_lty = NULL,
+                         confint_lwd = 1.75,
+                         ref_col = NULL,
+                         ref_lty = NULL,
+                         ref_lwd = 1.75,
                          axes = TRUE,
                          box = TRUE,
                          ...) {
@@ -680,12 +690,13 @@ plot.pithist <- function(x,
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
   ## * `ref` and `confint` w/i `abline()`
-  ## * `col`, `fill`, `lwd`, `lty` and `...` w/i `plot()`
+  ## * `col`, `border`, `lwd`, `lty` and `...` w/i `plot()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(freq))
   stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(is.null(simint) || is.logical(simint))
+  stopifnot(is.logical(confint) || confint %in% c("polygon", "line", "none"))
   stopifnot(
     is.numeric(confint_level),
     length(confint_level) == 1,
@@ -701,6 +712,14 @@ plot.pithist <- function(x,
   stopifnot(is.logical(box))
   style <- match.arg(style, c("bar", "line"))
   confint_type <- match.arg(confint_type)
+
+  ## extend input object (compute ci, ref, ...)
+  x <- summary(
+    x, 
+    freq = freq, 
+    confint_level = confint_level, 
+    confint_type = confint_type
+  ) 
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -718,8 +737,21 @@ plot.pithist <- function(x,
     style <- "line"
   }
 
+  ## determine which confint should be plotted
+  if (is.logical(confint)) {
+    confint <- ifelse(confint,
+      if (style == "bar") "line" else "polygon", 
+      "none"
+    )
+  }
+  stopifnot(all(confint %in% c("polygon", "line", "none")))
+
   ## determine other arguments conditional on `style` and `type`
   if (is.null(lwd)) lwd <- if (style == "bar") 1 else 2
+  if (is.null(confint_col)) confint_col <- if (style == "bar") 2 else "black"
+  if (is.null(confint_lty)) confint_lty <- if (style == "bar") 2 else 1
+  if (is.null(ref_col)) ref_col <- if (style == "bar") 2 else "black"
+  if (is.null(ref_lty)) ref_lty <- if (style == "bar") 1 else 2
 
   if (is.null(simint)) {
     simint <- if (style == "bar" && type == "random") TRUE else FALSE
@@ -730,7 +762,10 @@ plot.pithist <- function(x,
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, confint, ref, simint,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    col, fill, alpha_min, lwd, lty, axes, box
+    col, border, lwd, lty, alpha_min,
+    simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd,
+    ref_col, ref_lty, ref_lwd, 
+    axes, box
   )[, -1]
 
   ## annotation
@@ -762,33 +797,6 @@ plot.pithist <- function(x,
   # PREPARE DATA FOR PLOTTING
   # -------------------------------------------------------------------
 
-  ## compute confidence intervals for all groups
-  ci <- lapply(1:n, function(i) {
-    d <- x[x$group == i, ]
-    compute_pithist_confint(
-      n = sum(d$counts),
-      breaks = compute_breaks(d$mids, d$width),
-      level = confint_level,
-      type = confint_type,
-      freq = freq
-    )
-  })
-  ci <- do.call("rbind", ci)
-  x <- cbind(x, ci) # careful: loses all attributes of x
-
-  ## compute reference lines (perfect prediction) for all groups
-  ref <- lapply(1:n, function(i) {
-    d <- x[x$group == i, ]
-    rval <- compute_pithist_ref(
-      n = sum(d$counts),
-      breaks = compute_breaks(d$mids, d$width),
-      freq = freq
-    )
-    rval <- data.frame("ref" = rval)
-  })
-  ref <- do.call("rbind", ref)
-  x <- cbind(x, ref) # careful: loses all attributes of x
-
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR 'HISTOGRAM-STYLE PITHIST'
   # -------------------------------------------------------------------
@@ -801,6 +809,9 @@ plot.pithist <- function(x,
     xleft <- d$mids - d$width / 2
     xright <- d$mids + d$width / 2
     y <- if (freq) d$counts else d$counts / sum(d$counts * d$width)
+
+    ## step elements (only needed for ref, confint)
+    z <- compute_breaks(d$mids, d$width)
 
     ## simulation intervals
     if (!freq) {
@@ -837,41 +848,72 @@ plot.pithist <- function(x,
 
     ## plot pithist
     rect(xleft, 0, xright, y,
-      border = plot_arg$col[j],
-      col = set_minimum_transparency(plot_arg$fill[j], alpha_min = plot_arg$alpha_min[j]),
+      border = plot_arg$border[j],
+      col = set_minimum_transparency(plot_arg$col[j], alpha_min = plot_arg$alpha_min[j]),
       lty = plot_arg$lty[j],
       lwd = plot_arg$lwd[j]
     )
 
     ## plot sim lines
-    if (!identical(plot_arg$simint[j], FALSE)) {
-      if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- "black"
-
-      segments(x0 = d$mids, y0 = d$simint_lwr, y1 = d$simint_upr, col = plot_arg$simint[j], lwd = 1.25)
+    if (isTRUE(plot_arg$simint[j])) {
+      segments(
+        x0 = d$mids, 
+        y0 = d$simint_lwr, 
+        y1 = d$simint_upr, 
+        col = plot_arg$simint_col, 
+        lty = plot_arg$simint_lty,
+        lwd = plot_arg$simint_lwd)
     }
 
-    ## plot ref line
-    if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- 2 # red
-
-      ref_z <- compute_breaks(d$mids, d$width)
+    ## add ref line
+    if (isTRUE(plot_arg$ref[j])) {
       ref_y <- duplicate_last_value(d$ref)
-      lines(ref_y ~ ref_z, type = "s", col = plot_arg$ref[j], lty = 1, lwd = 1.75)
+      lines(
+        ref_y ~ z, 
+        type = "s", 
+        col = plot_arg$ref_col[j], 
+        lty = plot_arg$ref_lty[j], 
+        lwd = plot_arg$ref_lwd[j]
+      )
     }
 
     ## plot confint lines
-    if (!identical(plot_arg$confint[j], FALSE)) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- 2 # red
-
-      ci_z <- compute_breaks(d$mids, d$width)
+    if (plot_arg$confint[j] == "line") {
 
       ## lower confint line
       ci_lwr_y <- duplicate_last_value(d$ci_lwr)
-      lines(ci_lwr_y ~ ci_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
+      lines(
+        ci_lwr_y ~ z, 
+        type = "s", 
+        col = plot_arg$confint_col[j], 
+        lty = plot_arg$confint_lty[j], 
+        lwd = plot_arg$cofint_lwd[j]
+      )
 
       ## upper confint line
       ci_upr_y <- duplicate_last_value(d$ci_upr)
-      lines(ci_upr_y ~ ci_z, type = "s", col = plot_arg$confint[j], lty = 2, lwd = 1.75)
+      lines(
+        ci_upr_y ~ z, 
+        type = "s", 
+        col = plot_arg$confint_col[j], 
+        lty = plot_arg$confint_lty[j], 
+        lwd = plot_arg$cofint_lwd[j]
+      )
+
+    } else if (plot_arg$confint[j] == "polygon") {
+
+      polygon(
+        c(
+          rep(z, each = 2)[-c(1, length(z) * 2)],
+          rev(rep(z, each = 2)[-c(1, length(z) * 2)])
+        ),
+        c(
+          rep(d$ci_lwr, each = 2),
+          rev(rep(d$ci_upr, each = 2))
+        ),
+        col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
+        border = NA
+      )
     }
   }
 
@@ -892,27 +934,34 @@ plot.pithist <- function(x,
       duplicate_last_value(d$counts / sum(d$counts * d$width))
     }
 
+    ## simulation intervals
+    if (!freq) {
+      d$simint_lwr <- d$simint_lwr / sum(d$counts * d$width)
+      d$simint_upr <- d$simint_upr / sum(d$counts * d$width)
+    }
+
     ## get xlim and ylim (needs data for all groups)
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
+
     if (any(xlim_idx)) {
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(z)[xlim_idx]
     }
     if (any(ylim_idx) && !single_graph) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(c(y, d$ci_lwr, d$ci_upr), na.rm = TRUE)[ylim_idx]
+        range(c(y, d$ci_lwr, d$ci_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
     }
     if (any(ylim_idx) && single_graph) {
       if (freq) {
         plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-          range(c(x$counts, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
+          range(c(x$counts, x$ci_lwr, x$ci_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
       } else {
         y_tmp <- lapply(1:n, function(i) {
           d <- x[x$group == i, ]
           rval <- d$counts / sum(d$counts * d$width)
         })
         plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-          range(c(y_tmp, x$ci_lwr, x$ci_upr), na.rm = TRUE)[ylim_idx]
+          range(c(y_tmp, x$ci_lwr, x$ci_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
       }
     }
 
@@ -932,23 +981,6 @@ plot.pithist <- function(x,
       }
     }
 
-    ## plot confint polygon
-    if (!identical(plot_arg$confint[j], FALSE)) {
-      if (isTRUE(plot_arg$confint[j])) plot_arg$confint[j] <- "black"
-
-      polygon(
-        c(
-          rep(z, each = 2)[-c(1, length(z) * 2)],
-          rev(rep(z, each = 2)[-c(1, length(z) * 2)])
-        ),
-        c(
-          rep(d$ci_lwr, each = 2),
-          rev(rep(d$ci_upr, each = 2))
-        ),
-        col = set_minimum_transparency(plot_arg$confint[j], alpha_min = 0.2),
-        border = NA
-      )
-    }
   }
 
   # -------------------------------------------------------------------
@@ -967,16 +999,84 @@ plot.pithist <- function(x,
       duplicate_last_value(d$counts / sum(d$counts * d$width))
     }
 
-    ## plot ref line
-    if (!identical(plot_arg$ref[j], FALSE)) {
-      if (isTRUE(plot_arg$ref[j])) plot_arg$ref[j] <- "black"
-
-      ref_y <- duplicate_last_value(d$ref)
-      lines(ref_y ~ z, type = "s", col = plot_arg$ref[j], lty = 2, lwd = 1)
+    ## simulation intervals
+    if (!freq) {
+      d$simint_lwr <- d$simint_lwr / sum(d$counts * d$width)
+      d$simint_upr <- d$simint_upr / sum(d$counts * d$width)
     }
 
+    ## plot confint lines
+    if (plot_arg$confint[j] == "line") {
+
+      ## lower confint line
+      ci_lwr_y <- duplicate_last_value(d$ci_lwr)
+      lines(
+        ci_lwr_y ~ z, 
+        type = "s", 
+        col = plot_arg$confint_col[j], 
+        lty = plot_arg$confint_lty[j], 
+        lwd = plot_arg$cofint_lwd[j]
+      )
+
+      ## upper confint line
+      ci_upr_y <- duplicate_last_value(d$ci_upr)
+      lines(
+        ci_upr_y ~ z, 
+        type = "s", 
+        col = plot_arg$confint_col[j], 
+        lty = plot_arg$confint_lty[j], 
+        lwd = plot_arg$cofint_lwd[j]
+      )
+
+    } else if (plot_arg$confint[j] == "polygon") {
+
+      polygon(
+        c(
+          rep(z, each = 2)[-c(1, length(z) * 2)],
+          rev(rep(z, each = 2)[-c(1, length(z) * 2)])
+        ),
+        c(
+          rep(d$ci_lwr, each = 2),
+          rev(rep(d$ci_upr, each = 2))
+        ),
+        col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
+        border = NA
+      )
+    }
+
+    ## plot ref line
+    if (isTRUE(plot_arg$ref[j])) {
+
+      ref_y <- duplicate_last_value(d$ref)
+      lines(
+        ref_y ~ z, 
+        type = "s", 
+        col = plot_arg$ref_col[j], 
+        lty = plot_arg$ref_lty[j], 
+        lwd = plot_arg$ref_lwd[j]
+      )
+    }
+
+    ## plot sim lines
+    if (isTRUE(plot_arg$simint[j])) {
+      segments(
+        x0 = d$mids, 
+        y0 = d$simint_lwr, 
+        y1 = d$simint_upr, 
+        col = plot_arg$simint_col, 
+        lty = plot_arg$simint_lty,
+        lwd = plot_arg$simint_lwd)
+    }
+
+
     ## plot stepfun
-    lines(y ~ z, type = "s", lwd = plot_arg$lwd[j], lty = plot_arg$lty[j], col = plot_arg$col[j])
+    lines(
+      y ~ z, 
+      type = "s", 
+      lwd = plot_arg$lwd[j], 
+      lty = plot_arg$lty[j], 
+      col = plot_arg$col[j]
+    )
   }
 
   # -------------------------------------------------------------------
@@ -1155,7 +1255,7 @@ autoplot.pithist <- function(object,
                              confint = NULL,
                              confint_level = 0.95,
                              confint_type = c("exact", "approximation"),
-                             ref = TRUE,
+                             ref = NULL,
                              xlim = c(NA, NA),
                              ylim = c(0, NA),
                              xlab = NULL,
@@ -1207,7 +1307,7 @@ autoplot.pithist <- function(object,
   if (!is.null(add_arg$lwd)) size <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
-  ## fix `ylabel` according to possible new `freq`
+  ## fix `ylab` according to possible new `freq`
   if (ylab_missing) {
     if (freq && ylab == "Density") ylab <- "Frequency"
     if (!freq && ylab == "Frequency") ylab <- "Density"
@@ -2162,18 +2262,6 @@ GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerang
 # -------------------------------------------------------------------
 # HELPER FUNCTIONS FOR PIT HISTOGRAMS
 # -------------------------------------------------------------------
-get_pp <- function(n, breaks, freq) {
-  ## helper function to calculate perfect prediciton employing `qbinom()`
-
-
-  ## calc bin specific confidence levels
-  rval <- qbinom(0.5, size = n, prob = diff(breaks))
-
-  ## transform counts to density
-  if (!freq) rval <- rval / (n / (length(breaks) - 1))
-  rval
-}
-
 #' Compute Reference Line for PIT Histograms
 #'
 #' Helper function for computing reference lines showing perfect prediction for PIT histograms.

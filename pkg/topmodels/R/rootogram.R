@@ -422,7 +422,7 @@ c.rootogram <- function(...) {
 
 
 #' @export
-rbind.pithist <- c.pithist
+rbind.rootogram <- c.rootogram
 
 
 #' S3 Methods for Plotting Rootograms
@@ -444,7 +444,7 @@ rbind.pithist <- c.pithist
 #' @param x,object an object of class \code{\link{rootogram}}.
 #' @param ref logical. Should a reference line be plotted?
 #' @param xlab,ylab,main graphical parameters.
-#' @param xlim,ylim,fill,col,lwd,lty,axes,box graphical
+#' @param xlim,ylim,fill,col,border,lwd,lty,axes,box graphical
 #' parameters. These may pertain either to the whole plot or just the histogram
 #' or just the fitted line.
 #' @param colour,size,fitted,alpha,linetype graphical parameters passed to
@@ -543,8 +543,8 @@ plot.rootogram <- function(x,
                            xlab = NULL,
                            ylab = NULL,
                            main = NULL,
-                           col = "black",
-                           fill = "darkgray",
+                           col = "darkgray",
+                           border = "black",
                            lwd = 1,
                            lty = 1,
                            alpha_min = 0.8,
@@ -561,6 +561,9 @@ plot.rootogram <- function(x,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  ## check if ylab is defined
+  ylab_missing <- missing(ylab)
+
   ## get default arguments
   style <- use_arg_from_attributes(x, "style", default = "hanging", force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = "sqrt", force_single = TRUE)
@@ -570,7 +573,7 @@ plot.rootogram <- function(x,
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
   ## * `xlab`, `ylab`, `main` and `...` w/i `plot()`
-  ## * `border` and `fill` w/i `rect()`
+  ## * ``col` and `border` w/i `rect()`
   ## * `col`, `lwd`, `pch`, `lty` and `type` w/i `lines()`
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
@@ -583,7 +586,7 @@ plot.rootogram <- function(x,
   fitted <- c("none", "b", "l", "p")[match(fitted, c("none", "both", "line", "point"))]
   stopifnot(all(fitted %in% c("none", "b", "l", "p")))
 
-  ## compute heights
+  ## extend input object (compute heights, ...)
   x <- summary(x, scale = scale, style = style)
 
   ## convert always to data.frame
@@ -601,7 +604,7 @@ plot.rootogram <- function(x,
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
   plot_arg <- data.frame(1:n, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
-    fill, col, lwd, lty, alpha_min,
+    border, col, lwd, lty, alpha_min,
     fitted_col, fitted_pch, fitted_lty, fitted_lwd, fitted,
     ref_col, ref_lty, ref_lwd,
     axes, box
@@ -614,10 +617,10 @@ plot.rootogram <- function(x,
   )
   main <- use_arg_from_attributes(x, "main", default = "model", force_single = FALSE)
 
-  ## fix `ylabel` according to possible new `scale`
-  if (scale == "sqrt") {
+  ## fix `ylab` according to possible new `freq`
+  if (ylab_missing && scale == "sqrt") {
     ylab[grepl("^Frequency$", ylab)] <- "sqrt(Frequency)"
-  } else if (scale == "raw") {
+  } else if (ylab_missing && scale == "raw") {
     ylab[grepl("^sqrt\\(Frequency\\)$", ylab)] <- "Frequency"
   }
 
@@ -667,8 +670,8 @@ plot.rootogram <- function(x,
 
     ## plot rootogram
     rect(xleft, ybottom, xright, ytop,
-      col = set_minimum_transparency(plot_arg$fill[j], alpha_min = plot_arg$alpha_min[j]),
-      border = plot_arg$col[j],
+      col = set_minimum_transparency(plot_arg$col[j], alpha_min = plot_arg$alpha_min[j]),
+      border = plot_arg$border[j],
       lty = plot_arg$lty[j],
       lwd = plot_arg$lwd[j]
     )
