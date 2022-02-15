@@ -16,8 +16,8 @@
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  col = "black",
-  fill = "darkgray",
+  col = "darkgray",
+  border = "black",
   lwd = 1,
   lty = 1,
   alpha_min = 0.8,
@@ -72,7 +72,7 @@
 
 \item{ref}{logical. Should a reference line be plotted?}
 
-\item{xlim, ylim, fill, col, lwd, lty, axes, box}{graphical
+\item{xlim, ylim, fill, col, border, lwd, lty, axes, box}{graphical
 parameters. These may pertain either to the whole plot or just the histogram
 or just the fitted line.}
 

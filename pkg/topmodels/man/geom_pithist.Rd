@@ -54,7 +54,7 @@ stat_pithist_ref(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  trafo = NULL,
+  trafo = identity,
   freq = FALSE,
   ...
 )
@@ -67,7 +67,7 @@ geom_pithist_ref(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  trafo = NULL,
+  trafo = identity,
   freq = FALSE,
   ...
 )
@@ -80,7 +80,7 @@ stat_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  trafo = NULL,
+  trafo = identity,
   level = 0.95,
   type = "approximation",
   freq = FALSE,
