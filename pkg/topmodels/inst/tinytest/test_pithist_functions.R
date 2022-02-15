@@ -19,7 +19,7 @@ nd_cars <- cars[1:10, ]
 expect_silent( 
   pithist(m1, 
     newdata = nd_cars, class = "tibble", breaks = seq(0, 1, by = 0.25), freq = FALSE, 
-    confint = "black", confint_level = 0.9, confint_type = "exact",
+    confint_col = "black", confint_level = 0.9, confint_type = "exact",
     xlab = "test", ylab = "test", main = "test", plot = "base"
   )
 )
@@ -27,7 +27,7 @@ expect_silent(
 expect_silent( 
   pithist(m1, 
     newdata = nd_cars, class = "tibble", breaks = seq(0, 1, by = 0.25), freq = TRUE, 
-    confint = "black", confint_level = 0.9, confint_type = "exact",
+    confint_col = "black", confint_level = 0.9, confint_type = "exact",
     xlab = "test", ylab = "test", main = "test", plot = "ggplot2"
   )
 )

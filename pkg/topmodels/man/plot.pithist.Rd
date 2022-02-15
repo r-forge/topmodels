@@ -12,20 +12,29 @@
   style = NULL,
   freq = NULL,
   simint = NULL,
-  confint = TRUE,
+  confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = TRUE,
+  ref = NULL,
   xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
   col = "black",
-  fill = "black",
+  border = "black",
   lwd = NULL,
   lty = 1,
   alpha_min = 0.2,
+  simint_col = "black",
+  simint_lty = 1,
+  simint_lwd = 1.75,
+  confint_col = NULL,
+  confint_lty = NULL,
+  confint_lwd = 1.75,
+  ref_col = NULL,
+  ref_lty = NULL,
+  ref_lwd = 1.75,
   axes = TRUE,
   box = TRUE,
   ...
@@ -34,6 +43,7 @@
 \method{lines}{pithist}(
   x,
   freq = NULL,
+  simint = FALSE,
   confint = FALSE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
@@ -41,6 +51,15 @@
   col = "black",
   lwd = 2,
   lty = 1,
+  simint_col = "black",
+  simint_lty = 1,
+  simint_lwd = 1.75,
+  confint_col = "black",
+  confint_lty = 1,
+  confint_lwd = 1.75,
+  ref_col = "black",
+  ref_lty = 2,
+  ref_lwd = 1.75,
   ...
 )
 
@@ -53,7 +72,7 @@
   confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = TRUE,
+  ref = NULL,
   xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
@@ -103,13 +122,15 @@ plotted.}
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
-\item{ref, col, fill, alpha_min, lwd, lty, axes, box}{additional graphical
+\item{ref, col, border, fill, alpha_min, lwd, lty, axes, box}{additional graphical
 parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
 
 \item{xlim, ylim}{graphical parameters. These may pertain either to the whole
 plot or just the histogram or just the fitted line.}
 
 \item{xlab, ylab, main}{graphical parameters.}
+
+\item{simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Fix me.}
 
 \item{\dots}{further graphical parameters.}
 
@@ -146,12 +167,12 @@ m1_lm <- lm(dist ~ speed, data = cars)
 pithist(m1_lm)
 
 ## customize colors and style
-pithist(m1_lm, ref = "blue", lty = 2, pch = 20, style = "line")
+pithist(m1_lm, ref_col = "blue", lty = 2, pch = 20, style = "line")
 
 ## add separate model
 if (require("crch", quietly = TRUE)) {
   m1_crch <- crch(dist ~ speed | speed, data = cars)
-  lines(pithist(m1_crch, plot = FALSE), col = 2, lty = 2, confint = 2)
+  #lines(pithist(m1_crch, plot = FALSE), col = 2, lty = 2, confint_col = 2) #FIXME
 }
 
 #-------------------------------------------------------------------------------
@@ -176,7 +197,7 @@ if (require("crch")) {
 
   ## plot in single graph with style "line"
   plot(c(pit2_lm, pit2_crch),
-    col = c(1, 2), confint = c(1, 2), ref = 3,
+    col = c(1, 2), confint_col = c(1, 2), ref_col = 3,
     style = "line", single_graph = TRUE
   )
 }
