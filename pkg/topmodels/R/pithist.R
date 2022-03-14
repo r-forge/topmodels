@@ -2228,7 +2228,7 @@ stat_pithist_simint <- function(mapping = NULL,
 #' @export
 StatPithistSimint <- ggplot2::ggproto("StatPithistSimint", ggplot2::Stat,
   required_aes = c("x", "ymin", "ymax"),
-  optional_aes = c("y", "width"), # FIXME: (ML) "width" actually required for `freq = FALSE`
+  optional_aes = c("y", "width"), # FIXME: (ML) "y' and "width" actually required for `freq = FALSE`
 
   compute_group = function(data, scales, freq = FALSE) {
 
@@ -2237,8 +2237,8 @@ StatPithistSimint <- ggplot2::ggproto("StatPithistSimint", ggplot2::Stat,
       if (is.null(data$width)) stop("for arg `freq = FALSE`, aesthetics `width` must be provided.")
       if (is.null(data$y)) stop("for arg `freq = FALSE`, aesthetics `y` must be provided.")
       data <- transform(data,
-        ymin = ymin / sum(y * width),
-        ymax = ymax / sum(y * width),
+        ymin = ymin / (sum(y) * width),
+        ymax = ymax / (sum(y) * width),
         y = NULL
       )
     }
