@@ -210,23 +210,23 @@ if (require("ggplot2")) {
 
   ## Plot bar style PIT histogram
   gg1 <- ggplot(data = d) +
-    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = TRUE) +
-    geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = TRUE) +
-    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = TRUE) +
+    geom_pithist(aes(x = mid, y = observed, width = width, group = group), freq = TRUE) +
+    geom_pithist_simint(aes(x = mid, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
+    geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = TRUE) +
+    geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = TRUE) +
     facet_grid(group ~ .) +
     xlab("PIT") +
     ylab("Frequency")
   gg1
 
   gg2 <- ggplot(data = d) +
-    geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = FALSE) +
+    geom_pithist(aes(x = mid, y = observed, width = width, group = group), freq = FALSE) +
     geom_pithist_simint(aes(
-      x = mids, ymin = simint_lwr, ymax = simint_upr, y = counts,
+      x = mid, ymin = simint_lwr, ymax = simint_upr, y = observed,
       width = width
     ), freq = FALSE) +
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = FALSE) +
-    geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = FALSE) +
+    geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = FALSE) +
+    geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = FALSE) +
     facet_grid(group ~ .) +
     xlab("PIT") +
     ylab("Density")
@@ -234,8 +234,8 @@ if (require("ggplot2")) {
 
   ## Plot line style PIT histogram
   gg3 <- ggplot(data = d) +
-    geom_pithist(aes(x = mids, y = counts, width = width, group = group), style = "line") +
-    geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") +
+    geom_pithist(aes(x = mid, y = observed, width = width, group = group), style = "line") +
+    geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "polygon") +
     facet_grid(group ~ .) +
     xlab("PIT") +
     ylab("Density")

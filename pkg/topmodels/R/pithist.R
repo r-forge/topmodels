@@ -100,7 +100,7 @@
 #' with the following variables: \item{x}{histogram
 #' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 #' histogram bars,} \item{width}{widths of the histogram bars,}
-#' \item{ci_lwr, ci_upr}{lower and upper confidence interval bound,} \item{ref}{y-coordinates of
+#' \item{confint_lwr, confint_upr}{lower and upper confidence interval bound,} \item{ref}{y-coordinates of
 #' the reference curve.} Additionally, \code{freq}, \code{xlab},
 #' \code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
 #' @seealso \code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
@@ -342,7 +342,7 @@ pithist.default <- function(
       breaks = breaks,
       counts = f * n,
       density = f / diff(breaks),
-      mids = 0.5 * (breaks[-1L] + breaks[-length(breaks)])
+      mid = 0.5 * (breaks[-1L] + breaks[-length(breaks)])
     )
   }
 
@@ -353,19 +353,27 @@ pithist.default <- function(
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
   rval <- data.frame(
-    counts = tmp_hist$counts,
-    mids = tmp_hist$mids,
+    observed = tmp_hist$counts,
+    mid = tmp_hist$mid,
     width = diff(tmp_hist$breaks)
   )
 
   ## add simint
   if (!isFALSE(simint) && type == "random") {
     ## FIXME: (ML) Check if simint is correct
-    rval$simint_upr <- rval$counts + (simint_upr - simint_lwr) / 2
-    rval$simint_lwr <- rval$counts - (simint_upr - simint_lwr) / 2
+    rval$simint_lwr <- rval$observed - (simint_upr - simint_lwr) / 2
+    rval$simint_upr <- rval$observed + (simint_upr - simint_lwr) / 2
   } else {
-    rval$simint_upr <- NA
     rval$simint_lwr <- NA
+    rval$simint_upr <- NA
+  }
+
+  if (!freq) {
+    rval <- transform(rval,
+      observed = rval$observed / (n * rval$width),
+      simint_lwr = rval$simint_lwr / (n * rval$width),
+      simint_upr = rval$simint_upr / (n * rval$width)
+    )
   }
 
   ## attributes for graphical display
@@ -379,6 +387,7 @@ pithist.default <- function(
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
+  attr(rval, "counts") <- n
 
   ## add class
   if (class == "data.frame") {
@@ -451,6 +460,7 @@ c.pithist <- function(...) {
   freq <- prepare_arg_for_attributes(rval, "freq", force_single = TRUE)
   confint <- prepare_arg_for_attributes(rval, "confint")
   ref <- prepare_arg_for_attributes(rval, "ref")
+  counts <- prepare_arg_for_attributes(rval, "counts")
   n <- unlist(n)
 
   ## fix `ylabel` according to possible new `freq`
@@ -474,8 +484,18 @@ c.pithist <- function(...) {
   # -------------------------------------------------------------------
   # RETURN DATA
   # -------------------------------------------------------------------
-  ## combine and return (fill up missing variables with NAs)
+  ## get all names needed if extended object should be computed and for combination
   all_names <- unique(unlist(lapply(rval, names)))
+
+  ## get both objects on the same scale
+  if (any(grepl("confint_lwr|confint_upr|ref", all_names))) {
+    rval <- lapply(rval, summary.pithist, freq = freq, extend = TRUE)
+  } else {
+    rval <- lapply(rval, summary.pithist, freq = freq, extend = FALSE)
+  }
+  rval <- lapply(rval, as.data.frame) # remove inner class
+
+  ## combine and return (fill up missing variables with NAs)
   rval <- do.call(
     "rbind.data.frame",
     c(lapply(
@@ -498,6 +518,7 @@ c.pithist <- function(...) {
   attr(rval, "freq") <- freq
   attr(rval, "confint") <- confint
   attr(rval, "ref") <- ref
+  attr(rval, "counts") <- counts
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
@@ -654,6 +675,8 @@ plot.pithist <- function(x,
                          xlab = NULL,
                          ylab = NULL,
                          main = NULL,
+                         axes = TRUE,
+                         box = TRUE,
                          col = "black",
                          border = "black",
                          lwd = NULL,
@@ -668,8 +691,6 @@ plot.pithist <- function(x,
                          ref_col = NULL,
                          ref_lty = NULL,
                          ref_lwd = 1.75,
-                         axes = TRUE,
-                         box = TRUE,
                          ...) {
   ## TODO: (ML) several arg are implemented differently than in ggplot2:
   ## * confint, ref support colour(s)
@@ -713,10 +734,10 @@ plot.pithist <- function(x,
   style <- match.arg(style, c("bar", "line"))
   confint_type <- match.arg(confint_type)
 
-  ## extend input object (compute ci, ref, ...)
+  ## extend input object on correct scale (compute ci, ref, ...)
   x <- summary(
     x, 
-    freq = freq, 
+    freq = freq,
     confint_level = confint_level, 
     confint_type = confint_type
   ) 
@@ -806,18 +827,11 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## rect elements
-    xleft <- d$mids - d$width / 2
-    xright <- d$mids + d$width / 2
-    y <- if (freq) d$counts else d$counts / sum(d$counts * d$width)
+    xleft <- d$mid - d$width / 2
+    xright <- d$mid + d$width / 2
 
     ## step elements (only needed for ref, confint)
-    z <- compute_breaks(d$mids, d$width)
-
-    ## simulation intervals
-    if (!freq) {
-      d$simint_lwr <- d$simint_lwr / sum(d$counts * d$width)
-      d$simint_upr <- d$simint_upr / sum(d$counts * d$width)
-    }
+    z <- compute_breaks(d$mid, d$width)
 
     ## get xlim and ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
@@ -827,7 +841,7 @@ plot.pithist <- function(x,
     }
     if (any(ylim_idx)) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(c(0, y, d$ref, d$ci_lwr, d$ci_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
+        range(c(0, d$observed, d$ref, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
     }
 
     ## trigger plot
@@ -847,7 +861,7 @@ plot.pithist <- function(x,
     }
 
     ## plot pithist
-    rect(xleft, 0, xright, y,
+    rect(xleft, 0, xright, d$observed,
       border = plot_arg$border[j],
       col = set_minimum_transparency(plot_arg$col[j], alpha_min = plot_arg$alpha_min[j]),
       lty = plot_arg$lty[j],
@@ -857,7 +871,7 @@ plot.pithist <- function(x,
     ## plot sim lines
     if (isTRUE(plot_arg$simint[j])) {
       segments(
-        x0 = d$mids, 
+        x0 = d$mid, 
         y0 = d$simint_lwr, 
         y1 = d$simint_upr, 
         col = plot_arg$simint_col, 
@@ -881,9 +895,9 @@ plot.pithist <- function(x,
     if (plot_arg$confint[j] == "line") {
 
       ## lower confint line
-      ci_lwr_y <- duplicate_last_value(d$ci_lwr)
+      confint_lwr_y <- duplicate_last_value(d$confint_lwr)
       lines(
-        ci_lwr_y ~ z, 
+        confint_lwr_y ~ z, 
         type = "s", 
         col = plot_arg$confint_col[j], 
         lty = plot_arg$confint_lty[j], 
@@ -891,9 +905,9 @@ plot.pithist <- function(x,
       )
 
       ## upper confint line
-      ci_upr_y <- duplicate_last_value(d$ci_upr)
+      confint_upr_y <- duplicate_last_value(d$confint_upr)
       lines(
-        ci_upr_y ~ z, 
+        confint_upr_y ~ z, 
         type = "s", 
         col = plot_arg$confint_col[j], 
         lty = plot_arg$confint_lty[j], 
@@ -908,8 +922,8 @@ plot.pithist <- function(x,
           rev(rep(z, each = 2)[-c(1, length(z) * 2)])
         ),
         c(
-          rep(d$ci_lwr, each = 2),
-          rev(rep(d$ci_upr, each = 2))
+          rep(d$confint_lwr, each = 2),
+          rev(rep(d$confint_upr, each = 2))
         ),
         col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
         border = NA
@@ -927,18 +941,8 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    z <- compute_breaks(d$mids, d$width)
-    y <- if (freq) {
-      duplicate_last_value(d$counts)
-    } else {
-      duplicate_last_value(d$counts / sum(d$counts * d$width))
-    }
-
-    ## simulation intervals
-    if (!freq) {
-      d$simint_lwr <- d$simint_lwr / sum(d$counts * d$width)
-      d$simint_upr <- d$simint_upr / sum(d$counts * d$width)
-    }
+    z <- compute_breaks(d$mid, d$width)
+    y <- duplicate_last_value(d$observed)
 
     ## get xlim and ylim (needs data for all groups)
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
@@ -949,19 +953,19 @@ plot.pithist <- function(x,
     }
     if (any(ylim_idx) && !single_graph) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(c(y, d$ci_lwr, d$ci_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
+        range(c(y, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
     }
     if (any(ylim_idx) && single_graph) {
       if (freq) {
         plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-          range(c(x$counts, x$ci_lwr, x$ci_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
+          range(c(x$observed, x$confint_lwr, x$confint_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
       } else {
         y_tmp <- lapply(1:n, function(i) {
           d <- x[x$group == i, ]
-          rval <- d$counts / sum(d$counts * d$width)
+          rval <- d$observed / sum(d$observed * d$width)
         })
         plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-          range(c(y_tmp, x$ci_lwr, x$ci_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
+          range(c(y_tmp, x$confint_lwr, x$confint_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
       }
     }
 
@@ -992,26 +996,16 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    z <- compute_breaks(d$mids, d$width)
-    y <- if (freq) {
-      duplicate_last_value(d$counts)
-    } else {
-      duplicate_last_value(d$counts / sum(d$counts * d$width))
-    }
-
-    ## simulation intervals
-    if (!freq) {
-      d$simint_lwr <- d$simint_lwr / sum(d$counts * d$width)
-      d$simint_upr <- d$simint_upr / sum(d$counts * d$width)
-    }
+    z <- compute_breaks(d$mid, d$width)
+    y <- duplicate_last_value(d$observed)
 
     ## plot confint lines
     if (plot_arg$confint[j] == "line") {
 
       ## lower confint line
-      ci_lwr_y <- duplicate_last_value(d$ci_lwr)
+      confint_lwr_y <- duplicate_last_value(d$confint_lwr)
       lines(
-        ci_lwr_y ~ z, 
+        confint_lwr_y ~ z, 
         type = "s", 
         col = plot_arg$confint_col[j], 
         lty = plot_arg$confint_lty[j], 
@@ -1019,9 +1013,9 @@ plot.pithist <- function(x,
       )
 
       ## upper confint line
-      ci_upr_y <- duplicate_last_value(d$ci_upr)
+      confint_upr_y <- duplicate_last_value(d$confint_upr)
       lines(
-        ci_upr_y ~ z, 
+        confint_upr_y ~ z, 
         type = "s", 
         col = plot_arg$confint_col[j], 
         lty = plot_arg$confint_lty[j], 
@@ -1036,8 +1030,8 @@ plot.pithist <- function(x,
           rev(rep(z, each = 2)[-c(1, length(z) * 2)])
         ),
         c(
-          rep(d$ci_lwr, each = 2),
-          rev(rep(d$ci_upr, each = 2))
+          rep(d$confint_lwr, each = 2),
+          rev(rep(d$confint_upr, each = 2))
         ),
         col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
         border = NA
@@ -1060,7 +1054,7 @@ plot.pithist <- function(x,
     ## plot sim lines
     if (isTRUE(plot_arg$simint[j])) {
       segments(
-        x0 = d$mids, 
+        x0 = d$mid, 
         y0 = d$simint_lwr, 
         y1 = d$simint_upr, 
         col = plot_arg$simint_col, 
@@ -1195,26 +1189,16 @@ lines.pithist <- function(x,
     j <- unique(d$group)
 
     ## step elements
-    z <- compute_breaks(d$mids, d$width)
-    y <- if (freq) {
-      duplicate_last_value(d$counts)
-    } else {
-      duplicate_last_value(d$counts / sum(d$counts * d$width))
-    }
-
-    ## simulation intervals
-    if (!freq) {
-      d$simint_lwr <- d$simint_lwr / sum(d$counts * d$width)
-      d$simint_upr <- d$simint_upr / sum(d$counts * d$width)
-    }
+    z <- compute_breaks(d$mid, d$width)
+    y <- duplicate_last_value(d$observed)
 
     ## plot confint lines
     if (plot_arg$confint[j] == "line") {
 
       ## lower confint line
-      ci_lwr_y <- duplicate_last_value(d$ci_lwr)
+      confint_lwr_y <- duplicate_last_value(d$confint_lwr)
       lines(
-        ci_lwr_y ~ z,
+        confint_lwr_y ~ z,
         type = "s",
         col = plot_arg$confint_col[j],
         lty = plot_arg$confint_lty[j],
@@ -1222,9 +1206,9 @@ lines.pithist <- function(x,
       )
 
       ## upper confint line
-      ci_upr_y <- duplicate_last_value(d$ci_upr)
+      confint_upr_y <- duplicate_last_value(d$confint_upr)
       lines(
-        ci_upr_y ~ z,
+        confint_upr_y ~ z,
         type = "s",
         col = plot_arg$confint_col[j],
         lty = plot_arg$confint_lty[j],
@@ -1239,8 +1223,8 @@ lines.pithist <- function(x,
           rev(rep(z, each = 2)[-c(1, length(z) * 2)])
         ),
         c(
-          rep(d$ci_lwr, each = 2),
-          rev(rep(d$ci_upr, each = 2))
+          rep(d$confint_lwr, each = 2),
+          rev(rep(d$confint_upr, each = 2))
         ),
         col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
         border = NA
@@ -1263,7 +1247,7 @@ lines.pithist <- function(x,
     ## plot sim lines
     if (isTRUE(plot_arg$simint[j])) {
       segments(
-        x0 = d$mids,
+        x0 = d$mid,
         y0 = d$simint_lwr,
         y1 = d$simint_upr,
         col = plot_arg$simint_col,
@@ -1389,6 +1373,10 @@ autoplot.pithist <- function(object,
   size <- if (is.null(size)) NA else size
   linetype <- if (is.null(linetype)) NA else linetype
 
+  ## transform to `freq = TRUE` scale
+  ## FIXME: (ML) Alternatively, move that into geom
+  object <- summary.pithist(object, freq = TRUE, extend = FALSE)
+
   ## convert data always to data.frame
   object <- as.data.frame(object)
 
@@ -1483,8 +1471,8 @@ autoplot.pithist <- function(object,
   rval <- ggplot2::ggplot(
     object,
     ggplot2::aes_string(
-      x = "mids",
-      y = "counts",
+      x = "mid",
+      y = "observed",
       width = "width",
       group = "group"
     )
@@ -1509,7 +1497,7 @@ autoplot.pithist <- function(object,
     rval <- rval +
       geom_pithist_simint(
         ggplot2::aes_string(
-          x = "mids",
+          x = "mid",
           ymin = "simint_lwr",
           ymax = "simint_upr",
           group = "group"
@@ -1528,8 +1516,8 @@ autoplot.pithist <- function(object,
     rval <- rval +
       geom_pithist_confint(
         ggplot2::aes_string(
-          x = "mids",
-          y = "counts",
+          x = "mid",
+          y = "observed",
           width = "width"
         ),
         level = confint_level,
@@ -1550,8 +1538,8 @@ autoplot.pithist <- function(object,
     rval <- rval +
       geom_pithist_ref(
         ggplot2::aes_string(
-          x = "mids",
-          y = "counts",
+          x = "mid",
+          y = "observed",
           width = "width"
         ),
         freq = freq,
@@ -1702,10 +1690,10 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
   required_aes = c("x", "y", "width"),
   compute_group = function(data, scales, freq = FALSE, style = "bar") {
 
-    ## transform counts to freq
+    ## transform observed to freq
     if (!freq) {
       data <- transform(data,
-        y = y / sum(y * width)
+        y = y / (sum(y) * width)
       )
     }
 
@@ -1757,23 +1745,23 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #'
 #'   ## Plot bar style PIT histogram
 #'   gg1 <- ggplot(data = d) +
-#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = TRUE) +
-#'     geom_pithist_simint(aes(x = mids, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
-#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = TRUE) +
-#'     geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = TRUE) +
+#'     geom_pithist(aes(x = mid, y = observed, width = width, group = group), freq = TRUE) +
+#'     geom_pithist_simint(aes(x = mid, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
+#'     geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = TRUE) +
+#'     geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = TRUE) +
 #'     facet_grid(group ~ .) +
 #'     xlab("PIT") +
 #'     ylab("Frequency")
 #'   gg1
 #'
 #'   gg2 <- ggplot(data = d) +
-#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), freq = FALSE) +
+#'     geom_pithist(aes(x = mid, y = observed, width = width, group = group), freq = FALSE) +
 #'     geom_pithist_simint(aes(
-#'       x = mids, ymin = simint_lwr, ymax = simint_upr, y = counts,
+#'       x = mid, ymin = simint_lwr, ymax = simint_upr, y = observed,
 #'       width = width
 #'     ), freq = FALSE) +
-#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "line", freq = FALSE) +
-#'     geom_pithist_ref(aes(x = mids, y = counts, width = width), freq = FALSE) +
+#'     geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = FALSE) +
+#'     geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = FALSE) +
 #'     facet_grid(group ~ .) +
 #'     xlab("PIT") +
 #'     ylab("Density")
@@ -1781,8 +1769,8 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #'
 #'   ## Plot line style PIT histogram
 #'   gg3 <- ggplot(data = d) +
-#'     geom_pithist(aes(x = mids, y = counts, width = width, group = group), style = "line") +
-#'     geom_pithist_confint(aes(x = mids, y = counts, width = width), style = "polygon") +
+#'     geom_pithist(aes(x = mid, y = observed, width = width, group = group), style = "line") +
+#'     geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "polygon") +
 #'     facet_grid(group ~ .) +
 #'     xlab("PIT") +
 #'     ylab("Density")
@@ -2319,6 +2307,7 @@ GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerang
 compute_pithist_ref <- function(n, breaks, freq, trafo) {
 
   ## get inverse trafo
+  ## FIXME: (ML) Must be extended using `distributions3`
   if (identical(trafo, qnorm)) {
     invtrafo <- pnorm
   } else if (identical(trafo, identity)) {
@@ -2339,7 +2328,7 @@ compute_pithist_ref <- function(n, breaks, freq, trafo) {
 
   ## transform counts to density
   if (!freq) {
-    rval <- rval / (n / (length(breaks) - 1))
+    rval <- rval / (n * diff(breaks))
   }
   rval
 }
@@ -2366,6 +2355,7 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
   a <- (1 - level) / 2
 
   ## get inverse trafo
+  ## FIXME: (ML) Must be extended using `distributions3`
   if (identical(trafo, qnorm)) {
     invtrafo <- pnorm
   } else if (identical(trafo, identity)) {
@@ -2394,35 +2384,9 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
 
   ## transform counts to density
   if (!freq) {
-    rval <- data.frame(sapply(rval, function(x) x / (n / (length(breaks) - 1)), simplify = FALSE))
+    rval <- data.frame(sapply(rval, function(x) x / (n * diff(breaks)), simplify = FALSE))
   }
-  colnames(rval) <- c("ci_lwr", "ci_upr")
-  rval
-}
-
-get_confint <- function(n, breaks, level, freq) {
-  ## helper function to calculate CI employing `qbinom()`
-
-  ## get confidence level
-  a <- (1 - level) / 2
-
-  ## calc bin specific confidence levels
-  rval <- list(
-    qbinom(a, size = n, prob = diff(breaks)),
-    qbinom(1 - a, size = n, prob = diff(breaks))
-  )
-
-  ## transform counts to density
-  if (!freq) rval <- lapply(rval, function(x) x / (n / (length(breaks) - 1)))
-  rval
-}
-
-
-get_confint_agresti <- function(x, n, level, bins, freq) {
-  ## helper function to calculate an approximated CI according to Agresti & Coull (1998)
-  ## doi=10.1080/00031305.1998.10480550
-  rval <- PropCIs_add4ci(x, n, level)$conf.int * n
-  if (!freq) rval <- rval / (n / bins)
+  colnames(rval) <- c("confint_lwr", "confint_upr")
   rval
 }
 
@@ -2462,84 +2426,128 @@ PropCIs_add4ci <- function(x, n, conf.level) {
 
 #' @export
 summary.pithist <- function(object,
-                            freq,
+                            freq = NULL,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
-                            trafo = identity,
+                            extend = TRUE,
                             ...) {
 
-  ## get arg `freq`, `trafo`
+  stopifnot(is.logical(extend))
+
+  ## get arg `freq`
+  freq_object <- attr(object, "freq")
   freq <- use_arg_from_attributes(object, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(object, "trafo", default = FALSE, force_single = TRUE)
+  counts <- use_arg_from_attributes(object, "counts", default = NULL, force_single = FALSE)
 
-  ## group sizes
-  if (!("group" %in% names(object))) {
+  stopifnot(is.logical(freq))
+  stopifnot(!"group" %in% names(object) || length(counts) == length(unique(object$group)))
 
-    ## compute confidence intervals for all groups
-    ci <- compute_pithist_confint(
-      n = sum(object$counts),
-      breaks = compute_breaks(object$mids, object$width),
-      level = confint_level,
-      type = confint_type,
-      freq = freq,
-      trafo = trafo
-    )
+  ## get arg `trafo`
+  trafo <-  attr(object, "trafo")
 
-    ## compute reference lines (perfect prediction) for all groups
-    ref <- compute_pithist_ref(
-      n = sum(object$counts),
-      breaks = compute_breaks(object$mids, object$width),
-      freq = freq,
-      trafo = trafo
-    )
+  ## ensure column group
+  if (!any(grepl("group", names(object)))) {
+    object$group <- 1 
+    return_group <- FALSE
   } else {
-
-    ## compute confidence intervals for all groups
-    ci <- lapply(1:max(object$group), function(i) {
-      d <- object[object$group == i, ]
-      compute_pithist_confint(
-        n = sum(d$counts),
-        breaks = compute_breaks(d$mids, d$width),
-        level = confint_level,
-        type = confint_type,
-        freq = freq,
-        trafo = trafo
-      )
-    })
-    ci <- do.call("rbind", ci)
-
-    ## compute reference lines (perfect prediction) for all groups
-    ref <- lapply(1:max(object$group), function(i) {
-      d <- object[object$group == i, ]
-      rval <- compute_pithist_ref(
-        n = sum(d$counts),
-        breaks = compute_breaks(d$mids, d$width),
-        freq = freq,
-        trafo = trafo
-      )
-      rval <- data.frame("ref" = rval)
-    })
-    ref <- do.call("rbind", ref)
+    return_group <- TRUE
   }
 
-  rval <- transform(object,
-    ci_lwr = ci[[1]],
-    ci_upr = ci[[2]],
-    ref = ref
-  )
+  ## loop over groups
+  rval <- list()
+  for (i in seq_along(counts)) { 
+
+    ## ensure values are counts
+    if (!freq_object) {
+    
+      ## FIXME: (ML) How else to pass checks for visible binding
+      tmp <- object[object$group == i, ]
+
+      tmp <- transform(tmp,
+        observed = tmp$observed * (counts[i] * tmp$width),
+        simint_upr = tmp$simint_upr * (counts[i] * tmp$width),
+        simint_lwr = tmp$simint_lwr * (counts[i] * tmp$width)
+      )
+    } else {
+      tmp <- object[object$group == i, ]
+    }
+
+    if (extend) {
+
+      ## compute confidence intervals for all groups (freq = TRUE, as scaling below)
+      ci <- compute_pithist_confint(
+        n = counts[i],
+        breaks = compute_breaks(tmp$mid, tmp$width),
+        level = confint_level,
+        type = confint_type,
+        freq = TRUE,
+        trafo = trafo
+      )
+
+      ## compute reference lines (perfect prediction) for all groups (freq = TRUE, as scaling below)
+      ref <- compute_pithist_ref(
+        n = counts[i],
+        breaks = compute_breaks(tmp$mid, tmp$width),
+        freq = TRUE,
+        trafo = trafo
+      )
+
+      if (freq) {
+        rval[[i]] <- transform(tmp,
+          observed = tmp$observed,
+          simint_upr = tmp$simint_upr,
+          simint_lwr = tmp$simint_lwr,
+          confint_lwr = ci$confint_lwr,
+          confint_upr = ci$confint_upr,
+          ref = ref
+        )
+      } else {
+        rval[[i]] <- transform(tmp,
+          observed = tmp$observed / (counts[i] * tmp$width),
+          simint_upr = tmp$simint_upr / (counts[i] * tmp$width),
+          simint_lwr = tmp$simint_lwr / (counts[i] * tmp$width),
+          confint_lwr = ci$confint_lwr / (counts[i] * tmp$width),
+          confint_upr = ci$confint_upr / (counts[i] * tmp$width),
+          ref = ref / (counts[i] * tmp$width)
+        )
+      }
+
+    } else {
+
+      if (freq) {
+        rval[[i]] <- transform(tmp,
+          observed = tmp$observed,
+          simint_upr = tmp$simint_upr,
+          simint_lwr = tmp$simint_lwr
+        )
+      } else {
+        rval[[i]] <- transform(tmp,
+          observed = tmp$observed / (counts[i] * tmp$width),
+          simint_upr = tmp$simint_upr / (counts[i] * tmp$width),
+          simint_lwr = tmp$simint_lwr / (counts[i] * tmp$width)
+        )
+      }
+    }
+  }
+
+  rval <- do.call("rbind", rval)
+
+  if (!return_group) {
+    rval$group <- NULL
+  }
 
   ## set attributes
-  attr(rval, "freq") <- freq
-
-  attr(rval, "type") <- attr(object, "type")
-  attr(rval, "trafo") <- attr(object, "trafo")
   attr(rval, "simint") <- attr(object, "simint")
-  attr(rval, "style") <- attr(object, "style")
   attr(rval, "confint") <- attr(object, "confint")
   attr(rval, "ref") <- attr(object, "ref")
   attr(rval, "xlab") <- attr(object, "xlab")
   attr(rval, "ylab") <- attr(object, "ylab")
   attr(rval, "main") <- attr(object, "main")
+  attr(rval, "type") <- attr(object, "type")
+  attr(rval, "trafo") <- trafo
+  attr(rval, "style") <- attr(object, "style")
+  attr(rval, "freq") <- attr(object, "freq")
+  attr(rval, "counts") <- attr(object, "counts")
 
   ## return as `data.frame` or `tibble`
   if ("data.frame" %in% class(object)) {
@@ -2565,7 +2573,7 @@ print.pithist <- function(x, ...) {
   ## return custom print statement
   if (is.null(type) || is.null(freq) || is.null(style)) {
     cat("A `pithist` object without mandatory attributes `type`, `freq` and `style`\n\n")
-  } else if (all(c("ci_lwr", "ci_upr", "ref") %in% names(x))) {
+  } else if (all(c("confint_lwr", "confint_upr", "ref") %in% names(x))) {
     cat(
       paste0(
         sprintf(
@@ -2574,7 +2582,7 @@ print.pithist <- function(x, ...) {
           freq,
           style
         ),
-        " with columns: `ci_lwr`, `ci_upr` and `ref`\n\n"
+        " with columns: `confint_lwr`, `confint_upr` and `ref`\n\n"
       )
     )
   } else {

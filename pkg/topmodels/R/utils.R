@@ -63,11 +63,12 @@ use_arg_from_attributes <- function(object,
     }
   }
 
-  ## try to get arg value from function
-  arg_fun <- try(eval(parse(text = arg_name), envir), silent = TRUE)
-  if (inherits(arg_fun, "try-error")) {
-    ## TODO: (ML) Warning probably not necessary, compare `trafo` in `plot.pithist()`
-    #warning(sprintf("arg `%s` is not defined", arg_name))
+  ## use arg if defined by user
+  arg_by_user <- try(eval(parse(text = sprintf("missing(%s)", arg_name)), envir = parent.frame()), 
+    silent = TRUE)
+  if (!inherits(arg_by_user, "try-error") && isFALSE(arg_by_user)) {
+    arg_fun <- eval(parse(text = arg_name), envir)
+  } else {
     arg_fun <- NULL
   }
 

@@ -45,10 +45,10 @@ dir.create("figures", showWarnings = FALSE)
 
 ## Methods
 
-method | computation arguments | plotting arguments
---- | --- | ---
-`rootogram()` | `object`, `newdata`, `plot`, `class`, `response_type`, `breaks`, `width` | `style`<sup>[1](#myfootnote1)</sup>, `scale`<sup>[1](#myfootnote1)</sup>, `fitted`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...`
-`pithist()` | `object`, `newdata`, `plot`, `class`, `trafo`<sup>[1](#myfootnote2)</sup>, `breaks`, `type`<sup>[1](#myfootnote1)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `style`<sup>[1](#myfootnote1)</sup>, `freq`<sup>[1](#myfootnote1)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...`
+method | computation arguments | plotting arguments | output
+--- | --- | --- | ---
+`rootogram()` | `object`, `newdata`, `plot`, `class`, `response_type`, `breaks`, `width` | `style`<sup>[1](#myfootnote1)</sup>, `scale`<sup>[1](#myfootnote1)</sup>, `fitted`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`
+`pithist()` | `object`, `newdata`, `plot`, `class`, `trafo`<sup>[1](#myfootnote2)</sup>, `breaks`, `type`<sup>[1](#myfootnote1)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `style`<sup>[1](#myfootnote1)</sup>, `freq`<sup>[1](#myfootnote1)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `mid`, `width`, `simint_lwr`, `simint_upr`
 
 <a name="myfootnote1">1</a>: Setting is saved within `attributes` of the returned object.
 
@@ -61,32 +61,32 @@ combine | vector of attribute values | single attribute value
 
 <a name="myfootnote3">3</a>: Non-unique attribute values can't be comined.
 
-summary | default return values | extended return values
---- | --- | ---
-`summary.rootogram()` | `observed`, `expected`, `mids`, `width` | `ymin`, `ymax`
-`summary.pithist()` | `counts`, `mids`, width`, `simint_upr`, `simint_lwr` | `ci_lwr`, `ci_upr`, `ref`
+summary | arguments | return values | extended return values
+--- | --- | --- | ---
+`summary.rootogram()` | `object`, `scale`, `style`, `extend` | `observed`, `expected`, `mid`, `width` | `ymin`, `ymax`
+`summary.pithist()` | `object`, `freq`, `confint_level`, `confint_type`, `extend` | `observed`, `mid`, `width`, `simint_upr`, `simint_lwr` | `confint_lwr`, `confint_upr`, `ref`
 
 
 ## Plotting with base R
 
-plot | argument
---- | ---
-`plot.rootogram()` | `x`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty`, `alpha_min`, `axes`, `box`, `...`
-`plot.pithist()` | `x`, `single_graph`, `style`, `freq`, `trafo`, `simint`, `confint`, `confint_level`, `confint_type`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `col`, `fill`, `lwd`, `lty`, `alpha_min`, `axes`, `box`, `...`
+plot | arguments (main) | arguments (add ons)
+--- | --- | ---
+`plot.rootogram()` | `x`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `fitted_col`, `fitted_pch`, `fitted_lty`, `fitted_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
+`plot.pithist()` | `x`, `single_graph`, `style`, `freq`, `trafo`, `simint`, `confint`, `confint_level`, `confint_type`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `simint_col`, `simint_lty`, `simint_lwd`, `confint_col`, `confint_lty`, `confint_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
 
 
 
 ## Plotting with ggplot2
 
-autoplot | argument
---- | ---
-`autoplot.rootogram()` | `object`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `colour`, `fill`, `size`, `linetype`, `alpha`, `legend`, `...`
-
+autoplot | arguments (main) | arguments (add ons)
+--- | --- | ---
+`autoplot.rootogram()` | `object`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha`, `...` | `fitted_colour`, `fitted_size`, `fitted_linetype`, `fitted_alpha`, `fitted_fill`, `fitted_stroke`, `fitted_shape`, `ref_colour`, `ref_size`, `ref_linetype`, `ref_alpha`
+`autoplot.pithist()` | `object`, `single_graph`, `style`, `freq`, `simint`, `confint`, `confint_level`, `confint_type`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha` | `simint_colour`, `simint_size`, `simint_linetype`, `simint_alpha`, `confint_colour`, `confint_fill`, `confint_size`, `confint_linetype`, `confint_alpha`, `ref_colour`, `ref_size`, `ref_linetype`, `ref_alpha`
 
 geom_<...> | inherits | geom aes | stat_<...> | stat aes 
 --- | --- | --- | --- | ---
-`geom_rootogram()` | `GeomRect` | `xmin`, `xmax`, `ymin`, `ymax` | `stat_rootogram()` | `observed`, `expected`, `mids`, `width`
-`geom_rootogram_fitted()` | `GeomPath` | `x`, `y` | `stat_rootogram_fitted()` |  `expected`, `mids`
+`geom_rootogram()` | `GeomRect` | `xmin`, `xmax`, `ymin`, `ymax` | `stat_rootogram()` | `observed`, `expected`, `mid`, `width`
+`geom_rootogram_fitted()` | `GeomPath` | `x`, `y` | `stat_rootogram_fitted()` |  `expected`, `mid`
 `geom_rootogram_ref()` | `GeomHline` | `yintercept = 0` | Identity | -- 
 
 

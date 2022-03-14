@@ -16,6 +16,8 @@
   xlab = NULL,
   ylab = NULL,
   main = NULL,
+  axes = TRUE,
+  box = FALSE,
   col = "darkgray",
   border = "black",
   lwd = 1,
@@ -28,8 +30,6 @@
   ref_col = "black",
   ref_lty = 1,
   ref_lwd = 1.25,
-  axes = TRUE,
-  box = FALSE,
   ...
 )
 

@@ -237,7 +237,7 @@ rootogram.default <- function(
   }
 
   breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
-  mids <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+  mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
 
   ## fix pointmasses
   ## FIXME: (ML) Check if that always works or could be improved
@@ -289,9 +289,9 @@ rootogram.default <- function(
   # -------------------------------------------------------------------
   ## collect everything as data.frame
   rval <- data.frame(
-    observed = as.vector(observed),
-    expected = as.vector(expected),
-    mids = mids,
+    observed = if (scale == "raw") as.vector(observed) else sqrt(as.vector(observed)),
+    expected = if (scale == "raw") as.vector(expected) else sqrt(as.vector(expected)),
+    mid = mid,
     width = diff(breaks) * width
   )
 
@@ -383,8 +383,18 @@ c.rootogram <- function(...) {
   # -------------------------------------------------------------------
   # RETURN DATA
   # -------------------------------------------------------------------
-  ## combine and return (fill up missing variables with NAs)
+  ## get all names needed if extended object should be computed and for combination
   all_names <- unique(unlist(lapply(rval, names)))
+
+  ## get both objects on the same scale
+  if (any(grepl("ymin|ymax", all_names))) {
+    rval <- lapply(rval, summary.rootogram, style = style, scale = scale, extend = TRUE)
+  } else {
+    rval <- lapply(rval, summary.rootogram, style = style, scale = scale, extend = FALSE)
+  }
+  rval <- lapply(rval, as.data.frame) # remove inner class
+
+  ## combine and return (fill up missing variables with NAs)
   rval <- do.call(
     "rbind.data.frame",
     c(lapply(
@@ -543,6 +553,8 @@ plot.rootogram <- function(x,
                            xlab = NULL,
                            ylab = NULL,
                            main = NULL,
+                           axes = TRUE,
+                           box = FALSE,
                            col = "darkgray",
                            border = "black",
                            lwd = 1,
@@ -555,8 +567,6 @@ plot.rootogram <- function(x,
                            ref_col = "black",
                            ref_lty = 1,
                            ref_lwd = 1.25,
-                           axes = TRUE,
-                           box = FALSE,
                            ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -586,7 +596,7 @@ plot.rootogram <- function(x,
   fitted <- c("none", "b", "l", "p")[match(fitted, c("none", "both", "line", "point"))]
   stopifnot(all(fitted %in% c("none", "b", "l", "p")))
 
-  ## extend input object (compute heights, ...)
+  ## extend input object on correct scale (compute heights, ...)
   x <- summary(x, scale = scale, style = style)
 
   ## convert always to data.frame
@@ -639,12 +649,8 @@ plot.rootogram <- function(x,
     ## rect elements
     ybottom <- d$ymin
     ytop <- d$ymax
-    xleft <- d$mids - d$width / 2
-    xright <- d$mids + d$width / 2
-
-    if (scale == "sqrt") {
-      d$expected <- sqrt(d$expected)
-    }
+    xleft <- d$mid - d$width / 2
+    xright <- d$mid + d$width / 2
 
     ## get xlim and ylim
     if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
@@ -689,7 +695,7 @@ plot.rootogram <- function(x,
     ## add fitted line
     if (plot_arg$fitted[j] != "none") {
       lines(
-        d$mids,
+        d$mid,
         d$expected,
         col =  plot_arg$fitted_col[j],
         pch = plot_arg$fitted_pch[j],
@@ -783,6 +789,9 @@ autoplot.rootogram <- function(object,
   }
   fitted <- match.arg(fitted, c("none", "both", "line", "point"))
 
+  ## transform to correct scale
+  object <- summary.rootogram(object, scale = scale, style = style, extend = FALSE)
+
   ## convert data always to data.frame
   object <- as.data.frame(object)
 
@@ -822,7 +831,7 @@ autoplot.rootogram <- function(object,
     ggplot2::aes_string(
       observed = "observed",
       expected = "expected",
-      mids = "mids",
+      mid = "mid",
       width = "width",
       group = "group"
     )
@@ -838,7 +847,7 @@ autoplot.rootogram <- function(object,
         linetype = "group",
         alpha = "group"
       ),
-      scale = scale,
+      scale = "raw",
       style = style
     )
 
@@ -846,7 +855,7 @@ autoplot.rootogram <- function(object,
   if (fitted != "none") {
     rval <- rval +
       geom_rootogram_fitted(
-        scale = scale,
+        scale = "raw",
         linestyle = fitted,
         colour = fitted_colour,
         size = fitted_size,
@@ -1027,7 +1036,7 @@ stat_rootogram <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
-  required_aes = c("observed", "expected", "mids", "width"),
+  required_aes = c("observed", "expected", "mid", "width"),
   compute_group = function(data,
                            scales,
                            scale = c("sqrt", "raw"),
@@ -1038,13 +1047,13 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
     tmp_heights <- compute_rootogram_heights(data$expected, data$observed, scale = scale, style = style)
 
     data <- transform(data,
-      xmin = mids - width / 2,
-      xmax = mids + width / 2,
+      xmin = mid - width / 2,
+      xmax = mid + width / 2,
       ymin = tmp_heights$ymin,
       ymax = tmp_heights$ymax,
       observed = NULL,
       expected = NULL,
-      mids = NULL,
+      mid = NULL,
       width = NULL
     )
     data
@@ -1060,7 +1069,7 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
 #' @param style Fix description.
-#' @param scale Fix description.
+#' @param scale Fix description: Should additional sqrt scaling be applied.
 #' @param linestyle Fix description.
 #' @examples
 #' if (require("ggplot2")) {
@@ -1069,27 +1078,28 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #'   m1_pois <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson)
 #'   m2_pois <- glm(satellites ~ color, data = CrabSatellites, family = poisson)
 #'
-#'   ## Compute rootogram
-#'   p1 <- rootogram(m1_pois, plot = FALSE)
-#'   p2 <- rootogram(m2_pois, plot = FALSE)
+#'   ## Compute rootogram (on raw scale)
+#'   p1 <- rootogram(m1_pois, scale = "raw", plot = FALSE)
+#'   p2 <- rootogram(m2_pois, scale = "raw", plot = FALSE)
 #'
 #'   d <- c(p1, p2)
 #'
 #'   ## Get label names
-#'   xlab <- unique(attr(d, "xlab"))
-#'   ylab <- unique(attr(d, "ylab"))
 #'   main <- attr(d, "main")
 #'   main <- make.names(main, unique = TRUE)
 #'   d$group <- factor(d$group, labels = main)
 #'
+#'   ## Plot rootograms w/ on default "sqrt" scale
 #'   gg1 <- ggplot(data = d) +
 #'     geom_rootogram(aes(
-#'       observed = observed, expected = expected, mids = mids,
+#'       observed = observed, expected = expected, mid = mid,
 #'       width = width, group = group
 #'     )) +
-#'     geom_rootogram_fitted(aes(expected = expected, mids = mids)) +
+#'     geom_rootogram_fitted(aes(expected = expected, mid = mid)) +
 #'     geom_rootogram_ref() +
-#'     facet_grid(group ~ .)
+#'     facet_grid(group ~ .) + 
+#'     xlab("satellites") +
+#'     ylab("sqrt(Frequency)")
 #'   gg1
 #' }
 #' @export
@@ -1177,7 +1187,7 @@ stat_rootogram_fitted <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
-  required_aes = c("expected", "mids"),
+  required_aes = c("expected", "mid"),
   compute_group = function(data,
                            scales,
                            scale = c("sqrt", "raw")) {
@@ -1186,17 +1196,17 @@ StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
     ## raw vs. sqrt scale
     if (scale == "sqrt") {
       data <- transform(data,
-        x = mids,
+        x = mid,
         y = sqrt(expected),
         expected = NULL,
-        mids = NULL
+        mid = NULL
       )
     } else {
       data <- transform(data,
-        x = mids,
+        x = mid,
         y = expected,
         expected = NULL,
-        mids = NULL
+        mid = NULL
       )
     }
     data
@@ -1349,19 +1359,45 @@ compute_rootogram_heights <- function(expected,
 summary.rootogram <- function(object,
                               scale = NULL,
                               style = NULL,
+                              extend = TRUE,
                               ...) {
 
+
+  stopifnot(is.logical(extend))
+
   ## get arg `style` and `scale`
+  scale_object <- attr(object, "scale")
   scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
   style <- use_arg_from_attributes(object, "style", default = "hanging", force_single = TRUE)
 
-  ## compute heights
-  tmp <- compute_rootogram_heights(object$expected, object$observed, scale = scale, style = style)
+  scale <- match.arg(scale, c("sqrt", "raw"))
+  style <- match.arg(style, c("hanging", "standing", "suspended"))
 
-  rval <- transform(object,
-    ymin = tmp$ymin,
-    ymax = tmp$ymax
-  )
+  if (scale != scale_object && scale_object == "raw") {
+    object <- transform(object,
+      observed = sqrt(object$observed),
+      expected = sqrt(object$expected)
+    )
+  } else if (scale != scale_object && scale_object == "sqrt") {
+    object <- transform(object,
+      observed = object$observed^2,
+      expected = object$expected^2
+    )
+  } else if (scale != scale_object) {
+    stop('attribute `scale` must be unique and must match one of c("sqrt", "raw")`')
+  }
+
+  if (extend) {
+    ## compute heights (must always be `scale = "raw"` as already transformed)
+    tmp <- compute_rootogram_heights(object$expected, object$observed, scale = "raw", style = style)
+
+    rval <- transform(object,
+      ymin = tmp$ymin,
+      ymax = tmp$ymax
+    )
+  } else {
+    rval <- object
+  }
 
   ## set attributes
   attr(rval, "style") <- style
