@@ -66,14 +66,13 @@
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
-#' @param range logical or quantile specification. In case of discrete distributions, should the range 
-#' (confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 
-#' then \code{range = c(0.01, 0.99)} is used.
-#' @param range_level numeric. The confidence level required for calculating the range of values 
-#' due to the randomization. 
-#' @param range_nsim numeric. The number of simulated quantiles for calculating the range of values
-#' due to the randomization. 
-#' @param range_seed numeric. The seed to be set for calculating the range of values
+#' @param simint logical. In case of discrete distributions, should the simulation
+#' (confidence) interval due to the randomization be visualized?
+#' @param simint_level numeric. The confidence level required for calculating the simulation
+#' (confidence) interval due to the randomization.
+#' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
+#' simulation (confidence) interval due to the randomization.
+#' @param simint_seed numeric. The seed to be set for calculating the simint of values
 #' due to the randomization. 
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
@@ -86,7 +85,7 @@
 #' randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
 #' lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
 #' \code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
-#' \code{xlab}, \code{ylab}, \code{main}, and \code{range_level}, as well as the
+#' \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
 #' trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
 #' was computed are stored as attributes.
 #' @seealso \code{\link{plot.qqrplot}}, \code{\link{wormplot}},
@@ -133,7 +132,9 @@ qqrplot <- function(object, ...) {
 #' @rdname qqrplot
 #' @method qqrplot default
 #' @export
-qqrplot.default <- function(object,
+qqrplot.default <- function(
+                            ## computation arguments
+                            object,
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
@@ -141,11 +142,13 @@ qqrplot.default <- function(object,
                             trafo = qnorm,
                             nsim = 1L,
                             delta = NULL,
+
+                            ## plotting arguments
                             confint = TRUE,
-                            range = TRUE,
-                            range_level = 0.95,
-                            range_nsim = 250,
-                            range_seed = 1,
+                            simint = TRUE,
+                            simint_level = 0.95,
+                            simint_nrep = 250,
+                            simint_seed = 1,
                             single_graph = FALSE,
                             xlab = "Theoretical quantiles",
                             ylab = if (!detrend) "Quantile residuals" else "Deviation",
@@ -156,20 +159,20 @@ qqrplot.default <- function(object,
   # -------------------------------------------------------------------
   ## sanity checks
   ## * `object`, `newdata`, `delta w/i `qresiduals()`
-  ## * `range` w/i `polygon()`
+  ## * `simint` w/i `polygon()`
   ## * `delta` w/i `qresiduals()`
   ## * `...` in `plot()` and `autoplot()`
   stopifnot(is.logical(detrend))
   stopifnot(is.null(trafo) | is.function(trafo))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(
-    is.numeric(range_level),
-    length(range_level) == 1,
-    range_level >= 0,
-    range_level <= 1
+    is.numeric(simint_level),
+    length(simint_level) == 1,
+    simint_level >= 0,
+    simint_level <= 1
   )
-  stopifnot(is.numeric(range_nsim), length(range_nsim) == 1)
-  stopifnot(is.numeric(range_seed), length(range_seed) == 1)
+  stopifnot(is.numeric(simint_nrep), length(simint_nrep) == 1)
+  stopifnot(is.numeric(simint_seed), length(simint_seed) == 1)
   stopifnot(is.logical(single_graph))
   stopifnot(length(xlab) == 1)
   stopifnot(length(ylab) == 1)
@@ -215,26 +218,26 @@ qqrplot.default <- function(object,
   ## compute rg interval
   ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   ## FIXME: (ML) Return all in the same order w/o x values (same for additional nsim) -> might be an error
-  if (!identical(range, FALSE)) {
-    set.seed(range_seed)
+  if (!identical(simint, FALSE)) {
+    set.seed(simint_seed)
     tmp <- qresiduals(object,
-      newdata = newdata, trafo = trafo, type = "random", nsim = range_nsim,
+      newdata = newdata, trafo = trafo, type = "random", nsim = simint_nrep,
       delta = delta
     )
-    range_prob <- (1 - range_level) / 2
-    range_prob <- c(range_prob, 1 - range_prob)
-    qres_rg_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = range_prob[1], na.rm = TRUE)
-    qres_rg_upr <- apply(apply(tmp, 2, sort), 1, quantile, probs = range_prob[2], na.rm = TRUE)
+    simint_prob <- (1 - simint_level) / 2
+    simint_prob <- c(simint_prob, 1 - simint_prob)
+    qres_rg_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = simint_prob[1], na.rm = TRUE)
+    qres_rg_upr <- apply(apply(tmp, 2, sort), 1, quantile, probs = simint_prob[2], na.rm = TRUE)
     qthe_rg_lwr <- q2q(qres_rg_lwr)
     qthe_rg_upr <- q2q(qres_rg_upr)
 
-    ## FIXME: (ML) Improve workaround to get range only for discrete values
+    ## FIXME: (ML) Improve workaround to get simint only for discrete values
     if (isTRUE(all.equal(qres_rg_lwr, qres_rg_upr, tol = .Machine$double.eps^0.4))) {
       qres_rg_lwr <- NULL
       qres_rg_upr <- NULL
       qthe_rg_lwr <- NULL
       qthe_rg_upr <- NULL
-      range <- FALSE
+      simint <- FALSE
     }
   } else {
     qres_rg_lwr <- NULL
@@ -298,7 +301,7 @@ qqrplot.default <- function(object,
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "range_level") <- ifelse(range, range_level, NA)
+  attr(rval, "simint_level") <- ifelse(simint, simint_level, NA)
   attr(rval, "trafo") <- trafo
   attr(rval, "detrend") <- detrend
 
@@ -312,9 +315,9 @@ qqrplot.default <- function(object,
 
   ## plot by default
   if (plot == "ggplot2") {
-    try(print(ggplot2::autoplot(rval, confint = confint, range = range, ...)))
+    try(print(ggplot2::autoplot(rval, confint = confint, simint = simint, ...)))
   } else if (plot == "base") {
-    try(plot(rval, confint = confint, range = range, ...))
+    try(plot(rval, confint = confint, simint = simint, ...))
   }
 
   ## return invisibly
@@ -367,7 +370,7 @@ c.qqrplot <- function(...) {
 
   ## parameters
   detrend <- unlist(lapply(rval, function(r) attr(r, "detrend")))
-  range_level <- unlist(lapply(rval, function(r) attr(r, "range_level")))
+  simint_level <- unlist(lapply(rval, function(r) attr(r, "simint_level")))
   trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
   n <- unlist(n)
 
@@ -418,7 +421,7 @@ c.qqrplot <- function(...) {
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
   attr(rval, "detrend") <- detrend
-  attr(rval, "range_level") <- range_level
+  attr(rval, "simint_level") <- simint_level
   attr(rval, "trafo") <- trafo
 
   ## set class to data.frame or tibble
@@ -462,9 +465,9 @@ rbind.qqrplot <- c.qqrplot
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
-#' @param range logical or quantile specification. Should the range of
+#' @param simint logical or quantile specification. Should the simint of
 #' quantiles of the randomized quantile residuals be visualized? If
-#' \code{TRUE}, then \code{range = c(0.01, 0.99)} is used.
+#' \code{TRUE}, then \code{simint = c(0.01, 0.99)} is used.
 #' @param xlab,ylab,main,\dots graphical plotting parameters passed to
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
@@ -493,7 +496,7 @@ rbind.qqrplot <- c.qqrplot
 #' ## add separate model
 #' if (require("crch", quietly = TRUE)) {
 #'   m1_crch <- crch(dist ~ speed | speed, data = cars)
-#'   points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, range = 2)
+#'   points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, simint = 2)
 #' }
 #' 
 #' #-------------------------------------------------------------------------------
@@ -517,7 +520,7 @@ rbind.qqrplot <- c.qqrplot
 #'   qq2_crch <- qqrplot(m2_crch, plot = FALSE)
 #' 
 #'   ## plot in single graph
-#'   plot(c(qq2_lm, qq2_crch), col = c(1, 2), range = c(1, 2), ref = 3, single_graph = TRUE)
+#'   plot(c(qq2_lm, qq2_crch), col = c(1, 2), simint = c(1, 2), ref = 3, single_graph = TRUE)
 #' }
 #' 
 #' #-------------------------------------------------------------------------------
@@ -535,7 +538,7 @@ plot.qqrplot <- function(x,
                          single_graph = FALSE,
                          detrend = NULL,
                          confint = TRUE,  # FIXME: (ML) Implement different plotting styles
-                         range = TRUE,
+                         simint = TRUE,
                          ref = TRUE,
                          identity = TRUE,
                          probs = c(0.25, 0.75),
@@ -560,7 +563,7 @@ plot.qqrplot <- function(x,
   ## * `ref` w/i `abline()`
   ## * `xlab`, `ylab`, `main` and `....` w/i `plot()`
   ## * `col`, `pch` w/i `lines()`
-  ## * `range`, `fill` in `polygon()`
+  ## * `simint`, `fill` in `polygon()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(identity))
@@ -616,7 +619,7 @@ plot.qqrplot <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
-  plot_arg <- data.frame(1:n, range, ref,
+  plot_arg <- data.frame(1:n, simint, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     col, fill, alpha_min, pch, axes, box
   )[, -1]
@@ -646,11 +649,11 @@ plot.qqrplot <- function(x,
     ## get group index
     j <- unique(d$group)
 
-    ## get xlim and ylim conditional on range and on single_graph
+    ## get xlim and ylim conditional on simint and on single_graph
     if (single_graph) {
       if (
-        !identical(plot_arg$range[j], FALSE) &&
-          any(!is.na(attr(d, "range_level")))
+        !identical(plot_arg$simint[j], FALSE) &&
+          any(!is.na(attr(d, "simint_level")))
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
           tmp <- range(as.matrix(x[grepl("x", names(x))]), finite = TRUE)
@@ -672,8 +675,8 @@ plot.qqrplot <- function(x,
       }
     } else { 
       if (
-        !identical(plot_arg$range[j], FALSE) &&
-          !is.na(attr(d, "range_level")[j])
+        !identical(plot_arg$simint[j], FALSE) &&
+          !is.na(attr(d, "simint_level")[j])
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
           tmp <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
@@ -711,9 +714,9 @@ plot.qqrplot <- function(x,
       }
     }
 
-    ## plot range polygon
-    if (!identical(plot_arg$range[j], FALSE) && !is.na(attr(d, "range_level")[j])) {
-      if (isTRUE(plot_arg$range[j])) plot_arg$range[j] <- plot_arg$fill[j]
+    ## plot simint polygon
+    if (!identical(plot_arg$simint[j], FALSE) && !is.na(attr(d, "simint_level")[j])) {
+      if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- plot_arg$fill[j]
 
       idx_upr <- order(d$x_rg_upr)
       idx_lwr <- order(d$x_rg_lwr)
@@ -725,7 +728,7 @@ plot.qqrplot <- function(x,
       polygon(
         x_pol,
         y_pol,
-        col = set_minimum_transparency(plot_arg$range[j], alpha_min = plot_arg$alpha_min[j]),
+        col = set_minimum_transparency(plot_arg$simint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -837,7 +840,7 @@ plot.qqrplot <- function(x,
 #' @method points qqrplot
 #' @export
 points.qqrplot <- function(x,
-                           range = FALSE,
+                           simint = FALSE,
                            col = adjustcolor("black", alpha.f = 0.4),
                            fill = adjustcolor("black", alpha.f = 0.2),
                            alpha_min = 0.2,
@@ -849,7 +852,7 @@ points.qqrplot <- function(x,
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
   ## * `col`, `pch` w/i `lines()`
-  ## * `range`, `fill` in `polygon()`
+  ## * `simint`, `fill` in `polygon()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
 
   ## convert always to data.frame
@@ -860,7 +863,7 @@ points.qqrplot <- function(x,
   n <- max(x$group)
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, range, col, fill, alpha_min, pch)[, -1]
+  plot_arg <- data.frame(1:n, simint, col, fill, alpha_min, pch)[, -1]
 
   # -------------------------------------------------------------------
   # MAIN PLOTTING FUNCTION FOR POINTS
@@ -870,9 +873,9 @@ points.qqrplot <- function(x,
     ## get group index
     j <- unique(d$group)
 
-    ## plot range polygon
-    if (!identical(plot_arg$range[j], FALSE) && !is.na(attr(d, "range_level")[j])) {
-      if (isTRUE(plot_arg$range[j])) plot_arg$range[j] <- plot_arg$fill[j]
+    ## plot simint polygon
+    if (!identical(plot_arg$simint[j], FALSE) && !is.na(attr(d, "simint_level")[j])) {
+      if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- plot_arg$fill[j]
 
       idx_upr <- order(d$x_rg_upr)
       idx_lwr <- order(d$x_rg_lwr)
@@ -884,7 +887,7 @@ points.qqrplot <- function(x,
       polygon(
         x_pol,
         y_pol,
-        col = set_minimum_transparency(plot_arg$range[j], alpha_min = plot_arg$alpha_min[j]),
+        col = set_minimum_transparency(plot_arg$simint[j], alpha_min = plot_arg$alpha_min[j]),
         border = NA
       )
     }
@@ -915,7 +918,7 @@ autoplot.qqrplot <- function(object,
                              single_graph = FALSE,
                              detrend = NULL,
                              confint = TRUE,
-                             range = TRUE,
+                             simint = TRUE,
                              ref = TRUE,
                              identity = TRUE, 
                              probs = c(0.25, 0.75), 
@@ -944,7 +947,7 @@ autoplot.qqrplot <- function(object,
 
   ## sanity checks
   stopifnot(is.logical(single_graph))
-  stopifnot(is.logical(range))
+  stopifnot(is.logical(simint))
   stopifnot(is.logical(ref))
   stopifnot(is.logical(identity))
   stopifnot(is.numeric(probs), length(probs) == 2)
@@ -1059,10 +1062,10 @@ autoplot.qqrplot <- function(object,
       )
   }
 
-  ## add range
-  if (range && all(c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr") %in% names(object))) {
+  ## add simint
+  if (simint && all(c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr") %in% names(object))) {
     rval <- rval +
-      geom_qqr_range(
+      geom_qqr_simint(
         ggplot2::aes_string(
           x = "x_rg_upr", 
           ymin = "y_rg_lwr", 
@@ -1162,7 +1165,7 @@ autoplot.qqrplot <- function(object,
 #'     geom_qqr_ref() + 
 #'     geom_qqr_confint(fill = "red") + 
 #'     geom_qqr_point() + 
-#'     geom_qqr_range(
+#'     geom_qqr_simint(
 #'       aes(
 #'         x = x_rg_lwr, 
 #'         ymin = y_rg_lwr, 
@@ -1180,7 +1183,7 @@ autoplot.qqrplot <- function(object,
 #'     geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
 #'     geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
 #'     geom_qqr_point() + 
-#'     geom_qqr_range(
+#'     geom_qqr_simint(
 #'       aes(
 #'         x = x_rg_lwr, 
 #'         ymin = y_rg_lwr, 
@@ -1286,11 +1289,11 @@ GeomQqrPoints <- ggplot2::ggproto("GeomQqrPoints", ggplot2::Geom,
 
 #' @rdname geom_qqr_point
 #' @export
-stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
+stat_qqr_simint <- function(mapping = NULL, data = NULL, geom = "qqr_simint",
                              position = "identity", na.rm = FALSE, 
                              show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    stat = StatQqrRange, 
+    stat = StatQqrSimint, 
     data = data, 
     mapping = mapping, 
     geom = geom, 
@@ -1306,8 +1309,8 @@ stat_qqr_range <- function(mapping = NULL, data = NULL, geom = "qqr_range",
 #' @format NULL
 #' @usage NULL
 #' @export
-StatQqrRange <- ggplot2::ggproto("StatQqrRange", ggplot2::Stat,
-## TODO: (ML) Alternative to use `stat = "identity"` in `geom_qqr_range()` and write `setup_data()`
+StatQqrSimint <- ggplot2::ggproto("StatQqrSimint", ggplot2::Stat,
+## TODO: (ML) Alternative to use `stat = "identity"` in `geom_qqr_simint()` and write `setup_data()`
 ##            fails as here aes `x_lwr`, ... are unknown and ignored
   compute_group = function(data, scales) {
     
@@ -1326,11 +1329,11 @@ StatQqrRange <- ggplot2::ggproto("StatQqrRange", ggplot2::Stat,
 
 #' @rdname geom_qqr_point
 #' @export
-geom_qqr_range <- function(mapping = NULL, data = NULL, stat = "qqr_range",
+geom_qqr_simint <- function(mapping = NULL, data = NULL, stat = "qqr_simint",
                              position = "identity", na.rm = FALSE, 
                              show.legend = NA, inherit.aes = TRUE, ...) {
   ggplot2::layer(
-    geom = GeomQqrRange, mapping = mapping,  
+    geom = GeomQqrSimint, mapping = mapping,  
     data = data, stat = stat, position = position, 
     show.legend = show.legend, inherit.aes = inherit.aes,
     params = list(na.rm = na.rm, ...)
@@ -1342,7 +1345,7 @@ geom_qqr_range <- function(mapping = NULL, data = NULL, stat = "qqr_range",
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomQqrRange <- ggplot2::ggproto("GeomQqrRange", ggplot2::GeomPolygon,
+GeomQqrSimint <- ggplot2::ggproto("GeomQqrSimint", ggplot2::GeomPolygon,
   default_aes = ggplot2::aes(colour = "NA", fill = "black", size = 0.5, linetype = 1,
   alpha = 0.2, subgroup = NULL)
 )
@@ -1537,22 +1540,22 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
 
     ## Copied and modified from `StatFunction$compute_group()`
     if (is.null(scales$x)) {
-      range <- if(is.null(xlim)) c(0, 1) else xlim
-      xseq <- seq(range[1], range[2], length.out = n)
+      simint <- if(is.null(xlim)) c(0, 1) else xlim
+      xseq <- seq(simint[1], simint[2], length.out = n)
       x_trans <- xseq
     } else {
-      range <- if(is.null(xlim)) scales$x$dimension() else xlim
+      simint <- if(is.null(xlim)) scales$x$dimension() else xlim
 
-      ## Make sure range is not NA and add default ggplot2 expansion
-      range[is.na(range)] <- scales$x$dimension()[is.na(range)]
-      range <- range + c(-1, 1) * diff(range) * 0.05 
+      ## Make sure simint is not NA and add default ggplot2 expansion
+      simint[is.na(simint)] <- scales$x$dimension()[is.na(simint)]
+      simint <- simint + c(-1, 1) * diff(simint) * 0.05 
       ## FIXME: (ML) Better idea how to get the scales of the plot?
-      xseq <- seq(range[1], range[2], length.out = n) # alternative: xseq <- trafo(ppoints(xseq))
+      xseq <- seq(simint[1], simint[2], length.out = n) # alternative: xseq <- trafo(ppoints(xseq))
 
       if (scales$x$is_discrete()) {
         x_trans <- xseq
       } else {
-        # For continuous scales, need to back transform from transformed range
+        # For continuous scales, need to back transform from transformed simint
         # to original values
         x_trans <- scales$x$trans$inverse(xseq)
       }
@@ -1569,7 +1572,7 @@ StatQqrConfint <- ggplot2::ggproto("StatQqrConfint", ggplot2::Stat,
       y_out2 <- scales$y$trans$transform(y_out2)
     }
 
-    # Must make sure that is not NA for specific trafo (due to extension of plot range)
+    # Must make sure that is not NA for specific trafo (due to extension of plot simint)
     idx_na <- is.na(y_out1) | is.na(y_out2)
 
     ## Employing StatQqrRef Method

@@ -17,10 +17,10 @@ wormplot(object, ...)
   nsim = 1L,
   delta = NULL,
   confint = TRUE,
-  range = TRUE,
-  range_level = 0.95,
-  range_nsim = 250,
-  range_seed = 1,
+  simint = TRUE,
+  simint_level = 0.95,
+  simint_nrep = 250,
+  simint_seed = 1,
   single_graph = FALSE,
   xlab = "Theoretical quantiles",
   ylab = "Deviation",
@@ -56,17 +56,16 @@ different distribution scale (default: Gaussian).}
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 quantile residuals are visualized.}
 
-\item{range}{logical or quantile specification. In case of discrete distributions, should the range 
-(confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 
-then \code{range = c(0.01, 0.99)} is used.}
+\item{simint}{logical. In case of discrete distributions, should the simulation
+(confidence) interval due to the randomization be visualized?}
 
-\item{range_level}{numeric. The confidence level required for calculating the range of values 
-due to the randomization.}
+\item{simint_level}{numeric. The confidence level required for calculating the simulation
+(confidence) interval due to the randomization.}
 
-\item{range_nsim}{numeric. The number of simulated quantiles for calculating the range of values
-due to the randomization.}
+\item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the
+simulation (confidence) interval due to the randomization.}
 
-\item{range_seed}{numeric. The seed to be set for calculating the range of values
+\item{simint_seed}{numeric. The seed to be set for calculating the simint of values
 due to the randomization.}
 
 \item{single_graph}{logical. Should all computed extended reliability
@@ -83,7 +82,7 @@ with the following variables: \item{x}{theoretical quantiles,}
 randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
 lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
 \code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
-\code{xlab}, \code{ylab}, \code{main}, and \code{range_level}, as well as the
+\code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
 trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
 was computed are stored as attributes.
 }

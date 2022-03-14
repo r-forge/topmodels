@@ -4,10 +4,10 @@
 \name{geom_qqr_point}
 \alias{geom_qqr_point}
 \alias{GeomQqrPoints}
-\alias{stat_qqr_range}
-\alias{StatQqrRange}
-\alias{geom_qqr_range}
-\alias{GeomQqrRange}
+\alias{stat_qqr_simint}
+\alias{StatQqrSimint}
+\alias{geom_qqr_simint}
+\alias{GeomQqrSimint}
 \alias{stat_qqr_ref}
 \alias{StatQqrRef}
 \alias{geom_qqr_ref}
@@ -32,10 +32,10 @@ geom_qqr_point(
   ...
 )
 
-stat_qqr_range(
+stat_qqr_simint(
   mapping = NULL,
   data = NULL,
-  geom = "qqr_range",
+  geom = "qqr_simint",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
@@ -43,10 +43,10 @@ stat_qqr_range(
   ...
 )
 
-geom_qqr_range(
+geom_qqr_simint(
   mapping = NULL,
   data = NULL,
-  stat = "qqr_range",
+  stat = "qqr_simint",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
@@ -198,7 +198,7 @@ if (require("ggplot2")) {
     geom_qqr_ref() + 
     geom_qqr_confint(fill = "red") + 
     geom_qqr_point() + 
-    geom_qqr_range(
+    geom_qqr_simint(
       aes(
         x = x_rg_lwr, 
         ymin = y_rg_lwr, 
@@ -216,7 +216,7 @@ if (require("ggplot2")) {
     geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
     geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
     geom_qqr_point() + 
-    geom_qqr_range(
+    geom_qqr_simint(
       aes(
         x = x_rg_lwr, 
         ymin = y_rg_lwr, 

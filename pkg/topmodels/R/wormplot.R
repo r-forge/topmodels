@@ -54,14 +54,13 @@
 #' @param confint logical or character string describing the type for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
-#' @param range logical or quantile specification. In case of discrete distributions, should the range 
-#' (confidence interval) of values due to the randomization be visualized? If \code{TRUE}, 
-#' then \code{range = c(0.01, 0.99)} is used.
-#' @param range_level numeric. The confidence level required for calculating the range of values 
-#' due to the randomization. 
-#' @param range_nsim numeric. The number of simulated quantiles for calculating the range of values
-#' due to the randomization. 
-#' @param range_seed numeric. The seed to be set for calculating the range of values
+#' @param simint logical. In case of discrete distributions, should the simulation
+#' (confidence) interval due to the randomization be visualized?
+#' @param simint_level numeric. The confidence level required for calculating the simulation
+#' (confidence) interval due to the randomization.
+#' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
+#' simulation (confidence) interval due to the randomization.
+#' @param simint_seed numeric. The seed to be set for calculating the simint of values
 #' due to the randomization. 
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
@@ -74,7 +73,7 @@
 #' randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
 #' lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
 #' \code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
-#' \code{xlab}, \code{ylab}, \code{main}, and \code{range_level}, as well as the
+#' \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
 #' trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
 #' was computed are stored as attributes.
 #' @seealso \code{\link{qqrplot}}, \code{\link{plot.qqrplot}}, \code{\link{qqrplot}}, 
@@ -124,10 +123,10 @@ wormplot.default <- function(object,
                              nsim = 1L,
                              delta = NULL,
                              confint = TRUE,
-                             range = TRUE,
-                             range_level = 0.95,
-                             range_nsim = 250,
-                             range_seed = 1,
+                             simint = TRUE,
+                             simint_level = 0.95,
+                             simint_nrep = 250,
+                             simint_seed = 1,
                              single_graph = FALSE,
                              xlab = "Theoretical quantiles",
                              ylab = "Deviation",
@@ -144,10 +143,10 @@ wormplot.default <- function(object,
           nsim = nsim,
           delta = delta,
           confint = confint,
-          range = range,
-          range_level = range_level,
-          range_nsim = range_nsim,
-          range_seed = range_seed,
+          simint = simint,
+          simint_level = simint_level,
+          simint_nrep = simint_nrep,
+          simint_seed = simint_seed,
           single_graph = single_graph,
           xlab = xlab,
           ylab = ylab,

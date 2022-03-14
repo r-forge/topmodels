@@ -11,7 +11,7 @@
   single_graph = FALSE,
   detrend = NULL,
   confint = TRUE,
-  range = TRUE,
+  simint = TRUE,
   ref = TRUE,
   identity = TRUE,
   probs = c(0.25, 0.75),
@@ -32,7 +32,7 @@
 
 \method{points}{qqrplot}(
   x,
-  range = FALSE,
+  simint = FALSE,
   col = adjustcolor("black", alpha.f = 0.4),
   fill = adjustcolor("black", alpha.f = 0.2),
   alpha_min = 0.2,
@@ -45,7 +45,7 @@
   single_graph = FALSE,
   detrend = NULL,
   confint = TRUE,
-  range = TRUE,
+  simint = TRUE,
   ref = TRUE,
   identity = TRUE,
   probs = c(0.25, 0.75),
@@ -75,9 +75,9 @@ diagrams be plotted in a single graph?}
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 quantile residuals are visualized.}
 
-\item{range}{logical or quantile specification. Should the range of
+\item{simint}{logical or quantile specification. Should the simint of
 quantiles of the randomized quantile residuals be visualized? If
-\code{TRUE}, then \code{range = c(0.01, 0.99)} is used.}
+\code{TRUE}, then \code{simint = c(0.01, 0.99)} is used.}
 
 \item{ref, xlim, ylim, col, fill, alpha_min, pch, axes, box}{additional graphical
 parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.}
@@ -120,7 +120,7 @@ qqrplot(m1_lm, plot = "base", ref = "blue", lty = 2, pch = 20)
 ## add separate model
 if (require("crch", quietly = TRUE)) {
   m1_crch <- crch(dist ~ speed | speed, data = cars)
-  points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, range = 2)
+  points(qqrplot(m1_crch, plot = FALSE), col = 2, lty = 2, simint = 2)
 }
 
 #-------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ if (require("crch")) {
   qq2_crch <- qqrplot(m2_crch, plot = FALSE)
 
   ## plot in single graph
-  plot(c(qq2_lm, qq2_crch), col = c(1, 2), range = c(1, 2), ref = 3, single_graph = TRUE)
+  plot(c(qq2_lm, qq2_crch), col = c(1, 2), simint = c(1, 2), ref = 3, single_graph = TRUE)
 }
 
 #-------------------------------------------------------------------------------
