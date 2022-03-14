@@ -66,6 +66,7 @@
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
+#' @param ref to be fixed.
 #' @param simint logical. In case of discrete distributions, should the simulation
 #' (confidence) interval due to the randomization be visualized?
 #' @param simint_level numeric. The confidence level required for calculating the simulation
@@ -83,8 +84,8 @@
 #' with the following variables: \item{x}{theoretical quantiles,}
 #' \item{y}{deviations between theoretical and empirical quantiles.} In case of
 #' randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
-#' lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
-#' \code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
+#' lower and upper confidence interval bounds (\code{simint_expected}, \code{simint_observed_lwr},
+#' \code{simint_observed_upr}) can optionally be returned.  Additionally,
 #' \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
 #' trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
 #' was computed are stored as attributes.
@@ -142,14 +143,15 @@ qqrplot.default <- function(
                             trafo = qnorm,
                             nsim = 1L,
                             delta = NULL,
-
-                            ## plotting arguments
-                            confint = TRUE,
                             simint = TRUE,
                             simint_level = 0.95,
                             simint_nrep = 250,
                             simint_seed = 1,
+
+                            ## plotting arguments
+                            confint = TRUE,
                             single_graph = FALSE,
+                            ref = TRUE,
                             xlab = "Theoretical quantiles",
                             ylab = if (!detrend) "Quantile residuals" else "Deviation",
                             main = NULL,
@@ -260,17 +262,16 @@ qqrplot.default <- function(
       FUN.VALUE = FALSE
     ))) {
       rval <- data.frame(
-        x = qthe,
-        y = qres
+        expected = qthe,
+        observed = qres
       )
     } else {
       rval <- data.frame(
-        x = qthe,
-        y = qres,
-        y_rg_lwr = qres_rg_lwr,
-        y_rg_upr = qres_rg_upr,
-        x_rg_lwr = qthe_rg_lwr,
-        x_rg_upr = qthe_rg_upr
+        expected = qthe,
+        observed = qres,
+        simint_observed_lwr = qres_rg_lwr,
+        simint_observed_upr = qres_rg_upr,
+        simint_expected = qthe_rg_lwr
       )
     }
   } else { 
@@ -280,23 +281,22 @@ qqrplot.default <- function(
       FUN.VALUE = FALSE
     ))) {
       rval <- data.frame(
-        x = qthe,
-        y = qres - qthe
+        expected = qthe,
+        observed = qres - qthe
       )
     } else {
       rval <- data.frame(
-        x = qthe,
-        y = qres - qthe,
-        y_rg_lwr = qres_rg_lwr - qthe_rg_lwr,
-        y_rg_upr = qres_rg_upr - qthe_rg_upr,
-        x_rg_lwr = qthe_rg_lwr,
-        x_rg_upr = qthe_rg_lwr
+        expected = qthe,
+        observed = qres - qthe,
+        simint_observed_lwr = qres_rg_lwr - qthe_rg_lwr,
+        simint_observed_upr = qres_rg_upr - qthe_rg_upr,
+        simint_expected = qthe_rg_lwr
       )
     }
   }
-
+ 
   names(rval) <- gsub("(\\.r|\\.q)", "", names(rval))
-
+ 
   ## attributes for graphical display
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
@@ -398,10 +398,10 @@ c.qqrplot <- function(...) {
   # -------------------------------------------------------------------
   ## combine and return (fill up missing variables with NAs)
   all_names <- unique(unlist(lapply(rval, names)))
-  if (any(grepl("x_1", all_names)) & any(grepl("^x$", all_names))) {
+  if (any(grepl("expected_1", all_names)) & any(grepl("^expected$", all_names))) {
     for (i in 1:length(rval)) {
-      names(rval[[i]])[grepl("^x$", names(rval[[i]]))] <- "x_1"
-      names(rval[[i]])[grepl("^y$", names(rval[[i]]))] <- "y_1"
+      names(rval[[i]])[grepl("^expected$", names(rval[[i]]))] <- "expected_1"
+      names(rval[[i]])[grepl("^observed$", names(rval[[i]]))] <- "observed_1"
     }
     all_names <- unique(unlist(lapply(rval, names)))
   }
@@ -656,20 +656,20 @@ plot.qqrplot <- function(x,
           any(!is.na(attr(d, "simint_level")))
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
-          tmp <- range(as.matrix(x[grepl("x", names(x))]), finite = TRUE)
+          tmp <- range(as.matrix(x[grepl("expected", names(x))]), finite = TRUE)
           plot_arg[j, c("xlim1", "xlim2")] <- tmp
         }
         if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-          tmp <- range(as.matrix(x[grepl("y", names(x))]), finite = TRUE)
+          tmp <- range(as.matrix(x[grepl("observed", names(x))]), finite = TRUE)
           plot_arg[j, c("ylim1", "ylim2")] <- tmp
         }
       } else {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
-          tmp <- range(as.matrix(x[grepl("^x$|x_[0-9]", names(x))]), finite = TRUE)
+          tmp <- range(as.matrix(x[grepl("^expected$|expected_[0-9]", names(x))]), finite = TRUE)
           plot_arg[j, c("xlim1", "xlim2")] <- tmp
         }
         if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-          tmp <- range(as.matrix(x[grepl("^y$|y_[0-9]", names(x))]), finite = TRUE)
+          tmp <- range(as.matrix(x[grepl("^observed$|observed_[0-9]", names(x))]), finite = TRUE)
           plot_arg[j, c("ylim1", "ylim2")] <- tmp
         }
       }
@@ -679,20 +679,20 @@ plot.qqrplot <- function(x,
           !is.na(attr(d, "simint_level")[j])
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
-          tmp <- range(as.matrix(d[grepl("x", names(d))]), finite = TRUE)
+          tmp <- range(as.matrix(d[grepl("expected", names(d))]), finite = TRUE)
           plot_arg[j, c("xlim1", "xlim2")] <- tmp
         }
         if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-          tmp <- range(as.matrix(d[grepl("y", names(d))]), finite = TRUE)
+          tmp <- range(as.matrix(d[grepl("observed", names(d))]), finite = TRUE)
           plot_arg[j, c("ylim1", "ylim2")] <- tmp
         }
       } else {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
-          tmp <- range(as.matrix(d[grepl("^x$|x_[0-9]", names(d))]), finite = TRUE)
+          tmp <- range(as.matrix(d[grepl("^expected$|expected_[0-9]", names(d))]), finite = TRUE)
           plot_arg[j, c("xlim1", "xlim2")] <- tmp
         }
         if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-          tmp <- range(as.matrix(d[grepl("^y$|y_[0-9]", names(d))]), finite = TRUE)
+          tmp <- range(as.matrix(d[grepl("^observed$|observed_[0-9]", names(d))]), finite = TRUE)
           plot_arg[j, c("ylim1", "ylim2")] <- tmp
         }
       }
@@ -718,10 +718,9 @@ plot.qqrplot <- function(x,
     if (!identical(plot_arg$simint[j], FALSE) && !is.na(attr(d, "simint_level")[j])) {
       if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- plot_arg$fill[j]
 
-      idx_upr <- order(d$x_rg_upr)
-      idx_lwr <- order(d$x_rg_lwr)
-      x_pol <- c(d$x_rg_lwr[idx_lwr], d$x_rg_upr[rev(idx_upr)])
-      y_pol <- c(d$y_rg_lwr[idx_lwr], d$y_rg_upr[rev(idx_upr)])
+      idx <- order(d$simint_expected)
+      x_pol <- c(d$simint_expected[idx], d$simint_expected[rev(idx)])
+      y_pol <- c(d$simint_observed_lwr[idx], d$simint_observed_upr[rev(idx)])
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
@@ -815,8 +814,8 @@ plot.qqrplot <- function(x,
     ## add qq plot
     for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
       points.default(
-        d[grepl("x", names(d))][, i],
-        d[grepl("y", names(d))][, i],
+        d[grepl("expected", names(d))][, i],
+        d[grepl("observed", names(d))][, i],
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
@@ -877,10 +876,9 @@ points.qqrplot <- function(x,
     if (!identical(plot_arg$simint[j], FALSE) && !is.na(attr(d, "simint_level")[j])) {
       if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- plot_arg$fill[j]
 
-      idx_upr <- order(d$x_rg_upr)
-      idx_lwr <- order(d$x_rg_lwr)
-      x_pol <- c(d$x_rg_lwr[idx_lwr], d$x_rg_upr[rev(idx_upr)])
-      y_pol <- c(d$y_rg_lwr[idx_lwr], d$y_rg_upr[rev(idx_upr)])
+      idx <- order(d$simint_expected)
+      x_pol <- c(d$simint_expected[idx], d$simint_expected[rev(idx)])
+      y_pol <- c(d$simint_observed_lwr[idx], d$simint_observed_upr[rev(idx)])
       x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
       y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
 
@@ -895,8 +893,8 @@ points.qqrplot <- function(x,
     ## add qq plot
     for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
       points(
-        d[grepl("x", names(d))][, i],
-        d[grepl("y", names(d))][, i],
+        d[grepl("expected", names(d))][, i],
+        d[grepl("observed", names(d))][, i],
         col = plot_arg$col[j], pch = plot_arg$pch[j], ...
       )
     }
@@ -1015,15 +1013,15 @@ autoplot.qqrplot <- function(object,
   ## Get a long data.frame with all x and y simulations
   ## FIXME: (ML) This must be done in base and somehow nicer
   object <- tidyr::pivot_longer(object,
-    cols = names(object)[grepl("^x$|x_[0-9]", names(object))],
-    names_to = "x_sim", values_to = "x"
+    cols = names(object)[grepl("^expected$|expected_[0-9]", names(object))],
+    names_to = "expected_sim", values_to = "expected"
   )
   object <- tidyr::pivot_longer(object,
-    cols = names(object)[grepl("^y$|y_[0-9]", names(object))],
-    names_to = "y_sim", values_to = "y"
+    cols = names(object)[grepl("^observed$|observed_[0-9]", names(object))],
+    names_to = "observed_sim", values_to = "observed"
   )
-  object <- object[which(gsub("x", "", object$x_sim) == gsub("y", "", object$y_sim)), ]
-  object$y_sim <- NULL
+  object <- object[which(gsub("expected", "", object$expected_sim) == gsub("observed", "", object$observed_sim)), ]
+  object$observed_sim <- NULL
   object <- as.data.frame(object)
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
@@ -1036,7 +1034,7 @@ autoplot.qqrplot <- function(object,
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   ## actual plotting
-  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) 
+  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "expected", y = "observed")) 
 
   ## add ref
   if (ref) {
@@ -1063,13 +1061,13 @@ autoplot.qqrplot <- function(object,
   }
 
   ## add simint
-  if (simint && all(c("x_rg_lwr", "x_rg_upr", "y_rg_lwr", "y_rg_upr") %in% names(object))) {
+  if (simint && all(c("simint_expected", "simint_observed_lwr", "simint_observed_upr") %in% names(object))) {
     rval <- rval +
       geom_qqr_simint(
         ggplot2::aes_string(
-          x = "x_rg_upr", 
-          ymin = "y_rg_lwr", 
-          ymax = "y_rg_upr",
+          x = "simint_expected", 
+          ymin = "simint_observed_lwr", 
+          ymax = "simint_observed_upr",
           group = "group"
         )
       )
@@ -1161,15 +1159,15 @@ autoplot.qqrplot <- function(object,
 #'   d$group <- factor(d$group, labels = main)
 #'   
 #'   ## Polygon CI around identity line used as reference 
-#'   gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'   gg1 <- ggplot(data = d, aes(x = expected, y = observed, na.rm = TRUE)) + 
 #'     geom_qqr_ref() + 
 #'     geom_qqr_confint(fill = "red") + 
 #'     geom_qqr_point() + 
 #'     geom_qqr_simint(
 #'       aes(
-#'         x = x_rg_lwr, 
-#'         ymin = y_rg_lwr, 
-#'         ymax = y_rg_upr,
+#'         x = simint_expected, 
+#'         ymin = simint_observed_lwr, 
+#'         ymax = simint_observed_upr,
 #'         group = group
 #'       )
 #'     ) + 
@@ -1179,15 +1177,15 @@ autoplot.qqrplot <- function(object,
 #'   gg1 + facet_wrap(~group)
 #'   
 #'   ## Polygon CI around robust reference line
-#'   gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+#'   gg2 <- ggplot(data = d, aes(x = expected, y = observed, na.rm = TRUE)) + 
 #'     geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
 #'     geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
 #'     geom_qqr_point() + 
 #'     geom_qqr_simint(
 #'       aes(
-#'         x = x_rg_lwr, 
-#'         ymin = y_rg_lwr, 
-#'         ymax = y_rg_upr,
+#'         x = simint_expected, 
+#'         ymin = simint_observed_lwr, 
+#'         ymax = simint_observed_upr,
 #'         group = group
 #'       )
 #'     ) + 
@@ -1200,13 +1198,13 @@ autoplot.qqrplot <- function(object,
 #'   q1 <- qqrplot(m1_pois, trafo = qunif, plot = FALSE)
 #'   q2 <- qqrplot(m2_pois, plot = FALSE)
 #'   
-#'   gg3 <- ggplot(data = q1, aes(x, y, na.rm = TRUE)) +
+#'   gg3 <- ggplot(data = q1, aes(x = expected, y = observed, na.rm = TRUE)) +
 #'     geom_qqr_ref() +
 #'     geom_qqr_confint(fill = "red", trafo = qunif) +
 #'     geom_qqr_point()
 #'   gg3
 #'   
-#'   gg4 <- ggplot(data = q2, aes(x, y, na.rm = TRUE)) +
+#'   gg4 <- ggplot(data = q2, aes(x = expected, y = observed, na.rm = TRUE)) +
 #'     geom_qqr_ref() +
 #'     geom_qqr_confint(fill = "red", trafo = qnorm) +
 #'     geom_qqr_point()
