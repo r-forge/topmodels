@@ -2565,7 +2565,7 @@ summary.pithist <- function(object,
 print.pithist <- function(x, ...) {
 
   ## get arg `type`, `style` and `freq`
-  type <- freq <- style <- NULL # needed for `use_arg_from_attributes()`
+  type <- freq <- style <- NULL # needed for `use_arg_from_attributes()` #FIXME: (ML) Still needed?!
   style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
   type <- use_arg_from_attributes(x, "type", default = NULL, force_single = TRUE)
   freq <- use_arg_from_attributes(x, "freq", default = NULL, force_single = TRUE)

@@ -262,16 +262,16 @@ qqrplot.default <- function(
       FUN.VALUE = FALSE
     ))) {
       rval <- data.frame(
-        expected = qthe,
         observed = qres,
+        expected = qthe,
         simint_observed_lwr = NA_real_,
         simint_observed_upr = NA_real_,
         simint_expected = NA_real_
       )
     } else {
       rval <- data.frame(
-        expected = qthe,
         observed = qres,
+        expected = qthe,
         simint_observed_lwr = qres_rg_lwr,
         simint_observed_upr = qres_rg_upr,
         simint_expected = qthe_rg_lwr
@@ -284,16 +284,16 @@ qqrplot.default <- function(
       FUN.VALUE = FALSE
     ))) {
       rval <- data.frame(
-        expected = qthe,
         observed = qres - qthe,
+        expected = qthe,
         simint_observed_lwr = NA_real_,
         simint_observed_upr = NA_real_,
         simint_expected = NA_real_
       )
     } else {
       rval <- data.frame(
-        expected = qthe,
         observed = qres - qthe,
+        expected = qthe,
         simint_observed_lwr = qres_rg_lwr - qthe_rg_lwr,
         simint_observed_upr = qres_rg_upr - qthe_rg_upr,
         simint_expected = qthe_rg_lwr
@@ -307,7 +307,9 @@ qqrplot.default <- function(
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "simint_level") <- ifelse(simint, simint_level, NA)
+  attr(rval, "confint") <- confint
+  attr(rval, "simint") <- simint
+  attr(rval, "ref") <- ref
   attr(rval, "trafo") <- trafo
   attr(rval, "detrend") <- detrend
 
@@ -365,19 +367,21 @@ c.qqrplot <- function(...) {
   # PREPARE DATA
   # -------------------------------------------------------------------
   ## labels
-  xlab <- unlist(lapply(rval, function(r) attr(r, "xlab")))
-  ylab <- unlist(lapply(rval, function(r) attr(r, "ylab")))
+  xlab <- prepare_arg_for_attributes(rval, "xlab")
+  ylab <- prepare_arg_for_attributes(rval, "ylab")
   nam <- names(rval)
   main <- if (is.null(nam)) {
-    as.vector(sapply(rval, function(r) attr(r, "main")))
+    prepare_arg_for_attributes(rval, "main")
   } else {
     make.unique(rep.int(nam, sapply(n, length)))
   }
 
   ## parameters
-  detrend <- unlist(lapply(rval, function(r) attr(r, "detrend")))
-  simint_level <- unlist(lapply(rval, function(r) attr(r, "simint_level")))
-  trafo <- unlist(lapply(rval, function(r) attr(r, "trafo")))
+  detrend <- prepare_arg_for_attributes(rval, "detrend", force_single = TRUE)
+  trafo <- prepare_arg_for_attributes(rval, "trafo", force_single = FALSE) # check/force below
+  simint <- prepare_arg_for_attributes(rval, "simint")
+  confint <- prepare_arg_for_attributes(rval, "confint")
+  ref <- prepare_arg_for_attributes(rval, "ref")
   n <- unlist(n)
 
   # -------------------------------------------------------------------
@@ -391,44 +395,41 @@ c.qqrplot <- function(...) {
     }
   }
 
-  if (length(detrend) > 1) {
-    if(!all(sapply(2:length(detrend), function(i) identical(detrend[[i-1]], detrend[[i]])))) {
-      stop("objects with different `detrend`s are on different scales and hence must not be combined")
-    } else {
-    detrend <- detrend[[1]]
-    }
-  }
-
   # -------------------------------------------------------------------
   # RETURN DATA
   # -------------------------------------------------------------------
   ## combine and return (fill up missing variables with NAs)
   all_names <- unique(unlist(lapply(rval, names)))
-  if (any(grepl("expected_1", all_names)) & any(grepl("^expected$", all_names))) {
-    for (i in 1:length(rval)) {
-      names(rval[[i]])[grepl("^expected$", names(rval[[i]]))] <- "expected_1"
-      names(rval[[i]])[grepl("^observed$", names(rval[[i]]))] <- "observed_1"
-    }
-    all_names <- unique(unlist(lapply(rval, names)))
-  }
 
+  ## get both objects on the same scale
+  rval <- lapply(rval, summary.qqrplot, detrend = detrend)
+  rval <- lapply(rval, as.data.frame) # remove inner class
+
+  ## combine and return (fill up missing variables with NAs)
   rval <- do.call(
     "rbind.data.frame",
     c(lapply(
       rval,
-      function(x) data.frame(c(x, sapply(setdiff(all_names, names(x)), function(y) NA)))
+      function(x) {
+        data.frame(c(x, sapply(setdiff(all_names, names(x)), function(y) NA)))
+      }
     ),
     make.row.names = FALSE
     )
   )
 
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
+
+  ## add attributes
+  attr(rval, "detrend") <- detrend
+  attr(rval, "trafo") <- trafo
+
+  attr(rval, "simint") <- simint
+  attr(rval, "confint") <- confint
+  attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
-  attr(rval, "detrend") <- detrend
-  attr(rval, "simint_level") <- simint_level
-  attr(rval, "trafo") <- trafo
 
   ## set class to data.frame or tibble
   if (class == "data.frame") {
@@ -543,9 +544,9 @@ rbind.qqrplot <- c.qqrplot
 plot.qqrplot <- function(x,
                          single_graph = FALSE,
                          detrend = NULL,
-                         confint = TRUE,  # FIXME: (ML) Implement different plotting styles
-                         simint = TRUE,
-                         ref = TRUE,
+                         confint = NULL,  # FIXME: (ML) Implement different plotting styles
+                         simint = NULL,
+                         ref = NULL,
                          identity = TRUE,
                          probs = c(0.25, 0.75),
                          trafo = NULL,
@@ -564,6 +565,13 @@ plot.qqrplot <- function(x,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  ## get default arguments
+  detrend <- use_arg_from_attributes(x, "detrend", default = FALSE, force_single = TRUE)
+  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
+  simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
+  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
+  ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
+
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
   ## * `ref` w/i `abline()`
@@ -581,39 +589,8 @@ plot.qqrplot <- function(x,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
-  ## get confint
-  if (isFALSE(confint)) {
-    confint <- "none"
-  } else if (isTRUE(confint)) {
-    #confint <- "polygon"
-    confint <- "line"
-  }
-  ## FIXME: (ML) Implemnt style polygon
-  if (confint == "polygon") {
-    confint <- "line"
-    warning("confint style polygon not yet implemented in base plots, set to `confint = 'line'`")
-  }
-  confint <- match.arg(confint, c("polygon", "line", "none"))
-
-  ## get detrend
-  if (!is.null(attr(x, "detrend")) && !is.null(detrend)) {
-    detrend <- attr(x, "detrend")
-    warning(paste0(
-      "argument `detrend` is overwritten by x's attribute `detrend = ",
-      detrend,
-      "`"
-    ))
-  } else if (!is.null(attr(x, "detrend")) && is.null(detrend)) {
-    detrend <- attr(x, "detrend")
-  }
-
-  ## get trafo
-  if (!is.null(attr(x, "trafo")) && !is.null(trafo)) {
-    trafo <- attr(x, "trafo")
-    warning("argument `trafo` is overwritten by x's attribute `trafo`")
-  } else if (!is.null(attr(x, "trafo")) && is.null(trafo)) {
-    trafo <- attr(x, "trafo")
-  }
+  ## get input object on correct scale
+  x <- summary(x, detrend = detrend)
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -621,6 +598,23 @@ plot.qqrplot <- function(x,
   ## handling of groups
   if (is.null(x$group)) x$group <- 1L
   n <- max(x$group)
+
+  # -------------------------------------------------------------------
+  # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
+  # -------------------------------------------------------------------
+  ## determine which confint should be plotted
+  if (is.logical(confint)) {
+    confint <- ifelse(confint,
+      "line",
+      "none"
+    )
+  }
+  ## FIXME: (ML) Implemnt style polygon
+  if (any(confint == "polygon")) {
+    confint[confint == "polygon"] <- "line"
+    warning("confint style polygon not yet implemented in base plots, set to `confint = 'line'`")
+  }
+  stopifnot(all(confint %in% c("polygon", "line", "none")))
 
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
@@ -631,20 +625,38 @@ plot.qqrplot <- function(x,
   )[, -1]
 
   ## annotation
+  ylab_missing <- missing(ylab)
+  main_missing <- missing(main)
   if (single_graph) {
-    if (is.null(xlab)) xlab <- "Theoretical quantiles"
-    if (is.null(ylab)) ylab <- if (!detrend) "Quantile residuals" else "Deviation"
-    if (is.null(main)) main <- if (!detrend) "Q-Q residuals plot" else "Worm plot"  # FIXME: (ML) Achim prefers other title
+    xlab <- use_arg_from_attributes(x, "xlab", default = "Theoretical quantiles", force_single = TRUE)
+    ylab <- use_arg_from_attributes(x, "ylab",
+      default = if (detrend) "Deviation" else "Quantile residuals",
+      force_single = TRUE
+    )
+    if (is.null(main)) main <- if (detrend) "Worm plot" else "Q-Q residuals plot"
+
   } else {
-    if (is.null(xlab)) xlab <- TRUE
-    if (is.null(ylab)) ylab <- TRUE
-    if (is.null(main)) main <- TRUE
-    xlab <- rep(xlab, length.out = n)
-    ylab <- rep(ylab, length.out = n)
-    main <- rep(main, length.out = n)
-    if (is.logical(xlab)) xlab <- ifelse(xlab, attr(x, "xlab"), "")
-    if (is.logical(ylab)) ylab <- ifelse(ylab, attr(x, "ylab"), "")
-    if (is.logical(main)) main <- ifelse(main, attr(x, "main"), "")
+    xlab <- use_arg_from_attributes(x, "xlab", default = "Theoretical quantiles", force_single = FALSE)
+    ylab <- use_arg_from_attributes(x, "ylab",
+      default = if (detrend) "Deviation" else "Quantile residuals",
+      force_single = FALSE
+    )
+    main <- use_arg_from_attributes(x, "main", # FIXME: (ML) Different in pithist()
+      default = if (detrend) "Wormplot" else "Q-Q residuals plot", 
+      force_single = FALSE
+    )
+  }
+
+  ## fix `ylabel` according to possible new `detrend`
+  if (ylab_missing) {
+    ylab[(!detrend & ylab == "Deviation")] <- "Quantile residuals"
+    ylab[(detrend & ylab == "Quantile residuals")] <- "Deviation"
+  }
+
+  ## fix `main` according to possible new `detrend`
+  if (main_missing) {
+    main[(!detrend & main == "Wormplot")] <- "Q-Q residuals plot"
+    main[(detrend & main == "Q-Q residuals plot")] <- "Wormplot"
   }
 
   # -------------------------------------------------------------------
@@ -658,8 +670,7 @@ plot.qqrplot <- function(x,
     ## get xlim and ylim conditional on simint and on single_graph
     if (single_graph) {
       if (
-        !identical(plot_arg$simint[j], FALSE) &&
-          any(!is.na(attr(d, "simint_level")))
+        !identical(plot_arg$simint[j], FALSE) # FIXME: (ML) Needs to be so complicated?
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
           tmp <- range(as.matrix(x[grepl("expected", names(x))]), finite = TRUE)
@@ -681,8 +692,7 @@ plot.qqrplot <- function(x,
       }
     } else { 
       if (
-        !identical(plot_arg$simint[j], FALSE) &&
-          !is.na(attr(d, "simint_level")[j])
+        !identical(plot_arg$simint[j], FALSE) # FIXME: (ML) Needs to be so complicated?
       ) {
         if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
           tmp <- range(as.matrix(d[grepl("expected", names(d))]), finite = TRUE)
@@ -721,7 +731,7 @@ plot.qqrplot <- function(x,
     }
 
     ## plot simint polygon
-    if (!identical(plot_arg$simint[j], FALSE) && !is.na(attr(d, "simint_level")[j])) {
+    if (!identical(plot_arg$simint[j], FALSE)) {
       if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- plot_arg$fill[j]
 
       idx <- order(d$simint_expected)
@@ -879,7 +889,7 @@ points.qqrplot <- function(x,
     j <- unique(d$group)
 
     ## plot simint polygon
-    if (!identical(plot_arg$simint[j], FALSE) && !is.na(attr(d, "simint_level")[j])) {
+    if (!identical(plot_arg$simint[j], FALSE)) {
       if (isTRUE(plot_arg$simint[j])) plot_arg$simint[j] <- plot_arg$fill[j]
 
       idx <- order(d$simint_expected)
@@ -1727,3 +1737,78 @@ qqr_default_aesthetics <- function(style) {
   }
 }
 
+
+#' @export
+summary.qqrplot <- function(object,
+                            detrend = NULL,
+                            ...) {
+
+  ## get arg `freq`
+  detrend_object <- attr(object, "detrend")
+  detrend <- use_arg_from_attributes(object, "detrend", default = FALSE, force_single = TRUE)
+
+  stopifnot(is.logical(detrend), is.logical(detrend_object))
+
+  ## get arg `trafo`
+  trafo <-  attr(object, "trafo")
+
+  if (detrend != detrend_object && detrend_object) {
+    rval <- transform(object,
+      observed = object$observed + object$expected,
+      simint_observed_lwr = object$simint_observed_lwr + object$simint_expected,
+      simint_observed_upr = object$simint_observed_upr + object$simint_expected
+    )
+  } else if (detrend != detrend_object && !detrend_object) {
+    rval <- transform(object,
+      observed = object$observed - object$expected,
+      simint_observed_lwr = object$simint_observed_lwr - object$simint_expected,
+      simint_observed_upr = object$simint_observed_upr - object$simint_expected
+    )
+  } else {
+    rval <- object
+  }
+
+  ## set attributes
+  attr(rval, "simint") <- attr(object, "simint")
+  attr(rval, "confint") <- attr(object, "confint")
+  attr(rval, "ref") <- attr(object, "ref")
+  attr(rval, "xlab") <- attr(object, "xlab")
+  attr(rval, "ylab") <- attr(object, "ylab")
+  attr(rval, "main") <- attr(object, "main")
+
+  attr(rval, "trafo") <- trafo
+  attr(rval, "detrend") <- detrend
+
+
+  ## return as `data.frame` or `tibble`
+  if ("data.frame" %in% class(object)) {
+    class(rval) <- c("qqrplot", "data.frame")
+  } else {
+    rval <- tibble::as_tibble(rval)
+    class(rval) <- c("qqrplot", class(rval))
+  }
+
+  rval
+}
+
+#' @export
+print.qqrplot <- function(x, ...) {
+
+  ## get arg `type`, `style` and `freq`
+  detrend <- use_arg_from_attributes(x, "detrend", default = NULL, force_single = TRUE)
+
+  ## return custom print statement
+  if (is.null(detrend)) {
+    cat("A `qqrplot` object without mandatory attribute `detrend`\n\n")
+  } else {
+    cat(
+      sprintf(
+        "A `qqrplot` object with `detrend = \"%s\"`\n\n",
+        detrend
+      )
+    )
+  }
+
+  ## call next print method
+  NextMethod()
+}
