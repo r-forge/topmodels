@@ -263,7 +263,10 @@ qqrplot.default <- function(
     ))) {
       rval <- data.frame(
         expected = qthe,
-        observed = qres
+        observed = qres,
+        simint_observed_lwr = NA_real_,
+        simint_observed_upr = NA_real_,
+        simint_expected = NA_real_
       )
     } else {
       rval <- data.frame(
@@ -282,7 +285,10 @@ qqrplot.default <- function(
     ))) {
       rval <- data.frame(
         expected = qthe,
-        observed = qres - qthe
+        observed = qres - qthe,
+        simint_observed_lwr = NA_real_,
+        simint_observed_upr = NA_real_,
+        simint_expected = NA_real_
       )
     } else {
       rval <- data.frame(
@@ -812,7 +818,7 @@ plot.qqrplot <- function(x,
     }
 
     ## add qq plot
-    for (i in 1L:ncol(d[grepl("^y$|y_[0-9]", names(d))])) {
+    for (i in 1L:ncol(d[grepl("^observed$|observed_[0-9]", names(d))])) {
       points.default(
         d[grepl("expected", names(d))][, i],
         d[grepl("observed", names(d))][, i],
@@ -1012,17 +1018,20 @@ autoplot.qqrplot <- function(object,
   # -------------------------------------------------------------------
   ## Get a long data.frame with all x and y simulations
   ## FIXME: (ML) This must be done in base and somehow nicer
-  object <- tidyr::pivot_longer(object,
+  object_long <- tidyr::pivot_longer(object,
     cols = names(object)[grepl("^expected$|expected_[0-9]", names(object))],
     names_to = "expected_sim", values_to = "expected"
   )
-  object <- tidyr::pivot_longer(object,
-    cols = names(object)[grepl("^observed$|observed_[0-9]", names(object))],
+  object_long <- tidyr::pivot_longer(object_long,
+    cols = names(object_long)[grepl("^observed$|observed_[0-9]", names(object_long))],
     names_to = "observed_sim", values_to = "observed"
   )
-  object <- object[which(gsub("expected", "", object$expected_sim) == gsub("observed", "", object$observed_sim)), ]
-  object$observed_sim <- NULL
-  object <- as.data.frame(object)
+  object_long <- object_long[which(gsub("expected", "", object_long$expected_sim) == gsub("observed", "", object_long$observed_sim)), ]
+  object_long$observed_sim <- NULL
+  object_long <- as.data.frame(object_long)
+
+  ## FIXME: (ML) Improve somehow (see fixme above)
+  names(object)[grepl("^expected_1$|^observed_1$", names(object))] <- c("expected", "observed")
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
@@ -1061,7 +1070,7 @@ autoplot.qqrplot <- function(object,
   }
 
   ## add simint
-  if (simint && all(c("simint_expected", "simint_observed_lwr", "simint_observed_upr") %in% names(object))) {
+  if (TRUE) {
     rval <- rval +
       geom_qqr_simint(
         ggplot2::aes_string(
@@ -1069,24 +1078,27 @@ autoplot.qqrplot <- function(object,
           ymin = "simint_observed_lwr", 
           ymax = "simint_observed_upr",
           group = "group"
-        )
+        ),
+        na.rm = TRUE
       )
   }
 
   ## add points
   rval <- rval +
-    geom_qqr_point(ggplot2::aes_string(alpha = "group", colour = "group", fill = "group", 
-      shape = "group", size = "group"), stroke = stroke)
+    geom_qqr_point(ggplot2::aes_string(x = "expected", y = "observed", 
+      alpha = "group", colour = "group", fill = "group", 
+      shape = "group", size = "group"), data = object_long, stroke = stroke
+    )
   ## FIXME: (ML) alpha is not correctly represented in the legend 
   ##  (compare: https://stackoverflow.com/q/69634268/6583972?sem=2)
 
   ## set the colors, shapes, etc.
   rval <- rval +
-    ggplot2::scale_alpha_manual(values = plot_arg$alpha) +
-    ggplot2::scale_colour_manual(values = plot_arg$colour) +
-    ggplot2::scale_fill_manual(values = plot_arg$fill) + 
-    ggplot2::scale_shape_manual(values = plot_arg$shape) +
-    ggplot2::scale_size_manual(values = plot_arg$size) 
+    ggplot2::scale_alpha_manual(values = plot_arg$alpha, na.value = NA) +
+    ggplot2::scale_colour_manual(values = plot_arg$colour, na.value = NA) +
+    ggplot2::scale_fill_manual(values = plot_arg$fill, na.value = NA) + 
+    ggplot2::scale_shape_manual(values = plot_arg$shape, na.value = NA) +
+    ggplot2::scale_size_manual(values = plot_arg$size, na.value = NA) 
 
   ## annotation
   rval <- rval + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
