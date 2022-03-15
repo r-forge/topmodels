@@ -194,15 +194,15 @@ if (require("ggplot2")) {
   d$group <- factor(d$group, labels = main)
   
   ## Polygon CI around identity line used as reference 
-  gg1 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+  gg1 <- ggplot(data = d, aes(x = expected, y = observed, na.rm = TRUE)) + 
     geom_qqr_ref() + 
     geom_qqr_confint(fill = "red") + 
     geom_qqr_point() + 
     geom_qqr_simint(
       aes(
-        x = x_rg_lwr, 
-        ymin = y_rg_lwr, 
-        ymax = y_rg_upr,
+        x = simint_expected, 
+        ymin = simint_observed_lwr, 
+        ymax = simint_observed_upr,
         group = group
       )
     ) + 
@@ -212,15 +212,15 @@ if (require("ggplot2")) {
   gg1 + facet_wrap(~group)
   
   ## Polygon CI around robust reference line
-  gg2 <- ggplot(data = d, aes(x, y, na.rm = TRUE)) + 
+  gg2 <- ggplot(data = d, aes(x = expected, y = observed, na.rm = TRUE)) + 
     geom_qqr_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
     geom_qqr_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
     geom_qqr_point() + 
     geom_qqr_simint(
       aes(
-        x = x_rg_lwr, 
-        ymin = y_rg_lwr, 
-        ymax = y_rg_upr,
+        x = simint_expected, 
+        ymin = simint_observed_lwr, 
+        ymax = simint_observed_upr,
         group = group
       )
     ) + 
@@ -233,13 +233,13 @@ if (require("ggplot2")) {
   q1 <- qqrplot(m1_pois, trafo = qunif, plot = FALSE)
   q2 <- qqrplot(m2_pois, plot = FALSE)
   
-  gg3 <- ggplot(data = q1, aes(x, y, na.rm = TRUE)) +
+  gg3 <- ggplot(data = q1, aes(x = expected, y = observed, na.rm = TRUE)) +
     geom_qqr_ref() +
     geom_qqr_confint(fill = "red", trafo = qunif) +
     geom_qqr_point()
   gg3
   
-  gg4 <- ggplot(data = q2, aes(x, y, na.rm = TRUE)) +
+  gg4 <- ggplot(data = q2, aes(x = expected, y = observed, na.rm = TRUE)) +
     geom_qqr_ref() +
     geom_qqr_confint(fill = "red", trafo = qnorm) +
     geom_qqr_point()

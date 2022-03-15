@@ -17,12 +17,13 @@ qqrplot(object, ...)
   trafo = qnorm,
   nsim = 1L,
   delta = NULL,
-  confint = TRUE,
   simint = TRUE,
   simint_level = 0.95,
   simint_nrep = 250,
   simint_seed = 1,
+  confint = TRUE,
   single_graph = FALSE,
+  ref = TRUE,
   xlab = "Theoretical quantiles",
   ylab = if (!detrend) "Quantile residuals" else "Deviation",
   main = NULL,
@@ -53,10 +54,6 @@ different distribution scale (default: Gaussian).}
 
 \item{nsim, delta}{arguments passed to \code{qresiduals}.}
 
-\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
-If not set to `FALSE`, the pointwise confidence interval of the (randomized)
-quantile residuals are visualized.}
-
 \item{simint}{logical. In case of discrete distributions, should the simulation
 (confidence) interval due to the randomization be visualized?}
 
@@ -69,8 +66,14 @@ simulation (confidence) interval due to the randomization.}
 \item{simint_seed}{numeric. The seed to be set for calculating the simint of values
 due to the randomization.}
 
+\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
+If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+quantile residuals are visualized.}
+
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
+
+\item{ref}{to be fixed.}
 
 \item{xlab, ylab, main, \dots}{graphical parameters passed to
 \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}
@@ -81,8 +84,8 @@ An object of class \code{"qqrplot"} inheriting from
 with the following variables: \item{x}{theoretical quantiles,}
 \item{y}{deviations between theoretical and empirical quantiles.} In case of
 randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
-lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
-\code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
+lower and upper confidence interval bounds (\code{simint_expected}, \code{simint_observed_lwr},
+\code{simint_observed_upr}) can optionally be returned.  Additionally,
 \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
 trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
 was computed are stored as attributes.
