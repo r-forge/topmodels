@@ -267,8 +267,8 @@ pithist.default <- function(
     if (is.null(trafo) || identical(trafo, identity)) {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
-      tmp_range <- max(abs(p))
-      if (length(breaks) == 1L) breaks <- seq(-tmp_range, tmp_range, length.out = breaks + 1L)
+      tmp_range <- range(p, finite = TRUE) # FIXME: (ML) check if this is correct
+      if (length(breaks) == 1L) breaks <- seq(tmp_range[1], tmp_range[2], length.out = breaks + 1L)
     }
 
     ## collect everything as data.frame
@@ -330,8 +330,8 @@ pithist.default <- function(
     if (is.null(trafo) || identical(trafo, identity)) {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
-      tmp_range <- max(abs(p))
-      if (length(breaks) == 1L) breaks <- seq(-tmp_range, tmp_range, length.out = breaks + 1L)
+      tmp_range <- range(p, finite = TRUE) # FIXME: (ML) check if this is correct
+      if (length(breaks) == 1L) breaks <- seq(tmp_range[1], tmp_range[2], length.out = breaks + 1L)
     }
 
     ## equation 3 and computation of probability for each interval (f_j)

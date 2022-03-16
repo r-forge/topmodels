@@ -15,55 +15,207 @@ vignette: >
   %\VignettePackage{topmodels}
 ---
 
-```{css zoom-lib-src, echo = FALSE}
-script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
-```
-
-```{js zoom-jquery, echo = FALSE}
- $(document).ready(function() {
-    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
-    // onClick function for all plots (img's)
-    $('img:not(.zoomImg)').click(function() {
-      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
-      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
-    });
-    // onClick function for zoomImg
-    $('img.zoomImg').click(function() {
-      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
-    });
-  });
-```
-
 ```{r preliminaries, echo = FALSE, message = FALSE}
 library("topmodels")
+library("distributions3")
 library("crch")
 library("ggplot2")
-options(digits = 4)
 knitr::opts_chunk$set(fig.aling = "center")
-
-make_residuals_plot <- function(object, breaks = breaks) {
-
-  name <- deparse(substitute(object))
-
-  set.seed(1)
-  pithist(object, breaks = c(0, 0.01, 1:9 / 10, 0.99, 1), main = name)
-
-  set.seed(1)
-  hist(qq <- qresiduals(object), freq = FALSE,
-    main = sprintf("Histogram of qresiduals(%s)", name), xlab = "Q-Q residuals")
-  curve(dnorm, from = min(qq), to = max(qq), col = 2, add = TRUE)
-  legend("topright", "std. norm", lty = 1, col = 2, bty = "n")
-
-  set.seed(1)
-  boxplot(data.frame("Q-Q residuals" = qresiduals(object), "std. norm" = rnorm(length(qresiduals(object)))))
-}
-
-make_topmodels_plot <- function(object) {
-  topmodels(object, which = c(1:2, 4:5), ask = FALSE, spar = FALSE)
-}
 ```
 
-## Precipitation forecasts
+# Goals in the 2018 FIFA World Cup
+
+To investigate the number of goals scored per match in the 2018 FIFA World Cup,
+the `FIFA2018` data set provides two rows, one for each team, for each of the 64 matches
+during the tournament. In the following, we treat the goals scored by the two
+teams in the same match as independent which is a realistic assumption for this
+particular data set. We just remark briefly that there are also bivariate
+generalizations of the Poisson distribution that would allow for correlated
+observations but which are not considered here.
+
+In addition to the goals, the data set provides some basic meta-information for
+the matches (an ID, team name abbreviations, type of match, group vs. knockout stage)
+as well as some further covariates that we will revisit later in this document.
+The data looks like this:
+
+```{r}
+data("FIFA2018", package = "distributions3")
+head(FIFA2018)
+```
+
+For now, we will focus on the `goals` variable only. A brief summary yields
+
+```{r}
+summary(FIFA2018$goals)
+```
+
+showing that the teams scored between $0$ and $6$ goals per match with
+an average of $\bar y = `r round(mean(FIFA2018$goals), digits = 3)`$
+from the observations $y_i$ ($i = 1, \dots, 128$). The corresponding
+table of observed relative frequencies is:
+
+```{r}
+observed <- prop.table(table(FIFA2018$goals))
+observed
+```
+
+(Note that in recent versions of R using `proportions()` rather than `prop.table()`
+is recommended.)
+
+This confirms that goals are relatively rare events in a soccer game with
+each team scoring zero to two goals per match in almost 90 percent of the
+matches. Below we show that this observed frequency distribution can be
+approximated very well by a Poisson distribution which can subsequently
+be used to obtain predicted probabilities for the goals scored in a match.
+
+
+## Basic fitted distribution
+
+In a first step, we simply assume that goals are scored with a constant
+mean over all teams and matches and hence just fit a single Poisson
+distribution for the number of goals. To do so, we obtain a point
+estimate of the Poisson parameter by using the empirical mean
+$\hat \lambda = \bar y = `r round(mean(FIFA2018$goals), digits = 3)`$
+and set up the corresponding distribution object:
+
+```{r}
+p_const <- distributions3::Poisson(lambda = mean(FIFA2018$goals))
+p_const
+```
+
+Wich actually corresponds to the maximum likelihood estimator for this distriubtion
+fitting a generalized linear model (GLM) to the data that links
+the expected number of goals per team/match $\lambda_i$ to the linear predictor
+$x_i^\top \beta$ with regressor vector $x_i^\top$
+and corresponding coefficient vector $\beta$ using a log-link:
+$\log(\lambda_i) = x_i^\top \beta$. The maximum likelihood estimator $\hat \beta$
+with corresponding inference, predictions, residuals, etc. can be obtained
+using the `glm()` function from base R with `family = poisson`. 
+
+Here, in the simplest case we fit an intercept-only model where the regressor vector 
+consists solely of a constant intercept without further regressors ($x_i^\top = 1$):
+
+```{r}
+m_ic <- glm(goals ~ 1, data = FIFA2018, family = poisson)
+m_ic
+```
+
+The corresponding prediction for the
+number of goals can be obtained manually from the extracted `coef()`
+by applying `exp()` (as the inverse of the log-link).
+
+```{r}
+lambda_zero <- exp(coef(m_ic)[1])
+lambda_zero
+```
+
+To evaluate the marignal fit, we can compare the 
+the observed and expected absolute frequencies using a so-called _rootogram_
+[@Kleiber+Zeileis:2016]. The gray bars represent the observed
+frequencies overlayed by the expected frequencies as a red line.
+
+```{r}
+r1 <- rootogram(m_ic, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE)
+```
+
+## Poisson regression and probabilistic forecasting
+
+To account for different expected performances from the teams in the 2018 FIFA World Cup,
+the `FIFA2018` data provides an estimated `logability` for each team. These
+have been estimated by @Zeileis+Leitner+Hornik:2018 prior to the start of the
+tournament (2018-05-20) based on quoted odds from 26 online bookmakers using
+the bookmaker consensus model of @Leitner+Zeileis+Hornik:2010. The `difference` in
+`logability` between a team and its opponent is a useful predictor for the
+number of `goals` scored. 
+
+Hence, the regressor vector is $x_i^\top = (1, \mathtt{difference}_i)$
+where as for the intercept-only model a log-link is employed:
+
+```{r}
+m_prob <- glm(goals ~ difference, data = FIFA2018, family = poisson)
+m_prob
+```
+
+Here, the slope of $`r round(coef(m_prob)[2], digits = 3)`$ can be interpreted
+as an ability elasticity of the number of goals scored. This is because the
+difference of the log-abilities can also be understood as the log of the ability
+ratio. Thus, when the ability ratio increases by $1$ percent, the expected
+number of goals increases approximately by $`r round(coef(m_prob)[2], digits = 3)`$
+percent.
+
+As before, we can evaluate the marginal fit by comparing the observed and expected frequencies
+using a so-called _rootogram_:
+
+```{r}
+r2 <- rootogram(m_prob, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE, plot = FALSE)
+autoplot(c(r1, r2))
+```
+
+Further in a first step, we show the frequencies on a square root scale in order to stabilize
+the variances of the discrepancies which puts a larger focus on discrepancies for small frequencies.
+
+```{r}
+autoplot(c(r1, r2), scale = "sqrt")  # FIXME: (ML) names got lost
+```
+
+In a second step, we employ a so-called _hanging rootogram_ where bars representing the square-root of the observed frequencies are "hanging" from the square-root of the expected frequencies in the red line.
+The offset around the x-axis compared to a reference line now clearly shows the difference between the two frequencies for the intercept only model and the full probabilistic model. For both models the differences are reasonably close to zero indicating a rather good marginal fit:
+
+```{r}
+autoplot(c(r1, r2), scale = "sqrt", style = "hanging", ref = TRUE)  # FIXME: (ML) names got lost
+```
+
+So far we have only evaluated the marginal calibration comparing whether the
+oberseved frequencies match the frequencies expected by estimated model on the observaional scale.
+In the next step we will evaluate the probabilistic calibration performed on the probability scale.
+
+Probabilistic calibration is usually assessed using probability
+integral transform (PIT) values
+[@Dawid:1984;@Diebold+Gunther+Tay:1998;@Gneiting+Balabdaoui+Raftery:2007] or
+so-called PIT residuals [@Warton:2017]. These are simply the predictive
+cumulative distribution function (CDF) evaluated at the observations
+
+$$u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i),$$
+
+where $F( \cdot )$ denotes the CDF of the modeled distribution $f( \cdot )$
+with estimated parameters $\hat{\boldsymbol{\theta}}_{i}$. PIT residuals have
+the desirable property, that if the model is a good approximation to the true
+data-generating process, i.e., the observation is drawn from the predictive
+distribution, the PIT residuals $u_i$ are approximately uniformly distributed
+on $[0, 1]$ for continous predictive distributions $F( \cdot )$:
+
+```{r}
+p1 <- pithist(m_prob)
+```
+
+Alternatively PIT residuals can also be transformed to the normal scale, 
+so that their extreme values are more widely spread putting a larger focus on 
+violations of the distribution assumption within its tails.
+
+```{r}
+p2 <- pithist(m_prob, trafo = qnorm, type = "random", simint = FALSE) # `type = "expected"` does not work, check!
+```
+
+PIT residuals transformed to the normal scale can also be validated by well
+known Q-Q Plots. By plotting the raw (transformed) PIT residuals without any
+discretization, no rather arbitrary breakpoint must be chosen and certain
+misspecification cannot be masked.  For example, misscpecifications in the
+outer tails of the distribution are often not visible in PIT histograms, as the
+intervals are averaving over many data points.
+
+```{r}
+q1 <- qqrplot(m_prob, confint = "line", simint = FALSE)
+```
+
+As in Q-Q plots, small too medium deviations can be quite hard to detect,
+untilting the plot by subtracting the theoretical quantiles, makes detecting
+pattern of departure from a now horizontal line much easier:
+
+```{r}
+w1 <- wormplot(m_prob, confint = "line", simint = FALSE)
+```
+
+# Precipitation forecasts
 
 Censored or truncated response variables occur in a variety of applications.
 Censored data arise if exact values are only reported in a restricted range.
@@ -90,109 +242,43 @@ RainIbk <- subset(RainIbk, enssd > 0)
 
 ```{r crch models}
 ## linear model
-LM <- lm(rain ~ ensmean, data = RainIbk)
-
-## heteroscedastic censored regression with a gaussian distribution assumption
-CRCH_gaus <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
-  dist = "gaussian")
+m_lm <- lm(rain ~ ensmean, data = RainIbk)
 
 ## heteroscedastic censored regression with a logistic distribution assumption
-CRCH_log <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
+m_hclog <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
   dist = "logistic")
 ```
 
-```{r crch overview-plot, echo = FALSE, eval = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 1), bg = "#f7f7f7")
+```{r}
+plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
+abline(coef(m_lm)[1:2], col = 1, lwd = 2)
+abline(coef(m_hclog)[1:2], col = 4, lwd = 2)
 
-plot(rain~ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
-abline(coef(LM)[1:2], col = 1, lwd = 2)
-abline(coef(CRCH_gaus)[1:2], col = 2, lwd = 2)
-abline(coef(CRCH_log)[1:2], col = 4, lwd = 2)
-
-legend("topright", lwd = c(1, 1, 1), lty = c(1, 1, 1), col = c(1, 2, 4), 
-  c("LM", "CRCH gaussian", "CRCH logistic"), bty = "n")
-
-par(mfrow = c(1, 1))
+legend("topright", lwd = c(1, 1), lty = c(1, 1), col = c(1, 4), 
+  c("m_lm", "m_hclog"), bty = "n")
 ```
 
-```{r crch simulated, echo = FALSE, eval = FALSE}
-set.seed(1)
-d <- data.frame(x = runif(500, -1, 1), err = rnorm(500, sd = 1)) |>
-  transform(y = x + err) |>
-  transform(yc = pmax(0, y))
-m0 <- lm(y ~ x, data = d)
-m1 <- crch(y ~ x | x, data = d)
-m2 <- crch(yc ~ x | x, data = d, left = 0)
-m3 <- trch(y ~ x | x, data = d, left = 0, subset = y > 0)
+```{r}
+r1 <- rootogram(m_lm, plot = FALSE)
+r2 <- rootogram(m_hclog, plot = FALSE)
 
-cbind(coef(m1), coef(m2), coef(m3))
-summary(m1)
-summary(m2)
-summary(m3)
+autoplot(c(r1, r2))
 
-library("modelsummary")
-modelsummary(list(full = m1, censored = m2, truncated = m3))
-
-plot(c(
-  wormplot(m1, plot = FALSE), 
-  wormplot(m2, plot = FALSE), 
-  wormplot(m3, plot = FALSE)
-))
 ```
 
-```{r topmodels-rootogram, echo = FALSE, fig.height = 6, out.width = "100%", fig.align = "center"}
-r1 <- rootogram(LM, plot = FALSE)
-r2 <- rootogram(CRCH_gaus, plot = FALSE)
+```{r}
+p1 <- pithist(m_lm, plot = FALSE)
+p2 <- pithist(m_hclog, plot = FALSE)
 
-gg1 <- autoplot(
-    c(r1, r2)
-  ) 
-gg1
+autoplot(c(p1, p2))
+autoplot(c(p1, p2), colour = c(1, 4), style = "line", single_graph = TRUE, confint_col = 1, confint = "line", ref = FALSE)
 ```
 
-```{r topmodels-pithist, echo = FALSE, fig.height = 4, out.width = "100%", fig.align = "center"}
-p1 <- pithist(LM, plot = FALSE)
-p2 <- pithist(CRCH_gaus, plot = FALSE)
-p3 <- pithist(CRCH_log, plot = FALSE)
-
-gg2 <- autoplot(
-    c(p1, p2, p3), 
-    style = "line", 
-    col = c(1, 2, 4), 
-    confint = FALSE,
-    ylim = c(0.6, 1.4), 
-    single_graph = TRUE
-  ) + 
-  geom_pithist_confint(
-    aes(x = mids, y = counts, width = width, group = group), 
-    style = "line", 
-    colour = 1
-  ) + 
-  geom_pithist_ref(
-    aes(x = mids, y = counts, width = width, group = group), 
-    style = "line", 
-    colour = 1,
-    linetype = 2,
-    size = 0.5
-  )
-gg2
+```{r}
+q1 <- qqrplot(m_lm, plot = FALSE)
+q2 <- qqrplot(m_hclog, plot = FALSE)
+autoplot(c(q1, q2), colour = c(1, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
 ```
-
-```{r topmodels-wormplot, echo = FALSE, fig.height = 4, out.width = "100%", fig.align = "center"}
-w1 <- wormplot(LM, plot = FALSE)
-w2 <- wormplot(CRCH_gaus, plot = FALSE)
-w3 <- wormplot(CRCH_log, plot = FALSE)
-
-gg3 <- autoplot(
-    c(w1, w2, w3), 
-    col = c(1, 2, 4), 
-    confint = "line",
-    range = FALSE,
-    single_graph = TRUE
-  ) 
-gg3
-```
-
 
 ## References
 
