@@ -60,8 +60,6 @@
 #' (confidence) interval due to the randomization.
 #' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
 #' simulation (confidence) interval due to the randomization.
-#' @param simint_seed numeric. The seed to be set for calculating the simint of values
-#' due to the randomization. 
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
 #' @param xlab,ylab,main,\dots graphical parameters passed to
@@ -126,7 +124,6 @@ wormplot.default <- function(object,
                              simint = TRUE,
                              simint_level = 0.95,
                              simint_nrep = 250,
-                             simint_seed = 1,
                              single_graph = FALSE,
                              xlab = "Theoretical quantiles",
                              ylab = "Deviation",
@@ -146,7 +143,6 @@ wormplot.default <- function(object,
           simint = simint,
           simint_level = simint_level,
           simint_nrep = simint_nrep,
-          simint_seed = simint_seed,
           single_graph = single_graph,
           xlab = xlab,
           ylab = ylab,

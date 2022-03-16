@@ -951,22 +951,19 @@ plot.pithist <- function(x,
     if (any(xlim_idx)) {
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(z)[xlim_idx]
     }
+
     if (any(ylim_idx) && !single_graph) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(c(y, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
-    }
-    if (any(ylim_idx) && single_graph) {
-      if (freq) {
-        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-          range(c(x$observed, x$confint_lwr, x$confint_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
-      } else {
-        y_tmp <- lapply(1:n, function(i) {
-          d <- x[x$group == i, ]
-          rval <- d$observed / sum(d$observed * d$width)
-        })
-        plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-          range(c(y_tmp, x$confint_lwr, x$confint_upr, x$simint_lwr, x$simint_upr), na.rm = TRUE)[ylim_idx]
-      }
+        range(
+          c(y, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), 
+          na.rm = TRUE
+        )[ylim_idx]
+    } else if (any(ylim_idx) && single_graph) {
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
+        range(
+          c(x$observed, x$confint_lwr, x$confint_upr, x$simint_lwr, x$simint_upr), 
+          na.rm = TRUE
+        )[ylim_idx]
     }
 
     ## trigger plot

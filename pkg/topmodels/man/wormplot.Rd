@@ -20,7 +20,6 @@ wormplot(object, ...)
   simint = TRUE,
   simint_level = 0.95,
   simint_nrep = 250,
-  simint_seed = 1,
   single_graph = FALSE,
   xlab = "Theoretical quantiles",
   ylab = "Deviation",
@@ -64,9 +63,6 @@ quantile residuals are visualized.}
 
 \item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the
 simulation (confidence) interval due to the randomization.}
-
-\item{simint_seed}{numeric. The seed to be set for calculating the simint of values
-due to the randomization.}
 
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}

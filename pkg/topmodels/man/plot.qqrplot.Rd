@@ -10,33 +10,40 @@
   x,
   single_graph = FALSE,
   detrend = NULL,
-  confint = NULL,
   simint = NULL,
+  confint = NULL,
+  confint_level = 0.95,
   ref = NULL,
-  identity = TRUE,
-  probs = c(0.25, 0.75),
-  trafo = NULL,
+  ref_identity = TRUE,
+  ref_probs = c(0.25, 0.75),
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  col = adjustcolor("black", alpha.f = 0.4),
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
-  pch = 19,
   axes = TRUE,
   box = TRUE,
+  col = "black",
+  pch = 19,
+  simint_col = "black",
+  simint_alpha = 0.2,
+  confint_col = "black",
+  confint_lty = 2,
+  confint_lwd = 1.25,
+  ref_col = "black",
+  ref_lty = 2,
+  ref_lwd = 1.25,
   ...
 )
 
 \method{points}{qqrplot}(
   x,
+  detrend = NULL,
   simint = FALSE,
-  col = adjustcolor("black", alpha.f = 0.4),
-  fill = adjustcolor("black", alpha.f = 0.2),
-  alpha_min = 0.2,
+  col = "black",
   pch = 19,
+  simint_col = "black",
+  simint_alpha = 0.2,
   ...
 )
 
@@ -44,24 +51,35 @@
   object,
   single_graph = FALSE,
   detrend = NULL,
-  confint = TRUE,
-  simint = TRUE,
-  ref = TRUE,
-  identity = TRUE,
-  probs = c(0.25, 0.75),
-  trafo = NULL,
+  simint = NULL,
+  confint = NULL,
+  confint_level = 0.95,
+  ref = NULL,
+  ref_identity = TRUE,
+  ref_probs = c(0.25, 0.75),
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
   ylab = NULL,
   main = NULL,
+  legend = FALSE,
+  theme = NULL,
   alpha = NA,
   colour = "black",
   fill = NA,
   shape = 19,
   size = 2,
   stroke = 0.5,
-  legend = FALSE,
+  simint_fill = "black",
+  simint_alpha = 0.2,
+  confint_colour = NULL,
+  confint_fill = NULL,
+  confint_size = NULL,
+  confint_linetype = NULL,
+  confint_alpha = NULL,
+  ref_colour = "black",
+  ref_size = 0.5,
+  ref_linetype = 2,
   ...
 )
 }
@@ -71,23 +89,31 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
-\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
-If not set to `FALSE`, the pointwise confidence interval of the (randomized)
-quantile residuals are visualized.}
-
 \item{simint}{logical or quantile specification. Should the simint of
 quantiles of the randomized quantile residuals be visualized? If
 \code{TRUE}, then \code{simint = c(0.01, 0.99)} is used.}
 
-\item{ref, xlim, ylim, col, fill, alpha_min, pch, axes, box}{additional graphical
+\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
+If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+quantile residuals are visualized.}
+
+\item{confint_level}{numeric. The confidence level required.}
+
+\item{ref, xlim, ylim, col, fill, pch, axes, box}{additional graphical
 parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.}
 
 \item{xlab, ylab, main, \dots}{graphical plotting parameters passed to
 \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 respectively.}
 
-\item{alpha, colour, shape, size, stroke, legend, detrend, identity, trafo, probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
+\item{simint_col, simint_alpha, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Fix me.}
+
+\item{theme}{Fix me.}
+
+\item{alpha, colour, shape, size, stroke, legend, detrend, ref_identity, ref_probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
 \code{object} is a object of class \code{qqrplot}.}
+
+\item{simint_fill, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype}{Fix me.}
 }
 \description{
 Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
@@ -115,7 +141,7 @@ m1_lm <- lm(dist ~ speed, data = cars)
 qqrplot(m1_lm)
 
 ## customize colors
-qqrplot(m1_lm, plot = "base", ref = "blue", lty = 2, pch = 20)
+qqrplot(m1_lm, plot = "base", ref_col = "blue", lty = 2, pch = 20)
 
 ## add separate model
 if (require("crch", quietly = TRUE)) {
@@ -144,7 +170,7 @@ if (require("crch")) {
   qq2_crch <- qqrplot(m2_crch, plot = FALSE)
 
   ## plot in single graph
-  plot(c(qq2_lm, qq2_crch), col = c(1, 2), simint = c(1, 2), ref = 3, single_graph = TRUE)
+  plot(c(qq2_lm, qq2_crch), col = c(1, 2), simint_col = c(1, 2), single_graph = TRUE)
 }
 
 #-------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ nd_cars <- cars[1:10, ]
 expect_silent( 
   qqrplot(m1, 
     newdata = nd_cars, class = "tibble", trafo = qnorm, nsim = 1L, delta = NULL, 
-    simint = "black", simint_level = 0.9, simint_nrep = 20, simint_seed = 3, 
+    simint_col = "black", simint_level = 0.9, simint_nrep = 20, 
     xlab = "test", ylab = "test", main = "test", plot = "base"
   )
 )
@@ -27,7 +27,7 @@ expect_silent(
 expect_silent( 
   qqrplot(m2, 
     newdata = nd_cars, class = "tibble", trafo = qnorm, nsim = 1L, delta = 1E-10,
-    simint = "black", simint_level = 0.9, simint_nrep = 20, simint_seed = 3, 
+    simint_col = "black", simint_level = 0.9, simint_nrep = 20, 
     xlab = "test", ylab = "test", main = "test", plot = "base"
   )
 )
