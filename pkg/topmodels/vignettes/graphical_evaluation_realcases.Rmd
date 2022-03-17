@@ -69,7 +69,6 @@ from the observations $y_i$ ($i = 1, \dots, 128$). The corresponding
 table of observed absolute and relative frequencies are:
 
 ```{r}
-table(FIFA2018$goals)
 prop.table(table(FIFA2018$goals))
 ```
 
@@ -130,6 +129,14 @@ predictor $x_i^\top \hat \beta$ that is predicted by default).
 predict(m_ic, newdata = data.frame(difference = 0), type = "response")
 ```
 
+This yields the same predicted Poisson distribution for all teams and matches
+in this tournament - a slightly unrealistic assumption:
+
+```{r}
+p_ic <- Poisson(lambda = fitted(m_ic))
+head(p_ic)
+```
+
 To account for different expected performances from the teams in the 2018 FIFA World Cup,
 the `FIFA2018` data provides an estimated `logability` for each team. These
 have been estimated by @Zeileis+Leitner+Hornik:2018 prior to the start of the
@@ -142,53 +149,81 @@ Hence, the the intercept-only model `m_ic` can be extended by using the
 regressor vector $x_i^\top = (1, \mathtt{difference}_i)$:
 
 ```{r}
-m_prob <- glm(goals ~ difference, data = FIFA2018, family = poisson)
-m_prob
+m_reg <- glm(goals ~ difference, data = FIFA2018, family = poisson)
+m_reg
 ```
 
-Now, the slope of $`r round(coef(m_prob)[2], digits = 3)`$ can be interpreted
+Now, the slope of $`r round(coef(m_reg)[2], digits = 3)`$ can be interpreted
 as an ability elasticity of the number of goals scored. This is because the
 difference of the log-abilities can also be understood as the log of the ability
 ratio. Thus, when the ability ratio increases by $1$ percent, the expected
-number of goals increases approximately by $`r round(coef(m_prob)[2], digits = 3)`$
+number of goals increases approximately by $`r round(coef(m_reg)[2], digits = 3)`$
 percent.
+
+In comparison to the intercept-only models, this 
+yields a different predicted Poisson distribution for each team/match
+in the tournament. We can set up the vector of all $128$ `Poisson()`
+distribution objects by extracting the vector of all fitted point estimates
+$(\hat \lambda_1, \dots, \hat \lambda_{128})^\top$:
+
+```{r}
+p_reg <- Poisson(lambda = fitted(m_reg))
+head(p_reg)
+```
 
 ## Model evaluation: Marginal calibration
 
-To evaluate the marignal fit, we can compare the 
-the observed and expected absolute frequencies using a so-called _rootogram_
-[@Kleiber+Zeileis:2016]. The gray bars represent the observed
-frequencies overlayed by the expected frequencies as a red line.
+Marginal calibration is generally concerned with whether the oberseved
+frequencies match the frequencies expected by the model. For discrete
+observations, frequencies for the observations themselves can be considered;
+for continuous observations or more generally, frequencies for intevals of
+observations are being used. Here, the expected frequencies are computed by
+differences between the predictive CDFs $F( \cdot )$, evaluated at the interval
+breaks. Hence, mariginal calibration is always obtained on the observation
+scale compared to the probabilistic calibration performed on the probability
+scale. This makes it expecially useful for evaluating count data models which predictions are 
+often close to zero. 
+
+To do so, we compute the expected absolute frequencies by averaging across the
+expectations per team/match from the regression model and compare these
+for both estimated models with the observed frequencies:
 
 ```{r}
-r1 <- rootogram(m_ic, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE)
+observed <- table(FIFA2018$goals)
+expected_ic <- pdf(p_ic, 0:6)
+expected_ic <- colMeans(expected_ic) * sum(observed)
+expected_reg <- pdf(p_reg, 0:6)
+expected_reg <- colMeans(expected_reg) * sum(observed)
+cbind(observed, expected_ic, expected_reg) 
 ```
 
-
-As before, we can evaluate the marginal fit by comparing the observed and expected frequencies
-using a so-called _rootogram_:
+Graphically, this comparison is a so-called _rootogram_
+[@Kleiber+Zeileis:2016] where the gray bars represent the observed
+frequencies overlayed by the expected frequencies as a red line. By using the function
+`rootogram()`, we can easily reproduce the previous results just using the fitted model objects 
+`m_ic` and `m_reg`:
 
 ```{r}
-r2 <- rootogram(m_prob, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE, plot = FALSE)
+r1 <- rootogram(m_ic, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE, plot = FALSE)
+r2 <- rootogram(m_reg, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE, plot = FALSE)
 autoplot(c(r1, r2))
 ```
 
-Further in a first step, we show the frequencies on a square root scale in order to stabilize
-the variances of the discrepancies which puts a larger focus on discrepancies for small frequencies.
+Further, in order to stabilize the variances of the discrepancies, i.e., putting more focus on discrepancies for small frequencies, we can show the frequencies on a square root scale: 
 
 ```{r}
 autoplot(c(r1, r2), scale = "sqrt")  # FIXME: (ML) names got lost
 ```
 
 In a second step, we employ a so-called _hanging rootogram_ where bars representing the square-root of the observed frequencies are "hanging" from the square-root of the expected frequencies in the red line.
-The offset around the x-axis compared to a reference line now clearly shows the difference between the two frequencies for the intercept only model and the full probabilistic model. For both models the differences are reasonably close to zero indicating a rather good marginal fit:
+Here, the offset around the x-axis compared to a reference line clearly shows the difference between the two frequencies for the intercept only model and the full probabilistic model. For both models the differences are reasonably close to zero indicating a rather good marginal fit:
 
 ```{r}
 autoplot(c(r1, r2), scale = "sqrt", style = "hanging", ref = TRUE)  # FIXME: (ML) names got lost
 ```
 
 So far we have only evaluated the marginal calibration comparing whether the
-oberseved frequencies match the frequencies expected by estimated model on the observaional scale.
+oberseved frequencies match the frequencies expected by estimated model on the observational scale.
 In the next step we will evaluate the probabilistic calibration performed on the probability scale.
 
 ## Model evaluation: Probabilistic calibration
@@ -209,7 +244,7 @@ distribution, the PIT residuals $u_i$ are approximately uniformly distributed
 on $[0, 1]$ for continous predictive distributions $F( \cdot )$:
 
 ```{r}
-p1 <- pithist(m_prob)
+p1 <- pithist(m_reg)
 ```
 
 Alternatively PIT residuals can also be transformed to the normal scale, 
@@ -217,7 +252,7 @@ so that their extreme values are more widely spread putting a larger focus on
 violations of the distribution assumption within its tails.
 
 ```{r}
-p2 <- pithist(m_prob, trafo = qnorm, type = "random", simint = FALSE) # `type = "expected"` does not work, check!
+p2 <- pithist(m_reg, trafo = qnorm, type = "random", simint = FALSE) # `type = "expected"` does not work, check!
 ```
 
 PIT residuals transformed to the normal scale can also be validated by well
@@ -228,7 +263,7 @@ outer tails of the distribution are often not visible in PIT histograms, as the
 intervals are averaving over many data points.
 
 ```{r}
-q1 <- qqrplot(m_prob, confint = "line", simint = FALSE)
+q1 <- qqrplot(m_reg, confint = "line", simint = FALSE)
 ```
 
 As in Q-Q plots, small too medium deviations can be quite hard to detect,
@@ -236,7 +271,7 @@ untilting the plot by subtracting the theoretical quantiles, makes detecting
 pattern of departure from a now horizontal line much easier:
 
 ```{r}
-w1 <- wormplot(m_prob, confint = "line", simint = FALSE)
+w1 <- wormplot(m_reg, confint = "line", simint = FALSE)
 ```
 
 # Precipitation forecasts
