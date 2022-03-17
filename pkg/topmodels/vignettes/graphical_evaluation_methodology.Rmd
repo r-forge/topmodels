@@ -55,9 +55,6 @@ make_residuals_plot <- function(object, breaks = "Sturges", main = "") {
   legend("topright", "std. norm", lty = 1, col = 2, lwd = 2, bty = "n")
   box()
 }
-
-## create folder for graphics if does not exist
-dir.create("figures", showWarnings = FALSE)
 ```
 
 ```{r dgp, echo = FALSE}
@@ -396,8 +393,7 @@ respective standard normal quantiles.  This so-called de-trended Q-Q plot
 is therefore usually referred to as worm plot according to their naming.
 
 ## Summary plot
-```{r plot-qq, echo = FALSE, results = "hide"}
-grDevices::svg(file = "figures/graph_eval_meth_qq.svg", width = 14, height = 14)
+```{r plot-summary, echo = FALSE, fig.height = 14, fig.width = 14, out.width = "100%", fig.align = "center"}
 par(mfrow = c(6, 7), bg = "#f7f7f7")
 make_residuals_plot(m_norm, breaks = 20, main = "Well calibrated")
 make_residuals_plot(m_rskew, breaks = 20, main = "Too skew to the left")
@@ -456,10 +452,7 @@ rootogram(m_ltail, main = "Rootogram")
 rootogram(m_odisp, main = "Rootogram")
 rootogram(m_udisp, main = "Rootogram")
 par(mfrow = c(1, 1))
-dev.off()
 ```
-
-![](figures/graph_eval_meth_qq.svg){width=100%}
 
 Predictive distribution | well calibrated | too skew to the left | too skew to the right | tails too light | tails too heavy | underdispersed (underestimated variance) | overdispersed (overestimated variance)
 --- | --- | --- | --- | --- | --- | --- | ---

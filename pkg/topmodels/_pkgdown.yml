@@ -22,6 +22,8 @@ navbar:
           href: articles/graphical_evaluation_simulations.html
         - text: "Graphical Evaluation: Real Cases"
           href: articles/graphical_evaluation_realcases.html
+        - text: "Implementation: Functions for Graphical Evaluation"
+          href: articles/implementation_functions_graphical_evaluation.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"
@@ -44,8 +46,8 @@ reference:
       - plot.reliagram
       - plot.rootogram
       - topmodels
-      - geom_qqr_point
       - geom_pithist
+      - geom_qqrplot
       - geom_rootogram
   - title: "Procast infrastructure"
     contents: 
