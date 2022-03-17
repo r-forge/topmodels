@@ -30,7 +30,7 @@ FIFA World Cup employing a Poisson distribution. It is a direct extension of
 the vignette ["The Poisson Distribution: From Basic Probability Theory to
 Regression Models"](https://alexpghayes.github.io/distributions3/dev/articles/poisson.html)
 given in [`distributions3`](https://github.com/alexpghayes/distributions3). The
-second example models daily precipitation sums using a Gaussian normal
+second example models 3 day-accumulated precipitation sums using a Logistic
 distribution censored at zero accounting for non-negative precipitation sums.
 The use case builds heavily on the vignette ["Heteroscedastic Censored and Truncated
 Regression with crch"](https://cran.r-project.org/web/packages/crch/vignettes/crch.pdf) given in
@@ -295,19 +295,41 @@ This so-called de-trended Q-Q plot is best known as _worm plot_
 
 # Precipitation forecasts
 
-Censored or truncated response variables occur in a variety of applications.
-Censored data arise if exact values are only reported in a restricted range.
-Data may fall outside this range but are reported at the range limits. In
-contrast, if data outside this range are omitted completely we call the dataset
-truncated. E.g., consider wind measurements with an instrument that needs a
-certain minimum wind speed to start working. If wind speeds below this minimum
-are recorded as ≤ minimum the data are censored. If only wind speeds exceeding
-this limit are reported and those below are omitted the data are truncated.
-Even if the generating process is not as clear, censoring or truncation can be
-useful to consider limited data such as precipitation observations [@Messner+Mayr+Zeileis:2016]. 
+This use-case discusses a weather forecast example application of censored
+regression models. The example is taken from the vignette ["Heteroscedastic
+Censored and Truncated Regression with
+crch"](https://cran.r-project.org/web/packages/crch/vignettes/crch.pdf)
+provided for [`crch`](https://cran.r-project.org/web/packages/crch/) by
+@Messner+Mayr+Zeileis:2016. 
 
-The following application shows numerical weather predictions for daily precipitation sums
-for Innsbruck (Austria).
+Weather forecasts are usually based on numerical weather prediction (NWP)
+models, which take the current state of the atmosphere and calculate future
+weather by numerically simulating the main atmospheric processes. However, due
+to uncertain initial conditions and unknown or unresolved processes, these
+numerical predictions are always subject to errors.  To estimate these errors,
+many weather centers produce what are called ensemble forecasts: multiple NWP
+runs that use different initial conditions and model formulations.
+Unfortunately, these ensemble forecasts cannot account for all sources of
+error, so they are often still biased and uncalibrated. Therefore, they are
+often calibrated and corrected for systematic errors through statistical
+post-processing.
+
+One popular post-processing method is heteroscedastic linear regression where
+the ensemble mean is used as regressor for the location and the ensemble
+standard deviation or variance is used as regressor for the scale
+[Gneiting+Raftery+Westveld+Goldman:2005]. The following example applies
+heteroscedastic censored regression with a logistic distribution assumption to
+precipitation data in Innsbruck (Austria).
+
+The `RainIbk` data set contains observed 3 day-accumulated precipitation
+amounts (`rain`) and the corresponding 11 member ensemble forecasts of total
+accumulated precipitation amount between 5 and 8 days in advance (`rainfc.1`,
+`rainfc.2`, ... `rainfc.11`).  In previous studies it has been shown that it is
+of advantage to model the square root of precipitation rather than
+precipitation itself. Thus all precipitation amounts are square rooted before
+ensemble mean and standard deviation are derived. Furthermore, events with no
+variation in the ensemble are omitted:
+
 
 ```{r crch data}
 data("RainIbk", package = "crch")
@@ -319,6 +341,12 @@ RainIbk <- subset(RainIbk, enssd > 0)
 ```
 
 ## From linear regression to distributional regression models
+
+First, for comparison fit a homoscedastic linear regression model using the
+least squares approach for `rain` with `ensmean` as only regressor. As a more
+appropriate model for `rain`, we fit a hetereoscedastic censored model assuming
+an underlying logistic response distribution with `ensmean` as regressor for
+the location and `log(enssd)` as regressor for the scale:
 
 ```{r crch models}
 ## linear model
