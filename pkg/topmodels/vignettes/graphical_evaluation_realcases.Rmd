@@ -23,7 +23,21 @@ library("ggplot2")
 knitr::opts_chunk$set(fig.aling = "center")
 ```
 
+This vignette provides two real cases discussing the graphical evaluation of
+the marginal and probabilistic calibration of probabilistic regression models. The
+first example provides a short case study modeling the goals at the 2018 FIFA
+World Cup employing a Poisson distribution. It is a direct extension of the
+vignette given in [`distributions3`](https://github.com/alexpghayes/distributions3). The second example models daily
+precipitation sums using a Gaussian normal distribution censored at zero accounting for non-negative precipitation sums. The use case builds heavily on the vignette given in [`crch`](https://cran.r-project.org/web/packages/crch/) by @Messner+Mayr+Zeileis:2016. 
+
 # Goals in the 2018 FIFA World Cup
+
+This use-case employs the Poisson distribution for modeling count data along
+predicted probabilities for the number of goals in soccer matches from the 2018
+FIFA World Cup. The full analysis with an illustrative introduction from basic
+probability theory to regression models using the R package
+[`distributions3`](https://github.com/alexpghayes/distributions3) is given
+[here](https://alexpghayes.github.io/distributions3/dev/articles/poisson.html).
 
 To investigate the number of goals scored per match in the 2018 FIFA World Cup,
 the `FIFA2018` data set provides two rows, one for each team, for each of the 64 matches
@@ -52,11 +66,11 @@ summary(FIFA2018$goals)
 showing that the teams scored between $0$ and $6$ goals per match with
 an average of $\bar y = `r round(mean(FIFA2018$goals), digits = 3)`$
 from the observations $y_i$ ($i = 1, \dots, 128$). The corresponding
-table of observed relative frequencies is:
+table of observed absolute and relative frequencies are:
 
 ```{r}
-observed <- prop.table(table(FIFA2018$goals))
-observed
+table(FIFA2018$goals)
+prop.table(table(FIFA2018$goals))
 ```
 
 (Note that in recent versions of R using `proportions()` rather than `prop.table()`
@@ -69,45 +83,77 @@ approximated very well by a Poisson distribution which can subsequently
 be used to obtain predicted probabilities for the goals scored in a match.
 
 
-## Basic fitted distribution
+## From basic probability theory to regression models
 
-In a first step, we simply assume that goals are scored with a constant
-mean over all teams and matches and hence just fit a single Poisson
-distribution for the number of goals. To do so, we obtain a point
-estimate of the Poisson parameter by using the empirical mean
-$\hat \lambda = \bar y = `r round(mean(FIFA2018$goals), digits = 3)`$
-and set up the corresponding distribution object:
+In a first step, we simply assume that goals are scored with a constant mean
+over all teams and fit a single Poisson distribution for the number of goals.
+To do so, we obtain a point estimate of the Poisson parameter by using the
+empirical mean $\hat \lambda = \bar y = `r round(mean(FIFA2018$goals), digits =
+3)`$ and set up the corresponding distribution object:
 
 ```{r}
 p_const <- distributions3::Poisson(lambda = mean(FIFA2018$goals))
 p_const
 ```
 
-Wich actually corresponds to the maximum likelihood estimator for this distriubtion
-fitting a generalized linear model (GLM) to the data that links
+This actually corresponds to the maximum likelihood estimator for this
+distriubtion fitting a generalized linear model (GLM) to the data that links
 the expected number of goals per team/match $\lambda_i$ to the linear predictor
-$x_i^\top \beta$ with regressor vector $x_i^\top$
-and corresponding coefficient vector $\beta$ using a log-link:
-$\log(\lambda_i) = x_i^\top \beta$. The maximum likelihood estimator $\hat \beta$
-with corresponding inference, predictions, residuals, etc. can be obtained
-using the `glm()` function from base R with `family = poisson`. 
+$x_i^\top \beta$ with regressor vector $x_i^\top$ and corresponding coefficient
+vector $\beta$ using a log-link: $\log(\lambda_i) = x_i^\top \beta$.
 
-Here, in the simplest case we fit an intercept-only model where the regressor vector 
-consists solely of a constant intercept without further regressors ($x_i^\top = 1$):
+Here, in the simplest case fitting an intercept-only model without further
+regressors, the regressor vector can be written as $x_i^\top = 1$ and the
+maximum likelihood estimator $\hat \beta$ with corresponding inference,
+predictions, residuals, etc. can be obtained using the `glm()` function from
+base R with `family = poisson`: 
 
 ```{r}
 m_ic <- glm(goals ~ 1, data = FIFA2018, family = poisson)
 m_ic
 ```
 
-The corresponding prediction for the
-number of goals can be obtained manually from the extracted `coef()`
-by applying `exp()` (as the inverse of the log-link).
+The corresponding prediction for the number of goals can be obtained manually
+from the extracted `coef()` by applying `exp()` (as the inverse of the
+log-link).
 
 ```{r}
 lambda_zero <- exp(coef(m_ic)[1])
 lambda_zero
 ```
+
+Or equivalently the `predict()` function can be used with `type = "response"`
+in order to get the expected $\hat \lambda_i$ (rather than just the linear
+predictor $x_i^\top \hat \beta$ that is predicted by default).
+
+```{r}
+predict(m_ic, newdata = data.frame(difference = 0), type = "response")
+```
+
+To account for different expected performances from the teams in the 2018 FIFA World Cup,
+the `FIFA2018` data provides an estimated `logability` for each team. These
+have been estimated by @Zeileis+Leitner+Hornik:2018 prior to the start of the
+tournament (2018-05-20) based on quoted odds from 26 online bookmakers using
+the bookmaker consensus model of @Leitner+Zeileis+Hornik:2010. The `difference` in
+`logability` between a team and its opponent is a useful predictor for the
+number of `goals` scored. 
+
+Hence, the the intercept-only model `m_ic` can be extended by using the
+regressor vector $x_i^\top = (1, \mathtt{difference}_i)$:
+
+```{r}
+m_prob <- glm(goals ~ difference, data = FIFA2018, family = poisson)
+m_prob
+```
+
+Now, the slope of $`r round(coef(m_prob)[2], digits = 3)`$ can be interpreted
+as an ability elasticity of the number of goals scored. This is because the
+difference of the log-abilities can also be understood as the log of the ability
+ratio. Thus, when the ability ratio increases by $1$ percent, the expected
+number of goals increases approximately by $`r round(coef(m_prob)[2], digits = 3)`$
+percent.
+
+## Model evaluation: Marginal calibration
 
 To evaluate the marignal fit, we can compare the 
 the observed and expected absolute frequencies using a so-called _rootogram_
@@ -118,30 +164,6 @@ frequencies overlayed by the expected frequencies as a red line.
 r1 <- rootogram(m_ic, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE)
 ```
 
-## Poisson regression and probabilistic forecasting
-
-To account for different expected performances from the teams in the 2018 FIFA World Cup,
-the `FIFA2018` data provides an estimated `logability` for each team. These
-have been estimated by @Zeileis+Leitner+Hornik:2018 prior to the start of the
-tournament (2018-05-20) based on quoted odds from 26 online bookmakers using
-the bookmaker consensus model of @Leitner+Zeileis+Hornik:2010. The `difference` in
-`logability` between a team and its opponent is a useful predictor for the
-number of `goals` scored. 
-
-Hence, the regressor vector is $x_i^\top = (1, \mathtt{difference}_i)$
-where as for the intercept-only model a log-link is employed:
-
-```{r}
-m_prob <- glm(goals ~ difference, data = FIFA2018, family = poisson)
-m_prob
-```
-
-Here, the slope of $`r round(coef(m_prob)[2], digits = 3)`$ can be interpreted
-as an ability elasticity of the number of goals scored. This is because the
-difference of the log-abilities can also be understood as the log of the ability
-ratio. Thus, when the ability ratio increases by $1$ percent, the expected
-number of goals increases approximately by $`r round(coef(m_prob)[2], digits = 3)`$
-percent.
 
 As before, we can evaluate the marginal fit by comparing the observed and expected frequencies
 using a so-called _rootogram_:
@@ -168,6 +190,8 @@ autoplot(c(r1, r2), scale = "sqrt", style = "hanging", ref = TRUE)  # FIXME: (ML
 So far we have only evaluated the marginal calibration comparing whether the
 oberseved frequencies match the frequencies expected by estimated model on the observaional scale.
 In the next step we will evaluate the probabilistic calibration performed on the probability scale.
+
+## Model evaluation: Probabilistic calibration
 
 Probabilistic calibration is usually assessed using probability
 integral transform (PIT) values
@@ -240,6 +264,8 @@ RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
 RainIbk <- subset(RainIbk, enssd > 0)
 ```
 
+## From linear regression to distributional regression models
+
 ```{r crch models}
 ## linear model
 m_lm <- lm(rain ~ ensmean, data = RainIbk)
@@ -258,6 +284,8 @@ legend("topright", lwd = c(1, 1), lty = c(1, 1), col = c(1, 4),
   c("m_lm", "m_hclog"), bty = "n")
 ```
 
+## Model evaluation: Marginal calibration
+
 ```{r}
 r1 <- rootogram(m_lm, plot = FALSE)
 r2 <- rootogram(m_hclog, plot = FALSE)
@@ -265,6 +293,8 @@ r2 <- rootogram(m_hclog, plot = FALSE)
 autoplot(c(r1, r2))
 
 ```
+
+## Model evaluation: Probabilistic calibration
 
 ```{r}
 p1 <- pithist(m_lm, plot = FALSE)
