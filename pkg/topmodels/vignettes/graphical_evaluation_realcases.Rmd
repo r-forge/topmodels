@@ -24,11 +24,18 @@ knitr::opts_chunk$set(fig.aling = "center")
 ```
 
 This vignette provides two real cases discussing the graphical evaluation of
-the marginal and probabilistic calibration of probabilistic regression models. The
-first example provides a short case study modeling the goals at the 2018 FIFA
-World Cup employing a Poisson distribution. It is a direct extension of the
-vignette given in [`distributions3`](https://github.com/alexpghayes/distributions3). The second example models daily
-precipitation sums using a Gaussian normal distribution censored at zero accounting for non-negative precipitation sums. The use case builds heavily on the vignette given in [`crch`](https://cran.r-project.org/web/packages/crch/) by @Messner+Mayr+Zeileis:2016. 
+the marginal and probabilistic calibration of probabilistic regression models.
+The first example provides a short case study modeling the goals at the 2018
+FIFA World Cup employing a Poisson distribution. It is a direct extension of
+the vignette ["The Poisson Distribution: From Basic Probability Theory to
+Regression Models"](https://alexpghayes.github.io/distributions3/dev/articles/poisson.html)
+given in [`distributions3`](https://github.com/alexpghayes/distributions3). The
+second example models daily precipitation sums using a Gaussian normal
+distribution censored at zero accounting for non-negative precipitation sums.
+The use case builds heavily on the vignette ["Heteroscedastic Censored and Truncated
+Regression with crch"](https://cran.r-project.org/web/packages/crch/vignettes/crch.pdf) given in
+[`crch`](https://cran.r-project.org/web/packages/crch/) by
+@Messner+Mayr+Zeileis:2016. 
 
 # Goals in the 2018 FIFA World Cup
 
@@ -66,7 +73,7 @@ summary(FIFA2018$goals)
 showing that the teams scored between $0$ and $6$ goals per match with
 an average of $\bar y = `r round(mean(FIFA2018$goals), digits = 3)`$
 from the observations $y_i$ ($i = 1, \dots, 128$). The corresponding
-table of observed absolute and relative frequencies are:
+table of observed relative frequencies are:
 
 ```{r}
 prop.table(table(FIFA2018$goals))
@@ -129,8 +136,8 @@ predictor $x_i^\top \hat \beta$ that is predicted by default).
 predict(m_ic, newdata = data.frame(difference = 0), type = "response")
 ```
 
-This yields the same predicted Poisson distribution for all teams and matches
-in this tournament - a slightly unrealistic assumption:
+This yields the same predicted Poisson distribution, identical to $p_const$, for all teams and matches
+in this tournament -- most likely an incorrect assumption:
 
 ```{r}
 p_ic <- Poisson(lambda = fitted(m_ic))
@@ -145,7 +152,7 @@ the bookmaker consensus model of @Leitner+Zeileis+Hornik:2010. The `difference` 
 `logability` between a team and its opponent is a useful predictor for the
 number of `goals` scored. 
 
-Hence, the the intercept-only model `m_ic` can be extended by using the
+Hence, the intercept-only model `m_ic` can be extended by using the
 regressor vector $x_i^\top = (1, \mathtt{difference}_i)$:
 
 ```{r}
@@ -153,16 +160,16 @@ m_reg <- glm(goals ~ difference, data = FIFA2018, family = poisson)
 m_reg
 ```
 
-Now, the slope of $`r round(coef(m_reg)[2], digits = 3)`$ can be interpreted
+Here, the slope of $`r round(coef(m_reg)[2], digits = 3)`$ can be interpreted
 as an ability elasticity of the number of goals scored. This is because the
 difference of the log-abilities can also be understood as the log of the ability
 ratio. Thus, when the ability ratio increases by $1$ percent, the expected
 number of goals increases approximately by $`r round(coef(m_reg)[2], digits = 3)`$
 percent.
 
-In comparison to the intercept-only models, this 
-yields a different predicted Poisson distribution for each team/match
-in the tournament. We can set up the vector of all $128$ `Poisson()`
+In comparison to the intercept-only model `m_ic`, this yields a more realistic
+outcome providing a different predicted Poisson distribution for each
+team/match in the tournament. We can set up the vector of all $128$ `Poisson()`
 distribution objects by extracting the vector of all fitted point estimates
 $(\hat \lambda_1, \dots, \hat \lambda_{128})^\top$:
 
@@ -181,12 +188,13 @@ observations are being used. Here, the expected frequencies are computed by
 differences between the predictive CDFs $F( \cdot )$, evaluated at the interval
 breaks. Hence, mariginal calibration is always obtained on the observation
 scale compared to the probabilistic calibration performed on the probability
-scale. This makes it expecially useful for evaluating count data models which predictions are 
-often close to zero. 
+scale. This makes it expecially useful for evaluating count data models which
+predictions are often close to zero.
 
-To do so, we compute the expected absolute frequencies by averaging across the
-expectations per team/match from the regression model and compare these
-for both estimated models with the observed frequencies:
+For evaluating the marginal calibration of the Poisson models for 
+the number of `goals` scored, we compute the expected absolute
+frequencies by averaging across the expectations per team/match from both
+regression model and compare these with the observed absolute frequencies:
 
 ```{r}
 observed <- table(FIFA2018$goals)
@@ -197,15 +205,16 @@ expected_reg <- colMeans(expected_reg) * sum(observed)
 cbind(observed, expected_ic, expected_reg) 
 ```
 
-Graphically, this comparison is a so-called _rootogram_
+Graphically, this comparison can be shown as a so-called _rootogram_
 [@Kleiber+Zeileis:2016] where the gray bars represent the observed
 frequencies overlayed by the expected frequencies as a red line. By using the function
-`rootogram()`, we can easily reproduce the previous results just using the fitted model objects 
+`rootogram()`, we can reproduce the previous results plugging in the model objects 
 `m_ic` and `m_reg`:
 
 ```{r}
 r1 <- rootogram(m_ic, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE, plot = FALSE)
 r2 <- rootogram(m_reg, fitted = TRUE, style = "standing", scale = "raw", ref = FALSE, plot = FALSE)
+c(r1, r2)
 autoplot(c(r1, r2))
 ```
 
@@ -216,7 +225,7 @@ autoplot(c(r1, r2), scale = "sqrt")  # FIXME: (ML) names got lost
 ```
 
 In a second step, we employ a so-called _hanging rootogram_ where bars representing the square-root of the observed frequencies are "hanging" from the square-root of the expected frequencies in the red line.
-Here, the offset around the x-axis compared to a reference line clearly shows the difference between the two frequencies for the intercept only model and the full probabilistic model. For both models the differences are reasonably close to zero indicating a rather good marginal fit:
+Here, the offset around the x-axis compared to a reference line clearly shows the difference between the two frequencies for the intercept-only model `m_ic` and the full probabilistic model `m_reg`. For both models the differences are reasonably close to zero indicating a rather good marginal fit:
 
 ```{r}
 autoplot(c(r1, r2), scale = "sqrt", style = "hanging", ref = TRUE)  # FIXME: (ML) names got lost
@@ -224,7 +233,7 @@ autoplot(c(r1, r2), scale = "sqrt", style = "hanging", ref = TRUE)  # FIXME: (ML
 
 So far we have only evaluated the marginal calibration comparing whether the
 oberseved frequencies match the frequencies expected by estimated model on the observational scale.
-In the next step we will evaluate the probabilistic calibration performed on the probability scale.
+In the next step we will evaluate the probabilistic calibration which is performed on the probability scale.
 
 ## Model evaluation: Probabilistic calibration
 
@@ -241,38 +250,48 @@ with estimated parameters $\hat{\boldsymbol{\theta}}_{i}$. PIT residuals have
 the desirable property, that if the model is a good approximation to the true
 data-generating process, i.e., the observation is drawn from the predictive
 distribution, the PIT residuals $u_i$ are approximately uniformly distributed
-on $[0, 1]$ for continous predictive distributions $F( \cdot )$:
+on $[0, 1]$ for continous predictive distributions $F( \cdot )$.  Plotting the histogram of the
+PIT residuals and checking for uniformity is therefore a common empirical way
+of checking for calibration:
 
 ```{r}
 p1 <- pithist(m_reg)
 ```
 
-Alternatively PIT residuals can also be transformed to the normal scale, 
-so that their extreme values are more widely spread putting a larger focus on 
-violations of the distribution assumption within its tails.
+To focus more on violations of the distributional assumption in the tails of
+the distribution, PIT residuals can also be transformed to the normal scale or
+another scale if preferred. This allows the extreme values to be spread more
+widely, so that less values are included in the outer intervals. However, this
+has the drawback that detecting misspecification is more complicated than
+checking for uniformity:
 
 ```{r}
 p2 <- pithist(m_reg, trafo = qnorm, type = "random", simint = FALSE) # `type = "expected"` does not work, check!
 ```
 
-PIT residuals transformed to the normal scale can also be validated by well
-known Q-Q Plots. By plotting the raw (transformed) PIT residuals without any
-discretization, no rather arbitrary breakpoint must be chosen and certain
-misspecification cannot be masked.  For example, misscpecifications in the
-outer tails of the distribution are often not visible in PIT histograms, as the
-intervals are averaving over many data points.
+Discretization, i.e., the representation of values in intervals, has the
+advantage that it usually improves the readability of graphical
+representations. However, discretization can also hide certain
+misspecifications: breakpoints are often quite arbitrary and can mask
+misspecifications of relatively few but extreme values in the outer tails of
+the distribution. Here, classical Q-Q diagrams are clearly superior to PIT
+histograms:
 
 ```{r}
 q1 <- qqrplot(m_reg, confint = "line", simint = FALSE)
 ```
 
-As in Q-Q plots, small too medium deviations can be quite hard to detect,
-untilting the plot by subtracting the theoretical quantiles, makes detecting
-pattern of departure from a now horizontal line much easier:
+Since small to medium deviations are nevertheless difficult to detect in Q-Q
+diagrams, untilting the plot makes detecting pattern of departure from a now
+horizontal line much easier. Here, expected quantiles are subtracted from the
+observed quantiles:
 
 ```{r}
 w1 <- wormplot(m_reg, confint = "line", simint = FALSE)
 ```
+
+This so-called de-trended Q-Q plot is best known as _worm plot_
+[@Buuren+Fredriks:2001].
 
 # Precipitation forecasts
 
