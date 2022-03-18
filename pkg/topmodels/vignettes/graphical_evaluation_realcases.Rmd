@@ -376,8 +376,10 @@ legend("topright", lwd = c(2, 1), lty = c(1, 1), col = c(1, 4),
 
 The significant underfitting of zero observations is also very apparent in the
 _rootogramm_ of the linear model, as it does not correctly account for the
-point mass at zero. Additionally, a wavelike pattern indicates a slight overfitting of precipitation 
-sums between zero and 5mm. In contrast, the censored logistic regression `m_hclog`
+point mass at zero. Additionally, a weak wavelike pattern indicates a 
+slight overfitting of precipitation 
+sums between zero and 5mm and an underfitting of precipition sums above. 
+In contrast, the censored logistic regression `m_hclog`
 provides a pretty good marginal fit, where the expected squared frequencies
 closely match the squared observed frequencies:
 
@@ -394,10 +396,6 @@ ggplot2::autoplot(c(r1, r2))
 The _PIT histogram_ of the linear model `m_lm` is skewed, indicicating a misfit
 in terms of the probabilistic calibration, whereas the _PIT histogram_ of the 
 linear model is rather uniformly distributed.
-For the linear model, the underfitting at the lower tail
-is not visible in the lowest interval but only in the subsequent intervals,
-indicating that more values occur here than expected (FIXME: (ML) Is this
-correct?!):
 
 ```{r}
 p1 <- pithist(m_lm, plot = FALSE)
@@ -406,22 +404,38 @@ p2 <- pithist(m_hclog, plot = FALSE)
 ggplot2::autoplot(c(p1, p2))
 ```
 
-FIXME: (ML) Compare pattern "too skew to the left" in the summary!
-
-```{r}
-pithist(m_lm, breaks = 50)
-pithist(m_lm, breaks = 50, trafo = qnorm, xlim = c(-3, 3))
-```
-
-For a better comparison of the two model fits, alternatively a "line" `style`
-_PIT histogram_ can be shown:
+For a better comparison of the two model fits, alternatively a line-style
+_PIT histogram_ can also be shown:
 
 ```{r}
 ggplot2::autoplot(c(p1, p2), colour = c(2, 4), style = "line", single_graph = TRUE, confint_col = 1, confint = "line", ref = FALSE)
 ```
 
-In the _Q-Q plot_ of the linear model the positive curvature, bending above the line at both ends,
-indicates that the PIT residuals are too skew to the left; this is also supported by the _PIT histogram_ of normally scaled PIT residuals:
+To further analyse the misfit of the linear model in terms of probabilistic
+calibration, we transform the PIT residuals to the normal scale and increase
+the number of breaks in the _PIT histogram_. Transforming to the normal scale
+spreads the values at the tails of the distribution further apart, and
+increasing the breaks prevents potential masking of small scale patterns.
+
+We can see that the distribution of PIT residuals is right skewed with more
+values between -2 and 0, but less values between 0 and 2 compared to the
+standard normal distribution:
+
+```{r}
+pithist(m_lm, breaks = 50, trafo = qnorm, xlim = c(-3, 3))
+```
+
+This is also reflected in the pattern of the _Q-Q plot_ of the linear model:
+Due to the high frequency in values between -2 and 0, the observed quantile
+residuals increase slower in this region relative to the standard normal
+quantiles.  However, the low frequency of quantile residuals above zero leads
+to an higher increase in quantile residuals compared to the standard normal
+quantiles. 
+
+In summary, the _Q-Q plot_ of the linear model has a positive curvature,
+bending up at both ends of the distributional tails. The censored logistic
+regression `m_hclog` follows more or less the reference line indicating
+normally distributed quantile residuals:
 
 ```{r}
 q1 <- qqrplot(m_lm, plot = FALSE)
@@ -429,7 +443,10 @@ q2 <- qqrplot(m_hclog, plot = FALSE)
 ggplot2::autoplot(c(q1, q2), colour = c(2, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
 ```
 
-Accordingly, a U-shape pattern can be seen in the _worm plot_:
+Consistent with the pattern of right-skewed PIT residuals corresponding to a
+"too left-skewed" fitted distribution, a U-shaped pattern is evident in the
+_worm plot_ of the linear model; the censored logistic is more or less flat
+around zero.
 
 ```{r}
 w1 <- wormplot(m_lm, plot = FALSE)

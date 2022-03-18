@@ -203,7 +203,7 @@ elements can be seen:
 * PIT residuals are asymptotically uniformly distributed or transformed to
   another probability scale: The PIT histogram is on the uniform probability
   scale versus the normal Q-Q plot on the normal scale.  Whereas, the
-  transformation to the normals scale spreads the values in the tails further
+  transformation to the normal scale spreads the values in the tails further
   apart and thus better highlights possible discrepancies in the distribuional
   tails.
 
@@ -457,7 +457,7 @@ par(mfrow = c(1, 1))
 Predictive distribution | well calibrated | too skew to the left | too skew to the right | tails too light | tails too heavy | underdispersed (underestimated variance) | overdispersed (overestimated variance)
 --- | --- | --- | --- | --- | --- | --- | ---
 **Resdiuals** | normal | right skewed | left skewed | heavy tailed | light tailed | overdispersed | underdispersed
-**Q-Q plot** | bisecting line | positive curvature (bends above the line at both ends) | negative curvature (bends down at both ends) | reverse S-shape (dips below the line at the low end and rises above it at the high end) | S-shape | crossing qqline from below (?) | crossing qqline from above ?
+**Q-Q plot** | bisecting line | positive curvature (bends up the line at both ends) | negative curvature (bends down at both ends) | reverse S-shape (dips below the line at the low end and rises above it at the high end) | S-shape | crossing qqline from below (?) | crossing qqline from above ?
 **Worm plot** | horizontal line | U-shape | inverse U-shape | S-shape on the left bent down | S-shape on the left bent up | positive slope | negative slope
 **PIT histogram** | uniform | skewed | skewed | superimposed U-shape | superimposed inverse U-shape" | U-shape | inverse U-shape 
 **Rootogram** | no deviations | ? | ? | wave-like (underfitting in the tails and the center) | ? | ? | ?
