@@ -103,7 +103,7 @@ p_const
 ```
 
 This actually corresponds to the maximum likelihood estimator for this
-distriubtion fitting a generalized linear model (GLM) to the data that links
+distribution fitting a generalized linear model (GLM) to the data that links
 the expected number of goals per team/match $\lambda_i$ to the linear predictor
 $x_i^\top \beta$ with regressor vector $x_i^\top$ and corresponding coefficient
 vector $\beta$ using a log-link: $\log(\lambda_i) = x_i^\top \beta$.
@@ -180,15 +180,15 @@ head(p_reg)
 
 ## Model evaluation: Marginal calibration
 
-Marginal calibration is generally concerned with whether the oberseved
+Marginal calibration is generally concerned with whether the observed
 frequencies match the frequencies expected by the model. For discrete
 observations, frequencies for the observations themselves can be considered;
-for continuous observations or more generally, frequencies for intevals of
+for continuous observations or more generally, frequencies for intervals of
 observations are being used. Here, the expected frequencies are computed by
 differences between the predictive CDFs $F( \cdot )$, evaluated at the interval
-breaks. Hence, mariginal calibration is always obtained on the observation
+breaks. Hence, marginal calibration is always obtained on the observation
 scale compared to the probabilistic calibration performed on the probability
-scale. This makes it expecially useful for evaluating count data models which
+scale. This makes it especially useful for evaluating count data models which
 predictions are often close to zero.
 
 For evaluating the marginal calibration of the Poisson models for 
@@ -232,7 +232,7 @@ ggplot2::autoplot(c(r1, r2), scale = "sqrt", style = "hanging", ref = TRUE)  # F
 ```
 
 So far we have only evaluated the marginal calibration comparing whether the
-oberseved frequencies match the frequencies expected by estimated model on the observational scale.
+observed frequencies match the frequencies expected by estimated model on the observational scale.
 In the next step we will evaluate the probabilistic calibration which is performed on the probability scale.
 
 ## Model evaluation: Probabilistic calibration
@@ -250,7 +250,7 @@ with estimated parameters $\hat{\boldsymbol{\theta}}_{i}$. PIT residuals have
 the desirable property, that if the model is a good approximation to the true
 data-generating process, i.e., the observation is drawn from the predictive
 distribution, the PIT residuals $u_i$ are approximately uniformly distributed
-on $[0, 1]$ for continous predictive distributions $F( \cdot )$.  Plotting the histogram of the
+on $[0, 1]$ for continuous predictive distributions $F( \cdot )$.  Plotting the histogram of the
 PIT residuals and checking for uniformity is therefore a common empirical way
 of checking for calibration:
 
@@ -365,10 +365,10 @@ model to estimate the underlying relationship:
 
 ```{r}
 plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
-abline(coef(m_lm)[1:2], col = 2, lwd = 2)
+abline(coef(m_lm)[1:2], col = 3, lwd = 2)
 abline(coef(m_hclog)[1:2], col = 4, lwd = 2)
 
-legend("topright", lwd = c(2, 1), lty = c(1, 1), col = c(1, 4), 
+legend("topright", lwd = c(2, 1), lty = c(1, 1), col = c(3, 4), 
   c("m_lm", "m_hclog"), bty = "n")
 ```
 
@@ -378,7 +378,7 @@ The significant underfitting of zero observations is also very apparent in the
 _rootogramm_ of the linear model, as it does not correctly account for the
 point mass at zero. Additionally, a weak wavelike pattern indicates a 
 slight overfitting of precipitation 
-sums between zero and 5mm and an underfitting of precipition sums above. 
+sums between zero and 5mm and an underfitting of precipitation sums above. 
 In contrast, the censored logistic regression `m_hclog`
 provides a pretty good marginal fit, where the expected squared frequencies
 closely match the squared observed frequencies:
@@ -393,7 +393,7 @@ ggplot2::autoplot(c(r1, r2))
 
 ## Model evaluation: Probabilistic calibration
 
-The _PIT histogram_ of the linear model `m_lm` is skewed, indicicating a misfit
+The _PIT histogram_ of the linear model `m_lm` is skewed, indicating a misfit
 in terms of the probabilistic calibration, whereas the _PIT histogram_ of the 
 linear model is rather uniformly distributed.
 
@@ -408,7 +408,7 @@ For a better comparison of the two model fits, alternatively a line-style
 _PIT histogram_ can also be shown:
 
 ```{r}
-ggplot2::autoplot(c(p1, p2), colour = c(2, 4), style = "line", single_graph = TRUE, confint_col = 1, confint = "line", ref = FALSE)
+ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_col = 1, confint = "line", ref = FALSE)
 ```
 
 To further analyse the misfit of the linear model in terms of probabilistic
@@ -440,7 +440,7 @@ normally distributed quantile residuals:
 ```{r}
 q1 <- qqrplot(m_lm, plot = FALSE)
 q2 <- qqrplot(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(q1, q2), colour = c(2, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
+ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
 ```
 
 Consistent with the pattern of right-skewed PIT residuals corresponding to a
@@ -451,7 +451,7 @@ around zero.
 ```{r}
 w1 <- wormplot(m_lm, plot = FALSE)
 w2 <- wormplot(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(w1, w2), colour = c(2, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
+ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
 ```
 
 ## References
