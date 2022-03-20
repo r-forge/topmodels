@@ -16,13 +16,19 @@ navbar:
       href: articles/topmodels.html
     - text: "Articles"
       menu:
-        - text: "Graphical Evaluation: Methodology"
-          href: articles/graphical_evaluation_methodology.html
-        - text: "Graphical Evaluation: Simulations"
-          href: articles/graphical_evaluation_simulations.html
-        - text: "Graphical Evaluation: Real Cases"
-          href: articles/graphical_evaluation_realcases.html
-        - text: "Implementation: Functions for Graphical Evaluation"
+        - text: "Goodness of Fit of Probabilistic Regression Models"
+          href: articles/goodness_of_fit.html
+        - text: "Graphics for Assessing Goodness of Fit"
+          href: articles/graphics.html
+        - text: "Probabilistic Forecasting Infrastructure"
+          href: articles/procast.html
+        - text: "Illustration: Goals in the 2018 FIFA World Cup"
+          href: articles/illustration_fifa_2018.html
+        - text: "Illustration: Precipitation Forecasts in Innsbruck"
+          href: articles/illustration_rain_ibk.html
+        - text: "Illustration: Artificial Data"
+          href: articles/illustration_artificial.html
+        - text: "Implementation Overview"
           href: articles/implementation_functions_graphical_evaluation.html
     - text: "Reference"
       href: reference/index.html

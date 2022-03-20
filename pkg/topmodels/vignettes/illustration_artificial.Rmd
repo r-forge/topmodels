@@ -1,6 +1,5 @@
 ---
-title: "Graphical Evaluation: Simulations"
-author: "Moritz Lang, Achim Zeileis"
+title: "Illustration: Artificial Data"
 output:
   html_document:
     toc: true
@@ -8,7 +7,7 @@ output:
     theme: flatly
 bibliography: ref.bib
 vignette: >
-  %\VignetteIndexEntry{Graphical Evaluation: Simulations}
+  %\VignetteIndexEntry{Illustration: Artificial Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
   %\VignetteKeywords{FIXME}
@@ -41,7 +40,7 @@ library("MASS")
 library("rmutil")  # for laplace dist
 library("sn") # for skewed N dist
 options(digits = 4)
-knitr::opts_chunk$set(fig.aling = "center")
+knitr::opts_chunk$set(fig.align = "center")
 
 #make_residuals_plot <- function(object, xlim = c(-4, 4), ylim = c(0, 0.5)) {
 #
@@ -55,6 +54,135 @@ knitr::opts_chunk$set(fig.aling = "center")
 #  legend("topright", "std. norm", lty = 1, col = 2, bty = "n")
 #}
 
+make_residuals_plot <- function(object, breaks = "Sturges", main = "") {
+  name <- deparse(substitute(object))
+
+  set.seed(1)
+  hist(qresiduals(object), breaks = breaks, freq = FALSE,
+    main = main,
+    xlab = "Q-Q residuals", xlim = c(-5, 5), ylim = c(0, 1)
+  )
+  curve(dnorm, from = -5, to = 5, col = 2, lwd = 2, add = TRUE)
+  legend("topright", "std. norm", lty = 1, col = 2, lwd = 2, bty = "n")
+  box()
+}
+```
+
+
+## Summary
+
+```{r dgp, echo = FALSE}
+set.seed(0)
+
+## regressors
+d <- data.frame(
+  x = runif(500, -1, 1),
+  z = runif(500, -1, 1)
+)
+
+d <- transform(d,
+  y_norm = rnorm(500),
+  y_rskew = sn::rsn(500, xi = 0, omega = 1, alpha = 5, tau = 0),
+  y_lskew = sn::rsn(500, xi = 0, omega = 1, alpha = -5, tau = 0),
+
+  y_htail = rt(500, df = 4),
+  y_ltail = c(rnorm(100), runif(400, min = -1.5, max = 1.5)),
+
+  y_odisp = rpois(500, lambda = exp(0 + 2 * x + rnorm(500, mean = 0, sd = 1.5))),
+  y_udisp = round(rnorm(n = 500, mean = exp(0 + 2 * x), sd = 0.001))
+
+)
+```
+
+```{r fit, echo = FALSE}
+m_norm <- lm(y_norm ~ 1, data = d)
+m_rskew <- lm(y_rskew ~ 1, data = d)
+m_lskew <- lm(y_lskew ~ 1, data = d)
+m_htail <- lm(y_htail ~ 1, data = d)
+m_ltail <- lm(y_ltail ~ 1, data = d)
+
+m_odisp <- glm(y_odisp ~ x, family = "poisson", data = d)
+m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
+```
+
+```{r plot-summary, echo = FALSE, fig.height = 14, fig.width = 14, out.width = "100%", fig.align = "center"}
+par(mfrow = c(6, 7), bg = "#f7f7f7")
+make_residuals_plot(m_norm, breaks = 20, main = "Well calibrated")
+make_residuals_plot(m_rskew, breaks = 20, main = "Too skew to the left")
+make_residuals_plot(m_lskew, breaks = 20, main = "Too skew to the right")
+make_residuals_plot(m_htail, breaks = 20, main = "Tails too light")
+make_residuals_plot(m_ltail, breaks = 20, main = "Tails too heavy")
+make_residuals_plot(m_odisp, main = "Underdispersed")
+make_residuals_plot(m_udisp, main = "Overdispersed")
+qqrplot(m_norm, main = "Q-Q residuals plot")
+qqrplot(m_rskew, main = "Q-Q resiudals plot")
+qqrplot(m_lskew, main = "Q-Q resiudals plot")
+qqrplot(m_htail, main = "Q-Q resiudals plot")
+qqrplot(m_ltail, main = "Q-Q resiudals plot")
+qqrplot(m_odisp, main = "Q-Q resiudals plot")
+qqrplot(m_udisp, main = "Q-Q resiudals plot")
+#qqrplot(m_norm, trafo = identity, main = "Uniform Q-Q residuals plot")
+#qqrplot(m_rskew, trafo = identity, main = "Uniform Q-Q resiudals plot")
+#qqrplot(m_lskew, trafo = identity, main = "Uniform Q-Q resiudals plot")
+#qqrplot(m_htail, trafo = identity, main = "Uniform Q-Q resiudals plot")
+#qqrplot(m_ltail, trafo = identity, main = "Uniform Q-Q resiudals plot")
+#qqrplot(m_odisp, trafo = identity, main = "Uniform Q-Q resiudals plot")
+#qqrplot(m_udisp, trafo = identity, main = "Uniform Q-Q resiudals plot")
+wormplot(m_norm, main = "Worm plot")
+wormplot(m_rskew, main = "Worm plot")
+wormplot(m_lskew, main = "Worm plot")
+wormplot(m_htail, main = "Worm plot")
+wormplot(m_ltail, main = "Worm plot")
+wormplot(m_odisp, main = "Worm plot")
+wormplot(m_udisp, main = "Worm plot")
+pithist(m_norm, main = "PIT histogram")
+pithist(m_rskew, main = "PIT histogram")
+pithist(m_lskew, main = "PIT histogram")
+pithist(m_htail, main = "PIT histogram") 
+pithist(m_ltail, main = "PIT histogram") 
+pithist(m_odisp, main = "PIT histogram")
+pithist(m_udisp, main = "PIT histogram")
+pithist(m_norm, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_rskew, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_lskew, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_htail, main = "Customized PIT histogram", 
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_ltail, main = "Customized PIT histogram", 
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1))
+pithist(m_odisp, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+pithist(m_udisp, main = "Customized PIT histogram",
+  breaks = c(0, 0.005, seq(0,1,length.out = 22)[-c(1,22)], 0.995, 1)) 
+rootogram(m_norm, main = "Rootogram")
+rootogram(m_rskew, main = "Rootogram")
+rootogram(m_lskew, main = "Rootogram")
+rootogram(m_htail, main = "Rootogram")
+rootogram(m_ltail, main = "Rootogram")
+rootogram(m_odisp, main = "Rootogram")
+rootogram(m_udisp, main = "Rootogram")
+par(mfrow = c(1, 1))
+```
+
+Predictive distribution | well calibrated | too skew to the left | too skew to the right | tails too light | tails too heavy | underdispersed (underestimated variance) | overdispersed (overestimated variance)
+--- | --- | --- | --- | --- | --- | --- | ---
+**Resdiuals** | normal | right skewed | left skewed | heavy tailed | light tailed | overdispersed | underdispersed
+**Q-Q plot** | bisecting line | positive curvature (bends up the line at both ends) | negative curvature (bends down at both ends) | reverse S-shape (dips below the line at the low end and rises above it at the high end) | S-shape | crossing qqline from below (?) | crossing qqline from above ?
+**Worm plot** | horizontal line | U-shape | inverse U-shape | S-shape on the left bent down | S-shape on the left bent up | positive slope | negative slope
+**PIT histogram** | uniform | skewed | skewed | superimposed U-shape | superimposed inverse U-shape" | U-shape | inverse U-shape 
+**Rootogram** | no deviations | ? | ? | wave-like (underfitting in the tails and the center) | ? | ? | ?
+**Interpretation** | no misspecifications | ? | ? |  values more extrem as expected |  values less extrem as expected | ? | ?
+
+
+## Artifical data
+
+The following artificial data sets are simulated, with response values always
+depending on regressor variables, in order to obtain a realistic scenario for
+regression models:
+
+```{r dgp2}
 make_residuals_plot <- function(object, breaks = breaks) {
 
   name <- deparse(substitute(object))
@@ -75,15 +203,7 @@ make_residuals_plot <- function(object, breaks = breaks) {
 make_topmodels_plot <- function(object) {
   topmodels(object, which = c(1:2, 4:5), ask = FALSE, spar = FALSE)
 }
-```
 
-## Artifical data
-
-The following artificial data sets are simulated, with response values always
-depending on regressor variables, in order to obtain a realistic scenario for
-regression models:
-
-```{r dgp}
 set.seed(0)
 
 ## regressors

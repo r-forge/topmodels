@@ -1,6 +1,5 @@
 ---
-title: "Graphical Evaluation: Real Cases"
-author: "Moritz Lang, Achim Zeileis"
+title: "Illustration: Goals in the 2018 FIFA World Cup"
 output:
   html_document:
     toc: true
@@ -8,9 +7,9 @@ output:
     theme: flatly
 bibliography: ref.bib
 vignette: >
-  %\VignetteIndexEntry{Graphical Evaluation: Simulations}
+  %\VignetteIndexEntry{Illustration: Goals in the 2018 FIFA World Cup}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteDepends{topmodels,crch,ggplot2,MASS,rmutil,sn}
+  %\VignetteDepends{topmodels,distributions3,ggplot2}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}
 ---
@@ -18,9 +17,8 @@ vignette: >
 ```{r preliminaries, echo = FALSE, message = FALSE}
 library("topmodels")
 library("distributions3")
-library("crch")
 library("ggplot2")
-knitr::opts_chunk$set(fig.aling = "center")
+knitr::opts_chunk$set(fig.align = "center")
 ```
 
 This vignette provides two real cases discussing the graphical evaluation of
@@ -29,15 +27,10 @@ The first example provides a short case study modeling the goals at the 2018
 FIFA World Cup employing a Poisson distribution. It is a direct extension of
 the vignette ["The Poisson Distribution: From Basic Probability Theory to
 Regression Models"](https://alexpghayes.github.io/distributions3/dev/articles/poisson.html)
-given in [`distributions3`](https://github.com/alexpghayes/distributions3). The
-second example models 3 day-accumulated precipitation sums using a Logistic
-distribution censored at zero accounting for non-negative precipitation sums.
-The use case builds heavily on the vignette ["Heteroscedastic Censored and Truncated
-Regression with crch"](https://cran.r-project.org/web/packages/crch/vignettes/crch.pdf) given in
-[`crch`](https://cran.r-project.org/web/packages/crch/) by
-@Messner+Mayr+Zeileis:2016. 
+given in [`distributions3`](https://github.com/alexpghayes/distributions3).
 
-# Goals in the 2018 FIFA World Cup
+
+## Goals in the 2018 FIFA World Cup
 
 This use-case employs the Poisson distribution for modeling count data along
 predicted probabilities for the number of goals in soccer matches from the 2018
@@ -293,166 +286,6 @@ w1 <- wormplot(m_reg, confint = "line", simint = FALSE)
 This so-called de-trended _Q-Q plot_ is best known as _worm plot_
 [@Buuren+Fredriks:2001].
 
-# Precipitation forecasts
-
-This use-case discusses a weather forecast example application of censored
-regression models. The example is taken from the vignette ["Heteroscedastic
-Censored and Truncated Regression with
-crch"](https://cran.r-project.org/web/packages/crch/vignettes/crch.pdf)
-provided for the package [`crch`](https://cran.r-project.org/web/packages/crch/) by
-@Messner+Mayr+Zeileis:2016. 
-
-Weather forecasts are usually based on numerical weather prediction (NWP)
-models, which take the current state of the atmosphere and calculate future
-weather by numerically simulating the main atmospheric processes. However, due
-to uncertain initial conditions and unknown or unresolved processes, these
-numerical predictions are always subject to errors.  To estimate these errors,
-many weather centers produce what are called ensemble forecasts: multiple NWP
-runs that use different initial conditions and model formulations.
-Unfortunately, these ensemble forecasts cannot account for all sources of
-error, so they are often still biased and uncalibrated. Therefore, they are
-often calibrated and corrected for systematic errors through statistical
-post-processing.
-
-One popular post-processing method is heteroscedastic linear regression where
-the ensemble mean is used as regressor for the location and the ensemble
-standard deviation or variance is used as regressor for the scale
-[@Gneiting+Raftery+Westveld+Goldman:2005]. The following example applies
-heteroscedastic censored regression with a logistic distribution assumption to
-precipitation data in Innsbruck (Austria).
-
-The `RainIbk` data set contains observed 3 day-accumulated precipitation
-amounts (`rain`) and the corresponding 11 member ensemble forecasts of total
-accumulated precipitation amount between 5 and 8 days in advance (`rainfc.1`,
-`rainfc.2`, ... `rainfc.11`).  In previous studies it has been shown that it is
-of advantage to model the square root of precipitation rather than
-precipitation itself. Thus all precipitation amounts are square rooted before
-ensemble mean and standard deviation are derived. Furthermore, events with no
-variation in the ensemble are omitted:
-
-
-```{r crch data}
-data("RainIbk", package = "crch")
-
-RainIbk <- sqrt(RainIbk)
-RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
-RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
-RainIbk <- subset(RainIbk, enssd > 0)
-```
-
-## From linear regression to distributional regression models
-
-For comparison we fit a homoscedastic linear regression model using the least
-squares approach for `rain` with `ensmean` as regressor. As a more appropriate
-model for `rain` accounting for non-negative precipitation sums, we fit a
-hetereoscedastic censored model assuming an underlying logistic response
-distribution with `ensmean` as regressor for the location and `log(enssd)` as
-regressor for the scale:
-
-```{r crch models}
-## linear model
-m_lm <- lm(rain ~ ensmean, data = RainIbk)
-
-## heteroscedastic censored regression with a logistic distribution assumption
-m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
-  dist = "logistic")
-```
-
-In the scatterplot of `rain` against `ensmean` it can be seen, that
-precipitation is clearly non-negative with many zero observations. Thus the
-censored regression model `m_hclog` is more suitable than the linear regression
-model to estimate the underlying relationship:
-
-```{r}
-plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
-abline(coef(m_lm)[1:2], col = 3, lwd = 2)
-abline(coef(m_hclog)[1:2], col = 4, lwd = 2)
-
-legend("topright", lwd = c(2, 1), lty = c(1, 1), col = c(3, 4), 
-  c("m_lm", "m_hclog"), bty = "n")
-```
-
-## Model evaluation: Marginal calibration
-
-The significant underfitting of zero observations is also very apparent in the
-_rootogramm_ of the linear model, as it does not correctly account for the
-point mass at zero. Additionally, a weak wavelike pattern indicates a 
-slight overfitting of precipitation 
-sums between zero and 5mm and an underfitting of precipitation sums above. 
-In contrast, the censored logistic regression `m_hclog`
-provides a pretty good marginal fit, where the expected squared frequencies
-closely match the squared observed frequencies:
-
-```{r}
-r1 <- rootogram(m_lm, plot = FALSE)
-r2 <- rootogram(m_hclog, plot = FALSE)
-
-ggplot2::autoplot(c(r1, r2))
-
-```
-
-## Model evaluation: Probabilistic calibration
-
-The _PIT histogram_ of the linear model `m_lm` is skewed, indicating a misfit
-in terms of the probabilistic calibration, whereas the _PIT histogram_ of the 
-linear model is rather uniformly distributed.
-
-```{r}
-p1 <- pithist(m_lm, plot = FALSE)
-p2 <- pithist(m_hclog, plot = FALSE)
-
-ggplot2::autoplot(c(p1, p2))
-```
-
-For a better comparison of the two model fits, alternatively a line-style
-_PIT histogram_ can also be shown:
-
-```{r}
-ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_col = 1, confint = "line", ref = FALSE)
-```
-
-To further analyse the misfit of the linear model in terms of probabilistic
-calibration, we transform the PIT residuals to the normal scale and increase
-the number of breaks in the _PIT histogram_. Transforming to the normal scale
-spreads the values at the tails of the distribution further apart, and
-increasing the breaks prevents potential masking of small scale patterns.
-
-We can see that the distribution of PIT residuals is right skewed with more
-values between -2 and 0, but less values between 0 and 2 compared to the
-standard normal distribution:
-
-```{r}
-pithist(m_lm, breaks = 50, trafo = qnorm, xlim = c(-3, 3))
-```
-
-This is also reflected in the pattern of the _Q-Q plot_ of the linear model:
-Due to the high frequency in values between -2 and 0, the observed quantile
-residuals increase slower in this region relative to the standard normal
-quantiles.  However, the low frequency of quantile residuals above zero leads
-to an higher increase in quantile residuals compared to the standard normal
-quantiles. 
-
-In summary, the _Q-Q plot_ of the linear model has a positive curvature,
-bending up at both ends of the distributional tails. The censored logistic
-regression `m_hclog` follows more or less the reference line indicating
-normally distributed quantile residuals:
-
-```{r}
-q1 <- qqrplot(m_lm, plot = FALSE)
-q2 <- qqrplot(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
-```
-
-Consistent with the pattern of right-skewed PIT residuals corresponding to a
-"too left-skewed" fitted distribution, a U-shaped pattern is evident in the
-_worm plot_ of the linear model; the censored logistic is more or less flat
-around zero.
-
-```{r}
-w1 <- wormplot(m_lm, plot = FALSE)
-w2 <- wormplot(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
-```
 
 ## References
 

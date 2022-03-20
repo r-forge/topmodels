@@ -37,7 +37,7 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 ```{r preliminaries, echo = FALSE, message = FALSE}
 library("topmodels")
 options(digits = 4)
-knitr::opts_chunk$set(fig.aling = "center")
+knitr::opts_chunk$set(fig.align = "center")
 ```
 
 ## Methods
