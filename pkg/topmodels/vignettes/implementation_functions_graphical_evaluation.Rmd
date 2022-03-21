@@ -1,6 +1,5 @@
 ---
-title: "Implementation: Functions for Graphical Evaluation"
-author: "Moritz Lang, Achim Zeileis"
+title: "Implementation Overview"
 output:
   html_document:
     toc: true
@@ -8,7 +7,7 @@ output:
     theme: flatly
 bibliography: ref.bib
 vignette: >
-  %\VignetteIndexEntry{Graphical Model Assessment under Different Model Misspecifications}
+  %\VignetteIndexEntry{Implmentation Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
   %\VignetteKeywords{FIXME}

@@ -41,7 +41,36 @@ knitr::opts_chunk$set(fig.align = "center")
 
 ## Introduction
 
-Before discussing the various graphical evaluation methods in more detail, we
+Over the last decades there has been an increasing interest in regression models
+that not only capture the mean of a dependent variable but model its entire
+probability distribution [GAMLSS paper, Klein et al, Hothorn/Kneib/Buehlmann].
+In the simplest case this could be a generalized linear model
+[GLM, McCullagh & Nelder 1989] where higher moments of the probability distribution
+co-vary with the expectation. Instead, multiple distribution parameters could
+also be linked to explanatory variables as in distributional regression [Klein at al.]
+or generalized additive models of location, scale, and shape [GAMLSS ref].
+Moreover, many other flexible modeling techniques yield fitted distributions,
+including transformation models [Hothorn], Bayesian modeling [Umlauf et al.],
+machine learning approaches [refs], and many others.
+
+For assessing the goodness of fit of such probabilistic regression models, (proper)
+scoring rules [refs] are widely used, e.g., using the log-likelihood (also
+known as the log-score) or the continuous ranked probability score [CRPS, ref].
+In addition to such numerical summaries, visualizations capturing the goodness
+of fit are also of interest as they may also be able to shed some more light on
+the sources of a potential lack of fit.
+
+While various visualizations have been suggested in the literature and implemented
+in software packages, a unified framework for these visualizations has not yet
+been established. Here, we will provide such a unified framework that facilitates:
+
+- adoption of these graphics for a broad range of models/distributions,
+- understanding what the graphics have in common and what sets them apart,
+- demonstration of relative strengths and weaknesses in uncovering sources of lack of fit,
+- fine-tuning the graphics for certain models or data sets.
+
+
+_FIXME (include shortened version of Moritz' text):_ Before discussing the various graphical evaluation methods in more detail, we
 want to outline the underlying motivation and identify similarities and
 differences in the methodologies. According to the seminal work of
 @Gneiting+Balabdaoui+Raftery:2007, probabilistic forecasts aim to *maximize the
@@ -51,6 +80,9 @@ observation, and is thus a joint property of the forecast and observation.
 Sharpness, on the other hand, is a property of the forecast only and indicates
 how concentrated a predictive distribution is. In general, the more
 concentrated the sharper the forecast.
+
+
+## Notation
 
 In this article, we focus on several graphical diagnostic tools to assess the
 calibration of a probabilistic forecast $F( \cdot | \boldsymbol{\theta}_{i})$,
@@ -67,6 +99,8 @@ However, since the uncertainty in the estimation of the parameters is not
 accounted for, small deviations from asymptotic theoretical properties will be
 apparent in all graphical displays due to some sampling variation.
 
+_FIXME:_ Look ahead. Discuss the two basic approaches. Either marginal or conditional.
+
 ```{r calibration, fig.width = 4.5, fig.height = 4.5, fig.align = "center", dev = "png", out.width = "30%", fig.show = "hold"}
 library("topmodels")
 library("ggplot2")
@@ -82,7 +116,42 @@ pithist(m, type = "random", nsim = 10, trafo = qnorm,
   ref = FALSE, confint = FALSE, simint = FALSE)
 ```
 
-### Probabilistic calibration: PIT residuals
+## Marginal calibration: Observed vs. expected frequencies
+
+_Advantage:_ Scale of observations is natural, direct interpretation.
+
+_Disadvantage:_ Needs to be compared with a combination of distributions.
+
+Marginal calibration is generally concerned with whether the oberseved
+frequencies match the frequencies expected by the model. For discrete
+observations, frequencies for the observations themselves can be considered;
+for continuous observations or more generally, frequencies for intevals of
+observations are being used. Here, the expected frequencies are computed by
+differences between the predictive CDFs $F( \cdot )$, evaluated at the interval
+breaks. Hence, mariginal calibration is always obtained on the observation
+scale compared to the probabilistic calibration performed on the probability
+scale.  Although there are some previous studies that display observation
+points rather than intervals [e.g., @Gneiting+Balabdaoui+Raftery:2007], here we
+stick to the former and discuss only the so-called rootograms which are
+histogram-style plots [@Kleiber+Zeileis:2016]. 
+
+For the special case of a binary event, the observed event frequency is
+typically plotted against the predictive probability in a so-called reliability
+diagram [@Wilks:2011;@Broecker+Smith:2007]. Here, the predicted probability for
+a binary event is partitioned into a certain number of bins and the averaged
+forecast probability within each bin is plotted against the observerd relative
+frequency. Typically, equidistant binning is employed, but here the rather
+arbitrary number of bins can be quite sensible. A simple and common enhancement
+is therefore to use evenly populated bins, though even here instabilities can
+be a major issue [@Dimitriadis+Gneiting+Jordan:2021]. 
+
+
+
+## Probabilistic calibration: PIT and (randomized) quantile residuals
+
+_Advantage:_ Needs to be compared with only one distribution (uniform or normal).
+
+_Disadvantage:_ Scale is not so natural. May require randomization for discrete distributions.
 
 According to @Gneiting+Balabdaoui+Raftery:2007, model calibration can be
 further distinguished between probabilistic calibration and marginal
@@ -131,33 +200,7 @@ probability scale, which might be transformed to the normal scale or another
 scale if preferred.
 
 
-### Marginal calibration: Observed vs. expected frequencies
-
-Marginal calibration is generally concerned with whether the oberseved
-frequencies match the frequencies expected by the model. For discrete
-observations, frequencies for the observations themselves can be considered;
-for continuous observations or more generally, frequencies for intevals of
-observations are being used. Here, the expected frequencies are computed by
-differences between the predictive CDFs $F( \cdot )$, evaluated at the interval
-breaks. Hence, mariginal calibration is always obtained on the observation
-scale compared to the probabilistic calibration performed on the probability
-scale.  Although there are some previous studies that display observation
-points rather than intervals [e.g., @Gneiting+Balabdaoui+Raftery:2007], here we
-stick to the former and discuss only the so-called rootograms which are
-histogram-style plots [@Kleiber+Zeileis:2016]. 
-
-For the special case of a binary event, the observed event frequency is
-typically plotted against the predictive probability in a so-called reliability
-diagram [@Wilks:2011;@Broecker+Smith:2007]. Here, the predicted probability for
-a binary event is partitioned into a certain number of bins and the averaged
-forecast probability within each bin is plotted against the observerd relative
-frequency. Typically, equidistant binning is employed, but here the rather
-arbitrary number of bins can be quite sensible. A simple and common enhancement
-is therefore to use evenly populated bins, though even here instabilities can
-be a major issue [@Dimitriadis+Gneiting+Jordan:2021]. 
-
-
-### Similarities and differences
+## Similarities and differences
 
 In the graphical displays for assessing the goodness of fit, several recurring
 elements can be seen:
