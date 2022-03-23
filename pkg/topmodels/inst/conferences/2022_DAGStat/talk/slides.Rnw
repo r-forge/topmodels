@@ -129,7 +129,7 @@ library("distributional")
 \textbf{Goodness of fit:}
 \begin{itemize}
 \item Scoring rules for evaluation the predictive performance, e.g., using the log-score or the continuous ranked probability score.
-\item Visualizations especially suitable for evaluating potential lack of fits.
+\item Visualizations especially suitable for evaluating potential lacks of fit.
 \end{itemize}
 
 
@@ -172,7 +172,7 @@ m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
 \textbf{Model assumption:} 
 \begin{itemize}
 \item Poisson distribution for each team/match ($i$) in the tournament:
-\item[] $y_i \sim \, Pr\big(\log(\lambda_i = \beta_0 + \beta_1 \cdot \text{logability}_i)\big)$.
+\item[] $y_i \sim \, Pr\big(\lambda_i = \exp(\beta_0 + \beta_1 \cdot \text{logability}_i)\big)$
 \end{itemize}
 
 \end{frame}
@@ -691,7 +691,7 @@ m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
 \item Homoscedastic linear regression: 
 \item[] $ y_i \sim \, \beta_{0} + \beta_1 \cdot \text{ensmean}_i$
 \item Heteroscedastic censored regression with a logistic distribution assumption:
-\item[] $\text{y}_i \sim \, Log\big(\mu_i = \beta_{0} + \beta_1 \cdot \text{ensmean}_i, \, \log(\sigma_i = \gamma_0 + \gamma_1 \cdot \text{enssd}_i)\big)$
+\item[] $\text{y}_i \sim \, Log\big(\mu_i = \beta_{0} + \beta_1 \cdot \text{ensmean}_i, \, \sigma_i = \exp(\gamma_0 + \gamma_1 \cdot \text{enssd}_i)\big)$
 \end{itemize}
 
 \end{frame}
@@ -797,7 +797,7 @@ ggplot2::autoplot(c(p1, p2))
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_pithist2, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_fill = 1, confint = "polygon", ref = FALSE)
+ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_fill = 1, confint_alpha = 0.1, confint = "polygon", ref = FALSE)
 @
 \end{center}
 \end{frame}
@@ -837,7 +837,7 @@ ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TR
 <<rain_qqrplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
 q1 <- qqrplot(m_lm, plot = FALSE)
 q2 <- qqrplot(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
+ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
 @
 \end{center}
 \end{frame}
@@ -858,7 +858,7 @@ ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE,
 <<rain_wormplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
 w1 <- wormplot(m_lm, plot = FALSE)
 w2 <- wormplot(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="line")
+ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
 @
 \end{center}
 \end{frame}
@@ -954,13 +954,6 @@ Lang MN, Zeileis A \emph{et al.} (2021).
 \bigskip
 \bigskip
 
-Messner JW, Mayr GJ, Zeileis A (2016).
-\dquote{Heteroscedastic Censored and Truncated Regression with {crch}.}
-\emph{The R Journal}., \textbf{8}(1), 173--181.
-\doi{10.32614/RJ-2016-012}
-
-\medskip
-
 Dunn PK, Smyth GK (1996).
 \dquote{Randomized Quantile Residuals.}
 \emph{Journal of Computational and Graphical Statistics}, \textbf{5}(3), 236--244.
@@ -973,6 +966,13 @@ Kleiber C, Zeileis A (2016).
 \emph{The American Statistician}, 
 \textbf{70}(3), 296--303.
 \doi{10.1080/00031305.2016.1173590}
+
+\medskip
+
+Messner JW, Mayr GJ, Zeileis A (2016).
+\dquote{Heteroscedastic Censored and Truncated Regression with {crch}.}
+\emph{The R Journal}., \textbf{8}(1), 173--181.
+\doi{10.32614/RJ-2016-012}
 
 \medskip
 
