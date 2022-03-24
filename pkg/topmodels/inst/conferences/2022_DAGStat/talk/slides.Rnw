@@ -117,7 +117,7 @@ library("ggplot2")
 
 \textbf{Probabilistic regression models:}
 \begin{itemize}
-\item Not just prediction of the mean but model entire probability distribution.
+\item Modelling the entire probability distribution rather than just the expectation.
 \item Various model classes and types.
 \end{itemize}
 
@@ -126,8 +126,8 @@ library("ggplot2")
 
 \textbf{Goodness of fit:}
 \begin{itemize}
-\item Scoring rules for evaluation the predictive performance, e.g., using the log-score or the (continuous) ranked probability score.
-\item Visualizations especially suitable for evaluating potential lack of fit.
+\item Scoring rules for evaluating the predictive performance, e.g., using the log-score or the (continuous) ranked probability score.
+\item Visualizations especially suitable for identifying possible misspecifications.
 \end{itemize}
 
 
@@ -163,7 +163,7 @@ expected <- distributions3::pdf(distributions3::Poisson(fitted(m)), 0:6)
 \textbf{Regression:}
 \begin{itemize}
 \item Difference in estimated log-ability of the competing teams as covariable:
-\item[] $\log(\lambda_i) = \beta_0 + \beta_1 \cdot \text{diff\_logability}_i$
+\item[] $\log(\hat \lambda_i) = \hat \beta_0 + \hat \beta_1 \cdot \text{diff\_logability}_i$
 \end{itemize}
 
 \bigskip
@@ -747,8 +747,8 @@ wormplot(m, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE
 \textbf{PIT residuals and (randomized) quantile residuals:}
 
 \begin{itemize}
-\item Advantage: Needs to be compared with only one distribution (uniform or normal).
-\item Disadvantage: Scale is not so natural. May require randomization for discrete distributions.
+\item Advantage: Needs to be compared with only one distribution\\(uniform or normal).
+\item Disadvantage: Scale is not so natural.\\May require randomization for discrete distributions.
 \end{itemize}
 
 \bigskip
@@ -820,9 +820,9 @@ m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
 \textbf{Model assumptions:} 
 \begin{itemize}
 \item Homoscedastic linear regression: 
-\item[] $\mu_i = \, \beta_{0} + \beta_1 \cdot \text{ensmean}_i$
+\item[] $\hat \mu_i = \, \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i$, ~ $\hat \sigma = \text{sd}(\epsilon)$
 \item Heteroscedastic censored regression with a logistic distribution assumption:
-\item[] $\text{y}_i \sim \, \text{Logistic}\big(\hat \mu_i = \beta_{0} + \beta_1 \cdot \text{ensmean}_i, \, \hat \sigma_i = \exp(\gamma_0 + \gamma_1 \cdot \text{enssd}_i)\big)$
+\item[] $\text{y}_i \sim \, \text{Logistic}_0\big(\hat \mu_i = \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i, \, \hat \sigma_i = \exp(\hat \gamma_0 + \hat \gamma_1 \cdot \text{enssd}_i)\big)$
 \end{itemize}
 
 \end{frame}
