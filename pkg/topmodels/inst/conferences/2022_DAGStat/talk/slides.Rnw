@@ -333,8 +333,11 @@ gg1 + geom_text(
 \begin{columns}[T]
 \begin{column}{0.33\textwidth}
 \only<2>{
+<<fifa_goodness1a_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m, style = "standing", scale = "raw", fill = "darkgray", fitted = FALSE, xlab = "Goals", plot = FALSE, ref = FALSE))
+@
 <<fifa_goodness1a, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-rootogram(m, style = "standing", scale = "raw", fill = "darkgray", col = "black", fitted = FALSE, xlab = "Goals")
+gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 
 Marginal calibration:
@@ -343,8 +346,11 @@ Marginal calibration:
 \end{itemize}
 }
 \only<3->{
+<<fifa_goodness1b_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m, style = "standing", scale = "raw", fill = "darkgray", col = "black", fitted = TRUE, xlab = "Goals", plot = FALSE, ref = FALSE))
+@
 <<fifa_goodness1b, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-rootogram(m, style = "standing", scale = "raw", fill = "darkgray", col = "black", fitted = TRUE, xlab = "Goals")
+gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 
 Marginal calibration:
@@ -408,8 +414,11 @@ Probabilistic calibration:
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
+<<fifa_rootogram1_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m, style = "standing", scale = "raw", ref = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Goals", plot = FALSE))
+@
 <<fifa_rootogram1, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "standing", scale = "raw", fitted = FALSE, ref = FALSE, plot = "ggplot2", xlab = "Goals")
+gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
 \end{frame}
@@ -427,8 +436,11 @@ rootogram(m, style = "standing", scale = "raw", fitted = FALSE, ref = FALSE, plo
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
+<<fifa_rootogram2_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m, style = "standing", scale = "raw", fitted = TRUE, ref = FALSE, fitted_size = 1.25, xlab = "Goals", plot = FALSE))
+@
 <<fifa_rootogram2, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "standing", scale = "raw", fitted = TRUE, ref = FALSE, plot = "ggplot2", fitted_size = 1.25, xlab = "Goals")
+gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
 \end{frame}
@@ -446,8 +458,11 @@ rootogram(m, style = "standing", scale = "raw", fitted = TRUE, ref = FALSE, plot
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
+<<fifa_rootogram3_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m, style = "standing", scale = "sqrt", fitted = TRUE, ref = FALSE, fitted_size = 1.25, xlab = "Goals", plot = FALSE))
+@
 <<fifa_rootogram3, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "standing", scale = "sqrt", fitted = TRUE, ref = FALSE, plot = "ggplot2", fitted_size = 1.25, xlab = "Goals")
+gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
 \end{frame}
@@ -465,8 +480,10 @@ rootogram(m, style = "standing", scale = "sqrt", fitted = TRUE, ref = FALSE, plo
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
+<<fifa_rootogram4_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m, style = "hanging", scale = "sqrt", fitted = TRUE, ref = TRUE, fitted_size = 1.25, xlab = "Goals", plot = FALSE))
 <<fifa_rootogram4, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "hanging", scale = "sqrt", fitted = TRUE, ref = TRUE, plot = "ggplot2", fitted_size = 1.25, xlab = "Goals")
+gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
 \end{frame}
