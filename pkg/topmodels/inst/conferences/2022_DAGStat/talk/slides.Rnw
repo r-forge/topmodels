@@ -409,7 +409,7 @@ Probabilistic calibration:
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<fifa_rootogram1, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "standing", scale = "raw", fitted = FALSE, ref = FALSE, plot = "ggplot2")
+rootogram(m, style = "standing", scale = "raw", fitted = FALSE, ref = FALSE, plot = "ggplot2", xlab = "Goals")
 @
 \end{center}
 \end{frame}
@@ -428,7 +428,7 @@ rootogram(m, style = "standing", scale = "raw", fitted = FALSE, ref = FALSE, plo
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<fifa_rootogram2, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "standing", scale = "raw", fitted = TRUE, ref = FALSE, plot = "ggplot2", fitted_size = 1.25)
+rootogram(m, style = "standing", scale = "raw", fitted = TRUE, ref = FALSE, plot = "ggplot2", fitted_size = 1.25, xlab = "Goals")
 @
 \end{center}
 \end{frame}
@@ -447,7 +447,7 @@ rootogram(m, style = "standing", scale = "raw", fitted = TRUE, ref = FALSE, plot
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<fifa_rootogram3, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "standing", scale = "sqrt", fitted = TRUE, ref = FALSE, plot = "ggplot2", fitted_size = 1.25)
+rootogram(m, style = "standing", scale = "sqrt", fitted = TRUE, ref = FALSE, plot = "ggplot2", fitted_size = 1.25, xlab = "Goals")
 @
 \end{center}
 \end{frame}
@@ -466,7 +466,7 @@ rootogram(m, style = "standing", scale = "sqrt", fitted = TRUE, ref = FALSE, plo
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<fifa_rootogram4, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-rootogram(m, style = "hanging", scale = "sqrt", fitted = TRUE, ref = TRUE, plot = "ggplot2", fitted_size = 1.25)
+rootogram(m, style = "hanging", scale = "sqrt", fitted = TRUE, ref = TRUE, plot = "ggplot2", fitted_size = 1.25, xlab = "Goals")
 @
 \end{center}
 \end{frame}
@@ -574,7 +574,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TR
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<fifa_pithist3a, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-set.seed(4)
+set.seed(5)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
 @
 \end{center}
@@ -583,7 +583,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TR
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<fifa_pithist3b, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
-set.seed(4)
+set.seed(5)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TRUE, simint = TRUE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
 @
 \end{center}
@@ -805,7 +805,7 @@ m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
 \item Homoscedastic linear regression: 
 \item[] $\mu_i = \, \beta_{0} + \beta_1 \cdot \text{ensmean}_i$
 \item Heteroscedastic censored regression with a logistic distribution assumption:
-\item[] $\text{y}_i \sim \, \text{Logistic}\big(\mu_i = \beta_{0} + \beta_1 \cdot \text{ensmean}_i, \, \sigma_i = \exp(\gamma_0 + \gamma_1 \cdot \text{enssd}_i)\big)$
+\item[] $\text{y}_i \sim \, \text{Logistic}\big(\hat \mu_i = \beta_{0} + \beta_1 \cdot \text{ensmean}_i, \, \hat \sigma_i = \exp(\gamma_0 + \gamma_1 \cdot \text{enssd}_i)\big)$
 \end{itemize}
 
 \end{frame}
@@ -819,13 +819,13 @@ m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
 
 \textbf{Observed vs. ensmean:}
 
-\vspace{0.25em}
+\vspace{-2em}
 
 \only<1>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1a, fig=TRUE, echo=FALSE, height=6.6, width=7.8>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
 @
 \end{center}
 }
@@ -834,7 +834,7 @@ plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1b, fig=TRUE, echo=FALSE, height=6.6, width=7.8>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2], col = 3, lwd = 4)
 
 legend("topright", lwd = 4, lty = 1, col = 3, "m_lm", bty = "n")
@@ -846,7 +846,7 @@ legend("topright", lwd = 4, lty = 1, col = 3, "m_lm", bty = "n")
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1c, fig=TRUE, echo=FALSE, height=6.6, width=7.8>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2], col = 3, lwd = 4)
 abline(coef(m_hclog)[1:2], col = 4, lwd = 4)
 
@@ -875,7 +875,7 @@ legend("topright", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
 r1 <- rootogram(m_lm, plot = FALSE)
 r2 <- rootogram(m_hclog, plot = FALSE)
 
-ggplot2::autoplot(c(r1, r2), fitted_size = 1.25)
+ggplot2::autoplot(c(r1, r2), fitted_size = 1.25, xlab = "Rain")
 @
 \end{center}
 \end{frame}
@@ -1002,6 +1002,8 @@ ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE,
 
 \textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
 
+\pause
+
 \bigskip
 \medskip
 
@@ -1013,7 +1015,7 @@ ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE,
 \code{procast}    & Probabilistic forecasts (\code{(g)lm}, \code{crch}, \code{disttree}, more to come).\\
 & Computation of probabilities, densities, scores, and Hessians. \\
 \code{rootogram}, \code{pithist}, & Plotting rootograms, PIT histograms,\\
-\code{qqrplot}, \code{wormplot}, & (randomized) Q-Q plots, Worm plots,\\
+\code{qqrplot}, \code{wormplot}, & (randomized) Q-Q plots, worm plots,\\
 \code{reliagram} & and reliability diagrams.\\
 \code{plot, autoplot}   & Generic \code{plot}, \code{autoplot} function.%\\
 % \code{c}   & Generic \code{concatenate} function to plot combined objects.
@@ -1078,6 +1080,11 @@ Working Paper 2018-09. Working Papers in Economics; Statistics, Research Platfor
 \author[]{\footnotesize \faEnvelope\,\,\href{mailto:moritz.lang@uibk.ac.at}{moritz.lang@uibk.ac.at} \hspace{1em} \faTwitter\,\href{https://twitter.com/MoritzNLang}{MoritzNLang}}
 \URL{}
 
+%%% SLIDE
+%\title[]{\large{\color{uibkgraym}\url{https://topmodels.R-Forge.R-project.org/}}}
+%\author[]{\footnotesize \faHome\,\,\url{https://moritzlang.org/} \hspace{1em} \faEnvelope\,\,\href{mailto:moritz.lang@uibk.ac.at}{moritz.lang@uibk.ac.at} \hspace{1em} \faTwitter\,\href{https://twitter.com/MoritzNLang}{MoritzNLang}}
+%\URL{}
+
 \section{Thank you}
 
 
@@ -1108,6 +1115,27 @@ Working Paper 2018-09. Working Papers in Economics; Statistics, Research Platfor
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_pithist3, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
 pithist(m_lm, breaks = 50, trafo = qnorm, xlim = c(-3, 3))
+@
+\end{center}
+\end{frame}
+
+
+%% SLIDE
+\begin{frame}[fragile]
+\frametitle{Probabilistic calibration}
+
+\vspace{-0.75em}
+
+\textbf{Observed vs. expected quantiles:}
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_qqrplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+q1 <- qqrplot(m_lm, plot = FALSE)
+q2 <- qqrplot(m_hclog, plot = FALSE)
+ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
 @
 \end{center}
 \end{frame}
