@@ -63,16 +63,16 @@
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale (default: Gaussian).
 #' @param nsim,delta arguments passed to \code{qresiduals}.
-#' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
-#' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
-#' quantile residuals are visualized.
-#' @param ref to be fixed.
 #' @param simint logical. In case of discrete distributions, should the simulation
 #' (confidence) interval due to the randomization be visualized?
 #' @param simint_level numeric. The confidence level required for calculating the simulation
 #' (confidence) interval due to the randomization.
 #' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
 #' simulation (confidence) interval due to the randomization.
+#' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
+#' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
+#' quantile residuals are visualized.
+#' @param ref logical. Should a reference line be plotted?
 #' @param xlab,ylab,main,\dots graphical parameters passed to
 #' \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.
 #' @return An object of class \code{"qqrplot"} inheriting from
@@ -461,24 +461,29 @@ rbind.qqrplot <- c.qqrplot
 #' @param x,object an object of class \code{qqrplot}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph?
+#' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
+#' @param simint logical or quantile specification. Should the simint of
+#' quantiles of the randomized quantile residuals be visualized? 
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
 #' @param confint_level numeric. The confidence level required.
-#' @param simint logical or quantile specification. Should the simint of
-#' quantiles of the randomized quantile residuals be visualized? If
-#' \code{TRUE}, then \code{simint = c(0.01, 0.99)} is used.
+#' @param ref logical. Should a reference line be plotted?
+#' @param ref_identity,ref_probs Should the idenity line be plotted as reference 
+#' and otherwise which probabilities should be used for defining the reference line?
 #' @param xlab,ylab,main,\dots graphical plotting parameters passed to
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
-#' @param ref,xlim,ylim,col,fill,pch,axes,box additional graphical
+#' @param xlim,ylim,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
-#' @param alpha,colour,shape,size,stroke,legend,detrend,ref_identity,ref_probs 
-#' graphical parameters passed to \code{ggplot2} style plots, whereby
-#' \code{object} is a object of class \code{qqrplot}.
-#' @param simint_col,simint_alpha,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Fix me.
-#' @param simint_fill,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype Fix me.
-#' @param theme Fix me.
+#' @param col,pch, graphical parameters for the main part of the base plot.
+#' @param colour,fill,alpha,shape,size,stroke graphical parameters passed to \code{ggplot2} 
+#' style plots, whereby \code{object} is a object of class \code{qqrplot}.
+#' @param legend logical. Should a legend be added in the \code{ggplot2} style
+#' graphic?
+#' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
+#' @param simint_col,simint_alpha,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
+#' @param simint_fill,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
 #' @seealso \code{\link{qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
@@ -1236,11 +1241,11 @@ autoplot.qqrplot <- function(object,
 #' quartile of theoretical distribution (default: Gaussian \code{qnorm}).
 #' @param probs numeric vector of length two, representing probabilities of reference
 #' line used in \code{trafo}.
-#' @param detrend Fix description.
-#' @param level Fix description.
-#' @param xlim Fix description.
-#' @param n Fix description.
-#' @param style Fix description.
+#' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
+#' @param level numeric. The confidence level required.
+#' @param xlim The x limits for computing the confidence intervals.
+#' @param n The number of points used to compute the confidence intervals, the more the smoother.
+#' @param style The confidence style.
 #' @examples
 #' if (require("ggplot2")) {
 #'   ## Fit model

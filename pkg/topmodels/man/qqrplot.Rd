@@ -65,7 +65,7 @@ simulation (confidence) interval due to the randomization.}
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 quantile residuals are visualized.}
 
-\item{ref}{to be fixed.}
+\item{ref}{logical. Should a reference line be plotted?}
 
 \item{xlab, ylab, main, \dots}{graphical parameters passed to
 \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}

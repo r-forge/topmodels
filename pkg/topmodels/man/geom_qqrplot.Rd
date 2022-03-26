@@ -153,7 +153,7 @@ to the paired geom/stat.}
 
 \item{geom}{The geometric object to use display the data}
 
-\item{detrend}{Fix description.}
+\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
 
 \item{identity}{logical, should the identity line be plotted or a theoretical line
 which passes through \code{probs} quantiles computed by \code{trafo}.}
@@ -164,13 +164,13 @@ line used in \code{trafo}.}
 \item{trafo}{function for calculating reference line through first and third
 quartile of theoretical distribution (default: Gaussian \code{qnorm}).}
 
-\item{xlim}{Fix description.}
+\item{xlim}{The x limits for computing the confidence intervals.}
 
-\item{n}{Fix description.}
+\item{n}{The number of points used to compute the confidence intervals, the more the smoother.}
 
-\item{level}{Fix description.}
+\item{level}{numeric. The confidence level required.}
 
-\item{style}{Fix description.}
+\item{style}{The confidence style.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within

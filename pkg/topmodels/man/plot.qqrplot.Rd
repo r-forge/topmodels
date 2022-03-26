@@ -89,9 +89,10 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph?}
 
+\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
+
 \item{simint}{logical or quantile specification. Should the simint of
-quantiles of the randomized quantile residuals be visualized? If
-\code{TRUE}, then \code{simint = c(0.01, 0.99)} is used.}
+quantiles of the randomized quantile residuals be visualized?}
 
 \item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
@@ -99,21 +100,31 @@ quantile residuals are visualized.}
 
 \item{confint_level}{numeric. The confidence level required.}
 
-\item{ref, xlim, ylim, col, fill, pch, axes, box}{additional graphical
+\item{ref}{logical. Should a reference line be plotted?}
+
+\item{ref_identity, ref_probs}{Should the idenity line be plotted as reference 
+and otherwise which probabilities should be used for defining the reference line?}
+
+\item{xlim, ylim, axes, box}{additional graphical
 parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.}
 
 \item{xlab, ylab, main, \dots}{graphical plotting parameters passed to
 \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 respectively.}
 
-\item{simint_col, simint_alpha, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Fix me.}
+\item{col, pch, }{graphical parameters for the main part of the base plot.}
 
-\item{theme}{Fix me.}
+\item{simint_col, simint_alpha, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.}
 
-\item{alpha, colour, shape, size, stroke, legend, detrend, ref_identity, ref_probs}{graphical parameters passed to \code{ggplot2} style plots, whereby
-\code{object} is a object of class \code{qqrplot}.}
+\item{legend}{logical. Should a legend be added in the \code{ggplot2} style
+graphic?}
 
-\item{simint_fill, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype}{Fix me.}
+\item{theme}{Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.}
+
+\item{colour, fill, alpha, shape, size, stroke}{graphical parameters passed to \code{ggplot2} 
+style plots, whereby \code{object} is a object of class \code{qqrplot}.}
+
+\item{simint_fill, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
 }
 \description{
 Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
