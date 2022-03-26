@@ -130,9 +130,14 @@ library("ggplot2")
 \item Visualizations especially suitable for identifying possible misspecifications.
 \end{itemize}
 
+\bigskip
+\pause 
 
+\begin{itemize}[<+->]
+\item[\BoldRightarrow] \textbf{What are useful elements of such graphics?}
+\item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
+\end{itemize}
 \end{frame}
-
 
 
 %-------------------------------------------------------------------
@@ -162,8 +167,8 @@ expected <- distributions3::pdf(distributions3::Poisson(fitted(m)), 0:6)
 
 \textbf{Regression:}
 \begin{itemize}
-\item Difference in estimated log-ability of the competing teams as covariable:
-\item[] $\log(\hat \lambda_i) = \hat \beta_0 + \hat \beta_1 \cdot \text{diff\_logability}_i$
+\item Difference in estimated ability of the competing teams as covariable:
+\item[] $\log(\hat \lambda_i) = \hat \beta_0 + \hat \beta_1 \cdot \text{ability\_diff}_i$
 \end{itemize}
 
 \bigskip
@@ -190,7 +195,7 @@ expected <- distributions3::pdf(distributions3::Poisson(fitted(m)), 0:6)
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_poisson1, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_poisson1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 idx <- c(121, 122)
 df <- data.frame(group =  FIFA2018$team[idx])
 df <- cbind(df, expected[idx, ])
@@ -236,7 +241,7 @@ gg1 + geom_text(
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_poisson2, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_poisson2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 idx <- c(123, 124)
 df <- data.frame(group =  FIFA2018$team[idx])
 df <- cbind(df, expected[idx, ])
@@ -283,7 +288,7 @@ gg1 + geom_text(
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_poisson3, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_poisson3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 idx <- c(127, 128)
 df <- data.frame(group =  FIFA2018$team[idx])
 df <- cbind(df, expected[idx, ])
@@ -417,7 +422,7 @@ Probabilistic calibration:
 <<fifa_rootogram1_comp, fig=FALSE, echo=FALSE>>=
 gg <- autoplot(rootogram(m, style = "standing", scale = "raw", ref = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Goals", plot = FALSE))
 @
-<<fifa_rootogram1, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_rootogram1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
@@ -439,7 +444,7 @@ gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 <<fifa_rootogram2_comp, fig=FALSE, echo=FALSE>>=
 gg <- autoplot(rootogram(m, style = "standing", scale = "raw", fitted = TRUE, ref = FALSE, fitted_size = 1.25, xlab = "Goals", plot = FALSE))
 @
-<<fifa_rootogram2, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_rootogram2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
@@ -461,7 +466,7 @@ gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 <<fifa_rootogram3_comp, fig=FALSE, echo=FALSE>>=
 gg <- autoplot(rootogram(m, style = "standing", scale = "sqrt", fitted = TRUE, ref = FALSE, fitted_size = 1.25, xlab = "Goals", plot = FALSE))
 @
-<<fifa_rootogram3, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_rootogram3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
@@ -482,7 +487,7 @@ gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 \setkeys{Gin}{width=0.65\textwidth}
 <<fifa_rootogram4_comp, fig=FALSE, echo=FALSE>>=
 gg <- autoplot(rootogram(m, style = "hanging", scale = "sqrt", fitted = TRUE, ref = TRUE, fitted_size = 1.25, xlab = "Goals", plot = FALSE))
-<<fifa_rootogram4, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_rootogram4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 @
 \end{center}
@@ -528,7 +533,7 @@ gg + scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
 \only<1>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist1a, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(3)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = FALSE, simint = FALSE, confint = FALSE, alpha = 1, ylim = c(NA, 1.788086), plot = "ggplot2")
 @
@@ -538,7 +543,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = FA
 \only<2>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist1b, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(3)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TRUE, simint = FALSE, confint = FALSE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, plot = "ggplot2")
 @
@@ -548,7 +553,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TR
 \only<3>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist1c, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist1c, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(3)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
 @
@@ -569,7 +574,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TR
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist2, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(2)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
 @
@@ -590,7 +595,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TR
 \only<1>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist3a, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist3a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(5)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
 @
@@ -599,7 +604,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TR
 \only<2>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist3b, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist3b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(5)
 pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TRUE, simint = TRUE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
 @
@@ -619,7 +624,7 @@ pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", ref = TR
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist3, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(10)
 pithist(m, nsim = 10, type = "random", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1,  plot = "ggplot2")
 @
@@ -639,7 +644,7 @@ pithist(m, nsim = 10, type = "random", fill = "darkgray", col = "black", alpha =
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist4, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(10)
 pithist(m, nsim = 100, type = "random", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1,  plot = "ggplot2")
 @
@@ -659,7 +664,7 @@ pithist(m, nsim = 100, type = "random", fill = "darkgray", col = "black", alpha 
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist5, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist5, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(10)
 pithist(m, type = "expected", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1,  plot = "ggplot2")
 @
@@ -680,7 +685,7 @@ pithist(m, type = "expected", fill = "darkgray", col = "black", alpha = 1, ylim 
 \only<1>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist_norm1a, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist_norm1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(1000)
 pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type = "random", trafo = qnorm, xlim = c(-3.5, 3.5), fill = "darkgray", col = "black", alpha = 1, ref = FALSE, confint = FALSE,  plot = "ggplot2", ylim = c(NA, 0.515625))
 @
@@ -689,7 +694,7 @@ pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type 
 \only<2>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist_norm1b, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_pithist_norm1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(1000)
 pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type = "random", trafo = qnorm, xlim = c(-3.5, 3.5), fill = "darkgray", col = "black", alpha = 1, ref_size = 1, confint_size = 1,  plot = "ggplot2", ylim = c(NA, 0.515625))
 @
@@ -710,7 +715,7 @@ pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type 
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_qqrplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(3)
 qqrplot(m, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
 @
@@ -730,7 +735,7 @@ qqrplot(m, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<fifa_wormplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<fifa_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(3)
 wormplot(m, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
 @
@@ -841,7 +846,7 @@ m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
 \only<1>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_scatter1a, fig=TRUE, echo=FALSE, height=6.6, width=7.8>>=
+<<rain_scatter1a, fig=TRUE, echo=FALSE, height=5, width=6.>>=
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
 @
 \end{center}
@@ -850,7 +855,7 @@ plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alph
 \only<2>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_scatter1b, fig=TRUE, echo=FALSE, height=6.6, width=7.8>>=
+<<rain_scatter1b, fig=TRUE, echo=FALSE, height=5, width=6.>>=
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2], col = 3, lwd = 4)
 
@@ -862,7 +867,7 @@ legend("topright", lwd = 4, lty = 1, col = 3, "m_lm", bty = "n")
 \only<3>{
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_scatter1c, fig=TRUE, echo=FALSE, height=6.6, width=7.8>>=
+<<rain_scatter1c, fig=TRUE, echo=FALSE, height=5, width=6.>>=
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2], col = 3, lwd = 4)
 abline(coef(m_hclog)[1:2], col = 4, lwd = 4)
@@ -888,7 +893,7 @@ legend("topright", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_rootogram, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<rain_rootogram, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 r1 <- rootogram(m_lm, plot = FALSE)
 r2 <- rootogram(m_hclog, plot = FALSE)
 
@@ -910,7 +915,7 @@ ggplot2::autoplot(c(r1, r2), fitted_size = 1.25, xlab = "Rain")
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_pithist1, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<rain_pithist1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 p1 <- pithist(m_lm, plot = FALSE)
 p2 <- pithist(m_hclog, plot = FALSE)
 
@@ -932,7 +937,7 @@ ggplot2::autoplot(c(p1, p2), fill = "darkgray", col = "black", alpha = 1, ref_si
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_pithist2, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<rain_pithist2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_fill = 1, confint_alpha = 0.1, size = 1, confint = "polygon", ref = FALSE)
 @
 \end{center}
@@ -951,7 +956,7 @@ ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TR
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_qqrplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<rain_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 q1 <- qqrplot(m_lm, plot = FALSE)
 q2 <- qqrplot(m_hclog, plot = FALSE)
 ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
@@ -972,7 +977,7 @@ ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE,
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_wormplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<rain_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 w1 <- wormplot(m_lm, plot = FALSE)
 w2 <- wormplot(m_hclog, plot = FALSE)
 ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
@@ -1001,47 +1006,57 @@ ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE,
   \item Reliability diagram at prespecified thresholds.
 \end{itemize}
 
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}
-\frametitle{Software}
-\vspace{-0.75em}
-\textbf{topmodels}: available on R-Forge at\\
-
-\medskip
-
-\small{\url{https://topmodels.R-Forge.R-project.org/}}\\
-
-\bigskip
-\medskip
-
-\textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
-
 \pause
-
+\medskip
 \bigskip
-\medskip
 
-\textbf{Main functions:}
+\textbf{topmodels:} Unifying toolbox for graphical model assessment.
 
-\medskip
-
-\begin{tabular}{ll}
-\code{procast}    & Probabilistic forecasts (\code{(g)lm}, \code{crch}, \code{disttree}, more to come).\\
-& Computation of probabilities, densities, scores, and Hessians. \\
-\code{rootogram}, \code{pithist}, & Plotting rootograms, PIT histograms,\\
-\code{qqrplot}, \code{wormplot}, & (randomized) Q-Q plots, worm plots,\\
-\code{reliagram} & and reliability diagrams.\\
-\code{plot, autoplot}   & Generic \code{plot}, \code{autoplot} function.%\\
-% \code{c}   & Generic \code{concatenate} function to plot combined objects.
-\end{tabular}
-
-\bigskip
-\medskip
+\begin{itemize}
+  \item available on R-Forge at \small{\url{https://topmodels.R-Forge.R-project.org/}}
+\end{itemize}
 
 \end{frame}
+
+
+%%% SLIDE
+%\begin{frame}
+%\frametitle{Software}
+%\vspace{-0.75em}
+%\textbf{topmodels}: available on R-Forge at\\
+%
+%\medskip
+%
+%\small{\url{https://topmodels.R-Forge.R-project.org/}}\\
+%
+%\bigskip
+%\medskip
+%
+%\textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
+%
+%\pause
+%
+%\bigskip
+%\medskip
+%
+%\textbf{Main functions:}
+%
+%\medskip
+%
+%\begin{tabular}{ll}
+%\code{procast}    & Probabilistic forecasts (\code{(g)lm}, \code{crch}, \code{disttree}, more to come).\\
+%& Computation of probabilities, densities, scores, and Hessians. \\
+%\code{rootogram}, \code{pithist}, & Plotting rootograms, PIT histograms,\\
+%\code{qqrplot}, \code{wormplot}, & (randomized) Q-Q plots, worm plots,\\
+%\code{reliagram} & and reliability diagrams.\\
+%\code{plot, autoplot}   & Generic \code{plot}, \code{autoplot} function.%\\
+%% \code{c}   & Generic \code{concatenate} function to plot combined objects.
+%\end{tabular}
+%
+%\bigskip
+%\medskip
+%
+%\end{frame}
 
 
 %-------------------------------------------------------------------
@@ -1061,12 +1076,19 @@ Lang MN, Zeileis A \emph{et al.} (2021).
 \url{https://topmodels.R-Forge.R-project.org/}
 
 \bigskip
-\bigskip
 
 Dunn PK, Smyth GK (1996).
 \dquote{Randomized Quantile Residuals.}
 \emph{Journal of Computational and Graphical Statistics}, \textbf{5}(3), 236--244.
 \doi{10.2307/1390802}
+
+\medskip
+
+Gneiting T, Balabdaoui F, Raftery AE (2007)
+\dquote{Probabilistic Forecasts, Calibration and Sharpness.}
+\emph{Journal of the Royal Statistical Society: Series B (Methodological)},
+\textbf{69}(2), 243--268.
+\doi{10.1111/j.1467-9868.2007.00587.x}
 
 \medskip
 
@@ -1130,7 +1152,7 @@ Working Paper 2018-09. Working Papers in Economics; Statistics, Research Platfor
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_pithist3, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<rain_pithist3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 pithist(m_lm, breaks = 50, trafo = qnorm, xlim = c(-3, 3))
 @
 \end{center}
@@ -1149,7 +1171,7 @@ pithist(m_lm, breaks = 50, trafo = qnorm, xlim = c(-3, 3))
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_qqrplot, fig=TRUE, echo=FALSE, height=5.6, width=7.8>>=
+<<rain_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 q1 <- qqrplot(m_lm, plot = FALSE)
 q2 <- qqrplot(m_hclog, plot = FALSE)
 ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
