@@ -110,38 +110,44 @@ a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper 
 line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
 plotted.}
 
-\item{freq}{Fix me.}
+\item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
+frequencies, the \code{counts} component of the result; if \code{FALSE},
+probability densities, component \code{density}, are plotted (so that the
+histogram has a total area of one).}
 
-\item{simint}{Fix description.}
+\item{simint}{logical. In case of discrete distributions, should the simulation
+(confidence) interval due to the randomization be visualized?}
 
-\item{confint}{logical. Should confident intervals be drawn? Fix. can be colour}
+\item{confint}{Should confident intervals be drawn? Either logical or as 
+character string defining one of `"polygon"`, `"line"` or `"none"`.}
 
 \item{confint_level}{numeric. The confidence level required.}
 
-\item{confint_type}{character. Which type of confidence interval should be plotted. According
+\item{confint_type}{character. Which type of confidence interval should be plotted: 
+`"exact"` or `"approximation"`. According
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
-\item{ref, col, border, fill, alpha_min, lwd, lty, axes, box}{additional graphical
-parameters for base plots, whereby \code{x} is a object of class \code{pithist}.}
+\item{ref}{logical. Should a reference line be plotted?}
 
-\item{xlim, ylim}{graphical parameters. These may pertain either to the whole
-plot or just the histogram or just the fitted line.}
+\item{xlim, ylim, xlab, ylab, main, axes, box}{graphical parameters.}
 
-\item{xlab, ylab, main}{graphical parameters.}
+\item{col, border, lwd, lty, alpha_min}{graphical parameters for the main part of the base plot.}
 
-\item{simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Fix me.}
+\item{simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.}
 
-\item{\dots}{further graphical parameters.}
+\item{\dots}{further graphical parameters passed to the plotting function.}
 
 \item{object, x}{an object of class \code{\link{pithist}}.}
 
-\item{theme}{Fix me.}
+\item{legend}{logical. Should a legend be added in the \code{ggplot2} style
+graphic?}
 
-\item{colour, size, linetype, legend, alpha}{graphical parameters passed for
-\code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.}
+\item{theme}{Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.}
 
-\item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype, ref_alpha}{Fix me.}
+\item{colour, fill, size, linetype, alpha}{graphical parameters for the histogram style part in the \code{autoplot}.}
+
+\item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype, ref_alpha}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
 }
 \description{
 Generic plotting functions for PIT histograms of the class \code{"pithist"}

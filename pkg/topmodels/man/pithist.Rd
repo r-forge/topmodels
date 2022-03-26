@@ -91,7 +91,7 @@ histogram has a total area of one).}
 
 \item{confint}{logical. Should confident intervals be drawn?}
 
-\item{ref}{to be fixed.}
+\item{ref}{logical. Should a reference line be plotted?}
 
 \item{xlab, ylab, main}{graphical parameters passed to
 \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}

@@ -168,9 +168,14 @@ rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 
-\item{freq}{Fix description.}
+\item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
+frequencies, the \code{counts} component of the result; if \code{FALSE},
+probability densities, component \code{density}, are plotted (so that the
+histogram has a total area of one).}
 
-\item{style}{Fix description.}
+\item{style}{character specifying the style of pithist. For \code{style = "bar"}
+a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
+line is plotted.}
 
 \item{...}{Other arguments passed on to \code{\link[ggplot2:layer]{layer()}}. These are
 often aesthetics, used to set an aesthetic to a fixed value, like
@@ -180,11 +185,15 @@ to the paired geom/stat.}
 \item{stat}{The statistical transformation to use on the data for this
 layer, as a string.}
 
-\item{trafo}{Fix description.}
+\item{trafo}{function for tranforming residuals from probability scale to a
+different distribution scale.}
 
-\item{level}{Fix description.}
+\item{level}{numeric. The confidence level required.}
 
-\item{type}{Fix description.}
+\item{type}{character. Which type of confidence interval should be plotted: 
+`"exact"` or `"approximation"`. According
+to Agresti and Coull (1998), for interval estimation of binomial proportions
+an approximation can be better than exact.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within

@@ -65,10 +65,7 @@
 #' \code{tibble} is loaded.
 #' @param trafo function for tranforming residuals from probability scale to a
 #' different distribution scale.
-#' @param style character specifying the style of pithist. For \code{style = "bar"}
-#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
-#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
-#' drawn.
+#' @param breaks numeric. Breaks for the histogram intervals.
 #' @param type character. In case of discrete distributions, should an expected
 #' (non-normal) PIT histogram be computed according to Czado et al. (2009)
 #' (\code{"expected"}) or should the PIT be drawn randomly from the corresponding
@@ -79,19 +76,22 @@
 #' proabilities corresponding to each observation according to get (randomized)
 #' quantile residuals. For \code{NULL}, the minimal observed difference in the
 #' resonse divided by \code{5e-6} is used.
-#' @param freq logical. If \code{TRUE}, the PIT histogram is represented by
-#' frequencies, the \code{counts} component of the result; if \code{FALSE},
-#' probability densities, component \code{density}, are plotted (so that the
-#' histogram has a total area of one).
-#' @param breaks numeric. Breaks for the histogram intervals.
-#' @param ref to be fixed.
-#' @param confint logical. Should confident intervals be drawn?
 #' @param simint logical. In case of discrete distributions, should the simulation
 #' (confidence) interval due to the randomization be visualized?
 #' @param simint_level numeric. The confidence level required for calculating the simulation
 #' (confidence) interval due to the randomization.
 #' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
 #' simulation (confidence) interval due to the randomization.
+#' @param style character specifying the style of pithist. For \code{style = "bar"}
+#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
+#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
+#' drawn.
+#' @param freq logical. If \code{TRUE}, the PIT histogram is represented by
+#' frequencies, the \code{counts} component of the result; if \code{FALSE},
+#' probability densities, component \code{density}, are plotted (so that the
+#' histogram has a total area of one).
+#' @param ref logical. Should a reference line be plotted?
+#' @param confint logical. Should confident intervals be drawn?
 #' @param xlab,ylab,main graphical parameters passed to
 #' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.
 #' @param \dots further graphical parameters.
@@ -563,25 +563,29 @@ rbind.pithist <- c.pithist
 #' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
 #' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
 #' plotted.
-#' @param confint logical. Should confident intervals be drawn? Fix. can be colour
-#' @param simint Fix description.
-#' @param confint_type Fix description.
+#' @param freq logical. If \code{TRUE}, the PIT histogram is represented by
+#' frequencies, the \code{counts} component of the result; if \code{FALSE},
+#' probability densities, component \code{density}, are plotted (so that the
+#' histogram has a total area of one).
+#' @param simint logical. In case of discrete distributions, should the simulation
+#' (confidence) interval due to the randomization be visualized?
+#' @param confint Should confident intervals be drawn? Either logical or as 
+#' character string defining one of `"polygon"`, `"line"` or `"none"`.
 #' @param confint_level numeric. The confidence level required.
-#' @param confint_type character. Which type of confidence interval should be plotted. According
+#' @param confint_type character. Which type of confidence interval should be plotted: 
+#' `"exact"` or `"approximation"`. According
 #' to Agresti and Coull (1998), for interval estimation of binomial proportions
 #' an approximation can be better than exact.
-#' @param xlim,ylim graphical parameters. These may pertain either to the whole
-#' plot or just the histogram or just the fitted line.
-#' @param xlab,ylab,main graphical parameters.
-#' @param theme Fix me.
-#' @param \dots further graphical parameters.
-#' @param ref,col,border,fill,alpha_min,lwd,lty,axes,box additional graphical
-#' parameters for base plots, whereby \code{x} is a object of class \code{pithist}.
-#' @param colour,size,linetype,legend,alpha graphical parameters passed for
-#' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{pithist}.
-#' @param freq Fix me.
-#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype,ref_alpha Fix me.
-#' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Fix me.
+#' @param ref logical. Should a reference line be plotted?
+#' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
+#' @param col,border,lwd,lty,alpha_min graphical parameters for the main part of the base plot.
+#' @param colour,fill,size,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
+#' @param legend logical. Should a legend be added in the \code{ggplot2} style
+#' graphic?
+#' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
+#' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
+#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
+#' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -1717,11 +1721,20 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #'
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
-#' @param style Fix description.
-#' @param type Fix description.
-#' @param level Fix description.
-#' @param freq Fix description.
-#' @param trafo Fix description.
+#' @param style character specifying the style of pithist. For \code{style = "bar"}
+#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
+#' line is plotted.
+#' @param type character. Which type of confidence interval should be plotted: 
+#' `"exact"` or `"approximation"`. According
+#' to Agresti and Coull (1998), for interval estimation of binomial proportions
+#' an approximation can be better than exact.
+#' @param level numeric. The confidence level required.
+#' @param freq logical. If \code{TRUE}, the PIT histogram is represented by
+#' frequencies, the \code{counts} component of the result; if \code{FALSE},
+#' probability densities, component \code{density}, are plotted (so that the
+#' histogram has a total area of one).
+#' @param trafo function for tranforming residuals from probability scale to a
+#' different distribution scale.
 #' @examples
 #' if (require("ggplot2")) {
 #'   ## Fit model
