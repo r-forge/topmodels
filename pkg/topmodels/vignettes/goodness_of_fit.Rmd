@@ -43,19 +43,19 @@ knitr::opts_chunk$set(fig.align = "center")
 
 Over the last decades there has been an increasing interest in regression models
 that not only capture the mean of a dependent variable but model its entire
-probability distribution [GAMLSS paper, Klein et al, Hothorn/Kneib/Buehlmann].
+probability distribution [@Stasinopoulos+Rigby:2007;@Klein+Kneib+Lang+Sohn:2015;@Hothorn+Kneib+Buehlmann:2014].
 In the simplest case this could be a generalized linear model
-[GLM, McCullagh & Nelder 1989] where higher moments of the probability distribution
+[GLM, @Nelder+Wedderburn:1972;@McCullagh+Nelder:1989] where higher moments of the probability distribution
 co-vary with the expectation. Instead, multiple distribution parameters could
-also be linked to explanatory variables as in distributional regression [Klein at al.]
-or generalized additive models of location, scale, and shape [GAMLSS ref].
+also be linked to explanatory variables as in distributional regression [@Klein+Kneib+Lang+Sohn:2015]
+or generalized additive models of location, scale, and shape [@Stasinopoulos+Rigby:2007].
 Moreover, many other flexible modeling techniques yield fitted distributions,
-including transformation models [Hothorn], Bayesian modeling [Umlauf et al.],
-machine learning approaches [refs], and many others.
+including transformation models [@Hothorn+Kneib+Buehlmann:2014], Bayesian modeling [@Umlauf+Klein+Zeileis:2018],
+machine learning approaches [e.g., @Rasp+Lerch:2018], and many others.
 
 For assessing the goodness of fit of such probabilistic regression models, (proper)
-scoring rules [refs] are widely used, e.g., using the log-likelihood (also
-known as the log-score) or the continuous ranked probability score [CRPS, ref].
+scoring rules [@Gneiting+Raftery:2007] are widely used, e.g., using the log-likelihood (also
+known as the log-score) or the continuous ranked probability score [CRPS, @Gneiting+Raftery:2007].
 In addition to such numerical summaries, visualizations capturing the goodness
 of fit are also of interest as they may also be able to shed some more light on
 the sources of a potential lack of fit.
@@ -68,19 +68,6 @@ been established. Here, we will provide such a unified framework that facilitate
 - understanding what the graphics have in common and what sets them apart,
 - demonstration of relative strengths and weaknesses in uncovering sources of lack of fit,
 - fine-tuning the graphics for certain models or data sets.
-
-
-_FIXME (include shortened version of Moritz' text):_ Before discussing the various graphical evaluation methods in more detail, we
-want to outline the underlying motivation and identify similarities and
-differences in the methodologies. According to the seminal work of
-@Gneiting+Balabdaoui+Raftery:2007, probabilistic forecasts aim to *maximize the
-sharpness of the predictive distributions subject to calibration*. Calibration
-here refers to the statistical concordance between the forecast and the
-observation, and is thus a joint property of the forecast and observation.
-Sharpness, on the other hand, is a property of the forecast only and indicates
-how concentrated a predictive distribution is. In general, the more
-concentrated the sharper the forecast.
-
 
 ## Notation
 
@@ -99,7 +86,13 @@ However, since the uncertainty in the estimation of the parameters is not
 accounted for, small deviations from asymptotic theoretical properties will be
 apparent in all graphical displays due to some sampling variation.
 
-_FIXME:_ Look ahead. Discuss the two basic approaches. Either marginal or conditional.
+According to the seminal work of @Gneiting+Balabdaoui+Raftery:2007, probabilistic forecasts aim to *maximize the
+sharpness of the predictive distributions subject to calibration*. Calibration
+here refers to the statistical concordance between the forecast and the
+observation, and is thus a joint property of the forecast and observation.
+Sharpness, on the other hand, is a property of the forecast only and indicates
+how concentrated a predictive distribution is. In general, the more
+concentrated the sharper the forecast. In the assessment whether probabilistic predictions are calibrated, we further distinguish between *marginal* and *probabilistic* calibration. 
 
 ```{r calibration, fig.width = 4.5, fig.height = 4.5, fig.align = "center", dev = "png", out.width = "30%", fig.show = "hold"}
 library("topmodels")
