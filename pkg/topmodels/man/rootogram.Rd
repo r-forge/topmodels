@@ -61,7 +61,9 @@ and \code{"continous"} response distribution, as well as for the special case of
 \item{scale}{character specifying whether raw frequencies or their square
 roots (default) should be drawn.}
 
-\item{ref, fitted}{Fix description.}
+\item{fitted}{Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.}
+
+\item{ref}{logical. Should a reference line be plotted?}
 
 \item{xlab, ylab, main}{graphical parameters.}
 }

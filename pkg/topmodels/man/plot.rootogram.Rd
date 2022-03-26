@@ -68,25 +68,29 @@
 \arguments{
 \item{x, object}{an object of class \code{\link{rootogram}}.}
 
-\item{style, scale, alpha_min, theme}{Fix description.}
+\item{style}{character specifying the syle of rootogram.}
+
+\item{scale}{character specifying whether raw frequencies or their square
+roots (default) should be drawn.}
+
+\item{fitted}{Should the expected (fitted) frequencies be plotted?}
 
 \item{ref}{logical. Should a reference line be plotted?}
 
-\item{xlim, ylim, fill, col, border, lwd, lty, axes, box}{graphical
-parameters. These may pertain either to the whole plot or just the histogram
-or just the fitted line.}
+\item{xlim, ylim, xlab, ylab, main, axes, box}{graphical parameters.}
 
-\item{xlab, ylab, main}{graphical parameters.}
+\item{col, border, lwd, lty, alpha_min}{graphical parameters for the histogram style part of the base plot.}
 
-\item{fitted_col, fitted_pch, fitted_lty, fitted_lwd, ref_col, ref_lty, ref_lwd, fitted_colour, fitted_size, fitted_linetype, fitted_alpha, fitted_fill, fitted_stroke, fitted_shape, ref_colour, ref_size, ref_linetype, ref_alpha}{Fix description.}
+\item{fitted_col, fitted_pch, fitted_lty, fitted_lwd, ref_col, ref_lty, ref_lwd, fitted_colour, fitted_size, fitted_linetype, fitted_alpha, fitted_fill, fitted_stroke, fitted_shape, ref_colour, ref_size, ref_linetype, ref_alpha}{Further graphical parameters for the `fitted` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.}
 
 \item{\dots}{further graphical parameters passed to the plotting function.}
 
 \item{legend}{logical. Should a legend be added in the \code{ggplot2} style
 graphic?}
 
-\item{colour, size, fitted, alpha, linetype}{graphical parameters passed to
-\code{geom_line} and \code{geom_point}, respectively.}
+\item{theme}{Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.}
+
+\item{colour, fill, size, linetype, alpha}{graphical parameters for the histogram style part in the \code{autoplot}.}
 }
 \description{
 Generic plotting functions for rootograms of the class \code{"rootogram"}

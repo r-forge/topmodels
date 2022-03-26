@@ -55,18 +55,19 @@
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
-#' @param style character specifying the syle of rootogram (see below).
-#' @param scale character specifying whether raw frequencies or their square
-#' roots (default) should be drawn.
-#' @param breaks numeric. Breaks for the histogram intervals.
-#' @param width numeric. Widths of the histogram bars.
 #' @param response_type character. To set the default values for \code{breaks} and
 #' \code{widths}.  Currently different defaults are available for \code{"discrete"}
 #' and \code{"continous"} response distribution, as well as for the special case of a
 #' \code{"logseries"} response.
+#' @param breaks numeric. Breaks for the histogram intervals.
+#' @param width numeric. Widths of the histogram bars.
+#' @param style character specifying the syle of rootogram (see below).
+#' @param scale character specifying whether raw frequencies or their square
+#' roots (default) should be drawn.
+#' @param fitted Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.
+#' @param ref logical. Should a reference line be plotted?
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters passed to the plotting function.
-#' @param ref,fitted Fix description.
 #' @return An object of class \code{"rootogram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 #' with the following variables: \item{observed}{observed
@@ -452,17 +453,18 @@ rbind.rootogram <- c.rootogram
 #'
 #' @aliases plot.rootogram autoplot.rootogram
 #' @param x,object an object of class \code{\link{rootogram}}.
+#' @param style character specifying the syle of rootogram.
+#' @param scale character specifying whether raw frequencies or their square
+#' roots (default) should be drawn.
+#' @param fitted Should the expected (fitted) frequencies be plotted?
 #' @param ref logical. Should a reference line be plotted?
-#' @param xlab,ylab,main graphical parameters.
-#' @param xlim,ylim,fill,col,border,lwd,lty,axes,box graphical
-#' parameters. These may pertain either to the whole plot or just the histogram
-#' or just the fitted line.
-#' @param colour,size,fitted,alpha,linetype graphical parameters passed to
-#' \code{geom_line} and \code{geom_point}, respectively.
+#' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
+#' @param col,border,lwd,lty,alpha_min graphical parameters for the histogram style part of the base plot.
+#' @param colour,fill,size,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
-#' @param style,scale,alpha_min,theme Fix description.
-#' @param fitted_col,fitted_pch,fitted_lty,fitted_lwd,ref_col,ref_lty,ref_lwd,fitted_colour,fitted_size,fitted_linetype,fitted_alpha,fitted_fill,fitted_stroke,fitted_shape,ref_colour,ref_size,ref_linetype,ref_alpha Fix description.
+#' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
+#' @param fitted_col,fitted_pch,fitted_lty,fitted_lwd,ref_col,ref_lty,ref_lwd,fitted_colour,fitted_size,fitted_linetype,fitted_alpha,fitted_fill,fitted_stroke,fitted_shape,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `fitted` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
@@ -1068,9 +1070,9 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #'
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
-#' @param style Fix description.
-#' @param scale Fix description: Should additional sqrt scaling be applied.
-#' @param linestyle Fix description.
+#' @param style character specifying the syle of rootogram (see below).
+#' @param scale character specifying whether values should be transformed to the square root scale (not checking for original scale, so maybe applied again).
+#' @param linestyle Character string defining one of `"both"`, `"line"` or `"point"`.
 #' @examples
 #' if (require("ggplot2")) {
 #'   ## Fit model

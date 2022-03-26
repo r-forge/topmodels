@@ -121,9 +121,9 @@ rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 
-\item{scale}{Fix description: Should additional sqrt scaling be applied.}
+\item{scale}{character specifying whether values should be transformed to the square root scale (not checking for original scale, so maybe applied again).}
 
-\item{style}{Fix description.}
+\item{style}{character specifying the syle of rootogram (see below).}
 
 \item{...}{Other arguments passed on to \code{\link[ggplot2:layer]{layer()}}. These are
 often aesthetics, used to set an aesthetic to a fixed value, like
@@ -133,7 +133,7 @@ to the paired geom/stat.}
 \item{stat}{The statistical transformation to use on the data for this
 layer, as a string.}
 
-\item{linestyle}{Fix description.}
+\item{linestyle}{Character string defining one of `"both"`, `"line"` or `"point"`.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within
