@@ -42,7 +42,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">topmodels</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1-0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2-0</span>
       </span>
     </div>
 
@@ -50,6 +50,33 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../articles/topmodels.html">Get started</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/goodness_of_fit.html">Goodness of Fit of Probabilistic Regression Models</a>
+    </li>
+    <li>
+      <a href="../articles/graphics.html">Graphics for Assessing Goodness of Fit</a>
+    </li>
+    <li>
+      <a href="../articles/illustration_fifa_2018.html">Illustration: Goals in the 2018 FIFA World Cup</a>
+    </li>
+    <li>
+      <a href="../articles/illustration_rain_ibk.html">Illustration: Precipitation Forecasts in Innsbruck</a>
+    </li>
+    <li>
+      <a href="../articles/illustration_artificial.html">Illustration: Artificial Data</a>
+    </li>
+    <li>
+      <a href="../articles/implementation_functions_graphical_evaluation.html">Implementation Overview</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -121,10 +148,11 @@
 <code class="sourceCode R"><span class="fu"><a href="../reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
 <p><img src="topmodels_files/figure-html/example-qqrplot-1.png" width="700"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/reliagram.html">reliagram</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
-<p><img src="topmodels_files/figure-html/example-reliagram-1.png" width="700"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="co">#```{r example-reliagram}</span>
+<span class="co"># FIXME: (ML) Produces error due to eval (something w/ enivornments not properly set?!)</span>
+<span class="co">#reliagram(m)</span>
+<span class="co">#````</span>
+<span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
 <p><img src="topmodels_files/figure-html/example-wormplot-1.png" width="700"></p>
 </div>
 <div id="references" class="section level2 unnumbered">
@@ -173,7 +201,7 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Achim Zeileis, Moritz N. Lang.</p>
+  <p>Developed by Achim Zeileis, Moritz N. Lang, Reto Stauffer.</p>
 </div>
 
 <div class="pkgdown">

@@ -95,6 +95,21 @@ computed by link{wormplot}." />
         <li>
   <a href="../articles/topmodels.html">Get started</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>
+    </li>
+    <li>
+      <a href="../articles/graphical_evaluation_simulations.html">Graphical Evaluation: Simulations</a>
+    </li>
+  </ul>
+</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -163,7 +178,7 @@ computed by <code>link{wormplot}</code>.</p>
 <span class='op'>)</span>
 
 <span class='co'># S3 method for wormplot</span>
-<span class='fu'>autoplot</span><span class='op'>(</span>
+<span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span>
   <span class='va'>object</span>,
   single_graph <span class='op'>=</span> <span class='cn'>FALSE</span>,
   confint <span class='op'>=</span> <span class='cn'>TRUE</span>,
@@ -248,13 +263,13 @@ Residuals.&#8221; <em>Journal of Computational and Graphical Statistics</em>,
 </div><div class='img'><img src='plot.wormplot-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>## customize colors</span>
 <span class='fu'><a href='wormplot.html'>wormplot</a></span><span class='op'>(</span><span class='va'>m1_lm</span>, ref <span class='op'>=</span> <span class='st'>"blue"</span>, lty <span class='op'>=</span> <span class='fl'>2</span>, pch <span class='op'>=</span> <span class='fl'>20</span><span class='op'>)</span>
-</div><div class='input'>
+</div><div class='img'><img src='plot.wormplot-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>## add separate model</span>
 <span class='kw'>if</span> <span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'>"crch"</span>, quietly <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
   <span class='va'>m1_crch</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/crch/man/crch.html'>crch</a></span><span class='op'>(</span><span class='va'>dist</span> <span class='op'>~</span> <span class='va'>speed</span> <span class='op'>|</span> <span class='va'>speed</span>, data <span class='op'>=</span> <span class='va'>cars</span><span class='op'>)</span>
   <span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span><span class='op'>(</span><span class='fu'><a href='wormplot.html'>wormplot</a></span><span class='op'>(</span><span class='va'>m1_crch</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fl'>2</span>, lty <span class='op'>=</span> <span class='fl'>2</span>, confint <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 <span class='op'>}</span>
-</div><div class='img'><img src='plot.wormplot-2.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='error'>Error in plot.xy(xy.coords(x, y), type = type, ...): plot.new has not been called yet</span></div><div class='input'>
 <span class='co'>#-------------------------------------------------------------------------------</span>
 <span class='kw'>if</span> <span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'>"crch"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
 
@@ -278,7 +293,7 @@ Residuals.&#8221; <em>Journal of Computational and Graphical Statistics</em>,
   <span class='co'>## plot in single graph</span>
   <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>wp2_lm</span>, <span class='va'>wp2_crch</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>, confint <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>, ref <span class='op'>=</span> <span class='fl'>3</span>, single_graph <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 <span class='op'>}</span>
-</div><div class='img'><img src='plot.wormplot-3.png' alt='' width='700' height='433' /></div><div class='input'>
+
 <span class='co'>#-------------------------------------------------------------------------------</span>
 <span class='co'>## determinants for male satellites to nesting horseshoe crabs</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"CrabSatellites"</span>, package <span class='op'>=</span> <span class='st'>"countreg"</span><span class='op'>)</span>
@@ -288,7 +303,7 @@ Residuals.&#8221; <em>Journal of Computational and Graphical Statistics</em>,
 
 <span class='co'>## compute and plot wormplot as "ggplot2" graphic</span>
 <span class='fu'><a href='wormplot.html'>wormplot</a></span><span class='op'>(</span><span class='va'>m3_pois</span>, plot <span class='op'>=</span> <span class='st'>"ggplot2"</span><span class='op'>)</span>
-</div><div class='img'><img src='plot.wormplot-4.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='img'><img src='plot.wormplot-3.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

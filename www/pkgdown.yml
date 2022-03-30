@@ -2,8 +2,15 @@ pandoc: '2.5'
 pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
+  goodness_of_fit: goodness_of_fit.html
+  graphics: graphics.html
+  illustration_artificial: illustration_artificial.html
+  illustration_fifa_2018: illustration_fifa_2018.html
+  illustration_rain_ibk: illustration_rain_ibk.html
+  implementation_functions_graphical_evaluation: implementation_functions_graphical_evaluation.html
+  procast: procast.html
   topmodels: topmodels.html
-last_built: 2021-07-07T13:49Z
+last_built: 2022-03-30T08:55Z
 urls:
   reference: https://topmodels.R-Forge.R-project.org//reference
   article: https://topmodels.R-Forge.R-project.org//articles
