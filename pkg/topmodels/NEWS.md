@@ -1,3 +1,11 @@
+# topmodels 0.2-0
+
+* Version, presented at DAGStat 2022.
+
+* Some conceptual changes in the generation of graphical evaluation tools for both base *R* and `ggplot2` style graphics.
+
+* `autoplot()` builds now on newly written `geom_*()` and `stat_*()` functions. 
+
 # topmodels 0.1-0
 
 * First version, presented at useR! 2021.

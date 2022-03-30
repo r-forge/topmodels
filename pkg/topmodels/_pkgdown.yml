@@ -20,8 +20,6 @@ navbar:
           href: articles/goodness_of_fit.html
         - text: "Graphics for Assessing Goodness of Fit"
           href: articles/graphics.html
-        - text: "Probabilistic Forecasting Infrastructure"
-          href: articles/procast.html
         - text: "Illustration: Goals in the 2018 FIFA World Cup"
           href: articles/illustration_fifa_2018.html
         - text: "Illustration: Precipitation Forecasts in Innsbruck"

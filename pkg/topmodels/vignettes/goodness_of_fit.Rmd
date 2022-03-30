@@ -102,11 +102,11 @@ m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
 rootogram(m, style = "standing", scale = "raw", fitted = FALSE, xlab = "Goals")
 set.seed(0)
 pithist(m, type = "random", nsim = 10,
-  ref = FALSE, confint = FALSE, simint = FALSE)
+  ref = FALSE, confint = FALSE, simint = FALSE, fill = "darkgray", alpha = 1, col = "black")
 set.seed(0)
 pithist(m, type = "random", nsim = 10, trafo = qnorm,
   xlim = c(-3, 3), xlab = "Randomized quantile residuals",
-  ref = FALSE, confint = FALSE, simint = FALSE)
+  ref = FALSE, confint = FALSE, simint = FALSE, fill = "darkgray", alpha = 1, col = "black")
 ```
 
 ## Marginal calibration: Observed vs. expected frequencies

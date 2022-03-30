@@ -18,6 +18,9 @@ For discussions we also try to follow these channels:
 - Moritz N. Lang
   <a href="https://orcid.org/0000-0002-2533-9903" target="orcid.widget"><span class="fab fa-orcid orcid"></span></a>
   <a href="https://twitter.com/MoritzNLang"><span class="fa fa-twitter-square"></span></a>
+- Reto Stauffer
+  <a href="https://orcid.org/0000-0002-3798-5507" target="orcid.widget"><span class="fab fa-orcid orcid"></span></a>
+  <a href="https://twitter.com/RetoStauffer2"><span class="fa fa-twitter-square"></span></a>
 - Achim Zeileis
   <a href="https://orcid.org/0000-0003-0918-3766" target="orcid.widget"><span class="fab fa-orcid orcid"></span></a>
   <a href="https://www.zeileis.org/"><span class="fa fa-user"></span></a>
