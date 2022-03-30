@@ -758,7 +758,7 @@ plot.pithist <- function(x,
   # -------------------------------------------------------------------
   ## determine which style should be plotted
   if (n > 1 && single_graph && style == "bar") {
-    message(" * for several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
+    message(" * for several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'line' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "line"
   }
 
@@ -1404,7 +1404,7 @@ autoplot.pithist <- function(object,
   # -------------------------------------------------------------------
   ## determine which style should be plotted
   if (n > 1 && single_graph && style == "bar") {
-    message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'lines' when numbers of histograms greater one and `single_graph` = TRUE.")
+    message(" * For several histograms in a single graph solely line style histograms can be plotted. \n * For proper usage, set `style` = 'line' when numbers of histograms greater one and `single_graph` = TRUE.")
     style <- "line"
   }
 
