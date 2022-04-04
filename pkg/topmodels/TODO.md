@@ -124,3 +124,18 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
 * Implement simple homepage [**done**]
 * Some testing by working group (Reto)
 
+
+## 6. New April 2022
+* `qqrplot()` `confint = "line"`
+* CI for `rootogram()`: empirical drawn from distribution?!
+* `alpha` for PIT histogram
+* geoms for `reliagram()`
+* Order of plotting elements.
+* PIT histogram for trafo + type = expected.
+* Return `expected` for pithist
+* Warning/Error for non equidistant breaks plus trafo
+* Naming of geoms: `geom_rootogram_ref()` vs. `geom_rootogram_fitted()` vs. `geom_pithist_ref()` vs. `geom_qqrplot_ref()`
+
+* distributions 3: Single manunal
+* Discretized log-score
+

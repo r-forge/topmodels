@@ -346,6 +346,14 @@ pithist.default <- function(
     )
   }
 
+  ## compute reference line (freq = TRUE, as scaling below)
+  expected <- compute_pithist_ref(
+    n = n,
+    breaks = tmp_hist$breaks,
+    freq = TRUE,
+    trafo = trafo
+  )
+
   ## labels
   if (is.null(main)) main <- deparse(substitute(object))
 
@@ -354,6 +362,7 @@ pithist.default <- function(
   # -------------------------------------------------------------------
   rval <- data.frame(
     observed = tmp_hist$counts,
+    expected = expected,
     mid = tmp_hist$mid,
     width = diff(tmp_hist$breaks)
   )
@@ -371,6 +380,7 @@ pithist.default <- function(
   if (!freq) {
     rval <- transform(rval,
       observed = rval$observed / (n * rval$width),
+      expected = rval$expected / (n * rval$width),
       simint_lwr = rval$simint_lwr / (n * rval$width),
       simint_upr = rval$simint_upr / (n * rval$width)
     )
@@ -453,7 +463,7 @@ c.pithist <- function(...) {
   }
 
   ## parameters
-  type <- prepare_arg_for_attributes(rval, "type", force_single = TRUE)
+  type <- prepare_arg_for_attributes(rval, "type", force_single = FALSE)
   trafo <- prepare_arg_for_attributes(rval, "trafo", force_single = FALSE) # check/force below
   simint <- prepare_arg_for_attributes(rval, "simint")
   style <- prepare_arg_for_attributes(rval, "style", force_single = TRUE)
@@ -704,7 +714,7 @@ plot.pithist <- function(x,
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## get default arguments
-  type <- use_arg_from_attributes(x, "type", default = NULL, force_single = TRUE)
+  type <- use_arg_from_attributes(x, "type", default = NULL, force_single = FALSE)
   style <- use_arg_from_attributes(x, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
   trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
@@ -779,7 +789,7 @@ plot.pithist <- function(x,
   if (is.null(ref_lty)) ref_lty <- if (style == "bar") 1 else 2
 
   if (is.null(simint)) {
-    simint <- if (style == "bar" && type == "random") TRUE else FALSE
+    simint <- if (style == "bar" && any(type == "random")) TRUE else FALSE
   }
 
   ## recycle arguments for plotting to match the number of groups
@@ -845,7 +855,7 @@ plot.pithist <- function(x,
     }
     if (any(ylim_idx)) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(c(0, d$observed, d$ref, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
+        range(c(0, d$observed, d$expected, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
     }
 
     ## trigger plot
@@ -885,7 +895,7 @@ plot.pithist <- function(x,
 
     ## add ref line
     if (isTRUE(plot_arg$ref[j])) {
-      ref_y <- duplicate_last_value(d$ref)
+      ref_y <- duplicate_last_value(d$expected)
       lines(
         ref_y ~ z, 
         type = "s", 
@@ -1042,7 +1052,7 @@ plot.pithist <- function(x,
     ## plot ref line
     if (isTRUE(plot_arg$ref[j])) {
 
-      ref_y <- duplicate_last_value(d$ref)
+      ref_y <- duplicate_last_value(d$expected)
       lines(
         ref_y ~ z, 
         type = "s", 
@@ -1235,7 +1245,7 @@ lines.pithist <- function(x,
     ## plot ref line
     if (isTRUE(plot_arg$ref[j])) {
 
-      ref_y <- duplicate_last_value(d$ref)
+      ref_y <- duplicate_last_value(d$expected)
       lines(
         ref_y ~ z,
         type = "s",
@@ -1322,11 +1332,11 @@ autoplot.pithist <- function(object,
   ylab_missing <- missing(ylab)
 
   ## get default arguments
-  type <- use_arg_from_attributes(object, "type", default = NULL, force_single = TRUE)
+  type <- use_arg_from_attributes(object, "type", default = NULL, force_single = FALSE)
   style <- use_arg_from_attributes(object, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(object, "freq", default = FALSE, force_single = TRUE)
   trafo <- use_arg_from_attributes(object, "trafo", default = NULL, force_single = TRUE)
-  simint <- use_arg_from_attributes(object, "simint", default = NULL, force_single = TRUE)
+  simint <- use_arg_from_attributes(object, "simint", default = TRUE, force_single = TRUE)
   confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = NULL, force_single = TRUE)
   xlab <- use_arg_from_attributes(object, "xlab", default = "PIT", force_single = TRUE)
@@ -1418,7 +1428,7 @@ autoplot.pithist <- function(object,
 
   ## determine other arguments conditional on `style`
   if (is.null(simint)) {
-    simint <- if (style == "bar" && type == "random") TRUE else FALSE
+    simint <- if (style == "bar" && any(type == "random")) TRUE else FALSE
   }
 
   ## set plotting aes
@@ -1885,11 +1895,11 @@ set_default_aes_pithist <- function(style) {
   if (style == "bar") {
     my_modify_list(
       ggplot2::GeomPolygon$default_aes, 
-      list(colour = "darkgray", fill = "black", size = 0.5, linetype = 1, alpha = 0.2, subgroup = NULL),
+      list(colour = "black", fill = "darkgray", size = 0.5, linetype = 1, alpha = NA, subgroup = NULL),
       force = TRUE
     )
   } else { # "line" style
-    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 1, size = 0.75, linetype = 1, alpha = NA),
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", size = 0.75, linetype = 1, alpha = NA),
       force = TRUE
     )
   }
@@ -2475,6 +2485,7 @@ summary.pithist <- function(object,
 
       tmp <- transform(tmp,
         observed = tmp$observed * (counts[i] * tmp$width),
+        expected = tmp$expected * (counts[i] * tmp$width),
         simint_upr = tmp$simint_upr * (counts[i] * tmp$width),
         simint_lwr = tmp$simint_lwr * (counts[i] * tmp$width)
       )
@@ -2494,31 +2505,23 @@ summary.pithist <- function(object,
         trafo = trafo
       )
 
-      ## compute reference lines (perfect prediction) for all groups (freq = TRUE, as scaling below)
-      ref <- compute_pithist_ref(
-        n = counts[i],
-        breaks = compute_breaks(tmp$mid, tmp$width),
-        freq = TRUE,
-        trafo = trafo
-      )
-
       if (freq) {
         rval[[i]] <- transform(tmp,
           observed = tmp$observed,
+          expected = tmp$expected,
           simint_upr = tmp$simint_upr,
           simint_lwr = tmp$simint_lwr,
           confint_lwr = ci$confint_lwr,
-          confint_upr = ci$confint_upr,
-          ref = ref
+          confint_upr = ci$confint_upr
         )
       } else {
         rval[[i]] <- transform(tmp,
           observed = tmp$observed / (counts[i] * tmp$width),
+          expected = tmp$expected / (counts[i] * tmp$width),
           simint_upr = tmp$simint_upr / (counts[i] * tmp$width),
           simint_lwr = tmp$simint_lwr / (counts[i] * tmp$width),
           confint_lwr = ci$confint_lwr / (counts[i] * tmp$width),
-          confint_upr = ci$confint_upr / (counts[i] * tmp$width),
-          ref = ref / (counts[i] * tmp$width)
+          confint_upr = ci$confint_upr / (counts[i] * tmp$width)
         )
       }
 
@@ -2527,12 +2530,14 @@ summary.pithist <- function(object,
       if (freq) {
         rval[[i]] <- transform(tmp,
           observed = tmp$observed,
+          expected = tmp$expected,
           simint_upr = tmp$simint_upr,
           simint_lwr = tmp$simint_lwr
         )
       } else {
         rval[[i]] <- transform(tmp,
           observed = tmp$observed / (counts[i] * tmp$width),
+          expected = tmp$expected / (counts[i] * tmp$width),
           simint_upr = tmp$simint_upr / (counts[i] * tmp$width),
           simint_lwr = tmp$simint_lwr / (counts[i] * tmp$width)
         )
