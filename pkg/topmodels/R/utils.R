@@ -53,21 +53,23 @@ use_arg_from_attributes <- function(object,
 
   ## check input
   stopifnot(is.character(arg_name), length(arg_name) == 1)
+  stopifnot(is.null(default) || length(default) == 1)
 
   ## helper_function
-  check_fun_or_unique_length <- function(x, len = 1) {
-    if (is.function(x)) {
-      return(FALSE)
+  is_fun_or_unique <- function(x) {
+    if (is.function(x) || length(unique(x)) == 1) {
+      return(TRUE)
     } else {
-      return(length(unique(x)) > len)
+      return(FALSE)
     }
   }
 
   ## use arg if defined by user
-  arg_by_user <- try(eval(parse(text = sprintf("missing(%s)", arg_name)), envir = parent.frame()), 
+  arg_by_user <- try(eval(parse(text = sprintf("!missing(%s)", arg_name)), envir = parent.frame()), 
     silent = TRUE)
-  if (!inherits(arg_by_user, "try-error") && isFALSE(arg_by_user)) {
+  if (!inherits(arg_by_user, "try-error") && isTRUE(arg_by_user)) {
     arg_fun <- eval(parse(text = arg_name), envir)
+    stopifnot(length(arg_fun) <= 1)
   } else {
     arg_fun <- NULL
   }
@@ -76,35 +78,31 @@ use_arg_from_attributes <- function(object,
   arg_attr <- attr(object, arg_name)
 
   ## conditional return
-  if (is.null(arg_fun) && force_single && check_fun_or_unique_length(arg_attr)) {
-    message(sprintf(
-      " * as arg `%s`'s definition is not unique w/i object's attributes, using the default", arg_name
-    ))
-    rval <- default
-  } else if (is.null(arg_fun) && is.null(arg_attr)) {
-    rval <- default
-  } else if (is.null(arg_fun)) {
-    rval <- arg_attr
-  } else {
-    rval <- arg_fun
-  }
-
   if (force_single) {
-    if (check_fun_or_unique_length(rval)) {
+    if (is.null(arg_fun) && is.null(arg_attr)) {
+      rval <- default
+    } else if (is.null(arg_fun) && !is_fun_or_unique(arg_attr)) {
       message(sprintf(
-        " * as arg `%s`'s definition is not unique, using solely the first (\"%s\")", arg_name, rval[1]
+        " * as arg `%s`'s definition is not unique w/i object's attributes, using the default (\"%s\")",
+        arg_name, default
       ))
-    }
-    if (is.function(rval)) {
-      return(rval)
-    } else if (is.na(rval[1])) {
-      return(default)
+      rval <- default
+    } else if (is.null(arg_fun)) {
+      rval <- if (is.function(arg_attr)) arg_attr else arg_attr[1]
     } else {
-      return(rval[1])
+      rval <- if (is.function(arg_fun)) arg_fun else arg_fun[1]
     }
   } else {
-    return(rval)
+    if (is.null(arg_fun) && is.null(arg_attr)) {
+      rval <- default
+    } else if (is.null(arg_fun)) {
+      rval <- arg_attr
+    } else {
+      rval <- arg_fun
+    }
   }
+  
+  return(rval)
 }
 
 

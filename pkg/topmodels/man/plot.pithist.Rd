@@ -15,7 +15,7 @@
   confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = NULL,
+  ref = TRUE,
   xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,

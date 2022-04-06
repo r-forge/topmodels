@@ -210,6 +210,11 @@ pithist.default <- function(
   style <- match.arg(style)
   type <- match.arg(type)
 
+  if (type == "expected" && !(is.null(trafo) || identical(trafo, identity))) {
+    warning('For explicit `trafo` function `type = expected` not yet supported and set to "random".')
+    type <- "random"
+  }
+
   ## determine other arguments conditional on `style` and `type`
   if (is.null(simint)) {
     simint <- if (style == "bar" && type == "random") TRUE else FALSE
@@ -375,6 +380,13 @@ pithist.default <- function(
   } else {
     rval$simint_lwr <- NA
     rval$simint_upr <- NA
+  }
+
+  ## not allow freq = TRUE for non-equidistant breaks
+  ## FIXME: (ML) Not exactly unique widths
+  if (freq && any(abs(diff(rval$width)) > sqrt(.Machine$double.eps))) {
+    warning("For non-equidistant breaks `freq = FALSE` must be used and has been set accordingly.")
+    freq <- FALSE
   }
 
   if (!freq) {
@@ -683,7 +695,7 @@ plot.pithist <- function(x,
                          confint = NULL,
                          confint_level = 0.95,
                          confint_type = c("exact", "approximation"),
-                         ref = NULL,
+                         ref = TRUE,
                          xlim = c(NA, NA),
                          ylim = c(0, NA),
                          xlab = NULL,
@@ -714,13 +726,12 @@ plot.pithist <- function(x,
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## get default arguments
-  type <- use_arg_from_attributes(x, "type", default = NULL, force_single = FALSE)
+  type <- use_arg_from_attributes(x, "type", default = "expected", force_single = FALSE)
   style <- use_arg_from_attributes(x, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
   simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
-  ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
+  ref <- use_arg_from_attributes(x, "ref", default = TRUE, force_single = FALSE)
 
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
@@ -729,7 +740,6 @@ plot.pithist <- function(x,
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(freq))
-  stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(is.null(simint) || is.logical(simint))
   stopifnot(is.logical(confint) || confint %in% c("polygon", "line", "none"))
   stopifnot(
@@ -748,7 +758,7 @@ plot.pithist <- function(x,
   style <- match.arg(style, c("bar", "line"))
   confint_type <- match.arg(confint_type)
 
-  ## extend input object on correct scale (compute ci, ref, ...)
+  ## extend input object on correct scale (compute ci, ...)
   x <- summary(
     x, 
     freq = freq,
@@ -1143,7 +1153,6 @@ lines.pithist <- function(x,
   ## get default arguments
   confint_type <- match.arg(confint_type)
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
   simint <- use_arg_from_attributes(x, "simint", default = FALSE, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = FALSE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = FALSE, force_single = FALSE)
@@ -1153,7 +1162,6 @@ lines.pithist <- function(x,
   ## * `ref` and `confint` w/i `abline()`
   ## * `col`, `lwd`, `lty` and `...` w/i `lines()`
   stopifnot(is.logical(freq))
-  stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(
     is.numeric(confint_level),
     length(confint_level) == 1,
@@ -1161,7 +1169,7 @@ lines.pithist <- function(x,
     confint_level <= 1
   )
 
-  ## extend input object (compute ci, ref, ...)
+  ## extend input object (compute ci, ...)
   x <- summary(
     x,
     freq = freq,
@@ -1384,9 +1392,9 @@ autoplot.pithist <- function(object,
   size <- if (is.null(size)) NA else size
   linetype <- if (is.null(linetype)) NA else linetype
 
-  ## transform to `freq = TRUE` scale
+  ## transform to `freq = TRUE` scale and check if allowed (not for non-equidistant breaks)
   ## FIXME: (ML) Alternatively, move that into geom
-  object <- summary.pithist(object, freq = TRUE, extend = FALSE)
+  object <- summary.pithist(object, freq = TRUE, extend = FALSE, suppress_warnings = !freq)
 
   ## convert data always to data.frame
   object <- as.data.frame(object)
@@ -2450,6 +2458,7 @@ summary.pithist <- function(object,
                             confint_level = 0.95,
                             confint_type = c("exact", "approximation"),
                             extend = TRUE,
+                            suppress_warnings = FALSE,
                             ...) {
 
   stopifnot(is.logical(extend))
@@ -2476,6 +2485,12 @@ summary.pithist <- function(object,
   ## loop over groups
   rval <- list()
   for (i in seq_along(counts)) { 
+
+    ## not allow freq = TRUE for non-equidistant breaks
+    ## FIXME: (ML) Not exactly unique widths
+    if (!suppress_warnings && freq && any(abs(diff(object[object$group == i, "width"])) > sqrt(.Machine$double.eps))) {
+      warning("For non-equidistant breaks `freq = TRUE` should not be used due to incorrect areas.")
+    }
 
     ## ensure values are counts
     if (!freq_object) {
@@ -2578,7 +2593,6 @@ summary.pithist <- function(object,
 
 #' @export
 print.pithist <- function(x, ...) {
-
   ## get arg `type`, `style` and `freq`
   type <- freq <- style <- NULL # needed for `use_arg_from_attributes()` #FIXME: (ML) Still needed?!
   style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
