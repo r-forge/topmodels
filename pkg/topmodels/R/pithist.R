@@ -501,6 +501,8 @@ c.pithist <- function(...) {
     } else {
       trafo <- trafo[[1]]
     }
+  } else {
+    trafo <- trafo[[1]]
   }
 
   # -------------------------------------------------------------------
@@ -605,8 +607,8 @@ rbind.pithist <- c.pithist
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
-#' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
-#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
+#' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,confint_alpha,ref_col,ref_lty,ref_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
+#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references
@@ -714,6 +716,7 @@ plot.pithist <- function(x,
                          confint_col = NULL,
                          confint_lty = NULL,
                          confint_lwd = 1.75,
+                         confint_alpha = NULL,
                          ref_col = NULL,
                          ref_lty = NULL,
                          ref_lwd = 1.75,
@@ -795,6 +798,7 @@ plot.pithist <- function(x,
   if (is.null(lwd)) lwd <- if (style == "bar") 1 else 2
   if (is.null(confint_col)) confint_col <- if (style == "bar") 2 else "black"
   if (is.null(confint_lty)) confint_lty <- if (style == "bar") 2 else 1
+  if (is.null(confint_alpha)) confint_alpha <- if (style == "bar") 1 else 0.2 / n
   if (is.null(ref_col)) ref_col <- if (style == "bar") 2 else "black"
   if (is.null(ref_lty)) ref_lty <- if (style == "bar") 1 else 2
 
@@ -808,7 +812,7 @@ plot.pithist <- function(x,
   plot_arg <- data.frame(1:n, confint, ref, simint,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     col, border, lwd, lty, alpha_min,
-    simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd,
+    simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, confint_alpha,
     ref_col, ref_lty, ref_lwd, 
     axes, box
   )[, -1]
@@ -949,7 +953,7 @@ plot.pithist <- function(x,
           rep(d$confint_lwr, each = 2),
           rev(rep(d$confint_upr, each = 2))
         ),
-        col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
+        col = set_minimum_transparency(plot_arg$confint_col[j], alpha_min = plot_arg$confint_alpha[j]),
         border = NA
       )
     }
@@ -1054,7 +1058,7 @@ plot.pithist <- function(x,
           rep(d$confint_lwr, each = 2),
           rev(rep(d$confint_upr, each = 2))
         ),
-        col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
+        col = set_minimum_transparency(plot_arg$confint_col[j], alpha_min = plot_arg$confint_alpha[j]),
         border = NA
       )
     }
@@ -1143,6 +1147,7 @@ lines.pithist <- function(x,
                           confint_col = "black",
                           confint_lty = 1,
                           confint_lwd = 1.75,
+                          confint_alpha = 1,
                           ref_col = "black",
                           ref_lty = 2,
                           ref_lwd = 1.75,
@@ -1191,7 +1196,7 @@ lines.pithist <- function(x,
   plot_arg <- data.frame(
     1:n, confint, ref, simint,
     col, lwd, lty,
-    simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd,
+    simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, confint_alpha,
     ref_col, ref_lty, ref_lwd
   )[, -1]
 
@@ -1245,7 +1250,7 @@ lines.pithist <- function(x,
           rep(d$confint_lwr, each = 2),
           rev(rep(d$confint_upr, each = 2))
         ),
-        col = set_minimum_transparency(plot_arg$col[j], alpha_min = 0.2),
+        col = set_minimum_transparency(plot_arg$confint_col[j], alpha_min = plot_arg$confint_alpha[j]),
         border = NA
       )
     }
@@ -1327,7 +1332,7 @@ autoplot.pithist <- function(object,
                              confint_fill = NULL,
                              confint_size = 0.5,
                              confint_linetype = NULL,
-                             confint_alpha = NA,
+                             confint_alpha = NULL,
                              ref_colour = NULL,
                              ref_size = 0.75,
                              ref_linetype = NULL,
@@ -1437,6 +1442,10 @@ autoplot.pithist <- function(object,
   ## determine other arguments conditional on `style`
   if (is.null(simint)) {
     simint <- if (style == "bar" && any(type == "random")) TRUE else FALSE
+  }
+
+  if (is.null(confint_alpha)){ 
+    confint_alpha <- if (style == "bar") NA else 0.2 / n
   }
 
   ## set plotting aes

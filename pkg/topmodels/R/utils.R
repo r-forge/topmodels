@@ -88,9 +88,9 @@ use_arg_from_attributes <- function(object,
       ))
       rval <- default
     } else if (is.null(arg_fun)) {
-      rval <- if (is.function(arg_attr)) arg_attr else arg_attr[1]
+      rval <- if (is.function(arg_attr)) arg_attr else arg_attr[[1]]
     } else {
-      rval <- if (is.function(arg_fun)) arg_fun else arg_fun[1]
+      rval <- if (is.function(arg_fun)) arg_fun else arg_fun[[1]]
     }
   } else {
     if (is.null(arg_fun) && is.null(arg_attr)) {
