@@ -25,7 +25,7 @@ pithist(object, ...)
   style = c("bar", "line"),
   freq = FALSE,
   confint = TRUE,
-  ref = TRUE,
+  expected = TRUE,
   xlab = "PIT",
   ylab = if (freq) "Frequency" else "Density",
   main = NULL,
@@ -91,7 +91,7 @@ histogram has a total area of one).}
 
 \item{confint}{logical. Should confident intervals be drawn?}
 
-\item{ref}{logical. Should a reference line be plotted?}
+\item{expected}{logical. Should the expected values be plotted as reference?}
 
 \item{xlab, ylab, main}{graphical parameters passed to
 \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}
@@ -102,8 +102,8 @@ An object of class \code{"pithist"} inheriting from
 with the following variables: \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 histogram bars,} \item{width}{widths of the histogram bars,}
-\item{confint_lwr, confint_upr}{lower and upper confidence interval bound,} \item{ref}{y-coordinates of
-the reference curve.} Additionally, \code{freq}, \code{xlab},
+\item{confint_lwr, confint_upr}{lower and upper confidence interval bound,} \item{expected}{y-coordinates of
+the expected curve.} Additionally, \code{freq}, \code{xlab},
 \code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
 }
 \description{

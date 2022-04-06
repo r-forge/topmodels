@@ -6,10 +6,10 @@
 \alias{StatPithist}
 \alias{geom_pithist}
 \alias{GeomPithist}
-\alias{stat_pithist_ref}
-\alias{StatPithistRef}
-\alias{geom_pithist_ref}
-\alias{GeomPithistRef}
+\alias{stat_pithist_expected}
+\alias{StatPithistExpected}
+\alias{geom_pithist_expected}
+\alias{GeomPithistExpected}
 \alias{stat_pithist_confint}
 \alias{StatPithistConfint}
 \alias{geom_pithist_confint}
@@ -46,10 +46,10 @@ geom_pithist(
   ...
 )
 
-stat_pithist_ref(
+stat_pithist_expected(
   mapping = NULL,
   data = NULL,
-  geom = "pithist_ref",
+  geom = "pithist_expected",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
@@ -59,10 +59,10 @@ stat_pithist_ref(
   ...
 )
 
-geom_pithist_ref(
+geom_pithist_expected(
   mapping = NULL,
   data = NULL,
-  stat = "pithist_ref",
+  stat = "pithist_expected",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
@@ -222,7 +222,7 @@ if (require("ggplot2")) {
     geom_pithist(aes(x = mid, y = observed, width = width, group = group), freq = TRUE) +
     geom_pithist_simint(aes(x = mid, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
     geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = TRUE) +
-    geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = TRUE) +
+    geom_pithist_expected(aes(x = mid, y = observed, width = width), freq = TRUE) +
     facet_grid(group ~ .) +
     xlab("PIT") +
     ylab("Frequency")
@@ -235,7 +235,7 @@ if (require("ggplot2")) {
       width = width
     ), freq = FALSE) +
     geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = FALSE) +
-    geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = FALSE) +
+    geom_pithist_expected(aes(x = mid, y = observed, width = width), freq = FALSE) +
     facet_grid(group ~ .) +
     xlab("PIT") +
     ylab("Density")

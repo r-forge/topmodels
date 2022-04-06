@@ -43,8 +43,8 @@ knitr::opts_chunk$set(fig.align = "center")
 
 method | computation arguments | plotting arguments | output
 --- | --- | --- | ---
-`rootogram()` | `object`, `newdata`, `plot`, `class`, `response_type`, `breaks`, `width` | `style`<sup>[1](#myfootnote1)</sup>, `scale`<sup>[1](#myfootnote1)</sup>, `fitted`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`
-`pithist()` | `object`, `newdata`, `plot`, `class`, `trafo`<sup>[1](#myfootnote2)</sup>, `breaks`, `type`<sup>[1](#myfootnote1)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `style`<sup>[1](#myfootnote1)</sup>, `freq`<sup>[1](#myfootnote1)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`, `simint_lwr`, `simint_upr`
+`rootogram()` | `object`, `newdata`, `plot`, `class`, `response_type`, `breaks`, `width` | `style`<sup>[1](#myfootnote1)</sup>, `scale`<sup>[1](#myfootnote1)</sup>, `expected`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`
+`pithist()` | `object`, `newdata`, `plot`, `class`, `trafo`<sup>[1](#myfootnote2)</sup>, `breaks`, `type`<sup>[1](#myfootnote1)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `style`<sup>[1](#myfootnote1)</sup>, `freq`<sup>[1](#myfootnote1)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `expected`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`, `simint_lwr`, `simint_upr`
 `qqrplot()` | `object`, `newdata`, `plot`, `class`, `detrend`<sup>[1](#myfootnote1)</sup>, `trafo`<sup>[1](#myfootnote2)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `simint_observed_lwr`, `simint_observed_upr`, `simint_expected`
 
 <a name="myfootnote1">1</a>: Setting is saved within `attributes` of the returned object. Hence, `plot(<object>)` renders a graphic with the arguments saved in the attributes.
@@ -53,8 +53,8 @@ method | computation arguments | plotting arguments | output
 
 combine | vector of attribute values | single attribute value
 --- | --- | ---
-`c.rootogram()` | `fitted`, `ref`, `xlab`, `ylab`, `main` | `style`, `scale`
-`c.pithist()` | `type`, `simint`, `confint`, `ref`, `counts`, `xlab`, `ylab`, `main` | `trafo`<sup>[3](#myfootnote3)</sup>, `style`, `freq`
+`c.rootogram()` | `expected`, `ref`, `xlab`, `ylab`, `main` | `style`, `scale`
+`c.pithist()` | `type`, `simint`, `confint`, `expected`, `counts`, `xlab`, `ylab`, `main` | `trafo`<sup>[3](#myfootnote3)</sup>, `style`, `freq`
 `c.qqrplot()` | `simint`, `confint`, `ref`, `xlab`, `ylab`, `main` | `detrend`, `trafo`<sup>[3](#myfootnote3)</sup>
 
 <a name="myfootnote3">3</a>: Non-unique attribute values can't be comined.
@@ -69,8 +69,8 @@ summary | arguments | return values | extended return values
 
 plot | arguments (main) | arguments (add ons)
 --- | --- | ---
-`plot.rootogram()` | `x`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `fitted_col`, `fitted_pch`, `fitted_lty`, `fitted_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
-`plot.pithist()` | `x`, `single_graph`, `style`, `freq`, `simint`, `confint`, `confint_level`, `confint_type`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `simint_col`, `simint_lty`, `simint_lwd`, `confint_col`, `confint_lty`, `confint_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
+`plot.rootogram()` | `x`, `style`, `scale`, `expected`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `expected_col`, `expected_pch`, `expected_lty`, `expected_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
+`plot.pithist()` | `x`, `single_graph`, `style`, `freq`, `simint`, `confint`, `confint_level`, `confint_type`, `expected`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `simint_col`, `simint_lty`, `simint_lwd`, `confint_col`, `confint_lty`, `confint_lwd`, `expected_col`, `expected_lty`, `expected_lwd` 
 `plot.qqrplot()` | `x`, `single_graph`, `detrend`, `simint`, `confint`, `confint_level`, `ref`, `ref_identity`, `ref_probs`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `pch`, `...` | `simint_col`, `simint_alpha`, `confint_col`, `confint_lty`, `confint_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
 
 
@@ -79,22 +79,22 @@ plot | arguments (main) | arguments (add ons)
 
 autoplot | arguments (main) | arguments (add ons)
 --- | --- | ---
-`autoplot.rootogram()` | `object`, `style`, `scale`, `fitted`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha`, `...` | `fitted_colour`, `fitted_size`, `fitted_linetype`, `fitted_alpha`, `fitted_fill`, `fitted_stroke`, `fitted_shape`, `ref_colour`, `ref_size`, `ref_linetype`, `ref_alpha`
-`autoplot.pithist()` | `object`, `single_graph`, `style`, `freq`, `simint`, `confint`, `confint_level`, `confint_type`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha` | `simint_colour`, `simint_size`, `simint_linetype`, `simint_alpha`, `confint_colour`, `confint_fill`, `confint_size`, `confint_linetype`, `confint_alpha`, `ref_colour`, `ref_size`, `ref_linetype`, `ref_alpha`
+`autoplot.rootogram()` | `object`, `style`, `scale`, `expected`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha`, `...` | `expected_colour`, `expected_size`, `expected_linetype`, `expected_alpha`, `expected_fill`, `expected_stroke`, `expected_shape`, `ref_colour`, `ref_size`, `ref_linetype`, `ref_alpha`
+`autoplot.pithist()` | `object`, `single_graph`, `style`, `freq`, `simint`, `confint`, `confint_level`, `confint_type`, `expected`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha` | `simint_colour`, `simint_size`, `simint_linetype`, `simint_alpha`, `confint_colour`, `confint_fill`, `confint_size`, `confint_linetype`, `confint_alpha`, `expected_colour`, `expected_size`, `expected_linetype`, `expected_alpha`
 `autoplot.qqrplot()` | `object`, `single_graph`, `detrend`, `simint`, `confint`, `confint_level`, `ref`, `ref_identity`, `ref_probs`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `shape`, `size`, `stroke`, `...` | `simint_fill`, `simint_alpha`, `confint_colour`, `confint_fill`, `confint_size`, `confnt_linetype`, `confint_alpha`, `ref_colour`, `ref_size`, `ref_linetype` 
 
 geom_<...> | inherits | geom aes | stat_<...> | stat aes 
 --- | --- | --- | --- | ---
 `geom_rootogram()` | `GeomRect` | `xmin`, `xmax`, `ymin`, `ymax` | `stat_rootogram()` | `observed`, `expected`, `mid`, `width`
-`geom_rootogram_fitted()` | `GeomPath` | `x`, `y` | `stat_rootogram_fitted()` |  `expected`, `mid`
+`geom_rootogram_expected()` | `GeomPath` | `x`, `y` | `stat_rootogram_expected()` |  `expected`, `mid`
 `geom_rootogram_ref()` | `GeomHline` | `yintercept = 0` | Identity | -- 
 `geom_pithist()` with `style = "bar"` or `style = "line"` | `GeomTile` or `GeomStep` | `x`, `y` or `x`, `y`, `width`, `height` | `stat_pithist()` | `x`, `y`, `width`
-`geom_pithist_ref()` | `GeomStep` | `x`, `y` | `stat_pithist_ref()` | `x`, `y`, `width`
+`geom_pithist_expected()` | `GeomStep` | `x`, `y` | `stat_pithist_expected()` | `x`, `y`, `width`
 `geom_pithist_confint()` with `style = "polygon"` or `style = "line"` | `GeomRect` or `GeomStep` | `xmin`, `xmax`, `ymin`, `ymax` or `x`, `ymin`, `ymax` | `stat_pithist_confint()` | `x`, `y`, `width`
 `geom_pithist_simint()` | `GeomLinerange` | `x`, `ymin`, `ymax` | `stat_pithist_simint()` | `x`, `ymin`, `ymax` plus `y` and `width` required for `freq = FALSE`
 `geom_qqrplot()` | `Geom` | `x`, `y` | Identity | --
 `geom_qqrplot_simint()` | `GeomPolygon` | `x`, `y` | `stat_qqrplot_simint()` | `x`, `ymin`, `ymax`
-`geom_qqrplot_ref()` | `GeomAbline` | `slope`, `intercept` | `stat_qqrplot_ref()` | `x`, `y`
+`geom_qqrplot_ref()` | `GeomAbline` | `slope`, `intercept` | `stat_qqrplot_expected()` | `x`, `y`
 `geom_qqrplot_confint()` with `style = "polygon"` or `style = "line"` | `GeomPolygon` or `GeomPath` | `x_noaes`, `y_noaes` | `stat_qqrplot_confint()` | `x`, `y
 
 

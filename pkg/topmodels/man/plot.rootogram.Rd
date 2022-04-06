@@ -9,7 +9,7 @@
   x,
   style = NULL,
   scale = NULL,
-  fitted = NULL,
+  expected = NULL,
   ref = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -23,10 +23,10 @@
   lwd = 1,
   lty = 1,
   alpha_min = 0.8,
-  fitted_col = 2,
-  fitted_pch = 19,
-  fitted_lty = 1,
-  fitted_lwd = 2,
+  expected_col = 2,
+  expected_pch = 19,
+  expected_lty = 1,
+  expected_lwd = 2,
   ref_col = "black",
   ref_lty = 1,
   ref_lwd = 1.25,
@@ -37,7 +37,7 @@
   object,
   style = NULL,
   scale = NULL,
-  fitted = NULL,
+  expected = NULL,
   ref = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -51,13 +51,13 @@
   size = 0.5,
   linetype = 1,
   alpha = NA,
-  fitted_colour = 2,
-  fitted_size = 1,
-  fitted_linetype = 1,
-  fitted_alpha = 1,
-  fitted_fill = NA,
-  fitted_stroke = 0.5,
-  fitted_shape = 19,
+  expected_colour = 2,
+  expected_size = 1,
+  expected_linetype = 1,
+  expected_alpha = 1,
+  expected_fill = NA,
+  expected_stroke = 0.5,
+  expected_shape = 19,
   ref_colour = "black",
   ref_size = 0.5,
   ref_linetype = 1,
@@ -73,7 +73,7 @@
 \item{scale}{character specifying whether raw frequencies or their square
 roots (default) should be drawn.}
 
-\item{fitted}{Should the expected (fitted) frequencies be plotted?}
+\item{expected}{Should the expected (fitted) frequencies be plotted?}
 
 \item{ref}{logical. Should a reference line be plotted?}
 
@@ -81,7 +81,7 @@ roots (default) should be drawn.}
 
 \item{col, border, lwd, lty, alpha_min}{graphical parameters for the histogram style part of the base plot.}
 
-\item{fitted_col, fitted_pch, fitted_lty, fitted_lwd, ref_col, ref_lty, ref_lwd, fitted_colour, fitted_size, fitted_linetype, fitted_alpha, fitted_fill, fitted_stroke, fitted_shape, ref_colour, ref_size, ref_linetype, ref_alpha}{Further graphical parameters for the `fitted` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.}
+\item{expected_col, expected_pch, expected_lty, expected_lwd, ref_col, ref_lty, ref_lwd, expected_colour, expected_size, expected_linetype, expected_alpha, expected_fill, expected_stroke, expected_shape, ref_colour, ref_size, ref_linetype, ref_alpha}{Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.}
 
 \item{\dots}{further graphical parameters passed to the plotting function.}
 
@@ -98,13 +98,13 @@ computed by \code{link{rootogram}}.
 }
 \details{
 Rootograms graphically compare (square roots) of empirical frequencies with
-fitted frequencies from a probability model.
+expected (fitted) frequencies from a probability model.
 
 Rootograms graphically compare frequencies of empirical distributions and
-fitted probability models. For the observed distribution the histogram is
+expected (fitted) probability models. For the observed distribution the histogram is
 drawn on a square root scale (hence the name) and superimposed with a line
-for the fitted frequencies. The histogram can be \code{"standing"} on the
-x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
+for the expected frequencies. The histogram can be \code{"standing"} on the
+x-axis (as usual), or \code{"hanging"} from the expected (fitted) curve, or a
 \code{"suspended"} histogram of deviations can be drawn.
 }
 \examples{

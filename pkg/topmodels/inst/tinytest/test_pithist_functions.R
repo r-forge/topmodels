@@ -48,7 +48,7 @@ expect_silent(
 )
 
 expect_silent(
-  lines(p3, confint = TRUE, ref = TRUE)
+  lines(p3, confint = TRUE, expected = TRUE)
 )
 
 

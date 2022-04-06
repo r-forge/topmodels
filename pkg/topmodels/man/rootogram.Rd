@@ -19,7 +19,7 @@ rootogram(object, ...)
   width = NULL,
   style = c("hanging", "standing", "suspended"),
   scale = c("sqrt", "raw"),
-  fitted = TRUE,
+  expected = TRUE,
   ref = TRUE,
   xlab = NULL,
   ylab = NULL,
@@ -61,7 +61,7 @@ and \code{"continous"} response distribution, as well as for the special case of
 \item{scale}{character specifying whether raw frequencies or their square
 roots (default) should be drawn.}
 
-\item{fitted}{Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.}
+\item{expected}{Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.}
 
 \item{ref}{logical. Should a reference line be plotted?}
 
@@ -71,7 +71,7 @@ roots (default) should be drawn.}
 An object of class \code{"rootogram"} inheriting from
 \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 with the following variables: \item{observed}{observed
-frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
+frequencies,} \item{expected}{expected (fitted) frequencies,} \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 histogram bars,} \item{width}{widths of the histogram bars,}
 \item{height}{height of the histogram bars,} \item{line}{y-coordinates of
@@ -80,22 +80,22 @@ the fitted curve.} Additionally, \code{style}, \code{scale}, \code{xlab},
 }
 \description{
 Rootograms graphically compare (square roots) of empirical frequencies with
-fitted frequencies from a probability model. If \code{plot = TRUE}, the
+expected (fitted) frequencies from a probability model. If \code{plot = TRUE}, the
 resulting object of class \code{"rootogram"} is plotted by
 \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}} before it is
 returned, depending on whether the package \code{ggplot2} is loaded.
 }
 \details{
 Rootograms graphically compare frequencies of empirical distributions and
-fitted probability models. For the observed distribution the histogram is
+expected (fitted) probability models. For the observed distribution the histogram is
 drawn on a square root scale (hence the name) and superimposed with a line
-for the fitted frequencies. The histogram can be \code{"standing"} on the
-x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
+for the expected frequencies. The histogram can be \code{"standing"} on the
+x-axis (as usual), or \code{"hanging"} from the expected curve, or a
 \code{"suspended"} histogram of deviations can be drawn.
 
 The function \code{\link{rootogram}} leverages the \code{\link{procast}}
 generic in order to compute all necessary coordinates based on observed and
-fitted frequencies.
+expected (fitted) frequencies.
 
 In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 rootogram objects, it is also possible to combine two (or more) rootograms by

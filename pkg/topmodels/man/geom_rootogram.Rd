@@ -6,15 +6,15 @@
 \alias{StatRootogram}
 \alias{geom_rootogram}
 \alias{GeomRootogram}
-\alias{stat_rootogram_fitted}
-\alias{StatRootogramFitted}
-\alias{geom_rootogram_fitted}
-\alias{GeomRootogramFitted}
+\alias{stat_rootogram_expected}
+\alias{StatRootogramExpected}
+\alias{geom_rootogram_expected}
+\alias{GeomRootogramExpected}
 \alias{geom_rootogram_ref}
 \alias{GeomRootogramRef}
 \title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
 \format{
-An object of class \code{GeomRootogramFitted} (inherits from \code{GeomPath}, \code{Geom}, \code{ggproto}, \code{gg}) of length 3.
+An object of class \code{GeomRootogramExpected} (inherits from \code{GeomPath}, \code{Geom}, \code{ggproto}, \code{gg}) of length 3.
 }
 \usage{
 stat_rootogram(
@@ -43,10 +43,10 @@ geom_rootogram(
   ...
 )
 
-stat_rootogram_fitted(
+stat_rootogram_expected(
   mapping = NULL,
   data = NULL,
-  geom = "rootogram_fitted",
+  geom = "rootogram_expected",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
@@ -55,10 +55,10 @@ stat_rootogram_fitted(
   ...
 )
 
-geom_rootogram_fitted(
+geom_rootogram_expected(
   mapping = NULL,
   data = NULL,
-  stat = "rootogram_fitted",
+  stat = "rootogram_expected",
   position = "identity",
   na.rm = FALSE,
   show.legend = NA,
@@ -68,7 +68,7 @@ geom_rootogram_fitted(
   ...
 )
 
-GeomRootogramFitted
+GeomRootogramExpected
 
 geom_rootogram_ref(
   mapping = NULL,
@@ -163,7 +163,7 @@ if (require("ggplot2")) {
       observed = observed, expected = expected, mid = mid,
       width = width, group = group
     )) +
-    geom_rootogram_fitted(aes(expected = expected, mid = mid)) +
+    geom_rootogram_expected(aes(expected = expected, mid = mid)) +
     geom_rootogram_ref() +
     facet_grid(group ~ .) + 
     xlab("satellites") +

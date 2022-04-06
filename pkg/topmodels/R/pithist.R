@@ -90,7 +90,7 @@
 #' frequencies, the \code{counts} component of the result; if \code{FALSE},
 #' probability densities, component \code{density}, are plotted (so that the
 #' histogram has a total area of one).
-#' @param ref logical. Should a reference line be plotted?
+#' @param expected logical. Should the expected values be plotted as reference?
 #' @param confint logical. Should confident intervals be drawn?
 #' @param xlab,ylab,main graphical parameters passed to
 #' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.
@@ -100,8 +100,8 @@
 #' with the following variables: \item{x}{histogram
 #' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 #' histogram bars,} \item{width}{widths of the histogram bars,}
-#' \item{confint_lwr, confint_upr}{lower and upper confidence interval bound,} \item{ref}{y-coordinates of
-#' the reference curve.} Additionally, \code{freq}, \code{xlab},
+#' \item{confint_lwr, confint_upr}{lower and upper confidence interval bound,} \item{expected}{y-coordinates of
+#' the expected curve.} Additionally, \code{freq}, \code{xlab},
 #' \code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
 #' @seealso \code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
 #' @references
@@ -177,7 +177,7 @@ pithist.default <- function(
                             style = c("bar", "line"),
                             freq = FALSE,
                             confint = TRUE,
-                            ref = TRUE,
+                            expected = TRUE,
                             xlab = "PIT",
                             ylab = if (freq) "Frequency" else "Density",
                             main = NULL,
@@ -188,7 +188,7 @@ pithist.default <- function(
   ## sanity checks
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `delta w/i `qresiduals()`
-  ## * `confint` and `ref` w/i `plot()` and `autoplot()` (due to different implementations)
+  ## * `confint` and `expected` w/i `plot()` and `autoplot()` (due to different implementations)
   ## * `...` w/i
   stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
@@ -351,8 +351,8 @@ pithist.default <- function(
     )
   }
 
-  ## compute reference line (freq = TRUE, as scaling below)
-  expected <- compute_pithist_ref(
+  ## compute expected line (freq = TRUE, as scaling below)
+  val_expected <- compute_pithist_expected(
     n = n,
     breaks = tmp_hist$breaks,
     freq = TRUE,
@@ -367,7 +367,7 @@ pithist.default <- function(
   # -------------------------------------------------------------------
   rval <- data.frame(
     observed = tmp_hist$counts,
-    expected = expected,
+    expected = val_expected,
     mid = tmp_hist$mid,
     width = diff(tmp_hist$breaks)
   )
@@ -405,7 +405,7 @@ pithist.default <- function(
   attr(rval, "style") <- style
   attr(rval, "freq") <- freq
   attr(rval, "confint") <- confint
-  attr(rval, "ref") <- ref
+  attr(rval, "expected") <- expected
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
@@ -481,7 +481,7 @@ c.pithist <- function(...) {
   style <- prepare_arg_for_attributes(rval, "style", force_single = TRUE)
   freq <- prepare_arg_for_attributes(rval, "freq", force_single = TRUE)
   confint <- prepare_arg_for_attributes(rval, "confint")
-  ref <- prepare_arg_for_attributes(rval, "ref")
+  expected <- prepare_arg_for_attributes(rval, "expected")
   counts <- prepare_arg_for_attributes(rval, "counts")
   n <- unlist(n)
 
@@ -512,7 +512,7 @@ c.pithist <- function(...) {
   all_names <- unique(unlist(lapply(rval, names)))
 
   ## get both objects on the same scale
-  if (any(grepl("confint_lwr|confint_upr|ref", all_names))) {
+  if (any(grepl("confint_lwr|confint_upr|expected", all_names))) {
     rval <- lapply(rval, summary.pithist, freq = freq, extend = TRUE)
   } else {
     rval <- lapply(rval, summary.pithist, freq = freq, extend = FALSE)
@@ -541,7 +541,7 @@ c.pithist <- function(...) {
   attr(rval, "style") <- style
   attr(rval, "freq") <- freq
   attr(rval, "confint") <- confint
-  attr(rval, "ref") <- ref
+  attr(rval, "expected") <- expected
   attr(rval, "counts") <- counts
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
@@ -600,15 +600,15 @@ rbind.pithist <- c.pithist
 #' `"exact"` or `"approximation"`. According
 #' to Agresti and Coull (1998), for interval estimation of binomial proportions
 #' an approximation can be better than exact.
-#' @param ref logical. Should a reference line be plotted?
+#' @param expected logical. Should the expected values be plotted as reference?
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the main part of the base plot.
 #' @param colour,fill,size,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
-#' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,confint_alpha,ref_col,ref_lty,ref_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
-#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
+#' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,confint_alpha,expected_col,expected_lty,expected_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
+#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,expected_colour,expected_size,expected_linetype,expected_alpha Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references
@@ -644,7 +644,7 @@ rbind.pithist <- c.pithist
 #' pithist(m1_lm)
 #'
 #' ## customize colors and style
-#' pithist(m1_lm, ref_col = "blue", lty = 2, pch = 20, style = "line")
+#' pithist(m1_lm, expected_col = "blue", lty = 2, pch = 20, style = "line")
 #'
 #' ## add separate model
 #' if (require("crch", quietly = TRUE)) {
@@ -674,7 +674,7 @@ rbind.pithist <- c.pithist
 #'
 #'   ## plot in single graph with style "line"
 #'   plot(c(pit2_lm, pit2_crch),
-#'     col = c(1, 2), confint_col = c(1, 2), ref_col = 3,
+#'     col = c(1, 2), confint_col = c(1, 2), expected_col = 3,
 #'     style = "line", single_graph = TRUE
 #'   )
 #' }
@@ -697,7 +697,7 @@ plot.pithist <- function(x,
                          confint = NULL,
                          confint_level = 0.95,
                          confint_type = c("exact", "approximation"),
-                         ref = TRUE,
+                         expected = TRUE,
                          xlim = c(NA, NA),
                          ylim = c(0, NA),
                          xlab = NULL,
@@ -717,14 +717,14 @@ plot.pithist <- function(x,
                          confint_lty = NULL,
                          confint_lwd = 1.75,
                          confint_alpha = NULL,
-                         ref_col = NULL,
-                         ref_lty = NULL,
-                         ref_lwd = 1.75,
+                         expected_col = NULL,
+                         expected_lty = NULL,
+                         expected_lwd = 1.75,
                          ...) {
   ## TODO: (ML) several arg are implemented differently than in ggplot2:
-  ## * confint, ref support colour(s)
+  ## * confint, expected support colour(s)
   ## * xlim, ylim work for different panels by a list of vectors
-  ## * xlab, ylab, xlim, ylim, ref, confint work for different panels by vectors
+  ## * xlab, ylab, xlim, ylim, expected, confint work for different panels by vectors
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
@@ -734,11 +734,11 @@ plot.pithist <- function(x,
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
   simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
-  ref <- use_arg_from_attributes(x, "ref", default = TRUE, force_single = FALSE)
+  expected <- use_arg_from_attributes(x, "expected", default = TRUE, force_single = FALSE)
 
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
-  ## * `ref` and `confint` w/i `abline()`
+  ## * `expected` and `confint` w/i `abline()`
   ## * `col`, `border`, `lwd`, `lty` and `...` w/i `plot()`
   ## * `alpha_min` w/i `set_minimum_transparency()`
   stopifnot(is.logical(single_graph))
@@ -799,8 +799,8 @@ plot.pithist <- function(x,
   if (is.null(confint_col)) confint_col <- if (style == "bar") 2 else "black"
   if (is.null(confint_lty)) confint_lty <- if (style == "bar") 2 else 1
   if (is.null(confint_alpha)) confint_alpha <- if (style == "bar") 1 else 0.2 / n
-  if (is.null(ref_col)) ref_col <- if (style == "bar") 2 else "black"
-  if (is.null(ref_lty)) ref_lty <- if (style == "bar") 1 else 2
+  if (is.null(expected_col)) expected_col <- if (style == "bar") 2 else "black"
+  if (is.null(expected_lty)) expected_lty <- if (style == "bar") 1 else 2
 
   if (is.null(simint)) {
     simint <- if (style == "bar" && any(type == "random")) TRUE else FALSE
@@ -809,11 +809,11 @@ plot.pithist <- function(x,
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
-  plot_arg <- data.frame(1:n, confint, ref, simint,
+  plot_arg <- data.frame(1:n, confint, expected, simint,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     col, border, lwd, lty, alpha_min,
     simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, confint_alpha,
-    ref_col, ref_lty, ref_lwd, 
+    expected_col, expected_lty, expected_lwd, 
     axes, box
   )[, -1]
 
@@ -858,7 +858,7 @@ plot.pithist <- function(x,
     xleft <- d$mid - d$width / 2
     xright <- d$mid + d$width / 2
 
-    ## step elements (only needed for ref, confint)
+    ## step elements (only needed for expected, confint)
     z <- compute_breaks(d$mid, d$width)
 
     ## get xlim and ylim
@@ -907,15 +907,15 @@ plot.pithist <- function(x,
         lwd = plot_arg$simint_lwd)
     }
 
-    ## add ref line
-    if (isTRUE(plot_arg$ref[j])) {
-      ref_y <- duplicate_last_value(d$expected)
+    ## add expected line
+    if (isTRUE(plot_arg$expected[j])) {
+      expected_y <- duplicate_last_value(d$expected)
       lines(
-        ref_y ~ z, 
+        expected_y ~ z, 
         type = "s", 
-        col = plot_arg$ref_col[j], 
-        lty = plot_arg$ref_lty[j], 
-        lwd = plot_arg$ref_lwd[j]
+        col = plot_arg$expected_col[j], 
+        lty = plot_arg$expected_lty[j], 
+        lwd = plot_arg$expected_lwd[j]
       )
     }
 
@@ -1063,16 +1063,16 @@ plot.pithist <- function(x,
       )
     }
 
-    ## plot ref line
-    if (isTRUE(plot_arg$ref[j])) {
+    ## plot expected line
+    if (isTRUE(plot_arg$expected[j])) {
 
-      ref_y <- duplicate_last_value(d$expected)
+      expected_y <- duplicate_last_value(d$expected)
       lines(
-        ref_y ~ z, 
+        expected_y ~ z, 
         type = "s", 
-        col = plot_arg$ref_col[j], 
-        lty = plot_arg$ref_lty[j], 
-        lwd = plot_arg$ref_lwd[j]
+        col = plot_arg$expected_col[j], 
+        lty = plot_arg$expected_lty[j], 
+        lwd = plot_arg$expected_lwd[j]
       )
     }
 
@@ -1137,7 +1137,7 @@ lines.pithist <- function(x,
                           confint = FALSE,
                           confint_level = 0.95,
                           confint_type = c("exact", "approximation"),
-                          ref = FALSE,
+                          expected = FALSE,
                           col = "black",
                           lwd = 2,
                           lty = 1,
@@ -1148,9 +1148,9 @@ lines.pithist <- function(x,
                           confint_lty = 1,
                           confint_lwd = 1.75,
                           confint_alpha = 1,
-                          ref_col = "black",
-                          ref_lty = 2,
-                          ref_lwd = 1.75,
+                          expected_col = "black",
+                          expected_lty = 2,
+                          expected_lwd = 1.75,
                           ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -1160,11 +1160,11 @@ lines.pithist <- function(x,
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
   simint <- use_arg_from_attributes(x, "simint", default = FALSE, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = FALSE, force_single = FALSE)
-  ref <- use_arg_from_attributes(x, "ref", default = FALSE, force_single = FALSE)
+  expected <- use_arg_from_attributes(x, "expected", default = FALSE, force_single = FALSE)
 
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
-  ## * `ref` and `confint` w/i `abline()`
+  ## * `expected` and `confint` w/i `abline()`
   ## * `col`, `lwd`, `lty` and `...` w/i `lines()`
   stopifnot(is.logical(freq))
   stopifnot(
@@ -1194,10 +1194,10 @@ lines.pithist <- function(x,
   # -------------------------------------------------------------------
   ## recycle arguments for plotting to match the number of groups
   plot_arg <- data.frame(
-    1:n, confint, ref, simint,
+    1:n, confint, expected, simint,
     col, lwd, lty,
     simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, confint_alpha,
-    ref_col, ref_lty, ref_lwd
+    expected_col, expected_lty, expected_lwd
   )[, -1]
 
   # -------------------------------------------------------------------
@@ -1255,16 +1255,16 @@ lines.pithist <- function(x,
       )
     }
 
-    ## plot ref line
-    if (isTRUE(plot_arg$ref[j])) {
+    ## plot expected line
+    if (isTRUE(plot_arg$expected[j])) {
 
-      ref_y <- duplicate_last_value(d$expected)
+      expected_y <- duplicate_last_value(d$expected)
       lines(
-        ref_y ~ z,
+        expected_y ~ z,
         type = "s",
-        col = plot_arg$ref_col[j],
-        lty = plot_arg$ref_lty[j],
-        lwd = plot_arg$ref_lwd[j]
+        col = plot_arg$expected_col[j],
+        lty = plot_arg$expected_lty[j],
+        lwd = plot_arg$expected_lwd[j]
       )
     }
 
@@ -1311,7 +1311,7 @@ autoplot.pithist <- function(object,
                              confint = NULL,
                              confint_level = 0.95,
                              confint_type = c("exact", "approximation"),
-                             ref = NULL,
+                             expected = NULL,
                              xlim = c(NA, NA),
                              ylim = c(0, NA),
                              xlab = NULL,
@@ -1333,10 +1333,10 @@ autoplot.pithist <- function(object,
                              confint_size = 0.5,
                              confint_linetype = NULL,
                              confint_alpha = NULL,
-                             ref_colour = NULL,
-                             ref_size = 0.75,
-                             ref_linetype = NULL,
-                             ref_alpha = NA,
+                             expected_colour = NULL,
+                             expected_size = 0.75,
+                             expected_linetype = NULL,
+                             expected_alpha = NA,
                              ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -1351,7 +1351,7 @@ autoplot.pithist <- function(object,
   trafo <- use_arg_from_attributes(object, "trafo", default = NULL, force_single = TRUE)
   simint <- use_arg_from_attributes(object, "simint", default = TRUE, force_single = TRUE)
   confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
-  ref <- use_arg_from_attributes(object, "ref", default = NULL, force_single = TRUE)
+  expected <- use_arg_from_attributes(object, "expected", default = NULL, force_single = TRUE)
   xlab <- use_arg_from_attributes(object, "xlab", default = "PIT", force_single = TRUE)
   ylab <- use_arg_from_attributes(object, "ylab",
     default = if (freq) "Frequency" else "Density",
@@ -1381,7 +1381,7 @@ autoplot.pithist <- function(object,
     confint_level >= 0,
     confint_level <= 1
   )
-  stopifnot(is.null(ref) || is.logical(ref))
+  stopifnot(is.null(expected) || is.logical(expected))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(is.character(xlab), length(xlab) == 1)
@@ -1450,19 +1450,19 @@ autoplot.pithist <- function(object,
 
   ## set plotting aes
   if (style == "line") {
-    aes_ref_default <- list(colour = "black", linetype = 2)
+    aes_expected_default <- list(colour = "black", linetype = 2)
   } else {
-    aes_ref_default <- NULL
+    aes_expected_default <- NULL
   }
-  aes_ref <- set_aes_helper_geoms(
-    GeomPithistRef$default_aes,
+  aes_expected <- set_aes_helper_geoms(
+    GeomPithistExpected$default_aes,
     list(
-      colour = ref_colour,
-      size = ref_size,
-      linetype = ref_linetype,
-      alpha = ref_alpha
+      colour = expected_colour,
+      size = expected_size,
+      linetype = expected_linetype,
+      alpha = expected_alpha
     ),
-    aes_ref_default
+    aes_expected_default
   )
 
   aes_confint <- set_aes_helper_geoms(
@@ -1561,10 +1561,10 @@ autoplot.pithist <- function(object,
       )
   }
 
-  ## add ref
-  if (ref) {
+  ## add expected
+  if (expected) {
     rval <- rval +
-      geom_pithist_ref(
+      geom_pithist_expected(
         ggplot2::aes_string(
           x = "mid",
           y = "observed",
@@ -1572,10 +1572,10 @@ autoplot.pithist <- function(object,
         ),
         freq = freq,
         trafo = trafo,
-        colour = aes_ref$colour,
-        size = aes_ref$size,
-        linetype = aes_ref$linetype,
-        alpha = aes_ref$alpha
+        colour = aes_expected$colour,
+        size = aes_expected$size,
+        linetype = aes_expected$linetype,
+        alpha = aes_expected$alpha
       )
   }
 
@@ -1785,7 +1785,7 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #'     geom_pithist(aes(x = mid, y = observed, width = width, group = group), freq = TRUE) +
 #'     geom_pithist_simint(aes(x = mid, ymin = simint_lwr, ymax = simint_upr), freq = TRUE) +
 #'     geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = TRUE) +
-#'     geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = TRUE) +
+#'     geom_pithist_expected(aes(x = mid, y = observed, width = width), freq = TRUE) +
 #'     facet_grid(group ~ .) +
 #'     xlab("PIT") +
 #'     ylab("Frequency")
@@ -1798,7 +1798,7 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #'       width = width
 #'     ), freq = FALSE) +
 #'     geom_pithist_confint(aes(x = mid, y = observed, width = width), style = "line", freq = FALSE) +
-#'     geom_pithist_ref(aes(x = mid, y = observed, width = width), freq = FALSE) +
+#'     geom_pithist_expected(aes(x = mid, y = observed, width = width), freq = FALSE) +
 #'     facet_grid(group ~ .) +
 #'     xlab("PIT") +
 #'     ylab("Density")
@@ -1924,14 +1924,14 @@ set_default_aes_pithist <- function(style) {
 
 
 # -------------------------------------------------------------------
-# GGPLOT2 IMPLEMENTATIONS FOR `geom_pithist_ref()`
+# GGPLOT2 IMPLEMENTATIONS FOR `geom_pithist_expected()`
 # -------------------------------------------------------------------
 
 #' @rdname geom_pithist
 #' @export
-stat_pithist_ref <- function(mapping = NULL,
+stat_pithist_expected <- function(mapping = NULL,
                              data = NULL,
-                             geom = "pithist_ref",
+                             geom = "pithist_expected",
                              position = "identity",
                              na.rm = FALSE,
                              show.legend = NA,
@@ -1940,7 +1940,7 @@ stat_pithist_ref <- function(mapping = NULL,
                              freq = FALSE,
                              ...) {
   ggplot2::layer(
-    stat = StatPithistRef,
+    stat = StatPithistExpected,
     mapping = mapping,
     data = data,
     geom = geom,
@@ -1961,15 +1961,15 @@ stat_pithist_ref <- function(mapping = NULL,
 #' @format NULL
 #' @usage NULL
 #' @export
-StatPithistRef <- ggplot2::ggproto("StatPithistRef", ggplot2::Stat,
+StatPithistExpected <- ggplot2::ggproto("StatPithistExpected", ggplot2::Stat,
   required_aes = c("x", "y", "width"),
   compute_group = function(data,
                            scales,
                            trafo = identity,
                            freq = FALSE) {
 
-    ## compute reference line
-    ref <- compute_pithist_ref(
+    ## compute expected line
+    expected <- compute_pithist_expected(
       n = sum(data$y),
       breaks = compute_breaks(data$x, data$width),
       freq = freq,
@@ -1978,16 +1978,16 @@ StatPithistRef <- ggplot2::ggproto("StatPithistRef", ggplot2::Stat,
 
     data.frame(
       x = compute_breaks(data$x, data$width),
-      y = duplicate_last_value(ref)
+      y = duplicate_last_value(expected)
     )
   }
 )
 
 #' @rdname geom_pithist
 #' @export
-geom_pithist_ref <- function(mapping = NULL,
+geom_pithist_expected <- function(mapping = NULL,
                              data = NULL,
-                             stat = "pithist_ref",
+                             stat = "pithist_expected",
                              position = "identity",
                              na.rm = FALSE,
                              show.legend = NA,
@@ -1996,7 +1996,7 @@ geom_pithist_ref <- function(mapping = NULL,
                              freq = FALSE, # only needed w/i stat_*
                              ...) {
   ggplot2::layer(
-    geom = GeomPithistRef,
+    geom = GeomPithistExpected,
     mapping = mapping,
     data = data,
     stat = stat,
@@ -2017,7 +2017,7 @@ geom_pithist_ref <- function(mapping = NULL,
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomPithistRef <- ggplot2::ggproto("GeomPithistRef", ggplot2::GeomStep,
+GeomPithistExpected <- ggplot2::ggproto("GeomPithistExpected", ggplot2::GeomStep,
   default_aes = ggplot2::aes(
     colour = 2,
     size = 0.75,
@@ -2331,7 +2331,7 @@ GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerang
 # -------------------------------------------------------------------
 #' Compute Reference Line for PIT Histograms
 #'
-#' Helper function for computing reference lines showing perfect prediction for PIT histograms.
+#' Helper function for computing expected lines showing perfect prediction for PIT histograms.
 #'
 #' @noRd
 #' @param n number of observations.
@@ -2341,7 +2341,7 @@ GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerang
 #' by Agresti and Coull (1998).
 #' @param freq Should confidence intervals returned for reported frequencies or
 #' for counts of observation.
-compute_pithist_ref <- function(n, breaks, freq, trafo) {
+compute_pithist_expected <- function(n, breaks, freq, trafo) {
 
   ## get inverse trafo
   ## FIXME: (ML) Must be extended using `distributions3`
@@ -2360,7 +2360,7 @@ compute_pithist_ref <- function(n, breaks, freq, trafo) {
   ## get probs
   probs <- diff(invtrafo(breaks))
 
-  ## calc bin specific reference line
+  ## calc bin specific expected line
   rval <- qbinom(0.5, size = n, prob = probs)
 
   ## transform counts to density
@@ -2578,7 +2578,7 @@ summary.pithist <- function(object,
   ## set attributes
   attr(rval, "simint") <- attr(object, "simint")
   attr(rval, "confint") <- attr(object, "confint")
-  attr(rval, "ref") <- attr(object, "ref")
+  attr(rval, "expected") <- attr(object, "expected")
   attr(rval, "xlab") <- attr(object, "xlab")
   attr(rval, "ylab") <- attr(object, "ylab")
   attr(rval, "main") <- attr(object, "main")
@@ -2611,7 +2611,7 @@ print.pithist <- function(x, ...) {
   ## return custom print statement
   if (is.null(type) || is.null(freq) || is.null(style)) {
     cat("A `pithist` object without mandatory attributes `type`, `freq` and `style`\n\n")
-  } else if (all(c("confint_lwr", "confint_upr", "ref") %in% names(x))) {
+  } else if (all(c("confint_lwr", "confint_upr", "expected") %in% names(x))) {
     cat(
       paste0(
         sprintf(
@@ -2620,7 +2620,7 @@ print.pithist <- function(x, ...) {
           freq,
           style
         ),
-        " with columns: `confint_lwr`, `confint_upr` and `ref`\n\n"
+        " with columns: `confint_lwr`, `confint_upr` and `expected`\n\n"
       )
     )
   } else {

@@ -20,21 +20,21 @@
 #' Rootograms for Assessing Goodness of Fit of Probability Models
 #'
 #' Rootograms graphically compare (square roots) of empirical frequencies with
-#' fitted frequencies from a probability model. If \code{plot = TRUE}, the
+#' expected (fitted) frequencies from a probability model. If \code{plot = TRUE}, the
 #' resulting object of class \code{"rootogram"} is plotted by
 #' \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}} before it is
 #' returned, depending on whether the package \code{ggplot2} is loaded.
 #'
 #' Rootograms graphically compare frequencies of empirical distributions and
-#' fitted probability models. For the observed distribution the histogram is
+#' expected (fitted) probability models. For the observed distribution the histogram is
 #' drawn on a square root scale (hence the name) and superimposed with a line
-#' for the fitted frequencies. The histogram can be \code{"standing"} on the
-#' x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
+#' for the expected frequencies. The histogram can be \code{"standing"} on the
+#' x-axis (as usual), or \code{"hanging"} from the expected curve, or a
 #' \code{"suspended"} histogram of deviations can be drawn.
 #'
 #' The function \code{\link{rootogram}} leverages the \code{\link{procast}}
 #' generic in order to compute all necessary coordinates based on observed and
-#' fitted frequencies.
+#' expected (fitted) frequencies.
 #'
 #' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 #' rootogram objects, it is also possible to combine two (or more) rootograms by
@@ -64,14 +64,14 @@
 #' @param style character specifying the syle of rootogram (see below).
 #' @param scale character specifying whether raw frequencies or their square
 #' roots (default) should be drawn.
-#' @param fitted Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.
+#' @param expected Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.
 #' @param ref logical. Should a reference line be plotted?
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @return An object of class \code{"rootogram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
 #' with the following variables: \item{observed}{observed
-#' frequencies,} \item{expected}{fitted frequencies,} \item{x}{histogram
+#' frequencies,} \item{expected}{expected (fitted) frequencies,} \item{x}{histogram
 #' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 #' histogram bars,} \item{width}{widths of the histogram bars,}
 #' \item{height}{height of the histogram bars,} \item{line}{y-coordinates of
@@ -160,7 +160,7 @@ rootogram.default <- function(
                               ## plotting arguments
                               style = c("hanging", "standing", "suspended"),
                               scale = c("sqrt", "raw"),
-                              fitted = TRUE,
+                              expected = TRUE,
                               ref = TRUE,
                               xlab = NULL,
                               ylab = NULL,
@@ -171,7 +171,7 @@ rootogram.default <- function(
   # -------------------------------------------------------------------
   ## sanity checks
   ## * `object`, `newdata` w/i `newresponse()`
-  ## * `fitted`, `ref`, `...` in `plot()` and `autoplot()`
+  ## * `expected`, `ref`, `...` in `plot()` and `autoplot()`
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1))
   stopifnot(is.null(xlab) || (length(xlab) == 1 && is.character(xlab)))
@@ -283,7 +283,7 @@ rootogram.default <- function(
   observed <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
 
   ## expected frequencies (part2)
-  expected <- colSums(p * w)
+  val_expected <- colSums(p * w)
 
   # -------------------------------------------------------------------
   # OUTPUT AND OPTIONAL PLOTTING
@@ -291,7 +291,7 @@ rootogram.default <- function(
   ## collect everything as data.frame
   rval <- data.frame(
     observed = if (scale == "raw") as.vector(observed) else sqrt(as.vector(observed)),
-    expected = if (scale == "raw") as.vector(expected) else sqrt(as.vector(expected)),
+    expected = if (scale == "raw") as.vector(val_expected) else sqrt(as.vector(val_expected)),
     mid = mid,
     width = diff(breaks) * width
   )
@@ -299,7 +299,7 @@ rootogram.default <- function(
   ## attributes for graphical display
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
-  attr(rval, "fitted") <- fitted
+  attr(rval, "expected") <- expected
   attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
@@ -370,7 +370,7 @@ c.rootogram <- function(...) {
   ## parameters
   style <- prepare_arg_for_attributes(rval, "style", force_single = TRUE)
   scale <- prepare_arg_for_attributes(rval, "scale", force_single = TRUE)
-  fitted <- prepare_arg_for_attributes(rval, "fitted")
+  expected <- prepare_arg_for_attributes(rval, "expected")
   ref <- prepare_arg_for_attributes(rval, "ref")
   n <- unlist(n)
 
@@ -413,7 +413,7 @@ c.rootogram <- function(...) {
   ## add attributes
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
-  attr(rval, "fitted") <- fitted
+  attr(rval, "expected") <- expected
   attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
@@ -442,13 +442,13 @@ rbind.rootogram <- c.rootogram
 #' computed by \code{link{rootogram}}.
 #'
 #' Rootograms graphically compare (square roots) of empirical frequencies with
-#' fitted frequencies from a probability model.
+#' expected (fitted) frequencies from a probability model.
 #'
 #' Rootograms graphically compare frequencies of empirical distributions and
-#' fitted probability models. For the observed distribution the histogram is
+#' expected (fitted) probability models. For the observed distribution the histogram is
 #' drawn on a square root scale (hence the name) and superimposed with a line
-#' for the fitted frequencies. The histogram can be \code{"standing"} on the
-#' x-axis (as usual), or \code{"hanging"} from the fitted curve, or a
+#' for the expected frequencies. The histogram can be \code{"standing"} on the
+#' x-axis (as usual), or \code{"hanging"} from the expected (fitted) curve, or a
 #' \code{"suspended"} histogram of deviations can be drawn.
 #'
 #' @aliases plot.rootogram autoplot.rootogram
@@ -456,7 +456,7 @@ rbind.rootogram <- c.rootogram
 #' @param style character specifying the syle of rootogram.
 #' @param scale character specifying whether raw frequencies or their square
 #' roots (default) should be drawn.
-#' @param fitted Should the expected (fitted) frequencies be plotted?
+#' @param expected Should the expected (fitted) frequencies be plotted?
 #' @param ref logical. Should a reference line be plotted?
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the histogram style part of the base plot.
@@ -464,7 +464,7 @@ rbind.rootogram <- c.rootogram
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
-#' @param fitted_col,fitted_pch,fitted_lty,fitted_lwd,ref_col,ref_lty,ref_lwd,fitted_colour,fitted_size,fitted_linetype,fitted_alpha,fitted_fill,fitted_stroke,fitted_shape,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `fitted` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
+#' @param expected_col,expected_pch,expected_lty,expected_lwd,ref_col,ref_lty,ref_lwd,expected_colour,expected_size,expected_linetype,expected_alpha,expected_fill,expected_stroke,expected_shape,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
@@ -548,7 +548,7 @@ rbind.rootogram <- c.rootogram
 plot.rootogram <- function(x,
                            style = NULL,
                            scale = NULL,
-                           fitted = NULL,
+                           expected = NULL,
                            ref = NULL,
                            xlim = c(NA, NA),
                            ylim = c(NA, NA),
@@ -562,10 +562,10 @@ plot.rootogram <- function(x,
                            lwd = 1,
                            lty = 1,
                            alpha_min = 0.8,
-                           fitted_col = 2,
-                           fitted_pch = 19,
-                           fitted_lty = 1,
-                           fitted_lwd = 2,
+                           expected_col = 2,
+                           expected_pch = 19,
+                           expected_lty = 1,
+                           expected_lwd = 2,
                            ref_col = "black",
                            ref_lty = 1,
                            ref_lwd = 1.25,
@@ -579,7 +579,7 @@ plot.rootogram <- function(x,
   ## get default arguments
   style <- use_arg_from_attributes(x, "style", default = "hanging", force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = "sqrt", force_single = TRUE)
-  fitted <- use_arg_from_attributes(x, "fitted", default = TRUE, force_single = FALSE)
+  expected <- use_arg_from_attributes(x, "expected", default = TRUE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
 
   ## sanity checks
@@ -593,10 +593,10 @@ plot.rootogram <- function(x,
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
   ## get line style
-  fitted[fitted == FALSE | fitted == "FALSE"] <- "none"
-  fitted[fitted == TRUE | fitted == "TRUE"] <- "both"
-  fitted <- c("none", "b", "l", "p")[match(fitted, c("none", "both", "line", "point"))]
-  stopifnot(all(fitted %in% c("none", "b", "l", "p")))
+  expected[expected == FALSE | expected == "FALSE"] <- "none"
+  expected[expected == TRUE | expected == "TRUE"] <- "both"
+  expected <- c("none", "b", "l", "p")[match(expected, c("none", "both", "line", "point"))]
+  stopifnot(all(expected %in% c("none", "b", "l", "p")))
 
   ## extend input object on correct scale (compute heights, ...)
   x <- summary(x, scale = scale, style = style)
@@ -617,7 +617,7 @@ plot.rootogram <- function(x,
   plot_arg <- data.frame(1:n, ref,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     border, col, lwd, lty, alpha_min,
-    fitted_col, fitted_pch, fitted_lty, fitted_lwd, fitted,
+    expected_col, expected_pch, expected_lty, expected_lwd, expected,
     ref_col, ref_lty, ref_lwd,
     axes, box
   )[, -1]
@@ -694,16 +694,16 @@ plot.rootogram <- function(x,
       )
     }
 
-    ## add fitted line
-    if (plot_arg$fitted[j] != "none") {
+    ## add expected line
+    if (plot_arg$expected[j] != "none") {
       lines(
         d$mid,
         d$expected,
-        col =  plot_arg$fitted_col[j],
-        pch = plot_arg$fitted_pch[j],
-        type = plot_arg$fitted[j],
-        lty = plot_arg$fitted_lty[j],
-        lwd = plot_arg$fitted_lwd[j]
+        col =  plot_arg$expected_col[j],
+        pch = plot_arg$expected_pch[j],
+        type = plot_arg$expected[j],
+        lty = plot_arg$expected_lty[j],
+        lwd = plot_arg$expected_lwd[j]
       )
     }
   }
@@ -728,7 +728,7 @@ plot.rootogram <- function(x,
 autoplot.rootogram <- function(object,
                                style = NULL,
                                scale = NULL,
-                               fitted = NULL,
+                               expected = NULL,
                                ref = NULL,
                                xlim = c(NA, NA),
                                ylim = c(NA, NA),
@@ -742,13 +742,13 @@ autoplot.rootogram <- function(object,
                                size = 0.5,
                                linetype = 1,
                                alpha = NA,
-                               fitted_colour = 2,
-                               fitted_size = 1,
-                               fitted_linetype = 1,
-                               fitted_alpha = 1,
-                               fitted_fill = NA,
-                               fitted_stroke = 0.5,
-                               fitted_shape = 19,
+                               expected_colour = 2,
+                               expected_size = 1,
+                               expected_linetype = 1,
+                               expected_alpha = 1,
+                               expected_fill = NA,
+                               expected_stroke = 0.5,
+                               expected_shape = 19,
                                ref_colour = "black",
                                ref_size = 0.5,
                                ref_linetype = 1,
@@ -760,7 +760,7 @@ autoplot.rootogram <- function(object,
   ## get default arguments
   style <- use_arg_from_attributes(object, "style", default = "hanging", force_single = TRUE)
   scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
-  fitted <- use_arg_from_attributes(object, "fitted", default = TRUE, force_single = TRUE)
+  expected <- use_arg_from_attributes(object, "expected", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = TRUE, force_single = TRUE)
   xlab <- use_arg_from_attributes(object, "xlab", default = "Rootogram", force_single = TRUE)
   ylab <- use_arg_from_attributes(object, "ylab",
@@ -783,13 +783,13 @@ autoplot.rootogram <- function(object,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
-  ## get line style for fitted
-  if (isFALSE(fitted)) {
-    fitted <- "none"
-  } else if (isTRUE(fitted)) {
-    fitted <- "both"
+  ## get line style for expected
+  if (isFALSE(expected)) {
+    expected <- "none"
+  } else if (isTRUE(expected)) {
+    expected <- "both"
   }
-  fitted <- match.arg(fitted, c("none", "both", "line", "point"))
+  expected <- match.arg(expected, c("none", "both", "line", "point"))
 
   ## transform to correct scale
   object <- summary.rootogram(object, scale = scale, style = style, extend = FALSE)
@@ -853,19 +853,19 @@ autoplot.rootogram <- function(object,
       style = style
     )
 
-  ## add fitted line
-  if (fitted != "none") {
+  ## add expected line
+  if (expected != "none") {
     rval <- rval +
-      geom_rootogram_fitted(
+      geom_rootogram_expected(
         scale = "raw",
-        linestyle = fitted,
-        colour = fitted_colour,
-        size = fitted_size,
-        linetype = fitted_linetype,
-        alpha = fitted_alpha,
-        fill = fitted_fill,
-        stroke = fitted_stroke,
-        shape = fitted_shape,
+        linestyle = expected,
+        colour = expected_colour,
+        size = expected_size,
+        linetype = expected_linetype,
+        alpha = expected_alpha,
+        fill = expected_fill,
+        stroke = expected_stroke,
+        shape = expected_shape,
       )
   }
 
@@ -1097,7 +1097,7 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #'       observed = observed, expected = expected, mid = mid,
 #'       width = width, group = group
 #'     )) +
-#'     geom_rootogram_fitted(aes(expected = expected, mid = mid)) +
+#'     geom_rootogram_expected(aes(expected = expected, mid = mid)) +
 #'     geom_rootogram_ref() +
 #'     facet_grid(group ~ .) + 
 #'     xlab("satellites") +
@@ -1150,14 +1150,14 @@ GeomRootogram <- ggplot2::ggproto("GeomRootogram", ggplot2::GeomRect,
 
 
 # -------------------------------------------------------------------
-# GGPLOT2 IMPLEMENTATIONS FOR `geom_rootogram_fitted()`
+# GGPLOT2 IMPLEMENTATIONS FOR `geom_rootogram_expected()`
 # -------------------------------------------------------------------
 
 #' @rdname geom_rootogram
 #' @export
-stat_rootogram_fitted <- function(mapping = NULL,
+stat_rootogram_expected <- function(mapping = NULL,
                                   data = NULL,
-                                  geom = "rootogram_fitted",
+                                  geom = "rootogram_expected",
                                   position = "identity",
                                   na.rm = FALSE,
                                   show.legend = NA,
@@ -1168,7 +1168,7 @@ stat_rootogram_fitted <- function(mapping = NULL,
   style <- match.arg(style)
 
   ggplot2::layer(
-    stat = StatRootogramFitted,
+    stat = StatRootogramExpected,
     data = data,
     mapping = mapping,
     geom = geom,
@@ -1188,7 +1188,7 @@ stat_rootogram_fitted <- function(mapping = NULL,
 #' @format NULL
 #' @usage NULL
 #' @export
-StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
+StatRootogramExpected <- ggplot2::ggproto("StatRootogramExpected", ggplot2::Stat,
   required_aes = c("expected", "mid"),
   compute_group = function(data,
                            scales,
@@ -1217,9 +1217,9 @@ StatRootogramFitted <- ggplot2::ggproto("StatRootogramFitted", ggplot2::Stat,
 
 #' @rdname geom_rootogram
 #' @export
-geom_rootogram_fitted <- function(mapping = NULL,
+geom_rootogram_expected <- function(mapping = NULL,
                                   data = NULL,
-                                  stat = "rootogram_fitted",
+                                  stat = "rootogram_expected",
                                   position = "identity",
                                   na.rm = FALSE,
                                   show.legend = NA,
@@ -1231,7 +1231,7 @@ geom_rootogram_fitted <- function(mapping = NULL,
   linestyle <- match.arg(linestyle)
 
   ggplot2::layer(
-    geom = GeomRootogramFitted,
+    geom = GeomRootogramExpected,
     mapping = mapping,
     data = data,
     stat = stat,
@@ -1250,7 +1250,7 @@ geom_rootogram_fitted <- function(mapping = NULL,
 
 #' @rdname geom_rootogram
 #' @export
-GeomRootogramFitted <- ggplot2::ggproto("GeomRootogramFitted", ggplot2::GeomPath,
+GeomRootogramExpected <- ggplot2::ggproto("GeomRootogramExpected", ggplot2::GeomPath,
   default_aes = ggplot2::aes(
     colour = 2, size = 1, linetype = 1,
     alpha = 1, fill = NA, stroke = 0.5, shape = 19

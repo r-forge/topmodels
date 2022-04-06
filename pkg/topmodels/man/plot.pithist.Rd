@@ -15,7 +15,7 @@
   confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = TRUE,
+  expected = TRUE,
   xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
@@ -34,9 +34,10 @@
   confint_col = NULL,
   confint_lty = NULL,
   confint_lwd = 1.75,
-  ref_col = NULL,
-  ref_lty = NULL,
-  ref_lwd = 1.75,
+  confint_alpha = NULL,
+  expected_col = NULL,
+  expected_lty = NULL,
+  expected_lwd = 1.75,
   ...
 )
 
@@ -47,7 +48,7 @@
   confint = FALSE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = FALSE,
+  expected = FALSE,
   col = "black",
   lwd = 2,
   lty = 1,
@@ -57,9 +58,10 @@
   confint_col = "black",
   confint_lty = 1,
   confint_lwd = 1.75,
-  ref_col = "black",
-  ref_lty = 2,
-  ref_lwd = 1.75,
+  confint_alpha = 1,
+  expected_col = "black",
+  expected_lty = 2,
+  expected_lwd = 1.75,
   ...
 )
 
@@ -72,7 +74,7 @@
   confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  ref = NULL,
+  expected = NULL,
   xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
@@ -93,11 +95,11 @@
   confint_fill = NULL,
   confint_size = 0.5,
   confint_linetype = NULL,
-  confint_alpha = NA,
-  ref_colour = NULL,
-  ref_size = 0.75,
-  ref_linetype = NULL,
-  ref_alpha = NA,
+  confint_alpha = NULL,
+  expected_colour = NULL,
+  expected_size = 0.75,
+  expected_linetype = NULL,
+  expected_alpha = NA,
   ...
 )
 }
@@ -128,13 +130,13 @@ character string defining one of `"polygon"`, `"line"` or `"none"`.}
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
-\item{ref}{logical. Should a reference line be plotted?}
+\item{expected}{logical. Should the expected values be plotted as reference?}
 
 \item{xlim, ylim, xlab, ylab, main, axes, box}{graphical parameters.}
 
 \item{col, border, lwd, lty, alpha_min}{graphical parameters for the main part of the base plot.}
 
-\item{simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.}
+\item{simint_col, simint_lty, simint_lwd, confint_col, confint_lty, confint_lwd, confint_alpha, expected_col, expected_lty, expected_lwd}{Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.}
 
 \item{\dots}{further graphical parameters passed to the plotting function.}
 
@@ -147,7 +149,7 @@ graphic?}
 
 \item{colour, fill, size, linetype, alpha}{graphical parameters for the histogram style part in the \code{autoplot}.}
 
-\item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype, ref_alpha}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
+\item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, expected_colour, expected_size, expected_linetype, expected_alpha}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
 }
 \description{
 Generic plotting functions for PIT histograms of the class \code{"pithist"}
@@ -173,7 +175,7 @@ m1_lm <- lm(dist ~ speed, data = cars)
 pithist(m1_lm)
 
 ## customize colors and style
-pithist(m1_lm, ref_col = "blue", lty = 2, pch = 20, style = "line")
+pithist(m1_lm, expected_col = "blue", lty = 2, pch = 20, style = "line")
 
 ## add separate model
 if (require("crch", quietly = TRUE)) {
@@ -203,7 +205,7 @@ if (require("crch")) {
 
   ## plot in single graph with style "line"
   plot(c(pit2_lm, pit2_crch),
-    col = c(1, 2), confint_col = c(1, 2), ref_col = 3,
+    col = c(1, 2), confint_col = c(1, 2), expected_col = 3,
     style = "line", single_graph = TRUE
   )
 }
