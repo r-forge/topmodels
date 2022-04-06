@@ -27,7 +27,7 @@ navbar:
         - text: "Illustration: Artificial Data"
           href: articles/illustration_artificial.html
         - text: "Implementation Overview"
-          href: articles/implementation_functions_graphical_evaluation.html
+          href: articles/implementation.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"

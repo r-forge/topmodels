@@ -1036,7 +1036,7 @@ autoplot.qqrplot <- function(object,
   if (isFALSE(confint)) {
     confint <- "none"
   } else if (isTRUE(confint)) {
-    confint <- "polygon"
+    confint <- "line"
   }
   confint <- match.arg(confint, c("polygon", "line", "none"))
 
