@@ -210,10 +210,10 @@ pithist.default <- function(
   style <- match.arg(style)
   type <- match.arg(type)
 
-  if (type == "expected" && !(is.null(trafo) || identical(trafo, identity))) {
-    warning('For explicit `trafo` function `type = expected` not yet supported and set to "random".')
-    type <- "random"
-  }
+  #if (type == "expected" && !(is.null(trafo) || identical(trafo, identity))) {
+  #  warning('For explicit `trafo` function `type = expected` not yet supported and set to "random".')
+  #  type <- "random"
+  #}
 
   ## determine other arguments conditional on `style` and `type`
   if (is.null(simint)) {
@@ -320,6 +320,9 @@ pithist.default <- function(
       newdata = newdata, trafo = trafo, delta = delta,
       type = "quantile", prob = c(0, 1)
     )
+
+    p[p == -Inf] <- -.Machine$double.xmax
+    p[p == Inf] <- .Machine$double.xmax
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
     F <- if (all(abs(p[, 2L] - p[, 1L]) < sqrt(.Machine$double.eps))) {
