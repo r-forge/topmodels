@@ -192,7 +192,7 @@ rootogram.default <- function(
   }
   plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
   stopifnot(
-    "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
+    "The argument `plot` must be logical or match the arguments 'none', 'base' or 'ggplot2'." =
       !inherits(plot, "try-error")
   )
 
@@ -202,7 +202,7 @@ rootogram.default <- function(
   }
   class <- try(match.arg(class, c("tibble", "data.frame")))
   stopifnot(
-    "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
+    "The argument `class` must be NULL or match the arguments 'tibble' or 'data.frame'." =
       !inherits(class, "try-error")
   )
 
@@ -933,7 +933,7 @@ autoplot.rootogram <- function(object,
     }
     theme <- theme_tmp
     if (!is.function(theme)) {
-        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+        warning("The argument `theme` must be a `ggplot2` theme, a theme-generating function or a valid 'character string'.", call. = FALSE)
         theme <- ggplot2::theme_bw()
     }
   }
@@ -941,7 +941,7 @@ autoplot.rootogram <- function(object,
   if (is.function(theme)) {
     theme <- try(theme(), silent = TRUE)
     if (inherits(theme, "try-error") || !inherits(theme, "theme")) {
-        warning("`theme` must be a ggplot2 theme, theme-generating function or valid 'character string'")
+        warning("The argument `theme` must be a `ggplot2` theme, a theme-generating function or a valid 'character string'.", call. = FALSE)
         theme <- ggplot2::theme_bw()
     }
   }
