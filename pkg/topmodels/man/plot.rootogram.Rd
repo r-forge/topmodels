@@ -116,13 +116,7 @@ m1_lm <- lm(dist ~ speed, data = cars)
 rootogram(m1_lm)
 
 ## customize colors
-rootogram(m1_lm, ref = "blue", lty = 2, pch = 20)
-
-## add separate model
-if (require("crch", quietly = TRUE)) {
-  m1_crch <- crch(dist ~ speed | speed, data = cars)
-  points(rootogram(m1_crch, plot = FALSE), col = 2, lty = 2)
-}
+rootogram(m1_lm, ref_col = "blue", lty = 2, pch = 20)
 
 #-------------------------------------------------------------------------------
 if (require("crch")) {

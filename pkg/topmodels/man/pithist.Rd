@@ -24,8 +24,8 @@ pithist(object, ...)
   simint_nrep = 250,
   style = c("bar", "line"),
   freq = FALSE,
-  confint = TRUE,
   expected = TRUE,
+  confint = TRUE,
   xlab = "PIT",
   ylab = if (freq) "Frequency" else "Density",
   main = NULL,
@@ -89,9 +89,9 @@ frequencies, the \code{counts} component of the result; if \code{FALSE},
 probability densities, component \code{density}, are plotted (so that the
 histogram has a total area of one).}
 
-\item{confint}{logical. Should confident intervals be drawn?}
-
 \item{expected}{logical. Should the expected values be plotted as reference?}
+
+\item{confint}{logical. Should confident intervals be drawn?}
 
 \item{xlab, ylab, main}{graphical parameters passed to
 \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.}

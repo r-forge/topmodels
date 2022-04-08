@@ -124,7 +124,7 @@ r1 <- rootogram(m1_pois, plot = FALSE)
 r1
 
 ## combine plots
-plot(c(r1, r1), col = c(1, 2), ref = 4, lty = c(1, 2))
+plot(c(r1, r1), col = c(1, 2), expected_col = c(1, 2))
 
 
 #-------------------------------------------------------------------------------

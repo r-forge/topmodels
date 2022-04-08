@@ -44,7 +44,7 @@ knitr::opts_chunk$set(fig.align = "center")
 method | computation arguments | plotting arguments | output
 --- | --- | --- | ---
 `rootogram()` | `object`, `newdata`, `plot`, `class`, `response_type`, `breaks`, `width` | `style`<sup>[1](#myfootnote1)</sup>, `scale`<sup>[1](#myfootnote1)</sup>, `expected`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`
-`pithist()` | `object`, `newdata`, `plot`, `class`, `trafo`<sup>[1](#myfootnote2)</sup>, `breaks`, `type`<sup>[1](#myfootnote1)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `style`<sup>[1](#myfootnote1)</sup>, `freq`<sup>[1](#myfootnote1)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `expected`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`, `simint_lwr`, `simint_upr`
+`pithist()` | `object`, `newdata`, `plot`, `class`, `trafo`<sup>[1](#myfootnote2)</sup>, `breaks`, `type`<sup>[1](#myfootnote1)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `style`<sup>[1](#myfootnote1)</sup>, `freq`<sup>[1](#myfootnote1)</sup>, `expected`<sup>[1](#myfootnote1)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `mid`, `width`, `simint_lwr`, `simint_upr`
 `qqrplot()` | `object`, `newdata`, `plot`, `class`, `detrend`<sup>[1](#myfootnote1)</sup>, `trafo`<sup>[1](#myfootnote2)</sup>, `nsim`, `delta`, `simint`<sup>[1,2](#myfootnote2)</sup>, `simint_level`, `simint_nrep` | `simint`<sup>[1,2](#myfootnote2)</sup>, `confint`<sup>[1](#myfootnote1)</sup>, `ref`<sup>[1](#myfootnote1)</sup>, `xlab`<sup>[1](#myfootnote1)</sup>, `ylab`<sup>[1](#myfootnote1)</sup>, `main`<sup>[1](#myfootnote1)</sup>, `...` | `observed`, `expected`, `simint_observed_lwr`, `simint_observed_upr`, `simint_expected`
 
 <a name="myfootnote1">1</a>: Setting is saved within `attributes` of the returned object. Hence, `plot(<object>)` renders a graphic with the arguments saved in the attributes.
@@ -54,7 +54,7 @@ method | computation arguments | plotting arguments | output
 combine | vector of attribute values | single attribute value
 --- | --- | ---
 `c.rootogram()` | `expected`, `ref`, `xlab`, `ylab`, `main` | `style`, `scale`
-`c.pithist()` | `type`, `simint`, `confint`, `expected`, `counts`, `xlab`, `ylab`, `main` | `trafo`<sup>[3](#myfootnote3)</sup>, `style`, `freq`
+`c.pithist()` | `type`, `simint`, `expected`, `confint`, `counts`, `xlab`, `ylab`, `main` | `trafo`<sup>[3](#myfootnote3)</sup>, `style`, `freq`
 `c.qqrplot()` | `simint`, `confint`, `ref`, `xlab`, `ylab`, `main` | `detrend`, `trafo`<sup>[3](#myfootnote3)</sup>
 
 <a name="myfootnote3">3</a>: Non-unique attribute values can't be comined.
@@ -70,7 +70,7 @@ summary | arguments | return values | extended return values
 plot | arguments (main) | arguments (add ons)
 --- | --- | ---
 `plot.rootogram()` | `x`, `style`, `scale`, `expected`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `expected_col`, `expected_pch`, `expected_lty`, `expected_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
-`plot.pithist()` | `x`, `single_graph`, `style`, `freq`, `simint`, `confint`, `confint_level`, `confint_type`, `expected`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `simint_col`, `simint_lty`, `simint_lwd`, `confint_col`, `confint_lty`, `confint_lwd`, `expected_col`, `expected_lty`, `expected_lwd` 
+`plot.pithist()` | `x`, `single_graph`, `style`, `freq`, `expected`, `confint`, `confint_level`, `confint_type`, `simint`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `lwd`, `lty`, `alpha_min`, `...` | `expected_lty`, `expected_lwd`, `confint_col`, `confint_lty`, `confint_lwd`, `expected_col`, `simint_col`, `simint_lty`, `simint_lwd` 
 `plot.qqrplot()` | `x`, `single_graph`, `detrend`, `simint`, `confint`, `confint_level`, `ref`, `ref_identity`, `ref_probs`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `axes`, `box`, `col`, `border`, `pch`, `...` | `simint_col`, `simint_alpha`, `confint_col`, `confint_lty`, `confint_lwd`, `ref_col`, `ref_lty`, `ref_lwd` 
 
 
@@ -80,7 +80,7 @@ plot | arguments (main) | arguments (add ons)
 autoplot | arguments (main) | arguments (add ons)
 --- | --- | ---
 `autoplot.rootogram()` | `object`, `style`, `scale`, `expected`, `ref`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha`, `...` | `expected_colour`, `expected_size`, `expected_linetype`, `expected_alpha`, `expected_fill`, `expected_stroke`, `expected_shape`, `ref_colour`, `ref_size`, `ref_linetype`, `ref_alpha`
-`autoplot.pithist()` | `object`, `single_graph`, `style`, `freq`, `simint`, `confint`, `confint_level`, `confint_type`, `expected`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha` | `simint_colour`, `simint_size`, `simint_linetype`, `simint_alpha`, `confint_colour`, `confint_fill`, `confint_size`, `confint_linetype`, `confint_alpha`, `expected_colour`, `expected_size`, `expected_linetype`, `expected_alpha`
+`autoplot.pithist()` | `object`, `single_graph`, `style`, `freq`, `expected`, `confint`, `confint_level`, `confint_type`, `simint`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `size`, `linetype`, `alpha` | `expected_colour`, `expected_size`, `expected_linetype`, `expected_alpha`, `confint_colour`, `confint_fill`, `confint_size`, `confint_linetype`, `confint_alpha`, `simint_colour`, `simint_size`, `simint_linetype`, `simint_alpha`
 `autoplot.qqrplot()` | `object`, `single_graph`, `detrend`, `simint`, `confint`, `confint_level`, `ref`, `ref_identity`, `ref_probs`, `xlim`, `ylim`, `xlab`, `ylab`, `main`, `legend`, `theme`, `colour`, `fill`, `shape`, `size`, `stroke`, `...` | `simint_fill`, `simint_alpha`, `confint_colour`, `confint_fill`, `confint_size`, `confnt_linetype`, `confint_alpha`, `ref_colour`, `ref_size`, `ref_linetype` 
 
 geom_<...> | inherits | geom aes | stat_<...> | stat aes 

@@ -11,11 +11,11 @@
   single_graph = FALSE,
   style = NULL,
   freq = NULL,
-  simint = NULL,
+  expected = TRUE,
   confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  expected = TRUE,
+  simint = NULL,
   xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
@@ -28,40 +28,40 @@
   lwd = NULL,
   lty = 1,
   alpha_min = 0.2,
-  simint_col = "black",
-  simint_lty = 1,
-  simint_lwd = 1.75,
-  confint_col = NULL,
-  confint_lty = NULL,
-  confint_lwd = 1.75,
-  confint_alpha = NULL,
   expected_col = NULL,
   expected_lty = NULL,
   expected_lwd = 1.75,
+  confint_col = NULL,
+  confint_lty = 2,
+  confint_lwd = 1.75,
+  confint_alpha = NULL,
+  simint_col = "black",
+  simint_lty = 1,
+  simint_lwd = 1.75,
   ...
 )
 
 \method{lines}{pithist}(
   x,
   freq = NULL,
-  simint = FALSE,
+  expected = FALSE,
   confint = FALSE,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  expected = FALSE,
+  simint = FALSE,
   col = "black",
   lwd = 2,
   lty = 1,
-  simint_col = "black",
-  simint_lty = 1,
-  simint_lwd = 1.75,
+  expected_col = "black",
+  expected_lty = 2,
+  expected_lwd = 1.75,
   confint_col = "black",
   confint_lty = 1,
   confint_lwd = 1.75,
   confint_alpha = 1,
-  expected_col = "black",
-  expected_lty = 2,
-  expected_lwd = 1.75,
+  simint_col = "black",
+  simint_lty = 1,
+  simint_lwd = 1.75,
   ...
 )
 
@@ -70,11 +70,11 @@
   single_graph = FALSE,
   style = NULL,
   freq = NULL,
-  simint = NULL,
+  expected = NULL,
   confint = NULL,
   confint_level = 0.95,
   confint_type = c("exact", "approximation"),
-  expected = NULL,
+  simint = NULL,
   xlim = c(NA, NA),
   ylim = c(0, NA),
   xlab = NULL,
@@ -87,19 +87,19 @@
   size = NULL,
   linetype = NULL,
   alpha = NULL,
-  simint_colour = "black",
-  simint_size = 0.5,
-  simint_linetype = 1,
-  simint_alpha = NA,
-  confint_colour = NULL,
-  confint_fill = NULL,
-  confint_size = 0.5,
-  confint_linetype = NULL,
-  confint_alpha = NULL,
   expected_colour = NULL,
   expected_size = 0.75,
   expected_linetype = NULL,
   expected_alpha = NA,
+  confint_colour = NULL,
+  confint_fill = NULL,
+  confint_size = 0.75,
+  confint_linetype = NULL,
+  confint_alpha = NULL,
+  simint_colour = "black",
+  simint_size = 0.5,
+  simint_linetype = 1,
+  simint_alpha = NA,
   ...
 )
 }
@@ -117,8 +117,7 @@ frequencies, the \code{counts} component of the result; if \code{FALSE},
 probability densities, component \code{density}, are plotted (so that the
 histogram has a total area of one).}
 
-\item{simint}{logical. In case of discrete distributions, should the simulation
-(confidence) interval due to the randomization be visualized?}
+\item{expected}{logical. Should the expected values be plotted as reference?}
 
 \item{confint}{Should confident intervals be drawn? Either logical or as 
 character string defining one of `"polygon"`, `"line"` or `"none"`.}
@@ -130,7 +129,8 @@ character string defining one of `"polygon"`, `"line"` or `"none"`.}
 to Agresti and Coull (1998), for interval estimation of binomial proportions
 an approximation can be better than exact.}
 
-\item{expected}{logical. Should the expected values be plotted as reference?}
+\item{simint}{logical. In case of discrete distributions, should the simulation
+(confidence) interval due to the randomization be visualized?}
 
 \item{xlim, ylim, xlab, ylab, main, axes, box}{graphical parameters.}
 

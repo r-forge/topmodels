@@ -61,31 +61,39 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
 ### 2.4 Functions for graphical model assessment: TODOs
 * In general
     * Check order of different layers.
-    * Check consistency of `xlim` and `ylim`.
     * Check names and consistency of all (plotting) arguments.
+    * Rewrite examples w/i manuals.
+    * Extend tests!
 * In detail
     * Check again initilization for `glm` objects?
     * How should we handle values outside (truncation)/censoring points - these can lead to skewed PIT histograms.
+    * Should a `+.object` S3-method be implemented?
     * Support more `trafo`s.
+    * Change argument `trafo` to `scale`?
+    * Allow varying graphical parameters in `ggplot2` facets. E.g., varying colors for CI intervals.
 * `rootogram()`
-    * Improve breaks: currently do not really work for right-censoring [done, maybe to be improved].
-    * Fix bug of negative expecteded frequencies: For extreme values (see example 'underdispersed' in summary plot) there are very small negative expected frequencies?! [done, i.e., improved workaround `[abs(p) < sqrt(.Machine$double.eps)] <- 0`].
-    * Breaks no special options.
-    * `+.rootogram()`
-    * Empirical CIs based on random drawns from distribution?
-* `reliagram()`
-    * Implement additionally to absolute histogram a frquency histogram (for base and ggplot2).
-    * Write `geom`s and adapt according to other functions.
+    * Improve `breaks` and `width`
+        * Get rid of argument `response_type`.
+        * Extend breaks outside the range of observed frequencies in case expected probability mass exists.
+        * Improve workaround in case of negative expecteded frequencies.
+        * Improve workaround in case os point masses.
+    * Implement empirical CIs based on random drawns from distribution?
+    * Allow different `na.action`s?
+    * Plot solely an expected line w/o points for many bars.
 * `pithist()`
     * Implement proportional method (`type = "proportional"`).
-    * Check again if we need two different CI computations.
+    * Check if we really need two different CI computations.
     * Allow CI and ref to vary for non-equidstant breaks [done] -> improve for autoplot().
     * Implement CI and ref for trafo.
+    * Fix ordering of graphics for `autoplot`.
 * `qqrplot()`
     * Implement additional CI intervals (same for wormplot)? Compare R package qqplotr and Aldor-Noiman et al. (2013) [done].
 * `wormplot()`
     * ciplot (Burren and Frederiks) for other `trafo`: Compare order statistics!
     * Fix CI polygon: CI polygon seems sometimes to be mirrored?! [done]
+* `reliagram()`
+    * Implement additionally to absolute histogram a frquency histogram (for base and ggplot2).
+    * Write `geom`s and adapt `autoplot` accordingly.
 
 ## 3. Random notes
 * Errors in countreg

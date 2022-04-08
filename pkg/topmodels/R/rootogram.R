@@ -182,6 +182,17 @@ rootogram.default <- function(
   scale <- match.arg(scale)
   style <- match.arg(style)
 
+  ## default annotation
+  if (is.null(xlab)) {
+    xlab <- as.character(attr(terms(object), "variables"))[2L]
+  }
+  if (is.null(ylab)) {
+    ylab <- if (scale == "raw") "Frequency" else "sqrt(Frequency)"
+  }
+  if (is.null(main)) {
+    main <- deparse(substitute(object))
+  }
+
   ## guess plotting flavor
   if (isFALSE(plot)) {
     plot <- "none"
@@ -206,17 +217,6 @@ rootogram.default <- function(
       !inherits(class, "try-error")
   )
 
-  ## default annotation
-  if (is.null(xlab)) {
-    xlab <- as.character(attr(terms(object), "variables"))[2L]
-  }
-  if (is.null(ylab)) {
-    ylab <- if (scale == "raw") "Frequency" else "sqrt(Frequency)"
-  }
-  if (is.null(main)) {
-    main <- deparse(substitute(object))
-  }
-
   # -------------------------------------------------------------------
   # PREPARE DATA
   # -------------------------------------------------------------------
@@ -227,8 +227,8 @@ rootogram.default <- function(
   response_type <- match.arg(response_type, c("discrete", "logseries", "continuous"))
 
   ## set breaks and midpoints
-  ## FIXME: (ML) Extend breaks to the left, in case still expected frequency exists
-  ## FIXME: (Z) Try to get rid of 'response_type'
+  ## TODO: (ML) Extend breaks to the left, in case still expected frequency exists.
+  ## TODO: (Z) Try to get rid of 'response_type'.
   if (is.null(breaks) && response_type == "discrete") {
     breaks <- -1L:max(y[w > 0]) + 0.5
   } else if (is.null(breaks) && response_type == "logseries") {
@@ -241,7 +241,7 @@ rootogram.default <- function(
   mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
 
   ## fix pointmasses
-  ## FIXME: (ML) Check if that always works or could be improved
+  ## TODO: (ML) Check if that always works or could be improved.
   breaks[1] <- breaks[1] - 1e-12
   breaks[length(breaks)] <- breaks[length(breaks)] + 1e-12
 
@@ -269,11 +269,11 @@ rootogram.default <- function(
       )
   }
 
-  ## FIXME: (ML) Sometime neg. expected occurs (see example for underdispersed model fit)
+  ## TODO: (ML) Sometime neg. expected occurs (see example for underdispersed model fit).
   p[abs(p) < sqrt(.Machine$double.eps)] <- 0
 
   ## handle NAs
-  ## TODO: (ML) Maybe allow arg `na.action` in the future
+  ## TODO: (ML) Maybe allow arg `na.action` in the future.
   idx_not_na <- as.logical(complete.cases(y) * complete.cases(p))
   y <- y[idx_not_na]
   p <- p[idx_not_na, ]
@@ -296,7 +296,7 @@ rootogram.default <- function(
     width = diff(breaks) * width
   )
 
-  ## attributes for graphical display
+  ## add attributes
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
   attr(rval, "expected") <- expected
@@ -305,6 +305,7 @@ rootogram.default <- function(
   attr(rval, "ylab") <- ylab
   attr(rval, "main") <- main
 
+  ## set class to data.frame or tibble
   if (class == "data.frame") {
     class(rval) <- c("rootogram", "data.frame")
   } else {
@@ -340,7 +341,7 @@ c.rootogram <- function(...) {
   }
 
   ## remove temporary the class (needed below for `c()`)
-  ## FIXME: (ML) Rewrite by, e.g., employing `lapply()`
+  ## TODO: (ML) Rewrite by, e.g., employing `lapply()`.
   for (i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "rootogram"]
 
   ## convert always to data.frame
@@ -372,7 +373,6 @@ c.rootogram <- function(...) {
   scale <- prepare_arg_for_attributes(rval, "scale", force_single = TRUE)
   expected <- prepare_arg_for_attributes(rval, "expected")
   ref <- prepare_arg_for_attributes(rval, "ref")
-  n <- unlist(n)
 
   ## fix `ylabel` according to possible new `scale`
   if (scale == "sqrt") {
@@ -408,6 +408,8 @@ c.rootogram <- function(...) {
     )
   )
 
+  ## add group
+  n <- unlist(n)
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
 
   ## add attributes
@@ -589,12 +591,6 @@ plot.rootogram <- function(x,
   scale <- match.arg(scale, c("sqrt", "raw"))
   style <- match.arg(style, c("hanging", "standing", "suspended"))
 
-  ## get line style
-  expected[expected == FALSE | expected == "FALSE"] <- "none"
-  expected[expected == TRUE | expected == "TRUE"] <- "both"
-  expected <- c("none", "b", "l", "p")[match(expected, c("none", "both", "line", "point"))]
-  stopifnot(all(expected %in% c("none", "b", "l", "p")))
-
   ## extend input object on correct scale (compute heights, ...)
   x <- summary(x, scale = scale, style = style)
 
@@ -608,6 +604,12 @@ plot.rootogram <- function(x,
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
+  ## determine in which style the `expected` should be plotted
+  expected[expected == FALSE | expected == "FALSE"] <- "none"
+  expected[expected == TRUE | expected == "TRUE"] <- "both"
+  expected <- c("none", "b", "l", "p")[match(expected, c("none", "both", "line", "point"))]
+  stopifnot(all(expected %in% c("none", "b", "l", "p")))
+
   ## prepare xlim and ylim
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
@@ -621,7 +623,7 @@ plot.rootogram <- function(x,
     ref_col, ref_lty, ref_lwd
   )[, -1]
 
-  ## annotation
+  ## prepare annotation
   xlab <- use_arg_from_attributes(x, "xlab", default = "Rootogram", force_single = FALSE)
   ylab <- use_arg_from_attributes(x, "ylab",
     default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = FALSE
@@ -756,6 +758,9 @@ autoplot.rootogram <- function(object,
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
+  ## check if ylab is defined
+  ylab_missing <- missing(ylab)
+
   ## get default arguments
   style <- use_arg_from_attributes(object, "style", default = "hanging", force_single = TRUE)
   scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
@@ -767,10 +772,9 @@ autoplot.rootogram <- function(object,
   )
 
   ## fix `ylabel` according to possible new `scale`
-  if (scale == "sqrt" && grepl("^Frequency$", ylab)) {
-    ylab <- "sqrt(Frequency)"
-  } else if (scale == "raw" && grepl("^sqrt\\(Frequency\\)$", ylab)) {
-    ylab <- "Frequency"
+  if (ylab_missing) {
+    if (scale == "sqrt" && grepl("^Frequency$", ylab)) ylab <- "sqrt(Frequency)"
+    if (scale == "raw" && grepl("^sqrt\\(Frequency\\)$", ylab)) ylab <- "Frequency"
   }
 
   ## get base style arguments
@@ -801,7 +805,7 @@ autoplot.rootogram <- function(object,
   if (is.null(object$group)) object$group <- 1L
   n <- max(object$group)
 
-  ## get title
+  ## get title (must be done before handling of `main`)
   if (!is.null(main)) {
     title <- main[1]
     object$title <- factor(title)
@@ -1233,7 +1237,7 @@ GeomRootogramExpected <- ggplot2::ggproto("GeomRootogramExpected", ggplot2::Geom
     linestyle <- match.arg(linestyle)
 
     if (linestyle == "both") {
-      ## TODO: (ML) Do not copy data
+      ## TODO: (ML) Do not copy data.
       data2 <- transform(data, size = size * 2)
 
       grid::grobTree(
@@ -1394,7 +1398,7 @@ summary.rootogram <- function(object,
 print.rootogram <- function(x, ...) {
 
   ## get arg `style` and `scale`
-  scale <- style <- NULL # needed for `use_arg_from_attributes()`
+  scale <- style <- NULL # needed for `use_arg_from_attributes()` # FIXME: (ML) Still needed?!
   style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
 
