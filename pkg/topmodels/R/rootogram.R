@@ -107,7 +107,7 @@
 #' r1
 #'
 #' ## combine plots
-#' plot(c(r1, r1), col = c(1, 2), ref = 4, lty = c(1, 2))
+#' plot(c(r1, r1), col = c(1, 2), expected_col = c(1, 2))
 #'
 #'
 #' #-------------------------------------------------------------------------------
@@ -269,7 +269,7 @@ rootogram.default <- function(
       )
   }
 
-  ## FIXME: (ML) Sometime neg. expected occured (see example for underdispersed model fit)
+  ## FIXME: (ML) Sometime neg. expected occurs (see example for underdispersed model fit)
   p[abs(p) < sqrt(.Machine$double.eps)] <- 0
 
   ## handle NAs
@@ -280,7 +280,7 @@ rootogram.default <- function(
   w <- w[idx_not_na]
 
   ## observed frequencies
-  observed <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
+  val_observed <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
 
   ## expected frequencies (part2)
   val_expected <- colSums(p * w)
@@ -290,7 +290,7 @@ rootogram.default <- function(
   # -------------------------------------------------------------------
   ## collect everything as data.frame
   rval <- data.frame(
-    observed = if (scale == "raw") as.vector(observed) else sqrt(as.vector(observed)),
+    observed = if (scale == "raw") as.vector(val_observed) else sqrt(as.vector(val_observed)),
     expected = if (scale == "raw") as.vector(val_expected) else sqrt(as.vector(val_expected)),
     mid = mid,
     width = diff(breaks) * width
@@ -486,13 +486,7 @@ rbind.rootogram <- c.rootogram
 #' rootogram(m1_lm)
 #'
 #' ## customize colors
-#' rootogram(m1_lm, ref = "blue", lty = 2, pch = 20)
-#'
-#' ## add separate model
-#' if (require("crch", quietly = TRUE)) {
-#'   m1_crch <- crch(dist ~ speed | speed, data = cars)
-#'   points(rootogram(m1_crch, plot = FALSE), col = 2, lty = 2)
-#' }
+#' rootogram(m1_lm, ref_col = "blue", lty = 2, pch = 20)
 #'
 #' #-------------------------------------------------------------------------------
 #' if (require("crch")) {
@@ -580,17 +574,20 @@ plot.rootogram <- function(x,
   style <- use_arg_from_attributes(x, "style", default = "hanging", force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = "sqrt", force_single = TRUE)
   expected <- use_arg_from_attributes(x, "expected", default = TRUE, force_single = FALSE)
-  ref <- use_arg_from_attributes(x, "ref", default = NULL, force_single = FALSE)
+  ref <- use_arg_from_attributes(x, "ref", default = TRUE, force_single = FALSE)
 
   ## sanity checks
-  ## * lengths of all arguments are checked by recycling
-  ## * `xlab`, `ylab`, `main` and `...` w/i `plot()`
-  ## * ``col` and `border` w/i `rect()`
-  ## * `col`, `lwd`, `pch`, `lty` and `type` w/i `lines()`
+  ## * lengths of most arguments are checked by recycling
+  ## * graphical parameters are checked w/i function calls for plotting
+  stopifnot(is.logical(ref))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  ## match arguments
+  scale <- match.arg(scale, c("sqrt", "raw"))
+  style <- match.arg(style, c("hanging", "standing", "suspended"))
 
   ## get line style
   expected[expected == FALSE | expected == "FALSE"] <- "none"
@@ -611,15 +608,17 @@ plot.rootogram <- function(x,
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
-  ## recycle arguments for plotting to match the number of groups
+  ## prepare xlim and ylim
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
-  plot_arg <- data.frame(1:n, ref,
+
+  ## recycle arguments for plotting to match the number of groups
+  plot_arg <- data.frame(1:n, expected, ref, 
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
+    axes, box,
     border, col, lwd, lty, alpha_min,
-    expected_col, expected_pch, expected_lty, expected_lwd, expected,
-    ref_col, ref_lty, ref_lwd,
-    axes, box
+    expected_col, expected_pch, expected_lty, expected_lwd, 
+    ref_col, ref_lty, ref_lwd
   )[, -1]
 
   ## annotation
@@ -685,7 +684,7 @@ plot.rootogram <- function(x,
     )
 
     ## add ref line
-    if (isTRUE(plot_arg$ref[j])) {
+    if (plot_arg$ref[j]) {
       abline(
         h = 0,
         col = plot_arg$ref_col[j],
@@ -780,6 +779,7 @@ autoplot.rootogram <- function(object,
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
   ## sanity checks
+  stopifnot(is.logical(ref))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
@@ -807,7 +807,7 @@ autoplot.rootogram <- function(object,
     object$title <- factor(title)
   }
 
-  ## get main and into the right length (must be done after handling of `title`)
+  ## get main and transform to the right length (must be done after handling of `title`)
   main <- use_arg_from_attributes(object, "main", default = "model", force_single = FALSE)
   stopifnot(is.character(main))
   main <- make.names(rep_len(main, n), unique = TRUE)
@@ -870,7 +870,7 @@ autoplot.rootogram <- function(object,
   }
 
   ## add ref
-  if (isTRUE(ref)) {
+  if (ref) {
     rval <- rval +
       geom_rootogram_ref(
         colour = ref_colour,
@@ -937,7 +937,7 @@ autoplot.rootogram <- function(object,
         theme <- ggplot2::theme_bw()
     }
   }
-  
+
   if (is.function(theme)) {
     theme <- try(theme(), silent = TRUE)
     if (inherits(theme, "try-error") || !inherits(theme, "theme")) {
@@ -965,35 +965,6 @@ autoplot.rootogram <- function(object,
   ## return ggplot object
   rval
 }
-
-
-# -------------------------------------------------------------------
-# FIXME: (ML) Should this be implemented?
-# -------------------------------------------------------------------
-# "+.rootogram" <- function(e1, e2) {
-#   style <- unique(c(attr(e1, "style"), attr(e2, "style")))
-#   if(length(style) > 1L) {
-#     warning(sprintf("different styles (%s != %s) had been used, result now uses style = %s",
-#       style[1L], style[2L], style[1L]))
-#     style <- style[1L]
-#   }
-#   scale <- unique(c(attr(e1, "scale"), attr(e2, "scale")))
-#   if(length(scale) > 1L) {
-#     warning(sprintf("different scales (%s != %s) had been used, result now uses scale = %s",
-#       scale[1L], scale[2L], scale[1L]))
-#     scale <- scale[1L]
-#   }
-#
-#   ylab <- attr(e1, "ylab")
-#   xlab <- paste(unique(c(attr(e1, "xlab"), attr(e2, "xlab"))), collapse = " / ")
-#   main <- paste(unique(c(attr(e1, "main"), attr(e2, "main"))), collapse = " / ")
-#   e1 <- as.data.frame(e1)
-#   e2 <- as.data.frame(e2)
-#   e <- e1[e1$x %in% e2$x, ] + e2[e2$x %in% e1$x, ]
-#   rootogram.default(structure(e$observed, .Names = e$x/2), e$expected,
-#     style = style, scale = scale,
-#     main = main, xlab = xlab, ylab = ylab, plot = FALSE)
-# }
 
 
 # -------------------------------------------------------------------
