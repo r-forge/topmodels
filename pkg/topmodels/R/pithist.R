@@ -164,7 +164,7 @@ pithist.default <- function(
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
-                            trafo = identity,
+                            trafo = NULL,
                             breaks = NULL,
                             type = c("expected", "random"),
                             nsim = 1L,
@@ -210,10 +210,8 @@ pithist.default <- function(
   style <- match.arg(style)
   type <- match.arg(type)
 
-  #if (type == "expected" && !(is.null(trafo) || identical(trafo, identity))) {
-  #  warning('For explicit `trafo` function `type = expected` not yet supported and set to "random".')
-  #  type <- "random"
-  #}
+  ## set trafo
+  if (is.null(trafo)) trafo <- identity
 
   ## determine other arguments conditional on `style` and `type`
   if (is.null(simint)) {
@@ -317,30 +315,45 @@ pithist.default <- function(
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
     p <- qresiduals(object,
-      newdata = newdata, trafo = trafo, delta = delta,
+      newdata = newdata, trafo = NULL, delta = delta,
       type = "quantile", prob = c(0, 1)
     )
 
-    p[p == -Inf] <- -.Machine$double.xmax
-    p[p == Inf] <- .Machine$double.xmax
+    ## FIXME: (ML) Must be extended using `distributions3`
+    if (identical(trafo, qnorm)) {
+      invtrafo <- pnorm
+    } else if (is.null(trafo) || identical(trafo, identity)) {
+      invtrafo <- punif  # not really the invtrafo
+    } else {
+      stop("trafo not known")
+    }
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
     F <- if (all(abs(p[, 2L] - p[, 1L]) < sqrt(.Machine$double.eps))) {
       function(u) as.numeric(u >= p[, 1L])
       ## FIXME: (Z) check inequality sign to cover include.lowest/right options
     } else {
-      function(u) punif(u, min = p[, 1L], max = p[, 2L])
-      ## equals `pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L])))`
+      #function(u) punif(u, min = p[, 1L], max = p[, 2L]) # original 
+      #function(u) pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L]))) # equal to original
+      function(u) pmin(1, pmax(0, 1/(p[, 2L] - p[, 1L]) * (invtrafo(u) - p[, 1L]))) # new working w trafo
     }
 
     ## get breaks: part 2
     ## FIXME: (ML) maybe use xlim instead or `0` and `1`
-    if (is.null(trafo) || identical(trafo, identity)) {
-      if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
-    } else {
-      tmp_range <- range(p, finite = TRUE) # FIXME: (ML) check if this is correct
-      if (length(breaks) == 1L) breaks <- seq(tmp_range[1], tmp_range[2], length.out = breaks + 1L)
-    }
+    #if (is.null(trafo) || identical(trafo, identity)) {
+    #  if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
+    #} else {
+    #  tmp_range <- range(p, finite = TRUE) # FIXME: (ML) check if this is correct
+    #  if (length(breaks) == 1L) breaks <- seq(tmp_range[1], tmp_range[2], length.out = breaks + 1L)
+    #}
+    tmp_range <- range(
+      c(
+        trafo(0), trafo(0.000001), trafo(0.0001), trafo(0.001), trafo(0.005), trafo(0.01), 
+        trafo(0.99), trafo(0.995), trafo(0.999), trafo(0.9999), trafo(0.999999), trafo(1)
+      ), 
+      finite = TRUE
+    )
+    if (length(breaks) == 1L) breaks <- seq(tmp_range[1], tmp_range[2], length.out = breaks + 1L)
 
     ## equation 3 and computation of probability for each interval (f_j)
     f <- diff(colMeans(sapply(breaks, F)))
@@ -2350,7 +2363,7 @@ compute_pithist_expected <- function(n, breaks, freq, trafo) {
   ## FIXME: (ML) Must be extended using `distributions3`
   if (identical(trafo, qnorm)) {
     invtrafo <- pnorm
-  } else if (identical(trafo, identity)) {
+  } else if (is.null(trafo) || identical(trafo, identity)) {
     invtrafo <- identity
   } else {
     stop("trafo not known")
@@ -2398,7 +2411,7 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
   ## FIXME: (ML) Must be extended using `distributions3`
   if (identical(trafo, qnorm)) {
     invtrafo <- pnorm
-  } else if (identical(trafo, identity)) {
+  } else if (is.null(trafo) || identical(trafo, identity)) {
     invtrafo <- identity
   } else {
     stop("trafo not known")

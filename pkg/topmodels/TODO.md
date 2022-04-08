@@ -81,7 +81,6 @@ Class | S3 classes | `c()` | `plot()` | `lines()`/`points()` | `autoplot()` | TO
     * Check again if we need two different CI computations.
     * Allow CI and ref to vary for non-equidstant breaks [done] -> improve for autoplot().
     * Implement CI and ref for trafo.
-    * Implement `type = "expected"` for explicit `trafo`.
 * `qqrplot()`
     * Implement additional CI intervals (same for wormplot)? Compare R package qqplotr and Aldor-Noiman et al. (2013) [done].
 * `wormplot()`
