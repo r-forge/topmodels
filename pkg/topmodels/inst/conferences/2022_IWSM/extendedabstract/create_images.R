@@ -9,43 +9,51 @@
 
 
 rm(list = objects())
-rdsfile <- "../data_IWSM_day1to3.rda"
-stopifnot(file.exists(rdsfile))
-load(rdsfile, verbose = TRUE)
+#rdsfile <- "../data_IWSM_day1to3.rda"
+#stopifnot(file.exists(rdsfile))
+#load(rdsfile, verbose = TRUE)
+library("crch")
+data("RainIbk")
+head(RainIbk)
+RainIbk <- sqrt(RainIbk)
+idx <- grep("^rainfc\\.[0-9]+$", names(RainIbk))
+RainIbk$ensmean <- apply(RainIbk[, idx], 1, mean)
+RainIbk$enssd   <- apply(RainIbk[, idx], 1, sd)
+RainIbk <- subset(RainIbk, enssd > 0)
 
 
-# ------------------------------------------------------------
-# Prepare datasets by appending the ensemble mean and ensemble
-# standard deviation. The transformer is used to transform
-# the data (tp_[0-9]) before calculating the ensemble mean
-# and standard deviation. We are using
-# - train_id:  identity
-# - train_pow: power transformed (using 1/1.5; better than sqrt for this data set)
-#
-# - ensmean: mean(<transformed tp_[0-9]>)
-# - enssd:   sd(<transformed tp_[0-9]>)
-# - enswet:  Number of wet members in ensemble (a number 0 to 5); wet is identified
-#            if the forecast is larger than transformer(<wet_threshold>)
-# ------------------------------------------------------------
-prepare_training_data <- function(x, transformer = identity, wet_treshold = 1) {
-    stopifnot(is.data.frame(x))
-    stopifnot(is.function(transformer))
-    idx <- grep("^tp_[0-9]$", names(x))
-    for (i in idx) x[, i] <- transformer(x[, i])
-    x <- transform(x, observation = transformer(observation))
-    # Appending ensemble mean and standard deviation
-    x <- transform(x, ensmean = apply(x[, idx], 1, mean),
-                      enssd   = apply(x[, idx], 1, sd),
-                      enswet  = apply(x[, idx], 1, function(x) sum(x > transformer(wet_treshold))))
-    # Appending additional information
-    x <- transform(x, year = as.integer(format(x$datetime, "%Y")),
-                      yday = as.integer(format(x$datetime, "%j")))
-    # Remoe
-    return(x)
-}
-
-train_id  <- prepare_training_data(data, identity, 1)
-train_pow <- prepare_training_data(data, function(x) x^(1/1.5), 1)
+##### ------------------------------------------------------------
+##### Prepare datasets by appending the ensemble mean and ensemble
+##### standard deviation. The transformer is used to transform
+##### the data (tp_[0-9]) before calculating the ensemble mean
+##### and standard deviation. We are using
+##### - train_id:  identity
+##### - train_pow: power transformed (using 1/1.5; better than sqrt for this data set)
+#####
+##### - ensmean: mean(<transformed tp_[0-9]>)
+##### - enssd:   sd(<transformed tp_[0-9]>)
+##### - enswet:  Number of wet members in ensemble (a number 0 to 5); wet is identified
+#####            if the forecast is larger than transformer(<wet_threshold>)
+##### ------------------------------------------------------------
+####prepare_training_data <- function(x, transformer = identity, wet_treshold = 1) {
+####    stopifnot(is.data.frame(x))
+####    stopifnot(is.function(transformer))
+####    idx <- grep("^tp_[0-9]$", names(x))
+####    for (i in idx) x[, i] <- transformer(x[, i])
+####    x <- transform(x, observation = transformer(observation))
+####    # Appending ensemble mean and standard deviation
+####    x <- transform(x, ensmean = apply(x[, idx], 1, mean),
+####                      enssd   = apply(x[, idx], 1, sd),
+####                      enswet  = apply(x[, idx], 1, function(x) sum(x > transformer(wet_treshold))))
+####    # Appending additional information
+####    x <- transform(x, year = as.integer(format(x$datetime, "%Y")),
+####                      yday = as.integer(format(x$datetime, "%j")))
+####    # Remoe
+####    return(x)
+####}
+####
+####train_id  <- prepare_training_data(data, identity, 1)
+####train_pow <- prepare_training_data(data, function(x) x^(1/1.5), 1)
 
 
 # ------------------------------------------------------------
@@ -54,18 +62,20 @@ train_pow <- prepare_training_data(data, function(x) x^(1/1.5), 1)
 
 library("crch")
 
-# Homoscedastic non-censored Gaussian model (identity)
-m_lm_id <- lm(observation ~ ensmean, data = train_id)
+##### Homoscedastic non-censored Gaussian model (identity)
+####m_lm_id <- lm(observation ~ ensmean, data = train_id)
+####
+##### Heteroscedastic censored Gaussian model (identity)
+####m_chgauss_id <- crch(observation ~ ensmean | log(enssd), data = train_id, left = 0, dist = "gaussian")
+####
+##### Heteroscedastic censored logistic response model (power transformed data)
+####m_chlogis_pow <- crch(observation ~ ensmean | log(enssd), data = train_pow, left = 0, dist = "logistic")
 
-# Heteroscedastic censored Gaussian model (identity)
-m_chgauss_id <- crch(observation ~ ensmean | log(enssd), data = train_id, left = 0, dist = "gaussian")
+m_hom_gauss <- lm(rain ~ ensmean, data = RainIbk)
+m_het_gauss  <- crch(rain ~ ensmean, data = RainIbk, left = 0, dist = "gaussian")
+m_het_logis   <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
 
-# Heteroscedastic censored logistic response model (power transformed data)
-m_chlogis_pow <- crch(observation ~ ensmean | log(enssd), data = train_pow, left = 0, dist = "logistic")
-
-models <- list(m_lm_id = m_lm_id, m_chgauss_id = m_chgauss_id, m_chlogis_pow =  m_chlogis_pow)
-sapply(models, logLik)
-sapply(models, BIC)
+models <- list(m_hom_gauss = m_hom_gauss, m_het_gauss = m_het_gauss, m_het_logis = m_het_logis)
 
 
 # ------------------------------------------------------------
@@ -91,10 +101,10 @@ library("ggplot2")
 # Rootogram (hanging)
 library("gridExtra")
 bk <- 20
-g1 <- autoplot(rootogram(m_lm_id, breaks = bk, plot = FALSE)) +
+g1 <- autoplot(rootogram(m_hom_gauss, breaks = bk, plot = FALSE)) +
         ggtitle("Heteroscedastic Gaussian")
-g2 <- autoplot(rootogram(m_chgauss_id, breaks = bk, plot = FALSE)) +
-        ggtitle("Homoscedastic Censored Logistic")
+g2 <- autoplot(rootogram(m_het_gauss, breaks = bk, plot = FALSE)) +
+        ggtitle("Homoscedastic Gauss")
 ggsave(file = "Stauffer-rootograms.pdf", grid.arrange(g1, g2, ncol = 2),
        width = 7, height = 2.5)
 
@@ -102,12 +112,11 @@ ggsave(file = "Stauffer-rootograms.pdf", grid.arrange(g1, g2, ncol = 2),
 
 ###############
 # QQ-R-Plot plus wormplot
-models <- list(m_lm_id = m_lm_id, m_chgauss_id = m_chgauss_id, m_chlogis_pow = m_chlogis_pow)
-g1 <- autoplot(do.call(c, lapply(models, function(m) qqrplot(m, plot = FALSE))),
+g1 <- autoplot(do.call(c, lapply(models, function(m) qqrplot(m, plot = FALSE, simint = FALSE, confint = "line"))),
                single_graph = TRUE, col = seq_along(models) + 1) +
         ggtitle("Q-Q Residuals")
 
-g2 <- autoplot(do.call(c, lapply(models, function(m) wormplot(m, plot = FALSE))),
+g2 <- autoplot(do.call(c, lapply(models, function(m) wormplot(m, plot = FALSE, simint = FALSE, confint = "line"))),
                single_graph = TRUE, col = seq_along(models) + 1) +
         ggtitle("Wormplot") + ylim(-1, 1)
 
@@ -115,6 +124,17 @@ ggsave(file = "Stauffer-qqresiduals.pdf", grid.arrange(g1, g2, ncol = 2, widths 
        width = 7, height = 2.5)
 
 
+###############
+# PIT Histogram
+library("gridExtra")
+g1 <- autoplot(pithist(m_hom_gauss, plot = FALSE)) +
+        ggtitle("Heteroscedastic Gaussian")
+g2 <- autoplot(pithist(m_het_gauss, plot = FALSE)) +
+        ggtitle("Homoscedastic Censored Logistic")
+g3 <- autoplot(pithist(m_het_logis, plot = FALSE)) +
+        ggtitle("Homoscedastic Censored Logistic Power-transformed")
+ggsave(file = "Stauffer-pithist.pdf", grid.arrange(g1, g2, g3, ncol = 3),
+       width = 7, height = 2.5)
 
 
 
