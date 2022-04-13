@@ -101,12 +101,12 @@ library("ggplot2")
 # Rootogram (hanging)
 library("gridExtra")
 bk <- 20
-g1 <- autoplot(rootogram(m_hom_gauss, breaks = bk, plot = FALSE)) +
-        ggtitle("Heteroscedastic Gaussian")
-g2 <- autoplot(rootogram(m_het_gauss, breaks = bk, plot = FALSE)) +
-        ggtitle("Homoscedastic Gauss")
+g1 <- autoplot(rootogram(m_hom_gauss, breaks = bk, plot = FALSE, fitted = "line")) +
+        ggtitle("Homoscedastic Gaussian")
+g2 <- autoplot(rootogram(m_het_gauss, breaks = bk, plot = FALSE, fitted = "line")) +
+        ggtitle("Heteroscedastic left-censored Gaussian")
 ggsave(file = "Stauffer-rootograms.pdf", grid.arrange(g1, g2, ncol = 2),
-       width = 7, height = 2.5)
+       width = 7*1.1, height = 2.5*1.1)
 
 
 
@@ -118,10 +118,10 @@ g1 <- autoplot(do.call(c, lapply(models, function(m) qqrplot(m, plot = FALSE, si
 
 g2 <- autoplot(do.call(c, lapply(models, function(m) wormplot(m, plot = FALSE, simint = FALSE, confint = "line"))),
                single_graph = TRUE, col = seq_along(models) + 1) +
-        ggtitle("Wormplot") + ylim(-1, 1)
+        ggtitle("Worm plot") + ylim(-1, 1)
 
 ggsave(file = "Stauffer-qqresiduals.pdf", grid.arrange(g1, g2, ncol = 2, widths = c(1, 1.5)),
-       width = 7, height = 2.5)
+       width = 7*1.1, height = 2.5*1.1)
 
 
 ###############
