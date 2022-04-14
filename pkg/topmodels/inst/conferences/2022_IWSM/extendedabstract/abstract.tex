@@ -35,15 +35,22 @@
 
 % Brief abstract of the paper:
 \abstract{
-    The demand of accurate and reliable probabilistic predictions
-    has seen an strong growth over the past decades and are an essential
-    tool for proper risk assessment or strategic planning. In consequence,
-    there is an increasing demand on appropriate evaluation methods for
-    probabilistic models. Besides proper scoring rules graphical assessment
-    methods can be favorable to identify possible model misspecification.
+    Accurate and reliable probabilistic predictions have been becoming more and more
+    important over the last decades and they are an essential
+    tool for proper risk assessment and strategic planning. Consequently,
+    there is an increasing demand for appropriate evaluation techniques for
+    probabilistic models/predictions. Graphical assessment techniques can complement
+    proper scoring rules and help to identify possible model misspecifications.
 
     Distributional regression models are frequently used to provide
-    probabilistic predictions, whereof many different flavours and dedicated
+    probabilistic predictions, ranging from basic generalized linear models (GLM)
+    over generalized additive models (GAM) to generalized additive models for
+    locate, scale, and shape (GAMLSS) and other types of refined distributional
+    regression models.
+    
+    \emph{Not sure how exactly to continue here\dots}
+    
+    \dots whereof many different flavours and dedicated
     software (packages) have been proposed over the recent years. Thus,
     the calculation of the predictive distribution, probabilities, or quantiles
     is often dependent of the software being used and routines for graphical
@@ -52,12 +59,12 @@
     evaluate and compare different types of probabilistic models does not yet exist.
     We present a common conceptual framework, a
     flexible object-oriented toolbox for graphical model assessment implemented
-    in the \emph{R}\,package \textbf{topmodels} (\text{https://topmodels.R-forge.R-project.org}).
+    in the R~package \emph{topmodels} (\texttt{https://topmodels.R-Forge.R-project.org/}).
 
     The package provides a unified interface to create various visualization
     types including PIT (probability integral transform) histograms, Q-Q (quantile-quantile)
     plots of (randomized) quantile residuals, worm plots, or rootograms.
-    The plots can be rendered in base \emph{R} as well as in \textbf{ggplot2} and provide
+    The plots can be rendered in base R as well as in \emph{ggplot2} and provide
     a diversity of options such as adding confidence intervals, sample uncertainties,
     or different scalings.
     Based on a case study of probabilistic precipitation forecasts, examples
@@ -139,7 +146,7 @@ models and to select the best fitting model among a series of possible candidate
 
 The data used contains observed 3\,day-accumulated precipitation amounts for
 Innsbruck (Austria) and the corresponding ensemble mean ($\text{ensmean}$) and
-standard deviation ($\text{enssd}$) of total accumulated precipitation amounts
+ensemble standard deviation ($\text{enssd}$) of total accumulated precipitation amounts
 between $5$ and $8$ days in advance.
 Following previous studies, the square root of precipitation is used which has
 been shown to improve the calibration.
