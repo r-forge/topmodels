@@ -66,7 +66,7 @@
 
 % Sections and subsections (do not use lower levels):
 
-\section{Application}
+\section{Case study}
 
 Forecasting precipitation has always been one of the essential quantities in
 weather forecasting not only for the public, but for many socio-economic areas
@@ -160,20 +160,25 @@ CDFs $F(\cdot)$, evaluated at the interval breaks:
 
 
 $$
-\text{observed}_j = \sum_{i=1}^n I(y_i \in (b_j, b_{j+1})),
+\text{observed}_j = \sum_{i=1}^n \omega_i I(y_i \in (b_j, b_{j+1}]),
 $$
 
 $$
-\text{expected}_j = \sum_{i=1}^n \big[ F(b_{j+1} | \hat{\theta}_i) - F(b_{j} | \hat{\theta}_i) \big].
+\text{expected}_j = \sum_{i=1}^n \omega_i \big[ F(b_{j+1} | \hat{\theta}_i) - F(b_{j} | \hat{\theta}_i) \big].
 $$
 
 Figure~\ref{stauffer:fig1} shows so called hanging rootograms where the
-observed frequencies are hanging from the expected ones. The heteroscedastic
-Gaussian model clearly underfits zero precipitation amounts as it is not
-accounting for the observed point mass at zero.  Additionally, a weak wavelike
-pattern indicates a slight overfitting of precipitation sums between $0$ and
-$5$ and an underfitting of precipitation above. In contrast, the
-heteroscedastic left-censored Gaussian model provides a fairly good marginal fit.
+observed frequencies are hanging from the expected ones. The marginal
+calibration is assessed on the observational scale, which allows a direct
+interpretation.  The heteroscedastic Gaussian model clearly underfits zero
+precipitation amounts as it is not accounting for the observed point mass at
+zero. Additionally, a weak wavelike pattern indicates a slight overfitting of
+precipitation sums between $0$ and $5$ and an underfitting of precipitation
+above. In contrast, the heteroscedastic left-censored Gaussian model provides a
+fairly good marginal fit.
+
+However, due to the aggregation over all predictive distributions, a statement
+about a possible violation of the distributional assumption is not possible.
 
 \begin{figure}[!ht]\centering
     \includegraphics[width=\textwidth]{Stauffer-rootograms}
@@ -186,28 +191,31 @@ heteroscedastic left-censored Gaussian model provides a fairly good marginal fit
 \end{figure}
 
 
+%Advantage: Scale of observations is natural, direct interpretation.
+%Disadvantage: Needs to be compared with a combination of distributions.
+
+
 \subsection{Probabilistic calibration}
 
-Compared to the marginal calibration which is obtained on the observation scale,
-the probabilistic calibration is always performed on the probability scale.
-Probabilistic calibration is usually assessed using probability integral
-transform (PIT) values ($u_i$) which can be mapped to other distributional scales
-such as the standard Normal distribution as follows:
+Compared to the marginal calibration which is obtained on the observation
+scale, the probabilistic calibration is always performed on the probability
+scale. Probabilistic calibration is usually assessed using probability
+integral transform (PIT) values ($u_i$) which can be mapped to other
+distributional scales such as the standard Normal distribution as follows:
 
 $$
 r_i = \Phi^{-1}\big(u_i)~~\text{with}~~u_i = \begin{cases}
-     F(y_i | \hat{\theta}_i)\big) & \text{if}~~y_i > 0 \\
-     U\big[0, F(y_i | \hat{\theta}_i)\big] & \text{if}~~y_i = 0
+    F(y_i | \hat{\theta}_i) & \text{if}~F(\cdot)~\text{continuous}  \\
+    U\big[F(y_i - 1 | \hat{\theta}_i), F(y_i | \hat{\theta}_i)\big] & \text{if}~F(\cdot)~\text{discrete}
 \end{cases}
 $$
 
-These are also known as (randomized) quantile residuals ($r_i$; Dunn and Smyth 1996)
-and can be compared to the theoretical quantiles of the standard Normal
-distribution. 
-As in Q-Q plots, small too medium deviations can be quite hard to detect,
-detrending the plot by subtracting the theoretical quantiles can make 
-the detection of deviations from a now horizontal line easier and leads
-to the worm plot.
+These are also known as (randomized) quantile residuals ($r_i$; Dunn and Smyth
+1996) and can be compared to the theoretical quantiles of the standard Normal
+distribution.  As in Q-Q plots, small too medium deviations can be quite hard
+to detect, detrending the plot by subtracting the theoretical quantiles can
+make the detection of deviations from a now horizontal line easier and leads to
+the worm plot.
 
 \begin{figure}[!ht]\centering
     \includegraphics[width=\textwidth]{Stauffer-qqresiduals}
@@ -218,19 +226,28 @@ to the worm plot.
     }
 \end{figure}
 
-%This is also reflected in the pattern of the Q-Q plot of the
-%linear model: Due to the high frequency in values between -2 and 0, the
-%observed quantile residuals increase slower in this region relative to the
-%standard normal quantiles. However, the low frequency of quantile residuals
-%above zero leads to an higher increase in quantile residuals compared to the
-%standard normal quantiles.
 
-Both, the Q-Q plot and the worm plot show an obvious misfit of the 
-homoscedastic Gaussian model on both tails of the distribution.
-Both left-censored heteroscedastic model are clearly superior, with
-a slight advantage of the one using a left-censored logistic distribution
-on the upper distributional tail.
+Both, the Q-Q plot and the worm plot (Fig.\,\ref{stauffer:fig2}) show an
+obvious misfit of the homoscedastic Gaussian model on both tails of the
+distribution. While the marginal calibration (Fig.\,\ref{stauffer:fig1})
+clearly shows that this is mainly due to missing censoring, the probabilistic
+calibration does not allow to uncover the sources causing this lack of fit.
 
+While the scale itself not easily interpretable, the probabilistic calibration
+allows to check if the distributional assumption is correct.  Comparing both
+left-censored heteroscedastic models, a slight advantage can be seen for the
+one using a left-censored logistic distribution as its heavier tails lead to a
+better fit, especially for high quantiles.
+
+%Advantage: Needs to be compared with only one distribution (uniform or normal).
+%Disadvantage: Scale is not so natural. May require randomization for discrete distributions.
+
+
+
+%Vergleich:
+%
+%* Binning in marginal 'maskiert'
+%* QQ/worm: pairwise; dist
 
 
 %***********************************************************************
