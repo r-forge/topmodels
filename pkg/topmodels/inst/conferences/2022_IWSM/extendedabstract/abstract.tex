@@ -47,7 +47,7 @@
     scoring rules and help to identify possible model misspecifications.
     Based on a case study of probabilistic precipitation forecasts, three
     different regression models with different sources of misspecification are
-    graphically evaluated within a unified framework accompanied by the newly
+    graphically evaluated within a unified framework, implemented in the newly
     developed \emph{R}\,package \textbf{topmodels}
     (https://topmodels.R-forge.R-project.org).
     By evaluating the marginal and probabilistic calibration of the models, the
@@ -96,15 +96,16 @@ been shown to improve the calibration.
 For comparison, three models are employed. A homoscedastic Gaussian linear regression
 model which does not properly account for the non-negative nature of precipitation,
 and two heteroscedastic left-censored regression models --
-one assuming a Gaussian and one a logistic underlying response distribution:
+one assuming a Gaussian and one a logistic underlying response distribution.
+Given $\theta = (\mu, \sigma)$, the models are defined as follows:
 
 \begin{table}[!ht]\centering
     \begin{tabular}{lll}
          Distribution                              & Location                                         & Scale \\
         \midrule[0.09 em]
-        $y_i \sim \mathcal{N}(\mu_i, \sigma)$     & $\mu_i = \beta_0 + \beta_1 \cdot \text{ensmean}$ & $\sigma = \text{sd}(\epsilon)$ \\
-        $y_i \sim \mathcal{N}_0(\mu_i, \sigma_i)$ & $\mu_i = \beta_0 + \beta_1 \cdot \text{ensmean}$ & $\sigma_i = \gamma_0 + \gamma_1 \cdot \log(\text{enssd})$ \\
-        $y_i \sim \mathcal{L}_0(\mu_i, \sigma_i)$ & $\mu_i = \beta_0 + \beta_1 \cdot \text{ensmean}$ & $\sigma_i = \gamma_0 + \gamma_1 \cdot \log(\text{enssd})$ \\
+        $y_i \sim \mathcal{N}(\theta_i)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\hat{\sigma}_i = \text{sd}(\epsilon)$ \\
+        $y_i \sim \mathcal{N}_0(\theta_i)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\hat{\sigma}_i = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
+        $y_i \sim \mathcal{L}_0(\theta_i)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\hat{\sigma}_i = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
         \bottomrule[0.09 em]
     \end{tabular}
 \end{table}
@@ -124,14 +125,14 @@ Marginal calibration is generally concerned with whether the observed
 frequencies match the frequencies expected by the model.  For continuous
 observations, frequencies for intervals of observations are being used, while
 the expected frequencies are computed by differences between the predictive
-CDFs $F(\cdot)$, evaluated at the interval breaks:
+CDFs $F(\cdot)$, evaluated at the interval breaks $b_j$:
 
 $$
-\text{observed}_j = \sum_{i=1}^n \omega_i I(y_i \in (b_j, b_{j+1}]),
+\text{observed}_j = \sum_{i=1}^N I(y_i \in (b_j, b_{j+1}]),
 $$
 
 $$
-\text{expected}_j = \sum_{i=1}^n \omega_i \big[ F(b_{j+1} | \hat{\theta}_i) - F(b_{j} | \hat{\theta}_i) \big].
+\text{expected}_j = \sum_{i=1}^N \big[ F(b_{j+1} | \hat{\theta}_i) - F(b_{j} | \hat{\theta}_i) \big].
 $$
 
 Figure~\ref{stauffer:fig1} shows hanging rootograms for the two Gaussian
@@ -144,8 +145,9 @@ of precipitation sums between $0$ and $5$ and an underfitting of precipitation
 above. In contrast, the heteroscedastic left-censored Gaussian model provides a
 fairly good marginal fit.
 
-However, due to the aggregation over all predictive distributions, a statement
-about a possible violation of the distributional assumption is not easily possible.
+However, due to the aggregation over all individual predictive CDFs
+$F(y_i|\hat{\theta}_i)$ for $i \in \{1, \dots, N\}$, a statement about a
+possible violation of the distributional assumption is not easily possible.
 
 \begin{figure}[!ht]\centering
     \includegraphics[width=\textwidth]{Stauffer-rootograms}
@@ -163,7 +165,8 @@ Compared to the marginal calibration which is obtained on the observation
 scale, the probabilistic calibration is always performed on the probability
 scale. Probabilistic calibration is usually assessed using probability
 integral transform (PIT) values ($u_i$) which can be mapped to other
-distributional scales such as the standard Normal distribution as follows:
+distributional scales such as the standard Normal distribution
+with CDF $\Phi(\cdot)$ as follows:
 
 $$
 r_i = \Phi^{-1}\big(u_i)~~\text{with}~~u_i = \begin{cases}
@@ -188,13 +191,14 @@ the worm plot.
     }
 \end{figure}
 
-Both, the Q-Q plot and the worm plot included in Figure\,\ref{stauffer:fig2} show an
-obvious misfit of the homoscedastic Gaussian model on both tails of the
+Both, the Q-Q plot and the worm plot included in Figure\,\ref{stauffer:fig2}
+show an obvious misfit of the homoscedastic Gaussian model on both tails of the
 distribution. While the marginal calibration (Fig.\,\ref{stauffer:fig1})
 clearly shows that this is mainly due to missing censoring, the probabilistic
-calibration does not allow to uncover the sources causing this lack of fit.
+calibration in this example does not allow to uncover the sources causing this
+lack of fit.
 
-While the scale itself not easily interpretable, the probabilistic calibration
+While the scale itself is not easily interpretable, the probabilistic calibration
 allows to check if the distributional assumption is correct.  Comparing both
 left-censored heteroscedastic models, a slight advantage can be seen for the
 one using a left-censored logistic distribution as its heavier tails lead to a
@@ -232,7 +236,7 @@ better fit, especially for high quantiles.
 \item[Gneiting, T., Balabdaoui, F., and Raftery, A.E.] (2007).
     Probabilistic Forecasts, Calibration and Sharpness.
     {\it Journal of the Royal Statistical Society: Series B (Methodological)},
-    {\bf 69}(2), 243\,--\,68.
+    {\bf 69}(2), 243\,--\,268.
 % Rootograms (marginal calibration)
 %\item [Kleiber, C., and Zeileis A.] (2016).
 %    Visualizing Count Data Regressions Using Rootograms.
