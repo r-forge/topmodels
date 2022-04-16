@@ -72,7 +72,7 @@ library("crch")
 ####m_chlogis_pow <- crch(observation ~ ensmean | log(enssd), data = train_pow, left = 0, dist = "logistic")
 
 m_hom_gauss <- lm(rain ~ ensmean, data = RainIbk)
-m_het_gauss  <- crch(rain ~ ensmean, data = RainIbk, left = 0, dist = "gaussian")
+m_het_gauss  <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "gaussian")
 m_het_logis   <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
 
 models <- list(m_hom_gauss = m_hom_gauss, m_het_gauss = m_het_gauss, m_het_logis = m_het_logis)
@@ -114,7 +114,7 @@ ggsave(file = "Stauffer-rootograms.pdf", grid.arrange(g1, g2, ncol = 2),
 # QQ-R-Plot plus wormplot
 g1 <- autoplot(do.call(c, lapply(models, function(m) qqrplot(m, plot = FALSE, simint = FALSE, confint = "line"))),
                single_graph = TRUE, col = seq_along(models) + 1) +
-        ggtitle("Q-Q Residuals")
+        ggtitle("Q-Q plot")
 
 g2 <- autoplot(do.call(c, lapply(models, function(m) wormplot(m, plot = FALSE, simint = FALSE, confint = "line"))),
                single_graph = TRUE, col = seq_along(models) + 1) +
