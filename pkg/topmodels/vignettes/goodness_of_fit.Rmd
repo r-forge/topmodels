@@ -62,12 +62,18 @@ the sources of a potential lack of fit.
 
 While various visualizations have been suggested in the literature and implemented
 in software packages, a unified framework for these visualizations has not yet
-been established. Here, we will provide such a unified framework that facilitates:
+been established. Therefore, we investigate the following questions:
 
-- adoption of these graphics for a broad range of models/distributions,
-- understanding what the graphics have in common and what sets them apart,
-- demonstration of relative strengths and weaknesses in uncovering sources of lack of fit,
-- fine-tuning the graphics for certain models or data sets.
+- What are useful elements of such visualizations?
+- What are relative (dis)advantages?
+
+The insights help us to establish a unified framework that facilitates:
+
+- Adoption of these visualizations for a broad range of models/distributions.
+- Understanding what the graphics have in common and what sets them apart.
+- Demonstration of strengths and weaknesses in uncovering sources of lack of fit.
+- Fine-tuning the graphics for certain models or data sets.
+
 
 ## Notation
 
