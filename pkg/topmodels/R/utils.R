@@ -69,7 +69,6 @@ use_arg_from_attributes <- function(object,
     silent = TRUE)
   if (!inherits(arg_by_user, "try-error") && isTRUE(arg_by_user)) {
     arg_fun <- eval(parse(text = arg_name), envir)
-    stopifnot(length(arg_fun) <= 1)
   } else {
     arg_fun <- NULL
   }

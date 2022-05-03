@@ -63,8 +63,8 @@
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
-#' @param trafo function for tranforming residuals from probability scale to a
-#' different distribution scale.
+#' @param scale On which scale should the PIT residuals be shown; on the probability scale 
+#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @param breaks numeric. Breaks for the histogram intervals.
 #' @param type character. In case of discrete distributions, should an expected
 #' (non-normal) PIT histogram be computed according to Czado et al. (2009)
@@ -164,7 +164,7 @@ pithist.default <- function(
                             newdata = NULL,
                             plot = TRUE,
                             class = NULL,
-                            trafo = NULL,
+                            scale = c("uniform", "normal"),
                             breaks = NULL,
                             type = c("expected", "random"),
                             nsim = 1L,
@@ -189,7 +189,6 @@ pithist.default <- function(
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `delta w/i `qresiduals()`
   ## * `expected`, `confint`, `...` w/i `plot()` and `autoplot()`
-  stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(is.null(simint) || is.logical(simint))
@@ -208,9 +207,14 @@ pithist.default <- function(
   ## match arguments
   style <- match.arg(style)
   type <- match.arg(type)
+  scale <- match.arg(scale)
 
   ## set trafo
-  if (is.null(trafo)) trafo <- identity
+  if (scale == "uniform") {
+    trafo <- identity
+  } else {
+    trafo <- qnorm
+  } 
 
   ## determine other arguments conditional on `style` and `type`
   if (is.null(simint)) {
@@ -271,7 +275,7 @@ pithist.default <- function(
 
     ## get breaks: part 2
     ## TODO: (ML) maybe use xlim instead or `0` and `1`
-    if (is.null(trafo) || identical(trafo, identity)) {
+    if (scale == "uniform") {
       if (length(breaks) == 1L) breaks <- seq(0, 1, length.out = breaks + 1L)
     } else {
       tmp_range <- range(p, finite = TRUE)
@@ -323,12 +327,10 @@ pithist.default <- function(
     )
 
     ## TODO: (ML) Adapt by employing `distributions3`.
-    if (identical(trafo, qnorm)) {
-      invtrafo <- pnorm
-    } else if (is.null(trafo) || identical(trafo, identity)) {
+    if (scale == "uniform") {
       invtrafo <- punif
     } else {
-      stop("trafo not known")
+      invtrafo <- pnorm
     }
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
@@ -369,7 +371,7 @@ pithist.default <- function(
     n = n,
     breaks = tmp_rval$breaks,
     freq = TRUE,
-    trafo = trafo
+    scale = scale
   )
 
   # -------------------------------------------------------------------
@@ -414,7 +416,7 @@ pithist.default <- function(
   }
 
   ## add attributes
-  attr(rval, "trafo") <- trafo
+  attr(rval, "scale") <- scale
   attr(rval, "type") <- type
   attr(rval, "simint") <- simint
   attr(rval, "style") <- style
@@ -490,7 +492,7 @@ c.pithist <- function(...) {
   }
 
   ## parameters
-  trafo <- prepare_arg_for_attributes(rval, "trafo", force_single = FALSE) # check/force below
+  scale <- prepare_arg_for_attributes(rval, "scale", force_single = FALSE) # check/force below
   type <- prepare_arg_for_attributes(rval, "type", force_single = FALSE)
   simint <- prepare_arg_for_attributes(rval, "simint")
   style <- prepare_arg_for_attributes(rval, "style", force_single = TRUE)
@@ -509,14 +511,14 @@ c.pithist <- function(...) {
   # -------------------------------------------------------------------
   # CHECK FOR COMPATIBILITY
   # -------------------------------------------------------------------
-  if (length(trafo) > 1) {
-    if (!all(sapply(2:length(trafo), function(i) identical(trafo[[i - 1]], trafo[[i]])))) {
-      stop("objects with different `trafo`s are on different scales and hence must not be combined")
+  if (length(scale) > 1) {
+    if (!all(sapply(2:length(scale), function(i) identical(scale[[i - 1]], scale[[i]])))) {
+      stop("Objects on different scales must not be combined.")
     } else {
-      trafo <- trafo[[1]]
+      scale <- scale[[1]]
     }
   } else {
-    trafo <- trafo[[1]]
+    scale <- scale[[1]]
   }
 
   # -------------------------------------------------------------------
@@ -551,7 +553,7 @@ c.pithist <- function(...) {
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
 
   ## add attributes
-  attr(rval, "trafo") <- trafo
+  attr(rval, "scale") <- scale
   attr(rval, "type") <- type
   attr(rval, "simint") <- simint
   attr(rval, "style") <- style
@@ -749,7 +751,6 @@ plot.pithist <- function(x,
   freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
   expected <- use_arg_from_attributes(x, "expected", default = TRUE, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
-  # FIXME: Error in: plot(c(pit2_lm, pit2_crch), confint = c("line", "polygon")).
   simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
 
   ## sanity checks
@@ -814,7 +815,7 @@ plot.pithist <- function(x,
   ## determine other arguments conditional on `style` and `type`
   if (is.null(lwd)) lwd <- if (style == "bar") 1 else 2
   if (is.null(confint_col)) confint_col <- if (style == "bar") 2 else "black"
-  # FIXME: (ML) Check this again.
+  # FIXME: (ML) Check this again May 2nd.
   if (is.null(confint_alpha)) confint_alpha <- if (single_graph && any(confint == "line")) 1 else 0.2 / n
   if (is.null(expected_col)) expected_col <- if (style == "bar") 2 else "black"
   if (is.null(expected_lty)) expected_lty <- if (style == "bar") 1 else 2
@@ -1371,7 +1372,7 @@ autoplot.pithist <- function(object,
   type <- use_arg_from_attributes(object, "type", default = NULL, force_single = FALSE)
   style <- use_arg_from_attributes(object, "style", default = "bar", force_single = TRUE)
   freq <- use_arg_from_attributes(object, "freq", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(object, "trafo", default = NULL, force_single = TRUE)
+  scale <- use_arg_from_attributes(object, "scale", default = NULL, force_single = TRUE)
   expected <- use_arg_from_attributes(object, "expected", default = NULL, force_single = TRUE)
   confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
   simint <- use_arg_from_attributes(object, "simint", default = TRUE, force_single = TRUE)
@@ -1395,7 +1396,6 @@ autoplot.pithist <- function(object,
   ## sanity checks
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(freq))
-  stopifnot(is.null(trafo) || is.function(trafo))
   stopifnot(is.null(simint) || is.logical(simint))
   stopifnot(is.logical(confint) || confint %in% c("polygon", "line", "none"))
   stopifnot(
@@ -1414,6 +1414,7 @@ autoplot.pithist <- function(object,
   ## match arguments
   style <- match.arg(style, c("bar", "line"))
   confint_type <- match.arg(confint_type)
+  scale <- match.arg(scale, c("uniform", "normal"))
 
   ## set all aesthetics equal NULL to NA
   alpha <- if (is.null(alpha)) NA else alpha
@@ -1474,7 +1475,7 @@ autoplot.pithist <- function(object,
   }
 
   if (is.null(confint_colour)){ 
-    confint_colour <- if (style == "bar") 2 else "black" 
+    confint_colour <- if (style == "bar") 2 else NA 
   }
 
   if (is.null(confint_alpha) && confint == "polygon"){ 
@@ -1584,7 +1585,7 @@ autoplot.pithist <- function(object,
         level = confint_level,
         type = confint_type,
         freq = freq,
-        trafo = trafo,
+        scale = scale,
         style = confint,
         colour = aes_confint$colour,
         fill = aes_confint$fill,
@@ -1604,7 +1605,7 @@ autoplot.pithist <- function(object,
           width = "width"
         ),
         freq = freq,
-        trafo = trafo,
+        scale = scale,
         colour = aes_expected$colour,
         size = aes_expected$size,
         linetype = aes_expected$linetype,
@@ -1794,8 +1795,8 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #' frequencies, the \code{counts} component of the result; if \code{FALSE},
 #' probability densities, component \code{density}, are plotted (so that the
 #' histogram has a total area of one).
-#' @param trafo function for tranforming residuals from probability scale to a
-#' different distribution scale.
+#' @param scale On which scale should the PIT residuals be shown; on the probability scale 
+#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @examples
 #' if (require("ggplot2")) {
 #'   ## Fit model
@@ -1970,9 +1971,12 @@ stat_pithist_expected <- function(mapping = NULL,
                              na.rm = FALSE,
                              show.legend = NA,
                              inherit.aes = TRUE,
-                             trafo = identity,
+                             scale = c("uniform", "normal"),
                              freq = FALSE,
                              ...) {
+
+  scale <- match.arg(scale)
+
   ggplot2::layer(
     stat = StatPithistExpected,
     mapping = mapping,
@@ -1983,7 +1987,7 @@ stat_pithist_expected <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      trafo = trafo,
+      scale = scale,
       freq = freq,
       ...
     )
@@ -1999,7 +2003,7 @@ StatPithistExpected <- ggplot2::ggproto("StatPithistExpected", ggplot2::Stat,
   required_aes = c("x", "y", "width"),
   compute_group = function(data,
                            scales,
-                           trafo = identity,
+                           scale = "uniform",
                            freq = FALSE) {
 
     ## compute expected line
@@ -2007,7 +2011,7 @@ StatPithistExpected <- ggplot2::ggproto("StatPithistExpected", ggplot2::Stat,
       n = sum(data$y),
       breaks = compute_breaks(data$x, data$width),
       freq = freq,
-      trafo = trafo
+      scale = scale
     )
 
     data.frame(
@@ -2026,9 +2030,12 @@ geom_pithist_expected <- function(mapping = NULL,
                              na.rm = FALSE,
                              show.legend = NA,
                              inherit.aes = TRUE,
-                             trafo = identity,
+                             scale = c("uniform", "normal"),
                              freq = FALSE, # only needed w/i stat_*
                              ...) {
+
+  scale <- match.arg(scale)
+
   ggplot2::layer(
     geom = GeomPithistExpected,
     mapping = mapping,
@@ -2039,7 +2046,7 @@ geom_pithist_expected <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      trafo = trafo,
+      scale = scale,
       freq = freq,
       ...
     )
@@ -2075,13 +2082,14 @@ stat_pithist_confint <- function(mapping = NULL,
                                  na.rm = FALSE,
                                  show.legend = NA,
                                  inherit.aes = TRUE,
-                                 trafo = identity,
+                                 scale = c("uniform", "normal"),
                                  level = 0.95,
                                  type = "approximation",
                                  freq = FALSE,
                                  style = c("polygon", "line"),
                                  ...) {
   style <- match.arg(style)
+  scale <- match.arg(scale)
 
   ggplot2::layer(
     stat = StatPithistConfint,
@@ -2093,7 +2101,7 @@ stat_pithist_confint <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      trafo = trafo,
+      scale = scale,
       level = level,
       type = type,
       freq = freq,
@@ -2112,7 +2120,7 @@ StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
   required_aes = c("x", "y", "width"),
   compute_group = function(data,
                            scales,
-                           trafo = identity,
+                           scale = "uniform",
                            level = 0.95,
                            type = "approximation",
                            freq = FALSE,
@@ -2124,7 +2132,7 @@ StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
       level = level,
       type = type,
       freq = freq,
-      trafo = trafo
+      scale = scale
     )
 
     ## return new data.frame condition on plotting `style`
@@ -2156,13 +2164,14 @@ geom_pithist_confint <- function(mapping = NULL,
                                  na.rm = FALSE,
                                  show.legend = NA,
                                  inherit.aes = TRUE,
-                                 trafo = NULL,
+                                 scale = c("uniform", "normal"),
                                  level = 0.95,
                                  type = "approximation",
                                  freq = FALSE, # only needed w/i stat_*
                                  style = c("polygon", "line"),
                                  ...) {
   style <- match.arg(style)
+  scale <- match.arg(scale)
 
   ggplot2::layer(
     geom = GeomPithistConfint,
@@ -2174,7 +2183,7 @@ geom_pithist_confint <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      trafo = trafo,
+      scale = scale,
       level = level,
       type = type,
       freq = freq,
@@ -2375,16 +2384,14 @@ GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerang
 #' by Agresti and Coull (1998).
 #' @param freq Should confidence intervals returned for reported frequencies or
 #' for counts of observation.
-compute_pithist_expected <- function(n, breaks, freq, trafo) {
+compute_pithist_expected <- function(n, breaks, freq, scale) {
 
   ## get inverse trafo
   ## TODO: (ML) Must be extended using `distributions3`
-  if (identical(trafo, qnorm)) {
-    invtrafo <- pnorm
-  } else if (is.null(trafo) || identical(trafo, identity)) {
+  if (scale == "uniform") {
     invtrafo <- identity
   } else {
-    stop("trafo not known")
+    invtrafo <- pnorm
   }
 
   ## TODO: (ML)
@@ -2418,7 +2425,7 @@ compute_pithist_expected <- function(n, breaks, freq, trafo) {
 #' by Agresti and Coull (1998).
 #' @param freq Should confidence intervals returned for reported frequencies or
 #' for counts of observation.
-compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approximation"), freq, trafo) {
+compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approximation"), freq, scale) {
 
   type <- match.arg(type)
 
@@ -2427,12 +2434,10 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
 
   ## get inverse trafo
   ## TODO: (ML) Must be extended using `distributions3`
-  if (identical(trafo, qnorm)) {
-    invtrafo <- pnorm
-  } else if (is.null(trafo) || identical(trafo, identity)) {
+  if (scale == "uniform") {
     invtrafo <- identity
   } else {
-    stop("trafo not known")
+    invtrafo <- pnorm
   }
 
   ## get probs
@@ -2514,8 +2519,8 @@ summary.pithist <- function(object,
   stopifnot(is.logical(freq))
   stopifnot(!"group" %in% names(object) || length(counts) == length(unique(object$group)))
 
-  ## get arg `trafo`
-  trafo <-  attr(object, "trafo")
+  ## get arg `scale`
+  scale <-  attr(object, "scale")
 
   ## ensure column group
   if (!any(grepl("group", names(object)))) {
@@ -2563,7 +2568,7 @@ summary.pithist <- function(object,
         level = confint_level,
         type = confint_type,
         freq = TRUE,
-        trafo = trafo
+        scale = scale
       )
 
       if (freq) {
@@ -2620,7 +2625,7 @@ summary.pithist <- function(object,
   attr(rval, "ylab") <- attr(object, "ylab")
   attr(rval, "main") <- attr(object, "main")
   attr(rval, "type") <- attr(object, "type")
-  attr(rval, "trafo") <- trafo
+  attr(rval, "scale") <- scale
   attr(rval, "style") <- attr(object, "style")
   attr(rval, "freq") <- attr(object, "freq")
   attr(rval, "counts") <- attr(object, "counts")
