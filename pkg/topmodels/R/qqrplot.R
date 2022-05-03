@@ -30,13 +30,12 @@
 #' \code{\link{autoplot.qqrplot}} before it is returned, depending on whether the
 #' package \code{ggplot2} is loaded.
 #' 
-#' Q-Q residuals plots draw quantile residuals (by default: transformed to standard
-#' normal scale) against theoretical quantiles from the same distribution.
-#' Alternatively, transformations to other distributions can also be used,
-#' specifically using no transformation at all, i.e., remaining on the uniform
-#' scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-#' \code{identity}). For computation, \code{\link{qqrplot}} leverages the function
-#' \code{\link{qresiduals}} employing the \code{\link{procast}} generic.
+#' Q-Q residuals plots draw quantile residuals (by default on the standard normal
+#' scale) against theoretical quantiles from the same distribution.
+#' Alternatively, quantile residuals can also be compared on the uniform scale
+#' (\code{scale = "uniform"}) using no transformation.  For computation,
+#' \code{\link{qqrplot}} leverages the function \code{\link{qresiduals}} employing
+#' the \code{\link{procast}} generic.
 #' 
 #' Additional options are offered for models with discrete responses where
 #' randomization of quantiles is needed.
@@ -60,8 +59,8 @@
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
-#' @param trafo function for tranforming residuals from probability scale to a
-#' different distribution scale (default: Gaussian).
+#' @param scale On which scale should the quantile residuals be shown: on the probability scale 
+#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @param nsim,delta arguments passed to \code{qresiduals}.
 #' @param simint logical. In case of discrete distributions, should the simulation
 #' (confidence) interval due to the randomization be visualized?
@@ -83,7 +82,7 @@
 #' lower and upper confidence interval bounds (\code{simint_expected}, \code{simint_observed_lwr},
 #' \code{simint_observed_upr}) can optionally be returned.  Additionally,
 #' \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
-#' trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
+#' the (\code{scale}) and wether a \code{detrended} Q-Q residuals plot
 #' was computed are stored as attributes.
 #' @seealso \code{\link{plot.qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
@@ -114,11 +113,11 @@
 #' ## plot combined qqrplot as "ggplot2" graphic
 #' ggplot2::autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 #'
-#' ## Use different `trafo`s with confidence intervals
-#' qqrplot(m1_pois, trafo = qunif)
-#' qqrplot(m1_pois, trafo = qnorm)
-#' qqrplot(m1_pois, detrend = TRUE, trafo = qunif, confint = "line")
-#' qqrplot(m1_pois, detrend = TRUE, trafo = qnorm, confint = "line")
+#' ## Use different `scale`s with confidence intervals
+#' qqrplot(m1_pois, scale = "uniform")
+#' qqrplot(m1_pois, scale = "normal")
+#' qqrplot(m1_pois, detrend = TRUE, scale = "uniform", confint = "line")
+#' qqrplot(m1_pois, detrend = TRUE, scale = "normal", confint = "line")
 #' 
 #' @export
 qqrplot <- function(object, ...) {
@@ -136,7 +135,7 @@ qqrplot.default <- function(
                             plot = TRUE,
                             class = NULL,
                             detrend = FALSE,
-                            trafo = qnorm,
+                            scale = c("normal", "uniform"),
                             nsim = 1L,
                             delta = NULL,
                             simint = TRUE,
@@ -159,7 +158,6 @@ qqrplot.default <- function(
   ## * `delta` w/i `qresiduals()`
   ## * `...` in `plot()` and `autoplot()`
   stopifnot(is.logical(detrend))
-  stopifnot(is.null(trafo) | is.function(trafo))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(
     is.numeric(simint_level),
@@ -171,6 +169,9 @@ qqrplot.default <- function(
   stopifnot(length(xlab) == 1)
   stopifnot(length(ylab) == 1)
   stopifnot(length(main) == 1 || length(main) == 0)
+
+  ## match arguments
+  scale <- match.arg(scale)
 
   ## guess plotting flavor
   if (isFALSE(plot)) {
@@ -200,13 +201,16 @@ qqrplot.default <- function(
   # COMPUTATION OF QUANTILE RESIDUALS
   # -------------------------------------------------------------------
   qres <- qresiduals(object,
-    newdata = newdata, trafo = trafo, type = "random", nsim = nsim, delta = delta
+    newdata = newdata, scale = scale, type = "random", nsim = nsim, delta = delta
   )
   if (is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
 
   ## compute corresponding quantiles on the transformed scale (default: normal)
-  if (is.null(trafo)) trafo <- identity
-  q2q <- function(y) trafo(ppoints(length(y)))[order(order(y))]
+  if (scale == "uniform") {
+    q2q <- function(y) ppoints(length(y))[order(order(y))]
+  } else {
+    q2q <- function(y) qnorm(ppoints(length(y)))[order(order(y))]
+  }
   qthe <- apply(qres, 2L, q2q)
 
   ## compute rg interval
@@ -214,7 +218,7 @@ qqrplot.default <- function(
   ## FIXME: (ML) Return all in the same order w/o x values (same for additional nsim) -> might be an error
   if (!identical(simint, FALSE)) {
     tmp <- qresiduals(object,
-      newdata = newdata, trafo = trafo, type = "random", nsim = simint_nrep,
+      newdata = newdata, scale = scale, type = "random", nsim = simint_nrep,
       delta = delta
     )
     simint_prob <- (1 - simint_level) / 2
@@ -296,7 +300,7 @@ qqrplot.default <- function(
  
   ## attributes for graphical display
   attr(rval, "detrend") <- detrend
-  attr(rval, "trafo") <- trafo
+  attr(rval, "scale") <- scale
 
   attr(rval, "simint") <- simint
   attr(rval, "confint") <- confint
@@ -370,7 +374,7 @@ c.qqrplot <- function(...) {
 
   ## parameters
   detrend <- prepare_arg_for_attributes(rval, "detrend", force_single = TRUE)
-  trafo <- prepare_arg_for_attributes(rval, "trafo", force_single = FALSE) # check/force below
+  scale <- prepare_arg_for_attributes(rval, "scale", force_single = FALSE) # check/force below
   simint <- prepare_arg_for_attributes(rval, "simint")
   confint <- prepare_arg_for_attributes(rval, "confint")
   ref <- prepare_arg_for_attributes(rval, "ref")
@@ -379,11 +383,11 @@ c.qqrplot <- function(...) {
   # -------------------------------------------------------------------
   # CHECK FOR COMPATIBILITY
   # -------------------------------------------------------------------
-  if (length(trafo) > 1) {
-    if(!all(sapply(2:length(trafo), function(i) identical(trafo[[i-1]], trafo[[i]])))) {
-      stop("objects with different `trafo`s are on different scales and hence must not be combined")
+  if (length(scale) > 1) {
+    if(!all(sapply(2:length(scale), function(i) identical(scale[[i-1]], scale[[i]])))) {
+      stop("objects with different scales must not be combined.")
     } else {
-    trafo <- trafo[[1]]
+    scale <- scale[[1]]
     }
   }
 
@@ -414,7 +418,7 @@ c.qqrplot <- function(...) {
 
   ## add attributes
   attr(rval, "detrend") <- detrend
-  attr(rval, "trafo") <- trafo
+  attr(rval, "scale") <- scale
 
   attr(rval, "simint") <- simint
   attr(rval, "confint") <- confint
@@ -445,12 +449,10 @@ rbind.qqrplot <- c.qqrplot
 #' Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
 #' computed by \code{link{qqrplot}}. 
 #' 
-#' Q-Q residuals plot draw quantile residuals (by default: transformed to standard
-#' normal scale) against theoretical quantiles from the same distribution.
-#' Alternatively, transformations to other distributions can also be used,
-#' specifically using no transformation at all, i.e., remaining on the uniform
-#' scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-#' \code{identity}).
+#' Q-Q residuals plots draw quantile residuals (by default on the standard normal
+#' scale) against theoretical quantiles from the same distribution.
+#' Alternatively, quantile residuals can also be compared on the uniform scale
+#' (\code{scale = "uniform"}) using no transformation.
 #'
 #' Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
@@ -574,7 +576,7 @@ plot.qqrplot <- function(x,
   # -------------------------------------------------------------------
   ## get default arguments
   detrend <- use_arg_from_attributes(x, "detrend", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(x, "trafo", default = NULL, force_single = TRUE)
+  scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
   simint <- use_arg_from_attributes(x, "simint", default = TRUE, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = TRUE, force_single = FALSE)
@@ -591,12 +593,14 @@ plot.qqrplot <- function(x,
   stopifnot(is.logical(ref))
   stopifnot(is.logical(ref_identity))
   stopifnot(is.numeric(ref_probs), length(ref_probs) == 2)
-  stopifnot(length(trafo) <= 1, is.null(trafo) || is.function(trafo))
   stopifnot(length(detrend) <= 1, is.null(detrend) || is.logical(detrend))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  ## match scale
+  scale <- match.arg(scale, c("normal", "uniform"))
 
   ## get input object on correct scale
   x <- summary(x, detrend = detrend)
@@ -742,29 +746,20 @@ plot.qqrplot <- function(x,
       )
     }
 
-    ## helper function for plotting confint lines
-    fun <- function(x, n, level = 0.95, which = c("lower", "upper"), slope = 0, intercept = 1) {
-      stopifnot(is.numeric(n), length(n) == 1)
-      stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
-      which <- match.arg(which)
-
-      p <- pnorm(x)
-      se <- (1 / dnorm(x)) * (sqrt(p * (1 - p) / n))
-      rval <- as.numeric(trafo((1 - level) / 2) * se)
-
-      if (which == "lower") {
-        (intercept + slope * x) + rval
-      } else {
-        (intercept + slope * x) - rval
-      }
-    }
-
     ## compute intercept and slope of reference line
     if (j == 1 || (!single_graph && j > 1)) {
+
+      ## FIXME: (ML) Update once `distributions3` or alternative is working
+      if (scale == "uniform") {
+        qFun <- identity
+      } else {
+        qFun <- qnorm
+      }
+
       if (!detrend) {
         if (!ref_identity) {
           y_tmp <- quantile(d[grepl("^y$|y_0", names(d))], ref_probs, names = FALSE, na.rm = TRUE)
-          x_tmp <- trafo(ref_probs)
+          x_tmp <- qFun(ref_probs)
           slope <- diff(y_tmp) / diff(x_tmp)
           intercept <- y_tmp[1L] - slope * x_tmp[1L]
 
@@ -791,9 +786,10 @@ plot.qqrplot <- function(x,
       ## plot confidence lines
       if (plot_arg$confint[j] == "line") {
         curve(
-          fun(
+          compute_qqrplot_confint(
             x,
             n = NROW(d),
+            scale = scale,
             level = confint_level,
             which = "lower",
             slope = slope,
@@ -807,9 +803,10 @@ plot.qqrplot <- function(x,
           add = TRUE
         )
         curve(
-          fun(
+          compute_qqrplot_confint(
             x,
             n = NROW(d),
+            scale = scale,
             level = confint_level,
             which = "upper",
             slope = slope,
@@ -972,7 +969,7 @@ autoplot.qqrplot <- function(object,
 
   ## get default arguments
   detrend <- use_arg_from_attributes(object, "detrend", default = FALSE, force_single = TRUE)
-  trafo <- use_arg_from_attributes(object, "trafo", default = TRUE, force_single = TRUE)
+  scale <- use_arg_from_attributes(object, "scale", default = TRUE, force_single = TRUE)
   simint <- use_arg_from_attributes(object, "simint", default = TRUE, force_single = TRUE)
   confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = TRUE, force_single = TRUE)
@@ -999,11 +996,13 @@ autoplot.qqrplot <- function(object,
   stopifnot(is.logical(ref))
   stopifnot(is.logical(ref_identity))
   stopifnot(is.numeric(ref_probs), length(ref_probs) == 2)
-  stopifnot(length(trafo) <= 1, is.null(trafo) || is.function(trafo))
   stopifnot(length(detrend) <= 1, is.null(detrend) || is.logical(detrend))
   stopifnot(is.logical(legend))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+
+  # match arguments
+  scale <- match.arg(scale, c("normal", "uniform"))
 
   ## get input object on correct scale
   object <- summary(object, detrend = detrend)
@@ -1106,7 +1105,7 @@ autoplot.qqrplot <- function(object,
         detrend = detrend,
         identity = ref_identity, 
         probs = ref_probs, 
-        trafo = trafo,
+        scale = scale,
         colour = aes_ref$colour,
         size = aes_ref$size,
         linetype = aes_ref$linetype
@@ -1121,7 +1120,7 @@ autoplot.qqrplot <- function(object,
         level = confint_level,
         identity = ref_identity, 
         probs = ref_probs, 
-        trafo = trafo,
+        scale = scale,
         style = confint,
         xlim = xlim,
         colour = aes_confint$colour,
@@ -1236,11 +1235,12 @@ autoplot.qqrplot <- function(object,
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
 #' @param identity logical, should the identity line be plotted or a theoretical line
-#' which passes through \code{probs} quantiles computed by \code{trafo}. 
-#' @param trafo function for calculating reference line through first and third
-#' quartile of theoretical distribution (default: Gaussian \code{qnorm}).
+#' which passes through \code{probs} quantiles on the \code{"uniform"} or \code{"normal"} scale.
+#' @param scale On which scale are the quantile residuals be shown: on the probability scale 
+#' (\code{"uniform"}) or on the normal scale (\code{"normal"}). Used for the reference line which
+#' goes through the first and third quartile of theoretical distributions.
 #' @param probs numeric vector of length two, representing probabilities of reference
-#' line used in \code{trafo}.
+#' line used.
 #' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
 #' @param level numeric. The confidence level required.
 #' @param xlim The x limits for computing the confidence intervals.
@@ -1286,8 +1286,8 @@ autoplot.qqrplot <- function(object,
 #'   
 #'   ## Polygon CI around robust reference line
 #'   gg2 <- ggplot(data = d, aes(x = expected, y = observed, na.rm = TRUE)) + 
-#'     geom_qqrplot_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
-#'     geom_qqrplot_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
+#'     geom_qqrplot_ref(identity = FALSE, scale = attr(d, "scale")) + 
+#'     geom_qqrplot_confint(identity = FALSE, scale = attr(d, "scale"), style = "line") + 
 #'     geom_qqrplot() + 
 #'     geom_qqrplot_simint(
 #'       aes(
@@ -1302,19 +1302,19 @@ autoplot.qqrplot <- function(object,
 #'   gg2
 #'   gg2 + facet_wrap(~group)
 #' 
-#'   ## Use different `trafo`s with confidence intervals
-#'   q1 <- qqrplot(m1_pois, trafo = qunif, plot = FALSE)
+#'   ## Use different `scale`s with confidence intervals
+#'   q1 <- qqrplot(m1_pois, scale = "uniform", plot = FALSE)
 #'   q2 <- qqrplot(m2_pois, plot = FALSE)
 #'   
 #'   gg3 <- ggplot(data = q1, aes(x = expected, y = observed, na.rm = TRUE)) +
 #'     geom_qqrplot_ref() +
-#'     geom_qqrplot_confint(fill = "red", trafo = qunif) +
+#'     geom_qqrplot_confint(fill = "red", scale = "uniform") +
 #'     geom_qqrplot()
 #'   gg3
 #'   
 #'   gg4 <- ggplot(data = q2, aes(x = expected, y = observed, na.rm = TRUE)) +
 #'     geom_qqrplot_ref() +
-#'     geom_qqrplot_confint(fill = "red", trafo = qnorm) +
+#'     geom_qqrplot_confint(fill = "red", scale = "uniform") +
 #'     geom_qqrplot()
 #'   gg4
 #' } 
@@ -1468,7 +1468,11 @@ GeomQqrplotSimint <- ggplot2::ggproto("GeomQqrplotSimint", ggplot2::GeomPolygon,
 stat_qqrplot_ref <- function(mapping = NULL, data = NULL, geom = "qqrplot_ref",
                          position = "identity", na.rm = FALSE, 
                          show.legend = NA, inherit.aes = TRUE, 
-                         detrend = FALSE, identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, ...) {
+                         detrend = FALSE, identity = TRUE, probs = c(0.25, 0.75), 
+                         scale = c("normal", "uniform"), ...) {
+
+  scale <- match.arg(scale)
+
   ggplot2::layer(
     stat = StatQqrplotRef, 
     data = data, 
@@ -1482,7 +1486,7 @@ stat_qqrplot_ref <- function(mapping = NULL, data = NULL, geom = "qqrplot_ref",
       detrend = detrend,
       identity = identity,
       probs = probs,
-      trafo = trafo,
+      scale = scale,
       ...
     )
   )
@@ -1495,15 +1499,20 @@ stat_qqrplot_ref <- function(mapping = NULL, data = NULL, geom = "qqrplot_ref",
 #' @export
 StatQqrplotRef <- ggplot2::ggproto("StatQqrplotRef", ggplot2::Stat,
 
-  compute_group = function(data, scales, detrend, identity, probs, trafo) {
+  compute_group = function(data, scales, detrend, identity, probs, scale) {
     ## Manipulate object depending on arguments `detrend` and `identity`
     if (!detrend) {
       if (!identity) {
         stopifnot(is.numeric(probs), length(probs) == 2)
-        stopifnot(is.function(trafo))
+
+        if (scale == "uniform") {
+          qFun <- identity
+        } else {
+          qFun <- qnorm
+        }
 
         y_tmp <- quantile(data$y, probs, names = FALSE, na.rm = TRUE)
-        x_tmp <- trafo(probs)
+        x_tmp <- qFun(probs)
         slope <- diff(y_tmp) / diff(x_tmp)
         intercept <- y_tmp[1L] - slope * x_tmp[1L]
         nd <- data.frame(
@@ -1537,7 +1546,10 @@ StatQqrplotRef <- ggplot2::ggproto("StatQqrplotRef", ggplot2::Stat,
 geom_qqrplot_ref <- function(mapping = NULL, data = NULL, stat = "qqrplot_ref",
                          position = "identity", na.rm = FALSE, 
                          show.legend = NA, inherit.aes = TRUE, detrend = FALSE, identity = TRUE,
-                         probs = c(0.25, 0.75), trafo = qnorm, ...) {
+                         probs = c(0.25, 0.75), scale = c("normal", "uniform"), ...) {
+
+  scale <- match.arg(scale)
+
   ggplot2::layer(
     geom = GeomQqrplotRef, 
     mapping = mapping, 
@@ -1551,7 +1563,7 @@ geom_qqrplot_ref <- function(mapping = NULL, data = NULL, stat = "qqrplot_ref",
       detrend = detrend,
       identity = identity,
       probs = probs,
-      trafo = trafo,
+      scale = scale,
       ...
     )
   )
@@ -1582,10 +1594,11 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
                              show.legend = NA, inherit.aes = TRUE,
                              xlim = NULL, n = 101, 
                              detrend = FALSE, level = 0.95, 
-                             identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                             identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                              style = c("polygon", "line"), ...) {
 
   style <- match.arg(style)
+  scale <- match.arg(scale)
 
   ggplot2::layer(
     geom = geom, 
@@ -1603,7 +1616,7 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
       level = level,
       identity = identity,
       probs = probs,
-      trafo = trafo,
+      scale = scale,
       style = style,
       ...
     )
@@ -1627,35 +1640,8 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
                            level = 0.95,
                            identity = TRUE, 
                            probs = c(0.25, 0.75), 
-                           trafo = qnorm,
+                           scale = "normal",
                            style = "polygon") {
-
-    fun <- function(x, n, level = 0.95, which = c("lower", "upper")) {
-      stopifnot(is.numeric(n), length(n) == 1)
-      stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
-      which <- match.arg(which)
-
-      ## FIXME: (ML) Update once `distributions3` or alternative is working
-      if (identical(trafo, stats::qunif) | identical(trafo, base::identity)) {
-        dFun <- dunif
-        pFun <- punif
-      } else if (identical(trafo, stats::qnorm)) {
-        dFun <- dnorm
-        pFun <- pnorm
-      } else {
-        stop("Appropriate `dFun` and `pFun` are not yet supported.")
-      }
-
-      p <- pFun(x) # alternative: p <- ppoints(x)
-      se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n))
-      rval <- as.numeric(qnorm((1 - level) / 2) * se)
-
-      if (which == "lower") {
-        -rval
-      } else {
-        rval
-      }
-    }
 
     ## Copied and modified from `StatFunction$compute_group()`
     if (is.null(scales$x)) {
@@ -1680,12 +1666,20 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
       }
     }
 
-    y_out1 <- do.call(fun, c(list(quote(x_trans)), list(n = length(data$x), level = level, which = "upper")))
+    y_out1 <- do.call(
+      compute_qqrplot_confint, 
+      c(list(quote(x_trans)), 
+      list(n = length(data$x), scale = scale, level = level, which = "upper", slope = 0, intercept = 0))
+    )
     if (!is.null(scales$y) && !scales$y$is_discrete()) {
       # For continuous scales, need to apply transform
       y_out1 <- scales$y$trans$transform(y_out1)
     }
-    y_out2 <- do.call(fun, c(list(quote(x_trans)), list(n = length(data$x), level = level, which = "lower")))
+    y_out2 <- do.call(
+      compute_qqrplot_confint, 
+      c(list(quote(x_trans)), 
+      list(n = length(data$x), scale = scale, level = level, which = "lower", slope = 0, intercept = 0))
+    )
     if (!is.null(scales$y) && !scales$y$is_discrete()) {
       # For continuous scales, need to apply transform
       y_out2 <- scales$y$trans$transform(y_out2)
@@ -1700,13 +1694,13 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
                                           detrend = detrend,
                                           identity = identity,
                                           probs = probs,
-                                          trafo = trafo)$intercept
+                                          scale = scale)$intercept
     slope <- StatQqrplotRef$compute_group(data = data,
                                       scales = scales,
                                       detrend = detrend,
                                       identity = identity,
                                       probs = probs,
-                                      trafo = trafo)$slope
+                                      scale = scale)$slope
 
     if (style == "line") {
       ## prepare long format with group variable
@@ -1745,9 +1739,10 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
                             show.legend = NA, inherit.aes = TRUE,
                             xlim = NULL, n = 101, 
                             detrend = FALSE, level = 0.95, 
-                            identity = TRUE, probs = c(0.25, 0.75), trafo = qnorm, 
+                            identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                             style = c("polygon", "line"), ...) {
   style <- match.arg(style)
+  scale <- match.arg(scale)
 
   ggplot2::layer(
     geom = GeomQqrplotConfint,
@@ -1765,7 +1760,7 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
       level = level,
       identity = identity,
       probs = probs,
-      trafo = trafo,
+      scale = scale,
       style = style,
       ...
     )
@@ -1842,6 +1837,44 @@ set_default_aes_qqrplot_confint <- function(style) {
 # -------------------------------------------------------------------
 # HELPER FUNCTIONS FOR `qqrplot`
 # -------------------------------------------------------------------
+## helper function for plotting confint lines
+compute_qqrplot_confint <- function(x, 
+                                    n, 
+                                    type = c("pointwise", "simultanous"),
+                                    scale = c("normal", "uniform"), 
+                                    level = 0.95, 
+                                    which = c("lower", "upper"), 
+                                    slope = 0, 
+                                    intercept = 1) {
+  ## checks
+  stopifnot(is.numeric(n), length(n) == 1)
+  stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+  type <- match.arg(type)
+  scale <- match.arg(scale)
+  which <- match.arg(which)
+  
+  ## get trafos
+  if (scale == "uniform") {
+    dFun <- dunif
+    pFun <- punif
+  } else {
+    dFun <- dnorm
+    pFun <- pnorm
+  }
+  
+  ## compute ci
+  p <- pFun(x) # alternative: p <- ppoints(x)
+  se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n))
+  rval <- as.numeric(qnorm((1 - level) / 2) * se)
+  
+  ## add to reference line and return
+  if (which == "lower") {
+    (intercept + slope * x) - rval
+  } else {
+    (intercept + slope * x) + rval
+  }
+}
+
 
 #' @export
 summary.qqrplot <- function(object,
@@ -1878,7 +1911,7 @@ summary.qqrplot <- function(object,
   attr(rval, "ylab") <- attr(object, "ylab")
   attr(rval, "main") <- attr(object, "main")
 
-  attr(rval, "trafo") <- attr(object, "trafo")
+  attr(rval, "scale") <- attr(object, "scale")
   attr(rval, "detrend") <- detrend
 
 

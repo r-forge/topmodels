@@ -54,7 +54,7 @@ stat_pithist_expected(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  trafo = identity,
+  scale = c("uniform", "normal"),
   freq = FALSE,
   ...
 )
@@ -67,7 +67,7 @@ geom_pithist_expected(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  trafo = identity,
+  scale = c("uniform", "normal"),
   freq = FALSE,
   ...
 )
@@ -80,7 +80,7 @@ stat_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  trafo = identity,
+  scale = c("uniform", "normal"),
   level = 0.95,
   type = "approximation",
   freq = FALSE,
@@ -96,7 +96,7 @@ geom_pithist_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  trafo = NULL,
+  scale = c("uniform", "normal"),
   level = 0.95,
   type = "approximation",
   freq = FALSE,
@@ -185,8 +185,8 @@ to the paired geom/stat.}
 \item{stat}{The statistical transformation to use on the data for this
 layer, as a string.}
 
-\item{trafo}{function for tranforming residuals from probability scale to a
-different distribution scale.}
+\item{scale}{On which scale should the PIT residuals be computed: on the probability scale 
+(\code{"uniform"}) or on the normal scale (\code{"normal"}).}
 
 \item{level}{numeric. The confidence level required.}
 

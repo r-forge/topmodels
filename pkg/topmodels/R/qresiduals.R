@@ -10,7 +10,7 @@
 #' be random as well.
 #' 
 #' The default \code{qresiduals} method calls \code{\link{pitresiduals}} with
-#' \code{trafo} equal \code{\link[stats:Normal]{qnorm}}, as employed in normal Q-Q
+#' \code{scale} equal \code{"normal"}, as employed in normal Q-Q
 #' plots (\code{\link{qqrplot}}). 
 #' 
 #' @aliases qresiduals qresiduals.default
@@ -18,9 +18,10 @@
 #' either a specification of probabilities (vector or 2-dimensional matrix of
 #' probabilities) or an object from which the these can be obtained with
 #' \code{\link{procast}}.
-#' @param trafo function for tranforming residuals from probability scale to a
-#' different distribution scale. Here, for (randomized) quantile residuals, the
-#' quantiles of the standard normal distribution are used per default.
+#' @param scale On which scale should the PIT residuals be shown; on the probability scale 
+#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
+#' Here, for (randomized) quantile residuals, the
+#' quantiles of the standard normal distribution are computed per default.
 #' @param \dots further parameters passed to  \code{\link{pitresiduals}}.
 #' @return A vector or matrix of quantile residuals.
 #' @note Note that there is also a \code{\link[statmod]{qresiduals}} function
@@ -46,7 +47,7 @@ qresiduals <- function(object, ...) {
 #' @method qresiduals default
 #' @export
 qresiduals.default <- function(object, 
-                               trafo = qnorm, 
+                               scale = "normal",
                                ...) {
-  pitresiduals(object, trafo = trafo, ...)
+  pitresiduals(object, scale = scale, ...)
 }

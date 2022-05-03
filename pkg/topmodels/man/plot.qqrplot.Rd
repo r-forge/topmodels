@@ -131,12 +131,10 @@ Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
 computed by \code{link{qqrplot}}.
 }
 \details{
-Q-Q residuals plot draw quantile residuals (by default: transformed to standard
-normal scale) against theoretical quantiles from the same distribution.
-Alternatively, transformations to other distributions can also be used,
-specifically using no transformation at all, i.e., remaining on the uniform
-scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-\code{identity}).
+Q-Q residuals plots draw quantile residuals (by default on the standard normal
+scale) against theoretical quantiles from the same distribution.
+Alternatively, quantile residuals can also be compared on the uniform scale
+(\code{scale = "uniform"}) using no transformation.
 
 Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by using
 the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 

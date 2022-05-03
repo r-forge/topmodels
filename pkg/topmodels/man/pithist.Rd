@@ -14,7 +14,7 @@ pithist(object, ...)
   newdata = NULL,
   plot = TRUE,
   class = NULL,
-  trafo = NULL,
+  scale = c("uniform", "normal"),
   breaks = NULL,
   type = c("expected", "random"),
   nsim = 1L,
@@ -52,8 +52,8 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
-\item{trafo}{function for tranforming residuals from probability scale to a
-different distribution scale.}
+\item{scale}{On which scale should the PIT residuals be computed: on the probability scale 
+(\code{"uniform"}) or on the normal scale (\code{"normal"}).}
 
 \item{breaks}{numeric. Breaks for the histogram intervals.}
 

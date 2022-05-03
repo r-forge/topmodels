@@ -63,7 +63,7 @@
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
-#' @param scale On which scale should the PIT residuals be shown; on the probability scale 
+#' @param scale On which scale should the PIT residuals be computed: on the probability scale 
 #' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @param breaks numeric. Breaks for the histogram intervals.
 #' @param type character. In case of discrete distributions, should an expected
@@ -209,13 +209,6 @@ pithist.default <- function(
   type <- match.arg(type)
   scale <- match.arg(scale)
 
-  ## set trafo
-  if (scale == "uniform") {
-    trafo <- identity
-  } else {
-    trafo <- qnorm
-  } 
-
   ## determine other arguments conditional on `style` and `type`
   if (is.null(simint)) {
     simint <- if (style == "bar" && type == "random") TRUE else FALSE
@@ -269,7 +262,7 @@ pithist.default <- function(
   } else if (type == "random") {
     # -------------------------------------------------------------------
     p <- qresiduals(object,
-      newdata = newdata, trafo = trafo, delta = delta,
+      newdata = newdata, scale = scale, delta = delta,
       type = "random", nsim = nsim
     )
 
@@ -289,9 +282,9 @@ pithist.default <- function(
 
     if (!isFALSE(simint)) {
       ## helper function for calculating simulation interval
-      compute_simint <- function(object, newdata, trafo, delta, nsim, breaks) {
+      compute_simint <- function(object, newdata, scale, delta, nsim, breaks) {
         simint_p <- qresiduals(object,
-          newdata = newdata, trafo = trafo, delta = delta,
+          newdata = newdata, scale = scale, delta = delta,
           type = "random", nsim = nsim
         )
 
@@ -306,7 +299,7 @@ pithist.default <- function(
       ## compute simulation interval bases on quantiles
       simint_tmp <- replicate(
         simint_nrep,
-        compute_simint(object, newdata, trafo, delta, nsim, breaks)
+        compute_simint(object, newdata, scale, delta, nsim, breaks)
       )
 
       simint_prob <- (1 - simint_level) / 2
@@ -322,15 +315,17 @@ pithist.default <- function(
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
     p <- qresiduals(object,
-      newdata = newdata, trafo = NULL, delta = delta,
+      newdata = newdata, scale = "uniform", delta = delta,
       type = "quantile", prob = c(0, 1)
     )
 
     ## TODO: (ML) Adapt by employing `distributions3`.
     if (scale == "uniform") {
-      invtrafo <- punif
+      qFun <- identity
+      pFun <- punif
     } else {
-      invtrafo <- pnorm
+      qFun <- qnorm
+      pFun <- pnorm
     }
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
@@ -340,15 +335,15 @@ pithist.default <- function(
     } else {
       #function(u) punif(u, min = p[, 1L], max = p[, 2L]) # original 
       #function(u) pmin(1, pmax(0, (u - p[, 1L]) / (p[, 2L] - p[, 1L]))) # equal to original
-      function(u) pmin(1, pmax(0, 1/(p[, 2L] - p[, 1L]) * (invtrafo(u) - p[, 1L]))) # new working w trafo
+      function(u) pmin(1, pmax(0, 1/(p[, 2L] - p[, 1L]) * (pFun(u) - p[, 1L]))) # new working w trafo
     }
 
     ## get breaks: part 2
     ## TODO: (ML) Improve this educated guess.
     tmp_range <- range(
       c(
-        trafo(0), trafo(0.000001), trafo(0.0001), trafo(0.001), trafo(0.005), trafo(0.01), 
-        trafo(0.99), trafo(0.995), trafo(0.999), trafo(0.9999), trafo(0.999999), trafo(1)
+        qFun(0), qFun(0.000001), qFun(0.0001), qFun(0.001), qFun(0.005), qFun(0.01), 
+        qFun(0.99), qFun(0.995), qFun(0.999), qFun(0.9999), qFun(0.999999), qFun(1)
       ), 
       finite = TRUE
     )
@@ -1795,7 +1790,7 @@ StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
 #' frequencies, the \code{counts} component of the result; if \code{FALSE},
 #' probability densities, component \code{density}, are plotted (so that the
 #' histogram has a total area of one).
-#' @param scale On which scale should the PIT residuals be shown; on the probability scale 
+#' @param scale On which scale should the PIT residuals be computed: on the probability scale 
 #' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @examples
 #' if (require("ggplot2")) {
@@ -2389,9 +2384,9 @@ compute_pithist_expected <- function(n, breaks, freq, scale) {
   ## get inverse trafo
   ## TODO: (ML) Must be extended using `distributions3`
   if (scale == "uniform") {
-    invtrafo <- identity
+    pFun <- identity
   } else {
-    invtrafo <- pnorm
+    pFun <- pnorm
   }
 
   ## TODO: (ML)
@@ -2399,7 +2394,7 @@ compute_pithist_expected <- function(n, breaks, freq, scale) {
   ## * For small n qbinom(0.5, ...) is not equal 1.
 
   ## get probs
-  probs <- diff(invtrafo(breaks))
+  probs <- diff(pFun(breaks))
 
   ## calc bin specific expected line
   rval <- qbinom(0.5, size = n, prob = probs)
@@ -2435,13 +2430,13 @@ compute_pithist_confint <- function(n, breaks, level, type = c("exact", "approxi
   ## get inverse trafo
   ## TODO: (ML) Must be extended using `distributions3`
   if (scale == "uniform") {
-    invtrafo <- identity
+    pFun <- identity
   } else {
-    invtrafo <- pnorm
+    pFun <- pnorm
   }
 
   ## get probs
-  probs <- diff(invtrafo(breaks))
+  probs <- diff(pFun(breaks))
 
   if (type == "exact") {
     ## calc bin specific confidence levels

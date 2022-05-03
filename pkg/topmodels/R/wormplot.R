@@ -48,8 +48,8 @@
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
 #' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
-#' @param trafo function for tranforming residuals from probability scale to a
-#' different distribution scale (default: Gaussian).
+#' @param scale On which scale should the quantile residuals be shown: on the probability scale 
+#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @param nsim,delta arguments passed to \code{qresiduals}.
 #' @param confint logical or character string describing the type for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
@@ -72,7 +72,7 @@
 #' lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
 #' \code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
 #' \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
-#' trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
+#' the (\code{scale}) and wether a \code{detrended} Q-Q residuals plot
 #' was computed are stored as attributes.
 #' @seealso \code{\link{qqrplot}}, \code{\link{plot.qqrplot}}, \code{\link{qqrplot}}, 
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
@@ -117,7 +117,7 @@ wormplot.default <- function(object,
                              plot = TRUE,
                              class = NULL,
                              detrend = TRUE,
-                             trafo = qnorm,
+                             scale = c("normal", "uniform"),
                              nsim = 1L,
                              delta = NULL,
                              confint = TRUE,
@@ -130,13 +130,15 @@ wormplot.default <- function(object,
                              main = NULL,
                              ...) {
 
+  scale <- match.arg(scale)
+
   ## TODO: (ML) Like this, only with arg detrend or with call/eval (latter difficulties with tinytest)
   qqrplot(object,
           newdata = newdata,
           plot = plot,
           class = class,
           detrend = detrend,
-          trafo = trafo,
+          scale = scale,
           nsim = nsim,
           delta = delta,
           confint = confint,

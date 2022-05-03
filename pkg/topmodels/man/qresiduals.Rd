@@ -7,7 +7,7 @@
 \usage{
 qresiduals(object, ...)
 
-\method{qresiduals}{default}(object, trafo = qnorm, ...)
+\method{qresiduals}{default}(object, scale = "normal", ...)
 }
 \arguments{
 \item{object}{an object. For the \code{default} method this needs to be
@@ -17,9 +17,10 @@ probabilities) or an object from which the these can be obtained with
 
 \item{\dots}{further parameters passed to  \code{\link{pitresiduals}}.}
 
-\item{trafo}{function for tranforming residuals from probability scale to a
-different distribution scale. Here, for (randomized) quantile residuals, the
-quantiles of the standard normal distribution are used per default.}
+\item{scale}{On which scale should the PIT residuals be shown; on the probability scale 
+(\code{"uniform"}) or on the normal scale (\code{"normal"}).
+Here, for (randomized) quantile residuals, the
+quantiles of the standard normal distribution are computed per default.}
 }
 \value{
 A vector or matrix of quantile residuals.
@@ -36,7 +37,7 @@ probabilities corresponding to each observation, hence quantile residuals must
 be random as well.
 
 The default \code{qresiduals} method calls \code{\link{pitresiduals}} with
-\code{trafo} equal \code{\link[stats:Normal]{qnorm}}, as employed in normal Q-Q
+\code{scale} equal \code{"normal"}, as employed in normal Q-Q
 plots (\code{\link{qqrplot}}).
 }
 \note{

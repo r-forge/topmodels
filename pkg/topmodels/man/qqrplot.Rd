@@ -14,7 +14,7 @@ qqrplot(object, ...)
   plot = TRUE,
   class = NULL,
   detrend = FALSE,
-  trafo = qnorm,
+  scale = c("normal", "uniform"),
   nsim = 1L,
   delta = NULL,
   simint = TRUE,
@@ -47,8 +47,8 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 
 \item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
 
-\item{trafo}{function for tranforming residuals from probability scale to a
-different distribution scale (default: Gaussian).}
+\item{scale}{On which scale should the quantile residuals be shown: on the probability scale 
+(\code{"uniform"}) or on the normal scale (\code{"normal"}).}
 
 \item{nsim, delta}{arguments passed to \code{qresiduals}.}
 
@@ -79,7 +79,7 @@ randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
 lower and upper confidence interval bounds (\code{simint_expected}, \code{simint_observed_lwr},
 \code{simint_observed_upr}) can optionally be returned.  Additionally,
 \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
-trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
+the (\code{scale}) and wether a \code{detrended} Q-Q residuals plot
 was computed are stored as attributes.
 }
 \description{
@@ -90,13 +90,12 @@ residuals. If \code{plot = TRUE}, the resulting object of class
 package \code{ggplot2} is loaded.
 }
 \details{
-Q-Q residuals plots draw quantile residuals (by default: transformed to standard
-normal scale) against theoretical quantiles from the same distribution.
-Alternatively, transformations to other distributions can also be used,
-specifically using no transformation at all, i.e., remaining on the uniform
-scale (via \code{trafo = NULL} or equivalently \code{qunif} or
-\code{identity}). For computation, \code{\link{qqrplot}} leverages the function
-\code{\link{qresiduals}} employing the \code{\link{procast}} generic.
+Q-Q residuals plots draw quantile residuals (by default on the standard normal
+scale) against theoretical quantiles from the same distribution.
+Alternatively, quantile residuals can also be compared on the uniform scale
+(\code{scale = "uniform"}) using no transformation.  For computation,
+\code{\link{qqrplot}} leverages the function \code{\link{qresiduals}} employing
+the \code{\link{procast}} generic.
 
 Additional options are offered for models with discrete responses where
 randomization of quantiles is needed.
@@ -129,11 +128,11 @@ q2 <- qqrplot(m2_pois, plot = FALSE)
 ## plot combined qqrplot as "ggplot2" graphic
 ggplot2::autoplot(c(q1, q2), single_graph = TRUE, col = c(1, 2), fill = c(1, 2))
 
-## Use different `trafo`s with confidence intervals
-qqrplot(m1_pois, trafo = qunif)
-qqrplot(m1_pois, trafo = qnorm)
-qqrplot(m1_pois, detrend = TRUE, trafo = qunif, confint = "line")
-qqrplot(m1_pois, detrend = TRUE, trafo = qnorm, confint = "line")
+## Use different `scale`s with confidence intervals
+qqrplot(m1_pois, scale = "uniform")
+qqrplot(m1_pois, scale = "normal")
+qqrplot(m1_pois, detrend = TRUE, scale = "uniform", confint = "line")
+qqrplot(m1_pois, detrend = TRUE, scale = "normal", confint = "line")
 
 }
 \references{

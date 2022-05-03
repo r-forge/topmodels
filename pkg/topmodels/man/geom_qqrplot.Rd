@@ -65,7 +65,7 @@ stat_qqrplot_ref(
   detrend = FALSE,
   identity = TRUE,
   probs = c(0.25, 0.75),
-  trafo = qnorm,
+  scale = c("normal", "uniform"),
   ...
 )
 
@@ -80,7 +80,7 @@ geom_qqrplot_ref(
   detrend = FALSE,
   identity = TRUE,
   probs = c(0.25, 0.75),
-  trafo = qnorm,
+  scale = c("normal", "uniform"),
   ...
 )
 
@@ -98,7 +98,7 @@ geom_qqrplot_confint(
   level = 0.95,
   identity = TRUE,
   probs = c(0.25, 0.75),
-  trafo = qnorm,
+  scale = c("normal", "uniform"),
   style = c("polygon", "line"),
   ...
 )
@@ -156,13 +156,14 @@ to the paired geom/stat.}
 \item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
 
 \item{identity}{logical, should the identity line be plotted or a theoretical line
-which passes through \code{probs} quantiles computed by \code{trafo}.}
+which passes through \code{probs} quantiles on the \code{"uniform"} or \code{"normal"} scale.}
 
 \item{probs}{numeric vector of length two, representing probabilities of reference
-line used in \code{trafo}.}
+line used.}
 
-\item{trafo}{function for calculating reference line through first and third
-quartile of theoretical distribution (default: Gaussian \code{qnorm}).}
+\item{scale}{On which scale are the quantile residuals be shown: on the probability scale 
+(\code{"uniform"}) or on the normal scale (\code{"normal"}). Used for the reference line which
+goes through the first and third quartile of theoretical distributions.}
 
 \item{xlim}{The x limits for computing the confidence intervals.}
 
@@ -216,8 +217,8 @@ if (require("ggplot2")) {
   
   ## Polygon CI around robust reference line
   gg2 <- ggplot(data = d, aes(x = expected, y = observed, na.rm = TRUE)) + 
-    geom_qqrplot_ref(identity = FALSE, trafo = attr(d, "trafo")) + 
-    geom_qqrplot_confint(identity = FALSE, trafo = attr(d, "trafo"), style = "line") + 
+    geom_qqrplot_ref(identity = FALSE, scale = attr(d, "scale")) + 
+    geom_qqrplot_confint(identity = FALSE, scale = attr(d, "scale"), style = "line") + 
     geom_qqrplot() + 
     geom_qqrplot_simint(
       aes(
@@ -232,19 +233,19 @@ if (require("ggplot2")) {
   gg2
   gg2 + facet_wrap(~group)
 
-  ## Use different `trafo`s with confidence intervals
-  q1 <- qqrplot(m1_pois, trafo = qunif, plot = FALSE)
+  ## Use different `scale`s with confidence intervals
+  q1 <- qqrplot(m1_pois, scale = "uniform", plot = FALSE)
   q2 <- qqrplot(m2_pois, plot = FALSE)
   
   gg3 <- ggplot(data = q1, aes(x = expected, y = observed, na.rm = TRUE)) +
     geom_qqrplot_ref() +
-    geom_qqrplot_confint(fill = "red", trafo = qunif) +
+    geom_qqrplot_confint(fill = "red", scale = "uniform") +
     geom_qqrplot()
   gg3
   
   gg4 <- ggplot(data = q2, aes(x = expected, y = observed, na.rm = TRUE)) +
     geom_qqrplot_ref() +
-    geom_qqrplot_confint(fill = "red", trafo = qnorm) +
+    geom_qqrplot_confint(fill = "red", scale = "uniform") +
     geom_qqrplot()
   gg4
 } 

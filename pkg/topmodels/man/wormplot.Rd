@@ -13,7 +13,7 @@ wormplot(object, ...)
   plot = TRUE,
   class = NULL,
   detrend = TRUE,
-  trafo = qnorm,
+  scale = c("normal", "uniform"),
   nsim = 1L,
   delta = NULL,
   confint = TRUE,
@@ -46,8 +46,8 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 
 \item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
 
-\item{trafo}{function for tranforming residuals from probability scale to a
-different distribution scale (default: Gaussian).}
+\item{scale}{On which scale should the quantile residuals be shown: on the probability scale 
+(\code{"uniform"}) or on the normal scale (\code{"normal"}).}
 
 \item{nsim, delta}{arguments passed to \code{qresiduals}.}
 
@@ -79,7 +79,7 @@ randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
 lower and upper confidence interval bounds (\code{x_rg_lwr}, \code{y_rg_lwr},
 \code{x_rg_upr}, \code{y_rg_upr}) can optionally be returned.  Additionally,
 \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
-trafo function (\code{trafo}) and wether a \code{detrended} Q-Q residuals plot
+the (\code{scale}) and wether a \code{detrended} Q-Q residuals plot
 was computed are stored as attributes.
 }
 \description{

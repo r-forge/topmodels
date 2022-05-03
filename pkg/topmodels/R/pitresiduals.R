@@ -11,14 +11,14 @@
 #' to emphasize their similar properties to residuals we follow Warton (2017) and
 #' refer to them as PIT residuals.
 #' 
-#' The \code{pitresiduals} method can also transform PIT residuals from
-#' probability scale to a different distribution scale by employing a
-#' \code{trafo} and probabilities at which the quantiles should be
-#' computed. This can be a vector or a 2-column matrix of probabilities. The
+#' With the method \code{pitresiduals}, the PIT residuals can also be transformed
+#' from the probability scale to another distribution scale. Supported quantile
+#' scales are uniformly (\code{uniform}) and normally (\code{normal}) distributed.
+#' Probabilites can be either a vector or a 2-column matrix of probabilities. The
 #' latter offers to either draw \code{"random"} samples from the distribution or
-#' compute corresponding \code{"quantile"}s such as the median etc.  For
-#' (randomized) quantile residuals as suggested by Dunn and Smyth (1996), either
-#' the \code{trafo} must be set to \code{\link[stats:Normal]{qnorm}} or
+#' compute corresponding \code{"quantile"}s such as the median etc. For
+#' (randomized) quantile residuals (on the normal scale), as suggested by Dunn and Smyth (1996), 
+#' the \code{scale} must be set to \code{"normal"} or 
 #' \code{\link{qresiduals}} can be called directly.
 #' 
 #' @aliases pitresiduals pitresiduals.default
@@ -28,8 +28,8 @@
 #' \code{\link{procast}}.
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
-#' @param trafo function for tranforming residuals from probability scale to a
-#' different distribution scale.
+#' @param scale On which scale should the PIT residuals be shown; on the probability scale 
+#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @param type character specifying whether - in the case of discrete response
 #' distributions - randomized quantile residuals or their corresponding
 #' quantiles should be computed.
@@ -76,14 +76,15 @@ pitresiduals <- function(object, ...) {
 #' @export
 pitresiduals.default <- function(object, 
                                newdata = NULL, 
-                               trafo = NULL,
+                               scale = c("uniform", "normal"),
                                type = c("random", "quantile"), 
                                nsim = 1L, 
                                delta = NULL,
                                prob = NULL,
                                ...) {
 
-  ## type of residual for discrete distribution (if any)
+  ## match arguments
+  scale <- match.arg(scale)
   type <- match.arg(type)
 
   ## check and set prob to default
@@ -170,6 +171,6 @@ pitresiduals.default <- function(object,
   # FIXME: (ML) object can be a data.frame, so make sure drop works by converting to matrix
 
   ## compute quantile residuals  
-  if(!is.null(trafo)) object <- trafo(object)  # TODO: (ML) Why on the normal scale? Common behaviour compared to traditional diagnostics.
+  if (scale == "normal") object <- qnorm(object)
   return(object)
 }
