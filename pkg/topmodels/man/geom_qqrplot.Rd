@@ -95,6 +95,7 @@ geom_qqrplot_confint(
   xlim = NULL,
   n = 101,
   detrend = FALSE,
+  type = c("pointwise", "simultaneous"),
   level = 0.95,
   identity = TRUE,
   probs = c(0.25, 0.75),
@@ -168,6 +169,10 @@ goes through the first and third quartile of theoretical distributions.}
 \item{xlim}{The x limits for computing the confidence intervals.}
 
 \item{n}{The number of points used to compute the confidence intervals, the more the smoother.}
+
+\item{type}{Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
+of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
+on the Kolmogorov-Smirnov test.}
 
 \item{level}{numeric. The confidence level required.}
 

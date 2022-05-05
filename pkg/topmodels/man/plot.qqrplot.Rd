@@ -12,6 +12,7 @@
   detrend = NULL,
   simint = NULL,
   confint = NULL,
+  confint_type = c("pointwise", "simultaneous"),
   confint_level = 0.95,
   ref = NULL,
   ref_identity = TRUE,
@@ -53,6 +54,7 @@
   detrend = NULL,
   simint = NULL,
   confint = NULL,
+  confint_type = c("pointwise", "simultaneous"),
   confint_level = 0.95,
   ref = NULL,
   ref_identity = TRUE,
@@ -94,9 +96,11 @@ diagrams be plotted in a single graph?}
 \item{simint}{logical or quantile specification. Should the simint of
 quantiles of the randomized quantile residuals be visualized?}
 
-\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
-If not set to `FALSE`, the pointwise confidence interval of the (randomized)
-quantile residuals are visualized.}
+\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.}
+
+\item{confint_type}{Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
+of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
+on the Kolmogorov-Smirnov test.}
 
 \item{confint_level}{numeric. The confidence level required.}
 

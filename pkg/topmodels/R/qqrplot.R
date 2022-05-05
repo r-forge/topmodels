@@ -467,8 +467,9 @@ rbind.qqrplot <- c.qqrplot
 #' @param simint logical or quantile specification. Should the simint of
 #' quantiles of the randomized quantile residuals be visualized? 
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
-#' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
-#' quantile residuals are visualized.
+#' @param confint_type Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
+#' of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
+#' on the Kolmogorov-Smirnov test. 
 #' @param confint_level numeric. The confidence level required.
 #' @param ref logical. Should a reference line be plotted?
 #' @param ref_identity,ref_probs Should the idenity line be plotted as reference 
@@ -549,6 +550,7 @@ plot.qqrplot <- function(x,
                          detrend = NULL,
                          simint = NULL,
                          confint = NULL,  # FIXME: (ML) Implement different plotting styles
+                         confint_type = c("pointwise", "simultaneous"),
                          confint_level = 0.95,
                          ref = NULL,
                          ref_identity = TRUE,
@@ -599,8 +601,9 @@ plot.qqrplot <- function(x,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
-  ## match scale
+  ## match arguments
   scale <- match.arg(scale, c("normal", "uniform"))
+  confint_type <- match.arg(confint_type)
 
   ## get input object on correct scale
   x <- summary(x, detrend = detrend)
@@ -790,6 +793,7 @@ plot.qqrplot <- function(x,
             x,
             n = NROW(d),
             scale = scale,
+            type = confint_type,
             level = confint_level,
             which = "lower",
             slope = slope,
@@ -807,6 +811,7 @@ plot.qqrplot <- function(x,
             x,
             n = NROW(d),
             scale = scale,
+            type = confint_type,
             level = confint_level,
             which = "upper",
             slope = slope,
@@ -933,6 +938,7 @@ autoplot.qqrplot <- function(object,
                              detrend = NULL,
                              simint = NULL,
                              confint = NULL,
+                             confint_type = c("pointwise", "simultaneous"),
                              confint_level = 0.95,
                              ref = NULL,
                              ref_identity = TRUE, 
@@ -1003,6 +1009,7 @@ autoplot.qqrplot <- function(object,
 
   # match arguments
   scale <- match.arg(scale, c("normal", "uniform"))
+  confint_type <- match.arg(confint_type)
 
   ## get input object on correct scale
   object <- summary(object, detrend = detrend)
@@ -1117,6 +1124,7 @@ autoplot.qqrplot <- function(object,
     rval <- rval +
       geom_qqrplot_confint(
         detrend = detrend,
+        type = confint_type,
         level = confint_level,
         identity = ref_identity, 
         probs = ref_probs, 
@@ -1242,6 +1250,9 @@ autoplot.qqrplot <- function(object,
 #' @param probs numeric vector of length two, representing probabilities of reference
 #' line used.
 #' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
+#' @param type Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
+#' of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
+#' on the Kolmogorov-Smirnov test. 
 #' @param level numeric. The confidence level required.
 #' @param xlim The x limits for computing the confidence intervals.
 #' @param n The number of points used to compute the confidence intervals, the more the smoother.
@@ -1593,12 +1604,14 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
                              position = "identity", na.rm = FALSE,
                              show.legend = NA, inherit.aes = TRUE,
                              xlim = NULL, n = 101, 
-                             detrend = FALSE, level = 0.95, 
+                             detrend = FALSE, 
+                             type = c("pointwise", "simultaneous"), level = 0.95,
                              identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                              style = c("polygon", "line"), ...) {
 
   style <- match.arg(style)
   scale <- match.arg(scale)
+  type <- match.arg(type)
 
   ggplot2::layer(
     geom = geom, 
@@ -1613,6 +1626,7 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
       xlim = xlim,
       n = n,
       detrend = detrend,
+      type = type,
       level = level,
       identity = identity,
       probs = probs,
@@ -1637,6 +1651,7 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
                            xlim = NULL, 
                            n = 101, 
                            detrend = FALSE,
+                           type = "pointwise",
                            level = 0.95,
                            identity = TRUE, 
                            probs = c(0.25, 0.75), 
@@ -1666,10 +1681,25 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
       }
     }
 
+    ## Employing StatQqrplotRef Method
+    slope <- StatQqrplotRef$compute_group(data = data,
+      scales = scales,
+      detrend = detrend,
+      identity = identity,
+      probs = probs,
+      scale = scale)$slope
+    intercept <- StatQqrplotRef$compute_group(
+      data = data,
+      scales = scales,
+      detrend = detrend,
+      identity = identity,
+      probs = probs,
+      scale = scale)$intercept
+
     y_out1 <- do.call(
       compute_qqrplot_confint, 
       c(list(quote(x_trans)), 
-      list(n = length(data$x), scale = scale, level = level, which = "upper", slope = 0, intercept = 0))
+      list(n = length(data$x), scale = scale, type = type, level = level, which = "upper", slope = slope, intercept = intercept))
     )
     if (!is.null(scales$y) && !scales$y$is_discrete()) {
       # For continuous scales, need to apply transform
@@ -1678,7 +1708,7 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
     y_out2 <- do.call(
       compute_qqrplot_confint, 
       c(list(quote(x_trans)), 
-      list(n = length(data$x), scale = scale, level = level, which = "lower", slope = 0, intercept = 0))
+      list(n = length(data$x), scale = scale, type = type, level = level, which = "lower", slope = slope, intercept = intercept))
     )
     if (!is.null(scales$y) && !scales$y$is_discrete()) {
       # For continuous scales, need to apply transform
@@ -1688,27 +1718,13 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
     # Must make sure that is not NA for specific trafo (due to extension of plot simint)
     idx_na <- is.na(y_out1) | is.na(y_out2)
 
-    ## Employing StatQqrplotRef Method
-    intercept <- StatQqrplotRef$compute_group(data = data,
-                                          scales = scales,
-                                          detrend = detrend,
-                                          identity = identity,
-                                          probs = probs,
-                                          scale = scale)$intercept
-    slope <- StatQqrplotRef$compute_group(data = data,
-                                      scales = scales,
-                                      detrend = detrend,
-                                      identity = identity,
-                                      probs = probs,
-                                      scale = scale)$slope
-
     if (style == "line") {
       ## prepare long format with group variable
       d <- as.data.frame(tidyr::pivot_longer(
         data.frame(
           x_noaes = x_trans,  
-          y1 = (intercept + slope * xseq) + y_out1,
-          y2 = (intercept + slope * xseq) + y_out2
+          y1 = y_out1,
+          y2 = y_out2
         )[!idx_na, ],
         cols = c(y1, y2),
         names_to = "topbottom",
@@ -1722,8 +1738,8 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
       data.frame(
         x_noaes = c(x_trans, rev(x_trans)),
         y_noaes = c(
-          (intercept + slope * xseq) + y_out2,
-          rev((intercept + slope * xseq) + y_out1)
+          y_out2,
+          rev(y_out1)
         )
       )[!idx_na, ]
     }
@@ -1738,11 +1754,13 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
                             position = "identity", na.rm = FALSE,
                             show.legend = NA, inherit.aes = TRUE,
                             xlim = NULL, n = 101, 
-                            detrend = FALSE, level = 0.95, 
+                            detrend = FALSE,
+                            type = c("pointwise", "simultaneous"), level = 0.95,
                             identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                             style = c("polygon", "line"), ...) {
   style <- match.arg(style)
   scale <- match.arg(scale)
+  type <- match.arg(type)
 
   ggplot2::layer(
     geom = GeomQqrplotConfint,
@@ -1757,6 +1775,7 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
       xlim = xlim,
       n = n,
       detrend = detrend,
+      type = type,
       level = level,
       identity = identity,
       probs = probs,
@@ -1840,38 +1859,57 @@ set_default_aes_qqrplot_confint <- function(style) {
 ## helper function for plotting confint lines
 compute_qqrplot_confint <- function(x, 
                                     n, 
-                                    type = c("pointwise", "simultanous"),
                                     scale = c("normal", "uniform"), 
+                                    type = c("pointwise", "simultaneous"),
                                     level = 0.95, 
-                                    which = c("lower", "upper"), 
+                                    which = c("both", "lower", "upper"), 
                                     slope = 0, 
                                     intercept = 1) {
   ## checks
   stopifnot(is.numeric(n), length(n) == 1)
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
-  type <- match.arg(type)
   scale <- match.arg(scale)
+  type <- match.arg(type)
   which <- match.arg(which)
   
   ## get trafos
   if (scale == "uniform") {
     dFun <- dunif
     pFun <- punif
+    qFun <- qunif
   } else {
     dFun <- dnorm
     pFun <- pnorm
+    qFun <- qnorm
   }
   
-  ## compute ci
-  p <- pFun(x) # alternative: p <- ppoints(x)
-  se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n))
-  rval <- as.numeric(qnorm((1 - level) / 2) * se)
-  
-  ## add to reference line and return
-  if (which == "lower") {
-    (intercept + slope * x) - rval
+  ## compute pointwise or simultanous CI
+  if (type == "pointwise") {
+    p <- pFun(x) # alternative: p <- ppoints(x)
+    se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n))
+    rval <- as.numeric(qnorm(1 - (1 - level) / 2) * se)
+    
+    ## add to reference line and return
+    lower <- (intercept + slope * x) - rval
+    upper <- (intercept + slope * x) + rval
   } else {
-    (intercept + slope * x) + rval
+    p <- pFun(x)
+    epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))  # Komogorov quantile
+    lp <- pmax(p - epsilon, rep(0, length(p)))
+    up <- pmin(p + epsilon, rep(1, length(p)))
+    lower <- intercept + slope * qFun(lp)
+    upper <- intercept + slope * qFun(up)
+  }
+
+  if (which == "lower") {
+    lower
+  } else if (which == "upper") {
+    upper
+  } else {
+    data.frame(
+      confint_lwr = lower,
+      confint_upr = upper
+    )
   }
 }
 
