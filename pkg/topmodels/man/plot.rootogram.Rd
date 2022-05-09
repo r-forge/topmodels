@@ -134,12 +134,12 @@ if (require("crch")) {
   ## logistic censored model
   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
 
-  ## compute rootograms
-  r2_lm <- rootogram(m2_lm, plot = FALSE)
-  r2_crch <- rootogram(m2_crch, plot = FALSE)
+  ### compute rootograms FIXME
+  #r2_lm <- rootogram(m2_lm, plot = FALSE)
+  #r2_crch <- rootogram(m2_crch, plot = FALSE)
 
-  ## plot in single graph
-  plot(c(r2_lm, r2_crch), col = c(1, 2))
+  ### plot in single graph
+  #plot(c(r2_lm, r2_crch), col = c(1, 2))
 }
 
 #-------------------------------------------------------------------------------

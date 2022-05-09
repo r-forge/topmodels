@@ -506,12 +506,12 @@ rbind.rootogram <- c.rootogram
 #'   ## logistic censored model
 #'   m2_crch <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logistic")
 #'
-#'   ## compute rootograms
-#'   r2_lm <- rootogram(m2_lm, plot = FALSE)
-#'   r2_crch <- rootogram(m2_crch, plot = FALSE)
+#'   ### compute rootograms FIXME
+#'   #r2_lm <- rootogram(m2_lm, plot = FALSE)
+#'   #r2_crch <- rootogram(m2_crch, plot = FALSE)
 #'
-#'   ## plot in single graph
-#'   plot(c(r2_lm, r2_crch), col = c(1, 2))
+#'   ### plot in single graph
+#'   #plot(c(r2_lm, r2_crch), col = c(1, 2))
 #' }
 #'
 #' #-------------------------------------------------------------------------------
@@ -660,7 +660,7 @@ plot.rootogram <- function(x,
       plot_arg[j, c("xlim1", "xlim2")] <- range(c(xleft, xright))
     }
     if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-      plot_arg[j, c("ylim1", "ylim2")] <- range(c(ybottom, ytop, d$expected))
+      plot_arg[j, c("ylim1", "ylim2")] <- range(c(ybottom, ytop, d$expected, d$confint_lwr, d$confint_upr)) # FIXME: (ML) confint
     }
 
     ## trigger plot
@@ -706,6 +706,11 @@ plot.rootogram <- function(x,
         lty = plot_arg$expected_lty[j],
         lwd = plot_arg$expected_lwd[j]
       )
+    }
+
+    if (TRUE) {#(plot_arg$confint[j]) { #FIXME: (ML)
+      segments(xleft, d$confint_lwr, xright, d$confint_lwr)
+      segments(xleft, d$confint_upr, xright, d$confint_upr)
     }
   }
 
@@ -1309,6 +1314,47 @@ GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
 # -------------------------------------------------------------------
 # HELPER FUNCTIONS FOR GETTING AN EXTENDED ROOTOGRAM OBJECT
 # -------------------------------------------------------------------
+compute_rootogram_confint <- function(object,
+                                      level = 0.95,
+                                      nrep = 10000,
+                                      scale = c("sqrt", "raw"),
+                                      style = c("hanging", "standing", "suspended")) {
+  ## checks
+  scale <- match.arg(scale)
+  style <- match.arg(style)
+  stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+  stopifnot(is.numeric(nrep), length(nrep) == 1)
+
+  ## transform back to "raw"
+  object <- summary(object, scale = "raw", style = style, extend = FALSE)
+
+  ## helper function to compute one observed table (on input scale)
+  ytab <- function(rgram) {
+    y <- sample(rgram$mid, sum(rgram$observed), prob = rgram$expected,
+      replace = TRUE)
+    table(factor(y, levels = rgram$mid))
+  }
+  ## repeat nrep times
+  ytab <- replicate(nrep, ytab(object))
+  ## compute quantiles
+
+  ## compute quantiles
+  if (scale == "sqrt") {
+    if (style == "hanging") {
+      yq <- apply(sqrt(object$expected) - sqrt(ytab), 1, quantile, c((1 - level) / 2, 1 - (1 - level) / 2))
+    }
+  } else {
+    if (style == "hanging") {
+      yq <- apply(object$expected - ytab, 1, quantile, c((1 - level) / 2, 1 - (1 - level) / 2))
+    }
+  }
+
+  data.frame(
+    confint_lwr = yq[1, ],
+    confint_upr = yq[2, ]
+  )
+}
+
 compute_rootogram_heights <- function(expected,
                                       observed,
                                       scale = c("sqrt", "raw"),
@@ -1368,10 +1414,36 @@ summary.rootogram <- function(object,
     ## compute heights (must always be `scale = "raw"` as already transformed)
     tmp <- compute_rootogram_heights(object$expected, object$observed, scale = "raw", style = style)
 
+    ## compute confidence intervals (must be done per each group)
+    if (!any(grepl("group", names(object)))) {
+      tmp2 <- compute_rootogram_confint(
+        object, 
+        level = 0.95, 
+        nrep = 10000, 
+        scale = scale, 
+        style = style
+      )
+    } else {
+      tmp2 <- list()
+      for (i in unique(object$group)) {
+        tmp2[[i]] <- compute_rootogram_confint(
+          object[object$group == i, ], 
+          level = 0.95, 
+          nrep = 10000, 
+          scale = scale, 
+          style = style
+        )
+      }
+      tmp2 <- do.call("rbind", tmp2)
+    }
+
     rval <- transform(object,
       ymin = tmp$ymin,
-      ymax = tmp$ymax
+      ymax = tmp$ymax,
+      confint_lwr = tmp2$confint_lwr,
+      confint_upr = tmp2$confint_upr
     )
+
   } else {
     rval <- object
   }
