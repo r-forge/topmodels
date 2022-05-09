@@ -550,7 +550,7 @@ plot.qqrplot <- function(x,
                          detrend = NULL,
                          simint = NULL,
                          confint = NULL,  # FIXME: (ML) Implement different plotting styles
-                         confint_type = c("pointwise", "simultaneous"),
+                         confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
                          confint_level = 0.95,
                          ref = NULL,
                          ref_identity = TRUE,
@@ -938,7 +938,7 @@ autoplot.qqrplot <- function(object,
                              detrend = NULL,
                              simint = NULL,
                              confint = NULL,
-                             confint_type = c("pointwise", "simultaneous"),
+                             confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
                              confint_level = 0.95,
                              ref = NULL,
                              ref_identity = TRUE, 
@@ -1605,7 +1605,7 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
                              show.legend = NA, inherit.aes = TRUE,
                              xlim = NULL, n = 101, 
                              detrend = FALSE, 
-                             type = c("pointwise", "simultaneous"), level = 0.95,
+                             type = c("pointwise", "simultaneous", "tail-sensitive"), level = 0.95,
                              identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                              style = c("polygon", "line"), ...) {
 
@@ -1755,7 +1755,7 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
                             show.legend = NA, inherit.aes = TRUE,
                             xlim = NULL, n = 101, 
                             detrend = FALSE,
-                            type = c("pointwise", "simultaneous"), level = 0.95,
+                            type = c("pointwise", "simultaneous", "tail-sensitive"), level = 0.95,
                             identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                             style = c("polygon", "line"), ...) {
   style <- match.arg(style)
@@ -1860,7 +1860,7 @@ set_default_aes_qqrplot_confint <- function(style) {
 compute_qqrplot_confint <- function(x, 
                                     n, 
                                     scale = c("normal", "uniform"), 
-                                    type = c("pointwise", "simultaneous"),
+                                    type = c("pointwise", "simultaneous", "tail-sensitive"),
                                     level = 0.95, 
                                     which = c("both", "lower", "upper"), 
                                     slope = 0, 
@@ -1882,6 +1882,10 @@ compute_qqrplot_confint <- function(x,
     pFun <- pnorm
     qFun <- qnorm
   }
+
+  if (type == "tail-sensitive" && scale == "uniform") {
+    warning('Tail-sensitive confidence intervals are not implemented for uniform scale: \n * `type` set to `"simultaneous"`')
+  }
   
   ## compute pointwise or simultanous CI
   if (type == "pointwise") {
@@ -1892,14 +1896,64 @@ compute_qqrplot_confint <- function(x,
     ## add to reference line and return
     lower <- (intercept + slope * x) - rval
     upper <- (intercept + slope * x) + rval
-  } else {
+  } else if (type == "simultaneous") {
     p <- pFun(x)
     epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))  # Komogorov quantile
     lp <- pmax(p - epsilon, rep(0, length(p)))
     up <- pmin(p + epsilon, rep(1, length(p)))
     lower <- intercept + slope * qFun(lp)
     upper <- intercept + slope * qFun(up)
+  } else {
+    mu <- sigma <- NULL
+    B <- 1000
+    smp <- x
+    n <- length(x)
+
+    centerFunc <- function(x) robustbase::s_Qn(x, mu.too = TRUE)[[1]]  ## FIXME: (ML) Remove dependency again!
+    scaleFunc <- function(x) robustbase::Qn(x, finite.corr = FALSE)
+
+    upperCi <- rep(NA, n)
+    lowerCi <- rep(NA, n)
+    pValue <- matrix(NA, nrow = n, ncol = B)
+
+    # simulate data
+    sim <- NULL
+    if (is.null(mu) | is.null(sigma)) {
+      for (i in 1:B) sim <- cbind(sim, sort(rnorm(n)))
+
+      # center and scale simulated data
+      center <- apply(sim, 2, centerFunc)
+      scale <- apply(sim, 2, scaleFunc)
+      sim <- sweep(sweep(sim, 2, center, FUN = "-"), 2, scale, FUN = "/")
+
+      # convert simulated values to probabilities
+      sim <- t(apply(sim, 1, pnorm))
+    } else {
+      for (i in 1:B) sim <- cbind(sim, sort(runif(n)))
+    }
+
+    # widen the CIs to get simultanoues (100 * conf)% CIs
+    for (i in 1:n) {
+      tmp <- pbeta(sim[i, ], shape1 = i, shape2 = n + 1 - i)
+      pValue[i, ] <- apply(cbind(tmp, 1 - tmp), 1, min)
+    }
+
+    critical <- apply(pValue, 2, min)
+    criticalC <- quantile(critical, prob = 1 - level)
+
+    upperCi <- qbeta(1 - criticalC, shape1 = 1:n, shape2 = n + 1 - (1:n))
+    lowerCi <- qbeta(criticalC, shape1 = 1:n, shape2 = n + 1 - (1:n))
+
+    # translate back to sample quantiles
+    if (is.null(mu) | is.null(sigma)) {
+      upper <- qnorm(upperCi) * scaleFunc(smp) + centerFunc(smp)
+      lower <- qnorm(lowerCi) * scaleFunc(smp) + centerFunc(smp)
+    } else {
+      upper <- qnorm(upperCi) * sigma + mu
+      lower <- qnorm(lowerCi) * sigma + mu
+    }
   }
+
 
   if (which == "lower") {
     lower

@@ -95,7 +95,7 @@ geom_qqrplot_confint(
   xlim = NULL,
   n = 101,
   detrend = FALSE,
-  type = c("pointwise", "simultaneous"),
+  type = c("pointwise", "simultaneous", "tail-sensitive"),
   level = 0.95,
   identity = TRUE,
   probs = c(0.25, 0.75),

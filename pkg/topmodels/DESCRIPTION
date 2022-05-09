@@ -15,7 +15,7 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
                     comment = c(ORCID = "0000-0002-1027-3673")))
 Depends: R (>= 3.0.0)
 Imports: graphics, grDevices, stats, utils, colorspace, grid, ggplot2 
-Suggests: betareg, countreg, crch, disttree, tibble, tidyr, lmtest, MASS, tinytest, rmutil, sn
+Suggests: betareg, countreg, crch, disttree, tibble, tidyr, lmtest, MASS, tinytest, rmutil, sn, robustbase
 Description: Unified infrastructure for probabilistic models and distributional regressions:
              Computations of probabilities, densities, scores, and Hessians.
 	           Probabilistic forecasting. Diagnostic graphics like rootograms, PIT histograms,
