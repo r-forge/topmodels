@@ -1317,10 +1317,12 @@ GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
 compute_rootogram_confint <- function(object,
                                       level = 0.95,
                                       nrep = 10000,
+                                      type = c("pointwise", "simultaneous"),
                                       scale = c("sqrt", "raw"),
                                       style = c("hanging", "standing", "suspended")) {
   ## checks
   scale <- match.arg(scale)
+  type <- match.arg(type)
   style <- match.arg(style)
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
   stopifnot(is.numeric(nrep), length(nrep) == 1)
@@ -1349,10 +1351,18 @@ compute_rootogram_confint <- function(object,
     }
   }
 
-  data.frame(
-    confint_lwr = yq[1, ],
-    confint_upr = yq[2, ]
-  )
+  ## pointwise vs. simultaneous
+  if (type == "pointwise") { 
+    data.frame(
+      confint_lwr = yq[1, ],
+      confint_upr = yq[2, ]
+    )
+  } else { 
+    data.frame(
+      confint_lwr = rep(min(yq[1, ]), nrow(object)),
+      confint_upr = rep(max(yq[2, ]), nrow(object))
+    )
+  }
 }
 
 compute_rootogram_heights <- function(expected,
