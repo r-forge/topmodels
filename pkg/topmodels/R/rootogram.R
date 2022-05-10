@@ -1316,10 +1316,11 @@ GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
 # -------------------------------------------------------------------
 compute_rootogram_confint <- function(object,
                                       level = 0.95,
-                                      nrep = 10000,
+                                      nrep = 1000,
                                       type = c("pointwise", "simultaneous"),
                                       scale = c("sqrt", "raw"),
                                       style = c("hanging", "standing", "suspended")) {
+      cat("Hello World!\n")
   ## checks
   scale <- match.arg(scale)
   type <- match.arg(type)
@@ -1344,10 +1345,18 @@ compute_rootogram_confint <- function(object,
   if (scale == "sqrt") {
     if (style == "hanging") {
       yq <- apply(sqrt(object$expected) - sqrt(ytab), 1, quantile, c((1 - level) / 2, 1 - (1 - level) / 2))
+      #yq <- rbind(
+      #  rep.int(quantile(apply(sqrt(object$expected) - sqrt(ytab), 2, min), (1 - level) / 2), nrow(object)),
+      #  rep.int(quantile(apply(sqrt(object$expected) - sqrt(ytab), 2, max), 1 - (1 - level) / 2), nrow(object))
+      #)
     }
   } else {
     if (style == "hanging") {
       yq <- apply(object$expected - ytab, 1, quantile, c((1 - level) / 2, 1 - (1 - level) / 2))
+      #yq <- rbind(
+      #  rep.int(quantile(apply(object$expected - ytab, 2, min), (1 - level) / 2), nrow(object)),
+      #  rep.int(quantile(apply(object$expected - ytab, 2, max), 1 - (1 - level) / 2), nrow(object))
+      #)
     }
   }
 
@@ -1429,7 +1438,7 @@ summary.rootogram <- function(object,
       tmp2 <- compute_rootogram_confint(
         object, 
         level = 0.95, 
-        nrep = 10000, 
+        nrep = 1000, 
         scale = scale, 
         style = style
       )
@@ -1439,7 +1448,7 @@ summary.rootogram <- function(object,
         tmp2[[i]] <- compute_rootogram_confint(
           object[object$group == i, ], 
           level = 0.95, 
-          nrep = 10000, 
+          nrep = 1000, 
           scale = scale, 
           style = style
         )
