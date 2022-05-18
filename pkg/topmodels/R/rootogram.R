@@ -695,7 +695,7 @@ plot.rootogram <- function(x,
     xright <- d$mid + d$width / 2
 
     ## step elements (only needed for expected, confint)
-    z <- compute_breaks(d$mid, d$width)
+    z <- compute_breaks(d$mid, d$width, offset = TRUE)
 
     ## get xlim and ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
@@ -1494,7 +1494,7 @@ StatRootogramConfint <- ggplot2::ggproto("StatRootogramConfint", ggplot2::Stat,
 
     ## return new data.frame condition on plotting `style`
     nd <- data.frame(
-      x = compute_breaks(data$mid, data$width),
+      x = compute_breaks(data$mid, data$width, offset = TRUE),
       ymin = duplicate_last_value(ci[[1]]),
       ymax = duplicate_last_value(ci[[2]])
     )

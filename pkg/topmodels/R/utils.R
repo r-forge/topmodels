@@ -139,16 +139,28 @@ duplicate_last_value <- function(x) {
 }
 
 
-compute_breaks <- function(mids, width) {
+compute_breaks <- function(mid, width, offset = FALSE) {
 
   ## sanity checks
-  stopifnot(is.numeric(mids), is.null(dim(mids)))
+  stopifnot(is.numeric(mid), is.null(dim(mid)))
   stopifnot(is.numeric(width), is.null(dim(width)))
-  stopifnot(length(mids) == length(width))
+  stopifnot(length(mid) == length(width))
+  stopifnot(is.logical(offset))
 
-  ## compute breaks and return
-  n <- length(width)
-  c(mids - width / 2, mids[n] + width[n] / 2)
+  ## compute breaks
+  if (!offset) { 
+    n <- length(width)
+    rval <- c(mid - width / 2, mid[n] + width[n] / 2)
+  } else {
+    xleft <- mid - width / 2
+    xright <- mid + width / 2
+    rval <- c( 
+      xleft[1],
+      colMeans(rbind(xleft[-1], xright[-length(xright)])),
+      xright[length(xright)]
+    )
+  }
+  rval
 }
 
 set_aes_helper_geoms <- function(aes_geom, aes_arg, aes_default = NULL) {
