@@ -20,6 +20,7 @@ rootogram(object, ...)
   style = c("hanging", "standing", "suspended"),
   scale = c("sqrt", "raw"),
   expected = TRUE,
+  confint = TRUE,
   ref = TRUE,
   xlab = NULL,
   ylab = NULL,
@@ -63,6 +64,8 @@ roots (default) should be drawn.}
 
 \item{expected}{Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.}
 
+\item{confint}{logical. Should confident intervals be drawn?}
+
 \item{ref}{logical. Should a reference line be plotted?}
 
 \item{xlab, ylab, main}{graphical parameters.}
@@ -75,8 +78,9 @@ frequencies,} \item{expected}{expected (fitted) frequencies,} \item{x}{histogram
 interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 histogram bars,} \item{width}{widths of the histogram bars,}
 \item{height}{height of the histogram bars,} \item{line}{y-coordinates of
-the fitted curve.} Additionally, \code{style}, \code{scale}, \code{xlab},
-\code{ylab}, and \code{main} are stored as attributes.
+the fitted curve,} \item{confint_lwr, confint_upr}{lower and upper confidence interval bound.} 
+Additionally, \code{style}, \code{scale}, \code{xlab},
+\code{ylab} and \code{main}, and \code{confint_level} are stored as attributes.
 }
 \description{
 Rootograms graphically compare (square roots) of empirical frequencies with

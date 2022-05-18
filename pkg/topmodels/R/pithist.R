@@ -883,8 +883,18 @@ plot.pithist <- function(x,
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(c(xleft, xright))[xlim_idx]
     }
     if (any(ylim_idx)) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(c(0, d$observed, d$expected, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), na.rm = TRUE)[ylim_idx]
+      ylim_use <- c(
+        TRUE, 
+        rep(
+          c(TRUE, plot_arg$expected[j], plot_arg$confint[j] != "none", plot_arg$confint[j] != "none", 
+            plot_arg$simint[j], plot_arg$simint[j]), 
+          each = NROW(d)
+        )
+      )
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(
+        c(0, d$observed, d$expected, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr)[ylim_use],
+        na.rm = TRUE
+      )[ylim_idx]
     }
 
     ## trigger plot
@@ -996,17 +1006,25 @@ plot.pithist <- function(x,
     }
 
     if (any(ylim_idx) && !single_graph) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(
-          c(y, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr), 
-          na.rm = TRUE
-        )[ylim_idx]
+      ylim_use <- rep(
+        c(TRUE, plot_arg$expected[j], plot_arg$confint[j] != "none", plot_arg$confint[j] != "none", 
+          plot_arg$simint[j], plot_arg$simint[j]), 
+        each = NROW(d)
+      )
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(
+        c(d$observed, d$expected, d$confint_lwr, d$confint_upr, d$simint_lwr, d$simint_upr)[ylim_use],
+        na.rm = TRUE
+      )[ylim_idx]
     } else if (any(ylim_idx) && single_graph) {
-      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
-        range(
-          c(x$observed, x$confint_lwr, x$confint_upr, x$simint_lwr, x$simint_upr), 
-          na.rm = TRUE
-        )[ylim_idx]
+      ylim_use <- rep(
+        c(TRUE, plot_arg$expected[j], plot_arg$confint[j] != "none", plot_arg$confint[j] != "none", 
+          plot_arg$simint[j], plot_arg$simint[j]), 
+        each = NROW(x)
+      )
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(
+        c(x$observed, x$expected, x$confint_lwr, x$confint_upr, x$simint_lwr, x$simint_upr)[ylim_use],
+        na.rm = TRUE
+      )[ylim_idx]
     }
 
     ## trigger plot

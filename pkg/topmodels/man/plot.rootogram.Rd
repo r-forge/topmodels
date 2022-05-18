@@ -11,6 +11,10 @@
   scale = NULL,
   expected = NULL,
   ref = NULL,
+  confint = NULL,
+  confint_level = 0.95,
+  confint_type = c("pointwise", "simultaneous"),
+  confint_nrep = 1000,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -27,6 +31,9 @@
   expected_pch = 19,
   expected_lty = 1,
   expected_lwd = 2,
+  confint_col = "black",
+  confint_lty = 2,
+  confint_lwd = 1.75,
   ref_col = "black",
   ref_lty = 1,
   ref_lwd = 1.25,
@@ -39,6 +46,10 @@
   scale = NULL,
   expected = NULL,
   ref = NULL,
+  confint = NULL,
+  confint_level = 0.95,
+  confint_type = c("pointwise", "simultaneous"),
+  confint_nrep = 1000,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -58,6 +69,10 @@
   expected_fill = NA,
   expected_stroke = 0.5,
   expected_shape = 19,
+  confint_colour = "black",
+  confint_size = 0.5,
+  confint_linetype = 2,
+  confint_alpha = NA,
   ref_colour = "black",
   ref_size = 0.5,
   ref_linetype = 1,
@@ -77,11 +92,19 @@ roots (default) should be drawn.}
 
 \item{ref}{logical. Should a reference line be plotted?}
 
+\item{confint}{logical. Should confident intervals be drawn?}
+
+\item{confint_level}{numeric. The confidence level required.}
+
+\item{confint_type}{character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized.}
+
+\item{confint_nrep}{numeric. The repetition number of simulation for computing the confidence intervals.}
+
 \item{xlim, ylim, xlab, ylab, main, axes, box}{graphical parameters.}
 
 \item{col, border, lwd, lty, alpha_min}{graphical parameters for the histogram style part of the base plot.}
 
-\item{expected_col, expected_pch, expected_lty, expected_lwd, ref_col, ref_lty, ref_lwd, expected_colour, expected_size, expected_linetype, expected_alpha, expected_fill, expected_stroke, expected_shape, ref_colour, ref_size, ref_linetype, ref_alpha}{Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.}
+\item{expected_col, expected_pch, expected_lty, expected_lwd, ref_col, ref_lty, ref_lwd, expected_colour, expected_size, expected_linetype, expected_alpha, expected_fill, expected_stroke, expected_shape, ref_colour, ref_size, ref_linetype, ref_alpha, confint_col, confint_lty, confint_lwd, confint_colour, confint_size, confint_linetype, confint_alpha}{Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.}
 
 \item{\dots}{further graphical parameters passed to the plotting function.}
 

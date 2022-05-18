@@ -12,6 +12,10 @@
 \alias{GeomRootogramExpected}
 \alias{geom_rootogram_ref}
 \alias{GeomRootogramRef}
+\alias{stat_rootogram_confint}
+\alias{StatRootogramConfint}
+\alias{geom_rootogram_confint}
+\alias{GeomRootogramConfint}
 \title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
 \format{
 An object of class \code{GeomRootogramExpected} (inherits from \code{GeomPath}, \code{Geom}, \code{ggproto}, \code{gg}) of length 3.
@@ -80,6 +84,38 @@ geom_rootogram_ref(
   inherit.aes = TRUE,
   ...
 )
+
+stat_rootogram_confint(
+  mapping = NULL,
+  data = NULL,
+  geom = "rootogram_confint",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  level = 0.95,
+  nrep = 1000,
+  type = c("pointwise", "simultaneous"),
+  scale = c("sqrt", "raw"),
+  rootogram_style = c("hanging", "standing", "suspended"),
+  ...
+)
+
+geom_rootogram_confint(
+  mapping = NULL,
+  data = NULL,
+  stat = "rootogram_confint",
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  level = 0.95,
+  nrep = 1000,
+  type = c("pointwise", "simultaneous"),
+  scale = c("sqrt", "raw"),
+  rootogram_style = c("hanging", "standing", "suspended"),
+  ...
+)
 }
 \arguments{
 \item{mapping}{Set of aesthetic mappings created by \code{\link[ggplot2:aes]{aes()}} or
@@ -134,6 +170,14 @@ to the paired geom/stat.}
 layer, as a string.}
 
 \item{linestyle}{Character string defining one of `"both"`, `"line"` or `"point"`.}
+
+\item{level}{numeric. The confidence level required.}
+
+\item{nrep}{numeric. The repetition number of simulation for computing the confidence intervals.}
+
+\item{type}{character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized.}
+
+\item{rootogram_style}{character specifying the syle of rootogram.}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within

@@ -65,6 +65,7 @@
 #' @param scale character specifying whether raw frequencies or their square
 #' roots (default) should be drawn.
 #' @param expected Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.
+#' @param confint logical. Should confident intervals be drawn?
 #' @param ref logical. Should a reference line be plotted?
 #' @param xlab,ylab,main graphical parameters.
 #' @param \dots further graphical parameters passed to the plotting function.
@@ -75,8 +76,9 @@
 #' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
 #' histogram bars,} \item{width}{widths of the histogram bars,}
 #' \item{height}{height of the histogram bars,} \item{line}{y-coordinates of
-#' the fitted curve.} Additionally, \code{style}, \code{scale}, \code{xlab},
-#' \code{ylab}, and \code{main} are stored as attributes.
+#' the fitted curve,} \item{confint_lwr, confint_upr}{lower and upper confidence interval bound.} 
+#' Additionally, \code{style}, \code{scale}, \code{xlab},
+#' \code{ylab} and \code{main}, and \code{confint_level} are stored as attributes.
 #' @note Note that there is also a \code{\link[vcd]{rootogram}} function in the
 #' \pkg{vcd} package that is similar to the \code{numeric} method provided
 #' here. However, it is much more limited in scope, hence a function has been
@@ -161,6 +163,7 @@ rootogram.default <- function(
                               style = c("hanging", "standing", "suspended"),
                               scale = c("sqrt", "raw"),
                               expected = TRUE,
+                              confint = TRUE,
                               ref = TRUE,
                               xlab = NULL,
                               ylab = NULL,
@@ -171,7 +174,7 @@ rootogram.default <- function(
   # -------------------------------------------------------------------
   ## sanity checks
   ## * `object`, `newdata` w/i `newresponse()`
-  ## * `expected`, `ref`, `...` in `plot()` and `autoplot()`
+  ## * `expected`, `ref`, `confint`...` in `plot()` and `autoplot()`
   stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
   stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1))
   stopifnot(is.null(xlab) || (length(xlab) == 1 && is.character(xlab)))
@@ -300,6 +303,7 @@ rootogram.default <- function(
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
   attr(rval, "expected") <- expected
+  attr(rval, "confint") <- confint
   attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
@@ -373,6 +377,7 @@ c.rootogram <- function(...) {
   scale <- prepare_arg_for_attributes(rval, "scale", force_single = TRUE)
   expected <- prepare_arg_for_attributes(rval, "expected")
   ref <- prepare_arg_for_attributes(rval, "ref")
+  confint <- prepare_arg_for_attributes(rval, "confint")
 
   ## fix `ylabel` according to possible new `scale`
   if (scale == "sqrt") {
@@ -388,7 +393,7 @@ c.rootogram <- function(...) {
   all_names <- unique(unlist(lapply(rval, names)))
 
   ## get both objects on the same scale
-  if (any(grepl("ymin|ymax", all_names))) {
+  if (any(grepl("ymin|ymax|cofint_lwr|confint_upr", all_names))) {
     rval <- lapply(rval, summary.rootogram, style = style, scale = scale, extend = TRUE)
   } else {
     rval <- lapply(rval, summary.rootogram, style = style, scale = scale, extend = FALSE)
@@ -416,6 +421,7 @@ c.rootogram <- function(...) {
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
   attr(rval, "expected") <- expected
+  attr(rval, "confint") <- confint
   attr(rval, "ref") <- ref
   attr(rval, "xlab") <- xlab
   attr(rval, "ylab") <- ylab
@@ -460,13 +466,17 @@ rbind.rootogram <- c.rootogram
 #' roots (default) should be drawn.
 #' @param expected Should the expected (fitted) frequencies be plotted?
 #' @param ref logical. Should a reference line be plotted?
+#' @param confint logical. Should confident intervals be drawn?
+#' @param confint_level numeric. The confidence level required.
+#' @param confint_type character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized. 
+#' @param confint_nrep numeric. The repetition number of simulation for computing the confidence intervals.
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the histogram style part of the base plot.
 #' @param colour,fill,size,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
-#' @param expected_col,expected_pch,expected_lty,expected_lwd,ref_col,ref_lty,ref_lwd,expected_colour,expected_size,expected_linetype,expected_alpha,expected_fill,expected_stroke,expected_shape,ref_colour,ref_size,ref_linetype,ref_alpha Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
+#' @param expected_col,expected_pch,expected_lty,expected_lwd,ref_col,ref_lty,ref_lwd,expected_colour,expected_size,expected_linetype,expected_alpha,expected_fill,expected_stroke,expected_shape,ref_colour,ref_size,ref_linetype,ref_alpha,confint_col,confint_lty,confint_lwd,confint_colour,confint_size,confint_linetype,confint_alpha Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
@@ -546,6 +556,10 @@ plot.rootogram <- function(x,
                            scale = NULL,
                            expected = NULL,
                            ref = NULL,
+                           confint = NULL,
+                           confint_level = 0.95,
+                           confint_type = c("pointwise", "simultaneous"),
+                           confint_nrep = 1000,
                            xlim = c(NA, NA),
                            ylim = c(NA, NA),
                            xlab = NULL,
@@ -562,6 +576,9 @@ plot.rootogram <- function(x,
                            expected_pch = 19,
                            expected_lty = 1,
                            expected_lwd = 2,
+                           confint_col = "black",
+                           confint_lty = 2,
+                           confint_lwd = 1.75,
                            ref_col = "black",
                            ref_lty = 1,
                            ref_lwd = 1.25,
@@ -577,6 +594,7 @@ plot.rootogram <- function(x,
   scale <- use_arg_from_attributes(x, "scale", default = "sqrt", force_single = TRUE)
   expected <- use_arg_from_attributes(x, "expected", default = TRUE, force_single = FALSE)
   ref <- use_arg_from_attributes(x, "ref", default = TRUE, force_single = FALSE)
+  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
 
   ## sanity checks
   ## * lengths of most arguments are checked by recycling
@@ -586,13 +604,33 @@ plot.rootogram <- function(x,
   stopifnot(is.logical(box))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+  stopifnot(is.logical(confint))
+  stopifnot(
+    is.numeric(confint_level),
+    length(confint_level) == 1,
+    confint_level >= 0,
+    confint_level <= 1
+  )
+  stopifnot(
+    is.numeric(confint_nrep),
+    length(confint_nrep) == 1,
+    confint_nrep >= 0
+  )
 
   ## match arguments
   scale <- match.arg(scale, c("sqrt", "raw"))
   style <- match.arg(style, c("hanging", "standing", "suspended"))
+  confint_type <- match.arg(confint_type)
 
   ## extend input object on correct scale (compute heights, ...)
-  x <- summary(x, scale = scale, style = style)
+  x <- summary(
+    x, 
+    scale = scale, 
+    style = style,
+    confint_level = confint_level,
+    confint_type = confint_type,
+    confint_nrep = confint_nrep
+  )
 
   ## convert always to data.frame
   x <- as.data.frame(x)
@@ -615,12 +653,13 @@ plot.rootogram <- function(x,
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
 
   ## recycle arguments for plotting to match the number of groups
-  plot_arg <- data.frame(1:n, expected, ref, 
+  plot_arg <- data.frame(1:n, expected, ref, confint,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     axes, box,
     border, col, lwd, lty, alpha_min,
     expected_col, expected_pch, expected_lty, expected_lwd, 
-    ref_col, ref_lty, ref_lwd
+    ref_col, ref_lty, ref_lwd,
+    confint_col, confint_lty, confint_lwd
   )[, -1]
 
   ## prepare annotation
@@ -655,12 +694,24 @@ plot.rootogram <- function(x,
     xleft <- d$mid - d$width / 2
     xright <- d$mid + d$width / 2
 
+    ## step elements (only needed for expected, confint)
+    z <- compute_breaks(d$mid, d$width)
+
     ## get xlim and ylim
-    if (any(is.na(c(plot_arg$xlim1[j], plot_arg$xlim2[j])))) {
-      plot_arg[j, c("xlim1", "xlim2")] <- range(c(xleft, xright))
+    ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j]))
+    xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j]))
+    if (any(xlim_idx)) {
+      plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(c(xleft, xright))[xlim_idx]
     }
-    if (any(is.na(c(plot_arg$ylim1[j], plot_arg$ylim2[j])))) {
-      plot_arg[j, c("ylim1", "ylim2")] <- range(c(ybottom, ytop, d$expected, d$confint_lwr, d$confint_upr)) # FIXME: (ML) confint
+    if (any(ylim_idx)) {
+      ylim_use <- rep(
+        c(TRUE, TRUE, plot_arg$expected[j] != "none", plot_arg$confint[j], plot_arg$confint[j]),
+          each = NROW(d)
+      )
+      plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <- range(
+        c(d$ymin, d$ymax, d$expected, d$confint_lwr, d$confint_upr)[ylim_use],
+        na.rm = TRUE
+      )[ylim_idx]
     }
 
     ## trigger plot
@@ -708,9 +759,26 @@ plot.rootogram <- function(x,
       )
     }
 
-    if (TRUE) {#(plot_arg$confint[j]) { #FIXME: (ML)
-      segments(xleft, d$confint_lwr, xright, d$confint_lwr)
-      segments(xleft, d$confint_upr, xright, d$confint_upr)
+    if (plot_arg$confint[j]) {
+      ## lower confint line
+      confint_lwr_y <- duplicate_last_value(d$confint_lwr)
+      lines(
+        confint_lwr_y ~ z,
+        type = "s",
+        col = plot_arg$confint_col[j],
+        lty = plot_arg$confint_lty[j],
+        lwd = plot_arg$confint_lwd[j]
+      )
+
+      ## upper confint line
+      confint_upr_y <- duplicate_last_value(d$confint_upr)
+      lines(
+        confint_upr_y ~ z,
+        type = "s",
+        col = plot_arg$confint_col[j],
+        lty = plot_arg$confint_lty[j],
+        lwd = plot_arg$confint_lwd[j]
+      )
     }
   }
 
@@ -736,6 +804,10 @@ autoplot.rootogram <- function(object,
                                scale = NULL,
                                expected = NULL,
                                ref = NULL,
+                               confint = NULL,
+                               confint_level = 0.95,
+                               confint_type = c("pointwise", "simultaneous"),
+                               confint_nrep = 1000,
                                xlim = c(NA, NA),
                                ylim = c(NA, NA),
                                xlab = NULL,
@@ -755,6 +827,10 @@ autoplot.rootogram <- function(object,
                                expected_fill = NA,
                                expected_stroke = 0.5,
                                expected_shape = 19,
+                               confint_colour = "black",
+                               confint_size = 0.5,
+                               confint_linetype = 2,
+                               confint_alpha = NA,
                                ref_colour = "black",
                                ref_size = 0.5,
                                ref_linetype = 1,
@@ -771,6 +847,7 @@ autoplot.rootogram <- function(object,
   scale <- use_arg_from_attributes(object, "scale", default = "sqrt", force_single = TRUE)
   expected <- use_arg_from_attributes(object, "expected", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(object, "ref", default = TRUE, force_single = TRUE)
+  confint <- use_arg_from_attributes(object, "confint", default = TRUE, force_single = TRUE)
   xlab <- use_arg_from_attributes(object, "xlab", default = "Rootogram", force_single = TRUE)
   ylab <- use_arg_from_attributes(object, "ylab",
     default = if (scale == "raw") "Frequency" else "sqrt(Frequency)", force_single = TRUE
@@ -791,6 +868,21 @@ autoplot.rootogram <- function(object,
   stopifnot(is.logical(ref))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
+  stopifnot(is.logical(confint))
+  stopifnot(
+    is.numeric(confint_level),
+    length(confint_level) == 1,
+    confint_level >= 0,
+    confint_level <= 1
+  )
+  stopifnot(
+    is.numeric(confint_nrep),
+    length(confint_nrep) == 1,
+    confint_nrep >= 0
+  )
+
+  ## match arguments
+  confint_type <- match.arg(confint_type)
 
   ## get line style for expected
   if (isFALSE(expected)) {
@@ -886,6 +978,21 @@ autoplot.rootogram <- function(object,
         size = ref_size,
         linetype = ref_linetype,
         alpha = ref_alpha,
+      )
+  }
+
+  ## add confint
+  if (confint) { 
+    rval <- rval +
+      geom_rootogram_confint(
+        level = confint_level,
+        type = confint_type,
+        scale = scale,
+        rootogram_style = style,
+        colour = confint_colour,
+        size = confint_size,
+        linetype = confint_linetype,
+        alpha = confint_alpha
       )
   }
 
@@ -1053,6 +1160,10 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #' @param style character specifying the syle of rootogram (see below).
 #' @param scale character specifying whether values should be transformed to the square root scale (not checking for original scale, so maybe applied again).
 #' @param linestyle Character string defining one of `"both"`, `"line"` or `"point"`.
+#' @param level numeric. The confidence level required.
+#' @param type character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized. 
+#' @param nrep numeric. The repetition number of simulation for computing the confidence intervals.
+#' @param rootogram_style character specifying the syle of rootogram.
 #' @examples
 #' if (require("ggplot2")) {
 #'   ## Fit model
@@ -1310,26 +1421,205 @@ GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
   required_aes = NULL
 )
 
+# -------------------------------------------------------------------
+# GGPLOT2 IMPLEMENTATIONS FOR `geom_rootogram_confint()`
+# -------------------------------------------------------------------
+
+#' @rdname geom_rootogram
+#' @export
+stat_rootogram_confint <- function(mapping = NULL,
+                                   data = NULL,
+                                   geom = "rootogram_confint",
+                                   position = "identity",
+                                   na.rm = FALSE,
+                                   show.legend = NA,
+                                   inherit.aes = TRUE,
+                                   level = 0.95,
+                                   nrep = 1000,
+                                   type = c("pointwise", "simultaneous"),
+                                   scale = c("sqrt", "raw"),
+                                   rootogram_style =  c("hanging", "standing", "suspended"),
+                                   ...) {
+  type <- match.arg(type)
+  scale <- match.arg(scale)
+  rootogram_style <- match.arg(rootogram_style)
+
+  ggplot2::layer(
+    stat = StatRootogramConfint,
+    mapping = mapping,
+    data = data,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      level = level,
+      nrep = nrep,
+      type = type,
+      scale = scale,
+      rootogram_style = rootogram_style,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_rootogram
+#' @format NULL
+#' @usage NULL
+#' @export
+StatRootogramConfint <- ggplot2::ggproto("StatRootogramConfint", ggplot2::Stat,
+  required_aes = c("observed", "expected", "mid", "width"),
+  compute_group = function(data,
+                           scales,
+                           level = 0.95,
+                           nrep = 1000,
+                           type = "pointwise",
+                           scale = "sqrt",
+                           rootogram_style = "hanging") {
+
+    ## compute ci interval
+    ci <- compute_rootogram_confint(
+      observed = data$observed,
+      expected = data$expected,
+      mid = data$mid,
+      width = data$width,
+      level = level,
+      nrep = nrep,
+      type = type,
+      scale = scale,
+      style = rootogram_style
+    )
+
+    ## return new data.frame condition on plotting `style`
+    nd <- data.frame(
+      x = compute_breaks(data$mid, data$width),
+      ymin = duplicate_last_value(ci[[1]]),
+      ymax = duplicate_last_value(ci[[2]])
+    )
+    nd
+  }
+)
+
+
+#' @rdname geom_rootogram
+#' @export
+geom_rootogram_confint <- function(mapping = NULL,
+                                   data = NULL,
+                                   stat = "rootogram_confint",
+                                   position = "identity",
+                                   na.rm = FALSE,
+                                   show.legend = NA,
+                                   inherit.aes = TRUE,
+                                   level = 0.95,
+                                   nrep = 1000,
+                                   type = c("pointwise", "simultaneous"),
+                                   scale = c("sqrt", "raw"),
+                                   rootogram_style =  c("hanging", "standing", "suspended"),
+                                   ...) {
+  type <- match.arg(type)
+  scale <- match.arg(scale)
+  rootogram_style <- match.arg(rootogram_style)
+
+  ggplot2::layer(
+    geom = GeomRootogramConfint,
+    mapping = mapping,
+    data = data,
+    stat = stat,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      na.rm = na.rm,
+      level = level,
+      nrep = nrep,
+      type = type,
+      scale = scale,
+      rootogram_style = rootogram_style,
+      ...
+    )
+  )
+}
+
+
+#' @rdname geom_rootogram
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomRootogramConfint <- ggplot2::ggproto("GeomRootogramConfint", ggplot2::Geom,
+  required_aes = c("x", "ymin", "ymax"),
+
+  extra_params = c("na.rm"),
+
+  # TODO: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
+  handle_na = function(data, params) {
+    data
+  },
+
+  ## Setting up all defaults needed for `GeomPolygon` and `GeomStep`
+  default_aes = ggplot2::aes(
+    colour = "black",
+    size = 0.5,
+    linetype = 2,
+    alpha = NA,
+    yintercept = 0
+  ),
+
+  draw_panel = function(data, panel_params, coord,
+                        linejoin = "mitre", direction = "hv") {
+
+    ## Join two Grobs
+    data1 <- transform(data,
+      y = ymin
+    )
+    data2 <- transform(data,
+      y = ymax
+    )
+    grid::grobTree(
+      ggplot2::GeomStep$draw_panel(data1, panel_params, coord, direction),
+      ggplot2::GeomStep$draw_panel(data2, panel_params, coord, direction)
+    )
+  },
+  draw_key = function(data, params, size) {
+    draw_key_path(data, params, size)
+  }
+)
+
 
 # -------------------------------------------------------------------
 # HELPER FUNCTIONS FOR GETTING AN EXTENDED ROOTOGRAM OBJECT
 # -------------------------------------------------------------------
 compute_rootogram_confint <- function(object,
+                                      observed,
+                                      expected,
+                                      mid,
+                                      width,
                                       level = 0.95,
                                       nrep = 1000,
                                       type = c("pointwise", "simultaneous"),
                                       scale = c("sqrt", "raw"),
                                       style = c("hanging", "standing", "suspended")) {
-      cat("Hello World!\n")
+
   ## checks
   scale <- match.arg(scale)
   type <- match.arg(type)
   style <- match.arg(style)
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
-  stopifnot(is.numeric(nrep), length(nrep) == 1)
+  stopifnot(is.numeric(nrep), length(nrep) == 1, nrep >= 0)
 
   ## transform back to "raw"
-  object <- summary(object, scale = "raw", style = style, extend = FALSE)
+  if (!missing(object)) {
+    object <- summary(object, scale = "raw", style = style, extend = FALSE)
+  } else if (!missing(observed) & !missing(expected) & !missing(mid) & !missing(width)) {
+    object <- if (scale == "raw") {
+      data.frame(observed, expected, mid, width) 
+    } else {
+      data.frame(observed^2, expected^2, mid, width)
+    }
+  } else {
+    stop("No appropriate input data is given.")
+  }
 
   ## helper function to compute one observed table (on input scale)
   ytab <- function(rgram) {
@@ -1339,39 +1629,40 @@ compute_rootogram_confint <- function(object,
   }
   ## repeat nrep times
   ytab <- replicate(nrep, ytab(object))
-  ## compute quantiles
 
-  ## compute quantiles
+  ## compute CIs
   if (scale == "sqrt") {
-    if (style == "hanging") {
+    if (type == "pointwise") {
       yq <- apply(sqrt(object$expected) - sqrt(ytab), 1, quantile, c((1 - level) / 2, 1 - (1 - level) / 2))
-      #yq <- rbind(
-      #  rep.int(quantile(apply(sqrt(object$expected) - sqrt(ytab), 2, min), (1 - level) / 2), nrow(object)),
-      #  rep.int(quantile(apply(sqrt(object$expected) - sqrt(ytab), 2, max), 1 - (1 - level) / 2), nrow(object))
-      #)
+    } else {
+      yq <- rbind(
+        rep.int(quantile(apply(sqrt(object$expected) - sqrt(ytab), 2, min), (1 - level) / 2), nrow(object)),
+        rep.int(quantile(apply(sqrt(object$expected) - sqrt(ytab), 2, max), 1 - (1 - level) / 2), nrow(object))
+      )
     }
+
+    if (style == "standing") yq <- rep(sqrt(object$expected), each = 2) + yq
   } else {
-    if (style == "hanging") {
+    if (type == "pointwise") {
       yq <- apply(object$expected - ytab, 1, quantile, c((1 - level) / 2, 1 - (1 - level) / 2))
-      #yq <- rbind(
-      #  rep.int(quantile(apply(object$expected - ytab, 2, min), (1 - level) / 2), nrow(object)),
-      #  rep.int(quantile(apply(object$expected - ytab, 2, max), 1 - (1 - level) / 2), nrow(object))
-      #)
+    } else {
+      yq <- rbind(
+        rep.int(quantile(apply(object$expected - ytab, 2, min), (1 - level) / 2), nrow(object)),
+        rep.int(quantile(apply(object$expected - ytab, 2, max), 1 - (1 - level) / 2), nrow(object))
+      )
     }
+    if (style == "standing") yq <- rep(object$expected, each = 2) + yq
   }
 
-  ## pointwise vs. simultaneous
-  if (type == "pointwise") { 
-    data.frame(
-      confint_lwr = yq[1, ],
-      confint_upr = yq[2, ]
-    )
-  } else { 
-    data.frame(
-      confint_lwr = rep(min(yq[1, ]), nrow(object)),
-      confint_upr = rep(max(yq[2, ]), nrow(object))
-    )
-  }
+  ## return
+  df <- data.frame(
+    confint_lwr = yq[1, ],
+    confint_upr = yq[2, ]
+  )
+
+  print(df)
+  df
+  
 }
 
 compute_rootogram_heights <- function(expected,
@@ -1401,6 +1692,9 @@ compute_rootogram_heights <- function(expected,
 summary.rootogram <- function(object,
                               scale = NULL,
                               style = NULL,
+                              confint_level = 0.95,
+                              confint_type = c("pointwise", "simultaneous"),
+                              confint_nrep = 1000,
                               extend = TRUE,
                               ...) {
 
@@ -1437,8 +1731,9 @@ summary.rootogram <- function(object,
     if (!any(grepl("group", names(object)))) {
       tmp2 <- compute_rootogram_confint(
         object, 
-        level = 0.95, 
-        nrep = 1000, 
+        level = confint_level, 
+        type = confint_type,
+        nrep = confint_nrep, 
         scale = scale, 
         style = style
       )
@@ -1447,8 +1742,9 @@ summary.rootogram <- function(object,
       for (i in unique(object$group)) {
         tmp2[[i]] <- compute_rootogram_confint(
           object[object$group == i, ], 
-          level = 0.95, 
-          nrep = 1000, 
+          level = confint_level, 
+          type = confint_type,
+          nrep = confint_nrep, 
           scale = scale, 
           style = style
         )
