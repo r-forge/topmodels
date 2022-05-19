@@ -1,0 +1,557 @@
+---
+title: 'CIs Comparison: `qqplotr` and `topmodels`'
+output:
+  html_document:
+    df_print: paged
+---
+
+Start by loading the qqplotr package:
+
+```{r echo=TRUE, message=FALSE}
+require(qqplotr)
+require(patchwork)
+if(!require("devtools")) install.packages("devtools")
+install_svn("svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels",
+            revision = "r1575", quiet = TRUE, upgrade = "never")
+library("topmodels")
+```
+## `qqplotr` [vignette](https://aloy.github.io/qqplotr/)
+
+Let’s start by simulating from a standard Normal distribution:
+
+```{r}
+set.seed(0)
+smp <- data.frame(norm = rnorm(100))
+```
+
+Then, we use the provided stat_qq_* functions to construct a complete Q-Q plot with the points, reference line, and the confidence bands. As default, the standard Q-Q Normal plot with Normal confidence bands is constructed:
+
+```{r}
+gg <- ggplot(data = smp, mapping = aes(sample = norm)) +
+    stat_qq_band() +
+    stat_qq_line() +
+    stat_qq_point() +
+    labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
+gg
+```
+
+As we can see, all the points lie within the confidence bands, which is expected for the given distribution.
+
+As previously described in the Details section, three confidence bands constructs are available, which may be adjusted with the bandType parameter. Here, we may use the geom_qq_band instead of stat_qq_band, which permits a little more flexibility with the graphical parameters when constructing and visualizing different confidence bands.
+
+```{r}
+gg <- ggplot(data = smp, mapping = aes(sample = norm)) +
+    geom_qq_band(bandType = "ks", mapping = aes(fill = "KS"), alpha = 0.5) +
+    geom_qq_band(bandType = "ts", mapping = aes(fill = "TS"), alpha = 0.5) +
+    geom_qq_band(bandType = "pointwise", mapping = aes(fill = "Normal"), alpha = 0.5) +
+    geom_qq_band(bandType = "boot", mapping = aes(fill = "Bootstrap"), alpha = 0.5) +
+    stat_qq_line() +
+    stat_qq_point() +
+    labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+    scale_fill_discrete("Bandtype")
+gg
+```
+
+## Create `topmodel` object
+
+As `qqplotr` does not work with model objects, I squeeze the same simulated data into a `topmodels` `qqrplot` object: 
+```{r}
+tmp_model <- lm(dist ~ speed, data = cars)
+tmp_qqr <- qqrplot(tmp_model, plot = FALSE)
+
+q2q <- function(y) qnorm(ppoints(length(y)))[order(order(y))]
+compute_qthe <- function(x) apply(x, 2L, q2q)
+qqr <- data.frame(
+  observed = smp$norm, 
+  expected = compute_qthe(smp),
+ simint_observed_lwr = NA,
+ simint_observed_upr = NA,
+ simint_observed_expected = NA
+)
+
+attributes(qqr) <- attributes(tmp_qqr)
+attr(qqr, "row.names") <- seq.int(1, length(smp$norm))
+```
+
+## Plot comparison
+
+### Point-wise CIs
+
+Let's now compare the various implementations. Be aware, that `qqplotr` always plots polygons (with `geom_ribbon()`) for the various CI, whereas in `topmodels` the CI are visualized regardless the data using `curve()` etc. This allows us to plot also CI for areas without any data as typically seen in `wormplots`.
+
+```{r}
+qq1_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
+  geom_qq_band(
+    bandType = "pointwise", 
+    dparams = list(mean = 0, sd = 1),
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75), 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    dparams = list(mean = 0, sd = 1),
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75),
+    colour = "red"
+  ) +
+  stat_qq_point(
+    dparams = list(mean = 0, sd = 1),
+    colour = "black"
+  ) +
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('qqrplot')
+
+qq1_topmodels <- ggplot(qqr, aes(x = expected, y = observed)) + 
+  geom_qqrplot_confint(
+    type = "pointwise",
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    colour = "black"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('topmodels')
+
+qq1_combined <- ggplot(data = smp) +
+  geom_qq_band(
+    mapping = aes(sample = norm), 
+    bandType = "pointwise", 
+    dparams = list(mean = 0, sd = 1),
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75), 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    dparams = list(mean = 0, sd = 1),
+    mapping = aes(sample = norm), 
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75),
+    colour = "red"
+  ) +
+  stat_qq_point(
+    dparams = list(mean = 0, sd = 1),
+    mapping = aes(sample = norm), 
+    colour = "red"
+  ) +
+  geom_qqrplot_confint(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    type = "pointwise",
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    colour = "blue"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('combined')
+
+patchwork <- qq1_qqplotr + qq1_topmodels + qq1_combined
+patchwork + plot_annotation(
+  title = "QQ Plot (normal scale) with pointwise confidence intervals",
+  subtitle = "without identity reference line"
+)
+```
+
+```{r}
+qq1b_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
+  geom_qq_band(
+    bandType = "pointwise", 
+    identity = TRUE, 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    identity = TRUE, 
+    colour = "black"
+  ) +
+  stat_qq_point(
+    colour = "black"
+  ) +
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('qqrplot')
+
+qq1b_topmodels <- ggplot(qqr, aes(x = expected, y = observed)) + 
+  geom_qqrplot_confint(
+    type = "pointwise",
+    identity = TRUE, 
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    identity = TRUE, 
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    colour = "blue"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('topmodels')
+
+qq1b_combined <- ggplot(data = smp) +
+  geom_qq_band(
+    mapping = aes(sample = norm), 
+    bandType = "pointwise", 
+    identity = TRUE, 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    mapping = aes(sample = norm), 
+    identity = TRUE, 
+    colour = "red"
+  ) +
+  stat_qq_point(
+    mapping = aes(sample = norm), 
+    colour = "red"
+  ) +
+  geom_qqrplot_confint(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    type = "pointwise",
+    identity = TRUE, 
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    identity = TRUE, 
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    colour = "blue"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('combined')
+
+patchwork <- qq1b_qqplotr + qq1b_topmodels + qq1b_combined
+patchwork + plot_annotation(
+  title = "QQ Plot (normal scale) with pointwise confidence intervals",
+  subtitle = "with identity reference line"
+)
+```
+
+### Simultaneous CIs
+
+```{r}
+qq2_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
+  geom_qq_band(
+    bandType = "ks", 
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75), 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75),
+    colour = "red"
+  ) +
+  stat_qq_point(
+    colour = "black"
+  ) +
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('qqrplot')
+
+qq2_topmodels <- ggplot(qqr, aes(x = expected, y = observed)) + 
+  geom_qqrplot_confint(
+    type = "simultaneous",
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    colour = "black"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('topmodels')
+
+qq2_combined <- ggplot(data = smp) +
+  geom_qq_band(
+    mapping = aes(sample = norm), 
+    bandType = "ks", 
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75), 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    mapping = aes(sample = norm), 
+    identity = FALSE, 
+    qprobs = c(0.25, 0.75),
+    colour = "red"
+  ) +
+  stat_qq_point(
+    mapping = aes(sample = norm), 
+    colour = "red"
+  ) +
+  geom_qqrplot_confint(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    type = "simultaneous",
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    identity = FALSE, 
+    probs = c(0.25, 0.75),
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    colour = "blue"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('combined')
+
+patchwork <- qq2_qqplotr + qq2_topmodels + qq2_combined
+patchwork + plot_annotation(
+  title = "QQ Plot (normal scale) with simultaneous confidence intervals",
+  subtitle = "without identity reference line"
+)
+```
+
+```{r}
+qq2b_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
+  geom_qq_band(
+    bandType = "ks", 
+    identity = TRUE, 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    identity = TRUE, 
+    colour = "black"
+  ) +
+  stat_qq_point(
+    colour = "black"
+  ) +
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('qqrplot')
+
+qq2b_topmodels <- ggplot(qqr, aes(x = expected, y = observed)) + 
+  geom_qqrplot_confint(
+    type = "simultaneous",
+    identity = TRUE, 
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    identity = TRUE, 
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    colour = "blue"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('topmodels')
+
+qq2b_combined <- ggplot(data = smp) +
+  geom_qq_band(
+    mapping = aes(sample = norm), 
+    bandType = "ks", 
+    identity = TRUE, 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    mapping = aes(sample = norm), 
+    identity = TRUE, 
+    colour = "red"
+  ) +
+  stat_qq_point(
+    mapping = aes(sample = norm), 
+    colour = "red"
+  ) +
+  geom_qqrplot_confint(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    type = "simultaneous",
+    identity = TRUE, 
+    fill = "blue"
+  ) + 
+  geom_qqrplot_ref(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    identity = TRUE, 
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    colour = "blue"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('combined')
+
+patchwork <- qq2b_qqplotr + qq2b_topmodels + qq2b_combined
+patchwork + plot_annotation(
+  title = "QQ Plot (normal scale) with simultaneous confidence intervals",
+  subtitle = "with identity reference line"
+)
+```
+
+### Tail-sensitive CIs
+
+Here, we have the problem that in the current implementation we need the observed and expected data points which `geom_qqrplot_confint()` does not (yet) support. 
+
+```{r}
+qq3_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
+  geom_qq_band(
+    bandType = "ts", 
+    identity = TRUE, 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    identity = TRUE, 
+    colour = "red"
+  ) +
+  stat_qq_point(
+    colour = "black"
+  ) +
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('qqrplot')
+
+tmp <- topmodels:::compute_qqrplot_confint(x = sort(qqr$observed), n = length(qqr$observed), type = "tail-sensitive")
+qqr2 <- cbind(qqr, tmp)
+
+qq3_topmodels <- ggplot(qqr2, aes(x = expected, y = observed)) + 
+  geom_ribbon(
+    mapping = aes(x = sort(expected), ymin = confint_lwr, ymax = confint_upr), 
+    colour = NA, 
+    fill = "blue", 
+    alpha = 0.2
+  ) +
+  geom_qqrplot_ref(
+    identity = TRUE, 
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    colour = "black"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('topmodels')
+
+qq3_combined <- ggplot(data = smp) +
+  geom_qq_band(
+    mapping = aes(sample = norm), 
+    bandType = "ts", 
+    identity = TRUE, 
+    fill = "red", alpha = 0.5, show.legend = FALSE
+  ) +
+  stat_qq_line(
+    mapping = aes(sample = norm), 
+    identity = TRUE, 
+    colour = "red"
+  ) +
+  stat_qq_point(
+    mapping = aes(sample = norm), 
+    colour = "red"
+  ) +
+  geom_ribbon(
+    data = qqr2, 
+    mapping = aes(x = sort(expected), ymin = confint_lwr, ymax = confint_upr), 
+    colour = NA, 
+    fill = "blue", 
+    alpha = 0.2
+  ) +
+  geom_qqrplot_ref(
+    data = qqr2, 
+    mapping = aes(x = expected, y = observed),
+    identity = TRUE,
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    data = qqr, 
+    mapping = aes(x = expected, y = observed),
+    colour = "blue"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('combined')
+
+patchwork <- qq3_qqplotr + qq3_topmodels + qq3_combined
+patchwork + plot_annotation(
+  title = "QQ Plot (normal scale) with tail-sensitive confidence intervals",
+  subtitle = "with identity reference line"
+)
+```
+
+Trying to intimate what `geom_qqrplot_confint()` currently does:
+
+```{r}
+x <- seq(min(qqr$expected), max(qqr$expected), length.out = 100)
+tmp <- topmodels:::compute_qqrplot_confint(
+  x = x,
+  n = 100, 
+  type = "tail-sensitive"
+)
+qqr3 <- cbind(qqr, tmp, x)
+
+qq3b_topmodels <- ggplot(qqr3, aes(x = expected, y = observed)) + 
+  geom_ribbon(
+    mapping = aes(x = x, ymin = confint_lwr, ymax = confint_upr), 
+    colour = NA, 
+    fill = "blue", 
+    alpha = 0.2
+  ) +
+  geom_qqrplot_ref(
+    identity = TRUE, 
+    colour = "blue"
+  ) + 
+  geom_qqrplot(
+    colour = "black"
+  ) + 
+  coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle('alternativ topmodels')
+
+patchwork <- qq3_topmodels + qq3b_topmodels
+patchwork + plot_annotation(
+  title = "QQ Plot (normal scale) with tail-sensitive confidence intervals",
+  subtitle = "with identity reference line"
+)
+```
+Obviously this does not work. But shouldn't that still be working, e.g., for a perfect prediction where all points lie on the reference line?!
+
+## Summary
+Hence current issues are:
+
+* Are the various implementations of the CIs correct.
+* Why do the data points vary between `qqplotr` and `qqrplot`.
+* Can tail sensitive CIs also be implemented in order to work with `curve()` etc.
+
