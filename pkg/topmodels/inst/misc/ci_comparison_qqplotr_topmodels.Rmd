@@ -12,7 +12,7 @@ require(qqplotr)
 require(patchwork)
 if(!require("devtools")) install.packages("devtools")
 install_svn("svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels",
-            revision = "r1575", quiet = TRUE, upgrade = "never")
+            revision = "r1577", quiet = TRUE, upgrade = "never")
 library("topmodels")
 ```
 ## `qqplotr` [vignette](https://aloy.github.io/qqplotr/)
@@ -73,7 +73,7 @@ attributes(qqr) <- attributes(tmp_qqr)
 attr(qqr, "row.names") <- seq.int(1, length(smp$norm))
 ```
 
-## Plot comparison
+## Comparison of QQ Plots
 
 ### Point-wise CIs
 
@@ -177,14 +177,17 @@ patchwork + plot_annotation(
 qq1b_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
   geom_qq_band(
     bandType = "pointwise", 
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
     identity = TRUE, 
+    dparams = list(mean = 0, sd = 1),
     colour = "black"
   ) +
   stat_qq_point(
+    dparams = list(mean = 0, sd = 1),
     colour = "black"
   ) +
   coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
@@ -212,16 +215,19 @@ qq1b_combined <- ggplot(data = smp) +
   geom_qq_band(
     mapping = aes(sample = norm), 
     bandType = "pointwise", 
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     colour = "red"
   ) +
   stat_qq_point(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     colour = "red"
   ) +
   geom_qqrplot_confint(
@@ -259,16 +265,19 @@ patchwork + plot_annotation(
 qq2_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
   geom_qq_band(
     bandType = "ks", 
+    dparams = list(mean = 0, sd = 1),
     identity = FALSE, 
     qprobs = c(0.25, 0.75), 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
+    dparams = list(mean = 0, sd = 1),
     identity = FALSE, 
     qprobs = c(0.25, 0.75),
     colour = "red"
   ) +
   stat_qq_point(
+    dparams = list(mean = 0, sd = 1),
     colour = "black"
   ) +
   coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
@@ -298,18 +307,21 @@ qq2_combined <- ggplot(data = smp) +
   geom_qq_band(
     mapping = aes(sample = norm), 
     bandType = "ks", 
+    dparams = list(mean = 0, sd = 1),
     identity = FALSE, 
     qprobs = c(0.25, 0.75), 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     identity = FALSE, 
     qprobs = c(0.25, 0.75),
     colour = "red"
   ) +
   stat_qq_point(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     colour = "red"
   ) +
   geom_qqrplot_confint(
@@ -347,14 +359,17 @@ patchwork + plot_annotation(
 qq2b_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
   geom_qq_band(
     bandType = "ks", 
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     colour = "black"
   ) +
   stat_qq_point(
+    dparams = list(mean = 0, sd = 1),
     colour = "black"
   ) +
   coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
@@ -381,17 +396,20 @@ qq2b_topmodels <- ggplot(qqr, aes(x = expected, y = observed)) +
 qq2b_combined <- ggplot(data = smp) +
   geom_qq_band(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     bandType = "ks", 
     identity = TRUE, 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     colour = "red"
   ) +
   stat_qq_point(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     colour = "red"
   ) +
   geom_qqrplot_confint(
@@ -431,14 +449,17 @@ Here, we have the problem that in the current implementation we need the observe
 qq3_qqplotr <- ggplot(data = smp, mapping = aes(sample = norm)) +
   geom_qq_band(
     bandType = "ts", 
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     colour = "red"
   ) +
   stat_qq_point(
+    dparams = list(mean = 0, sd = 1),
     colour = "black"
   ) +
   coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3), expand = FALSE) +
@@ -469,17 +490,20 @@ qq3_topmodels <- ggplot(qqr2, aes(x = expected, y = observed)) +
 qq3_combined <- ggplot(data = smp) +
   geom_qq_band(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     bandType = "ts", 
     identity = TRUE, 
     fill = "red", alpha = 0.5, show.legend = FALSE
   ) +
   stat_qq_line(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     identity = TRUE, 
     colour = "red"
   ) +
   stat_qq_point(
     mapping = aes(sample = norm), 
+    dparams = list(mean = 0, sd = 1),
     colour = "red"
   ) +
   geom_ribbon(
@@ -548,10 +572,18 @@ patchwork + plot_annotation(
 ```
 Obviously this does not work. But shouldn't that still be working, e.g., for a perfect prediction where all points lie on the reference line?!
 
-## Summary
+## Summary of comparison
 Hence current issues are:
 
 * Are the various implementations of the CIs correct.
-* Why do the data points vary between `qqplotr` and `qqrplot`.
+* Why do the data points vary between `qqplotr` and `qqrplot`
+    * Solved.
+    * In `qqplotr`, per default distribution parameters are computed for the generation of theoretical quantiles.
+    * This can be turned off by setting `dparams = list(mean = 0, sd = 1)`. 
+    * Do we need something similar in `topmodels`?
+* Why are there small differences in the tails for `type = "pointwise"`? 
+    * Solved.
+    * Added `slope` in numerator of the standard error (compare commit 1577).
 * Can tail sensitive CIs also be implemented in order to work with `curve()` etc.
-
+* Check if all CIs are valid for `scale = "uniform"`, here `qqplotr` has solely a single CI implemented based on a bootstrap.
+* Check if all CIs are valid for worm plots (`detrended = TRUE`).
