@@ -1896,6 +1896,7 @@ compute_qqrplot_confint <- function(x,
     ## add to reference line and return
     lower <- (intercept + slope * x) - rval
     upper <- (intercept + slope * x) + rval
+
   } else if (type == "simultaneous") {
     p <- pFun(x)
     epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))  # Komogorov quantile
@@ -1903,36 +1904,28 @@ compute_qqrplot_confint <- function(x,
     up <- pmin(p + epsilon, rep(1, length(p)))
     lower <- intercept + slope * qFun(lp)
     upper <- intercept + slope * qFun(up)
-  } else {
-    mu <- sigma <- NULL
-    B <- 1000
-    smp <- x
-    n <- length(x)
 
-    centerFunc <- function(x) robustbase::s_Qn(x, mu.too = TRUE)[[1]]  ## FIXME: (ML) Remove dependency again!
+  } else { # tail sensitive
+
+    B <- 1000 # number of simulations
+
+    centerFunc <- function(x) robustbase::s_Qn(x, mu.too = TRUE)[[1]]  # FIXME: (ML) Remove dependency
     scaleFunc <- function(x) robustbase::Qn(x, finite.corr = FALSE)
-
-    upperCi <- rep(NA, n)
-    lowerCi <- rep(NA, n)
-    pValue <- matrix(NA, nrow = n, ncol = B)
 
     # simulate data
     sim <- NULL
-    if (is.null(mu) | is.null(sigma)) {
-      for (i in 1:B) sim <- cbind(sim, sort(rnorm(n)))
+    for (i in 1:B) sim <- cbind(sim, sort(rnorm(n)))
 
-      # center and scale simulated data
-      center <- apply(sim, 2, centerFunc)
-      scale <- apply(sim, 2, scaleFunc)
-      sim <- sweep(sweep(sim, 2, center, FUN = "-"), 2, scale, FUN = "/")
+    # center and scale simulated data
+    center <- apply(sim, 2, centerFunc)
+    scale <- apply(sim, 2, scaleFunc)
+    sim <- sweep(sweep(sim, 2, center, FUN = "-"), 2, scale, FUN = "/")
 
-      # convert simulated values to probabilities
-      sim <- t(apply(sim, 1, pnorm))
-    } else {
-      for (i in 1:B) sim <- cbind(sim, sort(runif(n)))
-    }
+    # convert simulated values to probabilities
+    sim <- t(apply(sim, 1, pnorm))
 
     # widen the CIs to get simultanoues (100 * conf)% CIs
+    pValue <- matrix(NA, nrow = n, ncol = B)
     for (i in 1:n) {
       tmp <- pbeta(sim[i, ], shape1 = i, shape2 = n + 1 - i)
       pValue[i, ] <- apply(cbind(tmp, 1 - tmp), 1, min)
@@ -1945,15 +1938,9 @@ compute_qqrplot_confint <- function(x,
     lowerCi <- qbeta(criticalC, shape1 = 1:n, shape2 = n + 1 - (1:n))
 
     # translate back to sample quantiles
-    if (is.null(mu) | is.null(sigma)) {
-      upper <- qnorm(upperCi) * scaleFunc(smp) + centerFunc(smp)
-      lower <- qnorm(lowerCi) * scaleFunc(smp) + centerFunc(smp)
-    } else {
-      upper <- qnorm(upperCi) * sigma + mu
-      lower <- qnorm(lowerCi) * sigma + mu
-    }
+    upper <- qnorm(upperCi) * scaleFunc(x) + centerFunc(x)
+    lower <- qnorm(lowerCi) * scaleFunc(x) + centerFunc(x)
   }
-
 
   if (which == "lower") {
     lower
