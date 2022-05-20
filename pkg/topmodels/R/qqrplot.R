@@ -1890,8 +1890,9 @@ compute_qqrplot_confint <- function(x,
   ## compute pointwise or simultanous CI
   if (type == "pointwise") {
     p <- pFun(x) 
-    se <- (slope / dFun(x)) * (sqrt(p * (1 - p) / n)) 
-    # FIXME: (ML) Is the slope in the numerator needed? Added due to comparison with `qqplotr`.
+    #se <- (slope / dFun(x)) * (sqrt(p * (1 - p) / n)) 
+    se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n)) 
+    # FIXME: (ML) Is the slope in the numerator needed? Included in `qqplotr`, but not working for wormplots.
     rval <- as.numeric(qnorm(1 - (1 - level) / 2) * se)
     
     ## add to reference line and return

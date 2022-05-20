@@ -1660,7 +1660,6 @@ compute_rootogram_confint <- function(object,
     confint_upr = yq[2, ]
   )
 
-  print(df)
   df
   
 }
