@@ -93,6 +93,9 @@ invisible(.Call(grDevices:::C_palette, grDevices::hcl(
   l = c(0,  55,  75,  60,  82,  48,  80,  65)
 )))
 
+if(!require("devtools")) install.packages("devtools")
+install_svn("svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels",
+            revision = "r1580", quiet = TRUE, upgrade = "never")
 library("topmodels")
 library("ggplot2")
 @
@@ -152,10 +155,10 @@ RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
 RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
 RainIbk <- subset(RainIbk, enssd > 0)
 
-m1 <- lm(rain ~ ensmean, data = RainIbk)
+m_lm <- lm(rain ~ ensmean, data = RainIbk)
 
 ## heteroscedastic censored regression with a logistic distribution assumption
-m2 <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
+m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
   dist = "logistic")
 
 @
@@ -219,9 +222,9 @@ plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alph
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1b, fig=TRUE, echo=FALSE, height=5, width=6.>>=
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
-abline(coef(m1)[1:2], col = 3, lwd = 4)
+abline(coef(m_lm)[1:2], col = 3, lwd = 4)
 
-legend("topright", lwd = 4, lty = 1, col = 3, "m1", bty = "n")
+legend("topright", lwd = 4, lty = 1, col = 3, "m_lm", bty = "n")
 @
 \end{center}
 }
@@ -231,11 +234,11 @@ legend("topright", lwd = 4, lty = 1, col = 3, "m1", bty = "n")
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1c, fig=TRUE, echo=FALSE, height=5, width=6.>>=
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
-abline(coef(m1)[1:2], col = 3, lwd = 4)
-abline(coef(m2)[1:2], col = 4, lwd = 4)
+abline(coef(m_lm)[1:2], col = 3, lwd = 4)
+abline(coef(m_hclog)[1:2], col = 4, lwd = 4)
 
 legend("topright", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
-  c("m1", "m2"), bty = "n")
+  c("m_lm", "m_hclog"), bty = "n")
 @
 \end{center}
 }
@@ -249,7 +252,7 @@ legend("topright", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
 
 \vspace{-0.75em}
 
-\textbf{However:}Is the model calibrated?
+\textbf{However:} Is the model calibrated?
 
 \bigskip
 \bigskip
@@ -260,7 +263,7 @@ legend("topright", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
 \begin{column}{0.33\textwidth}
 \only<2>{
 <<intro_goodness1a_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m1, style = "standing", scale = "raw", fill = "darkgray", expected = FALSE, confint = FALSE, xlab = "Rain", plot = FALSE, ref = FALSE))
+gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = FALSE, confint = FALSE, xlab = "Rain", plot = FALSE, ref = FALSE))
 @
 <<intro_goodness1a, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
 gg
@@ -273,7 +276,7 @@ Marginal calibration:
 }
 \only<3->{
 <<intro_goodness1b_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m1, style = "standing", scale = "raw", fill = "darkgray", expected = "line", confint = FALSE, xlab = "Rain", plot = FALSE, ref = FALSE))
+gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = "line", confint = FALSE, xlab = "Rain", plot = FALSE, ref = FALSE))
 @
 <<intro_goodness1b, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
 gg
@@ -293,7 +296,7 @@ Marginal calibration:
 \begin{column}{0.33\textwidth}
 <<intro_goodness2, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
 set.seed(0)
-pithist(m1, type = "random", nsim = 10, fill = "darkgray", alpha = 1, col = "black",
+pithist(m_lm, type = "random", nsim = 10, fill = "darkgray", alpha = 1, col = "black",
   expected = FALSE, confint = FALSE, simint = FALSE)
 @
 
@@ -310,7 +313,7 @@ Probabilistic calibration:
 \begin{column}{0.33\textwidth}
 <<intro_goodness3, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
 set.seed(0)
-pithist(m1, type = "random", nsim = 10, scale = "normal",
+pithist(m_lm, type = "random", nsim = 10, scale = "normal",
   fill = "darkgray", col = "black", alpha = 1, xlab = "(Randomized) quantile residuals",
   expected = FALSE, confint = FALSE, simint = FALSE)
 @
@@ -340,10 +343,10 @@ Probabilistic calibration:
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<intro_rootogram1_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m1, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
+<<intro_rootogram_lm_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
 @
-<<intro_rootogram1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+<<intro_rootogram_lm, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg
 @
 \end{center}
@@ -362,10 +365,10 @@ gg
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<intro_rootogram2_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m1, style = "standing", scale = "raw", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
+<<intro_rootogram_hclog_comp, fig=FALSE, echo=FALSE>>=
+gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
 @
-<<intro_rootogram2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+<<intro_rootogram_hclog, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg
 @
 \end{center}
@@ -385,7 +388,7 @@ gg
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<intro_rootogram3_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m1, style = "standing", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
+gg <- autoplot(rootogram(m_lm, style = "standing", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
 @
 <<intro_rootogram3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg
@@ -407,7 +410,7 @@ gg
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<intro_rootogram4_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m1, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE,, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE), ylim = c(NA, 35), confint_type = "simultaneous")
+gg <- autoplot(rootogram(m_lm, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE,, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE), ylim = c(NA, 35), confint_type = "simultaneous")
 <<intro_rootogram4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 gg
 @
@@ -455,7 +458,7 @@ gg
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<intro_pithist1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-pithist(m1, type = "expected", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
 @
 \end{center}
 }
@@ -464,7 +467,7 @@ pithist(m1, type = "expected", fill = "darkgray", col = "black", expected = FALS
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<intro_pithist1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-pithist(m1, type = "expected", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
 @
 \end{center}
 }
@@ -472,35 +475,35 @@ pithist(m1, type = "expected", fill = "darkgray", col = "black", expected = TRUE
 \end{frame}
 
 
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{(Randomized) quantile residuals:}
-
-\vspace{0.25em}
-
-\only<1>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_pithist_norm1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(0)
-pithist(m1, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2")
-@
-\end{center}
-}
-\only<2>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_pithist_norm1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(0)
-pithist(m1, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2")
-@
-\end{center}
-}
-\end{frame}
+%%% SLIDE
+%\begin{frame}[fragile]
+%\frametitle{Probabilistic calibration}
+%
+%\vspace{-0.75em}
+%
+%\textbf{(Randomized) quantile residuals:}
+%
+%\vspace{0.25em}
+%
+%\only<1>{
+%\begin{center}
+%\setkeys{Gin}{width=0.65\textwidth}
+%<<intro_pithist_norm_lma, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%set.seed(0)
+%pithist(m_lm, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2")
+%@
+%\end{center}
+%}
+%\only<2>{
+%\begin{center}
+%\setkeys{Gin}{width=0.65\textwidth}
+%<<intro_pithist_norm_lmb, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%set.seed(0)
+%pithist(m_lm, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2")
+%@
+%\end{center}
+%}
+%\end{frame}
 
 
 %% SLIDE
@@ -517,7 +520,7 @@ pithist(m1, type = "random", scale = "normal", fill = "darkgray", col = "black",
 \setkeys{Gin}{width=0.65\textwidth}
 <<intro_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(3)
-qqrplot(m1, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
+qqrplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
 @
 \end{center}
 \end{frame}
@@ -537,7 +540,7 @@ qqrplot(m1, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE
 \setkeys{Gin}{width=0.65\textwidth}
 <<intro_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 set.seed(3)
-wormplot(m1, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE)
+wormplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE, ylim = c(-0.5, 1.35))
 @
 \end{center}
 \end{frame}
@@ -582,45 +585,66 @@ wormplot(m1, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE)
 \subsection{Model comparison}
 %-------------------------------------------------------------------
 
+%%% SLIDE
+%\begin{frame}[fragile]
+%\frametitle{Model comparison}
+%
+%\vspace{-0.75em}
+%
+%\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:}
+%
+%\vspace{0.25em}
+%
+%\begin{center}
+%\setkeys{Gin}{width=0.65\textwidth}
+%<<rain_rootogram, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%r1 <- rootogram(m_lm, plot = FALSE)
+%r2 <- rootogram(m_hclog, plot = FALSE)
+%
+%ggplot2::autoplot(c(r1, r2), fitted_size = 1.25, xlab = "Rain", confint_type = "simultaneous")
+%@
+%\end{center}
+%\end{frame}
+
+
+%%% SLIDE
+%\begin{frame}[fragile]
+%\frametitle{Model comparison}
+%
+%\vspace{-0.75em}
+%
+%\textbf{PIT residuals:}
+%
+%\vspace{0.25em}
+%
+%\begin{center}
+%\setkeys{Gin}{width=0.65\textwidth}
+%<<rain_pithist1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%p1 <- pithist(m_lm, plot = FALSE)
+%p2 <- pithist(m_hclog, plot = FALSE)
+%
+%ggplot2::autoplot(c(p1, p2), fill = "darkgray", col = "black", ref_size = 1, confint_size = 1)
+%@
+%\end{center}
+%\end{frame}
+
+
 %% SLIDE
 \begin{frame}[fragile]
 \frametitle{Model comparison}
 
 \vspace{-0.75em}
 
-\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:}
+\textbf{Deviations vs. expected quantiles:}
 
 \vspace{0.25em}
 
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
-<<rain_rootogram, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-r1 <- rootogram(m1, plot = FALSE)
-r2 <- rootogram(m2, plot = FALSE)
-
-ggplot2::autoplot(c(r1, r2), fitted_size = 1.25, xlab = "Rain", confint_type = "simultaneous")
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Model comparison}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals:}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_pithist1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-p1 <- pithist(m1, plot = FALSE)
-p2 <- pithist(m2, plot = FALSE)
-
-ggplot2::autoplot(c(p1, p2), fill = "darkgray", col = "black", ref_size = 1, confint_size = 1)
+<<rain_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+w1 <- wormplot(m_lm, plot = FALSE)
+w2 <- wormplot(m_hclog, plot = FALSE)
+ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon", ylim = c(-0.5, 1.35))
 @
 \end{center}
 \end{frame}
@@ -639,31 +663,12 @@ ggplot2::autoplot(c(p1, p2), fill = "darkgray", col = "black", ref_size = 1, con
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_pithist2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+p1 <- pithist(m_lm, plot = FALSE)
+p2 <- pithist(m_hclog, plot = FALSE)
 ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_fill = 1, confint_alpha = 0.1, size = 1, confint = "polygon", ref = FALSE)
 @
 \end{center}
 \end{frame}
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Model comparison}
-
-\vspace{-0.75em}
-
-\textbf{Deviations vs. expected quantiles:}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-w1 <- wormplot(m1, plot = FALSE)
-w2 <- wormplot(m2, plot = FALSE)
-ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
-@
-\end{center}
-\end{frame}
-
 
 %-------------------------------------------------------------------
 \subsection{Summary}
@@ -751,7 +756,7 @@ ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE,
 
 Lang MN, Zeileis A \emph{et al.} (2021).
 \dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models.}
-\emph{R package version 0.1-0}.
+\emph{R package version 0.2-0}.
 \url{https://topmodels.R-Forge.R-project.org/}
 
 \bigskip
