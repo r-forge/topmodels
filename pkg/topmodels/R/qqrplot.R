@@ -1910,38 +1910,31 @@ compute_qqrplot_confint <- function(x,
   } else { # tail sensitive
 
     B <- 1000 # number of simulations
+    nx <- length(x)
 
-    centerFunc <- function(x) robustbase::s_Qn(x, mu.too = TRUE)[[1]]  # FIXME: (ML) Remove dependency
-    scaleFunc <- function(x) robustbase::Qn(x, finite.corr = FALSE)
-
-    # simulate data
     sim <- NULL
-    for (i in 1:B) sim <- cbind(sim, sort(rnorm(n)))
-
-    # center and scale simulated data
-    center <- apply(sim, 2, centerFunc)
-    scale <- apply(sim, 2, scaleFunc)
-    sim <- sweep(sweep(sim, 2, center, FUN = "-"), 2, scale, FUN = "/")
+    for (i in 1:B) sim <- cbind(sim, sort(rnorm(nx)))
 
     # convert simulated values to probabilities
     sim <- t(apply(sim, 1, pnorm))
 
     # widen the CIs to get simultanoues (100 * conf)% CIs
-    pValue <- matrix(NA, nrow = n, ncol = B)
-    for (i in 1:n) {
-      tmp <- pbeta(sim[i, ], shape1 = i, shape2 = n + 1 - i)
+    pValue <- matrix(NA, nrow = nx, ncol = B)
+    for (i in 1:nx) {
+      tmp <- pbeta(sim[i, ], shape1 = i, shape2 = nx + 1 - i)
       pValue[i, ] <- apply(cbind(tmp, 1 - tmp), 1, min)
     }
 
     critical <- apply(pValue, 2, min)
     criticalC <- quantile(critical, prob = 1 - level)
 
-    upperCi <- qbeta(1 - criticalC, shape1 = 1:n, shape2 = n + 1 - (1:n))
-    lowerCi <- qbeta(criticalC, shape1 = 1:n, shape2 = n + 1 - (1:n))
+    ## FIXME: how are the shape parameters computed??
+    upperCi <- qbeta(1 - criticalC, shape1 = pnorm(x) * nx, shape2 = pnorm(x, lower.tail = FALSE) * nx)
+    lowerCi <- qbeta(criticalC, shape1 = pnorm(x) * nx, shape2 = pnorm(x, lower.tail = FALSE) * nx)
 
     # translate back to sample quantiles
-    upper <- qnorm(upperCi) * scaleFunc(x) + centerFunc(x)
-    lower <- qnorm(lowerCi) * scaleFunc(x) + centerFunc(x)
+    upper <- qnorm(upperCi)
+    lower <- qnorm(lowerCi)
   }
 
   if (which == "lower") {
