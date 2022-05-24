@@ -563,6 +563,11 @@ c.pithist <- function(...) {
   n <- unlist(n)
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
 
+  ## re-order, make sure 'group' is the last variable such that
+  ## we get identical object when c-binding objects
+  ## returned by pithist() or from summary(pithist())
+  rval <- rval[, c(names(rval)[names(rval) != "group"], "group")]
+
   ## add attributes
   attr(rval, "scale") <- scale
   attr(rval, "type") <- type
