@@ -224,7 +224,7 @@ plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alph
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2], col = 3, lwd = 4)
 
-legend("topright", lwd = 4, lty = 1, col = 3, "m_lm", bty = "n")
+legend("topleft", lwd = 4, lty = 1, col = 3, "OLS", bty = "n")
 @
 \end{center}
 }
@@ -237,8 +237,8 @@ plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alph
 abline(coef(m_lm)[1:2], col = 3, lwd = 4)
 abline(coef(m_hclog)[1:2], col = 4, lwd = 4)
 
-legend("topright", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
-  c("m_lm", "m_hclog"), bty = "n")
+legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
+  c("OLS", "Censored NGR"), bty = "n")
 @
 \end{center}
 }
@@ -297,7 +297,7 @@ Marginal calibration:
 <<intro_goodness2, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
 set.seed(0)
 pithist(m_lm, type = "random", nsim = 10, fill = "darkgray", alpha = 1, col = "black",
-  expected = FALSE, confint = FALSE, simint = FALSE)
+  expected = TRUE, confint = FALSE, simint = FALSE)
 @
 
 Probabilistic calibration:
@@ -313,9 +313,10 @@ Probabilistic calibration:
 \begin{column}{0.33\textwidth}
 <<intro_goodness3, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
 set.seed(0)
-pithist(m_lm, type = "random", nsim = 10, scale = "normal",
-  fill = "darkgray", col = "black", alpha = 1, xlab = "(Randomized) quantile residuals",
-  expected = FALSE, confint = FALSE, simint = FALSE)
+p_gg <- pithist(m_lm, type = "random", nsim = 10, scale = "normal", plot = FALSE)
+autoplot(p_gg, fill = "darkgray", col = "black", alpha = 1, xlab = "(Randomized) quantile residuals",
+  expected = FALSE, confint = FALSE, simint = FALSE, xlim = c(-4, 4)) +
+  geom_function(fun = dnorm, col = 2, size = 0.75, xlim = c(-4, 4))
 @
 
 Probabilistic calibration:
@@ -337,7 +338,7 @@ Probabilistic calibration:
 
 \vspace{-0.75em}
 
-\textbf{Observed frequencies:}
+\textbf{Frequencies: Observed}
 
 \vspace{0.25em}
 
@@ -359,7 +360,7 @@ gg
 
 \vspace{-0.75em}
 
-\textbf{Observed vs. expected frequencies:}
+\textbf{Frequencies: Observed vs. expected}
 
 \vspace{0.25em}
 
@@ -381,7 +382,7 @@ gg
 
 \vspace{-0.75em}
 
-\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:}
+\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
 
 \vspace{0.25em}
 
@@ -403,7 +404,7 @@ gg
 
 \vspace{-0.75em}
 
-\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:}
+\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
 
 \vspace{0.25em}
 
@@ -424,7 +425,7 @@ gg
 %
 %\vspace{-0.75em}
 %
-%\textbf{Observed vs. expected frequencies:}
+%\textbf{Frequencies: Observed vs. expected}
 %
 %\begin{itemize}
 %\item Advantage: Scale of observations is natural, direct interpretation.
@@ -512,7 +513,7 @@ pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = TR
 
 \vspace{-0.75em}
 
-\textbf{Observed vs. expected quantiles:}
+\textbf{Quantile residuals: Observed vs. expected}
 
 \vspace{0.25em}
 
@@ -532,7 +533,7 @@ qqrplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FAL
 
 \vspace{-0.75em}
 
-\textbf{Deviations vs. expected quantiles:}
+\textbf{Quantile residuals: Deviations}
 
 \vspace{0.25em}
 
@@ -591,7 +592,7 @@ wormplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALS
 %
 %\vspace{-0.75em}
 %
-%\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:}
+%\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
 %
 %\vspace{0.25em}
 %
@@ -635,7 +636,7 @@ wormplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALS
 
 \vspace{-0.75em}
 
-\textbf{Deviations vs. expected quantiles:}
+\textbf{Quantile residuals: Deviations}
 
 \vspace{0.25em}
 
