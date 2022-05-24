@@ -19,9 +19,6 @@ expect_silent(m1 <- lm(dist ~ speed, data = cars))
 expect_silent(m2 <- crch(dist ~ speed | speed, left = 3, data = cars))
 expect_silent(m3 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson))
 
-# Newdata for predictions
-expect_silent(nd_cars <- cars[1:10, ])
-
 # Create pithist objects needed (forcing class = 'data.frame')
 expect_silent(p1 <- pithist(m1, class = "data.frame", plot = FALSE))
 expect_silent(p2 <- pithist(m2, class = "data.frame", plot = FALSE))

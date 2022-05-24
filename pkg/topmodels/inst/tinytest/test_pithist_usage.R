@@ -2,13 +2,15 @@
 # Testing usage of the `pithist()` function.
 # --------------------------------------------------------------------
 
-# --------------------------------------------------------------------
-# Setting up the data sets/models used to test the function
-# --------------------------------------------------------------------
+if (interactive()) { library("devtools"); library("tinytest"); library("topmodels") }
+
 library("crch")
 library("ggplot2")
 library("tibble")
 
+# --------------------------------------------------------------------
+# Setting up the data sets/models used to test the function
+# --------------------------------------------------------------------
 data("CrabSatellites", package = "countreg")
 CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 
@@ -16,9 +18,6 @@ CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 expect_silent(m1 <- lm(dist ~ speed, data = cars))
 expect_silent(m2 <- crch(dist ~ speed | speed, left = 3, data = cars))
 expect_silent(m3 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson))
-
-# Newdata for predictions
-expect_silent(nd_cars <- cars[1:10, ])
 
 
 # --------------------------------------------------------------------
@@ -136,9 +135,6 @@ expect_true(all(sapply(tmp, function(x) isFALSE(attr(x, "freq")))))
 expect_true(all(sapply(tmp, function(x) isTRUE(attr(x, "expected")))))
 expect_true(all(sapply(tmp, function(x) isTRUE(attr(x, "confint")))))
 
-
-# --------------------------------------------------------------------
-# --------------------------------------------------------------------
 
 
 
