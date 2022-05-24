@@ -38,51 +38,58 @@ extracted using the generic function \code{\link{procast}}.}
 
 \item{\dots}{further graphical parameters.}
 
-\item{newdata}{optionally, a data frame in which to look for variables with
+\item{newdata}{an optional data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.}
 
-\item{plot}{Should the \code{plot} or \code{autoplot} method be called to
-draw the computed extended reliability diagram? Either set \code{plot}
-expicitly to \code{"base"} vs. \code{"ggplot2"} to choose the type of plot, or for a
-logical \code{plot} argument it's chosen conditional if the package
-\code{ggplot2} is loaded.}
+\item{plot}{logical or character. Should the \code{plot} or \code{autoplot}
+method be called to draw the computed extended reliability diagram? Logical
+\code{FALSE} will suppress plotting, \code{TRUE} (default) will choose the
+type of plot conditional if the package \code{ggplot2} is loaded.
+Alternatively \code{"base"} or \code{"ggplot2"} can be specified to
+explicitly choose the type of plot.}
 
-\item{class}{Should the invisible return value be either a \code{data.frame}
-or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-\code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
-\code{tibble} is loaded.}
+\item{class}{should the invisible return value be either a \code{data.frame}
+or a \code{tbl_df}. Can be set to \code{"data.frame"} or \code{"tibble"} to
+explicitly specify the return class, or to \code{NULL} (default) in which
+case the return class is conditional on whether the package \code{"tibble"}
+is loaded.}
 
-\item{scale}{On which scale should the PIT residuals be computed: on the probability scale 
-(\code{"uniform"}) or on the normal scale (\code{"normal"}).}
+\item{scale}{controls the scale on which the PIT residuals are computed: on
+the probability scale (\code{"uniform"}; default) or on the normal scale
+(\code{"normal"}).}
 
-\item{breaks}{numeric. Breaks for the histogram intervals.}
+\item{breaks}{\code{NULL} (default) or numeric vector to manually specify
+the breaks for the histogram intervals.}
 
 \item{type}{character. In case of discrete distributions, should an expected
 (non-normal) PIT histogram be computed according to Czado et al. (2009)
-(\code{"expected"}) or should the PIT be drawn randomly from the corresponding
+(\code{"expected"}; default) or should the PIT be drawn randomly from the corresponding
 interval (\code{"random"})?}
 
-\item{nsim}{integer. If \code{type} is \code{"random"} how many simulated
-PITs should be drawn?}
+\item{nsim}{integer, defaults to \code{1L}. Only used when
+\code{type = "random"}; how many simulated PITs should be drawn?}
 
-\item{delta}{numeric. The minimal difference to compute the range of
-proabilities corresponding to each observation according to get (randomized)
-quantile residuals. For \code{NULL}, the minimal observed difference in the
-resonse divided by \code{5e-6} is used.}
+\item{delta}{\code{NULL} or numeric. The minimal difference to compute the range of
+probabilities corresponding to each observation to get (randomized)
+quantile residuals. For \code{NULL} (default), the minimal observed difference in the
+response divided by \code{5e-6} is used.}
 
-\item{simint}{logical. In case of discrete distributions, should the simulation
-(confidence) interval due to the randomization be visualized?}
+\item{simint}{\code{NULL} (default) or logical. In case of discrete
+distributions, should the simulation (confidence) interval due to the
+randomization be visualized?}
 
-\item{simint_level}{numeric. The confidence level required for calculating the simulation
-(confidence) interval due to the randomization.}
+\item{simint_level}{numeric, defaults to \code{0.95}. The confidence level
+required for calculating the simulation (confidence) interval due to the
+randomization.}
 
-\item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the
-simulation (confidence) interval due to the randomization.}
+\item{simint_nrep}{numeric, defaults to \code{250}. The repetition number of
+simulated quantiles for calculating the simulation (confidence) interval due
+to the randomization.}
 
-\item{style}{character specifying the style of pithist. For \code{style = "bar"}
-a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
-line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
-drawn.}
+\item{style}{character specifying plotting style. For \code{style = "bar"} (default)
+a traditional PIT histogram is drawn, \code{style = "line"} solely plots the upper border
+of the bars. If \code{single_graph = TRUE} is used (see \code{\link{plot.pithist}}),
+line-style PIT histograms will be enforced.}
 
 \item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
 frequencies, the \code{counts} component of the result; if \code{FALSE},
@@ -98,27 +105,31 @@ histogram has a total area of one).}
 }
 \value{
 An object of class \code{"pithist"} inheriting from
-\code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
-with the following variables: \item{x}{histogram
-interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
-histogram bars,} \item{width}{widths of the histogram bars,}
-\item{confint_lwr, confint_upr}{lower and upper confidence interval bound,} \item{expected}{y-coordinates of
-the expected curve.} Additionally, \code{freq}, \code{xlab},
-\code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
+\code{data.frame} or \code{tbl_df} conditional on the argument \code{class}
+including the following variables:
+\item{x}{histogram interval midpoints on the x-axis,}
+\item{y}{bottom coordinate of the histogram bars,}
+\item{width}{widths of the histogram bars,}
+\item{confint_lwr}{lower bound of the confidence interval,}
+\item{confint_upr}{upper bound of the confidence interval,}
+\item{expected}{y-coordinate of the expected curve.}
+Additionally, \code{freq}, \code{xlab}, \code{ylab}, \code{main}, and
+\code{confint_level} are stored as attributes.
 }
 \description{
-PIT histograms graphically compare empirical probabilities from fitted models
+Probability integral transform (PIT) histograms graphically
+compare empirical probabilities from fitted models
 with a uniform distribution. If \code{plot = TRUE}, the resulting object of
 class \code{"pithist"} is plotted by \code{\link{plot.pithist}} or
-\code{\link{autoplot.pithist}} before it is returned, depending on whether the
-package \code{ggplot2} is loaded.
+\code{\link{autoplot.pithist}} depending on whether the
+package \code{ggplot2} is loaded, before the \code{"pithist"} object is returned.
 }
 \details{
 PIT histograms graphically evaluate the probability integral transform (PIT),
 i.e., the value that the predictive CDF attains at the observation, with a
-uniform distribution. For a well calibrated model fit, the observation will be
-drawn from the predictive distribution and the PIT will have a standard uniform
-distribution. For computation, \code{\link{pithist}} leverages the function
+uniform distribution. For a well calibrated model fit, the PIT will have a
+standard uniform distribution.
+For computation, \code{\link{pithist}} leverages the function
 \code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
 essentially draws a \code{\link[graphics]{hist}}.
 
@@ -160,7 +171,7 @@ Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
 
 Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
 Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
-\doi{10.2307/2981683}
+\url{https://www.jstor.org/stable/20640646}.
 
 Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
@@ -173,7 +184,7 @@ Review}, \bold{39}(4), 863--883. \doi{10.2307/2527342}
 
 Gneiting T, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
 Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
-Series B (Methodological)}. \bold{69}(2), 243--268.
+Series B (Statistical Methodology)}. \bold{69}(2), 243--268.
 \doi{10.1111/j.1467-9868.2007.00587.x}
 }
 \seealso{

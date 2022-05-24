@@ -3,6 +3,7 @@
 # -------------------------------------------------------------------
 # - Observed y in-sample or out-of-sample (n x 1)
 # - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2)
+#   eps is a tiny numeric value required for discrete/censored distributions
 # - Two columns can be essentially equal -> continuous
 #   or different -> (partially) discrete
 # - Breaks for predicted probabilities in [0, 1] (m x 1)
@@ -15,7 +16,7 @@
 # - Add confidence interval as well.
 # - Instead of shaded rectangles plus reference line and CI lines
 #   support shaded CI plus step lines
-
+#
 # Functions:
 # - pithist() generic plus default method
 # - Return object of class "pithist" that is plotted by default
@@ -26,17 +27,18 @@
 
 #' PIT Histograms for Assessing Goodness of Fit of Probability Models
 #'
-#' PIT histograms graphically compare empirical probabilities from fitted models
+#' Probability integral transform (PIT) histograms graphically
+#' compare empirical probabilities from fitted models
 #' with a uniform distribution. If \code{plot = TRUE}, the resulting object of
 #' class \code{"pithist"} is plotted by \code{\link{plot.pithist}} or
-#' \code{\link{autoplot.pithist}} before it is returned, depending on whether the
-#' package \code{ggplot2} is loaded.
+#' \code{\link{autoplot.pithist}} depending on whether the
+#' package \code{ggplot2} is loaded, before the \code{"pithist"} object is returned.
 #'
 #' PIT histograms graphically evaluate the probability integral transform (PIT),
 #' i.e., the value that the predictive CDF attains at the observation, with a
-#' uniform distribution. For a well calibrated model fit, the observation will be
-#' drawn from the predictive distribution and the PIT will have a standard uniform
-#' distribution. For computation, \code{\link{pithist}} leverages the function
+#' uniform distribution. For a well calibrated model fit, the PIT will have a
+#' standard uniform distribution.
+#' For computation, \code{\link{pithist}} leverages the function
 #' \code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
 #' essentially draws a \code{\link[graphics]{hist}}.
 #'
@@ -50,42 +52,50 @@
 #' plotted in one go.
 #'
 #' @aliases pithist pithist.default c.pithist rbind.pithist
+#'
 #' @param object an object from which probability integral transforms can be
 #' extracted using the generic function \code{\link{procast}}.
-#' @param newdata optionally, a data frame in which to look for variables with
+#' @param newdata an optional data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
-#' @param plot Should the \code{plot} or \code{autoplot} method be called to
-#' draw the computed extended reliability diagram? Either set \code{plot}
-#' expicitly to \code{"base"} vs. \code{"ggplot2"} to choose the type of plot, or for a
-#' logical \code{plot} argument it's chosen conditional if the package
-#' \code{ggplot2} is loaded.
-#' @param class Should the invisible return value be either a \code{data.frame}
-#' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-#' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
-#' \code{tibble} is loaded.
-#' @param scale On which scale should the PIT residuals be computed: on the probability scale 
-#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
-#' @param breaks numeric. Breaks for the histogram intervals.
+#' @param plot logical or character. Should the \code{plot} or \code{autoplot}
+#' method be called to draw the computed extended reliability diagram? Logical
+#' \code{FALSE} will suppress plotting, \code{TRUE} (default) will choose the
+#' type of plot conditional if the package \code{ggplot2} is loaded.
+#' Alternatively \code{"base"} or \code{"ggplot2"} can be specified to
+#' explicitly choose the type of plot.
+#' @param class should the invisible return value be either a \code{data.frame}
+#' or a \code{tbl_df}. Can be set to \code{"data.frame"} or \code{"tibble"} to
+#' explicitly specify the return class, or to \code{NULL} (default) in which
+#' case the return class is conditional on whether the package \code{"tibble"}
+#' is loaded.
+#' @param scale controls the scale on which the PIT residuals are computed: on
+#' the probability scale (\code{"uniform"}; default) or on the normal scale
+#' (\code{"normal"}).
+#' @param breaks \code{NULL} (default) or numeric vector to manually specify
+#' the breaks for the histogram intervals.
 #' @param type character. In case of discrete distributions, should an expected
 #' (non-normal) PIT histogram be computed according to Czado et al. (2009)
-#' (\code{"expected"}) or should the PIT be drawn randomly from the corresponding
+#' (\code{"expected"}; default) or should the PIT be drawn randomly from the corresponding
 #' interval (\code{"random"})?
-#' @param nsim integer. If \code{type} is \code{"random"} how many simulated
-#' PITs should be drawn?
-#' @param delta numeric. The minimal difference to compute the range of
-#' proabilities corresponding to each observation according to get (randomized)
-#' quantile residuals. For \code{NULL}, the minimal observed difference in the
-#' resonse divided by \code{5e-6} is used.
-#' @param simint logical. In case of discrete distributions, should the simulation
-#' (confidence) interval due to the randomization be visualized?
-#' @param simint_level numeric. The confidence level required for calculating the simulation
-#' (confidence) interval due to the randomization.
-#' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
-#' simulation (confidence) interval due to the randomization.
-#' @param style character specifying the style of pithist. For \code{style = "bar"}
-#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
-#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
-#' drawn.
+#' @param nsim integer, defaults to \code{1L}. Only used when
+#' \code{type = "random"}; how many simulated PITs should be drawn?
+#' @param delta \code{NULL} or numeric. The minimal difference to compute the range of
+#' probabilities corresponding to each observation to get (randomized)
+#' quantile residuals. For \code{NULL} (default), the minimal observed difference in the
+#' response divided by \code{5e-6} is used.
+#' @param simint \code{NULL} (default) or logical. In case of discrete
+#' distributions, should the simulation (confidence) interval due to the
+#' randomization be visualized?
+#' @param simint_level numeric, defaults to \code{0.95}. The confidence level
+#' required for calculating the simulation (confidence) interval due to the
+#' randomization.
+#' @param simint_nrep numeric, defaults to \code{250}. The repetition number of
+#' simulated quantiles for calculating the simulation (confidence) interval due
+#' to the randomization.
+#' @param style character specifying plotting style. For \code{style = "bar"} (default)
+#' a traditional PIT histogram is drawn, \code{style = "line"} solely plots the upper border
+#' of the bars. If \code{single_graph = TRUE} is used (see \code{\link{plot.pithist}}),
+#' line-style PIT histograms will be enforced.
 #' @param freq logical. If \code{TRUE}, the PIT histogram is represented by
 #' frequencies, the \code{counts} component of the result; if \code{FALSE},
 #' probability densities, component \code{density}, are plotted (so that the
@@ -95,15 +105,21 @@
 #' @param xlab,ylab,main graphical parameters passed to
 #' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.
 #' @param \dots further graphical parameters.
+#'
 #' @return An object of class \code{"pithist"} inheriting from
-#' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
-#' with the following variables: \item{x}{histogram
-#' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
-#' histogram bars,} \item{width}{widths of the histogram bars,}
-#' \item{confint_lwr, confint_upr}{lower and upper confidence interval bound,} \item{expected}{y-coordinates of
-#' the expected curve.} Additionally, \code{freq}, \code{xlab},
-#' \code{ylab}, \code{main}, and \code{confint_level} are stored as attributes.
+#' \code{data.frame} or \code{tbl_df} conditional on the argument \code{class}
+#' including the following variables:
+#' \item{x}{histogram interval midpoints on the x-axis,}
+#' \item{y}{bottom coordinate of the histogram bars,}
+#' \item{width}{widths of the histogram bars,}
+#' \item{confint_lwr}{lower bound of the confidence interval,}
+#' \item{confint_upr}{upper bound of the confidence interval,}
+#' \item{expected}{y-coordinate of the expected curve.}
+#' Additionally, \code{freq}, \code{xlab}, \code{ylab}, \code{main}, and
+#' \code{confint_level} are stored as attributes.
+#'
 #' @seealso \code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
+#'
 #' @references
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
 #' for Interval Estimation of Binomial Proportions.} \emph{The American
@@ -111,7 +127,7 @@
 #'
 #' Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
 #' Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
-#' \doi{10.2307/2981683}
+#' \url{https://www.jstor.org/stable/20640646}.
 #'
 #' Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 #' Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
@@ -124,7 +140,7 @@
 #'
 #' Gneiting T, Balabdaoui F, Raftery AE (2007). \dQuote{Probabilistic Forecasts,
 #' Calibration and Sharpness}.  \emph{Journal of the Royal Statistical Society:
-#' Series B (Methodological)}. \bold{69}(2), 243--268.
+#' Series B (Statistical Methodology)}. \bold{69}(2), 243--268.
 #' \doi{10.1111/j.1467-9868.2007.00587.x}
 #'
 #' @keywords hplot
@@ -1339,7 +1355,7 @@ lines.pithist <- function(x,
 
 #' @rdname plot.pithist
 #' @method autoplot pithist
-#' @exportS3Method ggplot2::autoplot
+#' @exportS3Method ggplot2::autoplot pithist
 autoplot.pithist <- function(object,
                              single_graph = FALSE,
                              style = NULL,

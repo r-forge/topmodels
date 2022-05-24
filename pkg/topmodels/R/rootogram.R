@@ -798,7 +798,7 @@ plot.rootogram <- function(x,
 
 #' @rdname plot.rootogram
 #' @method autoplot rootogram
-#' @exportS3Method ggplot2::autoplot
+#' @exportS3Method ggplot2::autoplot rootogram
 autoplot.rootogram <- function(object,
                                style = NULL,
                                scale = NULL,

@@ -3,7 +3,8 @@
 # -------------------------------------------------------------------
 #
 # - Observed y in-sample or out-of-sample (n x 1)
-# - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2)
+# - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2);
+#   eps is a small number (required for discrete/censored distributions)
 # - Two columns can be essentially equal -> continuous
 #   or different -> (partially) discrete
 # - Potentially transform uniform scale to different
@@ -13,7 +14,7 @@
 #   theoretical quantiles (from same distribution)
 # - To deal with point masses, draw either multiple random
 #   draws (enable alpha blending by default) or shade quantiles
-
+#
 # Functions:
 # - qqrplot() generic plus default method
 # - Return object of class "qqrplot" that is plotted by default
@@ -932,7 +933,7 @@ points.qqrplot <- function(x,
 
 #' @rdname plot.qqrplot
 #' @method autoplot qqrplot
-#' @exportS3Method ggplot2::autoplot
+#' @exportS3Method ggplot2::autoplot qqrplot
 autoplot.qqrplot <- function(object,
                              single_graph = FALSE,
                              detrend = NULL,

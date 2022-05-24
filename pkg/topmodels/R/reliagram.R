@@ -894,7 +894,7 @@ lines.reliagram <- function(x,
 
 #' @rdname plot.reliagram
 #' @method autoplot reliagram
-#' @exportS3Method ggplot2::autoplot
+#' @exportS3Method ggplot2::autoplot reliagram
 autoplot.reliagram <- function(object,
                                single_graph = FALSE,
                                minimum = 0,
