@@ -366,7 +366,11 @@ pithist.default <- function(
     if (length(breaks) == 1L) breaks <- seq(tmp_range[1], tmp_range[2], length.out = breaks + 1L)
 
     ## equation 3 and computation of probability for each interval (f_j)
-    f <- diff(colMeans(sapply(breaks, F)))
+    ## TODO: RS->ML: pure diff loses 'point mass' on 0; code adjusted to
+    ##       account for possible point mass (probability on breaks[1])
+    tmp <- colMeans(sapply(breaks, F))
+    f   <- diff(tmp) + c(tmp[1], rep(0, length(tmp) - 2L)) #diff(colMeans(sapply(breaks, F)))
+    rm(tmp)
 
     ## collect everything as data.frame
     tmp_rval <- list(
