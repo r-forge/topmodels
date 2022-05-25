@@ -100,6 +100,13 @@ pitresiduals.default <- function(object,
   if(!is.object(object) || 
     all(class(object) == "data.frame") || 
     is.numeric(object)) { # TODO: (ML) is this case already caught by `is.object()`?
+                          # NOTE: (RS) A vector with a class is also an object, but a vector
+                          #            with class is no longer a (plain) vector.
+                          #            x <- 1:4
+                          #            y <- 1:4; class(y) <- "foo"
+                          #            | object  | is.object() | is.vector() | is.numeric() |
+                          #            |   x     |    FALSE    |    TRUE     |    TRUE      |
+                          #            |   y     |    TRUE     |    FALSE    |    TRUE      |
 
     stop(paste0("`object` must be a (model) 00 object:\n" ,
       "  * you have supplied either a base object,\n",
