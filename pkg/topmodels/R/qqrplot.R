@@ -606,6 +606,11 @@ plot.qqrplot <- function(x,
   scale <- match.arg(scale, c("normal", "uniform"))
   confint_type <- match.arg(confint_type)
 
+  if (detrend && confint_type != "pointwise") {
+    warning('For detrended Q-Q Plots only pointwise confidence intervals are currently implemented, set accordingly."`')
+    confint_type <- "pointwise"
+  }
+
   ## get input object on correct scale
   x <- summary(x, detrend = detrend)
 
@@ -1011,6 +1016,11 @@ autoplot.qqrplot <- function(object,
   # match arguments
   scale <- match.arg(scale, c("normal", "uniform"))
   confint_type <- match.arg(confint_type)
+
+  if (detrend && confint_type != "pointwise") {
+    warning('For detrended qqrplots only pointwise confidence intervals are currently implemented, set accordingly."`')
+    confint_type <- "pointwise"
+  }
 
   ## get input object on correct scale
   object <- summary(object, detrend = detrend)
@@ -1864,8 +1874,8 @@ compute_qqrplot_confint <- function(x,
                                     type = c("pointwise", "simultaneous", "tail-sensitive"),
                                     level = 0.95, 
                                     which = c("both", "lower", "upper"), 
-                                    slope = 0, 
-                                    intercept = 1) {
+                                    slope = 1, 
+                                    intercept = 0) {
   ## checks
   stopifnot(is.numeric(n), length(n) == 1)
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
@@ -1885,15 +1895,22 @@ compute_qqrplot_confint <- function(x,
   }
 
   if (type == "tail-sensitive" && scale == "uniform") {
-    warning('Tail-sensitive confidence intervals are not implemented for uniform scale: \n * `type` set to `"simultaneous"`')
+    # FIXME: (ML) Is this possible?
+    warning('tail-sensitive confidence intervals are not implemented for uniform scale: \n * `type` set to `"simultaneous"`')
+    type <- "simultaneous"
   }
+
+  ## NOTE: (ML) For detrended Q-Q Plots, only "pointwise" is implemented (same as in `qqplotr`).
   
   ## compute pointwise or simultanous CI
   if (type == "pointwise") {
     p <- pFun(x) 
-    #se <- (slope / dFun(x)) * (sqrt(p * (1 - p) / n)) 
-    se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n)) 
-    # FIXME: (ML) Is the slope in the numerator needed? Included in `qqplotr`, but not working for wormplots.
+    # FIXME: (ML) Currently "slope = 0" for wormplots, so if needed.
+    if (slope == 0) {
+      se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n)) 
+    } else {
+      se <- (slope / dFun(x)) * (sqrt(p * (1 - p) / n)) 
+    }
     rval <- as.numeric(qnorm(1 - (1 - level) / 2) * se)
     
     ## add to reference line and return
@@ -1902,13 +1919,15 @@ compute_qqrplot_confint <- function(x,
 
   } else if (type == "simultaneous") {
     p <- pFun(x)
-    epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))  # Komogorov quantile
+    epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))  # FIXME: (ML) Use exact Komogorov quantile. Exported?
     lp <- pmax(p - epsilon, rep(0, length(p)))
     up <- pmin(p + epsilon, rep(1, length(p)))
     lower <- intercept + slope * qFun(lp)
     upper <- intercept + slope * qFun(up)
 
   } else { # tail sensitive
+
+    warning("The implementation of tail-sensitive confidence intervals is not yet tested and are currently not suggested to be used.")
 
     B <- 1000 # number of simulations
     nx <- length(x)
@@ -1929,7 +1948,7 @@ compute_qqrplot_confint <- function(x,
     critical <- apply(pValue, 2, min)
     criticalC <- quantile(critical, prob = 1 - level)
 
-    ## FIXME: how are the shape parameters computed??
+    # FIXME: (ML) How are the shape parameters computed - this is just an educated guess!
     upperCi <- qbeta(1 - criticalC, shape1 = pnorm(x) * nx, shape2 = pnorm(x, lower.tail = FALSE) * nx)
     lowerCi <- qbeta(criticalC, shape1 = pnorm(x) * nx, shape2 = pnorm(x, lower.tail = FALSE) * nx)
 
