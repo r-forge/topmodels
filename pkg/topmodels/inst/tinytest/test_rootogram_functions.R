@@ -58,7 +58,7 @@ expect_silent(
 r2 <- rootogram(m2, style = "suspended", plot = FALSE)
 r3 <- rootogram(m3, plot = FALSE)
 
-expect_silent(
+expect_message(
   autoplot(c(r2, r3), pch = 3, legend = TRUE)
 )
 

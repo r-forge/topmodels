@@ -53,6 +53,7 @@ tmp_additional_variables <- c("confint_lwr", "confint_upr", "group")
 
 # Combining two pit histograms
 expect_silent(p1p2 <- c(p1, p2))
+expect_identical(class(p1p2), class(p1))
 expect_identical(nrow(p1p2), nrow(p1) + nrow(p2))
 expect_identical(ncol(p1p2), ncol(p2) + length(tmp_additional_variables))
 expect_identical(names(p1p2), c(names(p1), tmp_additional_variables))
@@ -62,6 +63,7 @@ rm(p1p2)
 
 # Combining three pit histograms
 expect_silent(p1p2p3 <- c(p1, p2, p3))
+expect_identical(class(p1p2p3), class(p1))
 expect_identical(nrow(p1p2p3), nrow(p1) + nrow(p2) + nrow(p3))
 expect_identical(ncol(p1p2p3), ncol(p2) + length(tmp_additional_variables))
 expect_identical(names(p1p2p3), c(names(p1), tmp_additional_variables))
@@ -76,7 +78,31 @@ identical(p1p2p3, s1s2s3)
 expect_silent(s1s2s3 <- rbind(p1_summary, p2_summary, p3_summary))
 identical(p1p2p3, s1s2s3)
 
+# NOTE: We can also row-bind the objects returned by summary;
+# `c.pithist()` ensures the order of the variables is the same, 
+# thus we should get identical results.
+expect_silent(s1s2s3 <- c(p1_summary, p2_summary, p3_summary))
+identical(p1p2p3, s1s2s3)
+expect_silent(s1s2s3 <- rbind(p1_summary, p2_summary, p3_summary))
+identical(p1p2p3, s1s2s3)
+
 rm(p1p2p3, s1s2s3)
+
+# Testing the same method for c("pithist", "tbl_df", ...) objects; only for the
+# tribble-combo (combining tbl_p1, tbl_p2 and tbl_p3).
+expect_silent(tbl_p1 <- pithist(m1, class = "tibble", plot = FALSE))
+expect_silent(tbl_p2 <- pithist(m2, class = "tibble", plot = FALSE))
+expect_silent(tbl_p3 <- pithist(m3, class = "tibble", plot = FALSE))
+expect_silent(tbl_p1p2p3 <- c(tbl_p1, tbl_p2, tbl_p3))
+expect_identical(class(tbl_p1), class(tbl_p1p2p3))
+expect_identical(nrow(tbl_p1p2p3), nrow(tbl_p1) + nrow(tbl_p2) + nrow(tbl_p3))
+expect_identical(ncol(tbl_p1p2p3), ncol(tbl_p2) + length(tmp_additional_variables))
+expect_identical(names(tbl_p1p2p3), c(names(tbl_p1), tmp_additional_variables))
+expect_identical(sort(unique(tbl_p1p2p3$group)), 1:3)
+expect_identical(c(tbl_p1, tbl_p2, tbl_p3), rbind(tbl_p1, tbl_p2, tbl_p3))
+
+rm(tbl_p1, tbl_p2, tbl_p3, tbl_p1p2p3)
+
 rm(tmp_additional_variables)
 
 

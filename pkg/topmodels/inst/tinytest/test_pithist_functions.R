@@ -35,12 +35,18 @@ expect_silent(
 p2 <- pithist(m2, confint_type = "approximation", plot = FALSE)
 p3 <- pithist(m3, nsim = 50L, plot = TRUE)
 
-expect_silent(
+expect_message(
   autoplot(c(p2, p3), single_graph = TRUE, confint = FALSE, pch = 3, legend = TRUE)
 )
-
 expect_silent(
+  autoplot(c(p2, p3), single_graph = TRUE, style = "line", confint = FALSE, pch = 3, legend = TRUE)
+)
+
+expect_message(
   plot(c(p2, p3), single_graph = TRUE, confint = FALSE)
+)
+expect_silent(
+  plot(c(p2, p3), single_graph = TRUE, style = "line", confint = FALSE)
 )
 
 expect_silent(

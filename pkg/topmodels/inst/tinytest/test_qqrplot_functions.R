@@ -35,24 +35,18 @@ expect_silent(
 q2 <- qqrplot(m2, nsim = 50L, plot = FALSE)
 q3 <- qqrplot(m3, nsim = 50L, plot = TRUE)
 
-expect_silent(
+expect_message(
   autoplot(c(q2, q3), single_graph = TRUE, pch = 3, legend = TRUE)
 )
 
-expect_silent(
+expect_message(
   autoplot(c(q2, q3), single_graph = FALSE, pch = 3, legend = TRUE)
 )
 
 dev.new()
-expect_silent(
+expect_silent({
   plot(c(q2, q3), single_graph = TRUE, simint = FALSE)
-)
-
-expect_silent(
   points(q3, col = 2)
-)
-
-expect_silent(
   points(q3, simint = TRUE)
-)
+})
 dev.off()
