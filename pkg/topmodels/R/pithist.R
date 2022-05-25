@@ -71,8 +71,8 @@
 #' @param scale controls the scale on which the PIT residuals are computed: on
 #' the probability scale (\code{"uniform"}; default) or on the normal scale
 #' (\code{"normal"}).
-#' @param breaks \code{NULL} (default) or numeric vector to manually specify
-#' the breaks for the histogram intervals.
+#' @param breaks \code{NULL} (default) or numeric vector of length \code{2} or more
+#' to manually specify the breaks for the histogram intervals.
 #' @param type character. In case of discrete distributions, should an expected
 #' (non-normal) PIT histogram be computed according to Czado et al. (2009)
 #' (\code{"expected"}; default) or should the PIT be drawn randomly from the corresponding
@@ -205,20 +205,19 @@ pithist.default <- function(
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `delta w/i `qresiduals()`
   ## * `expected`, `confint`, `...` w/i `plot()` and `autoplot()`
-  stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
+  stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) >= 2 && is.null(dim(breaks))))
   stopifnot(is.numeric(nsim), length(nsim) == 1)
-  stopifnot(is.null(simint) || is.logical(simint))
-  stopifnot(
-    is.numeric(simint_level),
-    length(simint_level) == 1,
-    simint_level >= 0,
-    simint_level <= 1
-  )
+  stopifnot(is.null(simint) || isTRUE(simint) || isFALSE(simint))
+  stopifnot(is.numeric(simint_level), length(simint_level) == 1, simint_level >= 0, simint_level <= 1)
   stopifnot(is.numeric(simint_nrep), length(simint_nrep) == 1, simint_nrep >= 1)
-  stopifnot(is.logical(freq))
+  stopifnot(isTRUE(freq) || isFALSE(freq))
   stopifnot(is.character(xlab), length(xlab) == 1)
   stopifnot(is.character(ylab), length(ylab) == 1)
   stopifnot(is.null(main) || (length(main) == 1 && is.character(main)))
+  stopifnot(isTRUE(plot) || isFALSE(plot) || (is.character(plot) && length(plot) == 1L))
+  stopifnot(is.null(class) || (is.character(class) && length(class) == 1L))
+  stopifnot(isTRUE(expected) || isFALSE(expected))
+  stopifnot(isTRUE(confint) || isFALSE(confint))
 
   ## match arguments
   style <- match.arg(style)
@@ -236,28 +235,41 @@ pithist.default <- function(
   }
 
   ## guess plotting flavor
-  if (isFALSE(plot)) {
-    plot <- "none"
-  } else if (isTRUE(plot)) {
-    plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
-  } else if (!is.character(plot)) {
-    plot <- "base"
+  if (is.logical(plot)) {
+      plot <- ifelse(isFALSE(plot), "none", if ("ggplot2" %in% .packages()) "ggplot2" else "base")
   }
-  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
-  stopifnot(
-    "The argument `plot` must be logical or match the arguments 'none', 'base' or 'ggplot2'." =
-      !inherits(plot, "try-error")
-  )
+  plot <- match.arg(plot, c("none", "base", "ggplot2"))
+  ## TODO: (RS2ML) Changed logic, added additional sanity checks above
+  ##       and removed the fallback to 'base' if plot is not either TRUE, FALSE,
+  ##       or one of the allowed types (none, base, or ggplot2).
+  ##       Hope that is fine or do you need the fallback? If not, remove these
+  ##       comments, else we need may need to quickly discuss it.
+  ## if (isFALSE(plot)) {
+  ##   plot <- "none"
+  ## } else if (isTRUE(plot)) {
+  ##   plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
+  ## } else if (!is.character(plot)) {
+  ##   plot <- "base"
+  ## }
+  ## stopifnot(
+  ##   "The argument `plot` must be logical or match the arguments 'none', 'base' or 'ggplot2'." =
+  ##     !inherits(plot, "try-error")
+  ## )
 
   ## guess output class
   if (is.null(class)) {
     class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
-  class <- try(match.arg(class, c("tibble", "data.frame")))
-  stopifnot(
-    "The argument `class` must be NULL or match the arguments 'tibble' or 'data.frame'." =
-      !inherits(class, "try-error")
-  )
+  class <- match.arg(class, c("tibble", "data.frame"))
+  ## TODO: (RS2ML) That did not work as expected, you should use a stop instead;
+  ##       or (as now) remove the try(match.arg()) as match.arg() throws a fairly
+  ##       nice error message itself anyways? If you really need NULL in the
+  ##       error message (as one of the options) we may add id again, this
+  ##       is now checked by additional sanity checks above.
+  ## stopifnot(
+  ##   "The argument `class` must be NULL or match the arguments 'tibble' or 'data.frame'." =
+  ##     !inherits(class, "try-error")
+  ## )
 
   # -------------------------------------------------------------------
   # COMPUTATION OF PIT
@@ -272,6 +284,8 @@ pithist.default <- function(
     ## TODO: (ML)
     ## * implement proportional over the inteverals (e.g., below censoring point)
     ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
+    ## NOTE(RS): There is a test for that in test_pithist_usage.R; must be removed
+    ##           once this option is added.
     stop("not yet implemented")
 
     # -------------------------------------------------------------------
