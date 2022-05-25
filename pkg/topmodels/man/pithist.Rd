@@ -58,8 +58,8 @@ is loaded.}
 the probability scale (\code{"uniform"}; default) or on the normal scale
 (\code{"normal"}).}
 
-\item{breaks}{\code{NULL} (default) or numeric vector to manually specify
-the breaks for the histogram intervals.}
+\item{breaks}{\code{NULL} (default) or numeric vector of length \code{2} or more
+to manually specify the breaks for the histogram intervals.}
 
 \item{type}{character. In case of discrete distributions, should an expected
 (non-normal) PIT histogram be computed according to Czado et al. (2009)

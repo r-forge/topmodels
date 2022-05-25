@@ -19,6 +19,102 @@ expect_silent(m1 <- lm(dist ~ speed, data = cars))
 expect_silent(m2 <- crch(dist ~ speed | speed, left = 3, data = cars))
 expect_silent(m3 <- glm(satellites ~ width + color, data = CrabSatellites, family = poisson))
 
+# --------------------------------------------------------------------
+# Sanity checks and allowed parameters
+# --------------------------------------------------------------------
+# Main argument must be a model object
+expect_error(pithist(1),
+             info = "Main object is not a model object")
+
+# plot
+expect_error(pithist(m1, plot = 1),                 info = "numeric not allowed")
+expect_error(pithist(m1, plot = logical(0)),        info = "zero-length logical not allowed")
+expect_error(pithist(m1, plot = rep(TRUE, 2)),      info = "logical length > 1 not allowed")
+expect_error(pithist(m1, plot = "foo"),             info = "option not allowed")
+expect_error(pithist(m1, plot = character(0)),      info = "character of length != 1 not allowed")
+expect_error(pithist(m1, plot = c("base", "ggplot2")), info = "character of length != 1 not allowed")
+
+# class, scale, type, and style
+expect_error(pithist(m1, class = 1),                info = "class must be character")
+expect_error(pithist(m1, class = character(0)),     info = "zero-length class not allowed")
+expect_error(pithist(m1, class = "foo"),            info = "invalid argument for class")
+expect_error(pithist(m1, scale = 1),                info = "scale must be character")
+expect_error(pithist(m1, scale = character(0)),     info = "zero-length scale not allowed")
+expect_error(pithist(m1, scale = "foo"),            info = "invalid argument for scale")
+expect_error(pithist(m1, type = 1),                 info = "type must be character")
+expect_error(pithist(m1, type = character(0)),      info = "zero-length type not allowed")
+expect_error(pithist(m1, type = "foo"),             info = "invalid argument for type")
+expect_error(pithist(m1, style = 1),                info = "style must be character")
+expect_error(pithist(m1, style = character(0)),     info = "zero-length style not allowed")
+expect_error(pithist(m1, style = "foo"),            info = "invalid argument for style")
+
+# TODO(RS): Currently testing that "type == "proportional" fails,
+#           must be removed in the future when this option has been added.
+expect_error(pithist(m1, type = "proportional"),    info = "test 'not implemented' option")
+
+# Testing 'breaks'
+expect_error(pithist(m1, breaks = "foo"),           info = "breaks non-numeric")
+expect_error(pithist(m1, breaks = TRUE),            info = "breaks non-numeric")
+expect_error(pithist(m1, breaks = matrix(1, nrow = 3, ncol = 1)), info = "breaks not dimension-less numeric vector")
+expect_error(pithist(m1, breaks = numeric(0)),      info = "breaks invalid length (must be 2 or more)")
+expect_error(pithist(m1, breaks = .5),              info = "breaks invalid length (must be 2 or more)")
+
+# nsim
+expect_error(pithist(m1, nsim = "3"),               info = "nsim not numeric")
+expect_error(pithist(m1, nsim = 1:2),               info = "nsim not of length 1")
+expect_error(pithist(m1, nsim = numeric(0)),        info = "nsim not of length 1")
+
+# delta: only forwarded; should be tested in qresiduals()
+
+# simint
+expect_error(pithist(m1, nsim = "3"),               info = "simint must be NULL, TRUE, or FALSE")
+expect_error(pithist(m1, nsim = c(TRUE, FALSE)),    info = "simint must be NULL, TRUE, or FALSE")
+
+# simint_level
+expect_error(pithist(m1, simint_level = -1e10),     info = "simint_level must be >= 0")
+expect_error(pithist(m1, simint_level = 1+1e10),    info = "simint_level must be <= 1")
+expect_error(pithist(m1, simint_level = 1:2 / 10),  info = "simint_level must be length 1")
+
+# simint_nrep
+expect_error(pithist(m1, simint_nrep = "3"),        info = "simint_nrep must be numeric")
+expect_error(pithist(m1, simint_nrep = 10:20),      info = "simint_nrep must be length 1")
+expect_error(pithist(m1, simint_nrep = 0),          info = "simint_nrep must be >= 1")
+
+# freq
+expect_error(pithist(m1, freq = "TRUE"),            info = "freq must be logical")
+expect_error(pithist(m1, freq = 1),                 info = "freq must be logical")
+expect_error(pithist(m1, freq = c(TRUE, FALSE)),    info = "freq must be of length 1")
+expect_error(pithist(m1, freq = logical(0)),        info = "freq must be of length 1")
+
+# expected, confint
+expect_error(pithist(m1, expected = "TRUE"),         info = "expected must be logical")
+expect_error(pithist(m1, expected = 1),              info = "expected must be logical")
+expect_error(pithist(m1, expected = c(TRUE, FALSE)), info = "expected must be of length 1")
+expect_error(pithist(m1, expected = logical(0)),     info = "expected must be of length 1")
+expect_error(pithist(m1, confint = "TRUE"),          info = "confint must be logical")
+expect_error(pithist(m1, confint = 1),               info = "confint must be logical")
+expect_error(pithist(m1, confint = c(TRUE, FALSE)),  info = "confint must be of length 1")
+expect_error(pithist(m1, confint = logical(0)),      info = "confint must be of length 1")
+
+# xlab/ylab/main
+expect_error(pithist(m1, xlab = 3),                 info = "xlab must be character")
+expect_error(pithist(m1, xlab = character(0)),      info = "xlab must be length 1")
+expect_error(pithist(m1, xlab = LETTERS[1:2]),      info = "xlab must be length 1")
+expect_error(pithist(m1, ylab = 3),                 info = "xlab must be character")
+expect_error(pithist(m1, ylab = character(0)),      info = "xlab must be length 1")
+expect_error(pithist(m1, ylab = LETTERS[1:2]),      info = "xlab must be length 1")
+expect_error(pithist(m1, main = 3),                 info = "main must be character or NULL")
+expect_error(pithist(m1, main = character(0)),      info = "main must be length 1 if character")
+expect_error(pithist(m1, main = LETTERS[1:2]),      info = "main must be length 1 if character")
+
+# There is a warning when `freq = TRUE` is used in combination with
+# non-equidistant breaks.
+expect_warning(pithist(m1, freq = TRUE, breaks = c(0, 0.1, 0.5, 1)),
+               info = "freq = TRUE and non-equidistant breaks trigger warning")
+expect_silent(pithist(m1, freq = FALSE, breaks = c(0, 0.1, 0.5, 1)),
+               info = "freq = FALSE and non-equidistant breaks trigger warning is silent")
+
+
 
 # --------------------------------------------------------------------
 # Basic usage; testing return objects
