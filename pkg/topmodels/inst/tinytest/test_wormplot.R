@@ -48,6 +48,12 @@ expect_true(attr(w1, "detrend"))
 expect_identical(w1, w2)
 expect_identical(w1, w3)
 
+# Checking y label and x label
+expect_identical(attr(w1, "ylab"), "Deviation")
+expect_identical(attr(w3, "ylab"), "Deviation")
+expect_identical(attr(w1, "xlab"), "Theoretical quantiles")
+expect_identical(attr(w3, "xlab"), "Theoretical quantiles")
+
 
 # `wormplot()` returns an object of class `"qqrplot"` with 
 # the attribute `detrend = TRUE`; else it should return the
