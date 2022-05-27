@@ -175,45 +175,46 @@ qqrplot.default <- function(
   ## * `simint` w/i `polygon()`
   ## * `delta` w/i `qresiduals()`
   ## * `...` in `plot()` and `autoplot()`
-  stopifnot(is.logical(detrend))
-  stopifnot(is.numeric(nsim), length(nsim) == 1)
-  stopifnot(
-    is.numeric(simint_level),
-    length(simint_level) == 1,
-    simint_level >= 0,
-    simint_level <= 1
-  )
-  stopifnot(is.numeric(simint_nrep), length(simint_nrep) == 1)
-  stopifnot(length(xlab) == 1)
-  stopifnot(length(ylab) == 1)
-  stopifnot(length(main) == 1 || length(main) == 0)
-
-  ## match arguments
+  stopifnot(isTRUE(detrend) || isFALSE(detrend))
+  stopifnot(is.numeric(simint_level), length(simint_level) == 1, simint_level >= 0, simint_level <= 1)
+  stopifnot(is.character(xlab), length(xlab) == 1)
+  stopifnot(is.character(ylab), length(ylab) == 1)
+  stopifnot(is.null(main) || (is.character(main) && length(main) == 1L))
+  stopifnot(isTRUE(plot) || isFALSE(plot) || (is.character(plot) && length(plot) == 1L))
+  stopifnot(is.null(class) || (is.character(class) && length(class) == 1L))
+  stopifnot(isTRUE(confint) || isFALSE(confint))
   scale <- match.arg(scale)
 
   ## guess plotting flavor
-  if (isFALSE(plot)) {
-    plot <- "none"
-  } else if (isTRUE(plot)) {
-    plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
-  } else if (!is.character(plot)) {
-    plot <- "base"
+  if (is.logical(plot)) {
+      plot <- ifelse(isFALSE(plot), "none", if ("ggplot2" %in% .packages()) "ggplot2" else "base")
   }
-  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
-  stopifnot(
-    "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
-      !inherits(plot, "try-error")
-  )
+  plot <- match.arg(plot, c("none", "base", "ggplot2"))
+  ## TODO: (RS2ML) Analog to pithist()
+  ## if (isFALSE(plot)) {
+  ##   plot <- "none"
+  ## } else if (isTRUE(plot)) {
+  ##   plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
+  ## } else if (!is.character(plot)) {
+  ##   plot <- "base"
+  ## }
+  ## plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
+  ## stopifnot(
+  ##   "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
+  ##     !inherits(plot, "try-error")
+  ## )
 
   ## guess output class
   if (is.null(class)) {
     class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
-  class <- try(match.arg(class, c("tibble", "data.frame")))
-  stopifnot(
-    "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
-      !inherits(class, "try-error")
-  )
+  class <- match.arg(class, c("tibble", "data.frame"))
+  ## TODO: (RS2ML) Analog to pithist()
+  ##class <- try(match.arg(class, c("tibble", "data.frame")))
+  ##stopifnot(
+  ##  "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
+  ##    !inherits(class, "try-error")
+  ##)
 
   # -------------------------------------------------------------------
   # COMPUTATION OF QUANTILE RESIDUALS

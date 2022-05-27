@@ -83,6 +83,10 @@ pitresiduals.default <- function(object,
                                prob = NULL,
                                ...) {
 
+  # Sanity checks
+  stopifnot(is.numeric(nsim), length(nsim) == 1, nsim > sqrt(.Machine$double.eps))
+  stopifnot(is.null(delta) || (is.numeric(delta) && length(delta) == 1 && delta > 0.0))
+
   ## match arguments
   scale <- match.arg(scale)
   type <- match.arg(type)

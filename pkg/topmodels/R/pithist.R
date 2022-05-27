@@ -77,7 +77,7 @@
 #' (non-normal) PIT histogram be computed according to Czado et al. (2009)
 #' (\code{"expected"}; default) or should the PIT be drawn randomly from the corresponding
 #' interval (\code{"random"})?
-#' @param nsim integer, defaults to \code{1L}. Only used when
+#' @param nsim positive integer, defaults to \code{1L}. Only used when
 #' \code{type = "random"}; how many simulated PITs should be drawn?
 #' @param delta \code{NULL} or numeric. The minimal difference to compute the range of
 #' probabilities corresponding to each observation to get (randomized)
@@ -206,7 +206,6 @@ pithist.default <- function(
   ## * `delta w/i `qresiduals()`
   ## * `expected`, `confint`, `...` w/i `plot()` and `autoplot()`
   stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) >= 2 && is.null(dim(breaks))))
-  stopifnot(is.numeric(nsim), length(nsim) == 1)
   stopifnot(is.null(simint) || isTRUE(simint) || isFALSE(simint))
   stopifnot(is.numeric(simint_level), length(simint_level) == 1, simint_level >= 0, simint_level <= 1)
   stopifnot(is.numeric(simint_nrep), length(simint_nrep) == 1, simint_nrep >= 1)

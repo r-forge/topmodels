@@ -66,7 +66,7 @@ to manually specify the breaks for the histogram intervals.}
 (\code{"expected"}; default) or should the PIT be drawn randomly from the corresponding
 interval (\code{"random"})?}
 
-\item{nsim}{integer, defaults to \code{1L}. Only used when
+\item{nsim}{positive integer, defaults to \code{1L}. Only used when
 \code{type = "random"}; how many simulated PITs should be drawn?}
 
 \item{delta}{\code{NULL} or numeric. The minimal difference to compute the range of
