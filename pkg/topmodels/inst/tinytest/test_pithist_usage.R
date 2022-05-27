@@ -26,6 +26,10 @@ expect_silent(m3 <- glm(satellites ~ width + color, data = CrabSatellites, famil
 expect_error(pithist(1),
              info = "Main object is not a model object")
 
+
+# newdata: forwarded to `pitresiduals()`
+expect_error(pithist(m1, newdata = 3),              info = "newdata of wrong class")
+
 # plot
 expect_error(pithist(m1, plot = 1),                 info = "numeric not allowed")
 expect_error(pithist(m1, plot = logical(0)),        info = "zero-length logical not allowed")
@@ -59,18 +63,10 @@ expect_error(pithist(m1, breaks = matrix(1, nrow = 3, ncol = 1)), info = "breaks
 expect_error(pithist(m1, breaks = numeric(0)),      info = "breaks invalid length (must be 2 or more)")
 expect_error(pithist(m1, breaks = .5),              info = "breaks invalid length (must be 2 or more)")
 
-# nsim
-expect_error(pithist(m1, nsim = "3"),               info = "nsim not numeric")
-expect_error(pithist(m1, nsim = 1:2),               info = "nsim not of length 1")
-expect_error(pithist(m1, nsim = numeric(0)),        info = "nsim not of length 1")
-
-# delta: only forwarded; should be tested in qresiduals()
-
-# simint
-expect_error(pithist(m1, nsim = "3"),               info = "simint must be NULL, TRUE, or FALSE")
-expect_error(pithist(m1, nsim = c(TRUE, FALSE)),    info = "simint must be NULL, TRUE, or FALSE")
+# simint; not tested, tested by pitresiduals() if used
 
 # simint_level
+expect_error(pithist(m1, simint_level = "0.5"),     info = "simint_level must be numeric")
 expect_error(pithist(m1, simint_level = -1e10),     info = "simint_level must be >= 0")
 expect_error(pithist(m1, simint_level = 1+1e10),    info = "simint_level must be <= 1")
 expect_error(pithist(m1, simint_level = 1:2 / 10),  info = "simint_level must be length 1")
@@ -79,6 +75,12 @@ expect_error(pithist(m1, simint_level = 1:2 / 10),  info = "simint_level must be
 expect_error(pithist(m1, simint_nrep = "3"),        info = "simint_nrep must be numeric")
 expect_error(pithist(m1, simint_nrep = 10:20),      info = "simint_nrep must be length 1")
 expect_error(pithist(m1, simint_nrep = 0),          info = "simint_nrep must be >= 1")
+
+# delta: forwarded to pitresiduals()
+expect_error(pithist(m1, delta = TRUE),              info = "delta must be numeric")
+expect_error(pithist(m1, delta = "1"),               info = "delta must be numeric")
+expect_error(pithist(m1, delta = 1:3),               info = "delta must be of length 1")
+expect_error(pithist(m1, delta = 0),                 info = "delta must be > 0.0")
 
 # freq
 expect_error(pithist(m1, freq = "TRUE"),            info = "freq must be logical")
@@ -132,7 +134,7 @@ expect_true(all(sapply(list(p1, p2, p3), function(x) inherits(x, "data.frame")))
 
 # Check if we get a tbl_df in return
 expect_true(all(sapply(list(tbl_p1, tbl_p2, tbl_p3), function(x) inherits(x, "tbl_df"))),
-            info = "pithist(..., class = 'data.frame') did not return a tbl_df")
+            info = "pithist(..., class = 'tibble') did not return a tbl_df")
 
 # Check that all objects have class "pithist" as first main class
 tmp <- list(p1, p2, p3, tbl_p1, tbl_p2, tbl_p3)
