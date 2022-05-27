@@ -8,6 +8,9 @@ library("crch")
 library("ggplot2")
 library("tibble")
 
+# Global seed for the tests in this file
+seed <- 123
+
 # --------------------------------------------------------------------
 # Setting up the data sets/models used to test the function
 # --------------------------------------------------------------------
@@ -122,15 +125,30 @@ expect_error(qqrplot(m1, main = LETTERS[1:2]),      info = "main must be length 
 # --------------------------------------------------------------------
 # Basic usage; testing return objects
 # --------------------------------------------------------------------
-set.seed(123); expect_silent(q1 <- qqrplot(m1, class = "data.frame"))
-# ---> throws a warning that non-finite values have been removed
-set.seed(123); expect_warning(q2 <- qqrplot(m2, class = "data.frame"),
+
+# Return class data.frame
+set.seed(seed)
+expect_silent(q1 <- qqrplot(m1, class = "data.frame"))
+# ---> throws a warning when plotted; should be silent when not.
+set.seed(seed)
+expect_silent(q2 <- qqrplot(m2, class = "data.frame", plot = FALSE))
+set.seed(seed)
+expect_warning(q2 <- qqrplot(m2, class = "data.frame"),
                "Removed 1 rows containing non-finite values \\((stat_qqrplot_ref|stat_qqrplot_confint)\\)\\.$")
-set.seed(123); expect_silent(q3 <- qqrplot(m3, class = "data.frame"))
-set.seed(123); expect_silent(tbl_q1 <- qqrplot(m1, class = "tibble"))
-set.seed(123); expect_warning(tbl_q2 <- qqrplot(m2, class = "tibble"),
+set.seed(seed)
+expect_silent(q3 <- qqrplot(m3, class = "data.frame"))
+
+# Return class tibble
+set.seed(seed)
+expect_silent(tbl_q1 <- qqrplot(m1, class = "tibble"))
+# ---> throws a warning when plotted; should be silent when not.
+set.seed(seed)
+expect_silent(tbl_q2 <- qqrplot(m2, class = "tibble", plot = FALSE))
+set.seed(seed)
+expect_warning(tbl_q2 <- qqrplot(m2, class = "tibble"),
                "Removed 1 rows containing non-finite values \\((stat_qqrplot_ref|stat_qqrplot_confint)\\)\\.$")
-set.seed(123); expect_silent(tbl_q3 <- qqrplot(m3, class = "tibble"))
+set.seed(seed)
+expect_silent(tbl_q3 <- qqrplot(m3, class = "tibble"))
 
 set.seed(Sys.time()) # Resetting seed
 
@@ -204,13 +222,13 @@ tmp_qqrplot_with_defaults <- function(object, main, ...) {
 }
 
 # Note: we need seeding
-set.seed(123); expect_silent(q1_default <- tmp_qqrplot_with_defaults(m1, main = "m1"))
-set.seed(123); expect_identical(q1, q1_default)
-set.seed(123); expect_warning(q2_default <- tmp_qqrplot_with_defaults(m2, main = "m2"),
-                              "Removed 1 rows containing non-finite values \\((stat_qqrplot_ref|stat_qqrplot_confint)\\)\\.$")
-set.seed(123); expect_equivalent(q2, q2_default)
-set.seed(123); expect_silent(q3_default <- tmp_qqrplot_with_defaults(m3, main = "m3"))
-set.seed(123); expect_identical(q3, q3_default)
+set.seed(seed); expect_silent(q1_default <- tmp_qqrplot_with_defaults(m1, main = "m1"))
+set.seed(seed); expect_identical(q1, q1_default)
+set.seed(seed); expect_warning(q2_default <- tmp_qqrplot_with_defaults(m2, main = "m2"),
+                               "Removed 1 rows containing non-finite values \\((stat_qqrplot_ref|stat_qqrplot_confint)\\)\\.$")
+set.seed(seed); expect_equivalent(q2, q2_default)
+set.seed(seed); expect_silent(q3_default <- tmp_qqrplot_with_defaults(m3, main = "m3"))
+set.seed(seed); expect_identical(q3, q3_default)
 rm(tmp_qqrplot_with_defaults, q1_default, q2_default, q3_default)
 
 set.seed(Sys.time()) # Resetting seed
@@ -227,4 +245,5 @@ expect_true(all(sapply(tmp, function(x) identical(attr(x, "ylab"), "Quantile res
 expect_true(isFALSE(attr(q1, "simint")))
 expect_true(isFALSE(attr(q2, "simint")))
 expect_true(isTRUE(attr(q3,  "simint")))
+
 

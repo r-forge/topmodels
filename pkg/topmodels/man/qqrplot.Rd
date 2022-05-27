@@ -150,7 +150,7 @@ qqrplot(m1_pois, detrend = TRUE, scale = "normal", confint = "line")
 \references{
 Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 Residuals.} \emph{Journal of Computational and Graphical Statistics},
-\bold{5}(3), 236-224. \doi{10.2307/1390802}
+\bold{5}(3), 236--244. \doi{10.2307/1390802}
 }
 \seealso{
 \code{\link{plot.qqrplot}}, \code{\link{wormplot}},

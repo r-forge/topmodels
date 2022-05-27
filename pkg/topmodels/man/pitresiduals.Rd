@@ -84,7 +84,7 @@ pitresiduals(m)
 \references{
 Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 Residuals.} \emph{Journal of Computational and Graphical Statistics},
-\bold{5}, 1--10. \doi{10.2307/1390802}.
+\bold{5}(3), 236--244. \doi{10.2307/1390802}
 
 Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 Personal Views: Statistical Theory: The Prequential Approach.} \emph{Journal of
