@@ -47,7 +47,7 @@
 #' @seealso \code{\link[stats]{qnorm}}, \code{\link{qqrplot}}
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
-#' \bold{5}, 1--10. \doi{10.2307/1390802}.
+#' \bold{5}(3), 236--244. \doi{10.2307/1390802}
 #' 
 #' Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 #' Personal Views: Statistical Theory: The Prequential Approach.} \emph{Journal of
@@ -75,13 +75,13 @@ pitresiduals <- function(object, ...) {
 #' @method pitresiduals default
 #' @export
 pitresiduals.default <- function(object, 
-                               newdata = NULL, 
-                               scale = c("uniform", "normal"),
-                               type = c("random", "quantile"), 
-                               nsim = 1L, 
-                               delta = NULL,
-                               prob = NULL,
-                               ...) {
+                                 newdata = NULL, 
+                                 scale   = c("uniform", "normal"),
+                                 type    = c("random", "quantile"), 
+                                 nsim    = 1L, 
+                                 delta   = NULL,
+                                 prob    = NULL,
+                                 ...) {
 
   # Sanity checks
   stopifnot(is.numeric(nsim), length(nsim) == 1, nsim > sqrt(.Machine$double.eps))
@@ -89,7 +89,7 @@ pitresiduals.default <- function(object,
 
   ## match arguments
   scale <- match.arg(scale)
-  type <- match.arg(type)
+  type  <- match.arg(type)
 
   ## check and set prob to default
   if (type == "random" & !is.null(prob)) {
@@ -101,22 +101,23 @@ pitresiduals.default <- function(object,
     stopifnot(is.numeric(prob) & is.vector(prob))
   } 
 
-  if(!is.object(object) || 
-    all(class(object) == "data.frame") || 
-    is.numeric(object)) { # TODO: (ML) is this case already caught by `is.object()`?
-                          # NOTE: (RS) A vector with a class is also an object, but a vector
-                          #            with class is no longer a (plain) vector.
-                          #            x <- 1:4
-                          #            y <- 1:4; class(y) <- "foo"
-                          #            | object  | is.object() | is.vector() | is.numeric() |
-                          #            |   x     |    FALSE    |    TRUE     |    TRUE      |
-                          #            |   y     |    TRUE     |    FALSE    |    TRUE      |
+  if (!is.object(object) || all(class(object) == "data.frame") || is.numeric(object)) {
+    # TODO: (ML) is this case already caught by `is.object()`?
+    # NOTE: (RS) A vector with a class is also an object, but a vector
+    #            with class is no longer a (plain) vector.
+    #            x <- 1:4
+    #            y <- 1:4; class(y) <- "foo"
+    #            | object  | is.object() | is.vector() | is.numeric() |
+    #            |   x     |    FALSE    |    TRUE     |    TRUE      |
+    #            |   y     |    TRUE     |    FALSE    |    TRUE      |
 
-    stop(paste0("`object` must be a (model) 00 object:\n" ,
+    # TODO: (RS2ML) FYI; stop takes up a series of objects which can be combined to
+    #       a character, thus stop(pate0("a\n", "b\n")) is identical to stop("a\n", "b\n").
+    #       You basically save a paste0() call here.
+    stop("`object` must be a (model) 00 object:\n" ,
       "  * you have supplied either a base object,\n",
       "  * an object of the single class `data.frame` or\n",
-      "  * a numeric."
-    ))
+      "  * a numeric.")
 
   } else {
 
@@ -130,7 +131,7 @@ pitresiduals.default <- function(object,
     ## FIXME: (ML) Increased difference, otherwise did not work for binom and pois
     ##at <- cbind(y - .Machine$double.eps^0.4, y)
     ##at <- cbind(y - 1L, y)
-    if(is.null(delta)) {
+    if (is.null(delta)) {
       delta <- min(diff(sort(unique(y))))
       delta <- delta / 5e6
     } else {
@@ -139,12 +140,17 @@ pitresiduals.default <- function(object,
 
     at <- cbind(y - delta, y)
 
-    attr(at, "nobs") <-     attr(y, "nobs")
-    attr(at, "n") <-        attr(y, "n")
-    attr(at, "weights") <-  attr(y, "weights")
+    attr(at, "nobs")    <- attr(y, "nobs")
+    attr(at, "n")       <- attr(y, "n")
+    attr(at, "weights") <- attr(y, "weights")
     object <- procast(object, newdata = newdata, at = at, type = "probability")
 
     # TODO: (ML) There is no `try()` environment, which errors can be caught
+    # TODO: (RS2ML) Not yet checked whats going on, we could use
+    #       a tryCatch() here if needed (tbd).
+    #       Someting along x <- tryCatch(<command>,
+    #                                    warning = function(w) w,
+    #                                    error   = function(e) stop("something went wrong"))
     if (inherits(object, "try-error")) {
       stop("could not obtain probability integral transform from 'object'")
     }
@@ -153,9 +159,9 @@ pitresiduals.default <- function(object,
   ## preprocess supplied probabilities
   nc <- NCOL(object)
   nr <- NROW(object)
-  if(nc > 2L) stop("quantiles must either be 1- or 2-dimensional")
-  if(nc == 2L) {
-    if(type == "random") {
+  if (nc > 2L) stop("quantiles must either be 1- or 2-dimensional")
+  if (nc == 2L) {
+    if (type == "random") {
       object <- matrix(
         runif(nr * nsim, min = rep(object[, 1L], nsim), max = rep(object[, 2L], nsim)),
         nrow = nr, ncol = nsim, dimnames = list(rownames(object), paste("r", 1L:nsim, sep = "_"))
@@ -166,7 +172,7 @@ pitresiduals.default <- function(object,
       ## * Otherwise akward features for heavily skewed distributions: observational vs. probability scale
       ## * Compare also "middle-point quantile residuals (MQRs) in Feng et al. (2020)
       nam <- rownames(object)
-      
+
       ## FIXME: (ML) Alternative computation, which is test below.
       object2 <- sapply(prob, function(x) qunif(x, min = object[, 1L], max = object[, 2L]))
 
@@ -178,7 +184,7 @@ pitresiduals.default <- function(object,
     }
     nc <- NCOL(object)
   }
-  if(!is.null(dim(object)) & nc == 1L) object <- drop(as.matrix(object))  
+  if (!is.null(dim(object)) & nc == 1L) object <- drop(as.matrix(object))
   # FIXME: (ML) object can be a data.frame, so make sure drop works by converting to matrix
 
   ## compute quantile residuals  

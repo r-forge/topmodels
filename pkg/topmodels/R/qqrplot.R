@@ -105,7 +105,7 @@
 #'
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
-#' \bold{5}(3), 236-224. \doi{10.2307/1390802}
+#' \bold{5}(3), 236--244. \doi{10.2307/1390802}
 #'
 #' @keywords hplot
 #' @examples
@@ -235,7 +235,7 @@ qqrplot.default <- function(
   ## compute rg interval
   ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   ## FIXME: (ML) Return all in the same order w/o x values (same for additional nsim) -> might be an error
-  if (!identical(simint, FALSE)) {
+  if (!isFALSE(simint)) {
     tmp <- qresiduals(object,
       newdata = newdata, scale = scale, type = "random", nsim = simint_nrep,
       delta = delta
@@ -515,7 +515,7 @@ rbind.qqrplot <- c.qqrplot
 #'
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
-#' \bold{5}(3), 236-224. \doi{10.2307/1390802}
+#' \bold{5}(3), 236--244. \doi{10.2307/1390802}
 #'
 #' @keywords hplot
 #' @examples
