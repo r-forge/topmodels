@@ -154,29 +154,32 @@ to the paired geom/stat.}
 
 \item{geom}{The geometric object to use display the data}
 
-\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
+\item{detrend}{logical, default \code{FALSE}. If set to \code{TRUE} the qqrplot is detrended,
+i.e, plotted as a \code{\link{wormplot}}.}
 
-\item{identity}{logical, should the identity line be plotted or a theoretical line
+\item{identity}{logical. Should the identity line be plotted or a theoretical line
 which passes through \code{probs} quantiles on the \code{"uniform"} or \code{"normal"} scale.}
 
 \item{probs}{numeric vector of length two, representing probabilities of reference
 line used.}
 
-\item{scale}{On which scale are the quantile residuals be shown: on the probability scale 
-(\code{"uniform"}) or on the normal scale (\code{"normal"}). Used for the reference line which
-goes through the first and third quartile of theoretical distributions.}
+\item{scale}{character. Scale on which the quantile residuals will
+be shown: \code{"uniform"} (default) for uniform scale or \code{"normal"} for normal scale.
+Used for the reference line which goes through the first and third quartile
+of theoretical distributions.}
 
-\item{xlim}{The x limits for computing the confidence intervals.}
+\item{xlim}{\code{NULL} (default) or numeric. The x limits for computing the confidence intervals.}
 
-\item{n}{The number of points used to compute the confidence intervals, the more the smoother.}
+\item{n}{positive numeric. Number of points used to compute the confidence intervals, the more the smoother.}
 
-\item{type}{Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
-of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
-on the Kolmogorov-Smirnov test.}
+\item{type}{character. Should \code{"pointwise"} (default), \code{"simultaneous"}, or
+\code{"tail-sensitive"} confidence intervals of the (randomized) quantile residuals be visualized.
+Simultaneous confidence intervals are based on the Kolmogorov-Smirnov test.}
 
-\item{level}{numeric. The confidence level required.}
+\item{level}{numeric. The confidence level required, defaults to \code{0.95}.}
 
-\item{style}{The confidence style.}
+\item{style}{character. Style for plotting confidence intervals. Either \code{"polygon"} (default)
+or \code{"line"}).}
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within

@@ -32,40 +32,46 @@ qqrplot(object, ...)
 \item{object}{an object from which probability integral transforms can be
 extracted using the generic function \code{\link{procast}}.}
 
-\item{newdata}{optionally, a data frame in which to look for variables with
+\item{newdata}{an optional data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.}
 
-\item{plot}{Should the \code{plot} or \code{autoplot} method be called to
-draw the computed Q-Q plot? Either set \code{plot} expicitly to \code{"base"} vs.
-\code{"ggplot2"} to choose the type of plot, or for a logical \code{plot} argument
-it's chosen conditional if the package \code{ggplot2} is loaded.}
+\item{plot}{logical or character. Should the \code{plot} or \code{autoplot}
+method be called to draw the computed Q-Q plot? Logical \code{FALSE} will
+suppress plotting, \code{TRUE} (default) will choose the type of plot
+conditional if the package \code{ggplot2} is loaded.  Alternatively
+\code{"base"} or \code{"ggplot2"} can be specified to explicitly choose the
+type of plot.}
 
-\item{class}{Should the invisible return value be either a \code{data.frame}
+\item{class}{should the invisible return value be either a \code{data.frame}
 or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 \code{tibble} is loaded.}
 
-\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
+\item{detrend}{logical, defaults to \code{FALSE}.
+Should the qqrplot be detrended, i.e, plotted as a \code{\link{wormplot}}?}
 
-\item{scale}{On which scale should the quantile residuals be shown: on the probability scale 
-(\code{"uniform"}) or on the normal scale (\code{"normal"}).}
+\item{scale}{character. On which scale should the quantile residuals be
+shown: on the probability scale (\code{"uniform"}) or on the normal scale (\code{"normal"}).}
 
-\item{nsim, delta}{arguments passed to \code{qresiduals}.}
+\item{nsim, delta}{arguments passed to \code{\link{qresiduals}}.}
 
 \item{simint}{logical. In case of discrete distributions, should the simulation
 (confidence) interval due to the randomization be visualized?}
 
-\item{simint_level}{numeric. The confidence level required for calculating the simulation
-(confidence) interval due to the randomization.}
+\item{simint_level}{numeric. The confidence level required for calculating
+the simulation (confidence) interval due to the randomization.}
 
-\item{simint_nrep}{numeric. The repetition number of simulated quantiles for calculating the
-simulation (confidence) interval due to the randomization.}
+\item{simint_nrep}{numeric (positive; default \code{250}). The number of
+repetitions of simulated quantiles for calculating the simulation (confidence)
+interval due to the randomization.}
 
-\item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.
-If not set to `FALSE`, the pointwise confidence interval of the (randomized)
-quantile residuals are visualized.}
+\item{confint}{logical or character describing the style for plotting
+confidence intervals.  \code{TRUE} (default) and \code{"line"} will add
+point-wise confidence intervals of the (randomized) quantile residuals as
+lines, \code{"polygon"} will draw a polygon instead, and \code{FALSE}
+suppresses the drawing.}
 
-\item{ref}{logical. Should a reference line be plotted?}
+\item{ref}{logical, defaults to \code{TRUE}. Should a reference line be plotted?}
 
 \item{xlab, ylab, main, \dots}{graphical parameters passed to
 \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.}
@@ -73,17 +79,23 @@ quantile residuals are visualized.}
 \value{
 An object of class \code{"qqrplot"} inheriting from
 \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
-with the following variables: \item{x}{theoretical quantiles,}
-\item{y}{deviations between theoretical and empirical quantiles.} In case of
-randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
-lower and upper confidence interval bounds (\code{simint_expected}, \code{simint_observed_lwr},
-\code{simint_observed_upr}) can optionally be returned.  Additionally,
-\code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
-the (\code{scale}) and wether a \code{detrended} Q-Q residuals plot
-was computed are stored as attributes.
+with the following variables:
+\item{observed}{deviations between theoretical and empirical quantiles,}
+\item{expected}{theoretical quantiles,}
+\item{simint_observed_lwr}{lower bound of the simulated confidence interval,}
+\item{simint_observed_upr}{upper bound of the simulated confidence interval,}
+\item{simint_expected}{TODO: (ML) Description missing.}
+
+In case of \code{nsim > 1}, a set of \code{nsim} pairs of observed and
+expected quantiles are returned (\code{observed_1}, \code{expected_1}, ...
+\code{observed_nsim}, \code{observed_nsim}) is returned.
+
+The \code{"qqrplot"} also contains additional attributes
+\code{xlab}, \code{ylab}, \code{main}, \code{simint_level}, \code{scale},
+and \code{detrended} used to create the plot.
 }
 \description{
-Visualize goodness of fit of regression models by Q-Q plots using quantile
+Visualize goodness of fit of regression models by Quantile-Quantile (Q-Q) plots using quantile
 residuals. If \code{plot = TRUE}, the resulting object of class
 \code{"qqrplot"} is plotted by \code{\link{plot.qqrplot}} or
 \code{\link{autoplot.qqrplot}} before it is returned, depending on whether the
@@ -138,7 +150,7 @@ qqrplot(m1_pois, detrend = TRUE, scale = "normal", confint = "line")
 \references{
 Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 Residuals.} \emph{Journal of Computational and Graphical Statistics},
-\bold{5}, 1--10. \doi{10.2307/1390802}
+\bold{5}(3), 236-224. \doi{10.2307/1390802}
 }
 \seealso{
 \code{\link{plot.qqrplot}}, \code{\link{wormplot}},

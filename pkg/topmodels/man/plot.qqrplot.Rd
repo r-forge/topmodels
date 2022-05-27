@@ -86,27 +86,28 @@
 )
 }
 \arguments{
-\item{x, object}{an object of class \code{qqrplot}.}
+\item{x, object}{an object of class \code{qqrplot} as returned by \code{\link{qqrplot}}.}
 
-\item{single_graph}{logical. Should all computed extended reliability
-diagrams be plotted in a single graph?}
+\item{single_graph}{logical, defaults to \code{FALSE}. In case of multiple Q-Q residual plots:
+should all be drawn in a single graph?}
 
-\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?}
+\item{detrend}{logical. Should the qqrplot be detrended, i.e, plotted as a
+`wormplot()`? If \code{NULL} (default) this is extracted from \code{x}/\code{object}.}
 
 \item{simint}{logical or quantile specification. Should the simint of
 quantiles of the randomized quantile residuals be visualized?}
 
 \item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.}
 
-\item{confint_type}{Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
+\item{confint_type}{character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
 of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
 on the Kolmogorov-Smirnov test.}
 
-\item{confint_level}{numeric. The confidence level required.}
+\item{confint_level}{numeric. The confidence level required, defaults to \code{0.95}.}
 
 \item{ref}{logical. Should a reference line be plotted?}
 
-\item{ref_identity, ref_probs}{Should the idenity line be plotted as reference 
+\item{ref_identity, ref_probs}{Should the identity line be plotted as reference 
 and otherwise which probabilities should be used for defining the reference line?}
 
 \item{xlim, ylim, axes, box}{additional graphical
@@ -116,23 +117,23 @@ parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
 \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 respectively.}
 
-\item{col, pch, }{graphical parameters for the main part of the base plot.}
+\item{col, pch}{graphical parameters for the main part of the base plot.}
 
 \item{simint_col, simint_alpha, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd}{Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.}
 
 \item{legend}{logical. Should a legend be added in the \code{ggplot2} style
 graphic?}
 
-\item{theme}{Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.}
+\item{theme}{name of the `ggplot2` theme to be used. If \code{theme = NULL}, the \code{\link[ggplot2]{theme_bw}} is employed.}
 
 \item{colour, fill, alpha, shape, size, stroke}{graphical parameters passed to \code{ggplot2} 
-style plots, whereby \code{object} is a object of class \code{qqrplot}.}
+style plots.}
 
 \item{simint_fill, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
 }
 \description{
-Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
-computed by \code{link{qqrplot}}.
+Generic plotting functions for Q-Q residual plots for objects of class \code{"qqrplot"}
+returned by \code{link{qqrplot}}.
 }
 \details{
 Q-Q residuals plots draw quantile residuals (by default on the standard normal
@@ -140,10 +141,11 @@ scale) against theoretical quantiles from the same distribution.
 Alternatively, quantile residuals can also be compared on the uniform scale
 (\code{scale = "uniform"}) using no transformation.
 
-Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by using
-the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-For a single base R graphically panel, \code{\link{points}} adds an additional Q-Q
-residuals plot.
+Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by
+using the generics \code{\link[ggplot2]{autoplot}} or
+\code{\link[graphics]{plot}}.  \code{\link{points}}
+(\code{\link{points.qqrplot}}) can be used to add Q-Q residuals to an
+existing base R graphics panel.
 }
 \examples{
 
@@ -200,7 +202,7 @@ qqrplot(m3_pois, plot = "ggplot2")
 \references{
 Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 Residuals.} \emph{Journal of Computational and Graphical Statistics},
-\bold{5}, 1--10. \doi{10.2307/1390802}
+\bold{5}(3), 236-224. \doi{10.2307/1390802}
 }
 \seealso{
 \code{\link{qqrplot}}, \code{\link{wormplot}},

@@ -5,8 +5,8 @@
 # - Observed y in-sample or out-of-sample (n x 1)
 # - Predicted probabilities F_y(y - eps) and F_y(y) (n x 2);
 #   eps is a small number (required for discrete/censored distributions)
-# - Two columns can be essentially equal -> continuous
-#   or different -> (partially) discrete
+# - The two columns ('predicted probabilities') can be essentially equal ->
+#   continuous or different -> (partially) discrete
 # - Potentially transform uniform scale to different
 #   distribution (default: Gaussian, via qnorm()).
 #
@@ -25,7 +25,7 @@
 
 #' Q-Q Plots for Quantile Residuals
 #' 
-#' Visualize goodness of fit of regression models by Q-Q plots using quantile
+#' Visualize goodness of fit of regression models by Quantile-Quantile (Q-Q) plots using quantile
 #' residuals. If \code{plot = TRUE}, the resulting object of class
 #' \code{"qqrplot"} is plotted by \code{\link{plot.qqrplot}} or
 #' \code{\link{autoplot.qqrplot}} before it is returned, depending on whether the
@@ -47,49 +47,66 @@
 #' plotted in one go. 
 #' 
 #' @aliases qqrplot qqrplot.default c.qqrplot
+#'
 #' @param object an object from which probability integral transforms can be
 #' extracted using the generic function \code{\link{procast}}.
-#' @param newdata optionally, a data frame in which to look for variables with
+#' @param newdata an optional data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
-#' @param plot Should the \code{plot} or \code{autoplot} method be called to
-#' draw the computed Q-Q plot? Either set \code{plot} expicitly to \code{"base"} vs.
-#' \code{"ggplot2"} to choose the type of plot, or for a logical \code{plot} argument
-#' it's chosen conditional if the package \code{ggplot2} is loaded.
-#' @param class Should the invisible return value be either a \code{data.frame}
+#' @param plot logical or character. Should the \code{plot} or \code{autoplot}
+#' method be called to draw the computed Q-Q plot? Logical \code{FALSE} will
+#' suppress plotting, \code{TRUE} (default) will choose the type of plot
+#' conditional if the package \code{ggplot2} is loaded.  Alternatively
+#' \code{"base"} or \code{"ggplot2"} can be specified to explicitly choose the
+#' type of plot.
+#' @param class should the invisible return value be either a \code{data.frame}
 #' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 #' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
 #' \code{tibble} is loaded.
-#' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
-#' @param scale On which scale should the quantile residuals be shown: on the probability scale 
-#' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
-#' @param nsim,delta arguments passed to \code{qresiduals}.
+#' @param detrend logical, defaults to \code{FALSE}.
+#' Should the qqrplot be detrended, i.e, plotted as a \code{\link{wormplot}}?
+#' @param scale character. On which scale should the quantile residuals be
+#' shown: on the probability scale (\code{"uniform"}) or on the normal scale (\code{"normal"}).
+#' @param nsim,delta arguments passed to \code{\link{qresiduals}}.
 #' @param simint logical. In case of discrete distributions, should the simulation
 #' (confidence) interval due to the randomization be visualized?
-#' @param simint_level numeric. The confidence level required for calculating the simulation
-#' (confidence) interval due to the randomization.
-#' @param simint_nrep numeric. The repetition number of simulated quantiles for calculating the
-#' simulation (confidence) interval due to the randomization.
-#' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
-#' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
-#' quantile residuals are visualized.
-#' @param ref logical. Should a reference line be plotted?
+#' @param simint_level numeric. The confidence level required for calculating
+#' the simulation (confidence) interval due to the randomization.
+#' @param simint_nrep numeric (positive; default \code{250}). The number of
+#' repetitions of simulated quantiles for calculating the simulation (confidence)
+#' interval due to the randomization.
+#' @param confint logical or character describing the style for plotting
+#' confidence intervals.  \code{TRUE} (default) and \code{"line"} will add
+#' point-wise confidence intervals of the (randomized) quantile residuals as
+#' lines, \code{"polygon"} will draw a polygon instead, and \code{FALSE}
+#' suppresses the drawing.
+#' @param ref logical, defaults to \code{TRUE}. Should a reference line be plotted?
 #' @param xlab,ylab,main,\dots graphical parameters passed to
 #' \code{\link{plot.qqrplot}} or \code{\link{autoplot.qqrplot}}.
+#'
 #' @return An object of class \code{"qqrplot"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
-#' with the following variables: \item{x}{theoretical quantiles,}
-#' \item{y}{deviations between theoretical and empirical quantiles.} In case of
-#' randomized residuals, \code{nsim} different \code{x} and \code{y} values, and
-#' lower and upper confidence interval bounds (\code{simint_expected}, \code{simint_observed_lwr},
-#' \code{simint_observed_upr}) can optionally be returned.  Additionally,
-#' \code{xlab}, \code{ylab}, \code{main}, and \code{simint_level}, as well as the
-#' the (\code{scale}) and wether a \code{detrended} Q-Q residuals plot
-#' was computed are stored as attributes.
+#' with the following variables:
+#' \item{observed}{deviations between theoretical and empirical quantiles,}
+#' \item{expected}{theoretical quantiles,}
+#' \item{simint_observed_lwr}{lower bound of the simulated confidence interval,}
+#' \item{simint_observed_upr}{upper bound of the simulated confidence interval,}
+#' \item{simint_expected}{TODO: (ML) Description missing.}
+#'
+#' In case of \code{nsim > 1}, a set of \code{nsim} pairs of observed and
+#' expected quantiles are returned (\code{observed_1}, \code{expected_1}, ...
+#' \code{observed_nsim}, \code{observed_nsim}) is returned.
+#'
+#' The \code{"qqrplot"} also contains additional attributes
+#' \code{xlab}, \code{ylab}, \code{main}, \code{simint_level}, \code{scale},
+#' and \code{detrended} used to create the plot.
+#'
 #' @seealso \code{\link{plot.qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#'
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
-#' \bold{5}, 1--10. \doi{10.2307/1390802}
+#' \bold{5}(3), 236-224. \doi{10.2307/1390802}
+#'
 #' @keywords hplot
 #' @examples
 #' 
@@ -447,52 +464,58 @@ rbind.qqrplot <- c.qqrplot
 
 #' S3 Methods for Plotting Q-Q Residuals Plots
 #' 
-#' Generic plotting functions for Q-Q residuals plots of the class \code{"qqrplot"}
-#' computed by \code{link{qqrplot}}. 
+#' Generic plotting functions for Q-Q residual plots for objects of class \code{"qqrplot"}
+#' returned by \code{link{qqrplot}}. 
 #' 
 #' Q-Q residuals plots draw quantile residuals (by default on the standard normal
 #' scale) against theoretical quantiles from the same distribution.
 #' Alternatively, quantile residuals can also be compared on the uniform scale
 #' (\code{scale = "uniform"}) using no transformation.
 #'
-#' Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by using
-#' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}. 
-#' For a single base R graphically panel, \code{\link{points}} adds an additional Q-Q
-#' residuals plot.
+#' Q-Q residuals plots can be rendered as \code{ggplot2} or base R graphics by
+#' using the generics \code{\link[ggplot2]{autoplot}} or
+#' \code{\link[graphics]{plot}}.  \code{\link{points}}
+#' (\code{\link{points.qqrplot}}) can be used to add Q-Q residuals to an
+#' existing base R graphics panel.
 #' 
 #' @aliases plot.qqrplot points.qqrplot autoplot.qqrplot
-#' @param x,object an object of class \code{qqrplot}.
-#' @param single_graph logical. Should all computed extended reliability
-#' diagrams be plotted in a single graph?
-#' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
+#'
+#' @param x,object an object of class \code{qqrplot} as returned by \code{\link{qqrplot}}.
+#' @param single_graph logical, defaults to \code{FALSE}. In case of multiple Q-Q residual plots:
+#' should all be drawn in a single graph?
+#' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a
+#' `wormplot()`? If \code{NULL} (default) this is extracted from \code{x}/\code{object}.
 #' @param simint logical or quantile specification. Should the simint of
 #' quantiles of the randomized quantile residuals be visualized? 
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
-#' @param confint_type Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
+#' @param confint_type character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
 #' of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
 #' on the Kolmogorov-Smirnov test. 
-#' @param confint_level numeric. The confidence level required.
+#' @param confint_level numeric. The confidence level required, defaults to \code{0.95}.
 #' @param ref logical. Should a reference line be plotted?
-#' @param ref_identity,ref_probs Should the idenity line be plotted as reference 
+#' @param ref_identity,ref_probs Should the identity line be plotted as reference 
 #' and otherwise which probabilities should be used for defining the reference line?
 #' @param xlab,ylab,main,\dots graphical plotting parameters passed to
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
 #' @param xlim,ylim,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.
-#' @param col,pch, graphical parameters for the main part of the base plot.
+#' @param col,pch graphical parameters for the main part of the base plot.
 #' @param colour,fill,alpha,shape,size,stroke graphical parameters passed to \code{ggplot2} 
-#' style plots, whereby \code{object} is a object of class \code{qqrplot}.
+#' style plots.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
-#' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
+#' @param theme name of the `ggplot2` theme to be used. If \code{theme = NULL}, the \code{\link[ggplot2]{theme_bw}} is employed.
 #' @param simint_col,simint_alpha,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
 #' @param simint_fill,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
+#'
 #' @seealso \code{\link{qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#'
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
-#' \bold{5}, 1--10. \doi{10.2307/1390802}
+#' \bold{5}(3), 236-224. \doi{10.2307/1390802}
+#'
 #' @keywords hplot
 #' @examples
 #' 
@@ -1253,21 +1276,25 @@ autoplot.qqrplot <- function(object,
 #' 
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point
-#' @param identity logical, should the identity line be plotted or a theoretical line
+#' @param identity logical. Should the identity line be plotted or a theoretical line
 #' which passes through \code{probs} quantiles on the \code{"uniform"} or \code{"normal"} scale.
-#' @param scale On which scale are the quantile residuals be shown: on the probability scale 
-#' (\code{"uniform"}) or on the normal scale (\code{"normal"}). Used for the reference line which
-#' goes through the first and third quartile of theoretical distributions.
+#' @param scale character. Scale on which the quantile residuals will
+#' be shown: \code{"uniform"} (default) for uniform scale or \code{"normal"} for normal scale.
+#' Used for the reference line which goes through the first and third quartile
+#' of theoretical distributions.
 #' @param probs numeric vector of length two, representing probabilities of reference
 #' line used.
-#' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
-#' @param type Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
-#' of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
-#' on the Kolmogorov-Smirnov test. 
-#' @param level numeric. The confidence level required.
-#' @param xlim The x limits for computing the confidence intervals.
-#' @param n The number of points used to compute the confidence intervals, the more the smoother.
-#' @param style The confidence style.
+#' @param detrend logical, default \code{FALSE}. If set to \code{TRUE} the qqrplot is detrended,
+#' i.e, plotted as a \code{\link{wormplot}}.
+#' @param type character. Should \code{"pointwise"} (default), \code{"simultaneous"}, or
+#' \code{"tail-sensitive"} confidence intervals of the (randomized) quantile residuals be visualized.
+#' Simultaneous confidence intervals are based on the Kolmogorov-Smirnov test.
+#' @param level numeric. The confidence level required, defaults to \code{0.95}.
+#' @param xlim \code{NULL} (default) or numeric. The x limits for computing the confidence intervals.
+#' @param n positive numeric. Number of points used to compute the confidence intervals, the more the smoother.
+#' @param style character. Style for plotting confidence intervals. Either \code{"polygon"} (default)
+#' or \code{"line"}).
+#'
 #' @examples
 #' if (require("ggplot2")) {
 #'   ## Fit model
