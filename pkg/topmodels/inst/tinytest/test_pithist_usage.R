@@ -112,6 +112,7 @@ expect_error(pithist(m1, main = LETTERS[1:2]),      info = "main must be length 
 # There is a warning when `freq = TRUE` is used in combination with
 # non-equidistant breaks.
 expect_warning(pithist(m1, freq = TRUE, breaks = c(0, 0.1, 0.5, 1)),
+               "^For non-equidistant breaks `freq = FALSE` must be used and has been set accordingly.$",
                info = "freq = TRUE and non-equidistant breaks trigger warning")
 expect_silent(pithist(m1, freq = FALSE, breaks = c(0, 0.1, 0.5, 1)),
                info = "freq = FALSE and non-equidistant breaks trigger warning is silent")
