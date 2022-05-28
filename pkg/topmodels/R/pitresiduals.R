@@ -131,13 +131,7 @@ pitresiduals.default <- function(object,
     ## FIXME: (ML) Increased difference, otherwise did not work for binom and pois
     ##at <- cbind(y - .Machine$double.eps^0.4, y)
     ##at <- cbind(y - 1L, y)
-    if (is.null(delta)) {
-      delta <- min(diff(sort(unique(y))))
-      delta <- delta / 5e6
-    } else {
-      stopifnot(is.numeric(delta) && length(delta) == 1)
-    }
-
+    if (is.null(delta)) delta <- min(diff(sort(unique(y)))) / 5e6
     at <- cbind(y - delta, y)
 
     attr(at, "nobs")    <- attr(y, "nobs")
