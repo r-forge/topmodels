@@ -36,7 +36,7 @@ pithist(object, ...)
 \item{object}{an object from which probability integral transforms can be
 extracted using the generic function \code{\link{procast}}.}
 
-\item{\dots}{further graphical parameters.}
+\item{\dots}{further graphical parameters forwarded to the plotting functions.}
 
 \item{newdata}{an optional data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.}

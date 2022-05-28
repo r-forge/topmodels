@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------
-## Programming outline: Rootogram
+# Programming outline: Rootogram
 # -------------------------------------------------------------------
 # - Observed y in-sample or out-of-sample (n x 1)
 # - Breaks for observations (m x 1)
@@ -8,7 +8,7 @@
 # - Cut observations at breaks -> observed frequencies for (m-1) groups
 # - Aggregate probabilities -> expected frequencies for (m-1) groups
 # - Can be drawn in different style (standing vs. hanging / raw vs. sqrt)
-
+#
 # Functions:
 # - rootogram() generic plus default method
 # - Return object of class "rootogram" that is plotted by default
@@ -20,7 +20,7 @@
 #' Rootograms for Assessing Goodness of Fit of Probability Models
 #'
 #' Rootograms graphically compare (square roots) of empirical frequencies with
-#' expected (fitted) frequencies from a probability model. If \code{plot = TRUE}, the
+#' expected (fitted) frequencies from a probabilistic model. If \code{plot = TRUE}, the
 #' resulting object of class \code{"rootogram"} is plotted by
 #' \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}} before it is
 #' returned, depending on whether the package \code{ggplot2} is loaded.
@@ -28,9 +28,9 @@
 #' Rootograms graphically compare frequencies of empirical distributions and
 #' expected (fitted) probability models. For the observed distribution the histogram is
 #' drawn on a square root scale (hence the name) and superimposed with a line
-#' for the expected frequencies. The histogram can be \code{"standing"} on the
-#' x-axis (as usual), or \code{"hanging"} from the expected curve, or a
-#' \code{"suspended"} histogram of deviations can be drawn.
+#' for the expected frequencies. The histogram can be \code{"hanging"} from the
+#' expected curve (default), \code{"standing"} on the (like bars in barplot),
+#' or drawn as a \code{"suspended"} histogram of deviations.
 #'
 #' The function \code{\link{rootogram}} leverages the \code{\link{procast}}
 #' generic in order to compute all necessary coordinates based on observed and
@@ -42,59 +42,71 @@
 #' plotted in one go.
 #'
 #' @aliases rootogram rootogram.default c.rootogram rbind.rootogram
+#'
 #' @param object an object from which an rootogram can be extracted with
 #' \code{\link{procast}}.
-#' @param newdata optionally, a data frame in which to look for variables with
+#' @param newdata an optional data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
-#' @param plot Should the \code{plot} or \code{autoplot} method be called to
-#' draw the computed extended reliability diagram? Either set \code{plot}
-#' expicitly to \code{"base"} vs. \code{"ggplot2"} to choose the type of plot, or for a
-#' logical \code{plot} argument it's chosen conditional if the package
-#' \code{ggplot2} is loaded.
-#' @param class Should the invisible return value be either a \code{data.frame}
-#' or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
-#' \code{"tibble"}, or for \code{NULL} it's chosen automatically conditional if the package
-#' \code{tibble} is loaded.
+#' @param plot logical or character. Should the \code{plot} or \code{autoplot} method be called to
+#' draw the computed extended reliability diagram? Logical
+#' \code{FALSE} will suppress plotting, \code{TRUE} (default) will choose the
+#' type of plot conditional if the package \code{ggplot2} is loaded.
+#' Alternatively \code{"base"} or \code{"ggplot2"} can be specified to
+#' explicitly choose the type of plot.
+#' @param class should the invisible return value be either a \code{data.frame}
+#' or a \code{tbl_df}. Can be set to \code{"data.frame"} or \code{"tibble"} to
+#' explicitly specify the return class, or to \code{NULL} (default) in which
+#' case the return class is conditional on whether the package \code{"tibble"}
+#' is loaded.
 #' @param response_type character. To set the default values for \code{breaks} and
 #' \code{widths}.  Currently different defaults are available for \code{"discrete"}
 #' and \code{"continous"} response distribution, as well as for the special case of a
 #' \code{"logseries"} response.
-#' @param breaks numeric. Breaks for the histogram intervals.
-#' @param width numeric. Widths of the histogram bars.
-#' @param style character specifying the syle of rootogram (see below).
-#' @param scale character specifying whether raw frequencies or their square
-#' roots (default) should be drawn.
-#' @param expected Should the expected (fitted) frequencies be plotted? Either logical or as character string defining one of `"both"`, `"line"` or `"point"`.
-#' @param confint logical. Should confident intervals be drawn?
-#' @param ref logical. Should a reference line be plotted?
-#' @param xlab,ylab,main graphical parameters.
+#' @param breaks \code{NULL} (default) or numeric vector of length \code{2} or more
+#' to manually specify the breaks for the rootogram intervals.
+#' @param width \code{NULL} (default) or single positive numeric. Width of the histogram bars.
+#' @param style character specifying the syle of rootogram (see 'Details').
+#' @param scale character specifying whether \code{"raw"} frequencies or their square
+#' roots (\code{"sqrt"}; default) should be drawn.
+#' @param expected logical or character. Should the expected (fitted) frequencies be plotted?
+#' Can be set to \code{"both"} (same as \code{TRUE}; default), \code{"line"}, \code{"point"},
+#' or \code{FALSE} which will suppress plotting.
+#' @param confint logical, defaults to \code{TRUE}. Should confident intervals be drawn?
+#' @param ref logical, defaults to \code{TRUE}. Should a reference line be plotted?
+#' @param xlab,ylab,main graphical parameters forwarded to
+#' \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}}.
 #' @param \dots further graphical parameters passed to the plotting function.
+#'
 #' @return An object of class \code{"rootogram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
-#' with the following variables: \item{observed}{observed
-#' frequencies,} \item{expected}{expected (fitted) frequencies,} \item{x}{histogram
-#' interval midpoints on the x-axis,} \item{y}{bottom coordinate of the
-#' histogram bars,} \item{width}{widths of the histogram bars,}
-#' \item{height}{height of the histogram bars,} \item{line}{y-coordinates of
-#' the fitted curve,} \item{confint_lwr, confint_upr}{lower and upper confidence interval bound.} 
-#' Additionally, \code{style}, \code{scale}, \code{xlab},
-#' \code{ylab} and \code{main}, and \code{confint_level} are stored as attributes.
+#' with the following variables:
+#' \item{observed}{observed frequencies,}
+#' \item{expected}{expected (fitted) frequencies,}
+#' \item{mid}{histogram interval midpoints on the x-axis,}
+#' \item{width}{widths of the histogram bars,}
+#' \item{confint_lwr, confint_upr}{lower and upper confidence interval bound.} 
+#'
+#' Additionally, \code{style}, \code{scale}, \code{expected}, \code{confint},
+#' \code{ref}, \code{xlab}, \code{ylab}, amd \code{main} are stored as attributes.
+#'
 #' @note Note that there is also a \code{\link[vcd]{rootogram}} function in the
 #' \pkg{vcd} package that is similar to the \code{numeric} method provided
 #' here. However, it is much more limited in scope, hence a function has been
 #' created here.
+#'
 #' @seealso \code{\link{plot.rootogram}}, \code{\link{procast}}
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
-#' Institute, Cary.
+#' Institute, Cary, ISBN 1580256600.
 #'
 #' Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
 #' Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
 #' \doi{10.1080/00031305.2016.1173590}.
 #'
-#' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
+#' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading,
+#' ISBN 0201076160.
+#'
 #' @keywords hplot
 #' @examples
-#'
 #' ## plots and output
 #'
 #' ## number of deaths by horsekicks in Prussian army (Von Bortkiewicz 1898)
@@ -175,11 +187,17 @@ rootogram.default <- function(
   ## sanity checks
   ## * `object`, `newdata` w/i `newresponse()`
   ## * `expected`, `ref`, `confint`...` in `plot()` and `autoplot()`
-  stopifnot(is.null(breaks) || (is.numeric(breaks) && is.null(dim(breaks))))
-  stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1))
+  stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) >= 2 && is.null(dim(breaks))))
+  stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1 && width > 0))
   stopifnot(is.null(xlab) || (length(xlab) == 1 && is.character(xlab)))
   stopifnot(is.null(ylab) || (length(ylab) == 1 && is.character(ylab)))
   stopifnot(is.null(main) || (length(main) == 1 && is.character(main)))
+  stopifnot(isTRUE(plot) || isFALSE(plot) || (is.character(plot) && length(plot) == 1L))
+  stopifnot(is.null(class) || (is.character(class) && length(class) == 1L))
+  stopifnot(isTRUE(expected) || isFALSE(expected) || (is.character(expected) && length(expected) == 1))
+  if (is.character(expected)) expected <- match.arg(expected, c("line", "point", "both"))
+  stopifnot(isTRUE(confint) || isFALSE(confint))
+  stopifnot(isTRUE(ref) || isFALSE(ref))
 
   ## match arguments
   scale <- match.arg(scale)
@@ -197,28 +215,38 @@ rootogram.default <- function(
   }
 
   ## guess plotting flavor
-  if (isFALSE(plot)) {
-    plot <- "none"
-  } else if (isTRUE(plot)) {
-    plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
-  } else if (!is.character(plot)) {
-    plot <- "base"
+  if (is.logical(plot)) {
+      plot <- ifelse(isFALSE(plot), "none", if ("ggplot2" %in% .packages()) "ggplot2" else "base")
   }
-  plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
-  stopifnot(
-    "The argument `plot` must be logical or match the arguments 'none', 'base' or 'ggplot2'." =
-      !inherits(plot, "try-error")
-  )
+  plot <- match.arg(plot, c("none", "base", "ggplot2"))
+  ## TODO: (RS2ML) Same as for pithist/qqrplot.
+  ## if (isFALSE(plot)) {
+  ##   plot <- "none"
+  ## } else if (isTRUE(plot)) {
+  ##   plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
+  ## } else if (!is.character(plot)) {
+  ##   plot <- "base"
+  ## }
+  ## plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
+  ## stopifnot(
+  ##   "The argument `plot` must be logical or match the arguments 'none', 'base' or 'ggplot2'." =
+  ##     !inherits(plot, "try-error")
+  ## )
 
   ## guess output class
   if (is.null(class)) {
     class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
-  class <- try(match.arg(class, c("tibble", "data.frame")))
-  stopifnot(
-    "The argument `class` must be NULL or match the arguments 'tibble' or 'data.frame'." =
-      !inherits(class, "try-error")
-  )
+  class <- match.arg(class, c("tibble", "data.frame"))
+  ## TODO: (RS2ML) Same as for pithist/qqrplot.
+  ## if (is.null(class)) {
+  ##   class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
+  ## }
+  ## class <- try(match.arg(class, c("tibble", "data.frame")))
+  ## stopifnot(
+  ##   "The argument `class` must be NULL or match the arguments 'tibble' or 'data.frame'." =
+  ##     !inherits(class, "try-error")
+  ## )
 
   # -------------------------------------------------------------------
   # PREPARE DATA
@@ -232,6 +260,7 @@ rootogram.default <- function(
   ## set breaks and midpoints
   ## TODO: (ML) Extend breaks to the left, in case still expected frequency exists.
   ## TODO: (Z) Try to get rid of 'response_type'.
+  ## TODO: (RS) Thought the very same while going trough args und sanity checks :).
   if (is.null(breaks) && response_type == "discrete") {
     breaks <- -1L:max(y[w > 0]) + 0.5
   } else if (is.null(breaks) && response_type == "logseries") {
@@ -249,6 +278,9 @@ rootogram.default <- function(
   breaks[length(breaks)] <- breaks[length(breaks)] + 1e-12
 
   ## set widths
+  ## TODO: (RS2ML) Question: if NULL and discrete/logseries it is set to 0.9,
+  ##       if NULL to 1. What else? There is no default fallback.
+  ##       There should be a dedicated 'else'.
   if (is.null(width) && (response_type == "discrete" || response_type == "logseries")) {
     width <- 0.9
   } else if (is.null(width)) {
@@ -460,6 +492,7 @@ rbind.rootogram <- c.rootogram
 #' \code{"suspended"} histogram of deviations can be drawn.
 #'
 #' @aliases plot.rootogram autoplot.rootogram
+#'
 #' @param x,object an object of class \code{\link{rootogram}}.
 #' @param style character specifying the syle of rootogram.
 #' @param scale character specifying whether raw frequencies or their square

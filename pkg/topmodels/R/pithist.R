@@ -104,7 +104,7 @@
 #' @param confint logical. Should confident intervals be drawn?
 #' @param xlab,ylab,main graphical parameters passed to
 #' \code{\link{plot.pithist}} or \code{\link{autoplot.pithist}}.
-#' @param \dots further graphical parameters.
+#' @param \dots further graphical parameters forwarded to the plotting functions.
 #'
 #' @return An object of class \code{"pithist"} inheriting from
 #' \code{data.frame} or \code{tbl_df} conditional on the argument \code{class}
