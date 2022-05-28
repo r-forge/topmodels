@@ -64,13 +64,14 @@ expect_identical(NROW(CrabSatellites), NROW(q3n), info = "testing dimension 1 (n
 # As we are using a fixed seed; check md5 sum of the returned objects.
 # In case a test fails it is not precise but shows that there are differences.
 # TODO: (RS2ML) Not sure if this works across different OSs!!!
+# NOTE: (RS) Switching to sha1, <https://cran.r-project.org/web/packages/digest/vignettes/sha1.html>
 # --------------------------------------------------------------------
-expect_identical(digest(q1u), "641a9d725b724d97757c7a1b83ca6883")
-expect_identical(digest(q1n), "950d8cf9f6064b7368698fd44c69fbb6")
-expect_identical(digest(q2u), "9429373875f9dbb8286a4d9308d4ef0a")
-expect_identical(digest(q2n), "4eb11af5b60908c41a0f7b00c6de6df9")
-expect_identical(digest(q3u), "89a51471444630b56275d60dc9db5d5a")
-expect_identical(digest(q3n), "69ee4fb089738de8a03899c47922f063")
+expect_identical(digest::sha1(q1u, 8, 7), "aa5d782459744c08b284c24f456f15a872a38a56")
+expect_identical(digest::sha1(q1n, 8, 7), "329a2506dc4c8ecccac263c3c86616f734e644d1")
+expect_identical(digest::sha1(q2u, 8, 7), "0884c326282442f88a6532dd18e4f2860a058874")
+expect_identical(digest::sha1(q2n, 8, 7), "071bd96cc7a0644c7ebb54216985686da6eedba4")
+expect_identical(digest::sha1(q3u, 8, 7), "f0053b11699eec966534e6937bce3f9ed6076383")
+expect_identical(digest::sha1(q3n, 8, 7), "1e3d4881360d1208b4470311cc3f8994bf749925")
 
 # Thus, altenratively, gong for colSums(abs()) for all finite values
 # which is a much weaker test.

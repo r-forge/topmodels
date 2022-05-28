@@ -5,6 +5,7 @@
 
 if (interactive()) { rm(list = objects()); library("devtools"); library("tinytest"); library("topmodels") }
 
+library("digest")
 library("crch")
 library("ggplot2")
 library("tibble")
@@ -34,6 +35,17 @@ expect_silent(p1_10 <- pithist(m1, class = "data.frame", breaks = bk10, plot = F
 expect_silent(p2_10 <- pithist(m2, class = "data.frame", breaks = bk10, plot = FALSE))
 expect_silent(p3_10 <- pithist(m3, class = "data.frame", breaks = bk10, plot = FALSE))
 
+
+# --------------------------------------------------------------------
+# Testing the entire objects uisng sha1 hasing. Not precise in case it
+# fails but covers the entire object.
+# --------------------------------------------------------------------
+expect_identical(digest::sha1(p1, digits = 10),    "bd8e42cb9ee24db09adf1372adefb3cc73848168")
+expect_identical(digest::sha1(p2, digits = 10),    "93f9b7c74f1324ae34d7ba003dd37632ae842ccd")
+expect_identical(digest::sha1(p3, digits = 10),    "c7aacccc28c18857aaf2fe9e7606c7def127130c")
+expect_identical(digest::sha1(p1_10, digits = 10), "8ea2bd043d217b5de77f9b40510411853078084d")
+expect_identical(digest::sha1(p2_10, digits = 10), "bf74794d30af290ec04fb914801eee2d334b1ebf")
+expect_identical(digest::sha1(p3_10, digits = 10), "0e26567a0a5205fb6568687a582ea4e27929663f")
 
 # --------------------------------------------------------------------
 # Manually calculate the PIT histogram
