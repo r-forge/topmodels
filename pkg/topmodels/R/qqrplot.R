@@ -75,7 +75,7 @@
 #' repetitions of simulated quantiles for calculating the simulation (confidence)
 #' interval due to the randomization.
 #' @param confint logical or character describing the style for plotting
-#' confidence intervals.  \code{TRUE} (default) and \code{"line"} will add
+#' confidence intervals. \code{TRUE} (default) and \code{"line"} will add
 #' point-wise confidence intervals of the (randomized) quantile residuals as
 #' lines, \code{"polygon"} will draw a polygon instead, and \code{FALSE}
 #' suppresses the drawing.
@@ -182,8 +182,11 @@ qqrplot.default <- function(
   stopifnot(is.null(main) || (is.character(main) && length(main) == 1L))
   stopifnot(isTRUE(plot) || isFALSE(plot) || (is.character(plot) && length(plot) == 1L))
   stopifnot(is.null(class) || (is.character(class) && length(class) == 1L))
-  stopifnot(isTRUE(confint) || isFALSE(confint))
+  stopifnot(isTRUE(confint) || isFALSE(confint) || (is.character(confint) && length(confint) == 1))
   scale <- match.arg(scale)
+
+  # If character; check if allowed
+  if (is.character(confint)) confint <- match.arg(confint, c("line", "polygon"))
 
   ## guess plotting flavor
   if (is.logical(plot)) {

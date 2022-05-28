@@ -66,7 +66,7 @@ repetitions of simulated quantiles for calculating the simulation (confidence)
 interval due to the randomization.}
 
 \item{confint}{logical or character describing the style for plotting
-confidence intervals.  \code{TRUE} (default) and \code{"line"} will add
+confidence intervals. \code{TRUE} (default) and \code{"line"} will add
 point-wise confidence intervals of the (randomized) quantile residuals as
 lines, \code{"polygon"} will draw a polygon instead, and \code{FALSE}
 suppresses the drawing.}
