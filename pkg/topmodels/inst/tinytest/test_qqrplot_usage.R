@@ -2,7 +2,7 @@
 # Testing usage of the `qqrplot()` function.
 # --------------------------------------------------------------------
 
-if (interactive()) { library("devtools"); library("tinytest"); library("topmodels") }
+if (interactive()) { rm(list = objects()); library("devtools"); library("tinytest"); library("topmodels") }
 
 library("crch")
 library("ggplot2")
@@ -26,31 +26,12 @@ expect_silent(m3 <- glm(satellites ~ width + color, data = CrabSatellites, famil
 # Sanity checks and allowed parameters
 # --------------------------------------------------------------------
 # Main argument must be a model object
-expect_error(qqrplot(1),
-             info = "Main object is not a model object")
+expect_error(qqrplot(1),            info = "Main object is not a model object")
+expect_error(qqrplot(NA),           info = "Main object is not a model object")
 
-
-## newdata: not tested (forwarded to qresiduals)
-## nsim: only forwarded; is getting tested in `pitresiduals()`
-## delta: only forwarded; should be tested in qresiduals()
-
-# plot = TRUE,
-# class = NULL,
-# detrend = FALSE,
-# scale = c("normal", "uniform"),
-# nsim = 1L,
-# delta = NULL,
-# simint = TRUE,
-# simint_level = 0.95,
-# simint_nrep = 250,
-#
-# ## plotting arguments
-# confint = TRUE,
-# ref = TRUE,
-# xlab = "Theoretical quantiles",
-# ylab = if (!detrend) "Quantile residuals" else "Deviation",
-# main = NULL,
-
+# newdata
+expect_error(qqrplot(m1, newdata = 1),     info = "newdata of wrong class")
+expect_error(qqrplot(m1, newdata = NA),    info = "newdata of wrong class")
 
 # plot
 expect_error(qqrplot(m1, plot = 1),                 info = "numeric not allowed")

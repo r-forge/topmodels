@@ -2,7 +2,7 @@
 # Testing usage of the `pithist()` function.
 # --------------------------------------------------------------------
 
-if (interactive()) { library("devtools"); library("tinytest"); library("topmodels") }
+if (interactive()) { rm(list = objects()); library("devtools"); library("tinytest"); library("topmodels") }
 
 library("crch")
 library("ggplot2")
@@ -23,12 +23,12 @@ expect_silent(m3 <- glm(satellites ~ width + color, data = CrabSatellites, famil
 # Sanity checks and allowed parameters
 # --------------------------------------------------------------------
 # Main argument must be a model object
-expect_error(pithist(1),
-             info = "Main object is not a model object")
-
+expect_error(pithist(1),            info = "Main object is not a model object")
+expect_error(pithist(NA),           info = "Main object is not a model object")
 
 # newdata: forwarded to `pitresiduals()`
 expect_error(pithist(m1, newdata = 3),              info = "newdata of wrong class")
+expect_error(pithist(m1, newdata = NA),             info = "newdata of wrong class")
 
 # plot
 expect_error(pithist(m1, plot = 1),                 info = "numeric not allowed")
