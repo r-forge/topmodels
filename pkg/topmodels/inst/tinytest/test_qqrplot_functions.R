@@ -5,8 +5,9 @@
 # --------------------------------------------------------------------
 # Run some tests FIXME: (ML) Implement more systematic testing
 # --------------------------------------------------------------------
-require("crch")
-require("ggplot2")
+suppressPackageStartupMessages(library("crch"))
+suppressPackageStartupMessages(library("ggplot2"))
+
 data("CrabSatellites", package = "countreg")
 CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 

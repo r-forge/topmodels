@@ -5,10 +5,10 @@
 
 if (interactive()) { rm(list = objects()); library("devtools"); library("tinytest"); library("topmodels") }
 
-library("digest")
-library("crch")
-library("ggplot2")
-library("tibble")
+suppressPackageStartupMessages(library("digest"))
+suppressPackageStartupMessages(library("crch"))
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("tibble"))
 
 # --------------------------------------------------------------------
 # Setting up the data sets/models used to test the function

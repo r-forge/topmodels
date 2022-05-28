@@ -6,9 +6,9 @@
 
 if (interactive()) { library("devtools"); library("tinytest"); library("topmodels") }
 
-library("crch")
-library("ggplot2")
-library("tibble")
+suppressPackageStartupMessages(library("crch"))
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("tibble"))
 
 m <- lm(dist ~ speed, data = cars)
 

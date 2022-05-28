@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------
 # Test procast.crch argument = `type`
 # --------------------------------------------------------------------
-require("crch")
+suppressPackageStartupMessages(require("crch"))
 m1 <- crch(dist ~ speed | speed, data = cars)
 
 expect_equal(

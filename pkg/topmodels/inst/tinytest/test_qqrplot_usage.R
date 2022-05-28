@@ -4,9 +4,9 @@
 
 if (interactive()) { rm(list = objects()); library("devtools"); library("tinytest"); library("topmodels") }
 
-library("crch")
-library("ggplot2")
-library("tibble")
+suppressPackageStartupMessages(library("crch"))
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("tibble"))
 
 # Global seed for the tests in this file
 seed <- 123

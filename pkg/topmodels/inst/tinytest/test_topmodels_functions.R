@@ -6,8 +6,9 @@
 # --------------------------------------------------------------------
 # Run some tests 
 # --------------------------------------------------------------------
-require("crch")
-require("ggplot2")
+suppressPackageStartupMessages(require("crch"))
+suppressPackageStartupMessages(require("ggplot2"))
+
 data("CrabSatellites", package = "countreg")
 CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 

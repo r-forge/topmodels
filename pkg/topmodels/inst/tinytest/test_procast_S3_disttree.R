@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------
 # Test procast.crch argument = `type = "parameter"`
 # --------------------------------------------------------------------
-require("disttree")
+suppressPackageStartupMessages(require("disttree"))
 dt1 <- disttree(dist ~ speed, data = cars)
 dt2 <- disttree(dist ~ speed, data = cars, family = dist_list_normal)
 

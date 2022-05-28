@@ -20,7 +20,7 @@ expect_equal(
 # --------------------------------------------------------------------
 # Test `qresiduals.default()` with censor point
 # --------------------------------------------------------------------
-require("crch")
+suppressPackageStartupMessages(require("crch"))
 m2 <- crch(dist ~ speed | speed, left = 30, data = cars)
 idx <- which(cars$dist <= 30)
 
