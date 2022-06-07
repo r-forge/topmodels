@@ -101,6 +101,7 @@ library("ggplot2")
 # Rootogram (hanging)
 library("gridExtra")
 bk <- 20
+devtools::load_all("~/Software/topmodels/pkg/topmodels")
 g1 <- autoplot(rootogram(m_hom_gauss, breaks = bk, plot = FALSE, fitted = "line")) +
         ggtitle("Homoscedastic Gaussian")
 g2 <- autoplot(rootogram(m_het_gauss, breaks = bk, plot = FALSE, fitted = "line")) +

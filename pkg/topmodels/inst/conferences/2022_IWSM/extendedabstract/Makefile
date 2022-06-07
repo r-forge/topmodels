@@ -1,6 +1,11 @@
 
 
 
+zip:
+	-rm abstract_IWSM2022_Stauffer_final.zip
+	(cp abstract.tex Stauffer.tex && \
+		zip abstract_IWSM2022_Stauffer_final.zip Stauffer.tex Stauffer-rootograms.pdf Stauffer-qqresiduals.pdf)
+	rm Stauffer.tex
 
 
 abstract:
