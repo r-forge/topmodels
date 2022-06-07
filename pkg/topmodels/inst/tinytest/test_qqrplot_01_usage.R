@@ -52,10 +52,6 @@ expect_error(qqrplot(m1, detrend = 1),                 info = "detrend must be l
 expect_error(qqrplot(m1, detrend = c(TRUE, FALSE)),    info = "detrend must be of length 1")
 expect_error(qqrplot(m1, detrend = logical(0)),        info = "detrend must be of length 1")
 
-## TODO(RS): Currently testing that "type == "proportional" fails,
-##           must be removed in the future when this option has been added.
-#expect_error(qqrplot(m1, type = "proportional"),    info = "test 'not implemented' option")
-
 ## scale
 expect_error(qqrplot(m1, scale = 1),                info = "scale must be character")
 expect_error(qqrplot(m1, scale = character(0)),     info = "zero-length scale not allowed")
