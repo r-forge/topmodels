@@ -62,8 +62,9 @@
 #' \code{widths}.  Currently different defaults are available for \code{"discrete"}
 #' and \code{"continous"} response distribution, as well as for the special case of a
 #' \code{"logseries"} response.
-#' @param breaks \code{NULL} (default) or numeric vector of length \code{2} or more
-#' to manually specify the breaks for the rootogram intervals.
+#' @param breaks \code{NULL} (default) or numeric to manually specify the breaks for
+#' the rootogram intervals. A single numeric (larger \code{0}) specifies the number of breaks
+#' to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.
 #' @param width \code{NULL} (default) or single positive numeric. Width of the histogram bars.
 #' @param style character specifying the syle of rootogram (see 'Details').
 #' @param scale character specifying whether \code{"raw"} frequencies or their square
@@ -187,7 +188,8 @@ rootogram.default <- function(
   ## sanity checks
   ## * `object`, `newdata` w/i `newresponse()`
   ## * `expected`, `ref`, `confint`...` in `plot()` and `autoplot()`
-  stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) >= 2 && is.null(dim(breaks))))
+  stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) > 0 && is.null(dim(breaks))))
+  if (length(breaks) == 1) stopifnot(breaks >= 1)
   stopifnot(is.null(width) || (is.numeric(width) && length(width) == 1 && width > 0))
   stopifnot(is.null(xlab) || (length(xlab) == 1 && is.character(xlab)))
   stopifnot(is.null(ylab) || (length(ylab) == 1 && is.character(ylab)))

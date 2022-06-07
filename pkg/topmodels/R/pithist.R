@@ -71,8 +71,9 @@
 #' @param scale controls the scale on which the PIT residuals are computed: on
 #' the probability scale (\code{"uniform"}; default) or on the normal scale
 #' (\code{"normal"}).
-#' @param breaks \code{NULL} (default) or numeric vector of length \code{2} or more
-#' to manually specify the breaks for the histogram intervals.
+#' @param breaks \code{NULL} (default) or numeric to manually specify the breaks for
+#' the rootogram intervals. A single numeric (larger \code{0}) specifies the number of breaks
+#' to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.
 #' @param type character. In case of discrete distributions, should an expected
 #' (non-normal) PIT histogram be computed according to Czado et al. (2009)
 #' (\code{"expected"}; default) or should the PIT be drawn randomly from the corresponding
@@ -205,7 +206,8 @@ pithist.default <- function(
   ## * `object` and `newdata` w/i `newrepsone()`
   ## * `delta w/i `qresiduals()`
   ## * `expected`, `confint`, `...` w/i `plot()` and `autoplot()`
-  stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) >= 2 && is.null(dim(breaks))))
+  stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) > 0 && is.null(dim(breaks))))
+  if (length(breaks) == 1) stopifnot(breaks >= 1)
   stopifnot(is.null(simint) || isTRUE(simint) || isFALSE(simint))
   stopifnot(is.numeric(simint_level), length(simint_level) == 1, simint_level >= 0, simint_level <= 1)
   stopifnot(is.numeric(simint_nrep), length(simint_nrep) == 1, simint_nrep >= 1)

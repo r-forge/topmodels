@@ -52,10 +52,10 @@ expect_error(rootogram(m1, response_type = character(0)),  info = "response_type
 expect_error(rootogram(m1, response_type = "Foo"),         info = "invalid argument for response_type")
 
 # breaks and width
-expect_error(rootogram(m1, breaks = c(TRUE, FALSE)),  info = "breaks must be numeric length 2 or more")
-expect_error(rootogram(m1, breaks = TRUE),            info = "breaks must be numeric length 2 or more")
-expect_error(rootogram(m1, breaks = "foo"),           info = "breaks must be numeric length 2 or more")
-expect_error(rootogram(m1, breaks = 1),               info = "breaks must be numeric length 2 or more")
+expect_error(rootogram(m1, breaks = c(TRUE, FALSE)),  info = "breaks must be NULL or numeric")
+expect_error(rootogram(m1, breaks = TRUE),            info = "breaks must be NULL or numeric")
+expect_error(rootogram(m1, breaks = "foo"),           info = "breaks must be NULL or numeric")
+expect_error(rootogram(m1, breaks = .99),             info = "breaks invalid; if single numeric it must be >= 1")
 expect_error(rootogram(me, breaks = matrix(1:5, nrow = 1)), info = "breaks must have no dimension")
 expect_error(rootogram(m1, width = "foo"),            info = "width must be numeric")
 expect_error(rootogram(m1, width = TRUE),             info = "width must be numeric")

@@ -55,8 +55,9 @@ is loaded.}
 and \code{"continous"} response distribution, as well as for the special case of a
 \code{"logseries"} response.}
 
-\item{breaks}{\code{NULL} (default) or numeric vector of length \code{2} or more
-to manually specify the breaks for the rootogram intervals.}
+\item{breaks}{\code{NULL} (default) or numeric to manually specify the breaks for
+the rootogram intervals. A single numeric (larger \code{0}) specifies the number of breaks
+to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.}
 
 \item{width}{\code{NULL} (default) or single positive numeric. Width of the histogram bars.}
 

@@ -61,7 +61,7 @@ expect_error(pithist(m1, breaks = "foo"),           info = "breaks non-numeric")
 expect_error(pithist(m1, breaks = TRUE),            info = "breaks non-numeric")
 expect_error(pithist(m1, breaks = matrix(1, nrow = 3, ncol = 1)), info = "breaks not dimension-less numeric vector")
 expect_error(pithist(m1, breaks = numeric(0)),      info = "breaks invalid length (must be 2 or more)")
-expect_error(pithist(m1, breaks = .5),              info = "breaks invalid length (must be 2 or more)")
+expect_error(pithist(m1, breaks = .99),             info = "breaks invalid; if single numeric it must be >= 1")
 
 # simint; not tested, tested by pitresiduals() if used
 
