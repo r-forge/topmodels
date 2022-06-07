@@ -239,38 +239,17 @@ pithist.default <- function(
   if (is.logical(plot)) {
       plot <- ifelse(isFALSE(plot), "none", if ("ggplot2" %in% .packages()) "ggplot2" else "base")
   }
-  plot <- match.arg(plot, c("none", "base", "ggplot2"))
-  ## TODO: (RS2ML) Changed logic, added additional sanity checks above
-  ##       and removed the fallback to 'base' if plot is not either TRUE, FALSE,
-  ##       or one of the allowed types (none, base, or ggplot2).
-  ##       Hope that is fine or do you need the fallback? If not, remove these
-  ##       comments, else we need may need to quickly discuss it.
-  ## if (isFALSE(plot)) {
-  ##   plot <- "none"
-  ## } else if (isTRUE(plot)) {
-  ##   plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
-  ## } else if (!is.character(plot)) {
-  ##   plot <- "base"
-  ## }
-  ## stopifnot(
-  ##   "The argument `plot` must be logical or match the arguments 'none', 'base' or 'ggplot2'." =
-  ##     !inherits(plot, "try-error")
-  ## )
+  plot <- try(match.arg(plot, c("none", "base", "ggplot2")), silent = TRUE)
+  if (inherits(plot, "try-error"))
+    stop("`plot` must be logical `TRUE`/`FALSE` or one of \"none\", \"base\", or \"ggplot2\"")
 
   ## guess output class
   if (is.null(class)) {
     class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
-  class <- match.arg(class, c("tibble", "data.frame"))
-  ## TODO: (RS2ML) That did not work as expected, you should use a stop instead;
-  ##       or (as now) remove the try(match.arg()) as match.arg() throws a fairly
-  ##       nice error message itself anyways? If you really need NULL in the
-  ##       error message (as one of the options) we may add id again, this
-  ##       is now checked by additional sanity checks above.
-  ## stopifnot(
-  ##   "The argument `class` must be NULL or match the arguments 'tibble' or 'data.frame'." =
-  ##     !inherits(class, "try-error")
-  ## )
+  class <- try(match.arg(class, c("tibble", "data.frame")), silent = TRUE)
+  if (inherits(class, "try-error"))
+    stop("`class` must be `NULL` or one of \"tibble\", \"data.frame\"")
 
   # -------------------------------------------------------------------
   # COMPUTATION OF PIT
@@ -285,8 +264,8 @@ pithist.default <- function(
     ## TODO: (ML)
     ## * implement proportional over the inteverals (e.g., below censoring point)
     ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
-    ## NOTE(RS): There is a test for that in test_pithist_usage.R; must be removed
-    ##           once this option is added.
+    ## NOTE: (RS) Cannot be tested as we currently don't allow type = "proportional"
+    ##       (see @param; match.arg(type)).
     stop("not yet implemented")
 
     # -------------------------------------------------------------------

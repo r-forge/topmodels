@@ -192,32 +192,17 @@ qqrplot.default <- function(
   if (is.logical(plot)) {
       plot <- ifelse(isFALSE(plot), "none", if ("ggplot2" %in% .packages()) "ggplot2" else "base")
   }
-  plot <- match.arg(plot, c("none", "base", "ggplot2"))
-  ## TODO: (RS2ML) Analog to pithist()
-  ## if (isFALSE(plot)) {
-  ##   plot <- "none"
-  ## } else if (isTRUE(plot)) {
-  ##   plot <- if ("ggplot2" %in% .packages()) "ggplot2" else "base"
-  ## } else if (!is.character(plot)) {
-  ##   plot <- "base"
-  ## }
-  ## plot <- try(match.arg(plot, c("none", "base", "ggplot2")))
-  ## stopifnot(
-  ##   "`plot` must either be logical, or match the arguments 'none', 'base' or 'ggplot2'" =
-  ##     !inherits(plot, "try-error")
-  ## )
+  plot <- try(match.arg(plot, c("none", "base", "ggplot2")), silent = TRUE)
+  if (inherits(plot, "try-error"))
+    stop("`plot` must be logical `TRUE`/`FALSE` or one of \"none\", \"base\", or \"ggplot2\"")
 
   ## guess output class
   if (is.null(class)) {
     class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
-  class <- match.arg(class, c("tibble", "data.frame"))
-  ## TODO: (RS2ML) Analog to pithist()
-  ##class <- try(match.arg(class, c("tibble", "data.frame")))
-  ##stopifnot(
-  ##  "`class` must either be NULL, or match the arguments 'tibble', or 'data.frame'" =
-  ##    !inherits(class, "try-error")
-  ##)
+  class <- try(match.arg(class, c("tibble", "data.frame")), silent = TRUE)
+  if (inherits(class, "try-error"))
+    stop("`class` must be `NULL` or one of \"tibble\", \"data.frame\"")
 
   # -------------------------------------------------------------------
   # COMPUTATION OF QUANTILE RESIDUALS
