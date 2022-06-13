@@ -75,6 +75,13 @@ expect_true(all(fn(p3r_uniform) > fn(p3r_uniform10)),
 expect_true(all(fn(p3r_uniform10) > fn(p3r_uniform20)),
             info = "width of simulated interval with nsim10 > nsim20")
 
+
+# ---------------------------------------------------------
+# TODO: (RS2ML): Can the simulated interval be lower than 0???
+if (any(p3r_uniform[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
+if (any(p3r_uniform10[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
+if (any(p3r_uniform20[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
+
 rm(p3r_uniform10, p3r_uniform20)
 
 # same seed, same nsim, different simint_levels (confidence level)
@@ -150,8 +157,8 @@ expect_true(all(p3r_normal$observed > p3r_normal$simint_lwr),
 expect_true(all(p3r_normal$observed < p3r_normal$simint_upr),
             info = "upper bound of sumulated random PIT must be lower than observed")
 
+
 # given we used a fixed seed the sha1 hash must be ...
-# TODO: (RS2ML): Can the simulated interval be lower than 0???
 expect_identical(sha1(p3r_normal), "2dfdf0a6126f2d153076f670515aaa9cb339896f",
                  info = "compare result of (pseudo-)random pithist with sha1")
 
@@ -165,6 +172,13 @@ expect_true(all(fn(p3r_normal) > fn(p3r_normal10)),
             info = "width of simulated interval with nsim1 > nsim10")
 expect_true(all(fn(p3r_normal10) > fn(p3r_normal20)),
             info = "width of simulated interval with nsim10 > nsim20")
+
+# ---------------------------------------------------------
+# TODO: (RS2ML): Can the simulated interval be lower than 0???
+if (any(p3r_normal[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
+if (any(p3r_normal10[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
+if (any(p3r_normal20[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
+
 
 rm(p3r_normal10, p3r_normal20)
 

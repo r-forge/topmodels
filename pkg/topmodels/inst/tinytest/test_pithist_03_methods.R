@@ -106,6 +106,12 @@ rm(tbl_p1, tbl_p2, tbl_p3, tbl_p1p2p3)
 rm(tmp_additional_variables)
 
 
+# Testing combine/rbind with two objects of different scales
+expect_silent(p1_unif <- pithist(m1, class = "data.frame", scale = "normal", plot = FALSE))
+expect_silent(p1_norm <- pithist(m1, class = "data.frame", scale = "uniform", plot = FALSE))
+expect_error(c(p1_unif, p1_norm), pattern = "^Can't combine pit histograms which are on different scales.$")
+
+
 # TODO: Plotting not yet covered by tests
 
 

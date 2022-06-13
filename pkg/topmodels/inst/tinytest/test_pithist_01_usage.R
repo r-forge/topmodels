@@ -235,7 +235,15 @@ expect_true(all(sapply(tmp, function(x) isTRUE(attr(x, "expected")))))
 expect_true(all(sapply(tmp, function(x) isTRUE(attr(x, "confint")))))
 
 
-
+# Frequency or density?
+expect_silent(p_density   <- pithist(m1, plot = FALSE, class = "data.frame", freq = FALSE))
+expect_silent(p_frequency <- pithist(m1, plot = FALSE, class = "data.frame", freq = TRUE))
+expect_identical(attr(p_density,   "ylab"), "Density")
+expect_identical(attr(p_frequency, "ylab"), "Frequency")
+expect_equal(p_density$observed * p_density$width * nrow(model.frame(m1)),
+             p_frequency$observed, info = "checking observed frequency versus density")
+expect_equal(p_density$expected * p_density$width * nrow(model.frame(m1)),
+             p_frequency$expected, info = "checking expected frequency versus density")
 
 
 
