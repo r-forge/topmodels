@@ -522,12 +522,10 @@ c.pithist <- function(...) {
   # -------------------------------------------------------------------
   if (length(scale) > 1) {
     if (!all(sapply(2:length(scale), function(i) identical(scale[[i - 1]], scale[[i]])))) {
-      stop("Objects on different scales must not be combined.")
+      stop("Can't combine pit histograms which are on different scales.")
     } else {
       scale <- scale[[1]]
     }
-  } else {
-    scale <- scale[[1]]
   }
 
   # -------------------------------------------------------------------
