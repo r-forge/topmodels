@@ -111,6 +111,40 @@ expect_silent(p1_unif <- pithist(m1, class = "data.frame", scale = "normal", plo
 expect_silent(p1_norm <- pithist(m1, class = "data.frame", scale = "uniform", plot = FALSE))
 expect_error(c(p1_unif, p1_norm), pattern = "^Can't combine pit histograms which are on different scales.$")
 
+rm(p1_unif, p1_norm)
+
+
+# Testing combine/rbind with two objects with different titles
+expect_silent(p1_A <- pithist(m1, class = "data.frame", plot = FALSE, main = "Model A", freq = TRUE))
+expect_silent(p1_B <- pithist(m1, class = "data.frame", plot = FALSE, main = "Model B", freq = TRUE))
+expect_silent(p1_C <- pithist(m1, class = "data.frame", plot = FALSE, main = "Model C", freq = FALSE))
+expect_identical(attr(p1_A, "main"), "Model A")
+expect_identical(attr(p1_B, "main"), "Model B")
+expect_identical(attr(p1_C, "main"), "Model C")
+
+# Combining A + B, both with freq = TRUE
+expect_silent(p1_AB <- c("model 1" = p1_A, "model 2" = p1_B))
+expect_identical(attr(p1_AB, "main"), c("model 1", "model 2"))
+expect_true(attr(p1_AB, "freq"))
+expect_identical(attr(p1_AB, "ylab"), c("model 1" = "Frequency", "model 2" = "Frequency"),
+                 info = "combined pit histogram with freq = TRUE and freq = TRUE should have ylab = \"Frequency\"")
+
+# Combining B + C with freq = TRUE and freq = FALSE; should take first one
+expect_message(p1_BC <- c("model 2" = p1_B, "model 3" = p1_C),
+               pattern = "^\\s\\* as arg `freq`'s definition is not unique, using solely the first \\(\"TRUE\"\\)\\s$")
+expect_true(attr(p1_BC, "freq"), info = "combined pit histogram with freq = TRUE and freq = FALSE should result in freq = TRUE")
+expect_identical(attr(p1_BC, "ylab"), c("model 2" = "Frequency", "model 3" = "Frequency"),
+                 info = "combined pit histogram with freq = TRUE and freq = FALSE should have ylab = \"Frequency\"")
+
+expect_message(p1_CB <- c("model 3" = p1_C, "model 2" = p1_B),
+               pattern = "^\\s\\* as arg `freq`'s definition is not unique, using solely the first \\(\"FALSE\"\\)\\s$")
+expect_false(attr(p1_CB, "freq"), info = "combined pit histogram with freq = FALSE and freq = TRUE should result in freq = FALSE")
+expect_identical(attr(p1_CB, "ylab"), c("model 3" = "Density", "model 2" = "Density"),
+                 info = "combined pit histogram with freq = FALSE and freq = TRUE should have ylab = \"Density\"")
+
+
+
+rm(p1_A, p1_B)
 
 # TODO: Plotting not yet covered by tests
 

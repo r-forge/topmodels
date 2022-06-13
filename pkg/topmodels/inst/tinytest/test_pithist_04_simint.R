@@ -78,6 +78,7 @@ expect_true(all(fn(p3r_uniform10) > fn(p3r_uniform20)),
 
 # ---------------------------------------------------------
 # TODO: (RS2ML): Can the simulated interval be lower than 0???
+
 if (any(p3r_uniform[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
 if (any(p3r_uniform10[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
 if (any(p3r_uniform20[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
@@ -178,7 +179,6 @@ expect_true(all(fn(p3r_normal10) > fn(p3r_normal20)),
 if (any(p3r_normal[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
 if (any(p3r_normal10[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
 if (any(p3r_normal20[, c("simint_lwr", "simint_upr")] < 0)) warning("NEGATIVE SIMINT IN PITHIST!")
-
 
 rm(p3r_normal10, p3r_normal20)
 

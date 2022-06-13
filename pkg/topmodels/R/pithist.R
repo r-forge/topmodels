@@ -397,6 +397,9 @@ pithist.default <- function(
   ## add simint
   if (!isFALSE(simint) && type == "random") {
     ## TODO: (ML) Check if simint is correct.
+    ## TODO: (RS2ML) It is possible that the resulting simint_lwr
+    ##       is getting negative; we have one test case in `test_pithist_04_simint.R`.
+    ##       Just pmax(0, rval$simint_lwr)?
     rval$simint_lwr <- rval$observed - (simint_upr - simint_lwr) / 2
     rval$simint_upr <- rval$observed + (simint_upr - simint_lwr) / 2
   } else {
@@ -538,6 +541,7 @@ c.pithist <- function(...) {
   if (any(grepl("confint_lwr|confint_upr|expected", all_names))) {
     rval <- lapply(rval, summary.pithist, freq = freq, extend = TRUE)
   } else {
+    ## TODO: (RS2ML): Is this case even possible?
     rval <- lapply(rval, summary.pithist, freq = freq, extend = FALSE)
   }
   rval <- lapply(rval, as.data.frame) # remove inner class
