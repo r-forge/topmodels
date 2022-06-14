@@ -461,7 +461,15 @@ pithist.default <- function(
 
 
 #' @export
+#' @method c pithist
 c.pithist <- function(...) {
+  ## TODO: (RS2ML) The method is listed nowhere and not documented.
+  ##               Should there be an entry for c/rbind pithist with
+  ##               a description? Furthermore, no sanity checks are
+  ##               carried out. Does it make sense to check the
+  ##               rvals?
+  ##               All allowed is (named or unnamed) series of
+  ##               pithist objects, right?
   # -------------------------------------------------------------------
   # GET DATA
   # -------------------------------------------------------------------
@@ -476,8 +484,7 @@ c.pithist <- function(...) {
   }
 
   ## remove temporary the class (needed below for `c()`)
-  ## TODO: (ML) Rewrite by, e.g., employing `lapply()`
-  for (i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "pithist"]
+  rval <- lapply(rval, function(x) structure(x, class = class(x)[-1]))
 
   ## convert always to data.frame
   if (class == "tibble") {
@@ -496,7 +503,7 @@ c.pithist <- function(...) {
   ## labels
   xlab <- prepare_arg_for_attributes(rval, "xlab")
   ylab <- prepare_arg_for_attributes(rval, "ylab")
-  nam <- names(rval)
+  nam  <- names(rval)
   main <- if (is.null(nam)) {
     prepare_arg_for_attributes(rval, "main")
   } else {
@@ -504,14 +511,14 @@ c.pithist <- function(...) {
   }
 
   ## parameters
-  scale <- prepare_arg_for_attributes(rval, "scale", force_single = FALSE) # check/force below
-  type <- prepare_arg_for_attributes(rval, "type", force_single = FALSE)
-  simint <- prepare_arg_for_attributes(rval, "simint")
-  style <- prepare_arg_for_attributes(rval, "style", force_single = TRUE)
-  freq <- prepare_arg_for_attributes(rval, "freq", force_single = TRUE)
+  scale    <- prepare_arg_for_attributes(rval, "scale",    force_single = FALSE) # check/force below
+  type     <- prepare_arg_for_attributes(rval, "type",     force_single = FALSE)
+  simint   <- prepare_arg_for_attributes(rval, "simint")
+  style    <- prepare_arg_for_attributes(rval, "style",    force_single = TRUE)
+  freq     <- prepare_arg_for_attributes(rval, "freq",     force_single = TRUE)
   expected <- prepare_arg_for_attributes(rval, "expected")
-  confint <- prepare_arg_for_attributes(rval, "confint")
-  counts <- prepare_arg_for_attributes(rval, "counts")
+  confint  <- prepare_arg_for_attributes(rval, "confint")
+  counts   <- prepare_arg_for_attributes(rval, "counts")
 
   ## fix `ylabel` according to possible new `freq`
   if (isTRUE(freq)) {
@@ -523,12 +530,8 @@ c.pithist <- function(...) {
   # -------------------------------------------------------------------
   # CHECK FOR COMPATIBILITY
   # -------------------------------------------------------------------
-  if (length(scale) > 1) {
-    if (!all(sapply(2:length(scale), function(i) identical(scale[[i - 1]], scale[[i]])))) {
-      stop("Can't combine pit histograms which are on different scales.")
-    } else {
-      scale <- scale[[1]]
-    }
+  if (length(unique(scale)) > 1) {
+    stop("Can't combine pit histograms which are on different scales.")
   }
 
   # -------------------------------------------------------------------
@@ -569,17 +572,17 @@ c.pithist <- function(...) {
   rval <- rval[, c(names(rval)[names(rval) != "group"], "group")]
 
   ## add attributes
-  attr(rval, "scale") <- scale
-  attr(rval, "type") <- type
-  attr(rval, "simint") <- simint
-  attr(rval, "style") <- style
-  attr(rval, "freq") <- freq
+  attr(rval, "scale")    <- scale
+  attr(rval, "type")     <- type
+  attr(rval, "simint")   <- simint
+  attr(rval, "style")    <- style
+  attr(rval, "freq")     <- freq
   attr(rval, "expected") <- expected
-  attr(rval, "confint") <- confint
-  attr(rval, "counts") <- counts
-  attr(rval, "xlab") <- xlab
-  attr(rval, "ylab") <- ylab
-  attr(rval, "main") <- main
+  attr(rval, "confint")  <- confint
+  attr(rval, "counts")   <- counts
+  attr(rval, "xlab")     <- xlab
+  attr(rval, "ylab")     <- ylab
+  attr(rval, "main")     <- main
 
   ## set class to data.frame or tibble
   if (class == "data.frame") {
@@ -595,6 +598,7 @@ c.pithist <- function(...) {
 
 
 #' @export
+#' @method rbind pithist
 rbind.pithist <- c.pithist
 
 

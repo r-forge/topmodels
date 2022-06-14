@@ -16,13 +16,15 @@ check: document
 
 test: install
 	Rscript -e "tinytest::test_package('topmodels')"
+testwarn: install
+	Rscript -e "tinytest::test_package('topmodels'); warnings()"
 
 coverage: install
 	Rscript -e 'covr::report(covr::package_coverage(), file = "../coverage.html")'
 
 reto:
 	#Rscript -e "library('topmodels'); devtools::load_all('topmodels'); tinytest::run_test_file('topmodels/inst/tinytest/test_pithist_usage.R')"
-	Rscript -e "library('topmodels'); devtools::load_all(); tinytest::run_test_file('inst/tinytest/test_qqrplot_values.R')"
+	Rscript -e "library('topmodels'); devtools::load_all(); tinytest::run_test_file('inst/tinytest/test_pithist_02_values.R')"
 
 
 # ---------------------------------------------------
