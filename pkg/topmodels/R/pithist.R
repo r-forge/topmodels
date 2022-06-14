@@ -532,6 +532,8 @@ c.pithist <- function(...) {
   # -------------------------------------------------------------------
   if (length(unique(scale)) > 1) {
     stop("Can't combine pit histograms which are on different scales.")
+  } else {
+    scale <- scale[[1]]
   }
 
   # -------------------------------------------------------------------
@@ -604,41 +606,43 @@ rbind.pithist <- c.pithist
 
 #' S3 Methods for Plotting PIT Histograms
 #'
-#' Generic plotting functions for PIT histograms of the class \code{"pithist"}
-#' computed by \code{link{pithist}}.
+#' Generic plotting functions for probability integral transform (PIT)
+#' histograms of the class \code{"pithist"} computed by \code{link{pithist}}.
 #'
-#' PIT histograms graphically evaluate the probability integral transform (PIT),
-#' i.e., the value that the predictive CDF attains at the observation, with a
-#' uniform distribution. For a well calibrated model fit, the observation will be
-#' drawn from the predictive distribution and the PIT will have a standard uniform
-#' distribution.
+#' PIT histograms evaluates the predictive cumulative distribution
+#' function (CDF) evaluated at the observation and compares the resulting
+#' values to a uniform distribution or normal distribution.
+#' For a well calibrated model fit, the distribution of the PIT residuals
+#' will show a standard uniform distrbution or normal distribution depending
+#' on the scale selected by the user.
 #'
 #' PIT histograms can be rendered as \code{ggplot2} or base R graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}.
 #' For a single base R graphically panel, \code{\link{lines}} adds an additional PIT histogram.
 #'
 #' @aliases plot.pithist lines.pithist autoplot.pithist
+#'
 #' @param object,x an object of class \code{\link{pithist}}.
 #' @param single_graph logical. Should all computed extended reliability
 #' diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.
-#' @param style character specifying the style of pithist. For \code{style = "bar"}
-#' a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
-#' line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
-#' plotted.
-#' @param freq logical. If \code{TRUE}, the PIT histogram is represented by
-#' frequencies, the \code{counts} component of the result; if \code{FALSE},
-#' probability densities, component \code{density}, are plotted (so that the
-#' histogram has a total area of one).
-#' @param simint logical. In case of discrete distributions, should the simulation
-#' (confidence) interval due to the randomization be visualized?
-#' @param confint Should confident intervals be drawn? Either logical or as 
-#' character string defining one of `"polygon"`, `"line"` or `"none"`.
-#' @param confint_level numeric. The confidence level required.
-#' @param confint_type character. Which type of confidence interval should be plotted: 
-#' `"exact"` or `"approximation"`. According
-#' to Agresti and Coull (1998), for interval estimation of binomial proportions
-#' an approximation can be better than exact.
+#' @param style \code{NULL} or character specifying the style of pithist. For
+#' \code{style = "bar"} a traditional PIT hisogram is drawn, for \code{style =
+#' "line"} solely the upper border line is plotted.  \code{single_graph = TRUE}
+#' always results in a combined line-style PIT histogram.
+#' @param freq \code{NULL} or logical.
+#' \code{TRUE} will enforce the PIT to be represented by frequencies (counts) while
+#' \code{FALSE} will enforce densities.
 #' @param expected logical. Should the expected values be plotted as reference?
+#' @param confint \code{NULL} or logical. Should confident intervals be drawn? Either logical or as 
+#' @param confint_level numeric in \code{[0, 1]}. The confidence level to be shown.
+#' @param confint_type character. Which type of confidence interval should be
+#' plotted: `"exact"` or `"approximation"`. According to Agresti and Coull
+#' (1998), for interval estimation of binomial proportions an approximation can
+#' be better than exact.
+#' @param simint \code{NULL} or logical. In case of discrete distributions, should the simulation
+#' (confidence) interval due to the randomization be visualized?
+#' character string defining one of `"polygon"`, `"line"` or `"none"`.
+#' If \code{freq = NULL} it is taken from the \code{object}.
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the main part of the base plot.
 #' @param colour,fill,size,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
@@ -766,38 +770,43 @@ plot.pithist <- function(x,
   ylab_missing <- missing(ylab)
 
   ## get default arguments
-  type <- use_arg_from_attributes(x, "type", default = "expected", force_single = FALSE)
-  style <- use_arg_from_attributes(x, "style", default = "bar", force_single = TRUE)
-  freq <- use_arg_from_attributes(x, "freq", default = FALSE, force_single = TRUE)
-  expected <- use_arg_from_attributes(x, "expected", default = TRUE, force_single = FALSE)
-  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
-  simint <- use_arg_from_attributes(x, "simint", default = NULL, force_single = FALSE)
+  type     <- use_arg_from_attributes(x, "type",     default = "expected", force_single = FALSE)
+  style    <- use_arg_from_attributes(x, "style",    default = "bar",      force_single = TRUE)
+  freq     <- use_arg_from_attributes(x, "freq",     default = FALSE,      force_single = TRUE)
+  expected <- use_arg_from_attributes(x, "expected", default = TRUE,       force_single = TRUE)
+  confint  <- use_arg_from_attributes(x, "confint",  default = TRUE,       force_single = TRUE)
+  simint   <- use_arg_from_attributes(x, "simint",   default = NULL,       force_single = TRUE)
 
   ## sanity checks
   ## * lengths of most arguments are checked by recycling
   ## * graphical parameters are checked w/i function calls for plotting
-  stopifnot(is.logical(expected))
-  stopifnot(is.logical(single_graph))
-  stopifnot(is.logical(freq))
-  stopifnot(is.null(simint) || is.logical(simint))
-  stopifnot(is.logical(confint) || confint %in% c("polygon", "line", "none"))
+  stopifnot(isTRUE(single_graph) || isFALSE(single_graph))
+  stopifnot(isTRUE(freq) || isFALSE(freq))
+  stopifnot(isTRUE(expected) || isFALSE(expected))
+  stopifnot(isTRUE(confint) || isFALSE(confint) || confint %in% c("polygon", "line", "none"))
   stopifnot(
     is.numeric(confint_level),
     length(confint_level) == 1,
     confint_level >= 0,
     confint_level <= 1
   )
+  stopifnot(is.null(simint) || isTRUE(simint) || isFALSE(simint))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(is.null(xlab) || is.character(xlab))
   stopifnot(is.null(ylab) || is.character(ylab))
   stopifnot(is.null(main) || is.character(main))
-  stopifnot(is.logical(axes))
-  stopifnot(is.logical(box))
+  stopifnot(isTRUE(axes) || isFALSE(axes))
+  stopifnot(isTRUE(box) || isFALSE(box))
 
   ## match arguments
   style <- match.arg(style, c("bar", "line"))
   confint_type <- match.arg(confint_type)
+
+  ## TODO: (RS2ML) Do we have to test col, border, lwd, lty, alpha_min,
+  ##       expected_col, expected_lty, confint_col, confint_lty,
+  ##       confint_lwd, confint_alpha, simint_col, simint_lty, simint_lwd
+
 
   ## extend input object on correct scale (compute ci, ...)
   x <- summary(
@@ -866,7 +875,6 @@ plot.pithist <- function(x,
       force_single = TRUE
     )
     if (is.null(main)) main <- "PIT histogram"
-
   } else {
     xlab <- use_arg_from_attributes(x, "xlab", default = "PIT", force_single = FALSE)
     ylab <- use_arg_from_attributes(x, "ylab",
@@ -879,7 +887,7 @@ plot.pithist <- function(x,
   ## fix `ylabel` according to possible new `freq`
   if (ylab_missing) {
     ylab[(!freq & ylab == "Frequency")] <- "Density"
-    ylab[(freq & ylab == "Density")] <- "Frequency"
+    ylab[(freq & ylab == "Density")]    <- "Frequency"
   }
 
   # -------------------------------------------------------------------
@@ -895,7 +903,7 @@ plot.pithist <- function(x,
     j <- unique(d$group)
 
     ## rect elements
-    xleft <- d$mid - d$width / 2
+    xleft  <- d$mid - d$width / 2
     xright <- d$mid + d$width / 2
 
     ## step elements (only needed for expected, confint)
@@ -909,10 +917,10 @@ plot.pithist <- function(x,
     }
     if (any(ylim_idx)) {
       ylim_use <- c(
-        TRUE, 
+        TRUE,
         rep(
-          c(TRUE, plot_arg$expected[j], plot_arg$confint[j] != "none", plot_arg$confint[j] != "none", 
-            plot_arg$simint[j], plot_arg$simint[j]), 
+          c(TRUE, plot_arg$expected[j], plot_arg$confint[j] != "none", plot_arg$confint[j] != "none",
+            plot_arg$simint[j], plot_arg$simint[j]),
           each = NROW(d)
         )
       )
@@ -924,88 +932,68 @@ plot.pithist <- function(x,
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
-      plot(0, 0,
-        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
-        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
-        xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...
-      )
-      if (plot_arg$axes[j]) {
-        axis(1)
-        axis(2)
-      }
-      if (plot_arg$box[j]) {
-        box()
-      }
+      plot(NA,
+           xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
+           ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
+           xlab = xlab[j], ylab = ylab[j], main = main[j], axes = FALSE, ...)
+      if (plot_arg$axes[j]) sapply(1:2, axis)
+      if (plot_arg$box[j])  box()
     }
 
     ## plot pithist
     rect(xleft, 0, xright, d$observed,
-      border = plot_arg$border[j],
-      col = set_minimum_transparency(plot_arg$col[j], alpha_min = plot_arg$alpha_min[j]),
-      lty = plot_arg$lty[j],
-      lwd = plot_arg$lwd[j]
-    )
+         border = plot_arg$border[j],
+         col = set_minimum_transparency(plot_arg$col[j], alpha_min = plot_arg$alpha_min[j]),
+         lty = plot_arg$lty[j],
+         lwd = plot_arg$lwd[j])
 
-    ## plot sim lines
+    ## plot sim lines (vertical 'bars/lines')
     if (plot_arg$simint[j]) {
-      segments(
-        x0 = d$mid, 
-        y0 = d$simint_lwr, 
-        y1 = d$simint_upr, 
-        col = plot_arg$simint_col, 
-        lty = plot_arg$simint_lty,
-        lwd = plot_arg$simint_lwd)
+      segments(x0  = d$mid,
+               y0  = d$simint_lwr,
+               y1  = d$simint_upr,
+               col = plot_arg$simint_col,
+               lty = plot_arg$simint_lty,
+               lwd = plot_arg$simint_lwd)
     }
 
     ## add expected line
     if (plot_arg$expected[j]) {
       expected_y <- duplicate_last_value(d$expected)
-      lines(
-        expected_y ~ z, 
-        type = "s", 
-        col = plot_arg$expected_col[j], 
-        lty = plot_arg$expected_lty[j], 
-        lwd = plot_arg$expected_lwd[j]
-      )
+      lines(expected_y ~ z,
+            type = "s",
+            col  = plot_arg$expected_col[j],
+            lty  = plot_arg$expected_lty[j],
+            lwd  = plot_arg$expected_lwd[j])
     }
 
     ## plot confint lines
     if (plot_arg$confint[j] == "line") {
-
       ## lower confint line
       confint_lwr_y <- duplicate_last_value(d$confint_lwr)
-      lines(
-        confint_lwr_y ~ z, 
-        type = "s", 
-        col = plot_arg$confint_col[j], 
-        lty = plot_arg$confint_lty[j], 
-        lwd = plot_arg$confint_lwd[j]
-      )
+      lines(confint_lwr_y ~ z,
+            type = "s",
+            col  = plot_arg$confint_col[j],
+            lty  = plot_arg$confint_lty[j],
+            lwd  = plot_arg$confint_lwd[j])
 
       ## upper confint line
       confint_upr_y <- duplicate_last_value(d$confint_upr)
-      lines(
-        confint_upr_y ~ z, 
-        type = "s", 
-        col = plot_arg$confint_col[j], 
-        lty = plot_arg$confint_lty[j], 
-        lwd = plot_arg$confint_lwd[j]
-      )
+      lines(confint_upr_y ~ z,
+            type = "s",
+            col  = plot_arg$confint_col[j],
+            lty  = plot_arg$confint_lty[j],
+            lwd  = plot_arg$confint_lwd[j])
 
+    ## plot confint polygons
     } else if (plot_arg$confint[j] == "polygon") {
-
-      polygon(
-        c(
-          rep(z, each = 2)[-c(1, length(z) * 2)],
-          rev(rep(z, each = 2)[-c(1, length(z) * 2)])
-        ),
-        c(
-          rep(d$confint_lwr, each = 2),
-          rev(rep(d$confint_upr, each = 2))
-        ),
-        col = set_minimum_transparency(plot_arg$confint_col[j], alpha_min = plot_arg$confint_alpha[j]),
-        border = NA
-      )
+      polygon(x   = c(rep(z, each = 2)[-c(1, length(z) * 2)],
+                      rev(rep(z, each = 2)[-c(1, length(z) * 2)])),
+              y   = c(rep(d$confint_lwr, each = 2),
+                      rev(rep(d$confint_upr, each = 2))),
+              col = set_minimum_transparency(plot_arg$confint_col[j],
+                                             alpha_min = plot_arg$confint_alpha[j]),
+              border = NA)
     }
   }
 
@@ -1030,6 +1018,7 @@ plot.pithist <- function(x,
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- range(z)[xlim_idx]
     }
 
+    ## 
     if (any(ylim_idx) && !single_graph) {
       ylim_use <- rep(
         c(TRUE, plot_arg$expected[j], plot_arg$confint[j] != "none", plot_arg$confint[j] != "none", 
@@ -1054,18 +1043,12 @@ plot.pithist <- function(x,
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
-      plot(0, 0,
-        type = "n", xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
-        ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
-        xlab = xlab[j], ylab = ylab[j], xaxs = "i", main = main[j], axes = FALSE, ...
-      )
-      if (plot_arg$axes[j]) {
-        axis(1)
-        axis(2)
-      }
-      if (plot_arg$box[j]) {
-        box()
-      }
+      plot(NA,
+           xlim = c(plot_arg$xlim1[j], plot_arg$xlim2[j]),
+           ylim = c(plot_arg$ylim1[j], plot_arg$ylim2[j]),
+           xlab = xlab[j], ylab = ylab[j], xaxs = "i", main = main[j], axes = FALSE, ...)
+      if (plot_arg$axes[j]) sapply(1:2, axis)
+      if (plot_arg$box[j])  box()
     }
 
   }
@@ -1086,73 +1069,58 @@ plot.pithist <- function(x,
 
       ## lower confint line
       confint_lwr_y <- duplicate_last_value(d$confint_lwr)
-      lines(
-        confint_lwr_y ~ z, 
-        type = "s", 
-        col = plot_arg$confint_col[j], 
-        lty = plot_arg$confint_lty[j], 
-        lwd = plot_arg$confint_lwd[j]
-      )
+      lines(confint_lwr_y ~ z,
+            type = "s",
+            col  = plot_arg$confint_col[j],
+            lty  = plot_arg$confint_lty[j],
+            lwd  = plot_arg$confint_lwd[j])
 
       ## upper confint line
       confint_upr_y <- duplicate_last_value(d$confint_upr)
-      lines(
-        confint_upr_y ~ z, 
-        type = "s", 
-        col = plot_arg$confint_col[j], 
-        lty = plot_arg$confint_lty[j], 
-        lwd = plot_arg$confint_lwd[j]
-      )
+      lines(confint_upr_y ~ z,
+            type = "s",
+            col  = plot_arg$confint_col[j],
+            lty  = plot_arg$confint_lty[j],
+            lwd  = plot_arg$confint_lwd[j])
 
+    ## plot confint polygons
     } else if (plot_arg$confint[j] == "polygon") {
 
-      polygon(
-        c(
-          rep(z, each = 2)[-c(1, length(z) * 2)],
-          rev(rep(z, each = 2)[-c(1, length(z) * 2)])
-        ),
-        c(
-          rep(d$confint_lwr, each = 2),
-          rev(rep(d$confint_upr, each = 2))
-        ),
-        col = set_minimum_transparency(plot_arg$confint_col[j], alpha_min = plot_arg$confint_alpha[j]),
-        border = NA
-      )
+      polygon(x = c(rep(z, each = 2)[-c(1, length(z) * 2)],
+                    rev(rep(z, each = 2)[-c(1, length(z) * 2)])),
+              y = c(rep(d$confint_lwr, each = 2),
+                    rev(rep(d$confint_upr, each = 2))),
+              col = set_minimum_transparency(plot_arg$confint_col[j], alpha_min = plot_arg$confint_alpha[j]),
+              border = NA)
     }
 
     ## plot expected line
     if (plot_arg$expected[j]) {
 
       expected_y <- duplicate_last_value(d$expected)
-      lines(
-        expected_y ~ z, 
-        type = "s", 
-        col = plot_arg$expected_col[j], 
-        lty = plot_arg$expected_lty[j], 
-        lwd = plot_arg$expected_lwd[j]
-      )
+      lines(expected_y ~ z,
+            type = "s",
+            col  = plot_arg$expected_col[j],
+            lty  = plot_arg$expected_lty[j],
+            lwd  = plot_arg$expected_lwd[j])
     }
 
     ## plot sim lines
     if (plot_arg$simint[j]) {
-      segments(
-        x0 = d$mid, 
-        y0 = d$simint_lwr, 
-        y1 = d$simint_upr, 
-        col = plot_arg$simint_col, 
-        lty = plot_arg$simint_lty,
-        lwd = plot_arg$simint_lwd)
+      segments(x0  = d$mid,
+               y0  = d$simint_lwr,
+               y1  = d$simint_upr,
+               col = plot_arg$simint_col,
+               lty = plot_arg$simint_lty,
+               lwd = plot_arg$simint_lwd)
     }
 
-
     ## plot stepfun
-    lines(
-      y ~ z, 
-      type = "s", 
-      lwd = plot_arg$lwd[j], 
-      lty = plot_arg$lty[j], 
-      col = plot_arg$col[j]
-    )
+    lines(y ~ z,
+          type = "s",
+          lwd  = plot_arg$lwd[j],
+          lty  = plot_arg$lty[j],
+          col  = plot_arg$col[j])
   }
 
   # -------------------------------------------------------------------
