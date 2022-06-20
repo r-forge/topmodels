@@ -1,934 +1,406 @@
 \documentclass[11pt,t,usepdftitle=false,aspectratio=169]{beamer}
-\usetheme[url]{uibk}
+\usetheme[license, url, foot]{uibk}
+\renewcommand{\hrulefill}{}
 
-\title{}
-
-\title[distributions3: From Basic Probability to Probabilistic Regression]{distributions3: From Basic Probability to \\\vspace{.2em} Probabilistic Regression}
+\gdef\myheaderimage{disc_header.png}
+\title{distributions3}
+\subtitle{From Basic Probability to Probabilistic Regression}
 \author[Achim Zeileis]{Achim Zeileis, Moritz N.\ Lang, Alex Hayes}
+\URL{https://alexpghayes.github.io/distributions3/}
 
-%-------------------------------------------------------------------
-% Preamble
-%-------------------------------------------------------------------
-%% Create new footer line
+%% need no \usepackage{Sweave}
+\SweaveOpts{engine=R, eps=FALSE, keep.source=TRUE}
+\setkeys{Gin}{width=0.65\textwidth}
 
-%% Right
-\setbeamertemplate{footline}{
-  \hfill \vspace*{1.em}  \insertframenumber{} / \inserttotalframenumber \hspace*{1ex} {\tiny \ccLogo \ccAttribution} \hspace*{2ex}
-}
+<<preliminaries, echo=FALSE, results=hide>>=
+options(prompt = "R> ", continue = "+  ", useFancyQuotes = FALSE, width = 80)
+set.seed(403)
+library("distributions3")
+library("topmodels")
+library("scoringRules")
+##library("ggplot2"
+##theme_set(theme_minimal())
+options(digits = 4)
+@
 
-%% Left
-%\setbeamertemplate{footline}{
-% \hspace{1em} \vspace*{1.em} {\tiny \ccLogo \ccAttribution}  \hspace*{1ex} \insertframenumber{} / \inserttotalframenumber \hspace*{2ex}
-%}
-
-%% Adapt URL font and set URL
-\setbeamerfont{url}{size*={11.5pt}{13pt},series=\mdseries}
-\URL{https://topmodels.R-Forge.R-project.org/}
-
-%% Adapt headerimage
-% \renewcommand{\headerimage}[1]{%
-%    \IfStrEqCase{#1}{%
-%       {1}{%
-%          \gdef\myheaderimageid{#1}%
-%          \gdef\myheaderimageposition{nw}%
-%          \gdef\myheaderimage{forest.jpg}%
-%       }}[%
-%          \gdef\myheaderimageid{1}%
-%          \gdef\myheaderimageposition{nw}%
-%          \gdef\myheaderimage{forest.jpg}%
-%       ]%
-% }
-\headerimage{4}
-
-%% Add graphics path
-\graphicspath{{Figures/}}
-
-\usepackage[utf8]{inputenc}
-
-%% Use some packages
-\usepackage[utf8]{inputenc}
-\setbeamertemplate{caption}{\insertcaption}
-% \usepackage{Sweave}
-\usepackage{changepage}
-\usepackage{amsmath,tikz}
-\usepackage{calc}
-\usepackage{graphicx}
-\usetikzlibrary{positioning,shapes,arrows,decorations.pathreplacing,calc,automata,mindmap,trees,tikzmark,decorations.pathreplacing}
-\usepackage{xcolor}
-\usepackage{fontawesome}
-\usepackage{ccicons}
-
-%% Define some new commands
-\newcommand{\credit}[1]{\par\hfill \tiny  \ccCopy ~\itshape#1}
-\newcommand{\argmax}{\operatorname{argmax}\displaylimits}
-\newcommand{\BoldRightarrow}[1][0.1pt]{\tikz[baseline=-0.26em,y=3em, x=3em]{\filldraw[line width=#1] (0.4202,0.0021) .. controls (0.4202,-0.0000) and (0.4188,-0.0018) .. (0.4171,-0.0025) .. controls (0.3917,-0.0092) and (0.3699,-0.0236) .. (0.3509,-0.0401) .. controls (0.3355,-0.0538) and (0.3225,-0.0704) .. (0.3130,-0.0890) .. controls (0.3119,-0.0915) and (0.3094,-0.0929) .. (0.3066,-0.0929) .. controls (0.3028,-0.0929) and (0.2996,-0.0897) .. (0.2996,-0.0858) .. controls (0.2996,-0.0848) and (0.3000,-0.0837) .. (0.3003,-0.0827) .. controls (0.3087,-0.0665) and (0.3193,-0.0517) .. (0.3316,-0.0391) -- (0.1181,-0.0391) .. controls (0.1143,-0.0391) and (0.1111,-0.0359) .. (0.1111,-0.0320) .. controls (0.1111,-0.0282) and (0.1143,-0.0250) .. (0.1181,-0.0250) -- (0.3471,-0.0250) .. controls (0.3611,-0.0137) and (0.3766,-0.0046) .. (0.3935,0.0021) .. controls (0.3766,0.0088) and (0.3611,0.0179) .. (0.3471,0.0292) -- (0.1181,0.0292) .. controls (0.1143,0.0292) and (0.1111,0.0323) .. (0.1111,0.0362) .. controls (0.1111,0.0401) and (0.1143,0.0432) .. (0.1181,0.0432) -- (0.3316,0.0432) .. controls (0.3193,0.0559) and (0.3087,0.0707) .. (0.3003,0.0868) .. controls (0.3000,0.0879) and (0.2996,0.0889) .. (0.2996,0.0900) .. controls (0.2996,0.0939) and (0.3028,0.0970) .. (0.3066,0.0970) .. controls (0.3094,0.0970) and (0.3119,0.0956) .. (0.3130,0.0932) .. controls (0.3225,0.0745) and (0.3355,0.0580) .. (0.3509,0.0443) .. controls (0.3699,0.0278) and (0.3917,0.0133) .. (0.4171,0.0067) .. controls (0.4188,0.0059) and (0.4202,0.0042) .. (0.4202,0.0021) -- cycle;}}
-
-%% Create appendix with no page numbering
-\newcommand{\backupbegin}{
-   \newcounter{finalframe}
-   \setcounter{finalframe}{\value{framenumber}}
-}
-\newcommand{\backupend}{
-   \setcounter{framenumber}{\value{finalframe}}
-}
-
-%% Define colors
 \definecolor{HighlightOrange}{rgb}{0.9490196,0.5725490,0.0000000}
 \definecolor{HighlightBlue}{rgb}{0.4784314,0.7490196,0.9803922}
-\definecolor{forestred}{RGB}{206,73,81}
-\definecolor{treegreen}{RGB}{0,143,0}
-\definecolor{lightblue}{RGB}{34,151,230}
-\definecolor{lightorange}{RGB}{255,165,0}
 
-%% Sweave options and setup R
-\SweaveOpts{engine=R, eps=FALSE, keep.source=TRUE}
-<<preliminaries, echo=FALSE, results=hide>>=
-options(prompt = "R> ", continue = "+  ", useFancyQuotes = FALSE, width = 70)
-
-set.seed(7)
-
-invisible(.Call(grDevices:::C_palette, grDevices::hcl(
-  h = c(0,   5, 125, 245, 195, 315,  65,   0),
-  c = c(0, 100,  90,  85,  63, 105,  90,   0),
-  l = c(0,  55,  75,  60,  82,  48,  80,  65)
-)))
-
-library("topmodels")
-library("ggplot2")
-@
-
-
-%-------------------------------------------------------------------
-% Main
-%-------------------------------------------------------------------
 \begin{document}
-\section{Visualizing Goodness of Fit of Probabilistic Regression Models}
 
+\section{distributions3: From Basic Probability to Probabilistic Regression}
 
-%-------------------------------------------------------------------
-\subsection{Motivation}
-%-------------------------------------------------------------------
+\subsection{Background}
 
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Motivation}
+\begin{frame}
+\frametitle{Background}
 
-\vspace{-0.75em}
-
-\textbf{Probabilistic regression models:}
+\textbf{distributions3:} Probability distributions as S3 objects.
 \begin{itemize}
-\item Modelling the entire probability distribution rather than just the expectation.
-\item Various model classes and types.
+  \item Started by Alex Hayes in 2019.
+  \item Early contributions from Ralph Moller-Trane, Daniel Jordan, Paul Northrop, \dots
+  \item Geared towards introductory statistics courses.
+  \item Beginner-friendly, well-documented, and lightweight interface.
 \end{itemize}
 
 \bigskip
 \pause
 
-\textbf{Goodness of fit:}
+\textbf{Recently:}
 \begin{itemize}
-\item Scoring rules for evaluating the predictive performance, e.g., using the log-score or the (continuous) ranked probability score.
-\item Visualizations especially suitable for identifying possible misspecifications.
+  \item Contributions from Moritz N. Lang and Achim Zeileis.
+  \item Extension to vectors of distributions (of the same class).
+  \item Extract probability distributions from models: \code{lm()}, \code{glm()}, \code{arima()}, \dots
+  \item Infrastructure for assessing goodness of fit in \emph{topmodels} package.
 \end{itemize}
+
+\end{frame}
+
+\subsection{Design}
+
+\begin{frame}
+\frametitle{Design}
+
+\textbf{S3 objects:} Distributions are essentially data frames of parameters.
 
 \bigskip
-\pause 
 
-\begin{itemize}[<+->]
-\item[\BoldRightarrow] \textbf{What are useful elements of such graphics?}
-\item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
-\end{itemize}
+\textbf{Class constructors:} For many distributions, e.g., \code{Normal()}, \code{Poisson()}, \dots
+
+\bigskip
+
+\textbf{Methods:} For standard tasks, e.g., \code{mean()}, \code{quantile()}, \code{cdf()}, \code{random()}, \dots
+
+\end{frame}
+
+\subsection{The Poisson distribution}
+
+\begin{frame}[fragile]
+\frametitle{The Poisson distribution}
+
+\textbf{Illustration:} Poisson as classic distribution for count data.
+
+\bigskip
+\pause
+
+\textbf{Probability mass function:} For $y \in \{0, 1, 2, \dots\}$ and parameter $\lambda > 0$.
+
+\[
+\text{Pr}(Y = y) = \frac{\exp\left(-\lambda\right) \cdot \lambda^y}{y!}.
+\]
+
+\bigskip
+\pause
+
+\textbf{Example:} $Y \sim \mathit{Poisson}(\lambda = 1.5)$.
+
+<<>>=
+library("distributions3")
+Y <- Poisson(lambda = 1.5)
+print(Y)
+pdf(Y, 0:5)
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{The Poisson distribution}
+
+\textbf{Moments:}
+
+<<>>=
+mean(Y)
+variance(Y)
+@
+
+\bigskip
+\pause
+
+\textbf{Cumulative probabilities and quantiles:}
+
+<<>>=
+cdf(Y, 0:5)
+quantile(Y, c(0.1, 0.5, 0.9))
+@
+
+\bigskip
+\pause
+
+\textbf{Random numbers:}
+
+<<>>=
+set.seed(0)
+random(Y, 5)
+@
+
 \end{frame}
 
 
-%-------------------------------------------------------------------
-\subsection{Probabilities of goals in the 2018 FIFA World Cup}
-%-------------------------------------------------------------------
+\subsection{Goals in the 2018 FIFA World Cup}
 
-<<model_fifa, eval=TRUE, echo=FALSE, results=hide>>=
+\begin{frame}[fragile]
+\frametitle{Goals in the 2018 FIFA World Cup}
+
+\textbf{Illustration:} Goals scored by the two teams in all 64 matches.
+
+\bigskip
+
+\textbf{Covariates:} Basic match information and prediction of team (log-)abilities.
+
+\bigskip
+
+<<>>=
 data("FIFA2018", package = "distributions3")
+head(FIFA2018)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Goals in the 2018 FIFA World Cup}
+
+\textbf{Basic fitted distribution:}
+
+<<>>=
+p_const <- Poisson(lambda = mean(FIFA2018$goals))
+p_const
+@
+
+\bigskip
+\pause
+
+\textbf{Observed and expected frequencies:}
+
+<<>>=
+observed <- proportions(table(FIFA2018$goals))
+expected <- pdf(p_const, 0:6)
+@
+
+\bigskip
+\pause
+
+\textbf{Comparison:}
+
+<<>>=
+tab <- 100 * rbind(observed, expected)
+tab
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Goals in the 2018 FIFA World Cup}
+
+\setkeys{Gin}{width=0.8\textwidth}
+
+<<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
+barplot(tab, beside = TRUE)
+@
+
+\end{frame}
+
+
+\subsection{Probabilistic regression}
+
+\begin{frame}[fragile]
+\frametitle{Probabilistic regression}
+
+\textbf{Extension:} Poisson generalized linear model (with log link).
+
+\bigskip
+
+\textbf{Regression:} Number of goals per team explained by ability difference (based on bookmakers odds).
+
+\bigskip
+\pause
+
+<<>>=
 m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
-expected <- distributions3::pdf(distributions3::Poisson(fitted(m)), 0:6)
+lmtest::coeftest(m)
 @
 
+\end{frame}
 
-%% SLIDE
+
 \begin{frame}[fragile]
-\frametitle{Probabilities of goals in the 2018 FIFA World Cup}
+\frametitle{Probabilistic regression}
 
-\vspace{-0.75em}
+\textbf{Fitted probability distributions:}
 
-\textbf{Observation data:}
+<<>>=
+p_reg <- Poisson(lambda = fitted(m))
+length(p_reg)
+head(p_reg)
+@
+
+\bigskip
+\pause
+
+\textbf{Convenience function:} \code{prodist(m)}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Probabilistic regression}
+
+\textbf{Opportunities:} Unification and simplification of many computations.
+
+\bigskip
+\pause
+
+\textbf{Domain-specific:}
 \begin{itemize}
-\item Goals ($y_i$) scored by the two teams in all 64 matches.
+  \item Probabilities for match results (assuming independence of goals).
+  \item Corresponding probabilities for win/draw/lose.
+  \item Also for more refined predictions of expected goals.
 \end{itemize}
 
 \bigskip
 \pause
 
-\textbf{Regression:}
+\textbf{General modeling:}
 \begin{itemize}
-\item Difference in estimated ability of the competing teams as covariable:
-\item[] $\log(\hat \lambda_i) = \hat \beta_0 + \hat \beta_1 \cdot \text{ability\_diff}_i$
+  \item Probabilistic forecasts.
+  \item Scoring rules.
+  \item Goodness-of-fit assessments.
 \end{itemize}
+
+
+\end{frame}
+
+\subsection{Graphical model assessment}
+
+\begin{frame}[fragile]
+\frametitle{Graphical model assessment}
+
+\textbf{Question:} Is the model calibrated?
 
 \bigskip
 \pause
 
-\textbf{Probability distribution:} 
-\begin{itemize}
-\item Poisson distribution for each team/match ($i$) in the tournament:
-\item[] $y_i \sim \, \text{Pois}(\hat \lambda_i)$
-\end{itemize}
+\textbf{Rootogram:} Compares observed and average expected frequencies.
 
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilities of goals in the 2018 FIFA World Cup}
-
-\vspace{-0.75em}
-
-\textbf{First semi-final:} France won 1-0 against Belgium.
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_poisson1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-idx <- c(121, 122)
-df <- data.frame(group =  FIFA2018$team[idx])
-df <- cbind(df, expected[idx, ])
-df <- tidyr::pivot_longer(df, cols = d_0:d_6, names_prefix = "^d_", names_to = "goals")
-df$observed <- factor(0, levels = c(0, 1), label = c("no", "yes"))
-df[df$group == "FRA" & df$goals == "1", "observed"] <- "yes"
-df[df$group == "BEL" & df$goals == "0", "observed"] <- "yes"
-df$group <- factor(df$group, levels = c("FRA", "BEL"))
-
-df_text <- data.frame(
-  label = sprintf("lambda == %s", round(fitted(m)[idx], 2)),
-  group =  factor(FIFA2018$team[idx], levels = c("FRA", "BEL"))
-)
-
-gg1 <- ggplot(df, aes(x = goals, y = value, group = group)) + 
-  geom_col(aes(fill = observed)) + 
-  xlab("Goals") + 
-  ylab("Probability") + 
-  facet_grid(group ~ .) +
-  theme_bw() + scale_fill_manual(values = c("darkgray", "grey50")) + guides(fill = "none")
-
-gg1 + geom_text(
-  data    = df_text,
-  mapping = aes(x = Inf, y = Inf, label = label),
-  hjust   = 1.2,
-  vjust   = 2,
-  parse = TRUE
-)
+<<>>=
+expected <- pdf(p_reg, 0:6)
+head(expected, 4)
+expected <- colMeans(expected)
 @
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilities of goals in the 2018 FIFA World Cup}
-
-\vspace{-0.75em}
-
-\textbf{Second semi-final:} Croatia won 2-1 against England.
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_poisson2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-idx <- c(123, 124)
-df <- data.frame(group =  FIFA2018$team[idx])
-df <- cbind(df, expected[idx, ])
-df <- tidyr::pivot_longer(df, cols = d_0:d_6, names_prefix = "^d_", names_to = "goals")
-df$observed <- factor(0, levels = c(0, 1), label = c("no", "yes"))
-df[df$group == "CRO" & df$goals == "2", "observed"] <- "yes"
-df[df$group == "ENG" & df$goals == "1", "observed"] <- "yes"
-df$group <- factor(df$group, levels = c("CRO", "ENG"))
-
-df_text <- data.frame(
-  label = sprintf("lambda == %s", round(fitted(m)[idx], 2)),
-  group =  factor(FIFA2018$team[idx], levels = c("CRO", "ENG"))
-
-)
-
-gg1 <- ggplot(df, aes(x = goals, y = value, group = group)) + 
-  geom_col(aes(fill = observed)) + 
-  xlab("Goals") + 
-  ylab("Probability") + 
-  facet_grid(group ~ .) +
-  theme_bw() + scale_fill_manual(values = c("darkgray", "grey50")) + guides(fill = "none")
-
-gg1 + geom_text(
-  data    = df_text,
-  mapping = aes(x = Inf, y = Inf, label = label),
-  hjust   = 1.2,
-  vjust   = 2,
-  parse = TRUE
-)
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilities of goals in the 2018 FIFA World Cup}
-
-\vspace{-0.75em}
-
-\textbf{Final:} France won 4-2 against Croatia.
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_poisson3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-idx <- c(127, 128)
-df <- data.frame(group =  FIFA2018$team[idx])
-df <- cbind(df, expected[idx, ])
-df <- tidyr::pivot_longer(df, cols = d_0:d_6, names_prefix = "^d_", names_to = "goals")
-df$observed <- factor(0, levels = c(0, 1), label = c("no", "yes"))
-df[df$group == "FRA" & df$goals == "4", "observed"] <- "yes"
-df[df$group == "CRO" & df$goals == "2", "observed"] <- "yes"
-df$group <- factor(df$group, levels = c("FRA", "CRO"))
-
-df_text <- data.frame(
-  label = sprintf("lambda == %s", round(fitted(m)[idx], 2)),
-  group =  factor(FIFA2018$team[idx], levels = c("FRA", "CRO"))
-)
-
-gg1 <- ggplot(df, aes(x = goals, y = value, group = group)) + 
-  geom_col(aes(fill = observed)) + 
-  xlab("Goals") + 
-  ylab("Probability") + 
-  facet_grid(group ~ .) +
-  theme_bw() + scale_fill_manual(values = c("darkgray", "grey50")) + guides(fill = "none")
-
-gg1 + geom_text(
-  data    = df_text,
-  mapping = aes(x = Inf, y = Inf, label = label),
-  hjust   = 1.2,
-  vjust   = 2,
-  parse = TRUE
-)
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Graphical assessment}
-
-\vspace{-0.75em}
-
-\textbf{However:} Is the model calibrated?
-
-\bigskip
-\bigskip
-
-\pause
-
-\begin{columns}[T]
-\begin{column}{0.33\textwidth}
-\only<2>{
-<<intro_goodness1a_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m, style = "standing", scale = "raw", fill = "darkgray", expected = FALSE, confint = FALSE, xlab = "Goals", plot = FALSE, ref = FALSE))
-@
-<<intro_goodness1a, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-gg
-@
-
-Marginal calibration:
-\begin{itemize}
-\item[-] Observed frequencies.
-\end{itemize}
-}
-\only<3->{
-<<intro_goodness1b_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m, style = "standing", scale = "raw", fill = "darkgray", expected = "both", confint = FALSE, xlab = "Goals", plot = FALSE, ref = FALSE))
-@
-<<intro_goodness1b, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-gg
-@
-
-Marginal calibration:
-\begin{itemize}
-\item[-] Observed frequencies.
-\item[-] Compare: Expected.
-\end{itemize}
-}
-\end{column}
-
-\pause
-\pause
-
-\begin{column}{0.33\textwidth}
-<<intro_goodness2, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-set.seed(0)
-pithist(m, type = "random", nsim = 10, fill = "darkgray", alpha = 1, col = "black",
-  expected = TRUE, expected_size = 1, confint = FALSE, simint = FALSE)
-@
-
-Probabilistic calibration:
-\begin{itemize}
-\item[-] PIT residuals: $u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i)$.
-\item[-] Compare: Uniform.
-\end{itemize}
-
-\end{column}
-
-\pause
-
-\begin{column}{0.33\textwidth}
-<<intro_goodness3, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-set.seed(0)
-p_gg <- pithist(m, type = "random", nsim = 10, scale = "normal", plot = FALSE)
-autoplot(p_gg, fill = "darkgray", col = "black", alpha = 1, xlab = "(Randomized) quantile residuals",
-  expected = FALSE, confint = FALSE, simint = FALSE, xlim = c(-4, 4)) +
-  geom_function(fun = dnorm, col = 2, size = 1, xlim = c(-4, 4))
-@
-
-Probabilistic calibration:
-\begin{itemize}
-\item[-] Quantile residuals: $\hat{r}_i = \Phi^{-1}(u_i)$.
-\item[-] Compare: Normal
-\end{itemize}
-
-\end{column}
-\end{columns}
-
-
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: Observed}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_rootogram_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Goals", plot = FALSE))
-@
-<<fifa_rootogram, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: Observed vs. expected}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_rootogram2_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m, style = "standing", scale = "raw", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Goals", plot = FALSE))
-@
-<<fifa_rootogram2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_rootogram3_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m, style = "standing", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Goals", plot = FALSE))
-@
-<<fifa_rootogram3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_rootogram4_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE,, fill = "darkgray", fitted = FALSE, xlab = "Goals", plot = FALSE), confint_type = "simultaneous")
-<<fifa_rootogram4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Observed vs. expected frequencies:}
-
-\begin{itemize}
-\item Advantage: Scale of observations is natural, direct interpretation.
-\item Disadvantage: Needs to be compared with a combination of distributions.
-\end{itemize}
 
 \bigskip
 \pause
 
-\textbf{Rootogram:}
+\textbf{PIT histogram:} Probability integral transform should be uniform.
 
-\begin{itemize}
-\item Frequencies on raw or square-root scale.
-\item Hanging, standing, or suspended styled rootograms.
-\end{itemize}
-
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals: Randomized, nsim = 1a}
-
-\vspace{0.25em}
-
-\only<1>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(3)
-pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, ylim = c(NA, 1.788086), plot = "ggplot2")
+<<>>=
+pit <- Uniform(a = cdf(p_reg, FIFA2018$goals - 1), b = cdf(p_reg, FIFA2018$goals))
 @
-\end{center}
-}
-
-\only<2>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(3)
-pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = FALSE, alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, plot = "ggplot2")
-@
-\end{center}
-}
-
-\only<3>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist1c, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(3)
-pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, confint_size = 1, plot = "ggplot2")
-@
-\end{center}
-}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals: Randomized, nsim = 1b}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(2)
-pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, confint_size = 1, plot = "ggplot2")
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals: Randomized, nsim = 1c}
-
-\vspace{0.25em}
-
-\only<1>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist3a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(5)
-pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, confint_size = 1, plot = "ggplot2")
-@
-\end{center}
-}
-\only<2>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist3b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(5)
-pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = TRUE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, confint_size = 1, plot = "ggplot2")
-@
-\end{center}
-}
-\end{frame}
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals: Randomized, nsim = 10}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(10)
-pithist(m, nsim = 10, type = "random", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, confint_size = 1,  plot = "ggplot2")
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals: Randomized, nsim = 100}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(10)
-pithist(m, nsim = 100, type = "random", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, confint_size = 1,  plot = "ggplot2")
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals: Expected}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist5, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(10)
-pithist(m, type = "expected", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), expected_size = 1, confint_size = 1,  plot = "ggplot2")
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{Quantile residuals:}
-
-\vspace{0.25em}
-
-\only<1>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist_norm1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(1000)
-pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type = "random", scale = "normal", xlim = c(-3.5, 3.5), fill = "darkgray", col = "black", alpha = 1, expected = FALSE, confint = FALSE,  plot = "ggplot2", ylim = c(NA, 0.515625))
-@
-\end{center}
-}
-\only<2>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_pithist_norm1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(1000)
-pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type = "random", scale = "normal", xlim = c(-3.5, 3.5), fill = "darkgray", col = "black", alpha = 1, expected_size = 1, confint_size = 1,  plot = "ggplot2", ylim = c(NA, 0.515625))
-@
-\end{center}
-}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{Quantile residuals: Observed vs. expected}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(3)
-qqrplot(m, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{Quantile residuals: Deviations}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<fifa_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(3)
-wormplot(m, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE, ylim = c(-0.5, 1.35))
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{PIT residuals and (randomized) quantile residuals:}
-
-\begin{itemize}
-\item Advantage: Needs to be compared with only one distribution\\(uniform or normal).
-\item Disadvantage: Scale is not so natural.\\May require randomization for discrete distributions.
-\end{itemize}
 
 \bigskip
 \pause
 
-\textbf{PIT histogram:}
-
-\begin{itemize}
-\item Probability scale or transformed to any other distribution scale.
-\item Random or expected (non-normal) computed PIT histogram.
-\end{itemize}
-
-\bigskip
-\pause
-
-\textbf{Q-Q residuals plot:}
-
-\begin{itemize}
-\item Normal scale or transformed to any other distribution scale.
-\item Q-Q plot or detrended Q-Q plot (wormplot).
-\end{itemize}
+\textbf{Illustration:} Computations by hand vs.\ \emph{topmodels}.
 
 \end{frame}
 
 
-%-------------------------------------------------------------------
-\subsection{Summary}
-%-------------------------------------------------------------------
-
-%% SLIDE
 \begin{frame}[fragile]
-\frametitle{Summary}
+\frametitle{Graphical model assessment}
 
-\vspace{-0.75em}
-
-\textbf{Graphical assessments:} Various possibilities suggested in different parts of the literature.
-
-\begin{itemize}
-  \item Rootogram.
-  \item Probability integral transform (PIT) histogram.
-  \item (Randomized) quantile-quantile residuals plot.
-  \item Detrended Q-Q residuals plot or worm plot.
-  \item Reliability diagram at prespecified thresholds.
-\end{itemize}
-
-\pause
-\medskip
-\bigskip
-
-\textbf{topmodels:} Unifying toolbox for graphical model assessment.
-
-\begin{itemize}
-  \item available on R-Forge at \small{\url{https://topmodels.R-Forge.R-project.org/}}
-\end{itemize}
+<<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
+bp <- barplot(sqrt(observed), offset = sqrt(expected) - sqrt(observed),
+  xlab = "Goals", ylab = "sqrt(Frequency)")
+lines(bp, sqrt(expected), type = "o", pch = 19, lwd = 2, col = 2)
+abline(h = 0, lty = 2)
+@
 
 \end{frame}
 
 
-%%% SLIDE
-%\begin{frame}
-%\frametitle{Software}
-%\vspace{-0.75em}
-%\textbf{topmodels}: available on R-Forge at\\
-%
-%\medskip
-%
-%\small{\url{https://topmodels.R-Forge.R-project.org/}}\\
-%
-%\bigskip
-%\medskip
-%
-%\textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
-%
-%\pause
-%
-%\bigskip
-%\medskip
-%
-%\textbf{Main functions:}
-%
-%\medskip
-%
-%\begin{tabular}{ll}
-%\code{procast}    & Probabilistic forecasts (\code{(g)lm}, \code{crch}, \code{disttree}, more to come).\\
-%& Computation of probabilities, densities, scores, and Hessians. \\
-%\code{rootogram}, \code{pithist}, & Plotting rootograms, PIT histograms,\\
-%\code{qqrplot}, \code{wormplot}, & (randomized) Q-Q plots, worm plots,\\
-%\code{reliagram} & and reliability diagrams.\\
-%\code{plot, autoplot}   & Generic \code{plot}, \code{autoplot} function.%\\
-%% \code{c}   & Generic \code{concatenate} function to plot combined objects.
-%\end{tabular}
-%
-%\bigskip
-%\medskip
-%
-%\end{frame}
+\begin{frame}[fragile]
+\frametitle{Graphical model assessment}
+
+<<fig=TRUE, height=5.5, width=7.5, echo=TRUE, results=hide>>=
+library("topmodels")
+rootogram(m)
+@
+
+\end{frame}
 
 
-%-------------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Graphical model assessment}
+
+<<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
+hist(random(pit, 1000), breaks = 10, freq = FALSE)
+abline(h = 1, lwd = 2, col = 2)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Graphical model assessment}
+
+<<fig=TRUE, height=5.5, width=7.5, echo=TRUE, results=hide>>=
+pithist(m)
+@
+
+\end{frame}
+
+\subsection{Outlook}
+
+\begin{frame}[fragile]
+\frametitle{Outlook}
+
+\textbf{distributions3:} Support for more distributions and models.
+
+\bigskip
+
+\textbf{topmodels:} Fully leverage S3 infrastructure from \emph{distributions3}.
+
+\bigskip
+
+\textbf{Moreover:} Interface scoring rules from \emph{scoringRules}.
+
+\end{frame}
+
+
 \subsection{References}
-%-------------------------------------------------------------------
 
 
-%% SLIDE
 \begin{frame}
 \frametitle{References}
 
-\footnotesize
+\small
 
-Lang MN, Zeileis A \emph{et al.} (2021).
-\dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models.}
-\emph{R package version 0.1-0}.
-\url{https://topmodels.R-Forge.R-project.org/}
+Hayes A, Moller-Trane R, Jordan D, Northrop P, Lang MN, Zeileis A, \emph{et al.} (2022).
+\dquote{distributions3: Probability Distributions as S3 Objects.}
+\emph{R package version 0.2.0}.
+\url{https://alexpghayes.github.io/distributions3/}
 
 \bigskip
 
-Dunn PK, Smyth GK (1996).
-\dquote{Randomized Quantile Residuals.}
-\emph{Journal of Computational and Graphical Statistics}, \textbf{5}(3), 236--244.
-\doi{10.2307/1390802}
+Lang MN, Zeileis A, Stauffer R, \emph{et al.} (2022).
+\dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models.}
+\emph{R package version 0.2-0}.
+\url{https://topmodels.R-Forge.R-project.org/}
+
+
+\bigskip
+\bigskip
+\bigskip
+
+
+\textbf{Twitter:} \href{https://twitter.com/AchimZeileis}{\tt @AchimZeileis}
 
 \medskip
 
-Gneiting T, Balabdaoui F, Raftery AE (2007)
-\dquote{Probabilistic Forecasts, Calibration and Sharpness.}
-\emph{Journal of the Royal Statistical Society: Series B (Methodological)},
-\textbf{69}(2), 243--268.
-\doi{10.1111/j.1467-9868.2007.00587.x}
-
-\medskip
-
-Kleiber C, Zeileis A (2016).  
-\dquote{Visualizing Count Data Regressions Using Rootograms.} 
-\emph{The American Statistician}, 
-\textbf{70}(3), 296--303.
-\doi{10.1080/00031305.2016.1173590}
-
-\medskip
-
-Zeileis A, Leitner C, Hornik K (2018)
-\dquote{Probabilistic Forecasts for the 2018 {FIFA} World Cup Based on the Bookmaker Consensus Model.}
-Working Paper 2018-09. Working Papers in Economics; Statistics, Research Platform Empirical; Experimental Economics, Universität Innsbruck. \url{https://EconPapers.RePEc.org/RePEc:inn:wpaper:2018-09}.
+\textbf{Web:} \url{https://www.zeileis.org/}
 
 \end{frame}
 
-
-%% SLIDE
-\title[]{\large{\color{uibkgraym}\url{https://topmodels.R-Forge.R-project.org/}}}
-\author[]{\footnotesize \faEnvelope\,\,\href{mailto:achim.zeileis@r-project.org}{achim.zeileis@r-project.org} \hspace{1em} \faTwitter\,\href{https://twitter.com/AchimZeileis}{AchimZeileis}}
-\URL{}
-
-
-\section{Thank you}
-
-
-%-------------------------------------------------------------------
-\subsection{Appendix}
-%-------------------------------------------------------------------
-\backupbegin
-
-%% SLIDE
-\begin{frame}
-~~~
-\end{frame}
-
-
-\subsection{More details}
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Some more slides}
-
-\end{frame}
-
-\backupend
 
 \end{document}
