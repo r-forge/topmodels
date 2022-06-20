@@ -18,8 +18,6 @@ set.seed(403)
 library("distributions3")
 library("topmodels")
 library("scoringRules")
-##library("ggplot2"
-##theme_set(theme_minimal())
 options(digits = 4)
 @
 
@@ -345,6 +343,17 @@ abline(h = 1, lwd = 2, col = 2)
 \frametitle{Graphical model assessment}
 
 <<fig=TRUE, height=5.5, width=7.5, echo=TRUE, results=hide>>=
+pithist(m)
+@
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Graphical model assessment}
+
+<<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
+library("ggplot2")
+theme_set(theme_minimal())
 pithist(m)
 @
 
