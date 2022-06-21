@@ -69,6 +69,10 @@ options(digits = 4)
 
 \textbf{Methods:} For standard tasks, e.g., \code{mean()}, \code{quantile()}, \code{cdf()}, \code{random()}, \dots
 
+\bigskip
+
+\textbf{Under the hood:} Rely on the usual \code{d}/\code{p}/\code{q}/\code{r} distribution functions.
+
 \end{frame}
 
 \subsection{The Poisson distribution}
@@ -91,6 +95,8 @@ options(digits = 4)
 \pause
 
 \textbf{Example:} $Y \sim \mathit{Poisson}(\lambda = 1.5)$.
+
+\smallskip
 
 <<>>=
 library("distributions3")
@@ -279,7 +285,7 @@ head(p_reg)
 \bigskip
 \pause
 
-\textbf{Rootogram:} Compares observed and average expected frequencies.
+\textbf{Idea:} Compare observed and average expected frequencies.
 
 <<>>=
 expected <- pdf(p_reg, 0:6)
@@ -290,16 +296,18 @@ expected <- colMeans(expected)
 \bigskip
 \pause
 
-\textbf{PIT histogram:} Probability integral transform should be uniform.
+\textbf{Rootogram:} Visualize frequencies and their deviations on a square root scale.
 
-<<>>=
-pit <- Uniform(a = cdf(p_reg, FIFA2018$goals - 1), b = cdf(p_reg, FIFA2018$goals))
-@
-
-\bigskip
-\pause
-
-\textbf{Illustration:} Computations by hand vs.\ \emph{topmodels}.
+%% \textbf{PIT histogram:} Probability integral transform should be uniform.
+%% 
+%% <<>>=
+%% pit <- Uniform(a = cdf(p_reg, FIFA2018$goals - 1), b = cdf(p_reg, FIFA2018$goals))
+%% @
+%% 
+%% \bigskip
+%% \pause
+%% 
+%% \textbf{Illustration:} Computations by hand vs.\ \emph{topmodels}.
 
 \end{frame}
 
@@ -327,37 +335,62 @@ rootogram(m)
 
 \end{frame}
 
-
-\begin{frame}[fragile]
-\frametitle{Graphical model assessment}
-
-<<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
-hist(random(pit, 1000), breaks = 10, freq = FALSE)
-abline(h = 1, lwd = 2, col = 2)
-@
-
-\end{frame}
-
-
-\begin{frame}[fragile]
-\frametitle{Graphical model assessment}
-
-<<fig=TRUE, height=5.5, width=7.5, echo=TRUE, results=hide>>=
-pithist(m)
-@
-
-\end{frame}
-
 \begin{frame}[fragile]
 \frametitle{Graphical model assessment}
 
 <<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
 library("ggplot2")
 theme_set(theme_minimal())
-pithist(m)
+rootogram(m)
 @
 
 \end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Graphical model assessment}
+
+\textbf{Furthermore:} Other visualizations supported in \emph{topmodels}.
+\begin{itemize}
+  \item Rootogram.
+  \item PIT (probability integral transform) histogram.
+  \item (Randomized) quantile residual Q-Q plot.
+  \item Worm plot.
+  \item Reliagram (reliability diagram).
+\end{itemize}
+
+\end{frame}
+
+
+%% \begin{frame}[fragile]
+%% \frametitle{Graphical model assessment}
+%% 
+%% <<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
+%% hist(random(pit, 1000), breaks = 10, freq = FALSE)
+%% abline(h = 1, lwd = 2, col = 2)
+%% @
+%% 
+%% \end{frame}
+%% 
+%% 
+%% \begin{frame}[fragile]
+%% \frametitle{Graphical model assessment}
+%% 
+%% <<fig=TRUE, height=5.5, width=7.5, echo=TRUE, results=hide>>=
+%% pithist(m)
+%% @
+%% 
+%% \end{frame}
+%% 
+%% \begin{frame}[fragile]
+%% \frametitle{Graphical model assessment}
+%% 
+%% <<fig=TRUE, height=5, width=7.5, echo=TRUE, results=hide>>=
+%% library("ggplot2")
+%% theme_set(theme_minimal())
+%% pithist(m)
+%% @
+%% 
+%% \end{frame}
 
 \subsection{Outlook}
 
@@ -368,7 +401,7 @@ pithist(m)
 
 \bigskip
 
-\textbf{topmodels:} Fully leverage S3 infrastructure from \emph{distributions3}.
+\textbf{topmodels:} Fully leverage \emph{distributions3} infrastructure, introductory vignettes.
 
 \bigskip
 
