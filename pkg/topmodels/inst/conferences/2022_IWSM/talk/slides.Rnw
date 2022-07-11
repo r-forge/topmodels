@@ -125,37 +125,6 @@ data("RainIbk", package = "crch")
 \begin{frame}[fragile]
     \frametitle{From the Abstract of the Abstract}
 
-<<ecmwf_map_forecast, fig=TRUE, echo=FALSE, height=5, width=6>>=
-# Loading ECMWF demo forecasts; random forecast of total precipitation
-# from the HIRES run, 2017-02-05, accumulated from +0 to +72 hours
-# ahead. Data in meters/period.
-demo_fcst <- readRDS("demo_ECMWF_HIRES_20170205_accumulated_tp_72.rds")
-offset    <- list(x = c(8, -10), y = c(.5, -.5))
-countries <- ne_countries(scale = "medium", returnclass = "sf")
-
-# Demo locations
-demo_loc <- st_as_sf(data.frame(name = c("Innsbruck", "Trieste"),
-                                lon  = c(11.3933, 13.7702),
-                                lat  = c(47.2683, 45.6502)),
-                     coords = c("lon", "lat"), crs = st_crs(demo_fcst))
-
-
-# Creating plot
-ggplot() + geom_stars(data = demo_fcst) + scale_fill_continuous_sequential("Blue-Yellow") +
-           geom_sf(aes(), col = "black", lwd = .4, fill = NA, data = countries) +
-           geom_sf(data = demo_loc, col = "black", pch = 19, cex = 4) +
-           geom_sf(data = demo_loc, col = "#f68712", pch = 19, cex = 3) +
-           coord_sf(xlim = as.vector(st_bbox(demo_fcst)[c(1, 3)]) + offset$x,
-                    ylim = as.vector(st_bbox(demo_fcst)[c(2, 4)]) + offset$y) +
-           xlab("") + ylab("") + ggtitle("Example Forecast") + labs(fill = "Precip")
-@
-
-\end{frame}
-
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-    \frametitle{From the Abstract of the Abstract}
-
     \begin{itemize}
         \item Accurate and reliable probabilistic predictions; important, risk assessment, planning
         \item Often used: distributional regression model (GLM, GAM, GAMLSS)
@@ -211,118 +180,328 @@ ggplot() + geom_stars(data = demo_fcst) + scale_fill_continuous_sequential("Blue
 %%        \item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
 %%    \end{itemize}
 
-
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
-\frametitle{Motivation}
+    \frametitle{Weather Forecasting}
 
-    \begin{block}{Motivation}
-        Precipitation forecasts
-    \end{block}
-
-    \begin{columns}[T]
-        \begin{column}{0.45\textwidth}
-            \begin{itemize}
-                \item 3\,day accumulated precipitation ($5-8$\,days ahead)
-                \item Daily records over 13 years ($2000-2013$) % ($N=\Sexpr{nrow(RainIbk)}$)
-                \item Station Innsbruck Airport, Austria.
-            \end{itemize}
-        \end{column}
-        \begin{column}{0.5\textwidth}
-<<hist_rain, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-hist(sqrt(RainIbk$rain),
-     main = "Observed Precipitation Sums",
-     xlab = "sqrt(precipitation)",
-     ylab = "Density",
-     freq = FALSE)
-@
-        \end{column}
-    \end{columns}
-\end{frame}
-
-
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-\frametitle{Motivation}
-
-    \begin{block}{Motivation}
-        Importance of probabilistic forecasts
-    \end{block}
-
-    \textbf{Probabilistic regression models:}
     \begin{itemize}
-        \item Modelling the entire probability distribution rather than just the expectation.
-        \item Various model classes and types.
+        \item Typically based physically-based numerical weather prediction models.
+        \item Multiple runs with modified conditions to account for
+            uncertainty $\rightarrow$ ensemble forecasts
+        \item Various sources of possible errors due to necessary simplifications.
+        \item Statistical post-processing is often applied to
+            improve accuracy and reliability, especially when compared
+            to point locations.
     \end{itemize}
 
-%%    \textbf{Goodness of fit:}
-%%    \begin{itemize}
-%%        \item Scoring rules for evaluating the predictive performance, e.g., using the log-score or the (continuous) ranked probability score.
-%%        \item Visualizations especially suitable for identifying possible misspecifications.
-%%    \end{itemize}
+\end{frame}
+
+
+%%% SLIDE ----------------------------------
+%\begin{frame}[fragile]
+%    \frametitle{Weather Forecasting}
+%
+%    \textbf{Numerical weather forecast models}
+%    \begin{itemize}
+%        \item Estimating current state of atmosphere (analysis)
+%        \item Predicting future state of atmosphere (prognosis)
+%        \item Ensemble forecast systems: multiple runs to quantify uncertainty
+%    \end{itemize}
+%
+%    \vspace{1em}
+%    $\BoldRightarrow$ Various sources of possible errors due to required simplifications.
+%
+%\end{frame}
+
+
+<<ecmwf_demo_forecast, echo=FALSE, results=hide>>=
+# Loading ECMWF demo forecasts; random forecast of total precipitation
+# from the HIRES run, 2017-02-05, accumulated from +0 to +72 hours
+# ahead. Data in meters/period.
+demo_fcst <- readRDS("demo_ECMWF_HIRES_20170205_accumulated_tp_72.rds")
+offset    <- list(x = c(3.0, -9), y = c(0.5, -2.0))
+countries <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Demo locations
+demo_loc <- st_as_sf(data.frame(name = c("Innsbruck", "Trieste"),
+                                lon  = c(11.3933, 13.7702),
+                                lat  = c(47.2683, 45.6502)),
+                     coords = c("lon", "lat"), crs = st_crs(demo_fcst))
+
+
+# Creating plot
+ggplot() + geom_stars(data = demo_fcst) + scale_fill_continuous_sequential("Blue-Yellow") +
+           geom_sf(aes(), col = "black", lwd = .4, fill = NA, data = countries) +
+           geom_sf(data = demo_loc, col = "black", pch = 19, cex = 4) +
+           geom_sf(data = demo_loc, col = c(2, "white"), pch = 19, cex = 3) +
+           coord_sf(xlim = as.vector(st_bbox(demo_fcst)[c(1, 3)]) + offset$x,
+                    ylim = as.vector(st_bbox(demo_fcst)[c(2, 4)]) + offset$y) +
+           theme(legend.position = "none") +
+           xlab("") + ylab("") + ggtitle("Spatial Prediction Demo") + labs(fill = "Precip")
+
+ggsave("slides_demo_fcst.pdf", width = 5, height = 3.5)
+@
+
+<<ecmwf_demo_forecast, echo=FALSE, results=hide>>=
+library("tidyr")
+head(RainIbk)
+tmp <- cbind(data.frame(date = as.Date(rownames(RainIbk))), subset(RainIbk, select = -rain))
+long <- as.data.frame(pivot_longer(tmp,
+            cols = names(RainIbk)[grepl("^rainfc\\.[0-9]+$", names(RainIbk))],
+            names_to = "member", values_to = "rain"))
+long     <- transform(long, member = gsub("^rainfc\\.", "mem_", member))
+long_agg <- aggregate(rain ~ date, data = long, FUN = mean)
+head(long_agg)
+
+ggplot() + geom_line(aes(x = date, y = rain, col = member), data = long) +
+    coord_cartesian(xlim = as.Date("2005-02-01") + c(0, 31), ylim = c(0, 52)) +
+    scale_color_manual(values = rep("gray60", length(unique(long$member)))) +
+    geom_line(aes(x = date, y = rain), lwd = 1, col = "black", data = long_agg) +
+    geom_line(aes(x = date, y = rain), lwd = 2, col = 2,
+              data = data.frame(date = as.Date(rownames(RainIbk)), rain = RainIbk$rain)) +
+    theme(legend.position = "none") +
+    ggtitle("Ensemble Forecast Demo") + ylab("precipitation [mm/3d]") + xlab("")
+
+ggsave("slides_demo_ens.pdf", width = 5, height = 3.5)
+@
+
+%%%% SLIDE ----------------------------------
+%%\begin{frame}[fragile]
+%%    \frametitle{Weather Forecasting}
 %%
-%%    \bigskip
-%%    \pause 
+%%    \begin{columns}[T]
+%%        \begin{column}{0.48\textwidth}
+%%            \includegraphics[width = \textwidth]{slides_demo_fcst.pdf}
+%%        \end{column}
+%%        \begin{column}{0.48\textwidth}
+%%            \pause
+%%            \includegraphics[width = \textwidth]{slides_demo_ens.pdf}
+%%        \end{column}
+%%    \end{columns}
 %%
-%%    \begin{itemize}[<+->]
-%%        \item[\BoldRightarrow] \textbf{What are useful elements of such graphics?}
-%%        \item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
-%%    \end{itemize}
+%%\end{frame}
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+    \frametitle{Weather Forecasting}
+
+    \textbf{Numerical weather forecast models}
+    \begin{itemize}
+        \item Estimating current state of atmosphere (analysis)
+        \item Predicting future state of atmosphere (prognosis)
+        \item Ensemble forecast systems: multiple runs to quantify uncertainty
+    \end{itemize}
+
+    \visible<2>{
+    \begin{columns}[T]
+        \begin{column}{0.49\textwidth}
+            \includegraphics[width = \textwidth]{slides_demo_fcst.pdf}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \includegraphics[width = \textwidth]{slides_demo_ens.pdf}
+        \end{column}
+    \end{columns}
+    }
 
 \end{frame}
 
 
-%-------------------------------------------------------------------
-\subsection{Probabilistic precipitation forecasting}
-%-------------------------------------------------------------------
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+    \frametitle{Data}
 
-<<model_rain, eval=TRUE, echo=FALSE, results=hide>>=
+<<rain_transform, echo = FALSE, results = hide>>=
 RainIbk <- sqrt(RainIbk)
 RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
 RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
 RainIbk <- subset(RainIbk, enssd > 0)
+@
 
+
+    \begin{itemize}
+        \item Daily records over 13 years ($2000-2013$), Innsbruck Airport (AUT)
+        \item Observations precipitation amount $mm/3\,days$ (`\code{Rain}')
+        \visible<2>{\item Accumulated precipitation from 11-member ensemble (`\code{ensmean}')}
+        %%\item Station Innsbruck Airport, Austria.
+    \end{itemize}
+
+<<data_figs, echo = FALSE, results = hide>>=
+pdf(file = "slides_data_figs_hist.pdf", width = 5, height = 4)
+hist(RainIbk$rain,
+     main = NA,
+     xlab = "Rain",
+     ylab = "Density",
+     freq = FALSE)
+dev.off()
+
+pdf(file = "slides_data_figs_scatter.pdf", width = 5, height = 4)
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
+dev.off()
+@
+
+    \begin{columns}[T]
+        \begin{column}{.49\textwidth}
+            \includegraphics[width = \textwidth]{slides_data_figs_hist.pdf}
+        \end{column}
+        \begin{column}{.49\textwidth}
+            \visible<2>{\includegraphics[width = \textwidth]{slides_data_figs_scatter.pdf}}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+
+
+
+<<model_rain, eval=TRUE, echo=FALSE, results=hide>>=
 m_lm <- lm(rain ~ ensmean, data = RainIbk)
-
-## heteroscedastic censored regression with a logistic distribution assumption
+m_hcnorm <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
+                       dist = "gaussian")
 m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
-  dist = "logistic")
+                      dist = "logistic")
 
 @
 
 
-%%% SLIDE
-%\begin{frame}[fragile]
-%\frametitle{Probabilistic precipitation forecasting}
-%
-%\vspace{-0.75em}
-%
-%\textbf{Observation data:}
-%\begin{itemize}
-%\item 3 day-accumulated precipitation amounts over 13 years (2000--2013).
-%\item Observation station ``Innsbruck'' in Austria.
-%\end{itemize}
-%
-%\bigskip
-%\pause
-%
-%\textbf{Covariates:}
-%\begin{itemize}
-%\item Ensemble mean and standard deviation of numerical precipitation forecasts.
-%\end{itemize}
-%
-%\bigskip
-%\pause
-%
-%\textbf{Model assumptions:} 
-%\begin{itemize}
-%\item Homoscedastic linear regression: 
-%\item[] $\hat \mu_i = \, \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i$, ~ $\hat \sigma = \text{sd}(\epsilon)$
-%\item Heteroscedastic censored regression with a logistic distribution assumption:
-%\item[] $\text{y}_i \sim \, \text{Logistic}_0\big(\hat \mu_i = \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i, \, \hat \sigma_i = \exp(\hat \gamma_0 + \hat \gamma_1 \cdot \text{enssd}_i)\big)$
-%\end{itemize}
-%
-%\end{frame}
+
+
+
+%%%% SLIDE ----------------------------------
+%%\begin{frame}[fragile]
+%%\frametitle{Motivation}
+%%
+%%    \begin{block}{Motivation}
+%%        Importance of probabilistic forecasts
+%%    \end{block}
+%%
+%%    \textbf{Probabilistic regression models:}
+%%    \begin{itemize}
+%%        \item Modelling the entire probability distribution rather than just the expectation.
+%%        \item Various model classes and types.
+%%    \end{itemize}
+%%
+%%%%    \textbf{Goodness of fit:}
+%%%%    \begin{itemize}
+%%%%        \item Scoring rules for evaluating the predictive performance, e.g., using the log-score or the (continuous) ranked probability score.
+%%%%        \item Visualizations especially suitable for identifying possible misspecifications.
+%%%%    \end{itemize}
+%%%%
+%%%%    \bigskip
+%%%%    \pause 
+%%%%
+%%%%    \begin{itemize}[<+->]
+%%%%        \item[\BoldRightarrow] \textbf{What are useful elements of such graphics?}
+%%%%        \item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
+%%%%    \end{itemize}
+%%
+%%\end{frame}
+%%
+%%
+%%%-------------------------------------------------------------------
+%%\subsection{Probabilistic precipitation forecasting}
+%%%-------------------------------------------------------------------
+%%
+%%
+%%
+%%%%% SLIDE
+%%%\begin{frame}[fragile]
+%%%\frametitle{Probabilistic precipitation forecasting}
+%%%
+%%%\vspace{-0.75em}
+%%%
+%%%\textbf{Observation data:}
+%%%\begin{itemize}
+%%%\item 3 day-accumulated precipitation amounts over 13 years (2000--2013).
+%%%\item Observation station ``Innsbruck'' in Austria.
+%%%\end{itemize}
+%%%
+%%%\bigskip
+%%%\pause
+%%%
+%%%\textbf{Covariates:}
+%%%\begin{itemize}
+%%%\item Ensemble mean and standard deviation of numerical precipitation forecasts.
+%%%\end{itemize}
+%%%
+%%%\bigskip
+%%%\pause
+%%%
+%%%\textbf{Model assumptions:} 
+%%%\begin{itemize}
+%%%\item Homoscedastic linear regression: 
+%%%\item[] $\hat \mu_i = \, \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i$, ~ $\hat \sigma = \text{sd}(\epsilon)$
+%%%\item Heteroscedastic censored regression with a logistic distribution assumption:
+%%%\item[] $\text{y}_i \sim \, \text{Logistic}_0\big(\hat \mu_i = \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i, \, \hat \sigma_i = \exp(\hat \gamma_0 + \hat \gamma_1 \cdot \text{enssd}_i)\big)$
+%%%\end{itemize}
+%%%
+%%%\end{frame}
+%%
+%%%% SLIDE
+%%\begin{frame}[fragile]
+%%\frametitle{Probabilistic precipitation forecasting}
+%%
+%%\textbf{Observed vs. ensmean:}
+%%
+%%\vspace{-2em}
+%%\begin{center}
+%%\setkeys{Gin}{width=0.65\textwidth}
+%%<<rain_scatter1a, fig=TRUE, echo=FALSE, height=5, width=6.>>=
+%%plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
+%%@
+%%\end{center}
+%%\end{frame}
+
+%%%% SLIDE ----------------------------------
+%%\begin{frame}[fragile]
+%%    \frametitle{Weather Forecasting}
+%%
+%%    \textbf{Statistical post-processing}
+%%    \begin{itemize}
+%%        \item Improve accuracy and reliability of raw forecasts.
+%%        \item Account for both, errors in expectation but also uncertainty.
+%%    \end{itemize}
+%%
+%%    \vspace{1em}
+%%    \textbf{Many models available}
+%%    \begin{itemize}
+%%        \item Generalized linear models (GLMs),
+%%        \item generalized additive models (GAMs),
+%%        \item generalized linear models for location, scale, and shape (GAMLSS),
+%%        \item and many more.
+%%    \end{itemize}
+%%
+%%    \vspace{1em}
+%%    $\BoldRightarrow$ We revisit the models by Messner, Mayr, and Zeileis (2010)
+%%        to introduce graphical assessment techniques.
+%%
+%%\end{frame}
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+    \frametitle{Weather Forecasting}
+
+    \textbf{Statistical post-processing}
+    \begin{itemize}
+        \item Improve accuracy and reliability of raw forecasts.
+        \item Account for both, errors in expectation but also uncertainty.
+    \end{itemize}
+
+    \vspace{1em}
+    \textbf{Models} (Messner, Mayr, and Zeileis, 2010)
+
+    \begin{table}[!ht]\centering
+    \begin{tabular}{lll}
+         Distribution                              & Location                                         & Scale \\
+        %\midrule[0.09 em]
+        $y_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0$ \\
+        $y_i \sim \mathcal{N}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
+        $y_i \sim \mathcal{L}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
+        %\bottomrule[0.09 em]
+    \end{tabular}
+\end{table}
+
+
+\end{frame}
 
 
 %% SLIDE
@@ -349,9 +528,9 @@ plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alph
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1b, fig=TRUE, echo=FALSE, height=5, width=6.>>=
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
-abline(coef(m_lm)[1:2], col = 3, lwd = 4)
+abline(coef(m_lm)[1:2], col = 2, lwd = 4)
 
-legend("topleft", lwd = 4, lty = 1, col = 3, "OLS", bty = "n")
+legend("topleft", lwd = 4, lty = 1, col = 2, "OLS", bty = "n")
 @
 \end{center}
 }
@@ -361,11 +540,26 @@ legend("topleft", lwd = 4, lty = 1, col = 3, "OLS", bty = "n")
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1c, fig=TRUE, echo=FALSE, height=5, width=6.>>=
 plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
-abline(coef(m_lm)[1:2], col = 3, lwd = 4)
-abline(coef(m_hclog)[1:2], col = 4, lwd = 4)
+abline(coef(m_lm)[1:2],     col = 2, lwd = 4)
+abline(coef(m_hcnorm)[1:2], col = 3, lwd = 4)
 
-legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(3, 4),
+legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3),
   c("OLS", "Censored NGR"), bty = "n")
+@
+\end{center}
+}
+
+\only<4>{
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<rain_scatter1d, fig=TRUE, echo=FALSE, height=5, width=6.>>=
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
+abline(coef(m_lm)[1:2],     col = 2, lwd = 4)
+abline(coef(m_hcnorm)[1:2], col = 3, lwd = 4)
+abline(coef(m_hclog)[1:2],  col = 4, lwd = 4)
+
+legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3, 4),
+  c("OLS", "Censored NGR", "Censored NLR"), bty = "n")
 @
 \end{center}
 }
