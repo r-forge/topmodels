@@ -173,86 +173,100 @@ data("RainIbk", package = "crch")
 %%        \item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
 %%    \end{itemize}
 
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+    \frametitle{Introduction}
+
+    \textbf{Probabilistic predictions}
+    \begin{itemize}
+        \item Modelling full probabilistic distribution
+        \item Allows to retrieve the expected value, probabilities, probability of exceedence, \dots
+        \item Important in many fields (e.g., medicine, economics, meteorology, \dots)
+    \end{itemize}
+
+    \vspace{2em}
+    \textbf{Objective}
+    \begin{itemize}
+        \item Increasing sharpness conditional on calibration (\emph{Gneiting et\,al. 2007a})
+        \item Optimization: proper scoring rules (\emph{Gneiting et\,al. 2007b})
+        \item Graphical assessment: goodness of fit and possible misspecifications
+    \end{itemize}
+
+    %%\vspace{1em}
+    %%\begin{center}
+    %%    $\BoldRightarrow$ \emph{R}\,package \code{topmodels}
+    %%\end{center}
+\end{frame}
+
 
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
-    \frametitle{Motivation}
+    \frametitle{Case study}
+
+    \textbf{Probabilistic precipitation forecasting:}\\
+    Accurate and reliable precipitation forecasts of increasing importance for:
+    \begin{itemize}
+        \item agricultural applications
+        \item risk assessment (droughts, floods, fire hazard, \dots)
+        \item strategic water resource planning (water supply, hydropower, transport, \dots)
+        \item road safety and maintenance during winter season
+        \item tourism and many more \dots
+    \end{itemize}
+
+    \pause
+    \vspace{1em}
+    \begin{center}
+        $\BoldRightarrow$ \textbf{Statistical weather prediction `detour'}
+    \end{center}
+
+\end{frame}
+
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+    \frametitle{Case study}
 
     \textbf{Weather forecasts}
-    \begin{itemize}
-        \item Important in many areas (leasure and business)
-        \item Probabilistic forecasts to assess certainty
-        \item Required for risk assessment, strategic planning, \dots
-    \end{itemize}
-    \pause
-
-    \vspace{1em}
-    \textbf{Weather forecast basis}
     \begin{itemize}
         \item Typically based physically-based numerical weather prediction models.
         \item Multiple runs with modified conditions $\rightarrow$ ensemble forecasts
         \item Various sources of possible errors due to necessary simplifications.
     \end{itemize}
-    \pause
 
     \vspace{1em}
-    $\BoldRightarrow$ Statistical post-processing is often applied to
-            improve accuracy and reliability
-            %, especially when compared to point locations.
+    \textbf{Statistical post-processing}
+    \begin{itemize}
+        \item Use historical observations and ensemble forecasts
+        \item Estimate statistical models to correct for possible forecast
+            errors in both, expectation and uncertainty
+        \item Apply correction to latest ensemble forecast
+    \end{itemize}
 
 \end{frame}
 
 
-%%% SLIDE ----------------------------------
-%\begin{frame}[fragile]
-%    \frametitle{Motivation}
-%
-%    \textbf{Why are accurate precipitation predictions important?}
-%    \begin{itemize}
-%        \item Accurate and reliable probabilistic predictions; important, risk assessment, planning
-%        \item Often used: distributional regression model (GLM, GAM, GAMLSS)
-%        \item Goodness of fit, graphical assessment an important complement to scores
-%        \item Case study: precipitation forecasts
-%    \end{itemize}
-%
-%\end{frame}
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+    \frametitle{Motivation}
 
+    \textbf{Data}
+    \begin{itemize}
+        \item Station Innsbruck Airport, Austria
+        \item 13 years of daily records ($2000-2013$; $N = \Sexpr{nrow(RainIbk)}$)
+        \pause
+        \item Response: Observed 3\,day accumulated precipitation (\code{rain})
+        \item Features: mean and standard deviation of $11$-member ensemble forecast
+            ($5-8$\,days ahead; \code{ensmean}, \code{enssd})
+    \end{itemize}
 
-%%% SLIDE ----------------------------------
-%\begin{frame}[fragile]
-%    \frametitle{Weather Forecasting}
-%
-%    \begin{itemize}
-%        \item Typically based physically-based numerical weather prediction models.
-%        \item Multiple runs with modified conditions to account for
-%            uncertainty $\rightarrow$ ensemble forecasts
-%        \item Various sources of possible errors due to necessary simplifications.
-%        \item Statistical post-processing is often applied to
-%            improve accuracy and reliability, especially when compared
-%            to point locations.
-%    \end{itemize}
-%
-%\end{frame}
+    \vspace{1em}
+    \textbf{Goal}
+    \begin{itemize}
+        \item Estimate three different parametric regression models
+        \item Assessing goodness of fit using graphical assessment methods
+    \end{itemize}
 
-%-------------------------------------------------------------------
-%\subsection{Motivation}
-%-------------------------------------------------------------------
-
-%%% SLIDE ----------------------------------
-%\begin{frame}[fragile]
-%    \frametitle{Weather Forecasting}
-%
-%    \textbf{Numerical weather forecast models}
-%    \begin{itemize}
-%        \item Estimating current state of atmosphere (analysis)
-%        \item Predicting future state of atmosphere (prognosis)
-%        \item Ensemble forecast systems: multiple runs to quantify uncertainty
-%    \end{itemize}
-%
-%    \vspace{1em}
-%    $\BoldRightarrow$ Various sources of possible errors due to required simplifications.
-%
-%\end{frame}
+\end{frame}
 
 
 <<ecmwf_demo_forecast, echo=FALSE, results=hide>>=
@@ -278,7 +292,7 @@ ggplot() + geom_stars(data = demo_fcst) + scale_fill_continuous_sequential("Blue
            coord_sf(xlim = as.vector(st_bbox(demo_fcst)[c(1, 3)]) + offset$x,
                     ylim = as.vector(st_bbox(demo_fcst)[c(2, 4)]) + offset$y) +
            theme(legend.position = "none") +
-           xlab("") + ylab("") + ggtitle("Spatial Prediction Demo") + labs(fill = "Precip")
+           xlab("") + ylab("") + ggtitle("Spatial forecast example") + labs(fill = "Precip")
 
 ggsave("slides_demo_fcst.pdf", width = 5, height = 3.5)
 @
@@ -298,26 +312,19 @@ ggplot() + geom_line(aes(x = date, y = rain, col = member), data = long) +
     coord_cartesian(xlim = as.Date("2005-02-01") + c(0, 31), ylim = c(0, 52)) +
     scale_color_manual(values = rep("gray60", length(unique(long$member)))) +
     geom_line(aes(x = date, y = rain), lwd = 1, col = "black", data = long_agg) +
-    #geom_line(aes(x = date, y = rain), lwd = 2, col = 2,
-    #          data = data.frame(date = as.Date(rownames(RainIbk)), rain = RainIbk$rain)) +
+    geom_line(aes(x = date, y = rain), lwd = 2, col = 2, lty = 2,
+              data = data.frame(date = as.Date(rownames(RainIbk)), rain = RainIbk$rain)) +
     theme(legend.position = "none") +
-    ggtitle("Ensemble Forecast Demo") + ylab("precipitation [mm/3d]") + xlab("")
+    ggtitle("Ensemble forecast example") + ylab("precipitation [mm/3d]") + xlab("")
 
 ggsave("slides_demo_ens.pdf", width = 5, height = 3.5)
 @
 
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
-    \frametitle{Weather Forecasting}
+    \frametitle{Case study}
 
-    \textbf{Numerical weather forecast models}
-    \begin{itemize}
-        \item Estimating current state of atmosphere (analysis)
-        \item Predicting future state of atmosphere (prognosis)
-        \item Ensemble forecast systems: multiple runs to quantify uncertainty
-    \end{itemize}
-
-    \visible<2>{
+    \vspace{2em}
     \begin{columns}[T]
         \begin{column}{0.49\textwidth}
             \includegraphics[width = \textwidth]{slides_demo_fcst.pdf}
@@ -326,35 +333,8 @@ ggsave("slides_demo_ens.pdf", width = 5, height = 3.5)
             \includegraphics[width = \textwidth]{slides_demo_ens.pdf}
         \end{column}
     \end{columns}
-    }
 
 \end{frame}
-
-
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-    \frametitle{Motivation}
-
-    \textbf{Data}
-    \begin{itemize}
-        \item 13 years of daily records ($2000-2013$)
-        \item Response: Observed 3\,day accumulated precipitation (\code{rain})
-        \item Features: mean and standard deviation of $11$-member ensemble forecast
-            ($5-8$\,days ahead; \code{ensmean}, \code{enssd})
-    \end{itemize}
-
-    \textbf{Goal}
-    \begin{itemize}
-        \item Improve accuracy of probabilistic precipitation forecasts
-        \item Accumulated amount of precipitation; Innsbruck Airport (AUT)
-    \end{itemize}
-
-    \vspace{1em}
-    $\BoldRightarrow$ Find suitable statistical model to post-process
-        raw ensemble forecasts
-
-\end{frame}
-
 
 
 %% SLIDE ----------------------------------
@@ -383,8 +363,8 @@ RainIbk <- subset(RainIbk, enssd > 0)
 ####dev.off()
 
 library("ggplot2")
-ggplot() + geom_histogram(aes(x = rain, y = ..density..), data = RainIbk, breaks = seq(0, 10, by = .5),
-            col = "gray90") +
+ggplot() + geom_histogram(aes(x = rain, y = ..density..), data = RainIbk,
+                          breaks = seq(0, 10, by = 1), col = "gray20", fill = "gray66") +
            xlab("rain") + ylab("Density") + ggtitle("Marginal distribution\nof observed Precipitation")
 ggsave("slides_data_figs_hist.pdf", width = 3.5, height = 3.5)
 
@@ -405,106 +385,34 @@ ggsave("slides_data_figs_scatter.pdf", width = 3.5, height = 3.5)
 
 \end{frame}
 
-<<model_rain, eval=TRUE, echo=FALSE, results=hide>>=
-m_lm <- lm(rain ~ ensmean, data = RainIbk)
-m_hcnorm <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
-                       dist = "gaussian")
-m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
-                      dist = "logistic")
-@
-
-
 
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
     \frametitle{Weather Forecasting}
 
-    \textbf{Statistical post-processing model}
-    \begin{itemize}
-        \item Account for the nature of the data.
-        \item Account for both, errors in expectation but also uncertainty.
-    \end{itemize}
+    \textbf{Statistical models:}\\
+    Revisiting models by Messner, Mayr, and Zeileis (2010):
 
-    \vspace{1em}
-    \textbf{Models} (Messner, Mayr, and Zeileis, 2010)
-
+    \vspace{0.1em}
     \begin{table}[!ht]\centering
       \begin{tabular}{llll}
           & Distribution                              & Location                                         & Scale \\
           %\midrule[0.09 em]
-          \code{OLS}     & $y_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0$ \\
+          \code{ols}     & $y_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0$ \\
           \code{hcnorm}  & $y_i \sim \mathcal{N}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
           \code{hclog}   & $y_i \sim \mathcal{L}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
           %\bottomrule[0.09 em]
       \end{tabular}
     \end{table}
 
-\end{frame}
-
-
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-\frametitle{Probabilistic precipitation forecasting}
-
-\vspace{-0.75em}
-
-\textbf{Observed vs. ensmean:}
-
-\vspace{-2em}
-
-\only<1>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_scatter1a, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
-
-####ggplot(data = RainIbk, aes(x = ensmean, y = rain)) + geom_point(col = gray(0, alpha = 0.2)) +
-####    geom_abline(col = 2, intercept = coef(m_lm)[1],     slope = coef(m_lm)[2]) +
-####    geom_abline(col = 3, intercept = coef(m_hcnorm)[1], slope = coef(m_hcnorm)[2])
+    \pause
+    \vspace{0.5em}
+<<model_rain, eval=TRUE, echo=TRUE, results=hide>>=
+library("crch")
+ols    <- lm(rain ~ ensmean, data = RainIbk)
+hcnorm <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "gauss")
+hclog  <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0, dist = "logis")
 @
-\end{center}
-}
-
-\only<2>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_scatter1b, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
-abline(coef(m_lm)[1:2], col = 2, lwd = 4)
-
-legend("topleft", lwd = 4, lty = 1, col = 2, "OLS", bty = "n")
-@
-\end{center}
-}
-
-\only<3>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_scatter1c, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
-abline(coef(m_lm)[1:2],     col = 2, lwd = 4)
-abline(coef(m_hcnorm)[1:2], col = 3, lwd = 4)
-
-legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3),
-  c("OLS", "Censored NGR"), bty = "n")
-@
-\end{center}
-}
-
-\only<4>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_scatter1d, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
-abline(coef(m_lm)[1:2],     col = 2, lwd = 4)
-abline(coef(m_hcnorm)[1:2], col = 3, lwd = 4)
-abline(coef(m_hclog)[1:2],  col = 4, lwd = 4)
-
-legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3, 4),
-  c("OLS", "Censored NGR", "Censored NLR"), bty = "n")
-@
-\end{center}
-}
 
 \end{frame}
 
@@ -513,12 +421,34 @@ legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3, 4),
 \begin{frame}[fragile]
     \frametitle{Model assessment}
 
-    \textbf{Assessing goodness of fit}
-    \begin{itemize}
-        \item Checking model calibration using
-        \item proper scoring rules (e.g., CRPS, likelihood, logScore, \dots; CITATION)
-        \item or graphical model assessments.
-    \end{itemize}
+    \textbf{Using proper scoring rules} (\emph{Gneiting et\,al. 2007b})
+
+<<model_rain, eval=TRUE, echo=FALSE, results=tex>>=
+library("scoringRules")
+# Mean CRPS
+s_crps <- c(mean(crps(RainIbk$rain, family = "norm",
+                 location = fitted(ols),
+                 scale = sqrt(1 / length(residuals(ols)) * sum((residuals(ols) - mean(residuals(ols)))^2)))),
+            mean(crps(RainIbk$rain, family = "cnorm",
+                      location = predict(hcnorm, type = "location"),
+                      scale    = predict(hcnorm, type = "scale"),
+                      lower    = hcnorm$cens$left,
+                      upper    = hcnorm$cens$right)),
+            mean(crps(RainIbk$rain, family = "clogis",
+                      location = predict(hclog, type = "location"),
+                      scale    = predict(hclog, type = "scale"),
+                      lower    = hclog$cens$left,
+                      upper    = hclog$cens$right)))
+# logScore
+tmp <- list(ols = ols, hcnorm = hcnorm, hclog = hclog)
+s_ls   <- sapply(tmp, function(x) -logLik(x) / nrow(RainIbk))
+
+s_res <- matrix(c(s_crps, s_ls), byrow = TRUE, nrow = 2,
+                dimnames = list(c("CRPS", "logScore"), names(tmp)))
+
+library("xtable")
+xtable(s_res, digits = 3)
+@
 
     \pause
     \vspace{1em}
@@ -530,88 +460,6 @@ legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3, 4),
     \end{itemize}
 
 \end{frame}
-
-
-
-%% %% SLIDE ----------------------------------
-%% \begin{frame}[fragile]
-%% \frametitle{Graphical assessment}
-%% 
-%% \vspace{-0.75em}
-%% 
-%% \bigskip
-%% 
-%% \begin{columns}[T]
-%% \begin{column}{0.33\textwidth}
-%% \only<2>{
-%% <<intro_goodness1a_comp, fig=FALSE, echo=FALSE>>=
-%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = FALSE, confint = FALSE, xlab = "rain", plot = FALSE, ref = FALSE))
-%% @
-%% <<intro_goodness1a, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-%% gg
-%% @
-%% 
-%% Marginal calibration:
-%% \begin{itemize}
-%% \item[-] Observed frequencies.
-%% \end{itemize}
-%% }
-%% \only<3->{
-%% <<intro_goodness1b_comp, fig=FALSE, echo=FALSE>>=
-%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = "line", confint = FALSE, xlab = "rain", plot = FALSE, ref = FALSE))
-%% @
-%% <<intro_goodness1b, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-%% gg
-%% @
-%% 
-%% Marginal calibration:
-%% \begin{itemize}
-%% \item[-] Observed frequencies.
-%% \item[-] Compare: Expected.
-%% \end{itemize}
-%% }
-%% \end{column}
-%% 
-%% \pause
-%% \pause
-%% 
-%% \begin{column}{0.33\textwidth}
-%% <<intro_goodness2, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-%% set.seed(0)
-%% pithist(m_lm, type = "random", nsim = 10, fill = "darkgray", alpha = 1, col = "black",
-%%   expected = TRUE, confint = FALSE, simint = FALSE)
-%% @
-%% 
-%% Probabilistic calibration:
-%% \begin{itemize}
-%% \item[-] PIT residuals: $u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i)$.
-%% \item[-] Compare: Uniform.
-%% \end{itemize}
-%% 
-%% \end{column}
-%% 
-%% \pause
-%% 
-%% \begin{column}{0.33\textwidth}
-%% <<intro_goodness3, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-%% set.seed(0)
-%% p_gg <- pithist(m_lm, type = "random", nsim = 10, scale = "normal", plot = FALSE)
-%% autoplot(p_gg, fill = "darkgray", col = "black", alpha = 1, xlab = "(Randomized) quantile residuals",
-%%   expected = FALSE, confint = FALSE, simint = FALSE, xlim = c(-4, 4)) +
-%%   geom_function(fun = dnorm, col = 2, size = 0.75, xlim = c(-4, 4))
-%% @
-%% 
-%% Probabilistic calibration:
-%% \begin{itemize}
-%% \item[-] Quantile residuals: $\hat{r}_i = \Phi^{-1}(u_i)$.
-%% \item[-] Compare: Normal
-%% \end{itemize}
-%% 
-%% \end{column}
-%% \end{columns}
-%% 
-%% 
-%% \end{frame}
 
 
 %% SLIDE ----------------------------------
@@ -629,23 +477,23 @@ legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3, 4),
     \begin{columns}[T]
         \begin{column}{.49\textwidth}
         \setkeys{Gin}{width=1\textwidth}
-<<intro_rootogram_lm_prep, fig=FALSE, echo=FALSE>>=
-g1 <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
-g2 <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
-g3 <- autoplot(rootogram(m_lm, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
+<<intro_rootograols_prep, fig=FALSE, echo=FALSE>>=
+g1 <- autoplot(rootogram(ols, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
+g2 <- autoplot(rootogram(ols, style = "standing", scale = "raw", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
+g3 <- autoplot(rootogram(ols, style = "hanging", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
 @
 \only<1>{
-<<intro_rootogram_lm_1, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+<<intro_rootograols_1, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
 g1
 @
 }
 \only<2>{
-<<intro_rootogram_lm_2, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+<<intro_rootograols_2, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
 g2
 @
 }
 \only<3>{
-<<intro_rootogram_lm_3, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+<<intro_rootograols_3, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
 g3
 @
 }
@@ -684,8 +532,8 @@ g3
 %% 
 %% \begin{center}
 %% \setkeys{Gin}{width=0.65\textwidth}
-%% <<intro_rootogram_hclog_comp, fig=FALSE, echo=FALSE>>=
-%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
+%% <<intro_rootograhclog_comp, fig=FALSE, echo=FALSE>>=
+%% gg <- autoplot(rootogram(ols, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
 %% @
 %% <<intro_rootogram_xxx1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 %% gg
@@ -707,7 +555,7 @@ g3
 %% \begin{center}
 %% \setkeys{Gin}{width=0.65\textwidth}
 %% <<intro_rootogram3_comp, fig=FALSE, echo=FALSE>>=
-%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
+%% gg <- autoplot(rootogram(ols, style = "standing", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
 %% @
 %% <<intro_rootogram3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 %% gg
@@ -729,7 +577,7 @@ g3
 %% \begin{center}
 %% \setkeys{Gin}{width=0.65\textwidth}
 %% <<intro_rootogram4_comp, fig=FALSE, echo=FALSE>>=
-%% gg <- autoplot(rootogram(m_lm, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE,, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE), ylim = c(NA, 35), confint_type = "simultaneous")
+%% gg <- autoplot(rootogram(ols, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE,, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE), ylim = c(NA, 35), confint_type = "simultaneous")
 %% <<intro_rootogram4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 %% gg
 %% @
@@ -775,9 +623,9 @@ g3
     \begin{columns}[T]
         \begin{column}{.49\textwidth}
         \setkeys{Gin}{width=1\textwidth}
-<<intro_rootogram_lm_prep, fig=FALSE, echo=FALSE>>=
-p1 <- autoplot(pithist(m_lm, confint = FALSE, expected = FALSE))
-p2 <- autoplot(pithist(m_lm))
+<<intro_rootograols_prep, fig=FALSE, echo=FALSE>>=
+p1 <- autoplot(pithist(ols, confint = FALSE, expected = FALSE))
+p2 <- autoplot(pithist(ols))
 @
 \only<1>{
 <<intro_pithist_lm_1, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
@@ -791,20 +639,21 @@ p2
 }
         \end{column}
         \begin{column}{.49\textwidth}
-            \vspace{3em}
+            \vspace{1em}
 
             Continuous case
             \begin{equation*}
-                \text{u}_i = F(y_i | \hat{\theta})
+                u_i = F(y_i | \hat{\theta})
             \end{equation*}
 
             \vspace{1em}
 
-            Discrete case: random draw from
+            Discrete case (\emph{Czado et\,al. 2009)})
             \begin{equation*}
-                \Big[F(y_i - 1 | \hat{\theta}_i), F(y_i, | \hat{\theta}_i)\Big]
+                u_i = F(y_i - 1 | \hat{\theta}_i) + \nu \Big[F(y_i - 1 | \hat{\theta}_i), F(y_i, | \hat{\theta}_i)\Big]
             \end{equation*}
 
+            \vspace{2em}
             \only<2>{
                 \centering
                 $\BoldRightarrow$ \textbf{Uniform scale: PIT histogram}
@@ -827,7 +676,7 @@ p2
 %%  \begin{center}
 %%  \setkeys{Gin}{width=0.65\textwidth}
 %%  <<intro_pithist1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-%%  pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+%%  pithist(ols, type = "expected", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
 %%  @
 %%  \end{center}
 %%  }
@@ -836,7 +685,7 @@ p2
 %%  \begin{center}
 %%  \setkeys{Gin}{width=0.65\textwidth}
 %%  <<intro_pithist1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-%%  pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+%%  pithist(ols, type = "expected", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
 %%  @
 %%  \end{center}
 %%  }
@@ -857,18 +706,18 @@ p2
 %\only<1>{
 %\begin{center}
 %\setkeys{Gin}{width=0.65\textwidth}
-%<<intro_pithist_norm_lma, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%<<intro_pithist_norolsa, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 %set.seed(0)
-%pithist(m_lm, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2")
+%pithist(ols, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2")
 %@
 %\end{center}
 %}
 %\only<2>{
 %\begin{center}
 %\setkeys{Gin}{width=0.65\textwidth}
-%<<intro_pithist_norm_lmb, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%<<intro_pithist_norolsb, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 %set.seed(0)
-%pithist(m_lm, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2")
+%pithist(ols, type = "random", scale = "normal", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2")
 %@
 %\end{center}
 %}
@@ -889,9 +738,9 @@ p2
     \begin{columns}[T]
         \begin{column}{.49\textwidth}
         \setkeys{Gin}{width=1\textwidth}
-<<intro_rootogram_lm_prep, fig=FALSE, echo=FALSE>>=
-q1 <- autoplot(qqrplot(m_lm, confint = TRUE))
-q2 <- autoplot(wormplot(m_lm))
+<<intro_rootograols_prep, fig=FALSE, echo=FALSE>>=
+q1 <- autoplot(qqrplot(ols, confint = TRUE))
+q2 <- autoplot(wormplot(ols))
 @
 \only<1>{
 <<intro_qqrplot_lm, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
@@ -905,7 +754,7 @@ q2
 }
         \end{column}
         \begin{column}{.49\textwidth}
-            \vspace{1em}
+            \vspace{0em}
 
             \begin{equation*}
                 \hat{r}_i = \Phi^{-1}\Big(F(y_i | \hat{\theta}_i)\Big) = \Phi^{-1}(u_i)
@@ -918,7 +767,7 @@ q2
             {
                 \vspace{1em}
                 \centering
-                $\BoldRightarrow$ \textbf{Quantile-quantile residual plot}
+                $\BoldRightarrow$ \textbf{(Randomized) Q-Q residual plot}
             }
 
             \visible<2->{
@@ -927,6 +776,7 @@ q2
                 \end{equation*}
 
                 {
+                    \vspace{1em}
                     \centering
                     $\BoldRightarrow$ \textbf{Wormplot}
                 }
@@ -949,7 +799,7 @@ q2
 %%  \setkeys{Gin}{width=0.65\textwidth}
 %%  <<intro_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 %%  set.seed(3)
-%%  qqrplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
+%%  qqrplot(ols, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
 %%  @
 %%  \end{center}
 %%  \end{frame}
@@ -969,7 +819,7 @@ q2
 %%  \setkeys{Gin}{width=0.65\textwidth}
 %%  <<intro_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
 %%  set.seed(3)
-%%  wormplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE, ylim = c(-0.5, 1.35))
+%%  wormplot(ols, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE, ylim = c(-0.5, 1.35))
 %%  @
 %%  \end{center}
 %%  \end{frame}
@@ -1027,8 +877,8 @@ q2
 %\begin{center}
 %\setkeys{Gin}{width=0.65\textwidth}
 %<<rain_rootogram, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-%r1 <- rootogram(m_lm, plot = FALSE)
-%r2 <- rootogram(m_hclog, plot = FALSE)
+%r1 <- rootogram(ols, plot = FALSE)
+%r2 <- rootogram(hclog, plot = FALSE)
 %
 %ggplot2::autoplot(c(r1, r2), fitted_size = 1.25, xlab = "Rain", confint_type = "simultaneous")
 %@
@@ -1049,8 +899,8 @@ q2
 %\begin{center}
 %\setkeys{Gin}{width=0.65\textwidth}
 %<<rain_pithist1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-%p1 <- pithist(m_lm, plot = FALSE)
-%p2 <- pithist(m_hclog, plot = FALSE)
+%p1 <- pithist(ols, plot = FALSE)
+%p2 <- pithist(hclog, plot = FALSE)
 %
 %ggplot2::autoplot(c(p1, p2), fill = "darkgray", col = "black", ref_size = 1, confint_size = 1)
 %@
@@ -1063,13 +913,16 @@ q2
 \frametitle{Model comparison}
 
 \begin{center}
+    \vspace{-0.7em}
     \textbf{Hanging rootograms}
+    \vspace{1em}
+
 \setkeys{Gin}{width=1\textwidth}
-<<comparison_rootogram, fig=TRUE, echo=FALSE, height=3, width=6>>=
-par(mfrow = c(1, 3), mar = c(4, 3, 1, 1))
-plot(r1 <- rootogram(m_lm, plot = FALSE, main = "OLS", col = 2))
-plot(r2 <- rootogram(m_hcnorm, plot = FALSE, main = "hcnorm", col = 3))
-plot(r3 <- rootogram(m_hclog, plot = FALSE, main = "hclog", col = 4))
+<<comparison_rootogram, fig=TRUE, echo=FALSE, height=3.7, width=8>>=
+par(mfrow = c(1, 2), mar = c(5, 4, 1, 1))
+ylim <- c(-14, 45)
+plot(r1 <- rootogram(ols, plot = FALSE,    confint = FALSE), expected_col = 2, ylim = ylim)
+plot(r2 <- rootogram(hcnorm, plot = FALSE, confint = FALSE), expected_col = 3, ylim = ylim)
 @
 \end{center}
 \end{frame}
@@ -1082,7 +935,7 @@ plot(r3 <- rootogram(m_hclog, plot = FALSE, main = "hclog", col = 4))
     \textbf{Multi-model PIT histogram} \\
 \setkeys{Gin}{width=.65\textwidth}
 <<comparison_pithist, fig=TRUE, echo=FALSE, height=4, width=6>>=
-tmp <- lapply(list(m_lm, m_hcnorm, m_hclog), pithist, plot = FALSE)
+tmp <- lapply(list(ols, hcnorm, hclog), pithist, plot = FALSE)
 autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
 @
 \end{center}
@@ -1096,7 +949,7 @@ autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
     \textbf{Multi-model QQ-residual plot} \\
 \setkeys{Gin}{width=.65\textwidth}
 <<comparison_qqrplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
-tmp <- lapply(list(m_lm, m_hcnorm, m_hclog), qqrplot, plot = FALSE)
+tmp <- lapply(list(ols, hcnorm, hclog), qqrplot, plot = FALSE)
 autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
 @
 \end{center}
@@ -1110,7 +963,7 @@ autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
     \textbf{Multi-model wormplot} \\
 \setkeys{Gin}{width=.65\textwidth}
 <<comparison_wormplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
-tmp <- lapply(list(m_lm, m_hcnorm, m_hclog), wormplot, plot = FALSE)
+tmp <- lapply(list(ols, hcnorm, hclog), wormplot, plot = FALSE)
 autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
 @
 \end{center}
@@ -1206,7 +1059,13 @@ Lang MN, Zeileis A \emph{et al.} (2021).
 \emph{R package version 0.2-0}.
 \url{https://topmodels.R-Forge.R-project.org/}
 
-\bigskip
+\medskip
+
+Czado C, Gneiting T, Held L (2009).
+\dquote{Predictive Model Assessment for Count Data.}
+\emph{Biometrics}, \textbf{65}(4), 1254--1261.
+\doi{10.1111/j.1541-0420.2009.01191.x}
+
 \medskip
 
 Dunn PK, Smyth GK (1996).
@@ -1216,11 +1075,19 @@ Dunn PK, Smyth GK (1996).
 
 \medskip
 
-Gneiting T, Balabdaoui F, Raftery AE (2007)
+Gneiting T, Balabdaoui F, Raftery AE (2007a)
 \dquote{Probabilistic Forecasts, Calibration and Sharpness.}
 \emph{Journal of the Royal Statistical Society: Series B (Methodological)},
 \textbf{69}(2), 243--268.
 \doi{10.1111/j.1467-9868.2007.00587.x}
+
+\medskip
+
+Gneiting T, Raftery AE (2007b)
+\dquote{Strictly Proper Scoring Rules, Prediction, and Estimation.}
+\emph{Journal of the American Statistical Association},
+\textbf{102}(477), 359--378.
+\doi{10.1198/016214506000001437}
 
 \medskip
 

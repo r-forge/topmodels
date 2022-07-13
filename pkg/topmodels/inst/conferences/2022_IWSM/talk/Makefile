@@ -6,4 +6,4 @@ slides:
 	make clean
 
 clean:
-	rm *.out *.aux *.log *.snm *.toc *.vrb *.nav slides.tex slides-*.pdf
+	rm *.out *.aux *.log *.snm *.toc *.vrb *.nav slides.tex slides-*.pdf slides_*.pdf
