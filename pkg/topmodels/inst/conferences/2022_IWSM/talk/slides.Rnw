@@ -106,65 +106,58 @@ library("ggplot2")
 \begin{document}
 \section{Motivation}
 
-
 %-------------------------------------------------------------------
 \subsection{Introduction}
-%-------------------------------------------------------------------
-
-
-
-%-------------------------------------------------------------------
-\subsection{Motivation}
 %-------------------------------------------------------------------
 
 <<loading_rain, eval=TRUE, echo=FALSE, results=hide>>=
 data("RainIbk", package = "crch")
 @
 
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-    \frametitle{From the Abstract of the Abstract}
-
-    \begin{itemize}
-        \item Accurate and reliable probabilistic predictions; important, risk assessment, planning
-        \item Often used: distributional regression model (GLM, GAM, GAMLSS)
-        \item Goodness of fit, graphical assessment an important complement to scores
-        \item Case study: precipitation forecasts
-    \end{itemize}
-
-\end{frame}
-
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-    \frametitle{From the Abstract Text}
-
-    \begin{itemize}
-        \item Weather forecasts typically based on physically-based numericl weather pred. models
-        \item Account for uncertainty: ensemble forecasts
-        \item To calibrate the model (point location) - post processed
-        \item We revisit Messner, Mayr, and Zeileis (2010) and show different graphical assessment techniques
-        \item Data description
-        \item For comparison, three models will be compared
-    \end{itemize}
-
-\end{frame}
-
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-    \frametitle{From the Abstract Text}
-
-    \textbf{Model assessment:} Gneiting (2007), sharpness subject to calibration
-    \begin{itemize}
-        \item Marginal calibration: observed freq match expected freq
-        \item $\rightarrow$ We then show the calibration
-        \item Probabilistic calibration: prob scale considering PIT; can be mapped
-            to mapped to other scales (e.g., normal)
-        \item $\rightarrow$ Randomized quantiles (Dunn)
-        \item $\rightarrow$ Model analysis
-        \item Show software
-    \end{itemize}
-
-\end{frame}
+%%%% SLIDE ----------------------------------
+%%\begin{frame}[fragile]
+%%    \frametitle{From the Abstract of the Abstract}
+%%
+%%    \begin{itemize}
+%%        \item Accurate and reliable probabilistic predictions; important, risk assessment, planning
+%%        \item Often used: distributional regression model (GLM, GAM, GAMLSS)
+%%        \item Goodness of fit, graphical assessment an important complement to scores
+%%        \item Case study: precipitation forecasts
+%%    \end{itemize}
+%%
+%%\end{frame}
+%%
+%%%% SLIDE ----------------------------------
+%%\begin{frame}[fragile]
+%%    \frametitle{From the Abstract Text}
+%%
+%%    \begin{itemize}
+%%        \item Weather forecasts typically based on physically-based numericl weather pred. models
+%%        \item Account for uncertainty: ensemble forecasts
+%%        \item To calibrate the model (point location) - post processed
+%%        \item We revisit Messner, Mayr, and Zeileis (2010) and show different graphical assessment techniques
+%%        \item Data description
+%%        \item For comparison, three models will be compared
+%%    \end{itemize}
+%%
+%%\end{frame}
+%%
+%%%% SLIDE ----------------------------------
+%%\begin{frame}[fragile]
+%%    \frametitle{From the Abstract Text}
+%%
+%%    \textbf{Model assessment:} Gneiting (2007), sharpness subject to calibration
+%%    \begin{itemize}
+%%        \item Marginal calibration: observed freq match expected freq
+%%        \item $\rightarrow$ We then show the calibration
+%%        \item Probabilistic calibration: prob scale considering PIT; can be mapped
+%%            to mapped to other scales (e.g., normal)
+%%        \item $\rightarrow$ Randomized quantiles (Dunn)
+%%        \item $\rightarrow$ Model analysis
+%%        \item Show software
+%%    \end{itemize}
+%%
+%%\end{frame}
 
 %%    \textbf{Goodness of fit:}
 %%    \begin{itemize}
@@ -180,22 +173,70 @@ data("RainIbk", package = "crch")
 %%        \item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
 %%    \end{itemize}
 
+
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
-    \frametitle{Weather Forecasting}
+    \frametitle{Motivation}
 
+    \textbf{Weather forecasts}
+    \begin{itemize}
+        \item Important in many areas (leasure and business)
+        \item Probabilistic forecasts to assess certainty
+        \item Required for risk assessment, strategic planning, \dots
+    \end{itemize}
+    \pause
+
+    \vspace{1em}
+    \textbf{Weather forecast basis}
     \begin{itemize}
         \item Typically based physically-based numerical weather prediction models.
-        \item Multiple runs with modified conditions to account for
-            uncertainty $\rightarrow$ ensemble forecasts
+        \item Multiple runs with modified conditions $\rightarrow$ ensemble forecasts
         \item Various sources of possible errors due to necessary simplifications.
-        \item Statistical post-processing is often applied to
-            improve accuracy and reliability, especially when compared
-            to point locations.
     \end{itemize}
+    \pause
+
+    \vspace{1em}
+    $\BoldRightarrow$ Statistical post-processing is often applied to
+            improve accuracy and reliability
+            %, especially when compared to point locations.
 
 \end{frame}
 
+
+%%% SLIDE ----------------------------------
+%\begin{frame}[fragile]
+%    \frametitle{Motivation}
+%
+%    \textbf{Why are accurate precipitation predictions important?}
+%    \begin{itemize}
+%        \item Accurate and reliable probabilistic predictions; important, risk assessment, planning
+%        \item Often used: distributional regression model (GLM, GAM, GAMLSS)
+%        \item Goodness of fit, graphical assessment an important complement to scores
+%        \item Case study: precipitation forecasts
+%    \end{itemize}
+%
+%\end{frame}
+
+
+%%% SLIDE ----------------------------------
+%\begin{frame}[fragile]
+%    \frametitle{Weather Forecasting}
+%
+%    \begin{itemize}
+%        \item Typically based physically-based numerical weather prediction models.
+%        \item Multiple runs with modified conditions to account for
+%            uncertainty $\rightarrow$ ensemble forecasts
+%        \item Various sources of possible errors due to necessary simplifications.
+%        \item Statistical post-processing is often applied to
+%            improve accuracy and reliability, especially when compared
+%            to point locations.
+%    \end{itemize}
+%
+%\end{frame}
+
+%-------------------------------------------------------------------
+%\subsection{Motivation}
+%-------------------------------------------------------------------
 
 %%% SLIDE ----------------------------------
 %\begin{frame}[fragile]
@@ -257,29 +298,13 @@ ggplot() + geom_line(aes(x = date, y = rain, col = member), data = long) +
     coord_cartesian(xlim = as.Date("2005-02-01") + c(0, 31), ylim = c(0, 52)) +
     scale_color_manual(values = rep("gray60", length(unique(long$member)))) +
     geom_line(aes(x = date, y = rain), lwd = 1, col = "black", data = long_agg) +
-    geom_line(aes(x = date, y = rain), lwd = 2, col = 2,
-              data = data.frame(date = as.Date(rownames(RainIbk)), rain = RainIbk$rain)) +
+    #geom_line(aes(x = date, y = rain), lwd = 2, col = 2,
+    #          data = data.frame(date = as.Date(rownames(RainIbk)), rain = RainIbk$rain)) +
     theme(legend.position = "none") +
     ggtitle("Ensemble Forecast Demo") + ylab("precipitation [mm/3d]") + xlab("")
 
 ggsave("slides_demo_ens.pdf", width = 5, height = 3.5)
 @
-
-%%%% SLIDE ----------------------------------
-%%\begin{frame}[fragile]
-%%    \frametitle{Weather Forecasting}
-%%
-%%    \begin{columns}[T]
-%%        \begin{column}{0.48\textwidth}
-%%            \includegraphics[width = \textwidth]{slides_demo_fcst.pdf}
-%%        \end{column}
-%%        \begin{column}{0.48\textwidth}
-%%            \pause
-%%            \includegraphics[width = \textwidth]{slides_demo_ens.pdf}
-%%        \end{column}
-%%    \end{columns}
-%%
-%%\end{frame}
 
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
@@ -308,7 +333,33 @@ ggsave("slides_demo_ens.pdf", width = 5, height = 3.5)
 
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
-    \frametitle{Data}
+    \frametitle{Motivation}
+
+    \textbf{Data}
+    \begin{itemize}
+        \item 13 years of daily records ($2000-2013$)
+        \item Response: Observed 3\,day accumulated precipitation (\code{rain})
+        \item Features: mean and standard deviation of $11$-member ensemble forecast
+            ($5-8$\,days ahead; \code{ensmean}, \code{enssd})
+    \end{itemize}
+
+    \textbf{Goal}
+    \begin{itemize}
+        \item Improve accuracy of probabilistic precipitation forecasts
+        \item Accumulated amount of precipitation; Innsbruck Airport (AUT)
+    \end{itemize}
+
+    \vspace{1em}
+    $\BoldRightarrow$ Find suitable statistical model to post-process
+        raw ensemble forecasts
+
+\end{frame}
+
+
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+    \frametitle{Use case}
 
 <<rain_transform, echo = FALSE, results = hide>>=
 RainIbk <- sqrt(RainIbk)
@@ -317,26 +368,30 @@ RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
 RainIbk <- subset(RainIbk, enssd > 0)
 @
 
-
-    \begin{itemize}
-        \item Daily records over 13 years ($2000-2013$), Innsbruck Airport (AUT)
-        \item Observations precipitation amount $mm/3\,days$ (`\code{Rain}')
-        \visible<2>{\item Accumulated precipitation from 11-member ensemble (`\code{ensmean}')}
-        %%\item Station Innsbruck Airport, Austria.
-    \end{itemize}
-
 <<data_figs, echo = FALSE, results = hide>>=
-pdf(file = "slides_data_figs_hist.pdf", width = 5, height = 4)
-hist(RainIbk$rain,
-     main = NA,
-     xlab = "Rain",
-     ylab = "Density",
-     freq = FALSE)
-dev.off()
+####pdf(file = "slides_data_figs_hist.pdf", width = 4, height = 4)
+####hist(RainIbk$rain,
+####     main = "Marginal distribution of\nobserved precipitation",
+####     xlab = "Rain",
+####     ylab = "Density",
+####     freq = FALSE)
+####dev.off()
+####
+####pdf(file = "slides_data_figs_scatter.pdf", width = 4, height = 4)
+####plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.1),
+####     main = "Observed precipitation vs.\nensemble mean forecast")
+####dev.off()
 
-pdf(file = "slides_data_figs_scatter.pdf", width = 5, height = 4)
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
-dev.off()
+library("ggplot2")
+ggplot() + geom_histogram(aes(x = rain, y = ..density..), data = RainIbk, breaks = seq(0, 10, by = .5),
+            col = "gray90") +
+           xlab("rain") + ylab("Density") + ggtitle("Marginal distribution\nof observed Precipitation")
+ggsave("slides_data_figs_hist.pdf", width = 3.5, height = 3.5)
+
+ggplot() + geom_point(aes(x = ensmean, y = rain), data = RainIbk,
+                      cex = 2, col = gray(0, alpha = 0.1)) +
+           xlab("ensmean") + ylab("rain") + ggtitle("Observed precipitation\nvs. ensemble mean forecast")
+ggsave("slides_data_figs_scatter.pdf", width = 3.5, height = 3.5)
 @
 
     \begin{columns}[T]
@@ -350,139 +405,23 @@ dev.off()
 
 \end{frame}
 
-
-
-
 <<model_rain, eval=TRUE, echo=FALSE, results=hide>>=
 m_lm <- lm(rain ~ ensmean, data = RainIbk)
 m_hcnorm <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
                        dist = "gaussian")
 m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
                       dist = "logistic")
-
 @
 
 
-
-
-
-%%%% SLIDE ----------------------------------
-%%\begin{frame}[fragile]
-%%\frametitle{Motivation}
-%%
-%%    \begin{block}{Motivation}
-%%        Importance of probabilistic forecasts
-%%    \end{block}
-%%
-%%    \textbf{Probabilistic regression models:}
-%%    \begin{itemize}
-%%        \item Modelling the entire probability distribution rather than just the expectation.
-%%        \item Various model classes and types.
-%%    \end{itemize}
-%%
-%%%%    \textbf{Goodness of fit:}
-%%%%    \begin{itemize}
-%%%%        \item Scoring rules for evaluating the predictive performance, e.g., using the log-score or the (continuous) ranked probability score.
-%%%%        \item Visualizations especially suitable for identifying possible misspecifications.
-%%%%    \end{itemize}
-%%%%
-%%%%    \bigskip
-%%%%    \pause 
-%%%%
-%%%%    \begin{itemize}[<+->]
-%%%%        \item[\BoldRightarrow] \textbf{What are useful elements of such graphics?}
-%%%%        \item[\BoldRightarrow] \textbf{What are relative (dis)advantages?}
-%%%%    \end{itemize}
-%%
-%%\end{frame}
-%%
-%%
-%%%-------------------------------------------------------------------
-%%\subsection{Probabilistic precipitation forecasting}
-%%%-------------------------------------------------------------------
-%%
-%%
-%%
-%%%%% SLIDE
-%%%\begin{frame}[fragile]
-%%%\frametitle{Probabilistic precipitation forecasting}
-%%%
-%%%\vspace{-0.75em}
-%%%
-%%%\textbf{Observation data:}
-%%%\begin{itemize}
-%%%\item 3 day-accumulated precipitation amounts over 13 years (2000--2013).
-%%%\item Observation station ``Innsbruck'' in Austria.
-%%%\end{itemize}
-%%%
-%%%\bigskip
-%%%\pause
-%%%
-%%%\textbf{Covariates:}
-%%%\begin{itemize}
-%%%\item Ensemble mean and standard deviation of numerical precipitation forecasts.
-%%%\end{itemize}
-%%%
-%%%\bigskip
-%%%\pause
-%%%
-%%%\textbf{Model assumptions:} 
-%%%\begin{itemize}
-%%%\item Homoscedastic linear regression: 
-%%%\item[] $\hat \mu_i = \, \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i$, ~ $\hat \sigma = \text{sd}(\epsilon)$
-%%%\item Heteroscedastic censored regression with a logistic distribution assumption:
-%%%\item[] $\text{y}_i \sim \, \text{Logistic}_0\big(\hat \mu_i = \hat \beta_{0} + \hat \beta_1 \cdot \text{ensmean}_i, \, \hat \sigma_i = \exp(\hat \gamma_0 + \hat \gamma_1 \cdot \text{enssd}_i)\big)$
-%%%\end{itemize}
-%%%
-%%%\end{frame}
-%%
-%%%% SLIDE
-%%\begin{frame}[fragile]
-%%\frametitle{Probabilistic precipitation forecasting}
-%%
-%%\textbf{Observed vs. ensmean:}
-%%
-%%\vspace{-2em}
-%%\begin{center}
-%%\setkeys{Gin}{width=0.65\textwidth}
-%%<<rain_scatter1a, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-%%plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
-%%@
-%%\end{center}
-%%\end{frame}
-
-%%%% SLIDE ----------------------------------
-%%\begin{frame}[fragile]
-%%    \frametitle{Weather Forecasting}
-%%
-%%    \textbf{Statistical post-processing}
-%%    \begin{itemize}
-%%        \item Improve accuracy and reliability of raw forecasts.
-%%        \item Account for both, errors in expectation but also uncertainty.
-%%    \end{itemize}
-%%
-%%    \vspace{1em}
-%%    \textbf{Many models available}
-%%    \begin{itemize}
-%%        \item Generalized linear models (GLMs),
-%%        \item generalized additive models (GAMs),
-%%        \item generalized linear models for location, scale, and shape (GAMLSS),
-%%        \item and many more.
-%%    \end{itemize}
-%%
-%%    \vspace{1em}
-%%    $\BoldRightarrow$ We revisit the models by Messner, Mayr, and Zeileis (2010)
-%%        to introduce graphical assessment techniques.
-%%
-%%\end{frame}
 
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
     \frametitle{Weather Forecasting}
 
-    \textbf{Statistical post-processing}
+    \textbf{Statistical post-processing model}
     \begin{itemize}
-        \item Improve accuracy and reliability of raw forecasts.
+        \item Account for the nature of the data.
         \item Account for both, errors in expectation but also uncertainty.
     \end{itemize}
 
@@ -490,21 +429,20 @@ m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
     \textbf{Models} (Messner, Mayr, and Zeileis, 2010)
 
     \begin{table}[!ht]\centering
-    \begin{tabular}{lll}
-         Distribution                              & Location                                         & Scale \\
-        %\midrule[0.09 em]
-        $y_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0$ \\
-        $y_i \sim \mathcal{N}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
-        $y_i \sim \mathcal{L}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
-        %\bottomrule[0.09 em]
-    \end{tabular}
-\end{table}
-
+      \begin{tabular}{llll}
+          & Distribution                              & Location                                         & Scale \\
+          %\midrule[0.09 em]
+          \code{OLS}     & $y_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0$ \\
+          \code{hcnorm}  & $y_i \sim \mathcal{N}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
+          \code{hclog}   & $y_i \sim \mathcal{L}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
+          %\bottomrule[0.09 em]
+      \end{tabular}
+    \end{table}
 
 \end{frame}
 
 
-%% SLIDE
+%% SLIDE ----------------------------------
 \begin{frame}[fragile]
 \frametitle{Probabilistic precipitation forecasting}
 
@@ -518,7 +456,11 @@ m_hclog <- crch::crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0,
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1a, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
+
+####ggplot(data = RainIbk, aes(x = ensmean, y = rain)) + geom_point(col = gray(0, alpha = 0.2)) +
+####    geom_abline(col = 2, intercept = coef(m_lm)[1],     slope = coef(m_lm)[2]) +
+####    geom_abline(col = 3, intercept = coef(m_hcnorm)[1], slope = coef(m_hcnorm)[2])
 @
 \end{center}
 }
@@ -527,7 +469,7 @@ plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alph
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1b, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2], col = 2, lwd = 4)
 
 legend("topleft", lwd = 4, lty = 1, col = 2, "OLS", bty = "n")
@@ -539,7 +481,7 @@ legend("topleft", lwd = 4, lty = 1, col = 2, "OLS", bty = "n")
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1c, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2],     col = 2, lwd = 4)
 abline(coef(m_hcnorm)[1:2], col = 3, lwd = 4)
 
@@ -553,7 +495,7 @@ legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3),
 \begin{center}
 \setkeys{Gin}{width=0.65\textwidth}
 <<rain_scatter1d, fig=TRUE, echo=FALSE, height=5, width=6.>>=
-plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "Rain", col = gray(0, alpha = 0.2))
+plot(rain ~ ensmean, data = RainIbk, pch = 19, ylab = "rain", col = gray(0, alpha = 0.2))
 abline(coef(m_lm)[1:2],     col = 2, lwd = 4)
 abline(coef(m_hcnorm)[1:2], col = 3, lwd = 4)
 abline(coef(m_hclog)[1:2],  col = 4, lwd = 4)
@@ -567,177 +509,232 @@ legend("topleft", lwd = c(4, 4), lty = c(1, 1), col = c(2, 3, 4),
 \end{frame}
 
 
-%% SLIDE
+%% SLIDE ----------------------------------
 \begin{frame}[fragile]
-\frametitle{Graphical assessment}
+    \frametitle{Model assessment}
+
+    \textbf{Assessing goodness of fit}
+    \begin{itemize}
+        \item Checking model calibration using
+        \item proper scoring rules (e.g., CRPS, likelihood, logScore, \dots; CITATION)
+        \item or graphical model assessments.
+    \end{itemize}
+
+    \pause
+    \vspace{1em}
+    \textbf{Graphical model assessment}
+    \begin{itemize}
+        \item Important complement to proper scoring rules
+        \item Checking marginal and probabilistic calibration
+        \item Allows to identify possible misspecifications
+    \end{itemize}
+
+\end{frame}
+
+
+
+%% %% SLIDE ----------------------------------
+%% \begin{frame}[fragile]
+%% \frametitle{Graphical assessment}
+%% 
+%% \vspace{-0.75em}
+%% 
+%% \bigskip
+%% 
+%% \begin{columns}[T]
+%% \begin{column}{0.33\textwidth}
+%% \only<2>{
+%% <<intro_goodness1a_comp, fig=FALSE, echo=FALSE>>=
+%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = FALSE, confint = FALSE, xlab = "rain", plot = FALSE, ref = FALSE))
+%% @
+%% <<intro_goodness1a, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+%% gg
+%% @
+%% 
+%% Marginal calibration:
+%% \begin{itemize}
+%% \item[-] Observed frequencies.
+%% \end{itemize}
+%% }
+%% \only<3->{
+%% <<intro_goodness1b_comp, fig=FALSE, echo=FALSE>>=
+%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = "line", confint = FALSE, xlab = "rain", plot = FALSE, ref = FALSE))
+%% @
+%% <<intro_goodness1b, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+%% gg
+%% @
+%% 
+%% Marginal calibration:
+%% \begin{itemize}
+%% \item[-] Observed frequencies.
+%% \item[-] Compare: Expected.
+%% \end{itemize}
+%% }
+%% \end{column}
+%% 
+%% \pause
+%% \pause
+%% 
+%% \begin{column}{0.33\textwidth}
+%% <<intro_goodness2, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+%% set.seed(0)
+%% pithist(m_lm, type = "random", nsim = 10, fill = "darkgray", alpha = 1, col = "black",
+%%   expected = TRUE, confint = FALSE, simint = FALSE)
+%% @
+%% 
+%% Probabilistic calibration:
+%% \begin{itemize}
+%% \item[-] PIT residuals: $u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i)$.
+%% \item[-] Compare: Uniform.
+%% \end{itemize}
+%% 
+%% \end{column}
+%% 
+%% \pause
+%% 
+%% \begin{column}{0.33\textwidth}
+%% <<intro_goodness3, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+%% set.seed(0)
+%% p_gg <- pithist(m_lm, type = "random", nsim = 10, scale = "normal", plot = FALSE)
+%% autoplot(p_gg, fill = "darkgray", col = "black", alpha = 1, xlab = "(Randomized) quantile residuals",
+%%   expected = FALSE, confint = FALSE, simint = FALSE, xlim = c(-4, 4)) +
+%%   geom_function(fun = dnorm, col = 2, size = 0.75, xlim = c(-4, 4))
+%% @
+%% 
+%% Probabilistic calibration:
+%% \begin{itemize}
+%% \item[-] Quantile residuals: $\hat{r}_i = \Phi^{-1}(u_i)$.
+%% \item[-] Compare: Normal
+%% \end{itemize}
+%% 
+%% \end{column}
+%% \end{columns}
+%% 
+%% 
+%% \end{frame}
+
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+\frametitle{Marginal calibration}
 
 \vspace{-0.75em}
 
-\textbf{However:} Is the model calibrated?
+    \only<1>{\textbf{Frequencies: Observed}}
+    \only<2>{\textbf{Frequencies: Observed vs. expected}}
+    \only<3>{\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}}
 
-\bigskip
-\bigskip
+\vspace{0.25em}
 
-\pause
-
-\begin{columns}[T]
-\begin{column}{0.33\textwidth}
+    \begin{columns}[T]
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<intro_rootogram_lm_prep, fig=FALSE, echo=FALSE>>=
+g1 <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
+g2 <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
+g3 <- autoplot(rootogram(m_lm, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE, fill = "darkgray", fitted = FALSE, xlab = "rain", plot = FALSE))
+@
+\only<1>{
+<<intro_rootogram_lm_1, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+g1
+@
+}
 \only<2>{
-<<intro_goodness1a_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = FALSE, confint = FALSE, xlab = "Rain", plot = FALSE, ref = FALSE))
+<<intro_rootogram_lm_2, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+g2
 @
-<<intro_goodness1a, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-gg
-@
-
-Marginal calibration:
-\begin{itemize}
-\item[-] Observed frequencies.
-\end{itemize}
 }
-\only<3->{
-<<intro_goodness1b_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", fill = "darkgray", expected = "line", confint = FALSE, xlab = "Rain", plot = FALSE, ref = FALSE))
+\only<3>{
+<<intro_rootogram_lm_3, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+g3
 @
-<<intro_goodness1b, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-gg
-@
-
-Marginal calibration:
-\begin{itemize}
-\item[-] Observed frequencies.
-\item[-] Compare: Expected.
-\end{itemize}
 }
-\end{column}
+        \end{column}
+        \begin{column}{.49\textwidth}
+            \vspace{3em}
 
-\pause
-\pause
+            \begin{equation*}
+                \text{obs}_j = \sum_{i=1}^{N} I\big( y_i \in (b_j, b_{j+1}) \big)
+            \end{equation*}
 
-\begin{column}{0.33\textwidth}
-<<intro_goodness2, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-set.seed(0)
-pithist(m_lm, type = "random", nsim = 10, fill = "darkgray", alpha = 1, col = "black",
-  expected = TRUE, confint = FALSE, simint = FALSE)
-@
+            \visible<2->{
+            \begin{equation*}
+                \text{exp}_j = \sum_{i=1}^{N} \big( F(b_{j+1} | \hat{\theta}_i) - F(b_j | \hat{\theta}_i) \big)
+            \end{equation*}
+            }
 
-Probabilistic calibration:
-\begin{itemize}
-\item[-] PIT residuals: $u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i)$.
-\item[-] Compare: Uniform.
-\end{itemize}
-
-\end{column}
-
-\pause
-
-\begin{column}{0.33\textwidth}
-<<intro_goodness3, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
-set.seed(0)
-p_gg <- pithist(m_lm, type = "random", nsim = 10, scale = "normal", plot = FALSE)
-autoplot(p_gg, fill = "darkgray", col = "black", alpha = 1, xlab = "(Randomized) quantile residuals",
-  expected = FALSE, confint = FALSE, simint = FALSE, xlim = c(-4, 4)) +
-  geom_function(fun = dnorm, col = 2, size = 0.75, xlim = c(-4, 4))
-@
-
-Probabilistic calibration:
-\begin{itemize}
-\item[-] Quantile residuals: $\hat{r}_i = \Phi^{-1}(u_i)$.
-\item[-] Compare: Normal
-\end{itemize}
-
-\end{column}
-\end{columns}
-
-
+            \visible<3->{
+                \centering
+                $\BoldRightarrow$ \textbf{Hanging rootogram}
+            }
+        \end{column}
+    \end{columns}
 \end{frame}
 
 
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: Observed}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_rootogram_lm_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
-@
-<<intro_rootogram_lm, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: Observed vs. expected}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_rootogram_hclog_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
-@
-<<intro_rootogram_hclog, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_rootogram3_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m_lm, style = "standing", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
-@
-<<intro_rootogram3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
-
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Marginal calibration}
-
-\vspace{-0.75em}
-
-\textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_rootogram4_comp, fig=FALSE, echo=FALSE>>=
-gg <- autoplot(rootogram(m_lm, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE,, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE), ylim = c(NA, 35), confint_type = "simultaneous")
-<<intro_rootogram4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-gg
-@
-\end{center}
-\end{frame}
+%% %% SLIDE
+%% \begin{frame}[fragile]
+%% \frametitle{Marginal calibration}
+%% 
+%% \vspace{-0.75em}
+%% 
+%% \textbf{Frequencies: Observed vs. expected}
+%% 
+%% \vspace{0.25em}
+%% 
+%% \begin{center}
+%% \setkeys{Gin}{width=0.65\textwidth}
+%% <<intro_rootogram_hclog_comp, fig=FALSE, echo=FALSE>>=
+%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "raw", expected = FALSE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
+%% @
+%% <<intro_rootogram_xxx1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%% gg
+%% @
+%% \end{center}
+%% \end{frame}
+%% 
+%% 
+%% %% SLIDE
+%% \begin{frame}[fragile]
+%% \frametitle{Marginal calibration}
+%% 
+%% \vspace{-0.75em}
+%% 
+%% \textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
+%% 
+%% \vspace{0.25em}
+%% 
+%% \begin{center}
+%% \setkeys{Gin}{width=0.65\textwidth}
+%% <<intro_rootogram3_comp, fig=FALSE, echo=FALSE>>=
+%% gg <- autoplot(rootogram(m_lm, style = "standing", scale = "sqrt", expected = TRUE, confint = FALSE, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE))
+%% @
+%% <<intro_rootogram3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%% gg
+%% @
+%% \end{center}
+%% \end{frame}
+%% 
+%% 
+%% %% SLIDE
+%% \begin{frame}[fragile]
+%% \frametitle{Marginal calibration}
+%% 
+%% \vspace{-0.75em}
+%% 
+%% \textbf{Frequencies: $\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$}
+%% 
+%% \vspace{0.25em}
+%% 
+%% \begin{center}
+%% \setkeys{Gin}{width=0.65\textwidth}
+%% <<intro_rootogram4_comp, fig=FALSE, echo=FALSE>>=
+%% gg <- autoplot(rootogram(m_lm, style = "hanging", scale = "sqrt", expected = TRUE, confint = TRUE,, fill = "darkgray", fitted = FALSE, xlab = "Rain", plot = FALSE), ylim = c(NA, 35), confint_type = "simultaneous")
+%% <<intro_rootogram4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%% gg
+%% @
+%% \end{center}
+%% \end{frame}
 
 
 %%% SLIDE
@@ -765,36 +762,86 @@ gg
 %
 %\end{frame}
 
-
-%% SLIDE
+%% SLIDE ----------------------------------
 \begin{frame}[fragile]
 \frametitle{Probabilistic calibration}
 
 \vspace{-0.75em}
 
-\textbf{PIT residuals:}
+    \textbf{PIT residuals}
 
 \vspace{0.25em}
 
+    \begin{columns}[T]
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<intro_rootogram_lm_prep, fig=FALSE, echo=FALSE>>=
+p1 <- autoplot(pithist(m_lm, confint = FALSE, expected = FALSE))
+p2 <- autoplot(pithist(m_lm))
+@
 \only<1>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_pithist1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+<<intro_pithist_lm_1, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+p1
 @
-\end{center}
 }
-
 \only<2>{
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_pithist1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+<<intro_pithist_lm_2, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+p2
 @
-\end{center}
 }
+        \end{column}
+        \begin{column}{.49\textwidth}
+            \vspace{3em}
 
+            Continuous case
+            \begin{equation*}
+                \text{u}_i = F(y_i | \hat{\theta})
+            \end{equation*}
+
+            \vspace{1em}
+
+            Discrete case: random draw from
+            \begin{equation*}
+                \Big[F(y_i - 1 | \hat{\theta}_i), F(y_i, | \hat{\theta}_i)\Big]
+            \end{equation*}
+
+            \only<2>{
+                \centering
+                $\BoldRightarrow$ \textbf{Uniform scale: PIT histogram}
+            }
+        \end{column}
+    \end{columns}
 \end{frame}
+
+%%  %% SLIDE
+%%  \begin{frame}[fragile]
+%%  \frametitle{Probabilistic calibration}
+%%  
+%%  \vspace{-0.75em}
+%%  
+%%  \textbf{PIT residuals:}
+%%  
+%%  \vspace{0.25em}
+%%  
+%%  \only<1>{
+%%  \begin{center}
+%%  \setkeys{Gin}{width=0.65\textwidth}
+%%  <<intro_pithist1a, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%%  pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+%%  @
+%%  \end{center}
+%%  }
+%%  
+%%  \only<2>{
+%%  \begin{center}
+%%  \setkeys{Gin}{width=0.65\textwidth}
+%%  <<intro_pithist1b, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%%  pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, plot = "ggplot2", ref_size = 1, confint_size = 1)
+%%  @
+%%  \end{center}
+%%  }
+%%  
+%%  \end{frame}
 
 
 %%% SLIDE
@@ -828,44 +875,104 @@ pithist(m_lm, type = "expected", fill = "darkgray", col = "black", expected = TR
 %\end{frame}
 
 
-%% SLIDE
+%% SLIDE ----------------------------------
 \begin{frame}[fragile]
 \frametitle{Probabilistic calibration}
 
 \vspace{-0.75em}
 
-\textbf{Quantile residuals: Observed vs. expected}
+    \only<1>{\textbf{Quantile residuals: Observed vs. expected}}
+    \only<2>{\textbf{Quantile residuals: Deviations}}
 
 \vspace{0.25em}
 
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(3)
-qqrplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
+    \begin{columns}[T]
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<intro_rootogram_lm_prep, fig=FALSE, echo=FALSE>>=
+q1 <- autoplot(qqrplot(m_lm, confint = TRUE))
+q2 <- autoplot(wormplot(m_lm))
 @
-\end{center}
+\only<1>{
+<<intro_qqrplot_lm, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+q1
+@
+}
+\only<2>{
+<<intro_wormplot_lm, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+q2
+@
+}
+        \end{column}
+        \begin{column}{.49\textwidth}
+            \vspace{1em}
+
+            \begin{equation*}
+                \hat{r}_i = \Phi^{-1}\Big(F(y_i | \hat{\theta}_i)\Big) = \Phi^{-1}(u_i)
+            \end{equation*}
+
+            \begin{equation*}
+                (z_{(1)}, \hat{r}_{(1)}), \dots, (z_{(N)}, \hat{r}_{(N)})
+            \end{equation*}
+
+            {
+                \vspace{1em}
+                \centering
+                $\BoldRightarrow$ \textbf{Quantile-quantile residual plot}
+            }
+
+            \visible<2->{
+                \begin{equation*}
+                    (z_{(1)}, \hat{r}_{(1)} - z_{(1)}), \dots, (z_{(N)}, \hat{r}_{(N)} - z_{(N)})
+                \end{equation*}
+
+                {
+                    \centering
+                    $\BoldRightarrow$ \textbf{Wormplot}
+                }
+            }
+        \end{column}
+    \end{columns}
 \end{frame}
 
-
-%% SLIDE
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-\textbf{Quantile residuals: Deviations}
-
-\vspace{0.25em}
-
-\begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<intro_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-set.seed(3)
-wormplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE, ylim = c(-0.5, 1.35))
-@
-\end{center}
-\end{frame}
+%%  %% SLIDE
+%%  \begin{frame}[fragile]
+%%  \frametitle{Probabilistic calibration}
+%%  
+%%  \vspace{-0.75em}
+%%  
+%%  \textbf{Quantile residuals: Observed vs. expected}
+%%  
+%%  \vspace{0.25em}
+%%  
+%%  \begin{center}
+%%  \setkeys{Gin}{width=0.65\textwidth}
+%%  <<intro_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%%  set.seed(3)
+%%  qqrplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = "line", simint = FALSE)
+%%  @
+%%  \end{center}
+%%  \end{frame}
+%%  
+%%  
+%%  %% SLIDE
+%%  \begin{frame}[fragile]
+%%  \frametitle{Probabilistic calibration}
+%%  
+%%  \vspace{-0.75em}
+%%  
+%%  \textbf{Quantile residuals: Deviations}
+%%  
+%%  \vspace{0.25em}
+%%  
+%%  \begin{center}
+%%  \setkeys{Gin}{width=0.65\textwidth}
+%%  <<intro_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+%%  set.seed(3)
+%%  wormplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALSE, ylim = c(-0.5, 1.35))
+%%  @
+%%  \end{center}
+%%  \end{frame}
 
 
 %%% SLIDE
@@ -951,46 +1058,64 @@ wormplot(m_lm, plot = "ggplot2", ref_linetype = 1, confint = TRUE, simint = FALS
 %\end{frame}
 
 
-%% SLIDE
+%% SLIDE ----------------------------------
 \begin{frame}[fragile]
 \frametitle{Model comparison}
 
-\vspace{-0.75em}
-
-\textbf{Quantile residuals: Deviations}
-
-\vspace{0.25em}
-
 \begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-w1 <- wormplot(m_lm, plot = FALSE)
-w2 <- wormplot(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon", ylim = c(-0.5, 1.35))
+    \textbf{Hanging rootograms}
+\setkeys{Gin}{width=1\textwidth}
+<<comparison_rootogram, fig=TRUE, echo=FALSE, height=3, width=6>>=
+par(mfrow = c(1, 3), mar = c(4, 3, 1, 1))
+plot(r1 <- rootogram(m_lm, plot = FALSE, main = "OLS", col = 2))
+plot(r2 <- rootogram(m_hcnorm, plot = FALSE, main = "hcnorm", col = 3))
+plot(r3 <- rootogram(m_hclog, plot = FALSE, main = "hclog", col = 4))
 @
 \end{center}
 \end{frame}
 
-
-%% SLIDE
+%% SLIDE ----------------------------------
 \begin{frame}[fragile]
 \frametitle{Model comparison}
 
-\vspace{-0.75em}
-
-\textbf{PIT residuals:}
-
-\vspace{0.25em}
-
 \begin{center}
-\setkeys{Gin}{width=0.65\textwidth}
-<<rain_pithist2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
-p1 <- pithist(m_lm, plot = FALSE)
-p2 <- pithist(m_hclog, plot = FALSE)
-ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_fill = 1, confint_alpha = 0.1, size = 1, confint = "polygon", ref = FALSE)
+    \textbf{Multi-model PIT histogram} \\
+\setkeys{Gin}{width=.65\textwidth}
+<<comparison_pithist, fig=TRUE, echo=FALSE, height=4, width=6>>=
+tmp <- lapply(list(m_lm, m_hcnorm, m_hclog), pithist, plot = FALSE)
+autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
 @
 \end{center}
 \end{frame}
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+\frametitle{Model comparison}
+
+\begin{center}
+    \textbf{Multi-model QQ-residual plot} \\
+\setkeys{Gin}{width=.65\textwidth}
+<<comparison_qqrplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
+tmp <- lapply(list(m_lm, m_hcnorm, m_hclog), qqrplot, plot = FALSE)
+autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
+@
+\end{center}
+\end{frame}
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+\frametitle{Model comparison}
+
+\begin{center}
+    \textbf{Multi-model wormplot} \\
+\setkeys{Gin}{width=.65\textwidth}
+<<comparison_wormplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
+tmp <- lapply(list(m_lm, m_hcnorm, m_hclog), wormplot, plot = FALSE)
+autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
+@
+\end{center}
+\end{frame}
+
 
 %-------------------------------------------------------------------
 \subsection{Summary}
