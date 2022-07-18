@@ -160,7 +160,7 @@ expect_true(all(p3r_normal$observed < p3r_normal$simint_upr),
 
 
 # given we used a fixed seed the sha1 hash must be ...
-expect_identical(sha1(p3r_normal), "2dfdf0a6126f2d153076f670515aaa9cb339896f",
+expect_identical(sha1(p3r_normal), "80a66ac3be1f028cb8e37d452b232fe1dfb216e2",
                  info = "compare result of (pseudo-)random pithist with sha1")
 
 # Testing nsim = 1 (default) against nsim = 10 and nsim = 20; expecting sharper intervals
@@ -210,6 +210,6 @@ rm(p3r_normal_nosimint)
 set.seed(seed); expect_silent(tmp <- pithist(m3, plot = FALSE, nsim = 1, type = "random", scale = "normal", class = "data.frame", simint_nrep = 100))
 expect_true(!identical(p3r_normal, tmp),
             info = "different number of repetitions for drawing quantiles - results not identical")
-expect_identical(sha1(tmp), "806b01222490d9384d718270162b0a7b186cd555")
+expect_identical(sha1(tmp), "7883be6c78488cbee41b9add5206bf40697c5597")
 
 rm(p3r_normal, tmp)
