@@ -340,7 +340,7 @@ pithist.default <- function(
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
     F <- if (all(abs(p[, 2L] - p[, 1L]) < sqrt(.Machine$double.eps))) {
-      function(u) as.numeric(u >= p[, 1L])
+      function(u) as.numeric(pFun(u) >= p[, 1L])
       ## TODO: (Z) Check inequality sign to cover include.lowest/right options.
     } else {
       #function(u) punif(u, min = p[, 1L], max = p[, 2L]) # original 
