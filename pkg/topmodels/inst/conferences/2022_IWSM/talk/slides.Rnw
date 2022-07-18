@@ -89,7 +89,7 @@ invisible(.Call(grDevices:::C_palette, grDevices::hcl(
 
 if(!require("devtools")) install.packages("devtools")
 ##RETO## install_svn("svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels",
-##RETO##             revision = "r1631", quiet = TRUE, upgrade = "never")
+##RETO##             revision = "r1635", quiet = TRUE, upgrade = "never")
 library("topmodels")
 library("sf")
 library("stars")
@@ -185,6 +185,7 @@ data("RainIbk", package = "crch")
         \item Important in many fields (e.g., medicine, economics, meteorology, \dots)
     \end{itemize}
 
+    \pause
     \vspace{2em}
     \textbf{Objective}
     \begin{itemize}
@@ -331,7 +332,7 @@ ggsave("slides_demo_ens.pdf", width = 3.5, height = 3.2)
 \begin{frame}[fragile]
     \frametitle{Case study}
 
-    \vspace{2em}
+    \vspace{0.5em}
     \begin{columns}[T]
         \begin{column}{0.49\textwidth}
             \includegraphics[width = \textwidth]{slides_demo_fcst.pdf}
@@ -746,7 +747,7 @@ p2
 
             \vspace{1em}
 
-            Discrete case (\emph{Czado et\,al. 2009)})
+            Discrete case (\emph{Czado et\,al. 2009})
             \begin{equation*}
                 u_i = F(y_i - 1 | \hat{\theta}_i) + \nu \Big[F(y_i - 1 | \hat{\theta}_i), F(y_i, | \hat{\theta}_i)\Big]
             \end{equation*}
@@ -756,6 +757,33 @@ p2
                 \centering
                 $\BoldRightarrow$ \textbf{Uniform scale: PIT histogram}
             }
+        \end{column}
+    \end{columns}
+\end{frame}
+
+
+
+%% SLIDE ----------------------------------
+\begin{frame}[fragile]
+\frametitle{Probabilistic calibration}
+
+\vspace{-0.75em}
+
+    \textbf{PIT residuals: Normal scale}
+
+\vspace{0.25em}
+
+    \begin{columns}[T]
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<intro_pithist_lm_normal, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+autoplot(pithist(ols, confint = TRUE, expected = TRUE, type = "random", scale = "normal", breaks = seq(-3.0, 5.0, by = 0.5)))
+@
+        \end{column}
+        \begin{column}{.49\textwidth}
+            \vspace{1em}
+
+            TODO
         \end{column}
     \end{columns}
 \end{frame}
@@ -862,7 +890,7 @@ autoplot(qqrplot(ols, confint = TRUE))
             {
                 \vspace{2em}
                 \centering
-                $\BoldRightarrow$ \textbf{(Randomized) Q-Q residual plot}
+                $\BoldRightarrow$ \textbf{(Randomized) Q-Q~residual plot}
             }
 
         \end{column}
@@ -891,7 +919,7 @@ autoplot(wormplot(ols))
         \begin{column}{.49\textwidth}
             \vspace{1em}
 
-            Detrended Q-Q residuals:
+            Detrended Q-Q~residuals:
             \begin{equation*}
                 (z_{(1)}, \hat{r}_{(1)} - z_{(1)}), \dots, (z_{(N)}, \hat{r}_{(N)} - z_{(N)})
             \end{equation*}
@@ -980,6 +1008,52 @@ autoplot(wormplot(ols))
 %
 %\end{frame}
 
+
+
+%% SLIDE
+\begin{frame}[fragile]
+    \frametitle{Implementation}
+
+    \vspace{-0.75em}
+
+<<eval = FALSE>>=
+library("topmodels")
+@
+\medskip
+
+<<eval = FALSE>>=
+rootogram(ols, ...)
+autoplot(c(rootogram(ols), rootogram(hcnorm)), ...)
+@
+\medskip
+
+<<eval = FALSE>>=
+pithist(ols)
+plot(c(pithist(ols), pithist(hcnorm)))
+plot(c(pithist(ols), pithist(hcnorm)), single_graph = TRUE, style = "l", ...)
+@
+\medskip
+
+<<eval = FALSE>>=
+qqrplot(ols)
+plot(c(qqrplot(ols), qqrplot(hcnorm)))
+plot(c(qqrplot(ols), qqrplot(hcnorm)), single_graph = TRUE, ...)
+@
+\medskip
+
+<<eval = FALSE>>=
+qqrplot(ols)
+wormplot(ols)
+plot(c(wormplot(ols), wormplot(hcnorm)))
+plot(c(wormplot(ols), wormplot(hcnorm)), single_graph = TRUE, ...)
+@
+
+\medskip
+Both implemented with R base graphics and \code{ggplot2::autoplot}.
+
+\end{frame}
+
+
 %-------------------------------------------------------------------
 \subsection{Model comparison}
 %-------------------------------------------------------------------
@@ -1047,49 +1121,113 @@ plot(r2 <- rootogram(hcnorm, plot = FALSE, confint = FALSE), expected_col = 3, y
 \end{center}
 \end{frame}
 
+
+
+%%%%    %% SLIDE ----------------------------------
+%%%%    \begin{frame}[fragile]
+%%%%    \frametitle{Model comparison}
+%%%%
+%%%%    \begin{center}
+%%%%        \textbf{Multi-model PIT histogram} \\
+%%%%    \setkeys{Gin}{width=.65\textwidth}
+%%%%    <<comparison_pithist, fig=TRUE, echo=FALSE, height=4, width=6>>=
+%%%%    tmp <- lapply(list(ols, hcnorm, hclog), pithist, plot = FALSE)
+%%%%    autoplot(do.call(rbind, tmp), nrow = 1, style = "line", single_graph = TRUE, col = 2:4)
+%%%%    @
+%%%%    \end{center}
+%%%%    \end{frame}
+%%%%    
+%%%%    %% SLIDE ----------------------------------
+%%%%    \begin{frame}[fragile]
+%%%%    \frametitle{Model comparison}
+%%%%    
+%%%%    \begin{center}
+%%%%        \textbf{Multi-model PIT histogram} \\
+%%%%    \setkeys{Gin}{width=.65\textwidth}
+%%%%    <<comparison_pithist_norm, fig=TRUE, echo=FALSE, height=4, width=6>>=
+%%%%    tmp <- lapply(list(ols, hcnorm, hclog), pithist, plot = FALSE, scale = "normal")
+%%%%    autoplot(do.call(rbind, tmp), nrow = 1, style = "line", single_graph = TRUE, col = 2:4)
+%%%%    @
+%%%%    \end{center}
+%%%%    \end{frame}
+
+
+
+
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
 \frametitle{Model comparison}
 
-\begin{center}
-    \textbf{Multi-model PIT histogram} \\
-\setkeys{Gin}{width=.65\textwidth}
-<<comparison_pithist, fig=TRUE, echo=FALSE, height=4, width=6>>=
+    \begin{columns}[T]
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<comparison_pithist_columns, fig=TRUE, echo=FALSE, height=3, width=3>>=
 tmp <- lapply(list(ols, hcnorm, hclog), pithist, plot = FALSE)
-autoplot(do.call(rbind, tmp), nrow = 1, style = "line", single_graph = TRUE, col = 2:4)
+autoplot(do.call(rbind, tmp), nrow = 1, style = "line", single_graph = TRUE, col = 2:4,
+         main = "PIT histogram\nuniform scale")
 @
-\end{center}
+        \end{column}
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<comparison_pithist_norm_columns, fig=TRUE, echo=FALSE, height=3, width=3>>=
+tmp <- lapply(list(ols, hcnorm, hclog), pithist, plot = FALSE, scale = "normal")
+autoplot(do.call(rbind, tmp), nrow = 1, style = "line", single_graph = TRUE, col = 2:4,
+         main = "PIT histogram\nnormal scale")
+@
+        \end{column}
+    \end{columns}
 \end{frame}
+
+%%%%%    %% SLIDE ----------------------------------
+%%%%%    \begin{frame}[fragile]
+%%%%%    \frametitle{Model comparison}
+%%%%%    
+%%%%%    \begin{center}
+%%%%%        \textbf{Multi-model Q-Q~residual plot} \\
+%%%%%    \setkeys{Gin}{width=.65\textwidth}
+%%%%%    <<comparison_qqrplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
+%%%%%    tmp <- lapply(list(ols, hcnorm, hclog), qqrplot, plot = FALSE)
+%%%%%    autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
+%%%%%    @
+%%%%%    \end{center}
+%%%%%    \end{frame}
+%%%%%    
+%%%%%    %% SLIDE ----------------------------------
+%%%%%    \begin{frame}[fragile]
+%%%%%    \frametitle{Model comparison}
+%%%%%    
+%%%%%    \begin{center}
+%%%%%        \textbf{Multi-model wormplot} \\
+%%%%%    \setkeys{Gin}{width=.65\textwidth}
+%%%%%    <<comparison_wormplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
+%%%%%    tmp <- lapply(list(ols, hcnorm, hclog), wormplot, plot = FALSE)
+%%%%%    autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
+%%%%%    @
+%%%%%    \end{center}
+%%%%%    \end{frame}
+
 
 %% SLIDE ----------------------------------
 \begin{frame}[fragile]
 \frametitle{Model comparison}
 
-\begin{center}
-    \textbf{Multi-model QQ-residual plot} \\
-\setkeys{Gin}{width=.65\textwidth}
-<<comparison_qqrplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
+    \begin{columns}[T]
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<comparison_qqrplot_columns, fig=TRUE, echo=FALSE, height=3, width=3>>=
 tmp <- lapply(list(ols, hcnorm, hclog), qqrplot, plot = FALSE)
-autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
+autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4, main = "Q-Q residual plot")
 @
-\end{center}
-\end{frame}
-
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-\frametitle{Model comparison}
-
-\begin{center}
-    \textbf{Multi-model wormplot} \\
-\setkeys{Gin}{width=.65\textwidth}
-<<comparison_wormplot, fig=TRUE, echo=FALSE, height=4, width=6>>=
+        \end{column}
+        \begin{column}{.49\textwidth}
+        \setkeys{Gin}{width=1\textwidth}
+<<comparison_wormplot_columns, fig=TRUE, echo=FALSE, height=3, width=3>>=
 tmp <- lapply(list(ols, hcnorm, hclog), wormplot, plot = FALSE)
-autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
+autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4, main = "Wormplot")
 @
-\end{center}
+        \end{column}
+    \end{columns}
 \end{frame}
-
-
 
 
 %-------------------------------------------------------------------
@@ -1102,46 +1240,38 @@ autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4)
 
     \vspace{-0.75em}
 
-<<eval = FALSE>>=
-rootogram(ols, ...)
-autoplot(c(rootogram(ols), rootogram(hcnorm)), ...)
-
-pithist(ols)
-plot(c(pithist(ols), pithist(hcnorm)))
-plot(c(pithist(ols), pithist(hcnorm)), single_graph = TRUE, style = "l", ...)
-
-qqrplot(ols)
-plot(c(qqrplot(ols), qqrplot(hcnorm)))
-plot(c(qqrplot(ols), qqrplot(hcnorm)), single_graph = TRUE, ...)
-
-wormplot(ols)
-plot(c(wormplot(ols), wormplot(hcnorm)))
-plot(c(wormplot(ols), wormplot(hcnorm)), single_graph = TRUE, ...)
-@
-
-Both implemented with R base graphics and \code{ggplot2::autoplot}
-
-\end{frame}
-
-%% SLIDE
-\begin{frame}[fragile]
-    \frametitle{Summary}
-
-    \vspace{-0.75em}
-
-    \textbf{Graphical assessments:} Various possibilities suggested in different parts of the literature.
+    \textbf{Graphical assessments:} \\
+    Various possibilities suggested in different parts of the literature.
 
     \begin{itemize}
       \item Rootogram.
       \item Probability integral transform (PIT) histogram.
       \item (Randomized) quantile-quantile residuals plot.
-      \item Detrended Q-Q residuals plot or worm plot.
+      \item Detrended Q-Q~residuals plot or worm plot.
       \item Reliability diagram at prespecified thresholds.
     \end{itemize}
 
-    \pause
-    \medskip
-    \bigskip
+    %%\pause
+    %%\bigskip
+
+    %%\textbf{topmodels:} Unifying toolbox for graphical model assessment.
+
+    %%\begin{itemize}
+    %%  \item available on R-Forge at \small{\url{https://topmodels.R-Forge.R-project.org/}}
+    %%\end{itemize}
+
+    %%\bigskip
+    %%\textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
+
+\end{frame}
+
+
+%% SLIDE
+\usebackgroundtemplate{\includegraphics[width=\paperwidth]{background.pdf}}
+\begin{frame}[fragile]
+    \frametitle{Summary}
+
+    \vspace{-0.75em}
 
     \textbf{topmodels:} Unifying toolbox for graphical model assessment.
 
@@ -1149,49 +1279,17 @@ Both implemented with R base graphics and \code{ggplot2::autoplot}
       \item available on R-Forge at \small{\url{https://topmodels.R-Forge.R-project.org/}}
     \end{itemize}
 
+    \bigskip
+    \textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
+
+    \bigskip
+    \textbf{Graphics:} Implemented in R~base graphics and \code{ggplot2}.
+    
+    \bigskip
+    \textbf{Models:} \code{(g)lm}, \code{crch}, \code{disttree}, and more to come.
+
 \end{frame}
-
-
-
-%%% SLIDE
-%\begin{frame}
-%\frametitle{Software}
-%\vspace{-0.75em}
-%\textbf{topmodels}: available on R-Forge at\\
-%
-%\medskip
-%
-%\small{\url{https://topmodels.R-Forge.R-project.org/}}\\
-%
-%\bigskip
-%\medskip
-%
-%\textbf{Concept:} Unifying toolbox for probabilistic forecasts and graphical model assessment.
-%
-%\pause
-%
-%\bigskip
-%\medskip
-%
-%\textbf{Main functions:}
-%
-%\medskip
-%
-%\begin{tabular}{ll}
-%\code{procast}    & Probabilistic forecasts (\code{(g)lm}, \code{crch}, \code{disttree}, more to come).\\
-%& Computation of probabilities, densities, scores, and Hessians. \\
-%\code{rootogram}, \code{pithist}, & Plotting rootograms, PIT histograms,\\
-%\code{qqrplot}, \code{wormplot}, & (randomized) Q-Q plots, worm plots,\\
-%\code{reliagram} & and reliability diagrams.\\
-%\code{plot, autoplot}   & Generic \code{plot}, \code{autoplot} function.%\\
-%% \code{c}   & Generic \code{concatenate} function to plot combined objects.
-%\end{tabular}
-%
-%\bigskip
-%\medskip
-%
-%\end{frame}
-
+\usebackgroundtemplate{}
 
 %-------------------------------------------------------------------
 \subsection{References}
