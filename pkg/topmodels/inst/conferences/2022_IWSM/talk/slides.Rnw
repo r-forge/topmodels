@@ -742,7 +742,7 @@ p2
 
             Continuous case
             \begin{equation*}
-                u_i = F(y_i | \hat{\theta})
+                u_i = F(y_i | \hat{\theta}_i)
             \end{equation*}
 
             \vspace{1em}
@@ -783,7 +783,15 @@ autoplot(pithist(ols, confint = TRUE, expected = TRUE, type = "random", scale = 
         \begin{column}{.49\textwidth}
             \vspace{1em}
 
-            TODO
+            PIT residuals on normal scale:
+
+            \begin{equation*}
+                u_i^* = \Phi^{-1}\big(u_i\big)
+            \end{equation*}
+
+            \vspace{1em}
+            \dots to emphasize tail distribution.
+
         \end{column}
     \end{columns}
 \end{frame}
@@ -1010,11 +1018,10 @@ autoplot(wormplot(ols))
 
 
 
-%% SLIDE
+%% SLIDE -----------------------------------------
 \begin{frame}[fragile]
-    \frametitle{Implementation}
+    \frametitle{\textbf{topmodels} implementation}
 
-    \vspace{-0.75em}
 
 <<eval = FALSE>>=
 library("topmodels")
@@ -1023,35 +1030,33 @@ library("topmodels")
 
 <<eval = FALSE>>=
 rootogram(ols, ...)
-autoplot(c(rootogram(ols), rootogram(hcnorm)), ...)
+pithist(ols, ...)
+qqrplot(ols, ...)
+wormplot(ols, ...)
 @
+\pause
 \medskip
 
 <<eval = FALSE>>=
-pithist(ols)
-plot(c(pithist(ols), pithist(hcnorm)))
+plot(c(pithist(ols), pithist(hcnorm)), ...)
 plot(c(pithist(ols), pithist(hcnorm)), single_graph = TRUE, style = "l", ...)
 @
 \medskip
 
 <<eval = FALSE>>=
-qqrplot(ols)
-plot(c(qqrplot(ols), qqrplot(hcnorm)))
+plot(c(qqrplot(ols), qqrplot(hcnorm)), ...)
 plot(c(qqrplot(ols), qqrplot(hcnorm)), single_graph = TRUE, ...)
 @
 \medskip
 
 <<eval = FALSE>>=
-qqrplot(ols)
-wormplot(ols)
-plot(c(wormplot(ols), wormplot(hcnorm)))
+plot(c(wormplot(ols), wormplot(hcnorm)), ...)
 plot(c(wormplot(ols), wormplot(hcnorm)), single_graph = TRUE, ...)
 @
 
-\medskip
-Both implemented with R base graphics and \code{ggplot2::autoplot}.
 
 \end{frame}
+
 
 
 %-------------------------------------------------------------------
@@ -1300,6 +1305,7 @@ autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4, main = "
 \begin{frame}
 \frametitle{References}
 
+    \vspace{-0.5em}
 \footnotesize
 
 Lang MN, Zeileis A \emph{et al.} (2021).
@@ -1357,7 +1363,7 @@ Messner JW, Mayr GJ, Zeileis A (2016).
 
 %% SLIDE
 \title[]{\large{\color{uibkgraym}\url{https://topmodels.R-Forge.R-project.org/}}}
-\author[]{\footnotesize \faEnvelope\,\,\href{mailto:moritz.lang@uibk.ac.at}{moritz.lang@uibk.ac.at} \hspace{1em} \faTwitter\,\href{https://twitter.com/MoritzNLang}{MoritzNLang}}
+\author[]{\footnotesize \faEnvelope\,\,\href{mailto:Reto.Stauffer@uibk.ac.at}{Reto.Stauffer@uibk.ac.at}}
 \URL{}
 
 %%% SLIDE
