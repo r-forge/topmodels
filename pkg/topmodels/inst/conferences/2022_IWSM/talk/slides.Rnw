@@ -52,6 +52,10 @@
 \usepackage{fontawesome}
 \usepackage{ccicons}
 
+\definecolor{mred}{RGB}{223,83,107}
+\definecolor{mgreen}{RGB}{97,208,79}
+\definecolor{mblue}{RGB}{34,151,230}
+
 %% Define some new commands
 \newcommand{\credit}[1]{\par\hfill \tiny  \ccCopy ~\itshape#1}
 \newcommand{\argmax}{\operatorname{argmax}\displaylimits}
@@ -230,9 +234,9 @@ data("RainIbk", package = "crch")
 
     \textbf{Weather forecasts}
     \begin{itemize}
-        \item Typically physically-based numerical weather prediction models.
+        \item Typically physically-based numerical weather prediction models
         \item Multiple runs with modified conditions $\rightarrow$ ensemble forecasts
-        \item Various sources of possible errors due to necessary simplifications.
+        \item Various sources of possible errors due to necessary simplifications
     \end{itemize}
 
     \pause
@@ -412,9 +416,10 @@ ggsave("slides_data_figs_scatter.pdf", width = 3.5, height = 3.5)
       \begin{tabular}{llll}
           & Distribution                              & Location                                         & Scale \\
           %\midrule[0.09 em]
-          \code{ols}     & $y_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0$ \\
-          \code{hcnorm}  & $y_i \sim \mathcal{N}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
-          \code{hclog}   & $y_i \sim \mathcal{L}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
+          \textcolor{mred}{\textbf{ols}}     & $y_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$   & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0$ \\
+          \pause
+          \textcolor{mgreen}{\textbf{hcnorm}}  & $y_i \sim \mathcal{N}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
+          \textcolor{mblue}{\textbf{hclog}}   & $y_i \sim \mathcal{L}_0(\mu_i, \sigma_i^2)$ & $\hat{\mu}_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{ensmean}_i$ & $\log(\hat{\sigma}_i) = \hat{\gamma}_0 + \hat{\gamma}_1 \cdot \log(\text{enssd}_i)$ \\
           %\bottomrule[0.09 em]
       \end{tabular}
     \end{table}
@@ -763,38 +768,38 @@ p2
 
 
 
-%% SLIDE ----------------------------------
-\begin{frame}[fragile]
-\frametitle{Probabilistic calibration}
-
-\vspace{-0.75em}
-
-    \textbf{PIT residuals: Normal scale}
-
-\vspace{0.25em}
-
-    \begin{columns}[T]
-        \begin{column}{.49\textwidth}
-        \setkeys{Gin}{width=1\textwidth}
-<<intro_pithist_lm_normal, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
-autoplot(pithist(ols, confint = TRUE, expected = TRUE, type = "random", scale = "normal", breaks = seq(-3.0, 5.0, by = 0.5)))
-@
-        \end{column}
-        \begin{column}{.49\textwidth}
-            \vspace{1em}
-
-            PIT residuals on normal scale:
-
-            \begin{equation*}
-                u_i^* = \Phi^{-1}\big(u_i\big)
-            \end{equation*}
-
-            \vspace{1em}
-            \dots to emphasize tail distribution.
-
-        \end{column}
-    \end{columns}
-\end{frame}
+%% %% SLIDE ----------------------------------
+%% \begin{frame}[fragile]
+%% \frametitle{Probabilistic calibration}
+%% 
+%% \vspace{-0.75em}
+%% 
+%%     \textbf{PIT residuals: Normal scale}
+%% 
+%% \vspace{0.25em}
+%% 
+%%     \begin{columns}[T]
+%%         \begin{column}{.49\textwidth}
+%%         \setkeys{Gin}{width=1\textwidth}
+%% <<intro_pithist_lm_normal, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+%% autoplot(pithist(ols, confint = TRUE, expected = TRUE, type = "random", scale = "normal", breaks = seq(-3.0, 5.0, by = 0.5)))
+%% @
+%%         \end{column}
+%%         \begin{column}{.49\textwidth}
+%%             \vspace{1em}
+%% 
+%%             PIT residuals on normal scale:
+%% 
+%%             \begin{equation*}
+%%                 \hat{r}_i = \Phi^{-1}\Big(F(y_i | \hat{\theta}_i)\Big) = \Phi^{-1}(u_i)
+%%             \end{equation*}
+%% 
+%%             \vspace{1em}
+%%             \dots to emphasize tail distribution.
+%% 
+%%         \end{column}
+%%     \end{columns}
+%% \end{frame}
 
 %%  %% SLIDE
 %%  \begin{frame}[fragile]
@@ -864,22 +869,25 @@ autoplot(pithist(ols, confint = TRUE, expected = TRUE, type = "random", scale = 
 
 \vspace{-0.75em}
 
-    \textbf{Quantile residuals: Observed vs. expected}
+    \only<1>{\textbf{PIT residuals: Normal scale}}
+    \only<2>{\textbf{Quantile residuals: Observed vs. expected}}
 
     \vspace{0.25em}
 
     \begin{columns}[T]
         \begin{column}{.49\textwidth}
         \setkeys{Gin}{width=1\textwidth}
-<<intro_qqrplot_lm, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
-autoplot(qqrplot(ols, confint = TRUE))
+            \only<1>{
+<<intro_pithist_lm_normal, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+autoplot(pithist(ols, confint = TRUE, expected = TRUE, type = "random", scale = "normal", breaks = seq(-3.0, 5.0, by = 0.5)))
 @
-%}
-%\only<2>{
-%<<intro_wormplot_lm, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
-%q2
-%@
-%}
+            }
+            \only<2>{
+<<intro_qqrplot_lm, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
+qqrplot(ols, col = 2, plot = "ggplot2")
+#autoplot(qqrplot(ols, confint = TRUE), col = "red")
+@
+            }
         \end{column}
         \begin{column}{.49\textwidth}
             \vspace{1em}
@@ -889,16 +897,18 @@ autoplot(qqrplot(ols, confint = TRUE))
                 \hat{r}_i = \Phi^{-1}\Big(F(y_i | \hat{\theta}_i)\Big) = \Phi^{-1}(u_i)
             \end{equation*}
 
-            \vspace{1em}
-            Data pairs: 
-            \begin{equation*}
-                (z_{(1)}, \hat{r}_{(1)}), \dots, (z_{(N)}, \hat{r}_{(N)})
-            \end{equation*}
+            \only<2>{
+                \vspace{1em}
+                Data pairs:
+                \begin{equation*}
+                    (z_{(1)}, \hat{r}_{(1)}), \dots, (z_{(N)}, \hat{r}_{(N)})
+                \end{equation*}
 
-            {
-                \vspace{2em}
-                \centering
-                $\BoldRightarrow$ \textbf{(Randomized) Q-Q~residual plot}
+                {
+                    \vspace{2em}
+                    \centering
+                    $\BoldRightarrow$ \textbf{(Randomized) Q-Q~residual plot}
+                }
             }
 
         \end{column}
@@ -921,7 +931,7 @@ autoplot(qqrplot(ols, confint = TRUE))
         \begin{column}{.49\textwidth}
         \setkeys{Gin}{width=1\textwidth}
 <<intro_wormplot_lm, fig=TRUE, echo=FALSE, height=3, width=3.5>>=
-autoplot(wormplot(ols))
+wormplot(ols, col = 2, plot = "ggplot2")
 @
         \end{column}
         \begin{column}{.49\textwidth}
@@ -1028,14 +1038,18 @@ library("topmodels")
 @
 \medskip
 
+Core functions:
+
 <<eval = FALSE>>=
-rootogram(ols, ...)
-pithist(ols, ...)
-qqrplot(ols, ...)
-wormplot(ols, ...)
+rootogram(ols)
+pithist(ols)
+qqrplot(ols)
+wormplot(ols)
 @
 \pause
 \medskip
+
+Comparing different models:
 
 <<eval = FALSE>>=
 plot(c(pithist(ols), pithist(hcnorm)), ...)
@@ -1249,11 +1263,11 @@ autoplot(do.call(rbind, tmp), nrow = 1, single_graph = TRUE, col = 2:4, main = "
     Various possibilities suggested in different parts of the literature.
 
     \begin{itemize}
-      \item Rootogram.
-      \item Probability integral transform (PIT) histogram.
-      \item (Randomized) quantile-quantile residuals plot.
-      \item Detrended Q-Q~residuals plot or worm plot.
-      \item Reliability diagram at prespecified thresholds.
+      \item Rootogram
+      \item Probability integral transform (PIT) histogram
+      \item (Randomized) quantile-quantile residuals plot
+      \item Detrended Q-Q~residuals plot or worm plot
+      \item Reliability diagram at prespecified thresholds
     \end{itemize}
 
     %%\pause
