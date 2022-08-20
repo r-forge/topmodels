@@ -13,34 +13,48 @@ export(
   "crch.fit",
   "crch.stabsel",
   "getSummary.crch",
+
+  "crch.boost",
+  "crch.boost.fit",
+
   "hxlr",
   "hxlr.control",
+
+  "CensoredNormal",
   "dcnorm",
   "pcnorm",
   "qcnorm",
   "rcnorm",
+
+  "CensoredLogistic",
   "dclogis",
   "pclogis",
   "qclogis",
   "rclogis",
+
+  "CensoredStudentsT",
   "dct",
   "pct",
   "qct",
   "rct",
+
+  "TruncatedNormal",
   "dtnorm",
   "ptnorm",
   "qtnorm",
   "rtnorm",
+
+  "TruncatedLogistic",
   "dtlogis",
   "ptlogis",
   "qtlogis",
   "rtlogis",
+
+  "TruncatedStudentsT",
   "dtt",
   "ptt",
   "qtt",
-  "rtt",
-  "crch.boost",
-  "crch.boost.fit"
+  "rtt"
 )
 
 ## methods for crch
@@ -48,6 +62,7 @@ S3method("coef", "crch")
 S3method("fitted", "crch")
 S3method("logLik", "crch")
 S3method("predict", "crch")
+S3method(distributions3::prodist, "crch")
 S3method("print", "crch")
 S3method("print", "summary.crch")
 S3method("residuals", "crch")
@@ -79,3 +94,81 @@ S3method("terms", "hxlr")
 S3method("fitted", "hxlr")
 S3method("coef", "hxlr")
 S3method("vcov", "hxlr")
+
+## methods for CensoredNormal
+S3method("mean", "CensoredNormal")
+S3method("quantile", "CensoredNormal")
+S3method("crps", "CensoredNormal")
+S3method(distributions3::variance, "CensoredNormal")
+S3method(distributions3::skewness, "CensoredNormal")
+S3method(distributions3::kurtosis, "CensoredNormal")
+S3method(distributions3::random, "CensoredNormal")
+S3method(distributions3::pdf, "CensoredNormal")
+S3method(distributions3::log_pdf, "CensoredNormal")
+S3method(distributions3::cdf, "CensoredNormal")
+S3method(distributions3::support, "CensoredNormal")
+
+## methods for TruncatedNormal
+S3method("mean", "TruncatedNormal")
+S3method("quantile", "TruncatedNormal")
+S3method("crps", "TruncatedNormal")
+S3method(distributions3::variance, "TruncatedNormal")
+S3method(distributions3::skewness, "TruncatedNormal")
+S3method(distributions3::kurtosis, "TruncatedNormal")
+S3method(distributions3::random, "TruncatedNormal")
+S3method(distributions3::pdf, "TruncatedNormal")
+S3method(distributions3::log_pdf, "TruncatedNormal")
+S3method(distributions3::cdf, "TruncatedNormal")
+S3method(distributions3::support, "TruncatedNormal")
+
+## methods for CensoredLogistic
+S3method("mean", "CensoredLogistic")
+S3method("quantile", "CensoredLogistic")
+S3method("crps", "CensoredLogistic")
+S3method(distributions3::variance, "CensoredLogistic")
+S3method(distributions3::skewness, "CensoredLogistic")
+S3method(distributions3::kurtosis, "CensoredLogistic")
+S3method(distributions3::random, "CensoredLogistic")
+S3method(distributions3::pdf, "CensoredLogistic")
+S3method(distributions3::log_pdf, "CensoredLogistic")
+S3method(distributions3::cdf, "CensoredLogistic")
+S3method(distributions3::support, "CensoredLogistic")
+
+## methods for TruncatedLogistic
+S3method("mean", "TruncatedLogistic")
+S3method("quantile", "TruncatedLogistic")
+S3method("crps", "TruncatedLogistic")
+S3method(distributions3::variance, "TruncatedLogistic")
+S3method(distributions3::skewness, "TruncatedLogistic")
+S3method(distributions3::kurtosis, "TruncatedLogistic")
+S3method(distributions3::random, "TruncatedLogistic")
+S3method(distributions3::pdf, "TruncatedLogistic")
+S3method(distributions3::log_pdf, "TruncatedLogistic")
+S3method(distributions3::cdf, "TruncatedLogistic")
+S3method(distributions3::support, "TruncatedLogistic")
+
+## methods for CensoredStudentsT
+S3method("mean", "CensoredStudentsT")
+S3method("quantile", "CensoredStudentsT")
+S3method("crps", "CensoredStudentsT")
+S3method(distributions3::variance, "CensoredStudentsT")
+S3method(distributions3::skewness, "CensoredStudentsT")
+S3method(distributions3::kurtosis, "CensoredStudentsT")
+S3method(distributions3::random, "CensoredStudentsT")
+S3method(distributions3::pdf, "CensoredStudentsT")
+S3method(distributions3::log_pdf, "CensoredStudentsT")
+S3method(distributions3::cdf, "CensoredStudentsT")
+S3method(distributions3::support, "CensoredStudentsT")
+
+## methods for TruncatedStudentsT
+S3method("mean", "TruncatedStudentsT")
+S3method("quantile", "TruncatedStudentsT")
+S3method("crps", "TruncatedStudentsT")
+S3method(distributions3::variance, "TruncatedStudentsT")
+S3method(distributions3::skewness, "TruncatedStudentsT")
+S3method(distributions3::kurtosis, "TruncatedStudentsT")
+S3method(distributions3::random, "TruncatedStudentsT")
+S3method(distributions3::pdf, "TruncatedStudentsT")
+S3method(distributions3::log_pdf, "TruncatedStudentsT")
+S3method(distributions3::cdf, "TruncatedStudentsT")
+S3method(distributions3::support, "TruncatedStudentsT")
