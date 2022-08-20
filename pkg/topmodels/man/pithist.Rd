@@ -172,7 +172,7 @@ Statistician}, \bold{52}(2), 119--126. \doi{10.1080/00031305.1998.10480550}
 
 Czado C, Gneiting T, Held L (2009). \dQuote{Predictive Model
 Assessment for Count Data.} \emph{Biometrics}, \bold{65}(4), 1254--1261.
-\url{https://www.jstor.org/stable/20640646}.
+\doi{10.1111/j.1541-0420.2009.01191.x}
 
 Dawid AP (1984). \dQuote{Present Position and Potential Developments: Some
 Personal Views: Statistical Theory: The Prequential Approach}, \emph{Journal of
