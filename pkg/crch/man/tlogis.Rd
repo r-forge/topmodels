@@ -1,8 +1,8 @@
 \name{tlogis}
 \alias{dtlogis}
 \alias{ptlogis}
-\alias{rtlogis}
 \alias{qtlogis}
+\alias{rtlogis}
 
 \title{The Truncated Logistic Distribution}
 
@@ -16,10 +16,10 @@ dtlogis(x, location = 0, scale = 1, left = -Inf, right = Inf, log = FALSE)
 ptlogis(q, location = 0, scale = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE)
 
-rtlogis(n, location = 0, scale = 1, left = -Inf, right = Inf)
-
 qtlogis(p, location = 0, scale = 1, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
+
+rtlogis(n, location = 0, scale = 1, left = -Inf, right = Inf)
 }
 \arguments{
   \item{x, q}{vector of quantiles.}

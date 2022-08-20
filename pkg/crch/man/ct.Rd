@@ -1,8 +1,8 @@
 \name{ct}
 \alias{dct}
 \alias{pct}
-\alias{rct}
 \alias{qct}
+\alias{rct}
 
 \title{The Censored Student-t Distribution}
 
@@ -17,10 +17,10 @@ dct(x, location = 0, scale = 1, df, left = -Inf, right = Inf, log = FALSE)
 pct(q, location = 0, scale = 1, df, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 
-rct(n, location = 0, scale = 1, df, left = -Inf, right = Inf)
-
 qct(p, location = 0, scale = 1, df, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
+
+rct(n, location = 0, scale = 1, df, left = -Inf, right = Inf)
 }
 \arguments{
   \item{x, q}{vector of quantiles.}

@@ -1,8 +1,8 @@
 \name{tnorm}
 \alias{dtnorm}
 \alias{ptnorm}
-\alias{rtnorm}
 \alias{qtnorm}
+\alias{rtnorm}
 
 \title{The Truncated Normal Distribution}
 
@@ -16,10 +16,10 @@ dtnorm(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE)
 ptnorm(q, mean = 0, sd = 1, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 
-rtnorm(n, mean = 0, sd = 1, left = -Inf, right = Inf)
-
 qtnorm(p, mean = 0, sd = 1, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
+
+rtnorm(n, mean = 0, sd = 1, left = -Inf, right = Inf)
 }
 \arguments{
   \item{x, q}{vector of quantiles.}

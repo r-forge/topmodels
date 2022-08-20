@@ -1,8 +1,8 @@
 \name{clogis}
 \alias{dclogis}
 \alias{pclogis}
-\alias{rclogis}
 \alias{qclogis}
+\alias{rclogis}
 
 \title{The Censored Logistic Distribution}
 
@@ -16,10 +16,10 @@ dclogis(x, location = 0, scale = 1, left = -Inf, right = Inf, log = FALSE)
 pclogis(q, location = 0, scale = 1, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 
-rclogis(n, location = 0, scale = 1, left = -Inf, right = Inf)
-
 qclogis(p, location = 0, scale = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE)
+
+rclogis(n, location = 0, scale = 1, left = -Inf, right = Inf)
 }
 \arguments{
   \item{x, q}{vector of quantiles.}

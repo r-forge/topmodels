@@ -1,8 +1,8 @@
 \name{cnorm}
 \alias{dcnorm}
 \alias{pcnorm}
-\alias{rcnorm}
 \alias{qcnorm}
+\alias{rcnorm}
 
 \title{The Censored Normal Distribution}
 
@@ -16,10 +16,10 @@ dcnorm(x, mean = 0, sd = 1, left = -Inf, right = Inf, log = FALSE)
 pcnorm(q, mean = 0, sd = 1, left = -Inf, right = Inf, 
   lower.tail = TRUE, log.p = FALSE)
 
-rcnorm(n, mean = 0, sd = 1, left = -Inf, right = Inf)
-
 qcnorm(p, mean = 0, sd = 1, left = -Inf, right = Inf,
   lower.tail = TRUE, log.p = FALSE)
+
+rcnorm(n, mean = 0, sd = 1, left = -Inf, right = Inf)
 }
 \arguments{
   \item{x, q}{vector of quantiles.}
