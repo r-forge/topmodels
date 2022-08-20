@@ -96,15 +96,18 @@ topmodels <- function(object,
       !inherits(class, "try-error")
   )
 
+  ## FIXME: (Z) I have commented the code below because it does not make sense anymore
+  ## now that there is a default procast() method
+  ##
   ## check if S3 methods exist
-  if (!any(class(object) %in% gsub("procast.", "", methods("procast")))) {
-    stop(
-      sprintf(
-        "The `object` must be one of the following classes: %s.",
-        paste(gsub("procast.", "", methods("procast")), collapse = ", ")
-      )
-    )
-  }
+  ## if (!any(class(object) %in% gsub("procast.", "", methods("procast")))) {
+  ##   stop(
+  ##     sprintf(
+  ##       "The `object` must be one of the following classes: %s.",
+  ##       paste(gsub("procast.", "", methods("procast")), collapse = ", ")
+  ##     )
+  ##   )
+  ## }
 
   # check which method should be plotted
   which.match <- c("rootogram", "pithist", "reliagram", "qqrplot", "wormplot")

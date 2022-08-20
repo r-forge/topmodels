@@ -609,12 +609,11 @@ rbind.pithist <- c.pithist
 #' Generic plotting functions for probability integral transform (PIT)
 #' histograms of the class \code{"pithist"} computed by \code{link{pithist}}.
 #'
-#' PIT histograms evaluates the predictive cumulative distribution
-#' function (CDF) evaluated at the observation and compares the resulting
-#' values to a uniform distribution or normal distribution.
-#' For a well calibrated model fit, the distribution of the PIT residuals
-#' will show a standard uniform distrbution or normal distribution depending
-#' on the scale selected by the user.
+#' PIT histograms graphically evaluate the probability integral transform (PIT),
+#' i.e., the value that the predictive CDF attains at the observation, with a
+#' uniform distribution. For a well calibrated model fit, the observation will be
+#' drawn from the predictive distribution and the PIT will have a standard uniform
+#' distribution.
 #'
 #' PIT histograms can be rendered as \code{ggplot2} or base R graphics by using
 #' the generics \code{\link[ggplot2]{autoplot}} or \code{\link[graphics]{plot}}.

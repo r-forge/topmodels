@@ -1,31 +1,41 @@
-# -------------------------------------------------------------------
-# Programming outline: `procast()`
-# -------------------------------------------------------------------
-# - For scores we need at = data.frame(y = response, x = model.matrix)
-# -------------------------------------------------------------------
-
-
 #' Procast: Probabilistic Forecasting
 #' 
-#' Generic function and methods for computing various kinds of forecasts from
-#' probabilistic (regression) models (probabilistic 4-casting).
+#' Generic function and methods for computing various kinds of probabilistic
+#' forecasts from (regression) models.
 #' 
 #' The function \code{procast} provides a unified framework for probabilistic
-#' 4-casting based on probabilistic (regression) models, also known as
-#' distributional regression approaches. Typical types of predictions include
-#' quantiles, probabilities, (conditional) expectations, variances,
-#' (log-)densities, or scores. Internally, \code{procast} methods typically
-#' compute the predicted parameters for each observation and then transform
-#' these to the desired outcome. Some quantities (e.g., expectations or
-#' variances) can be computed directly from the predicted parameters of the
+#' forcasting (or procasting, for short) based on probabilistic (regression)
+#' models, also known as distributional regression approaches. Typical types
+#' of predictions include quantiles, probabilities, (conditional) expectations,
+#' variances, and (log-)densities. Internally, \code{procast} methods typically
+#' compute the predicted parameters for each observation and then compute the
+#' desired outcome for the distributions with the respective parameters.
+#'
+#' Some quantities, e.g., the moments of the distribution (like mean or variance),
+#' can be computed directly from the predicted parameters of the
 #' distribution while others require an additional argument \code{at} which the
 #' distribution is evaluated (e.g., the probability of a quantile or an
-#' observation of the response. The argument \code{at} can also be the
-#' character \code{"function"} or \code{"list"} so that a single function or
-#' list of functions is set up that can be evaluated \code{at} different values
-#' later on.
+#' observation of the response.
 #' 
-#' The function \code{procast_setup} is a convenience wrapper that make setting
+#' The default \code{procast} method leverages the S3 classes and methods for
+#' probability distributions from the \pkg{distributions3} package. It proceeds
+#' in two steps: First, \code{\link[distributions3]{prodist}} is used to obtain the
+#' predicted probability distribution object. Second, the extractor methods such
+#' as \code{quantile}, \code{\link[distributions3]{cdf}}, etc. are used to
+#' compute quantiles, probabilities, etc. from the distribution objects.
+#'
+#' Therefore, to enable \code{procast} for a certain type of model object, the
+#' recommended approach is to implement a \code{prodist} method which can then
+#' be leveraged. However, if the \pkg{distributions3} package does not support
+#' the necessary probability distribution, then it may also be necessary to
+#' implement a new distribution objects, see \code{\link[distributions3]{apply_dpqr}}.
+#'
+#' Before adopting the \pkg{distributions3} framework as the recommended workflow
+#' for procasting, the package had taken a different approach which is described
+#' in the following. Note, however, that this will be discontinued when we have
+#' converted all procasting methods to the new workflow.
+#'
+#' Old workflow: The function \code{procast_setup} is a convenience wrapper that makes setting
 #' up \code{procast} methods easier for package developers. It takes a data
 #' frame of predicted parameters \code{pars} and a function \code{FUN} which is
 #' to be evaluated at the parameters. This can either have the interface
@@ -33,15 +43,11 @@
 #' directly from the predicted parameters -- or the interface \code{FUN(at,
 #' pars, \dots)} if an additional argument \code{at} is needed.
 #' \code{procast_setup} takes care of suitable expanding \code{at} to the
-#' dimensions of \code{pars} and optionally setting up a (list of) function(s)
-#' to be returned.
+#' dimensions of \code{pars}.
 #' 
-#' @aliases procast procast.lm procast_setup
+#' @aliases procast procast_setup
 #' @param object a fitted model object. For the \code{default} method this
-#' needs to be \code{formula}-based so that \code{\link[stats]{model.frame}}
-#' can be used to extract the response from the original data the model was
-#' fitted to or \code{\link[stats]{terms}} can be used to set up the response
-#' on \code{newdata}.
+#' needs to have a \code{\link[distributions3]{prodist}} method.
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
 #' @param na.action function determining what should be done with missing
@@ -59,6 +65,14 @@
 #' \dots)} or \code{FUN(at, pars, \dots)}, see details below.
 #' @param pars a data frame of predicted distribution parameters.
 #' @param \dots further parameters passed to methods.
+#' @param elementwise logical. Should each element of distribution only be evaluated at the
+#' corresponding element of \code{at} (\code{elementwise = TRUE}) or at all elements
+#' in \code{at} (\code{elementwise = FALSE}). Elementwise evaluation is only possible
+#' if the number of observations is length of \code{at} are the same and in that case a vector of
+#' the same length is returned. Otherwise a matrix is returned. The default is to use
+#' \code{elementwise = TRUE} if possible, and otherwise \code{elementwise = FALSE}.
+#' @param drop logical. Should the result be simplified to a vector if possible (by
+#' dropping the dimension attribute)? If \code{FALSE} a matrix is always returned.
 #' @return Either a \code{data.frame} of predictions (in case of multivariate
 #' forecasts, or if \code{drop = FALSE}, default) or a vector (in case of a
 #' univariate forecast and additionally \code{drop = TRUE}). Unless \code{at}
@@ -66,7 +80,6 @@
 #' (list of) function(s) is returned.
 #' @keywords regression
 #' @examples
-#' 
 #' ## linear regression models (homoscedastic Gaussian response)
 #' m <- lm(dist ~ speed, data = cars)
 #' 
@@ -90,28 +103,73 @@
 #' procast(m, newdata = nd)
 #' 
 #' ## different quantile for each observation
-#' procast(m, newdata = nd, at = c(0.25, 0.5, 0.75))
+#' procast(m, newdata = nd, at = c(0.25, 0.5, 0.75), elementwise = TRUE)
 #' 
 #' ## all combinations of quantiles and observations
-#' procast(m, newdata = nd, at = rbind(c(0.25, 0.5, 0.75)))
-#' 
-#' ## function for computing quantiles (vectorized)
-#' qnt1 <- procast(m, newdata = nd, at = "function")
-#' ## as before
-#' qnt1(0.5)
-#' qnt1(c(0.25, 0.5, 0.75))
-#' qnt1(rbind(c(0.25, 0.5, 0.75)))
-#' 
-#' ## list of functions
-#' qnt2 <- procast(m, newdata = nd, at = "list")
-#' qnt2[[1]]
-#' qnt2[[1]](0.5)
-#' qnt2[[1]](c(0.25, 0.5, 0.75))
-#' 
+#' procast(m, newdata = nd, at = c(0.25, 0.5, 0.75), elementwise = FALSE)
 #' 
 #' @export 
-procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, ...) {
+procast <- function(object, newdata = NULL, na.action = na.pass, type = "quantile", at = 0.5, drop = FALSE, ...) {
   UseMethod("procast")
+}
+
+#' @rdname procast
+#' @importFrom distributions3 prodist cdf pdf log_pdf variance skewness kurtosis
+#' @export 
+procast.default <- function(object, newdata = NULL, na.action = na.pass,
+  type = c("quantile", "mean", "variance", "probability", "density", "loglikelihood", "distribution", "parameters", "kurtosis", "skewness"),
+  at = 0.5, drop = FALSE, ...)
+{
+  ## match type
+  type <- match.arg(type[1L], c(
+    "quantile", "mean", "variance",
+    "probability", "cdf",
+    "density", "pdf", "pmf",
+    "loglikelihood", "log_pdf",
+    "distribution", "parameters",
+    "kurtosis", "skewness"))
+  if(type == "cdf") type <- "probability"
+  if(type %in% c("pdf", "pmf")) type <- "density"
+  if(type == "log_pdf") type <- "loglikelihood"
+
+  ## FIXME: how to handle 'size' in binomial family?
+  ## extract probability distribution object
+  pd <- if(is.null(newdata)) {
+    distributions3::prodist(object)
+  } else {
+    distributions3::prodist(object, newdata = newdata, na.action = na.action)
+  }
+  
+  ## evaluate type of procast
+  pc <- switch(type,
+    "quantile"      = quantile(pd, at, ...),
+    "mean"          = mean(pd),
+    "variance"      = distributions3::variance(pd),
+    "probability"   = distributions3::cdf(pd, at, ...),
+    "density"       = distributions3::pdf(pd, at, ...),
+    "loglikelihood" = distributions3::log_pdf(pd, at, ...),
+    "distribution"  = pd,
+    "parameters"    = as.matrix(pd),
+    "skewness"      = distributions3::skewness(pd, at, ...),
+    "kurtosis"      = distributions3::kurtosis(pd, at, ...)
+  )
+  
+  ## convert to data frame if drop = FALSE
+  if(drop) {
+    if(!is.null(dim(pc)) && NCOL(pc) == 1L) pc <- drop(pc)
+  } else {
+    if(inherits(pc, "distribution")) {
+      pc <- as.data.frame(pc)
+      colnames(pc) <- type
+    }
+    if(is.null(dim(pc))) {
+      pc <- as.matrix(pc)
+      if(ncol(pc) == 1L) colnames(pc) <- type
+    }
+    if(!inherits(pc, "data.frame")) pc <- as.data.frame(pc)
+  }
+  
+  return(pc)
 }
 
 #' @rdname procast
@@ -121,6 +179,7 @@ procast_setup <- function(pars,
                           at = NULL,
                           drop = FALSE,
                           type = "procast",
+                          elementwise = NULL,
                           ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -172,22 +231,38 @@ procast_setup <- function(pars,
     } else {
       FUN2a <- function(at, pars, ...) {
         n <- NROW(pars)
-        if (!is.data.frame(at)) {
+        if (is.null(dim(at))) {
           if (length(at) == 1L) at <- rep.int(as.vector(at), n)
-          if (length(at) != n) at <- rbind(at)
+          if (length(at) == n) {
+            if(is.null(elementwise)) elementwise <- TRUE
+          } else {
+            if(isTRUE(elementwise)) stop(
+              sprintf("length of 'at' differs from number of observations: %s != %s", length(at), n)
+            )
+            elementwise <- FALSE
+          }
+        } else {
+          if(NROW(at) != n) stop(
+            sprintf("number of rows of 'at' differs from number of observations: %s != %s", NROW(at), n)
+          )
+          at <- as.matrix(at)
         }
-        if (is.matrix(at) && NROW(at) == 1L) {
-          at <- matrix(rep(at, each = n), nrow = n)
+        if (elementwise && is.null(dim(at))) {
+          rv <- FUN(at, pars = pars, ...)
+          names(rv) <- rownames(pars)
+        } else {
+          if(is.null(dim(at))) {
+            at <- matrix(rep(at, each = n), nrow = n)
+            cnam <- paste(substr(type, 1L, 1L),
+              round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)),
+              sep = "_")
+          } else {
+            cnam <- paste(substr(type, 1L, 1L), 1L:NCOL(at), sep = "_")
+          }
           rv <- FUN(as.vector(at), pars = pars[rep(1L:n, ncol(at)), , drop = FALSE], ...)
           rv <- matrix(rv, nrow = n)
           rownames(rv) <- rownames(pars)
-          colnames(rv) <- paste(substr(type, 1L, 1L),
-            round(at[1L, ], digits = pmax(3L, getOption("digits") - 3L)),
-            sep = "_"
-          )
-        } else {
-          rv <- FUN(at, pars = pars, ...)
-          names(rv) <- rownames(pars)
+          colnames(rv) <- cnam
         }
         return(rv)
       }
@@ -234,72 +309,12 @@ procast_setup <- function(pars,
 
 
 #' @rdname procast
-#' @method procast lm
-#' @export
-procast.lm <- function(object,
-                       newdata = NULL,
-                       na.action = na.pass,
-                       type = c(
-                         "quantile", "location", "scale", "parameter",
-                         "density", "probability", "score"
-                       ),
-                       at = 0.5,
-                       drop = FALSE,
-                       ...) {
-  # -------------------------------------------------------------------
-  # SET UP PRELIMINARIES AND NECESSARY ARGUMENTS
-  # -------------------------------------------------------------------
-  ## Predicted means
-  pars <- if (missing(newdata) || is.null(newdata)) {
-    object$fitted.values
-  } else {
-    predict(object, newdata = newdata, na.action = na.action)
-  }
-  pars <- data.frame(mu = pars)
-
-  ## Add maximum likelihood estimator of constant varians
-  pars$sigma <- summary(object)$sigma * sqrt(df.residual(object) / nobs(object))
-
-  ## Types of predictions
-  type <- match.arg(type)
-  ## Set up function that computes prediction from model parameters
-  FUN <- switch(type,
-    "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "location" = function(pars) pars$mu,
-    "scale" = function(pars) pars$sigma,
-    "parameter" = function(pars) pars,
-    "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-    "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x#,
-# FIXME: (ML) Decide if random is needed, if yes, implement for all S3 classes
-#    "random" = function(n, pars) t(sapply(1:NROW(pars), function(i) 
-#      rnorm(n, mean = pars[i, "mu"], sd = pars[i, "sigma"])))
-  )
-
-#  ## FIXME: (ML) Quick workaround not using `procast_setup()`
-#  if (type == "random") {
-#    rval <- data.frame(FUN(n, pars))
-#    colnames(rval) <- paste0("n_", 1:NCOL(rval))
-#    return(rval)
-#  }
-
-  # -------------------------------------------------------------------
-  # CALL WOKRHORSE AND RETURN
-  # -------------------------------------------------------------------
-  procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
-}
-
-
-#' @rdname procast
 #' @method procast crch
 #' @export
 procast.crch <- function(object,
                          newdata = NULL,
                          na.action = na.pass,
-                         type = c(
-                           "quantile", "location", "scale", "parameter",
-                           "density", "probability", "score"
-                         ),
+                         type = c("quantile", "location", "scale", "parameter", "density", "probability"),
                          at = 0.5,
                          drop = FALSE,
                          ...) { # FIXME: (ML) Additional parameters currently not used
@@ -308,16 +323,12 @@ procast.crch <- function(object,
   # -------------------------------------------------------------------
   ## Call
   cl <- match.call() # FIXME: (ML) Change to normal function call, do not use `eval(cl, parent.frame())`
+  cl$elementwise <- NULL # NOTE: (Z) Quick & dirty workaround so that procast(..., elementwise = ...) does not fail
   cl[[1]] <- quote(predict)
   cl$drop <- NULL
 
   ## Check possible types of predictions
   type <- match.arg(type)
-
-  ## FIXME: (ML) Implement score (estfun)
-  if (type == "score") {
-    stop("`type=score` not supported yet.")
-  }
 
   ## * Is 'at' some kind of 'data'
   ## * or the special type 'list' or 'function'
@@ -380,10 +391,7 @@ procast.crch <- function(object,
 procast.disttree <- function(object,
                              newdata = NULL,
                              na.action = na.pass, # FIXME: (ML) Currently not supported
-                             type = c(
-                               "quantile", "location", "scale", "parameter",
-                               "density", "probability", "score"
-                             ),
+                             type = c("quantile", "location", "scale", "parameter", "density", "probability"),
                              at = 0.5,
                              drop = FALSE,
                              use_distfamily = TRUE,
@@ -408,11 +416,6 @@ procast.disttree <- function(object,
   ## Types of predictions
   type <- match.arg(type)
 
-  ## FIXME: (ML) Implement score (estfun)
-  if (type == "score") {
-    stop("`type=score` not supported yet.")
-  }
-
   ## Set up function that computes prediction from model parameters
   if (!use_distfamily) {
     warning("For `use_distfamily = FALSE`, `qnorm()`, `dnorm()`, and `pnorm()` are used")
@@ -426,7 +429,7 @@ procast.disttree <- function(object,
     )
   } else {
     ## FIXME: (ML) `disttree` unfortunately does not support a vector of parameters!
-    ## Here ugly workaround, which must be improved (probabily straight in `disstree`).
+    ## Here ugly workaround, which must be improved (probabily straight in `disttree`).
     FUN <- switch(type,
       "quantile" = function(at, pars, ...) {
         object <- cbind(at = at, pars)
@@ -488,130 +491,6 @@ procast.disttree <- function(object,
         return(rval)
       }
     )
-  }
-
-  # -------------------------------------------------------------------
-  # CALL WOKRHORSE AND RETURN
-  # -------------------------------------------------------------------
-  procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
-}
-
-
-#' @rdname procast
-#' @method procast glm
-#' @export
-procast.glm <- function(object,
-                        newdata = NULL,
-                        na.action = na.pass,
-                        type = c(
-                          "quantile", "location", "scale", "parameter",
-                          "density", "probability", "score"
-                        ),
-                        at = 0.5,
-                        drop = FALSE,
-                        ...) {
-  # -------------------------------------------------------------------
-  # SET UP PRELIMINARIES AND NECESSARY ARGUMENTS
-  # -------------------------------------------------------------------
-  ## Get family
-  family <- substr(family(object)$family, 1L, 17L)
-
-  ## Get weight, nobs, n if available
-  weights <- if (is.null(attr(at, "weights"))) weights(object) else attr(at, "weights")
-  nobs <- if (is.null(attr(at, "nobs"))) nobs(object) else attr(at, "nobs")
-  n <- if (is.null(attr(at, "n"))) NULL else attr(at, "n")
-
-  if (is.null(n)) {
-    ## FIXME: (ML) This is probably not correct, as we need initializing for `at`
-    ## NOTE: (ML) weights and nobs property of the (new) response?
-    ## NOTE: (ML) n property of the model?
-    y <- newresponse(object, newdata = newdata)
-
-    weights <- attr(y, "weights")
-    nobs <- attr(y, "nobs")
-    n <- attr(y, "n")
-  }
-
-  ## Predicted means
-  ## FIXME: (ML) Is it really always only one predicted parameter
-  pars <- if (missing(newdata) || is.null(newdata)) {
-    fitted(object)
-  } else {
-    predict(object, newdata = newdata, na.action = na.action)
-  }
-  pars <- data.frame(mu = pars)
-
-  ## Types of predictions
-  type <- match.arg(type)
-
-  ## FIXME: (ML) Implement score (estfun)
-  if (family == "gaussian") {
-
-    ## Add maximum likelihood estimator of constant varians
-    ## FIXME: (ML) do we need second part (compare countreg)
-    pars$sigma <- sqrt(summary(object)$dispersion) * sqrt(df.residual(object) / nobs(object))
-
-    FUN <- switch(type,
-      "quantile" = function(at, pars, ...) qnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-      "location" = function(pars) pars$mu,
-      "scale" = function(pars) pars$sigma,
-      "parameter" = function(pars) pars,
-      "density" = function(at, pars, ...) dnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-      "probability" = function(at, pars, ...) pnorm(at, mean = pars$mu, sd = pars$sigma, ...),
-      "score" = function(at, pars, ...) (at$y - pars$mu)^2 * at$x
-    )
-  } else if (family == "poisson") {
-    FUN <- switch(type,
-      "quantile" = function(at, pars, ...) qpois(at, lambda = pars$mu, ...),
-      "location" = function(pars) pars$mu,
-      "scale" = stop("not yet implemented"),
-      "parameter" = function(pars) pars,
-      "density" = function(at, pars, ...) dpois(at, lambda = pars$mu, ...),
-      "probability" = function(at, pars, ...) ppois(at, lambda = pars$mu, ...),
-      "score" =  stop("not yet implemented")
-    )
-  } else if (family == "Negative Binomial") {
-    ## FIXME: (ML) check implementation and compare w/ countreg -> different number of bins
-    pars$theta <- object$theta
-    if(is.null(pars$theta)) pars$theta <- get(".Theta", environment(family(object)$variance))
-
-    FUN <- switch(type,
-      "quantile" = function(at, pars, ...) qnbinom(at, mu = pars$mu, size = pars$theta, ...),
-      "location" = stop("not yet implemented"),
-      "scale" = stop("not yet implemented"),
-      "parameter" = stop("not yet implemented"),
-      "density" = function(at, pars, ...) dnbinom(at, mu = pars$mu,, size = pars$theta, ...),
-      "probability" = function(at, pars, ...) pnbinom(at, mu = pars$mu,, size = pars$theta, ...),
-      "score" =  stop("not yet implemented")
-    )
-  } else if (family == "binomial") {
-    FUN <- switch(type,
-      "quantile" = function(at, pars, ...) qbinom(at, size = n, prob = pars$mu, ...),
-      "location" = stop("not yet implemented"),
-      "scale" = stop("not yet implemented"),
-      "parameter" = stop("not yet implemented"),
-      "density" = function(at, pars, ...) {
-        ## FIXME: (ML) copied from countreg, is this needed (1st part why, 2nd part handled in `dbinom`)
-        # at <- y * weights / n  # TODO: (ML) Here `at <- at * weights / n` ?
-        # if (!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
-        #  stop("binomial quantile residuals require integer response")
-        # }
-        # at <- round(at)
-        dbinom(at, size = n, prob = pars$mu, ...)
-      },
-      "probability" = function(at, pars, ...) {
-        ## FIXME: (ML) copied from countreg, is this needed (1st part why, 2nd part no error in `pbinom`)
-        # at <- y * weights / n  # TODO: (ML) Here `at <- at * weights / n` ?
-        # if (!isTRUE(all.equal(as.numeric(at), as.numeric(round(at))))) {
-        #  stop("binomial quantile residuals require integer response")
-        # }
-        # at <- round(at)
-        pbinom(at, size = n, prob = pars$mu, ...)
-      },
-      "score" = stop("not yet implemented"),
-    )
-  } else {
-    stop(sprintf("family %s not implemented yet", family))
   }
 
   # -------------------------------------------------------------------

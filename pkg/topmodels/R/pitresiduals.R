@@ -73,6 +73,7 @@ pitresiduals <- function(object, ...) {
 
 #' @rdname pitresiduals
 #' @method pitresiduals default
+#' @importFrom distributions3 prodist cdf
 #' @export
 pitresiduals.default <- function(object, 
                                  newdata = NULL, 
@@ -137,7 +138,21 @@ pitresiduals.default <- function(object,
     attr(at, "nobs")    <- attr(y, "nobs")
     attr(at, "n")       <- attr(y, "n")
     attr(at, "weights") <- attr(y, "weights")
-    object <- procast(object, newdata = newdata, at = at, type = "probability")
+
+    ## try to get new style prodist/procast - otherwise resort to old-style procast
+    pd <- if(is.null(newdata)) {
+      try(distributions3::prodist(object), silent = TRUE)
+    } else {
+      try(distributions3::prodist(object, newdata = newdata), silent = TRUE)    
+    }
+    if(distributions3::is_distribution(pd)) {
+      object <- cbind(
+        distributions3::cdf(pd, at[, 1L], elementwise = TRUE),
+        distributions3::cdf(pd, at[, 2L], elementwise = TRUE))
+    } else {
+      object <- procast(object, newdata = newdata, at = at, type = "probability",
+        drop = FALSE, elementwise = TRUE)
+    }
 
     # TODO: (ML) There is no `try()` environment, which errors can be caught
     # TODO: (RS2ML) Not yet checked whats going on, we could use
@@ -172,7 +187,7 @@ pitresiduals.default <- function(object,
 
       object <- object[, 1L]  %*% t(1 - prob) + object[, 2L] %*% t(prob)
 
-      stopifnot(all.equal(object, object2))  # FIXME: (ML) Test alternative computation
+      stopifnot(all.equal(object, object2, check.attributes = FALSE))  # FIXME: (ML) Test alternative computation
 
       dimnames(object) <- list(nam, paste("q", prob, sep = "_"))
     }

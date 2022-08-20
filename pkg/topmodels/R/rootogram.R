@@ -275,18 +275,9 @@ rootogram.default <- function(
   # COMPUTATION OF EXPECTED AND OBSERVED FREQUENCIES
   # -------------------------------------------------------------------
   ## expected frequencies (part1)
-  p <- matrix(NA, nrow = length(y), ncol = length(breaks) - 1L)
-  for (i in 1L:ncol(p)) {
-    p[, i] <-
-      procast(object,
-        newdata = newdata, na.action = na.pass, type = "probability",
-        at = breaks[i + 1L], drop = TRUE
-      ) -
-      procast(object,
-        newdata = newdata, na.action = na.pass, type = "probability",
-        at = breaks[i], drop = TRUE
-      )
-  }
+  p <- procast(object, newdata = newdata, na.action = na.pass, type = "probability",
+    drop = FALSE, at = breaks, elementwise = FALSE)
+  p <- p[, -1L, drop = FALSE] - p[, -ncol(p), drop = FALSE]
 
   ## TODO: (ML) Sometime neg. expected occurs (see example for underdispersed model fit).
   p[abs(p) < sqrt(.Machine$double.eps)] <- 0

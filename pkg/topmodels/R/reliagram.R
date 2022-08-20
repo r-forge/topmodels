@@ -227,10 +227,8 @@ reliagram.default <- function(object,
   }
 
   ## predicted probabilities
-  pred <- procast(object,
-    newdata = newdata, type = "probability", at = matrix(thresholds, nrow = 1L),
-    drop = FALSE
-  )
+  pred <- procast(object, newdata = newdata, type = "probability", drop = FALSE,
+    at = thresholds, elementwise = FALSE)
 
   ## make sure lengths match (can't really go wrong after no arg `y` exists anymore)
   stopifnot(NROW(pred) == length(y))
