@@ -1,5 +1,6 @@
 \name{predict.crch}
 \alias{predict.crch}
+\alias{prodist.crch}
 
 \title{Predicted/Fitted Values for CRCH Fits}
 
@@ -11,6 +12,9 @@ Obtains various types of predictions for \code{crch} models.
 \method{predict}{crch}(object, newdata = NULL, type = c("location", "scale", 
   "response", "parameter", "density", "probability", "quantile", "crps"), 
   na.action = na.pass, at = 0.5, left = NULL, right = NULL, \dots)
+
+\method{prodist}{crch}(object, newdata = NULL, na.action = na.pass,
+  left = NULL, right = NULL, \dots)
 }
 
 \arguments{
@@ -45,13 +49,14 @@ Obtains various types of predictions for \code{crch} models.
 }
 
 \value{
-For type \code{"response"}, \code{"location"}, or \code{"scale"} a vector with
-either the location or the scale of the predicted distribution.
-
+The \code{predict} method, for type \code{"response"}, \code{"location"}, or \code{"scale"},
+returns a vector with either the location or the scale of the predicted distribution.
 For type \code{"quantile"} a matrix of predicted quantiles each column
-corresponding to an element of \code{at}. 
+corresponding to an element of \code{at}.
+
+The \code{prodist} method returns the fitted/predict probability distribution object.
 }
 
-\seealso{\code{\link{crch}}}
+\seealso{\code{\link{crch}}, \code{\link[distributions3]{prodist}}}
 
 \keyword{regression}
