@@ -9,9 +9,7 @@ TODO.pdf
 ^README\.Rmd$
 ^README\.md$
 ^README\.html$
-^contact.md$
-^logo*.png$
-vignettes/topmodels.Rmd
-vignettes/graphical_model_assessment.Rmd
-vignettes/ref.bib
+^contact\.md$
+^logo*\.png$
+^vignettes$
 
