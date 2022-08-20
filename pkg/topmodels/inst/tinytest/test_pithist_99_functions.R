@@ -9,7 +9,6 @@
 ###suppressPackageStartupMessages(library("ggplot2"))
 ###
 ###data("CrabSatellites", package = "countreg")
-###CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 ###
 ###m1 <- lm(dist ~ speed, data = cars)
 ###m2 <- crch(dist ~ speed | speed, left = 3, data = cars)

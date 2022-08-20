@@ -12,7 +12,6 @@ suppressPackageStartupMessages(library("tibble"))
 # Setting up the data sets/models used to test the function
 # --------------------------------------------------------------------
 data("CrabSatellites", package = "countreg")
-CrabSatellites2 <- CrabSatellites[CrabSatellites$satellites <= 1, ]
 
 # Different regression models (lm, censored lm, poisson count data model)
 expect_silent(m1 <- lm(dist ~ speed, data = cars))
