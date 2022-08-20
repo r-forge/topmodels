@@ -55,10 +55,10 @@ quantile.TruncatedNormal <- function(x, probs, drop = TRUE, elementwise = NULL, 
   distributions3::apply_dpqr(d = x, FUN = FUN, at = probs, type = "quantile", drop = drop, elementwise = elementwise)
 }
 
-crps.TruncatedNormal <- function(d, x, drop = TRUE, elementwise = NULL) {
+crps.TruncatedNormal <- function(y, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   FUN <- function(at, d) scoringRules::crps_tnorm(y = at, location = d$mu, scale = d$sigma, lower = d$left, upper = d$right)
-  distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "crps", drop = drop, elementwise = elementwise)
+  distributions3::apply_dpqr(d = y, FUN = FUN, at = x, type = "crps", drop = drop, elementwise = elementwise)
 }
 
 support.TruncatedNormal <- function(d, drop = TRUE, ...) {
