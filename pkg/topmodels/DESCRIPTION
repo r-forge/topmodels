@@ -1,5 +1,5 @@
 Package: topmodels
-Title: Infrastructure for Inference and Forecasting in Probabilistic Models
+Title: Infrastructure for Forecasting and Assessment of Probabilistic Models
 Version: 0.3-0
 Date: 2022-08-20
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org",
@@ -13,13 +13,13 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
                     comment = c(ORCID = "0000-0003-1556-0302")),
              person(given = "Jakob", family = "Messner", role = "ctb", email = "jakob.messner@posteo.net",
                     comment = c(ORCID = "0000-0002-1027-3673")))
-Depends: R (>= 3.0.0)
+Depends: R (>= 3.4.0)
 Imports: graphics, grDevices, stats, utils, colorspace, distributions3, grid, ggplot2
 Suggests: betareg, countreg, crch, disttree, tibble, tidyr, lmtest, MASS, tinytest, rmutil, sn, robustbase
 Description: Unified infrastructure for probabilistic models and distributional regressions:
-             Computations of probabilities, densities, scores, and Hessians.
-	           Probabilistic forecasting. Diagnostic graphics like rootograms, PIT histograms,
-	           reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots.
+             Probabilistic forecasting (procasting for short) in sample and out of sample of probabilities,
+             densities, quantiles, and moments. Diagnostic graphics like rootograms, PIT histograms,
+	     (randomized) quantile residual Q-Q plots, and reliagrams (reliability diagrams).
 License: GPL-2 | GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.1
