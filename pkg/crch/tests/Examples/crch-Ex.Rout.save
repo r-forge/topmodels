@@ -1,6 +1,6 @@
 
-R version 3.4.0 (2017-04-21) -- "You Stupid Darkness"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
+Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -23,7 +23,422 @@ Type 'q()' to quit R.
 > library('crch')
 > 
 > base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
 > cleanEx()
+> nameEx("CensoredLogistic")
+> ### * CensoredLogistic
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: CensoredLogistic
+> ### Title: Create a Censored Logistic Distribution
+> ### Aliases: CensoredLogistic mean.CensoredLogistic
+> ###   variance.CensoredLogistic skewness.CensoredLogistic
+> ###   kurtosis.CensoredLogistic pdf.CensoredLogistic
+> ###   log_pdf.CensoredLogistic cdf.CensoredLogistic
+> ###   quantile.CensoredLogistic random.CensoredLogistic
+> ###   crps.CensoredLogistic support.CensoredLogistic
+> 
+> ### ** Examples
+> 
+> ## Don't show: 
+>  if(!requireNamespace("distributions3")) {
++   if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
++     stop("not all packages required for the example are installed")
++   } else q() }
+Loading required namespace: distributions3
+> ## End(Don't show)
+> ## package and random seed
+> library("distributions3")
+
+Attaching package: ‘distributions3’
+
+The following object is masked from ‘package:stats’:
+
+    Gamma
+
+The following object is masked from ‘package:grDevices’:
+
+    pdf
+
+> set.seed(6020)
+> 
+> ## three censored logistic distributions:
+> ## - uncensored standard logistic
+> ## - left-censored at zero with latent location = 1 and scale = 1
+> ## - interval-censored in [0, 5] with latent location = 2 and scale = 1
+> X <- CensoredLogistic(
++   location = c(   0,   1, 2),
++   scale    = c(   1,   1, 1),
++   left     = c(-Inf,   0, 0),
++   right    = c( Inf, Inf, 5)
++ )
+> X
+[1] "CensoredLogistic distribution (location = 0, scale = 1, left = -Inf, right = Inf)"
+[2] "CensoredLogistic distribution (location = 1, scale = 1, left =    0, right = Inf)"
+[3] "CensoredLogistic distribution (location = 2, scale = 1, left =    0, right =   5)"
+> 
+> ## compute mean of the censored distribution
+> mean(X)
+[1] 0.000000 1.313262 2.078341
+> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> 
+> ## support interval (minimum and maximum)
+> support(X)
+      min max
+[1,] -Inf Inf
+[2,]    0 Inf
+[3,]    0   5
+> 
+> ## simulate random variables
+> random(X, 5)
+            r_1        r_2        r_3         r_4        r_5
+[1,] -0.5489266 0.71149394 -0.9934677 -0.09368233 -3.1677767
+[2,]  0.3829342 2.00150190  2.0657180  0.31347300  0.0000000
+[3,]  2.7294189 0.05283236  0.0000000  1.19632319  0.5573964
+> 
+> ## histograms of 1,000 simulated observations
+> x <- random(X, 1000)
+> hist(x[1, ], main = "uncensored")
+> hist(x[2, ], main = "left-censored at zero")
+> hist(x[3, ], main = "interval-censored in [0, 5]")
+> 
+> ## probability density function (PDF) and log-density (or log-likelihood)
+> x <- c(0, 0, 1)
+> pdf(X, x)
+[1] 0.2500000 0.2689414 0.1966119
+> pdf(X, x, log = TRUE)
+[1] -1.386294 -1.313262 -1.626523
+> log_pdf(X, x)
+[1] -1.386294 -1.313262 -1.626523
+> 
+> ## cumulative distribution function (CDF)
+> cdf(X, x)
+[1] 0.5000000 0.2689414 0.2689414
+> 
+> ## quantiles
+> quantile(X, 0.5)
+[1] 0 1 2
+> 
+> ## cdf() and quantile() are inverses (except at censoring points)
+> cdf(X, quantile(X, 0.5))
+[1] 0.5 0.5 0.5
+> quantile(X, cdf(X, 1))
+[1] 1 1 1
+> 
+> ## all methods above can either be applied elementwise or for
+> ## all combinations of X and x, if length(X) = length(x),
+> ## also the result can be assured to be a matrix via drop = FALSE
+> p <- c(0.05, 0.5, 0.95)
+> quantile(X, p, elementwise = FALSE)
+        q_0.05 q_0.5   q_0.95
+[1,] -2.944439     0 2.944439
+[2,]  0.000000     1 3.944439
+[3,]  0.000000     2 4.944439
+> quantile(X, p, elementwise = TRUE)
+[1] -2.944439  1.000000  4.944439
+> quantile(X, p, elementwise = TRUE, drop = FALSE)
+      quantile
+[1,] -2.944439
+[2,]  1.000000
+[3,]  4.944439
+> 
+> ## compare theoretical and empirical mean from 1,000 simulated observations
+> cbind(
++   "theoretical" = mean(X),
++   "empirical" = rowMeans(random(X, 1000))
++ )
+     theoretical  empirical
+[1,]    0.000000 -0.0299458
+[2,]    1.313262  1.2761385
+[3,]    2.078341  2.0830220
+> 
+> ## evaluate continuous ranked probability score (CRPS) using scoringRules
+> library("scoringRules")
+> crps(X, x)
+[1] 0.3862944 0.5822031 0.6176368
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:scoringRules’, ‘package:distributions3’
+
+> nameEx("CensoredNormal")
+> ### * CensoredNormal
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: CensoredNormal
+> ### Title: Create a Censored Normal Distribution
+> ### Aliases: CensoredNormal mean.CensoredNormal variance.CensoredNormal
+> ###   skewness.CensoredNormal kurtosis.CensoredNormal pdf.CensoredNormal
+> ###   log_pdf.CensoredNormal cdf.CensoredNormal quantile.CensoredNormal
+> ###   random.CensoredNormal crps.CensoredNormal support.CensoredNormal
+> 
+> ### ** Examples
+> 
+> ## Don't show: 
+>  if(!requireNamespace("distributions3")) {
++   if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
++     stop("not all packages required for the example are installed")
++   } else q() }
+> ## End(Don't show)
+> ## package and random seed
+> library("distributions3")
+
+Attaching package: ‘distributions3’
+
+The following object is masked from ‘package:stats’:
+
+    Gamma
+
+The following object is masked from ‘package:grDevices’:
+
+    pdf
+
+> set.seed(6020)
+> 
+> ## three censored normal distributions:
+> ## - uncensored standard normal
+> ## - left-censored at zero (Tobit) with latent mu = 1 and sigma = 1
+> ## - interval-censored in [0, 5] with latent mu = 1 and sigma = 2
+> X <- CensoredNormal(
++   mu    = c(   0,   1, 1),
++   sigma = c(   1,   1, 2),
++   left  = c(-Inf,   0, 0),
++   right = c( Inf, Inf, 5)
++ )
+> X
+[1] "CensoredNormal distribution (mu = 0, sigma = 1, left = -Inf, right = Inf)"
+[2] "CensoredNormal distribution (mu = 1, sigma = 1, left =    0, right = Inf)"
+[3] "CensoredNormal distribution (mu = 1, sigma = 2, left =    0, right =   5)"
+> 
+> ## compute mean of the censored distribution
+> mean(X)
+[1] 0.000000 1.083315 1.378612
+> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> 
+> ## support interval (minimum and maximum)
+> support(X)
+      min max
+[1,] -Inf Inf
+[2,]    0 Inf
+[3,]    0   5
+> 
+> ## simulate random variables
+> random(X, 5)
+            r_1        r_2        r_3       r_4       r_5
+[1,] -0.3421647 -0.6121245 -1.7461032 0.3600695 0.9275691
+[2,]  1.4528670  0.0000000  0.1263061 2.5174300 1.0124322
+[3,]  2.2338249  0.1466394  3.1254139 0.0000000 0.0000000
+> 
+> ## histograms of 1,000 simulated observations
+> x <- random(X, 1000)
+> hist(x[1, ], main = "uncensored")
+> hist(x[2, ], main = "left-censored at zero")
+> hist(x[3, ], main = "interval-censored in [0, 5]")
+> 
+> ## probability density function (PDF) and log-density (or log-likelihood)
+> x <- c(0, 0, 1)
+> pdf(X, x)
+[1] 0.3989423 0.1586553 0.1994711
+> pdf(X, x, log = TRUE)
+[1] -0.9189385 -1.8410216 -1.6120857
+> log_pdf(X, x)
+[1] -0.9189385 -1.8410216 -1.6120857
+> 
+> ## cumulative distribution function (CDF)
+> cdf(X, x)
+[1] 0.5000000 0.1586553 0.5000000
+> 
+> ## quantiles
+> quantile(X, 0.5)
+[1] 0 1 1
+> 
+> ## cdf() and quantile() are inverses (except at censoring points)
+> cdf(X, quantile(X, 0.5))
+[1] 0.5 0.5 0.5
+> quantile(X, cdf(X, 1))
+[1] 1 1 1
+> 
+> ## all methods above can either be applied elementwise or for
+> ## all combinations of X and x, if length(X) = length(x),
+> ## also the result can be assured to be a matrix via drop = FALSE
+> p <- c(0.05, 0.5, 0.95)
+> quantile(X, p, elementwise = FALSE)
+        q_0.05 q_0.5   q_0.95
+[1,] -1.644854     0 1.644854
+[2,]  0.000000     1 2.644854
+[3,]  0.000000     1 4.289707
+> quantile(X, p, elementwise = TRUE)
+[1] -1.644854  1.000000  4.289707
+> quantile(X, p, elementwise = TRUE, drop = FALSE)
+      quantile
+[1,] -1.644854
+[2,]  1.000000
+[3,]  4.289707
+> 
+> ## compare theoretical and empirical mean from 1,000 simulated observations
+> cbind(
++   "theoretical" = mean(X),
++   "empirical" = rowMeans(random(X, 1000))
++ )
+     theoretical  empirical
+[1,]    0.000000 0.01580424
+[2,]    1.083315 1.12030540
+[3,]    1.378612 1.38062119
+> 
+> ## evaluate continuous ranked probability score (CRPS) using scoringRules
+> library("scoringRules")
+> crps(X, x)
+[1] 0.2336950 0.5952063 0.3984091
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:scoringRules’, ‘package:distributions3’
+
+> nameEx("CensoredStudentsT")
+> ### * CensoredStudentsT
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: CensoredStudentsT
+> ### Title: Create a Censored Student's T Distribution
+> ### Aliases: CensoredStudentsT mean.CensoredStudentsT
+> ###   variance.CensoredStudentsT skewness.CensoredStudentsT
+> ###   kurtosis.CensoredStudentsT pdf.CensoredStudentsT
+> ###   log_pdf.CensoredStudentsT cdf.CensoredStudentsT
+> ###   quantile.CensoredStudentsT random.CensoredStudentsT
+> ###   crps.CensoredStudentsT support.CensoredStudentsT
+> 
+> ### ** Examples
+> 
+> ## Don't show: 
+>  if(!requireNamespace("distributions3")) {
++   if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
++     stop("not all packages required for the example are installed")
++   } else q() }
+> ## End(Don't show)
+> ## package and random seed
+> library("distributions3")
+
+Attaching package: ‘distributions3’
+
+The following object is masked from ‘package:stats’:
+
+    Gamma
+
+The following object is masked from ‘package:grDevices’:
+
+    pdf
+
+> set.seed(6020)
+> 
+> ## three censored t distributions:
+> ## - uncensored standard t with 5 degrees of freedom
+> ## - left-censored at zero with 5 df, latent location = 1 and scale = 1
+> ## - interval-censored in [0, 5] with 5 df, latent location = 2 and scale = 2
+> X <- CensoredStudentsT(
++   df       = c(   5,   5, 5),
++   location = c(   0,   1, 2),
++   scale    = c(   1,   1, 2),
++   left     = c(-Inf,   0, 0),
++   right    = c( Inf, Inf, 5)
++ )
+> X
+[1] "CensoredStudentsT distribution (df = 5, location = 0, scale = 1, left = -Inf, right = Inf)"
+[2] "CensoredStudentsT distribution (df = 5, location = 1, scale = 1, left =    0, right = Inf)"
+[3] "CensoredStudentsT distribution (df = 5, location = 2, scale = 2, left =    0, right =   5)"
+> 
+> ## compute mean of the censored distribution
+> mean(X)
+[1] 0.000000 1.147911 2.135302
+> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> 
+> ## support interval (minimum and maximum)
+> support(X)
+      min max
+[1,] -Inf Inf
+[2,]    0 Inf
+[3,]    0   5
+> 
+> ## simulate random variables
+> random(X, 5)
+           r_1        r_2        r_3        r_4       r_5
+[1,] -0.329754 -0.7100405 0.01721632 -0.2439421 0.4039513
+[2,]  1.880227  1.2620058 1.04606093  1.0363624 2.3830650
+[3,]  1.840700  0.1924168 1.99666405  0.0000000 1.6668390
+> 
+> ## histograms of 1,000 simulated observations
+> x <- random(X, 1000)
+> hist(x[1, ], main = "uncensored")
+> hist(x[2, ], main = "left-censored at zero")
+> hist(x[3, ], main = "interval-censored in [0, 5]")
+> 
+> ## probability density function (PDF) and log-density (or log-likelihood)
+> x <- c(0, 0, 1)
+> pdf(X, x)
+[1] 0.3796067 0.1816087 0.1639593
+> pdf(X, x, log = TRUE)
+[1] -0.9686196 -1.7059007 -1.8081373
+> log_pdf(X, x)
+[1] -0.9686196 -1.7059007 -1.8081373
+> 
+> ## cumulative distribution function (CDF)
+> cdf(X, x)
+[1] 0.5000000 0.1816087 0.3191494
+> 
+> ## quantiles
+> quantile(X, 0.5)
+[1] 0 1 2
+> 
+> ## cdf() and quantile() are inverses (except at censoring points)
+> cdf(X, quantile(X, 0.5))
+[1] 0.5 0.5 0.5
+> quantile(X, cdf(X, 1))
+[1] 1 1 1
+> 
+> ## all methods above can either be applied elementwise or for
+> ## all combinations of X and x, if length(X) = length(x),
+> ## also the result can be assured to be a matrix via drop = FALSE
+> p <- c(0.05, 0.5, 0.95)
+> quantile(X, p, elementwise = FALSE)
+        q_0.05 q_0.5   q_0.95
+[1,] -2.015048     0 2.015048
+[2,]  0.000000     1 3.015048
+[3,]  0.000000     2 5.000000
+> quantile(X, p, elementwise = TRUE)
+[1] -2.015048  1.000000  5.000000
+> quantile(X, p, elementwise = TRUE, drop = FALSE)
+      quantile
+[1,] -2.015048
+[2,]  1.000000
+[3,]  5.000000
+> 
+> ## compare theoretical and empirical mean from 1,000 simulated observations
+> cbind(
++   "theoretical" = mean(X),
++   "empirical" = rowMeans(random(X, 1000))
++ )
+     theoretical  empirical
+[1,]    0.000000 0.07350449
+[2,]    1.147911 1.12643481
+[3,]    2.135302 2.14667243
+> 
+> ## evaluate continuous ranked probability score (CRPS) using scoringRules
+> library("scoringRules")
+> crps(X, x)
+[1]        Inf 0.00000000 0.06200845
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:scoringRules’, ‘package:distributions3’
+
 > nameEx("RainIbk")
 > ### * RainIbk
 > 
@@ -67,6 +482,419 @@ Type 'q()' to quit R.
 > 
 > 
 > cleanEx()
+> nameEx("TruncatedLogistic")
+> ### * TruncatedLogistic
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: TruncatedLogistic
+> ### Title: Create a Truncated Logistic Distribution
+> ### Aliases: TruncatedLogistic mean.TruncatedLogistic
+> ###   variance.TruncatedLogistic skewness.TruncatedLogistic
+> ###   kurtosis.TruncatedLogistic pdf.TruncatedLogistic
+> ###   log_pdf.TruncatedLogistic cdf.TruncatedLogistic
+> ###   quantile.TruncatedLogistic random.TruncatedLogistic
+> ###   crps.TruncatedLogistic support.TruncatedLogistic
+> 
+> ### ** Examples
+> 
+> ## Don't show: 
+>  if(!requireNamespace("distributions3")) {
++   if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
++     stop("not all packages required for the example are installed")
++   } else q() }
+> ## End(Don't show)
+> ## package and random seed
+> library("distributions3")
+
+Attaching package: ‘distributions3’
+
+The following object is masked from ‘package:stats’:
+
+    Gamma
+
+The following object is masked from ‘package:grDevices’:
+
+    pdf
+
+> set.seed(6020)
+> 
+> ## three truncated logistic distributions:
+> ## - untruncated standard logistic
+> ## - left-truncated at zero with latent location = 1 and scale = 1
+> ## - interval-truncated in [0, 5] with latent location = 2 and scale = 1
+> X <- TruncatedLogistic(
++   location = c(   0,   1, 2),
++   scale    = c(   1,   1, 1),
++   left     = c(-Inf,   0, 0),
++   right    = c( Inf, Inf, 5)
++ )
+> X
+[1] "TruncatedLogistic distribution (location = 0, scale = 1, left = -Inf, right = Inf)"
+[2] "TruncatedLogistic distribution (location = 1, scale = 1, left =    0, right = Inf)"
+[3] "TruncatedLogistic distribution (location = 2, scale = 1, left =    0, right =   5)"
+> 
+> ## compute mean of the truncated distribution
+> mean(X)
+[1] 0.000000 1.796384 2.209353
+> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> 
+> ## support interval (minimum and maximum)
+> support(X)
+      min max
+[1,] -Inf Inf
+[2,]    0 Inf
+[3,]    0   5
+> 
+> ## simulate random variables
+> random(X, 5)
+            r_1       r_2        r_3         r_4         r_5
+[1,] -0.5489266 0.7114939 -0.9934677 -0.09368233 -3.16777672
+[2,]  1.1006458 2.4089727  2.4675811  1.05483091  0.02403454
+[3,]  2.7604891 0.7532299  0.6488695  1.49733364  1.04806366
+> 
+> ## histograms of 1,000 simulated observations
+> x <- random(X, 1000)
+> hist(x[1, ], main = "untruncated")
+> hist(x[2, ], main = "left-truncated at zero")
+> hist(x[3, ], main = "interval-truncated in [0, 5]")
+> 
+> ## probability density function (PDF) and log-density (or log-likelihood)
+> x <- c(0, 0, 1)
+> pdf(X, x)
+[1] 0.2500000 0.2689414 0.2359236
+> pdf(X, x, log = TRUE)
+[1] -1.386294 -1.313262 -1.444247
+> log_pdf(X, x)
+[1] -1.386294 -1.313262 -1.444247
+> 
+> ## cumulative distribution function (CDF)
+> cdf(X, x)
+[1] 0.500000 0.000000 0.179678
+> 
+> ## quantiles
+> quantile(X, 0.5)
+[1] 0.000000 1.551445 2.143801
+> 
+> ## cdf() and quantile() are inverses (except at truncation points)
+> cdf(X, quantile(X, 0.5))
+[1] 0.5 0.5 0.5
+> quantile(X, cdf(X, 1))
+[1] 1 1 1
+> 
+> ## all methods above can either be applied elementwise or for
+> ## all combinations of X and x, if length(X) = length(x),
+> ## also the result can be assured to be a matrix via drop = FALSE
+> p <- c(0.05, 0.5, 0.95)
+> quantile(X, p, elementwise = FALSE)
+         q_0.05    q_0.5   q_0.95
+[1,] -2.9444390 0.000000 2.944439
+[2,]  0.1787310 1.551445 4.271756
+[3,]  0.3482419 2.143801 4.324742
+> quantile(X, p, elementwise = TRUE)
+[1] -2.944439  1.551445  4.324742
+> quantile(X, p, elementwise = TRUE, drop = FALSE)
+      quantile
+[1,] -2.944439
+[2,]  1.551445
+[3,]  4.324742
+> 
+> ## compare theoretical and empirical mean from 1,000 simulated observations
+> cbind(
++   "theoretical" = mean(X),
++   "empirical" = rowMeans(random(X, 1000))
++ )
+     theoretical  empirical
+[1,]    0.000000 -0.0299458
+[2,]    1.796384  1.7546601
+[3,]    2.209353  2.2205845
+> 
+> ## evaluate continuous ranked probability score (CRPS) using scoringRules
+> library("scoringRules")
+> crps(X, x)
+[1] 0.3862944 1.0893568 0.6860449
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:scoringRules’, ‘package:distributions3’
+
+> nameEx("TruncatedNormal")
+> ### * TruncatedNormal
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: TruncatedNormal
+> ### Title: Create a Truncated Normal Distribution
+> ### Aliases: TruncatedNormal mean.TruncatedNormal variance.TruncatedNormal
+> ###   skewness.TruncatedNormal kurtosis.TruncatedNormal pdf.TruncatedNormal
+> ###   log_pdf.TruncatedNormal cdf.TruncatedNormal quantile.TruncatedNormal
+> ###   random.TruncatedNormal crps.TruncatedNormal support.TruncatedNormal
+> 
+> ### ** Examples
+> 
+> ## Don't show: 
+>  if(!requireNamespace("distributions3")) {
++   if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
++     stop("not all packages required for the example are installed")
++   } else q() }
+> ## End(Don't show)
+> ## package and random seed
+> library("distributions3")
+
+Attaching package: ‘distributions3’
+
+The following object is masked from ‘package:stats’:
+
+    Gamma
+
+The following object is masked from ‘package:grDevices’:
+
+    pdf
+
+> set.seed(6020)
+> 
+> ## three truncated normal distributions:
+> ## - untruncated standard normal
+> ## - left-truncated at zero with latent mu = 1 and sigma = 1
+> ## - interval-truncated in [0, 5] with latent mu = 1 and sigma = 2
+> X <- TruncatedNormal(
++   mu    = c(   0,   1, 1),
++   sigma = c(   1,   1, 2),
++   left  = c(-Inf,   0, 0),
++   right = c( Inf, Inf, 5)
++ )
+> X
+[1] "TruncatedNormal distribution (mu = 0, sigma = 1, left = -Inf, right = Inf)"
+[2] "TruncatedNormal distribution (mu = 1, sigma = 1, left =    0, right = Inf)"
+[3] "TruncatedNormal distribution (mu = 1, sigma = 2, left =    0, right =   5)"
+> 
+> ## compute mean of the truncated distribution
+> mean(X)
+[1] 0.000000 1.287600 1.891488
+> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> 
+> ## support interval (minimum and maximum)
+> support(X)
+      min max
+[1,] -Inf Inf
+[2,]    0 Inf
+[3,]    0   5
+> 
+> ## simulate random variables
+> random(X, 5)
+            r_1       r_2        r_3         r_4         r_5
+[1,] -0.3421647 0.4419331 -0.6121245 -0.05869749 -1.74610318
+[2,]  0.8831861 1.7520048  1.7872496  0.84989937  0.02234993
+[3,]  2.4106941 0.4519601  0.3781711  1.07687138  0.67957521
+> 
+> ## histograms of 1,000 simulated observations
+> x <- random(X, 1000)
+> hist(x[1, ], main = "untruncated")
+> hist(x[2, ], main = "left-truncated at zero")
+> hist(x[3, ], main = "interval-truncated in [0, 5]")
+> 
+> ## probability density function (PDF) and log-density (or log-likelihood)
+> x <- c(0, 0, 1)
+> pdf(X, x)
+[1] 0.3989423 0.2876000 0.2982914
+> pdf(X, x, log = TRUE)
+[1] -0.9189385 -1.2461848 -1.2096844
+> log_pdf(X, x)
+[1] -0.9189385 -1.2461848 -1.2096844
+> 
+> ## cumulative distribution function (CDF)
+> cdf(X, x)
+[1] 0.5000000 0.0000000 0.2863151
+> 
+> ## quantiles
+> quantile(X, 0.5)
+[1] 0.000000 1.200174 1.732409
+> 
+> ## cdf() and quantile() are inverses
+> cdf(X, quantile(X, 0.5))
+[1] 0.5 0.5 0.5
+> quantile(X, cdf(X, 1))
+[1] 1 1 1
+> 
+> ## all methods above can either be applied elementwise or for
+> ## all combinations of X and x, if length(X) = length(x),
+> ## also the result can be assured to be a matrix via drop = FALSE
+> p <- c(0.05, 0.5, 0.95)
+> quantile(X, p, elementwise = FALSE)
+         q_0.05    q_0.5   q_0.95
+[1,] -1.6448536 0.000000 1.644854
+[2,]  0.1609566 1.200174 2.727185
+[3,]  0.1858320 1.732409 4.175247
+> quantile(X, p, elementwise = TRUE)
+[1] -1.644854  1.200174  4.175247
+> quantile(X, p, elementwise = TRUE, drop = FALSE)
+      quantile
+[1,] -1.644854
+[2,]  1.200174
+[3,]  4.175247
+> 
+> ## compare theoretical and empirical mean from 1,000 simulated observations
+> cbind(
++   "theoretical" = mean(X),
++   "empirical" = rowMeans(random(X, 1000))
++ )
+     theoretical   empirical
+[1,]    0.000000 -0.01591685
+[2,]    1.287600  1.25873948
+[3,]    1.891488  1.90212846
+> 
+> ## evaluate continuous ranked probability score (CRPS) using scoringRules
+> library("scoringRules")
+> crps(X, x)
+[1] 0.2336950 0.8408519 0.4738612
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:scoringRules’, ‘package:distributions3’
+
+> nameEx("TruncatedStudentsT")
+> ### * TruncatedStudentsT
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: TruncatedStudentsT
+> ### Title: Create a Truncated Student's T Distribution
+> ### Aliases: TruncatedStudentsT mean.TruncatedStudentsT
+> ###   variance.TruncatedStudentsT skewness.TruncatedStudentsT
+> ###   kurtosis.TruncatedStudentsT pdf.TruncatedStudentsT
+> ###   log_pdf.TruncatedStudentsT cdf.TruncatedStudentsT
+> ###   quantile.TruncatedStudentsT random.TruncatedStudentsT
+> ###   crps.TruncatedStudentsT support.TruncatedStudentsT
+> 
+> ### ** Examples
+> 
+> ## Don't show: 
+>  if(!requireNamespace("distributions3")) {
++   if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
++     stop("not all packages required for the example are installed")
++   } else q() }
+> ## End(Don't show)
+> ## package and random seed
+> library("distributions3")
+
+Attaching package: ‘distributions3’
+
+The following object is masked from ‘package:stats’:
+
+    Gamma
+
+The following object is masked from ‘package:grDevices’:
+
+    pdf
+
+> set.seed(6020)
+> 
+> ## three truncated t distributions:
+> ## - untruncated standard t with 5 degrees of freedom
+> ## - left-truncated at zero with 5 df, latent location = 1 and scale = 1
+> ## - interval-truncated in [0, 5] with 5 df, latent location = 2 and scale = 2
+> X <- TruncatedStudentsT(
++   df       = c(   5,   5, 5),
++   location = c(   0,   1, 2),
++   scale    = c(   1,   1, 2),
++   left     = c(-Inf,   0, 0),
++   right    = c( Inf, Inf, 5)
++ )
+> X
+[1] "TruncatedStudentsT distribution (df = 5, location = 0, scale = 1, left = -Inf, right = Inf)"
+[2] "TruncatedStudentsT distribution (df = 5, location = 1, scale = 1, left =    0, right = Inf)"
+[3] "TruncatedStudentsT distribution (df = 5, location = 2, scale = 2, left =    0, right =   5)"
+> 
+> ## compute mean of the truncated distribution
+> mean(X)
+[1] 0.000000 1.402643 2.287847
+> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> 
+> ## support interval (minimum and maximum)
+> support(X)
+      min max
+[1,] -Inf Inf
+[2,]    0 Inf
+[3,]    0   5
+> 
+> ## simulate random variables
+> random(X, 5)
+            r_1       r_2        r_3         r_4         r_5
+[1,] -0.3618879 0.4694046 -0.6565922 -0.06169882 -2.18313389
+[2,]  0.9166752 1.8390221  1.8795242  0.88274478  0.02392676
+[3,]  2.9245453 0.6966685  0.5923259  1.49145953  1.00217689
+> 
+> ## histograms of 1,000 simulated observations
+> x <- random(X, 1000)
+> hist(x[1, ], main = "untruncated")
+> hist(x[2, ], main = "left-truncated at zero")
+> hist(x[3, ], main = "interval-truncated in [0, 5]")
+> 
+> ## probability density function (PDF) and log-density (or log-likelihood)
+> x <- c(0, 0, 1)
+> pdf(X, x)
+[1] 0.3796067 0.2684288 0.2272668
+> pdf(X, x, log = TRUE)
+[1] -0.9686196 -1.3151695 -1.4816304
+> log_pdf(X, x)
+[1] -0.9686196 -1.3151695 -1.4816304
+> 
+> ## cumulative distribution function (CDF)
+> cdf(X, x)
+[1] 0.5000000 0.0000000 0.1906476
+> 
+> ## quantiles
+> quantile(X, 0.5)
+[1] 0.000000 1.242002 2.223569
+> 
+> ## cdf() and quantile() are inverses (except at truncation points)
+> cdf(X, quantile(X, 0.5))
+[1] 0.5 0.5 0.5
+> quantile(X, cdf(X, 1))
+[1] 1 1 1
+> 
+> ## all methods above can either be applied elementwise or for
+> ## all combinations of X and x, if length(X) = length(x),
+> ## also the result can be assured to be a matrix via drop = FALSE
+> p <- c(0.05, 0.5, 0.95)
+> quantile(X, p, elementwise = FALSE)
+         q_0.05    q_0.5   q_0.95
+[1,] -2.0150484 0.000000 2.015048
+[2,]  0.1713748 1.242002 3.172937
+[3,]  0.3048628 2.223569 4.503390
+> quantile(X, p, elementwise = TRUE)
+[1] -2.015048  1.242002  4.503390
+> quantile(X, p, elementwise = TRUE, drop = FALSE)
+      quantile
+[1,] -2.015048
+[2,]  1.242002
+[3,]  4.503390
+> 
+> ## compare theoretical and empirical mean from 1,000 simulated observations
+> cbind(
++   "theoretical" = mean(X),
++   "empirical" = rowMeans(random(X, 1000))
++ )
+     theoretical   empirical
+[1,]    0.000000 -0.02414368
+[2,]    1.402643  1.37202824
+[3,]    2.287847  2.29976419
+> 
+> ## evaluate continuous ranked probability score (CRPS) using scoringRules
+> library("scoringRules")
+> crps(X, x)
+[1]       Inf 0.0000000 0.3016241
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:scoringRules’, ‘package:distributions3’
+
 > nameEx("crch")
 > ### * crch
 > 
@@ -167,7 +995,7 @@ CRCH4  4 17867.35
 > ### Name: crch.boost
 > ### Title: Auxiliary functions to fit 'crch' models via boosting.
 > ### Aliases: crch.boost crch.boost.fit
-> ### Keywords: regression, boosting
+> ### Keywords: regression
 > 
 > ### ** Examples
 > 
@@ -287,7 +1115,7 @@ Iteration 1/2000 parameters added 1/42Iteration 2/2000 parameters added 1/42It
 
   Selected formula:
    y ~ V2 + V3 | V4
-<environment: 0x4cf8c48>
+<environment: 0x563091b54340>
 > 
 > CRCH2 <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0 )
 > BOOST <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0,
@@ -468,9 +1296,13 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 > 
 > ### * <FOOTER>
 > ###
+> cleanEx()
+
+detaching ‘package:lmtest’, ‘package:zoo’
+
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  6.776 0.232 7.045 0 0 
+Time elapsed:  4.437 0.065 4.504 0 0 
 > grDevices::dev.off()
 null device 
           1 
