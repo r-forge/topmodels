@@ -107,30 +107,30 @@
 \item{single_graph}{logical. Should all computed extended reliability
 diagrams be plotted in a single graph? If yes, \code{style} must be set to \code{"line"}.}
 
-\item{style}{character specifying the style of pithist. For \code{style = "bar"}
-a traditional PIT hisogram is drawn, for \code{style = "line"} solely the upper border
-line is plotted. For \code{single_graph = TRUE}, always line-style PIT histograms are
-plotted.}
+\item{style}{\code{NULL} or character specifying the style of pithist. For
+\code{style = "bar"} a traditional PIT hisogram is drawn, for \code{style =
+"line"} solely the upper border line is plotted.  \code{single_graph = TRUE}
+always results in a combined line-style PIT histogram.}
 
-\item{freq}{logical. If \code{TRUE}, the PIT histogram is represented by
-frequencies, the \code{counts} component of the result; if \code{FALSE},
-probability densities, component \code{density}, are plotted (so that the
-histogram has a total area of one).}
+\item{freq}{\code{NULL} or logical.
+\code{TRUE} will enforce the PIT to be represented by frequencies (counts) while
+\code{FALSE} will enforce densities.}
 
 \item{expected}{logical. Should the expected values be plotted as reference?}
 
-\item{confint}{Should confident intervals be drawn? Either logical or as 
-character string defining one of `"polygon"`, `"line"` or `"none"`.}
+\item{confint}{\code{NULL} or logical. Should confident intervals be drawn? Either logical or as}
 
-\item{confint_level}{numeric. The confidence level required.}
+\item{confint_level}{numeric in \code{[0, 1]}. The confidence level to be shown.}
 
-\item{confint_type}{character. Which type of confidence interval should be plotted: 
-`"exact"` or `"approximation"`. According
-to Agresti and Coull (1998), for interval estimation of binomial proportions
-an approximation can be better than exact.}
+\item{confint_type}{character. Which type of confidence interval should be
+plotted: `"exact"` or `"approximation"`. According to Agresti and Coull
+(1998), for interval estimation of binomial proportions an approximation can
+be better than exact.}
 
-\item{simint}{logical. In case of discrete distributions, should the simulation
-(confidence) interval due to the randomization be visualized?}
+\item{simint}{\code{NULL} or logical. In case of discrete distributions, should the simulation
+(confidence) interval due to the randomization be visualized?
+character string defining one of `"polygon"`, `"line"` or `"none"`.
+If \code{freq = NULL} it is taken from the \code{object}.}
 
 \item{xlim, ylim, xlab, ylab, main, axes, box}{graphical parameters.}
 
@@ -152,8 +152,8 @@ graphic?}
 \item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, expected_colour, expected_size, expected_linetype, expected_alpha}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
 }
 \description{
-Generic plotting functions for PIT histograms of the class \code{"pithist"}
-computed by \code{link{pithist}}.
+Generic plotting functions for probability integral transform (PIT)
+histograms of the class \code{"pithist"} computed by \code{link{pithist}}.
 }
 \details{
 PIT histograms graphically evaluate the probability integral transform (PIT),

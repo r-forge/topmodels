@@ -2,11 +2,10 @@
 % Please edit documentation in R/procast.R
 \name{procast}
 \alias{procast}
-\alias{procast.lm}
 \alias{procast_setup}
+\alias{procast.default}
 \alias{procast.crch}
 \alias{procast.disttree}
-\alias{procast.glm}
 \alias{procast.distforest}
 \title{Procast: Probabilistic Forecasting}
 \usage{
@@ -16,19 +15,28 @@ procast(
   na.action = na.pass,
   type = "quantile",
   at = 0.5,
+  drop = FALSE,
   ...
 )
 
-procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
-
-\method{procast}{lm}(
+\method{procast}{default}(
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability",
-    "score"),
+  type = c("quantile", "mean", "variance", "probability", "density", "loglikelihood",
+    "distribution", "parameters", "kurtosis", "skewness"),
   at = 0.5,
   drop = FALSE,
+  ...
+)
+
+procast_setup(
+  pars,
+  FUN,
+  at = NULL,
+  drop = FALSE,
+  type = "procast",
+  elementwise = NULL,
   ...
 )
 
@@ -36,8 +44,7 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability",
-    "score"),
+  type = c("quantile", "location", "scale", "parameter", "density", "probability"),
   at = 0.5,
   drop = FALSE,
   ...
@@ -47,22 +54,10 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability",
-    "score"),
+  type = c("quantile", "location", "scale", "parameter", "density", "probability"),
   at = 0.5,
   drop = FALSE,
   use_distfamily = TRUE,
-  ...
-)
-
-\method{procast}{glm}(
-  object,
-  newdata = NULL,
-  na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability",
-    "score"),
-  at = 0.5,
-  drop = FALSE,
   ...
 )
 
@@ -70,8 +65,7 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability",
-    "score"),
+  type = c("quantile", "location", "scale", "parameter", "density", "probability"),
   at = 0.5,
   drop = FALSE,
   use_distfamily = TRUE,
@@ -80,10 +74,7 @@ procast_setup(pars, FUN, at = NULL, drop = FALSE, type = "procast", ...)
 }
 \arguments{
 \item{object}{a fitted model object. For the \code{default} method this
-needs to be \code{formula}-based so that \code{\link[stats]{model.frame}}
-can be used to extract the response from the original data the model was
-fitted to or \code{\link[stats]{terms}} can be used to set up the response
-on \code{newdata}.}
+needs to have a \code{\link[distributions3]{prodist}} method.}
 
 \item{newdata}{optionally, a data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.}
@@ -100,6 +91,9 @@ evaluated, typically a numeric vector but possibly also a matrix or data
 frame.  Additionally, \code{at} can be the character string
 \code{"function"} or \code{"list"}, see details below.}
 
+\item{drop}{logical. Should the result be simplified to a vector if possible (by
+dropping the dimension attribute)? If \code{FALSE} a matrix is always returned.}
+
 \item{\dots}{further parameters passed to methods.}
 
 \item{pars}{a data frame of predicted distribution parameters.}
@@ -107,8 +101,12 @@ frame.  Additionally, \code{at} can be the character string
 \item{FUN}{function to be used for forecasts. Either of type \code{FUN(pars,
 \dots)} or \code{FUN(at, pars, \dots)}, see details below.}
 
-\item{drop}{logical. Should forecasts be returned in a data frame (default)
-or (if possible) dropped to a vector, see details below.}
+\item{elementwise}{logical. Should each element of distribution only be evaluated at the
+corresponding element of \code{at} (\code{elementwise = TRUE}) or at all elements
+in \code{at} (\code{elementwise = FALSE}). Elementwise evaluation is only possible
+if the number of observations is length of \code{at} are the same and in that case a vector of
+the same length is returned. Otherwise a matrix is returned. The default is to use
+\code{elementwise = TRUE} if possible, and otherwise \code{elementwise = FALSE}.}
 
 \item{use_distfamily}{For intern use only, will not be supported in the future.}
 }
@@ -120,26 +118,43 @@ is the character string \code{"function"} or \code{"list"} in which case a
 (list of) function(s) is returned.
 }
 \description{
-Generic function and methods for computing various kinds of forecasts from
-probabilistic (regression) models (probabilistic 4-casting).
+Generic function and methods for computing various kinds of probabilistic
+forecasts from (regression) models.
 }
 \details{
 The function \code{procast} provides a unified framework for probabilistic
-4-casting based on probabilistic (regression) models, also known as
-distributional regression approaches. Typical types of predictions include
-quantiles, probabilities, (conditional) expectations, variances,
-(log-)densities, or scores. Internally, \code{procast} methods typically
-compute the predicted parameters for each observation and then transform
-these to the desired outcome. Some quantities (e.g., expectations or
-variances) can be computed directly from the predicted parameters of the
+forcasting (or procasting, for short) based on probabilistic (regression)
+models, also known as distributional regression approaches. Typical types
+of predictions include quantiles, probabilities, (conditional) expectations,
+variances, and (log-)densities. Internally, \code{procast} methods typically
+compute the predicted parameters for each observation and then compute the
+desired outcome for the distributions with the respective parameters.
+
+Some quantities, e.g., the moments of the distribution (like mean or variance),
+can be computed directly from the predicted parameters of the
 distribution while others require an additional argument \code{at} which the
 distribution is evaluated (e.g., the probability of a quantile or an
-observation of the response. The argument \code{at} can also be the
-character \code{"function"} or \code{"list"} so that a single function or
-list of functions is set up that can be evaluated \code{at} different values
-later on.
+observation of the response.
 
-The function \code{procast_setup} is a convenience wrapper that make setting
+The default \code{procast} method leverages the S3 classes and methods for
+probability distributions from the \pkg{distributions3} package. It proceeds
+in two steps: First, \code{\link[distributions3]{prodist}} is used to obtain the
+predicted probability distribution object. Second, the extractor methods such
+as \code{quantile}, \code{\link[distributions3]{cdf}}, etc. are used to
+compute quantiles, probabilities, etc. from the distribution objects.
+
+Therefore, to enable \code{procast} for a certain type of model object, the
+recommended approach is to implement a \code{prodist} method which can then
+be leveraged. However, if the \pkg{distributions3} package does not support
+the necessary probability distribution, then it may also be necessary to
+implement a new distribution objects, see \code{\link[distributions3]{apply_dpqr}}.
+
+Before adopting the \pkg{distributions3} framework as the recommended workflow
+for procasting, the package had taken a different approach which is described
+in the following. Note, however, that this will be discontinued when we have
+converted all procasting methods to the new workflow.
+
+Old workflow: The function \code{procast_setup} is a convenience wrapper that makes setting
 up \code{procast} methods easier for package developers. It takes a data
 frame of predicted parameters \code{pars} and a function \code{FUN} which is
 to be evaluated at the parameters. This can either have the interface
@@ -147,11 +162,9 @@ to be evaluated at the parameters. This can either have the interface
 directly from the predicted parameters -- or the interface \code{FUN(at,
 pars, \dots)} if an additional argument \code{at} is needed.
 \code{procast_setup} takes care of suitable expanding \code{at} to the
-dimensions of \code{pars} and optionally setting up a (list of) function(s)
-to be returned.
+dimensions of \code{pars}.
 }
 \examples{
-
 ## linear regression models (homoscedastic Gaussian response)
 m <- lm(dist ~ speed, data = cars)
 
@@ -175,24 +188,10 @@ nd <- data.frame(speed = c(10, 15, 20))
 procast(m, newdata = nd)
 
 ## different quantile for each observation
-procast(m, newdata = nd, at = c(0.25, 0.5, 0.75))
+procast(m, newdata = nd, at = c(0.25, 0.5, 0.75), elementwise = TRUE)
 
 ## all combinations of quantiles and observations
-procast(m, newdata = nd, at = rbind(c(0.25, 0.5, 0.75)))
-
-## function for computing quantiles (vectorized)
-qnt1 <- procast(m, newdata = nd, at = "function")
-## as before
-qnt1(0.5)
-qnt1(c(0.25, 0.5, 0.75))
-qnt1(rbind(c(0.25, 0.5, 0.75)))
-
-## list of functions
-qnt2 <- procast(m, newdata = nd, at = "list")
-qnt2[[1]]
-qnt2[[1]](0.5)
-qnt2[[1]](c(0.25, 0.5, 0.75))
-
+procast(m, newdata = nd, at = c(0.25, 0.5, 0.75), elementwise = FALSE)
 
 }
 \keyword{regression}
