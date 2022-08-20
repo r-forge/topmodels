@@ -12,7 +12,7 @@ expect_equal(
   qnorm(pnorm(
     cars$dist, 
     m$fitted.values, 
-    summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    summary(m)$sigma
   ))
 )
 
@@ -29,4 +29,4 @@ expect_equal(
   qnorm(predict(m2, type = "probability", at = cars$dist))[-idx]
 )
 
-# TODO: Improve/extent tests for censoring/truncation
+# TODO: Improve/extend tests for censoring/truncation

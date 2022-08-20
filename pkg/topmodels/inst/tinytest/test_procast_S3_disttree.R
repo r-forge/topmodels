@@ -1,9 +1,9 @@
 # --------------------------------------------------------------------
-# TESTS FOR FUNCTIONS WITHIN `procast.R` FOR S3-CLASS `crch`
+# TESTS FOR FUNCTIONS WITHIN `procast.R` FOR S3-CLASSES `disttree` and `distforest`
 # --------------------------------------------------------------------
 
 # --------------------------------------------------------------------
-# Test procast.crch argument = `type = "parameter"`
+# Test procast.disttree/distforest argument = `type = "parameter"`
 # --------------------------------------------------------------------
 suppressPackageStartupMessages(require("disttree"))
 dt1 <- disttree(dist ~ speed, data = cars)

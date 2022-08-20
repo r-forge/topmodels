@@ -66,8 +66,8 @@ expect_identical(NROW(CrabSatellites), NROW(q3n), info = "testing dimension 1 (n
 # TODO: (RS2ML) Not sure if this works across different OSs!!!
 # NOTE: (RS) Switching to sha1, <https://cran.r-project.org/web/packages/digest/vignettes/sha1.html>
 # --------------------------------------------------------------------
-expect_identical(digest::sha1(q1u, 8, 7), "aa5d782459744c08b284c24f456f15a872a38a56")
-expect_identical(digest::sha1(q1n, 8, 7), "329a2506dc4c8ecccac263c3c86616f734e644d1")
+expect_identical(digest::sha1(q1u, 8, 7), "2166be1e5d9553056812e0c18d054ef52b2a82b1")
+expect_identical(digest::sha1(q1n, 8, 7), "9f04f539e709162c8e43a723b9f55fd953e8a066")
 expect_identical(digest::sha1(q2u, 8, 7), "0884c326282442f88a6532dd18e4f2860a058874")
 expect_identical(digest::sha1(q2n, 8, 7), "071bd96cc7a0644c7ebb54216985686da6eedba4")
 expect_identical(digest::sha1(q3u, 8, 7), "f0053b11699eec966534e6937bce3f9ed6076383")
@@ -76,8 +76,8 @@ expect_identical(digest::sha1(q3n, 8, 7), "1e3d4881360d1208b4470311cc3f8994bf749
 # Thus, altenratively, gong for colSums(abs()) for all finite values
 # which is a much weaker test.
 fn <- function(x) as.numeric(sapply(x, function(y) ifelse(all(is.na(y)), NA, sum(abs(y[is.finite(y)])))))
-expect_equal(fn(q1u), c(23.8823086240537, 25, NA, NA, NA))
-expect_equal(fn(q1n), c(38.4240155605576, 39.6761730673991, NA, NA, NA))
+expect_equal(fn(q1u), c(23.9175639817764, 25, NA, NA, NA))
+expect_equal(fn(q1n), c(37.6476927968508, 39.6761730673991, NA, NA, NA))
 expect_equal(fn(q2u), c(23.6139646074072, 25, NA, NA, NA))
 expect_equal(fn(q2n), c(38.5067890113182, 39.6761730673991, NA, NA, NA))
 expect_equal(fn(q3u), c(74.4564233315605, 86.5, 72.0636565265156, 78.8877997788859, 86.5))
@@ -96,7 +96,7 @@ expect_true(all(sapply(list(q1u, q2u, q3u), function(x) all(x$observed >= 0 & x$
 # LINEAR MODEL ----------------------------
 # Calculate residuals with ML corrected standard deviation (scale)
 m1_eps   <- residuals(m1)
-m1_scale <- sqrt(1 / length(m1_eps) * sum((m1_eps - mean(m1_eps))^2))
+m1_scale <- sqrt(1/df.residual(m1) * sum((m1_eps - mean(m1_eps))^2))
 m1_prob  <- pnorm(model.response(model.frame(m1)),
                   mean = fitted(m1),
                   sd   = m1_scale)

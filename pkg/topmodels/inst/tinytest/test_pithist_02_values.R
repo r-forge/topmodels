@@ -44,7 +44,7 @@ expect_silent(p3_uniform10 <- pithist(m3, scale = "uniform", class = "data.frame
 expect_identical(digest::sha1(p1_uniform, digits = 10),    "bd8e42cb9ee24db09adf1372adefb3cc73848168")
 expect_identical(digest::sha1(p2_uniform, digits = 10),    "93f9b7c74f1324ae34d7ba003dd37632ae842ccd")
 expect_identical(digest::sha1(p3_uniform, digits = 10),    "c7aacccc28c18857aaf2fe9e7606c7def127130c")
-expect_identical(digest::sha1(p1_uniform10, digits = 10), "8ea2bd043d217b5de77f9b40510411853078084d")
+expect_identical(digest::sha1(p1_uniform10, digits = 10), "a7df92257fac687ae019d1dea8242078e6f68ec7")
 expect_identical(digest::sha1(p2_uniform10, digits = 10), "bf74794d30af290ec04fb914801eee2d334b1ebf")
 expect_identical(digest::sha1(p3_uniform10, digits = 10), "0e26567a0a5205fb6568687a582ea4e27929663f")
 
@@ -55,9 +55,9 @@ expect_identical(digest::sha1(p3_uniform10, digits = 10), "0e26567a0a5205fb65686
 # LINEAR MODEL -------------------------
 manual_uniform_pit_lm <- function(x, breaks) {
     location <- predict(x)
-    #scale    <- summary(x)$sigma * sqrt(df.residual(x) / nobs(x)) # ML CONS
+    #scale    <- summary(x)$sigma # ML CONS
     eps      <- residuals(x)
-    scale    <- sqrt(1 / length(eps) * sum((eps - mean(eps))^2))
+    scale    <- sqrt(1 / df.residual(x) * sum((eps - mean(eps))^2))
     obs      <- model.response(model.frame(x))
     pitresid <- pnorm(obs, mean = location, sd = scale)
     bin      <- cut(pitresid, breaks = breaks, include.lowest = TRUE, left = TRUE)
@@ -138,9 +138,9 @@ expect_silent(p1_normal <- pithist(m1, scale = "normal", class = "data.frame", b
 # LINEAR MODEL -------------------------
 manual_normal_pit_lm <- function(x, breaks) {
     location <- predict(x)
-    #scale    <- summary(x)$sigma * sqrt(df.residual(x) / nobs(x)) # ML CONS
+    #scale    <- summary(x)$sigma # ML CONS
     eps      <- residuals(x)
-    scale    <- sqrt(1 / length(eps) * sum((eps - mean(eps))^2))
+    scale    <- sqrt(1 / df.residual(x) * sum((eps - mean(eps))^2))
     obs      <- model.response(model.frame(x))
     pitresid <- qnorm(pnorm(obs, mean = location, sd = scale))
     return(pitresid)

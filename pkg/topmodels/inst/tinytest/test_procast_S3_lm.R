@@ -9,24 +9,24 @@ m <- lm(dist ~ speed, data = cars)
 
 expect_equal(
   procast(m, drop = TRUE), 
-  qnorm(0.5, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m)))
+  qnorm(0.5, m$fitted.values, sd = summary(m)$sigma)
 )
 
 expect_equal(
-  procast(m, type = "location", drop = TRUE), 
+  procast(m, type = "mean", drop = TRUE), 
   m$fitted.values
 )
 
 expect_equal(
-  unique(procast(m, type = "scale", drop = TRUE)),
-  summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+  unique(procast(m, type = "variance", drop = TRUE)),
+  summary(m)$sigma^2
 )
 
 expect_equal(
   procast(m, type = "parameter"),
   data.frame(
     mu = m$fitted.values, 
-    sigma = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    sigma = summary(m)$sigma
   )
 )
 
@@ -35,7 +35,7 @@ expect_equal(
   dnorm(
     0.5,
     m$fitted.values, 
-    summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    summary(m)$sigma
   )
 )
 
@@ -44,7 +44,7 @@ expect_equal(
   pnorm(
     0.5,
     m$fitted.values, 
-    summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    summary(m)$sigma
   )
 )
 
@@ -57,7 +57,7 @@ expect_equal(
 expect_equal(
   procast(m, drop = FALSE),
   data.frame(
-    quantile = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m)))
+    quantile = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma)
   )
 )
 
@@ -74,7 +74,7 @@ expect_equal(
   procast(m, type = "parameter", newdata = nd),
   data.frame(
     mu = predict(m, newdata = nd), 
-    sigma = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    sigma = summary(m)$sigma
   )
 )
 
@@ -88,38 +88,18 @@ nd <- data.frame(speed = c(10, 15, 20))
 expect_equal(
   procast(m, at = c(0.25, 0.5, 0.75)),
   data.frame(
-    q_0.25 = qnorm(0.25, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))),
-    q_0.5  = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))),
-    q_0.75 = qnorm(0.75, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m)))
+    q_0.25 = qnorm(0.25, m$fitted.values, sd = summary(m)$sigma),
+    q_0.5  = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma),
+    q_0.75 = qnorm(0.75, m$fitted.values, sd = summary(m)$sigma)
   )
 )
 
 expect_equal(
   procast(m, at = rbind(c(0.25, 0.5, 0.75))),
   data.frame(
-    q_0.25 = qnorm(0.25, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))),
-    q_0.5  = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))),
-    q_0.75 = qnorm(0.75, m$fitted.values, sd = summary(m)$sigma * sqrt(df.residual(m) / nobs(m)))
-  )
-)
-
-qnt1 <- procast(m, newdata = nd, at = "function")
-expect_equal(
-  as.numeric(qnt1(c(0.25, 0.5, 0.75))),  # TODO: (ML) Should it really be a named vector?
-  qnorm(
-    c(0.25, 0.5, 0.75), 
-    predict(m, newdata = nd),
-    summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
-  )
-)
-
-qnt2 <- procast(m, newdata = nd, at = "list")
-expect_equal(
-  qnt2[[2]](c(0.25, 0.5, 0.75)),
-  qnorm(
-    c(0.25, 0.5, 0.75), 
-    predict(m, newdata = nd)[2],
-    summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    q_0.25 = qnorm(0.25, m$fitted.values, sd = summary(m)$sigma),
+    q_0.5  = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma),
+    q_0.75 = qnorm(0.75, m$fitted.values, sd = summary(m)$sigma)
   )
 )
 
@@ -134,7 +114,7 @@ expect_equal(
   procast(m, type = "parameter", newdata = nd),
   data.frame(
     mu = predict(m, newdata = nd), 
-    sigma = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    sigma = summary(m)$sigma
   )
 )
 
@@ -142,6 +122,6 @@ expect_equal(
   procast(m, type = "parameter", newdata = nd, na.action = na.omit),
   data.frame(
     mu = predict(m, newdata = nd, na.action = na.omit), 
-    sigma = summary(m)$sigma * sqrt(df.residual(m) / nobs(m))
+    sigma = summary(m)$sigma
   )
 )
