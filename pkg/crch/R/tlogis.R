@@ -99,10 +99,20 @@ htlogis <- function(x, location = 0, scale = 1, left = -Inf, right = Inf,
 
 ## Expectation
 etlogis <- function(location = 0, scale = 1, left = -Inf, right = Inf) {
-  rmm <- (right-location)/scale
-  lmm <- (left-location)/scale
-  pncens <- plogis(rmm)-plogis(lmm)
-  rval <- location + scale*(rmm*plogis(rmm) - log(1+exp(rmm)) - 
-    lmm*plogis(lmm) + log(1+exp(lmm))) /pncens
+  ## scaled truncation points
+  rmm <- (right - location)/scale
+  lmm <- (left - location)/scale
+  
+  ## non-truncated probability
+  pncens <- plogis(rmm) - plogis(lmm)
+
+  ## effect on right and left truncation point
+  rmm <- rmm * plogis(rmm) - log(1 + exp(rmm))
+  rmm[!is.finite(rmm) | is.nan(rmm)] <- 0
+  lmm <- lmm * plogis(lmm) - log(1 + exp(lmm))
+  lmm[!is.finite(lmm) | is.nan(lmm)] <- 0
+
+  ## mean of truncated variable
+  rval <- location + scale * (rmm - lmm) / pncens
   rval
 }
