@@ -707,9 +707,6 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
     distfun <- if(dist == "student") distfun2 else function(..., df) distfun2(...)
 
 
-
-    
-
     ## distribution function for different formats of at
     fun <- function(at, location = mu, scale = sigma, df = object$df, ...) {
       n <- length(location)
@@ -741,7 +738,6 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
   }
 
 
-
   rval <- switch(type,
     "location" = mu,
     "scale" = sigma,
@@ -754,6 +750,28 @@ predict.crch <- function(object, newdata = NULL, type = c("location", "scale",
   return(rval)
 }
 
+prodist.crch <- function(object, newdata = NULL, na.action = na.pass, left = NULL, right = NULL, ...) {
+  ## type of distribution
+  dist <- object$dist
+  dist <- if(object$truncated) paste0("truncated_", dist) else paste0("censored_", dist)
+  
+  ## location and scale parameters
+  par <- predict(object, newdata = newdata, na.action = na.action, type = "parameter", left = left, right = right, ...)
+
+  ## censoring points
+  if(is.null(left))  left  <- object$cens$left
+  if(is.null(right)) right <- object$cens$right
+
+  ## distributions3 object
+  switch(dist,
+    "censored_gaussian"  = CensoredNormal(mu = par$location, sigma = par$scale, left = left, right = right),
+    "censored_logistic"  = CensoredLogistic(location = par$location, scale = par$scale, left = left, right = right),
+    "censored_student"   = CensoredStudentsT(df = object$df, location = par$location, scale = par$scale, left = left, right = right),
+    "truncated_gaussian" = TruncatedNormal(mu = par$location, sigma = par$scale, left = left, right = right),
+    "truncated_logistic" = TruncatedLogistic(location = par$location, scale = par$scale, left = left, right = right),
+    "truncated_student"  = TruncatedStudentsT(df = object$df, location = par$location, scale = par$scale, left = left, right = right)
+  )
+}
 
 coef.crch <- function(object, model = c("full", "location", "scale", "df"), ...) {
   model <- match.arg(model)
