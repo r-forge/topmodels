@@ -4,7 +4,6 @@
 \alias{procast}
 \alias{procast_setup}
 \alias{procast.default}
-\alias{procast.crch}
 \alias{procast.disttree}
 \alias{procast.distforest}
 \title{Procast: Probabilistic Forecasting}
@@ -37,16 +36,6 @@ procast_setup(
   drop = FALSE,
   type = "procast",
   elementwise = NULL,
-  ...
-)
-
-\method{procast}{crch}(
-  object,
-  newdata = NULL,
-  na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability"),
-  at = 0.5,
-  drop = FALSE,
   ...
 )
 
