@@ -8,12 +8,9 @@
 m <- lm(dist ~ speed, data = cars)
 
 expect_equal(
-  as.numeric(qresiduals(m)),  # TODO: (ML) Should it really be a named vector?
-  qnorm(pnorm(
-    cars$dist, 
-    m$fitted.values, 
-    summary(m)$sigma
-  ))
+  qresiduals(m),
+  qnorm(pnorm(setNames(cars$dist, rownames(cars)),
+    mean = fitted(m), sd = summary(m)$sigma))
 )
 
 
@@ -22,11 +19,10 @@ expect_equal(
 # --------------------------------------------------------------------
 suppressPackageStartupMessages(require("crch"))
 m2 <- crch(dist ~ speed | speed, left = 30, data = cars)
-idx <- which(cars$dist <= 30)
 
 expect_equal(
-  qresiduals(m2)[-idx],  # TODO: (ML) Should it really be a named vector?
-  qnorm(predict(m2, type = "probability", at = cars$dist))[-idx]
+  qresiduals(m2),
+  qnorm(predict(m2, type = "probability", at = cars$dist))
 )
 
 # TODO: Improve/extend tests for censoring/truncation
