@@ -764,12 +764,12 @@ prodist.crch <- function(object, newdata = NULL, na.action = na.pass, left = NUL
 
   ## distributions3 object
   switch(dist,
-    "censored_gaussian"  = CensoredNormal(mu = par$location, sigma = par$scale, left = left, right = right),
-    "censored_logistic"  = CensoredLogistic(location = par$location, scale = par$scale, left = left, right = right),
-    "censored_student"   = CensoredStudentsT(df = object$df, location = par$location, scale = par$scale, left = left, right = right),
-    "truncated_gaussian" = TruncatedNormal(mu = par$location, sigma = par$scale, left = left, right = right),
-    "truncated_logistic" = TruncatedLogistic(location = par$location, scale = par$scale, left = left, right = right),
-    "truncated_student"  = TruncatedStudentsT(df = object$df, location = par$location, scale = par$scale, left = left, right = right)
+    "censored_gaussian"  = CensoredNormal(mu = setNames(par$location, rownames(par)), sigma = par$scale, left = left, right = right),
+    "censored_logistic"  = CensoredLogistic(location = setNames(par$location, rownames(par)), scale = par$scale, left = left, right = right),
+    "censored_student"   = CensoredStudentsT(df = object$df, location = setNames(par$location, rownames(par)), scale = par$scale, left = left, right = right),
+    "truncated_gaussian" = TruncatedNormal(mu = setNames(par$location, rownames(par)), sigma = par$scale, left = left, right = right),
+    "truncated_logistic" = TruncatedLogistic(location = setNames(par$location, rownames(par)), scale = par$scale, left = left, right = right),
+    "truncated_student"  = TruncatedStudentsT(df = object$df, location = setNames(par$location, rownames(par)), scale = par$scale, left = left, right = right)
   )
 }
 
