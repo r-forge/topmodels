@@ -37,7 +37,7 @@ expect_silent(p3_uniform10 <- pithist(m3, scale = "uniform", class = "data.frame
 
 
 # --------------------------------------------------------------------
-# Testing the entire objects uisng sha1 hasing. Not precise in case it
+# Testing the entire objects using sha1 hasing. Not precise in case it
 # fails but covers the entire object.
 # --------------------------------------------------------------------
 expect_identical(digest::sha1(p1_uniform, digits = 10),    "bd8e42cb9ee24db09adf1372adefb3cc73848168")
