@@ -9,7 +9,7 @@ bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Implmentation Overview}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
+  %\VignetteDepends{topmodels}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}
 ---
