@@ -8,7 +8,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Infrastructure for Inference and Forecasting in Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="180px" style="padding: 0 0 0 0.5em;" />
+# Infrastructure for Forecasting and Assessment of Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="180px" style="padding: 0 0 0 0.5em;" />
 
 Unified infrastructure for probabilistic models and distributional regressions:
 Computation of probabilities, densities, scores, and Hessians.
