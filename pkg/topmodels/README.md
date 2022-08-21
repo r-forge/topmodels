@@ -11,7 +11,7 @@ reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots,
 and worm plots.
 
 Modular object-oriented implementation with support for many model objects, including
-`lm`, `glm`, `crch`, `disttree`, and more to come.
+`lm`, `glm`, `glm.nb`, `hurdle`, `zeroinfl`, `zerotrunc`, `crch`, `disttree`, and more to come.
 
 
 
