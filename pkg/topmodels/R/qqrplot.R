@@ -1372,6 +1372,7 @@ geom_qqrplot <- function(mapping = NULL, data = NULL, stat = "identity",
 #' @rdname geom_qqrplot
 #' @format NULL
 #' @usage NULL
+#' @importFrom colorspace adjust_transparency
 #' @export
 GeomQqrplot <- ggplot2::ggproto("GeomQqrplot", ggplot2::Geom,
   required_aes = c("x", "y"),
