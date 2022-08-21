@@ -1,81 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//index.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/404.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/geom_pithist.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/TODO.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/geom_qqrplot.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/examine_misspecifications_simulations.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/geom_rootogram.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/goodness_of_fit.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/newresponse.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/graphical_evaluation_methodology.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/pithist.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/graphical_evaluation_realcases.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/pitresiduals.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/graphical_evaluation_simulations.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/plot.pithist.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/graphical_model_assessment.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/plot.qqrplot.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/graphical_model_assessment_original.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/plot.reliagram.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/graphics.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/plot.rootogram.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/illustration_artificial.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/procast.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/illustration_fifa_2018.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/qqrplot.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/illustration_rain_ibk.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/qresiduals.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/implementation.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/reliagram.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/implementation_functions_graphical_evaluation.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/rootogram.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/implementation_plot_function.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/topmodels.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/implementation_plotting.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//reference/wormplot.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/goodness_of_fit.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/procast.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/graphics.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/summary_implementation.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/illustration_artificial.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/articles/topmodels.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/illustration_fifa_2018.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/authors.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/illustration_rain_ibk.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/contact.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/implementation_functions_graphical_evaluation.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/index.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/procast.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/news/index.html</loc>
   </url>
   <url>
-    <loc>https://topmodels.R-Forge.R-project.org//articles/topmodels.html</loc>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_pit_bar.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_pit_hist.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_pithist.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_qqr_point.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_qqr_points.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_rootogram.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_rootogram_bar.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/geom_worm_points.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/newresponse.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/pithist.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/pitresiduals.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/plot.pithist.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/plot.qqrplot.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/plot.reliagram.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/plot.rootogram.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/plot.wormplot.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/procast.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/qqrplot.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/qresiduals.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/reliagram.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/rootogram.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/topmodels.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/wormplot.html</loc>
   </url>
 </urlset>

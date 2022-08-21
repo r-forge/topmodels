@@ -30,6 +30,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -42,7 +44,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">topmodels</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2-0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3-0</span>
       </span>
     </div>
 
@@ -52,7 +54,7 @@
   <a href="../articles/topmodels.html">Get started</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -74,7 +76,7 @@
       <a href="../articles/illustration_artificial.html">Illustration: Artificial Data</a>
     </li>
     <li>
-      <a href="../articles/implementation_functions_graphical_evaluation.html">Implementation Overview</a>
+      <a href="../articles/implementation.html">Implementation Overview</a>
     </li>
   </ul>
 </li>
@@ -101,7 +103,8 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Goodness of Fit of Probabilistic Regression Models</h1>
+      <h1 data-toc-skip>Goodness of Fit of Probabilistic Regression
+Models</h1>
             
       
       
@@ -127,141 +130,339 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
       $('.zoomDiv').css({opacity: '0', width: '0%'}); 
     });
   });
-</script><div id="introduction" class="section level2">
-<h2 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h2>
-<p>Over the last decades there has been an increasing interest in regression models that not only capture the mean of a dependent variable but model its entire probability distribution <span class="citation">(Stasinopoulos and Rigby 2007; Klein et al. 2015; Hothorn, Kneib, and Bühlmann 2014)</span>. In the simplest case this could be a generalized linear model <span class="citation">(GLM, Nelder and Wedderburn 1972; McCullagh and Nelder 1989)</span> where higher moments of the probability distribution co-vary with the expectation. Instead, multiple distribution parameters could also be linked to explanatory variables as in distributional regression <span class="citation">(Klein et al. 2015)</span> or generalized additive models of location, scale, and shape <span class="citation">(Stasinopoulos and Rigby 2007)</span>. Moreover, many other flexible modeling techniques yield fitted distributions, including transformation models <span class="citation">(Hothorn, Kneib, and Bühlmann 2014)</span>, Bayesian modeling <span class="citation">(Umlauf, Klein, and Zeileis 2018)</span>, machine learning approaches <span class="citation">(e.g., Rasp and Lerch 2018)</span>, and many others.</p>
-<p>For assessing the goodness of fit of such probabilistic regression models, (proper) scoring rules <span class="citation">(Gneiting and Raftery 2007)</span> are widely used, e.g., using the log-likelihood (also known as the log-score) or the continuous ranked probability score <span class="citation">(CRPS, Gneiting and Raftery 2007)</span>. In addition to such numerical summaries, visualizations capturing the goodness of fit are also of interest as they may also be able to shed some more light on the sources of a potential lack of fit.</p>
-<p>While various visualizations have been suggested in the literature and implemented in software packages, a unified framework for these visualizations has not yet been established. Here, we will provide such a unified framework that facilitates:</p>
+</script><div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>Over the last decades there has been an increasing interest in
+regression models that not only capture the mean of a dependent variable
+but model its entire probability distribution <span class="citation">(Stasinopoulos and Rigby 2007; Klein et al. 2015;
+Hothorn, Kneib, and Bühlmann 2014)</span>. In the simplest case this
+could be a generalized linear model <span class="citation">(GLM, Nelder
+and Wedderburn 1972; McCullagh and Nelder 1989)</span> where higher
+moments of the probability distribution co-vary with the expectation.
+Instead, multiple distribution parameters could also be linked to
+explanatory variables as in distributional regression <span class="citation">(Klein et al. 2015)</span> or generalized additive
+models of location, scale, and shape <span class="citation">(Stasinopoulos and Rigby 2007)</span>. Moreover, many
+other flexible modeling techniques yield fitted distributions, including
+transformation models <span class="citation">(Hothorn, Kneib, and
+Bühlmann 2014)</span>, Bayesian modeling <span class="citation">(Umlauf,
+Klein, and Zeileis 2018)</span>, machine learning approaches <span class="citation">(e.g., Rasp and Lerch 2018)</span>, and many
+others.</p>
+<p>For assessing the goodness of fit of such probabilistic regression
+models, (proper) scoring rules <span class="citation">(Gneiting and
+Raftery 2007)</span> are widely used, e.g., using the log-likelihood
+(also known as the log-score) or the continuous ranked probability score
+<span class="citation">(CRPS, Gneiting and Raftery 2007)</span>. In
+addition to such numerical summaries, visualizations capturing the
+goodness of fit are also of interest as they may also be able to shed
+some more light on the sources of a potential lack of fit.</p>
+<p>While various visualizations have been suggested in the literature
+and implemented in software packages, a unified framework for these
+visualizations has not yet been established. Therefore, we investigate
+the following questions:</p>
 <ul>
-<li>adoption of these graphics for a broad range of models/distributions,</li>
-<li>understanding what the graphics have in common and what sets them apart,</li>
-<li>demonstration of relative strengths and weaknesses in uncovering sources of lack of fit,</li>
-<li>fine-tuning the graphics for certain models or data sets.</li>
+<li>What are useful elements of such visualizations?</li>
+<li>What are relative (dis)advantages?</li>
+</ul>
+<p>The insights help us to establish a unified framework that
+facilitates:</p>
+<ul>
+<li>Adoption of these visualizations for a broad range of
+models/distributions.</li>
+<li>Understanding what the graphics have in common and what sets them
+apart.</li>
+<li>Demonstration of strengths and weaknesses in uncovering sources of
+lack of fit.</li>
+<li>Fine-tuning the graphics for certain models or data sets.</li>
 </ul>
 </div>
-<div id="notation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#notation" class="anchor"></a>Notation</h2>
-<p>In this article, we focus on several graphical diagnostic tools to assess the calibration of a probabilistic forecast <span class="math inline">\(F( \cdot | \boldsymbol{\theta}_{i})\)</span>, issued in form of a predictive distribution <span class="math inline">\(f( \cdot | \boldsymbol{\theta}_{i})\)</span>. Given observations <span class="math inline">\(y_i (i = 1, \ldots, n)\)</span>, we assume a set of observation-specific fitted parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span>, where the estimation may have been performed on the same observations <span class="math inline">\(i = 1, \ldots, n\)</span> (i.e., corresponding to an in-sample assessment) or on a different data set (i.e., corresponding to an out-of-sample evaluation). The estimation procedure itself can be either fully parametric or semi-parametric, as long as fitted parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i}\)</span> exist for all observations of interest. However, since the uncertainty in the estimation of the parameters is not accounted for, small deviations from asymptotic theoretical properties will be apparent in all graphical displays due to some sampling variation.</p>
-<p>According to the seminal work of <span class="citation">Gneiting, Balabdaoui, and Raftery (2007)</span>, probabilistic forecasts aim to <em>maximize the sharpness of the predictive distributions subject to calibration</em>. Calibration here refers to the statistical concordance between the forecast and the observation, and is thus a joint property of the forecast and observation. Sharpness, on the other hand, is a property of the forecast only and indicates how concentrated a predictive distribution is. In general, the more concentrated the sharper the forecast. In the assessment whether probabilistic predictions are calibrated, we further distinguish between <em>marginal</em> and <em>probabilistic</em> calibration.</p>
+<div class="section level2">
+<h2 id="notation">Notation<a class="anchor" aria-label="anchor" href="#notation"></a>
+</h2>
+<p>In this article, we focus on several graphical diagnostic tools to
+assess the calibration of a probabilistic forecast <span class="math inline">\(F( \cdot | \boldsymbol{\theta}_{i})\)</span>,
+issued in form of a predictive distribution <span class="math inline">\(f( \cdot | \boldsymbol{\theta}_{i})\)</span>.
+Given observations <span class="math inline">\(y_i (i = 1, \ldots,
+n)\)</span>, we assume a set of observation-specific fitted parameters
+<span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} =
+(\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span>, where the
+estimation may have been performed on the same observations <span class="math inline">\(i = 1, \ldots, n\)</span> (i.e., corresponding to
+an in-sample assessment) or on a different data set (i.e., corresponding
+to an out-of-sample evaluation). The estimation procedure itself can be
+either fully parametric or semi-parametric, as long as fitted parameters
+<span class="math inline">\(\hat{\boldsymbol{\theta}}_{i}\)</span> exist
+for all observations of interest. However, since the uncertainty in the
+estimation of the parameters is not accounted for, small deviations from
+asymptotic theoretical properties will be apparent in all graphical
+displays due to some sampling variation.</p>
+<p>According to the seminal work of <span class="citation">Gneiting,
+Balabdaoui, and Raftery (2007)</span>, probabilistic forecasts aim to
+<em>maximize the sharpness of the predictive distributions subject to
+calibration</em>. Calibration here refers to the statistical concordance
+between the forecast and the observation, and is thus a joint property
+of the forecast and observation. Sharpness, on the other hand, is a
+property of the forecast only and indicates how concentrated a
+predictive distribution is. In general, the more concentrated the
+sharper the forecast. In the assessment whether probabilistic
+predictions are calibrated, we further distinguish between
+<em>marginal</em> and <em>probabilistic</em> calibration.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st">"topmodels"</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org">"ggplot2"</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span>
-<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"topmodels"</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org" class="external-link">"ggplot2"</a></span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span>
+<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span>
 <span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m</span>, style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, fitted <span class="op">=</span> <span class="cn">FALSE</span>, xlab <span class="op">=</span> <span class="st">"Goals"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>
 <span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"random"</span>, nsim <span class="op">=</span> <span class="fl">10</span>,
   ref <span class="op">=</span> <span class="cn">FALSE</span>, confint <span class="op">=</span> <span class="cn">FALSE</span>, simint <span class="op">=</span> <span class="cn">FALSE</span>, fill <span class="op">=</span> <span class="st">"darkgray"</span>, alpha <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>
 <span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"random"</span>, nsim <span class="op">=</span> <span class="fl">10</span>, trafo <span class="op">=</span> <span class="va">qnorm</span>,
-  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Randomized quantile residuals"</span>,
+  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Randomized quantile residuals"</span>,
   ref <span class="op">=</span> <span class="cn">FALSE</span>, confint <span class="op">=</span> <span class="cn">FALSE</span>, simint <span class="op">=</span> <span class="cn">FALSE</span>, fill <span class="op">=</span> <span class="st">"darkgray"</span>, alpha <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></code></pre></div>
 <p><img src="goodness_of_fit_files/figure-html/calibration-1.png" width="30%" style="display: block; margin: auto;"><img src="goodness_of_fit_files/figure-html/calibration-2.png" width="30%" style="display: block; margin: auto;"><img src="goodness_of_fit_files/figure-html/calibration-3.png" width="30%" style="display: block; margin: auto;"></p>
 </div>
-<div id="marginal-calibration-observed-vs--expected-frequencies" class="section level2">
-<h2 class="hasAnchor">
-<a href="#marginal-calibration-observed-vs--expected-frequencies" class="anchor"></a>Marginal calibration: Observed vs. expected frequencies</h2>
-<p><em>Advantage:</em> Scale of observations is natural, direct interpretation.</p>
-<p><em>Disadvantage:</em> Needs to be compared with a combination of distributions.</p>
-<p>Marginal calibration is generally concerned with whether the oberseved frequencies match the frequencies expected by the model. For discrete observations, frequencies for the observations themselves can be considered; for continuous observations or more generally, frequencies for intevals of observations are being used. Here, the expected frequencies are computed by differences between the predictive CDFs <span class="math inline">\(F( \cdot )\)</span>, evaluated at the interval breaks. Hence, mariginal calibration is always obtained on the observation scale compared to the probabilistic calibration performed on the probability scale. Although there are some previous studies that display observation points rather than intervals <span class="citation">(e.g., Gneiting, Balabdaoui, and Raftery 2007)</span>, here we stick to the former and discuss only the so-called rootograms which are histogram-style plots <span class="citation">(Kleiber and Zeileis 2016)</span>.</p>
-<p>For the special case of a binary event, the observed event frequency is typically plotted against the predictive probability in a so-called reliability diagram <span class="citation">(Wilks 2011; Bröcker and Smith 2007)</span>. Here, the predicted probability for a binary event is partitioned into a certain number of bins and the averaged forecast probability within each bin is plotted against the observerd relative frequency. Typically, equidistant binning is employed, but here the rather arbitrary number of bins can be quite sensible. A simple and common enhancement is therefore to use evenly populated bins, though even here instabilities can be a major issue <span class="citation">(Dimitriadis, Gneiting, and Jordan 2021)</span>.</p>
+<div class="section level2">
+<h2 id="marginal-calibration-observed-vs--expected-frequencies">Marginal calibration: Observed vs. expected frequencies<a class="anchor" aria-label="anchor" href="#marginal-calibration-observed-vs--expected-frequencies"></a>
+</h2>
+<p><em>Advantage:</em> Scale of observations is natural, direct
+interpretation.</p>
+<p><em>Disadvantage:</em> Needs to be compared with a combination of
+distributions.</p>
+<p>Marginal calibration is generally concerned with whether the
+oberseved frequencies match the frequencies expected by the model. For
+discrete observations, frequencies for the observations themselves can
+be considered; for continuous observations or more generally,
+frequencies for intevals of observations are being used. Here, the
+expected frequencies are computed by differences between the predictive
+CDFs <span class="math inline">\(F( \cdot )\)</span>, evaluated at the
+interval breaks. Hence, mariginal calibration is always obtained on the
+observation scale compared to the probabilistic calibration performed on
+the probability scale. Although there are some previous studies that
+display observation points rather than intervals <span class="citation">(e.g., Gneiting, Balabdaoui, and Raftery 2007)</span>,
+here we stick to the former and discuss only the so-called rootograms
+which are histogram-style plots <span class="citation">(Kleiber and
+Zeileis 2016)</span>.</p>
+<p>For the special case of a binary event, the observed event frequency
+is typically plotted against the predictive probability in a so-called
+reliability diagram <span class="citation">(Wilks 2011; Bröcker and
+Smith 2007)</span>. Here, the predicted probability for a binary event
+is partitioned into a certain number of bins and the averaged forecast
+probability within each bin is plotted against the observerd relative
+frequency. Typically, equidistant binning is employed, but here the
+rather arbitrary number of bins can be quite sensible. A simple and
+common enhancement is therefore to use evenly populated bins, though
+even here instabilities can be a major issue <span class="citation">(Dimitriadis, Gneiting, and Jordan 2021)</span>.</p>
 </div>
-<div id="probabilistic-calibration-pit-and-randomized-quantile-residuals" class="section level2">
-<h2 class="hasAnchor">
-<a href="#probabilistic-calibration-pit-and-randomized-quantile-residuals" class="anchor"></a>Probabilistic calibration: PIT and (randomized) quantile residuals</h2>
-<p><em>Advantage:</em> Needs to be compared with only one distribution (uniform or normal).</p>
-<p><em>Disadvantage:</em> Scale is not so natural. May require randomization for discrete distributions.</p>
-<p>According to <span class="citation">Gneiting, Balabdaoui, and Raftery (2007)</span>, model calibration can be further distinguished between probabilistic calibration and marginal calibration. Probabilistic calibration is usually assessed using probability integral transform (PIT) values <span class="citation">(Dawid 1984; Diebold, Gunther, and Tay 1998; Gneiting, Balabdaoui, and Raftery 2007)</span> or so-called PIT residuals <span class="citation">(Warton, Thibaut, and Wang 2017)</span>. These are simply the predictive cumulative distribution function (CDF) evaluated at the observations</p>
-<p><span class="math display">\[u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i),\]</span></p>
-<p>where <span class="math inline">\(F( \cdot )\)</span> denotes the CDF of the modeled distribution <span class="math inline">\(f( \cdot )\)</span> with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i}\)</span>. PIT residuals have the desirable property, that if the model is a good approximation to the true data-generating process, i.e., the observation is drawn from the predictive distribution, the PIT residuals <span class="math inline">\(u_i\)</span> are approximately uniformly distributed on <span class="math inline">\([0, 1]\)</span> for continous predictive distributions <span class="math inline">\(F( \cdot )\)</span>. PIT residuals or variants have therefore been used extensively for model diagnosis and depending on their implementation are known under various names, among them forecast distribution transformed residuals <span class="citation">(Smith 1985)</span>, randomized quantile residuals <span class="citation">(Dunn and Smyth 1996)</span>, and universal residuals <span class="citation">(Brockwell 2007)</span>.</p>
-<p>In case of a discrete predictive distribution or a distribution with a discrete component, e.g., in case of censoring, <span class="math inline">\(u_i\)</span> can be generated as a random draw <span class="math inline">\(\text{U}\)</span> from the interval:</p>
-<p><span class="math display">\[u_i = \text{U}[F(y_i - 1 | \, \hat{\boldsymbol{\theta}}_i), F(y_i | \,
+<div class="section level2">
+<h2 id="probabilistic-calibration-pit-and-randomized-quantile-residuals">Probabilistic calibration: PIT and (randomized) quantile
+residuals<a class="anchor" aria-label="anchor" href="#probabilistic-calibration-pit-and-randomized-quantile-residuals"></a>
+</h2>
+<p><em>Advantage:</em> Needs to be compared with only one distribution
+(uniform or normal).</p>
+<p><em>Disadvantage:</em> Scale is not so natural. May require
+randomization for discrete distributions.</p>
+<p>According to <span class="citation">Gneiting, Balabdaoui, and Raftery
+(2007)</span>, model calibration can be further distinguished between
+probabilistic calibration and marginal calibration. Probabilistic
+calibration is usually assessed using probability integral transform
+(PIT) values <span class="citation">(Dawid 1984; Diebold, Gunther, and
+Tay 1998; Gneiting, Balabdaoui, and Raftery 2007)</span> or so-called
+PIT residuals <span class="citation">(Warton, Thibaut, and Wang
+2017)</span>. These are simply the predictive cumulative distribution
+function (CDF) evaluated at the observations</p>
+<p><span class="math display">\[u_i = F(y_i | \,
+\hat{\boldsymbol{\theta}}_i),\]</span></p>
+<p>where <span class="math inline">\(F( \cdot )\)</span> denotes the CDF
+of the modeled distribution <span class="math inline">\(f( \cdot
+)\)</span> with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i}\)</span>. PIT
+residuals have the desirable property, that if the model is a good
+approximation to the true data-generating process, i.e., the observation
+is drawn from the predictive distribution, the PIT residuals <span class="math inline">\(u_i\)</span> are approximately uniformly
+distributed on <span class="math inline">\([0, 1]\)</span> for continous
+predictive distributions <span class="math inline">\(F( \cdot
+)\)</span>. PIT residuals or variants have therefore been used
+extensively for model diagnosis and depending on their implementation
+are known under various names, among them forecast distribution
+transformed residuals <span class="citation">(Smith 1985)</span>,
+randomized quantile residuals <span class="citation">(Dunn and Smyth
+1996)</span>, and universal residuals <span class="citation">(Brockwell
+2007)</span>.</p>
+<p>In case of a discrete predictive distribution or a distribution with
+a discrete component, e.g., in case of censoring, <span class="math inline">\(u_i\)</span> can be generated as a random draw
+<span class="math inline">\(\text{U}\)</span> from the interval:</p>
+<p><span class="math display">\[u_i = \text{U}[F(y_i - 1 | \,
+\hat{\boldsymbol{\theta}}_i), F(y_i | \,
 \hat{\boldsymbol{\theta}}_i)].\]</span></p>
-<p>Here, we follow the definition by <span class="citation">Dunn and Smyth (1996)</span>, but similar approaches have also been proposed in, e.g., <span class="citation">Brockwell (2007)</span> and <span class="citation">Smith (1985)</span>. Again <span class="math inline">\(u_i\)</span> is uniformally distributed, apart from sampling variability.</p>
-<p>Since the PIT residuals are an iid sample from the standard uniform distribution, the PIT residuals can also be mapped to other distribution scales, e.g. to the standard normal scale, and should follow a standard normal distribution here. In the simplest case, the PIT residuals <span class="math inline">\(u_i\)</span> can be plotted against the probabilities of a uniform distribution in so-called P-P plots <span class="citation">(Wilk and Gnanadesikan 1968; Handcock and Morris 1999)</span>. However, it is far more common to transform the PIT residuals to the normal scale and compare them to the standard normal quantiles in a normal Q-Q plot <span class="citation">(Hoaglin 2006)</span>. Alternatively, in a PIT histogram, the uniformally distributed PIT residuals are divided into intervals by a certain number of breakpoints and plotted in a histogram-style plot. Regardless of the graphical display, the PIT residuals are always on the probability scale, which might be transformed to the normal scale or another scale if preferred.</p>
+<p>Here, we follow the definition by <span class="citation">Dunn and
+Smyth (1996)</span>, but similar approaches have also been proposed in,
+e.g., <span class="citation">Brockwell (2007)</span> and <span class="citation">Smith (1985)</span>. Again <span class="math inline">\(u_i\)</span> is uniformally distributed, apart
+from sampling variability.</p>
+<p>Since the PIT residuals are an iid sample from the standard uniform
+distribution, the PIT residuals can also be mapped to other distribution
+scales, e.g. to the standard normal scale, and should follow a standard
+normal distribution here. In the simplest case, the PIT residuals <span class="math inline">\(u_i\)</span> can be plotted against the
+probabilities of a uniform distribution in so-called P-P plots <span class="citation">(Wilk and Gnanadesikan 1968; Handcock and Morris
+1999)</span>. However, it is far more common to transform the PIT
+residuals to the normal scale and compare them to the standard normal
+quantiles in a normal Q-Q plot <span class="citation">(Hoaglin
+2006)</span>. Alternatively, in a PIT histogram, the uniformally
+distributed PIT residuals are divided into intervals by a certain number
+of breakpoints and plotted in a histogram-style plot. Regardless of the
+graphical display, the PIT residuals are always on the probability
+scale, which might be transformed to the normal scale or another scale
+if preferred.</p>
 </div>
-<div id="similarities-and-differences" class="section level2">
-<h2 class="hasAnchor">
-<a href="#similarities-and-differences" class="anchor"></a>Similarities and differences</h2>
-<p>In the graphical displays for assessing the goodness of fit, several recurring elements can be seen:</p>
+<div class="section level2">
+<h2 id="similarities-and-differences">Similarities and differences<a class="anchor" aria-label="anchor" href="#similarities-and-differences"></a>
+</h2>
+<p>In the graphical displays for assessing the goodness of fit, several
+recurring elements can be seen:</p>
 <ul>
-<li><p>PIT residuals are asymptotically uniformly distributed or transformed to another probability scale: The PIT histogram is on the uniform probability scale versus the normal Q-Q plot on the normal scale. Whereas, the transformation to the normal scale spreads the values in the tails further apart and thus better highlights possible discrepancies in the distribuional tails.</p></li>
-<li><p>The marginal calibration is usually evaluated on the observation scale by checking whether observed and expected frequencies match. The rootogram, on the observation scale, is therefore especially useful for count data with values close to zero.</p></li>
-<li><p>Discretization: Instead of plotting the raw values, e.g. PIT residuals, often some discretization improves readability of the graphical displays. The disadvantage here is that the breakpoint are often kind of arbitrary and certain misspecification might therefore be masked by plotting the values as intervals. For example, misscpecifications in the outer tails of the distribution are often not visible in PIT histograms, as the intervals are averaving over many data points; here, Q-Q plots are clearly superior. Another example is the reliabitiliy diagram, which can be quite instable when using equidistant binning.</p></li>
-<li><p>The uncertainty due to the estimation of the parameters is not taken into account. Therefore, some sampling variation is seen in all graphical displays.</p></li>
+<li><p>PIT residuals are asymptotically uniformly distributed or
+transformed to another probability scale: The PIT histogram is on the
+uniform probability scale versus the normal Q-Q plot on the normal
+scale. Whereas, the transformation to the normal scale spreads the
+values in the tails further apart and thus better highlights possible
+discrepancies in the distribuional tails.</p></li>
+<li><p>The marginal calibration is usually evaluated on the observation
+scale by checking whether observed and expected frequencies match. The
+rootogram, on the observation scale, is therefore especially useful for
+count data with values close to zero.</p></li>
+<li><p>Discretization: Instead of plotting the raw values, e.g. PIT
+residuals, often some discretization improves readability of the
+graphical displays. The disadvantage here is that the breakpoint are
+often kind of arbitrary and certain misspecification might therefore be
+masked by plotting the values as intervals. For example,
+misscpecifications in the outer tails of the distribution are often not
+visible in PIT histograms, as the intervals are averaving over many data
+points; here, Q-Q plots are clearly superior. Another example is the
+reliabitiliy diagram, which can be quite instable when using equidistant
+binning.</p></li>
+<li><p>The uncertainty due to the estimation of the parameters is not
+taken into account. Therefore, some sampling variation is seen in all
+graphical displays.</p></li>
 </ul>
 </div>
-<div id="references" class="section level2 unnumbered">
-<h2 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h2>
-<div id="refs" class="references">
-<div id="ref-Broecker+Smith:2007">
-<p>Bröcker, Jochen, and Leonard A. Smith. 2007. “Increasing the Reliability of Reliability Diagrams.” <em>Weather and Forecasting</em> 22 (3): 651–61. <a href="https://doi.org/10.1175/WAF993.1">https://doi.org/10.1175/WAF993.1</a>.</p>
+<div class="section level2 unnumbered">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Broecker+Smith:2007" class="csl-entry">
+Bröcker, Jochen, and Leonard A. Smith. 2007. <span>“Increasing the
+Reliability of Reliability Diagrams.”</span> <em>Weather and
+Forecasting</em> 22 (3): 651–61. <a href="https://doi.org/10.1175/WAF993.1" class="external-link">https://doi.org/10.1175/WAF993.1</a>.
 </div>
-<div id="ref-Brockwell:2007">
-<p>Brockwell, A.E. 2007. “Universal Residuals: A Multivariate Transformation.” <em>Statistics &amp; Probability Letters</em> 77 (14): 1473–8. <a href="https://doi.org/https://doi.org/10.1016/j.spl.2007.02.008">https://doi.org/https://doi.org/10.1016/j.spl.2007.02.008</a>.</p>
+<div id="ref-Brockwell:2007" class="csl-entry">
+Brockwell, A. E. 2007. <span>“Universal Residuals: A Multivariate
+Transformation.”</span> <em>Statistics &amp; Probability Letters</em> 77
+(14): 1473–78. https://doi.org/<a href="https://doi.org/10.1016/j.spl.2007.02.008" class="external-link">https://doi.org/10.1016/j.spl.2007.02.008</a>.
 </div>
-<div id="ref-Dawid:1984">
-<p>Dawid, A. P. 1984. “Present Position and Potential Developments: Some Personal Views: Statistical Theory: The Prequential Approach.” <em>Journal of the Royal Statistical Society: Series A (General)</em> 147 (2): 278–92. <a href="https://doi.org/10.2307/2981683">https://doi.org/10.2307/2981683</a>.</p>
+<div id="ref-Dawid:1984" class="csl-entry">
+Dawid, A. P. 1984. <span>“Present Position and Potential Developments:
+<span>S</span>ome Personal Views: <span>S</span>tatistical Theory:
+<span>T</span>he Prequential Approach.”</span> <em>Journal of the Royal
+Statistical Society: Series A (General)</em> 147 (2): 278–92. <a href="https://doi.org/10.2307/2981683" class="external-link">https://doi.org/10.2307/2981683</a>.
 </div>
-<div id="ref-Diebold+Gunther+Tay:1998">
-<p>Diebold, Francis X., Todd A. Gunther, and Anthony S. Tay. 1998. “Evaluating Density Forecasts with Applications to Financial Risk Management.” <em>International Economic Review</em> 39 (4): 863–83. <a href="https://doi.org/10.2307/2527342">https://doi.org/10.2307/2527342</a>.</p>
+<div id="ref-Diebold+Gunther+Tay:1998" class="csl-entry">
+Diebold, Francis X., Todd A. Gunther, and Anthony S. Tay. 1998.
+<span>“Evaluating Density Forecasts with Applications to Financial Risk
+Management.”</span> <em>International Economic Review</em> 39 (4):
+863–83. <a href="https://doi.org/10.2307/2527342" class="external-link">https://doi.org/10.2307/2527342</a>.
 </div>
-<div id="ref-Dimitriadis+Gneiting+Jordan:2021">
-<p>Dimitriadis, Timo, Tilmann Gneiting, and Alexander I. Jordan. 2021. “Stable Reliability Diagrams for Probabilistic Classifiers.” <em>Proceedings of the National Academy of Sciences</em> 118 (8). <a href="https://doi.org/10.1073/pnas.2016191118">https://doi.org/10.1073/pnas.2016191118</a>.</p>
+<div id="ref-Dimitriadis+Gneiting+Jordan:2021" class="csl-entry">
+Dimitriadis, Timo, Tilmann Gneiting, and Alexander I. Jordan. 2021.
+<span>“Stable Reliability Diagrams for Probabilistic
+Classifiers.”</span> <em>Proceedings of the National Academy of
+Sciences</em> 118 (8). <a href="https://doi.org/10.1073/pnas.2016191118" class="external-link">https://doi.org/10.1073/pnas.2016191118</a>.
 </div>
-<div id="ref-Dunn+Smyth:1996">
-<p>Dunn, Peter K., and Gordon K. Smyth. 1996. “Randomized Quantile Residuals.” <em>Journal of Computational and Graphical Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802">https://doi.org/10.2307/1390802</a>.</p>
+<div id="ref-Dunn+Smyth:1996" class="csl-entry">
+Dunn, Peter K., and Gordon K. Smyth. 1996. <span>“Randomized Quantile
+Residuals.”</span> <em>Journal of Computational and Graphical
+Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802" class="external-link">https://doi.org/10.2307/1390802</a>.
 </div>
-<div id="ref-Gneiting+Balabdaoui+Raftery:2007">
-<p>Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007. “Probabilistic Forecasts, Calibration and Sharpness.” <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.</p>
+<div id="ref-Gneiting+Balabdaoui+Raftery:2007" class="csl-entry">
+Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007.
+<span>“Probabilistic Forecasts, Calibration and Sharpness.”</span>
+<em>Journal of the Royal Statistical Society: Series B
+(Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x" class="external-link">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.
 </div>
-<div id="ref-Gneiting+Raftery:2007">
-<p>Gneiting, Tilmann, and Adrian E. Raftery. 2007. “Strictly Proper Scoring Rules, Prediction, and Estimation.” <em>Journal of the American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437">https://doi.org/10.1198/016214506000001437</a>.</p>
+<div id="ref-Gneiting+Raftery:2007" class="csl-entry">
+Gneiting, Tilmann, and Adrian E. Raftery. 2007. <span>“Strictly Proper
+Scoring Rules, Prediction, and Estimation.”</span> <em>Journal of the
+American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437" class="external-link">https://doi.org/10.1198/016214506000001437</a>.
 </div>
-<div id="ref-Handcock+Morris:1999">
-<p>Handcock, Mark S., and Martina Morris. 1999. <em>Relative Distribution Methods in the Social Sciences</em>. New York: Springer. <a href="http://www.stat.ucla.edu/~handcock/RelDist">http://www.stat.ucla.edu/~handcock/RelDist</a>.</p>
+<div id="ref-Handcock+Morris:1999" class="csl-entry">
+Handcock, Mark S., and Martina Morris. 1999. <em>Relative Distribution
+Methods in the Social Sciences</em>. New York: Springer. <a href="http://www.stat.ucla.edu/~handcock/RelDist" class="external-link">http://www.stat.ucla.edu/~handcock/RelDist</a>.
 </div>
-<div id="ref-Hoaglin:2006">
-<p>Hoaglin, David C. 2006. “Using Quantiles to Study Shape.” In <em>Exploring Data Tables, Trends, and Shapes</em>, 417–60. John Wiley &amp; Sons, Ltd. <a href="https://doi.org/https://doi.org/10.1002/9781118150702.ch10">https://doi.org/https://doi.org/10.1002/9781118150702.ch10</a>.</p>
+<div id="ref-Hoaglin:2006" class="csl-entry">
+Hoaglin, David C. 2006. <span>“Using Quantiles to Study Shape.”</span>
+In <em>Exploring Data Tables, Trends, and Shapes</em>, 417–60. John
+Wiley &amp; Sons, Ltd. https://doi.org/<a href="https://doi.org/10.1002/9781118150702.ch10" class="external-link">https://doi.org/10.1002/9781118150702.ch10</a>.
 </div>
-<div id="ref-Hothorn+Kneib+Buehlmann:2014">
-<p>Hothorn, Torsten, Thomas Kneib, and Peter Bühlmann. 2014. “Conditional Transformation Models.” <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 76 (1): 3–27. <a href="https://doi.org/10.1111/rssb.12017">https://doi.org/10.1111/rssb.12017</a>.</p>
+<div id="ref-Hothorn+Kneib+Buehlmann:2014" class="csl-entry">
+Hothorn, Torsten, Thomas Kneib, and Peter Bühlmann. 2014.
+<span>“Conditional Transformation Models.”</span> <em>Journal of the
+Royal Statistical Society: Series B (Methodological)</em> 76 (1): 3–27.
+<a href="https://doi.org/10.1111/rssb.12017" class="external-link">https://doi.org/10.1111/rssb.12017</a>.
 </div>
-<div id="ref-Kleiber+Zeileis:2016">
-<p>Kleiber, Christian, and Achim Zeileis. 2016. “Visualizing Count Data Regressions Using Rootograms.” <em>The American Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590">https://doi.org/10.1080/00031305.2016.1173590</a>.</p>
+<div id="ref-Kleiber+Zeileis:2016" class="csl-entry">
+Kleiber, Christian, and Achim Zeileis. 2016. <span>“Visualizing Count
+Data Regressions Using Rootograms.”</span> <em>The American
+Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590" class="external-link">https://doi.org/10.1080/00031305.2016.1173590</a>.
 </div>
-<div id="ref-Klein+Kneib+Lang+Sohn:2015">
-<p>Klein, Nadja, Thomas Kneib, Stefan Lang, and Alexander Sohn. 2015. “Bayesian Structured Additive Distributional Regression with an Application to Regional Income Inequality in Germany.” <em>Annals of Applied Statistics</em> 9: 1024–52. <a href="https://doi.org/10.1214/15-aoas823">https://doi.org/10.1214/15-aoas823</a>.</p>
+<div id="ref-Klein+Kneib+Lang+Sohn:2015" class="csl-entry">
+Klein, Nadja, Thomas Kneib, Stefan Lang, and Alexander Sohn. 2015.
+<span>“<span>B</span>ayesian Structured Additive Distributional
+Regression with an Application to Regional Income Inequality in
+<span>G</span>ermany.”</span> <em>Annals of Applied Statistics</em> 9:
+1024–52. <a href="https://doi.org/10.1214/15-aoas823" class="external-link">https://doi.org/10.1214/15-aoas823</a>.
 </div>
-<div id="ref-McCullagh+Nelder:1989">
-<p>McCullagh, P., and John A. Nelder. 1989. <em>Generalized Linear Models</em>. 2nd ed. London: Chapman &amp; Hall. <a href="https://doi.org/10.1007/978-1-4899-3242-6">https://doi.org/10.1007/978-1-4899-3242-6</a>.</p>
+<div id="ref-McCullagh+Nelder:1989" class="csl-entry">
+McCullagh, P., and John A. Nelder. 1989. <em>Generalized Linear
+Models</em>. 2nd ed. London: Chapman &amp; Hall. <a href="https://doi.org/10.1007/978-1-4899-3242-6" class="external-link">https://doi.org/10.1007/978-1-4899-3242-6</a>.
 </div>
-<div id="ref-Nelder+Wedderburn:1972">
-<p>Nelder, John A., and Robert W. M. Wedderburn. 1972. “Generalized Linear Models.” <em>Journal of the Royal Statistical Society A</em> 135: 370–84. <a href="https://doi.org/10.2307/2344614">https://doi.org/10.2307/2344614</a>.</p>
+<div id="ref-Nelder+Wedderburn:1972" class="csl-entry">
+Nelder, John A., and Robert W. M. Wedderburn. 1972. <span>“Generalized
+Linear Models.”</span> <em>Journal of the Royal Statistical Society
+A</em> 135: 370–84. <a href="https://doi.org/10.2307/2344614" class="external-link">https://doi.org/10.2307/2344614</a>.
 </div>
-<div id="ref-Rasp+Lerch:2018">
-<p>Rasp, Stephan, and Sebastian Lerch. 2018. “Neural Networks for Postprocessing Ensemble Weather Forecasts.” <em>Monthly Weather Review</em> 146 (11): 3885–3900. <a href="https://doi.org/10.1175/MWR-D-18-0187.1">https://doi.org/10.1175/MWR-D-18-0187.1</a>.</p>
+<div id="ref-Rasp+Lerch:2018" class="csl-entry">
+Rasp, Stephan, and Sebastian Lerch. 2018. <span>“Neural Networks for
+Postprocessing Ensemble Weather Forecasts.”</span> <em>Monthly Weather
+Review</em> 146 (11): 3885–3900. <a href="https://doi.org/10.1175/MWR-D-18-0187.1" class="external-link">https://doi.org/10.1175/MWR-D-18-0187.1</a>.
 </div>
-<div id="ref-Smith:1985">
-<p>Smith, J. Q. 1985. “Diagnostic Checks of Non-Standard Time Series Models.” <em>Journal of Forecasting</em> 4 (3): 283–91. <a href="https://doi.org/https://doi.org/10.1002/for.3980040305">https://doi.org/https://doi.org/10.1002/for.3980040305</a>.</p>
+<div id="ref-Smith:1985" class="csl-entry">
+Smith, J. Q. 1985. <span>“Diagnostic Checks of Non-Standard Time Series
+Models.”</span> <em>Journal of Forecasting</em> 4 (3): 283–91.
+https://doi.org/<a href="https://doi.org/10.1002/for.3980040305" class="external-link">https://doi.org/10.1002/for.3980040305</a>.
 </div>
-<div id="ref-Stasinopoulos+Rigby:2007">
-<p>Stasinopoulos, D Mikis, and Robert A Rigby. 2007. “Generalized Additive Models for Location Scale and Shape (GAMLSS) in <span class="sans-serif">R</span>.” <em>Journal of Statistical Software</em> 23 (7): 1–46. <a href="https://doi.org/10.18637/jss.v023.i07">https://doi.org/10.18637/jss.v023.i07</a>.</p>
+<div id="ref-Stasinopoulos+Rigby:2007" class="csl-entry">
+Stasinopoulos, D Mikis, and Robert A Rigby. 2007. <span>“Generalized
+Additive Models for Location Scale and Shape (<span>GAMLSS</span>) in
+<span><span class="sans-serif">R</span></span>.”</span> <em>Journal of
+Statistical Software</em> 23 (7): 1–46. <a href="https://doi.org/10.18637/jss.v023.i07" class="external-link">https://doi.org/10.18637/jss.v023.i07</a>.
 </div>
-<div id="ref-Umlauf+Klein+Zeileis:2018">
-<p>Umlauf, Nikolaus, Nadja Klein, and Achim Zeileis. 2018. “BAMLSS: Bayesian Additive Models for Location, Scale and Shape (and Beyond).” <em>Journal of Computational and Graphical Statistics</em> 27 (3): 612–27. <a href="https://doi.org/10.1080/10618600.2017.1407325">https://doi.org/10.1080/10618600.2017.1407325</a>.</p>
+<div id="ref-Umlauf+Klein+Zeileis:2018" class="csl-entry">
+Umlauf, Nikolaus, Nadja Klein, and Achim Zeileis. 2018.
+<span>“<span>BAMLSS</span>: <span>B</span>ayesian Additive Models for
+Location, Scale and Shape (and Beyond).”</span> <em>Journal of
+Computational and Graphical Statistics</em> 27 (3): 612–27. <a href="https://doi.org/10.1080/10618600.2017.1407325" class="external-link">https://doi.org/10.1080/10618600.2017.1407325</a>.
 </div>
-<div id="ref-Warton:2017">
-<p>Warton, David I., Loïc Thibaut, and Yi Alice Wang. 2017. “The Pit-Trap—A ‘Model-Free’ Bootstrap Procedure for Inference About Regression Models with Discrete, Multivariate Responses.” <em>PLOS ONE</em> 12 (7): 1–18. <a href="https://doi.org/10.1371/journal.pone.0181790">https://doi.org/10.1371/journal.pone.0181790</a>.</p>
+<div id="ref-Warton:2017" class="csl-entry">
+Warton, David I., Loïc Thibaut, and Yi Alice Wang. 2017. <span>“The
+PIT-Trap—<span>A</span> <span>‘Model-Free’</span> Bootstrap Procedure
+for Inference about Regression Models with Discrete, Multivariate
+Responses.”</span> <em>PLOS ONE</em> 12 (7): 1–18. <a href="https://doi.org/10.1371/journal.pone.0181790" class="external-link">https://doi.org/10.1371/journal.pone.0181790</a>.
 </div>
-<div id="ref-Wilk:1968">
-<p>Wilk, M. B., and R. Gnanadesikan. 1968. “Probability Plotting Methods for the Analysis of Data.” <em>Biometrika</em> 55 (1): 1–17.</p>
+<div id="ref-Wilk:1968" class="csl-entry">
+Wilk, M. B., and R. Gnanadesikan. 1968. <span>“Probability Plotting
+Methods for the Analysis of Data.”</span> <em>Biometrika</em> 55 (1):
+1–17.
 </div>
-<div id="ref-Wilks:2011">
-<p>Wilks, Daniel. 2011. <em>Statistical Methods in the Atmospheric Sciences</em>. 3rd ed. Academic Press.</p>
+<div id="ref-Wilks:2011" class="csl-entry">
+Wilks, Daniel. 2011. <em>Statistical Methods in the Atmospheric
+Sciences</em>. 3rd ed. Academic Press.
 </div>
 </div>
 </div>
@@ -278,11 +479,13 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 
 
       <footer><div class="copyright">
-  <p>Developed by Achim Zeileis, Moritz N. Lang, Reto Stauffer.</p>
+  <p></p>
+<p>Developed by Achim Zeileis, Moritz N. Lang, Reto Stauffer.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
@@ -290,6 +493,8 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 
   
 
+
+  
 
   </body>
 </html>

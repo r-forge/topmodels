@@ -30,6 +30,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -42,7 +44,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">topmodels</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2-0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3-0</span>
       </span>
     </div>
 
@@ -52,7 +54,7 @@
   <a href="../articles/topmodels.html">Get started</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -74,7 +76,7 @@
       <a href="../articles/illustration_artificial.html">Illustration: Artificial Data</a>
     </li>
     <li>
-      <a href="../articles/implementation_functions_graphical_evaluation.html">Implementation Overview</a>
+      <a href="../articles/implementation.html">Implementation Overview</a>
     </li>
   </ul>
 </li>
@@ -101,8 +103,10 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models</h1>
-                        <h4 class="author">Moritz Lang, Reto Stauffer, Achim Zeileis</h4>
+      <h1 data-toc-skip>topmodels: Infrastructure for Inference and
+Forecasting in Probabilistic Models</h1>
+                        <h4 data-toc-skip class="author">Moritz Lang,
+Reto Stauffer, Achim Zeileis</h4>
             
       
       
@@ -112,32 +116,67 @@
 
     
     
-<div id="overview" class="section level2">
-<h2 class="hasAnchor">
-<a href="#overview" class="anchor"></a>Overview</h2>
-<p>As a consequence of the growing importance of probabilistic predictions in various application fields due to a necessary functional risk management and strategy, there is an increasing demand for appropriate probabilistic model evaluation. Besides proper probabilistic scores <span class="citation">(Gneiting and Raftery 2007)</span>, which evaluate not only the expectation but the entire predictive distribution, graphical assessment methods are particularly advantageous to diagnose possible model misspecification problems.</p>
-<p>Probabilistic predictions are often based on distributional regression models, whereby the computation of predictive distributions, probabilities, and quantiles is generally dependent on the <em>R</em> package being used. Therefore, routines to graphically evaluate probabilistic models are not always available and if so then only for specific types of models and distributions provided by the corresponding package. An easy to use unified infrastructure to graphical assess and compare different probabilistic model types does not yet exist.</p>
-<p>The <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/"><strong>topmodels</strong></a> packages is designed to provide such an unifiying infrastructure to gain predictions of probabilities, densities, scores, and Hessian values for probabilistic models. The unifying prediction method offers the user numerous graphical evaluation tools, such as rootograms <span class="citation">(Kleiber and Zeileis 2016)</span>, PIT histograms <span class="citation">(Gneiting, Balabdaoui, and Raftery 2007)</span>, reliagrams <span class="citation">(reliability diagrams, Wilks 2011)</span>, randomized quantile Q-Q plots <span class="citation">(Dunn and Smyth 1996)</span>, and worm plots <span class="citation">(Buuren and Fredriks 2001)</span>.</p>
-<p>To be able to use the object-oriented framework of <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/"><strong>topmodels</strong></a>, solely a <code><a href="../reference/procast.html">procast()</a></code> method must exist for the model class of interest. Currently the package provides generic <code>procast</code> methods for the model classes <code>lm</code>, <code>glm</code>, <a href="https://CRAN.R-project.org/package=crch"><code>crch</code></a> <span class="citation">(Messner, Mayr, and Zeileis 2016)</span>, and <a href="https://r-forge.r-project.org/projects/partykit/pkg/disttree/"><code>disttree</code></a> <span class="citation">(Schlosser et al. 2019)</span>.</p>
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p>As a consequence of the growing importance of probabilistic
+predictions in various application fields due to a necessary functional
+risk management and strategy, there is an increasing demand for
+appropriate probabilistic model evaluation. Besides proper probabilistic
+scores <span class="citation">(Gneiting and Raftery 2007)</span>, which
+evaluate not only the expectation but the entire predictive
+distribution, graphical assessment methods are particularly advantageous
+to diagnose possible model misspecification problems.</p>
+<p>Probabilistic predictions are often based on distributional
+regression models, whereby the computation of predictive distributions,
+probabilities, and quantiles is generally dependent on the <em>R</em>
+package being used. Therefore, routines to graphically evaluate
+probabilistic models are not always available and if so then only for
+specific types of models and distributions provided by the corresponding
+package. An easy to use unified infrastructure to graphical assess and
+compare different probabilistic model types does not yet exist.</p>
+<p>The <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/" class="external-link"><strong>topmodels</strong></a>
+packages is designed to provide such an unifiying infrastructure to gain
+predictions of probabilities, densities, scores, and Hessian values for
+probabilistic models. The unifying prediction method offers the user
+numerous graphical evaluation tools, such as rootograms <span class="citation">(Kleiber and Zeileis 2016)</span>, PIT histograms <span class="citation">(Gneiting, Balabdaoui, and Raftery 2007)</span>,
+reliagrams <span class="citation">(reliability diagrams, Wilks
+2011)</span>, randomized quantile Q-Q plots <span class="citation">(Dunn
+and Smyth 1996)</span>, and worm plots <span class="citation">(Buuren
+and Fredriks 2001)</span>.</p>
+<p>To be able to use the object-oriented framework of <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/" class="external-link"><strong>topmodels</strong></a>,
+solely a <code><a href="../reference/procast.html">procast()</a></code> method must exist for the model class of
+interest. Currently the package provides generic <code>procast</code>
+methods for the model classes <code>lm</code>, <code>glm</code>, <a href="https://CRAN.R-project.org/package=crch" class="external-link"><code>crch</code></a>
+<span class="citation">(Messner, Mayr, and Zeileis 2016)</span>, and <a href="https://r-forge.r-project.org/projects/partykit/pkg/disttree/" class="external-link"><code>disttree</code></a>
+<span class="citation">(Schlosser et al. 2019)</span>.</p>
 </div>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
-<p>For the package <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/"><strong>topmodels</strong></a> so far only a development version is available, which is hosted on R-Forge at <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/" class="uri">https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/</a> in a Subversion (SVN) repository. The package can be installed via</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>For the package <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/" class="external-link"><strong>topmodels</strong></a>
+so far only a development version is available, which is hosted on
+R-Forge at <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/" class="external-link uri">https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/</a>
+in a Subversion (SVN) repository. The package can be installed via</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"topmodels"</span>, repos<span class="op">=</span><span class="st">"http://R-Forge.R-project.org"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"topmodels"</span>, repos<span class="op">=</span><span class="st">"http://R-Forge.R-project.org"</span><span class="op">)</span></code></pre></div>
 <p>or via</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_svn.html">install_svn</a></span><span class="op">(</span><span class="st">"svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels"</span><span class="op">)</span></code></pre></div>
-<p>where a specific revision can be installed by setting the optional argument <code>revision</code>.</p>
+<code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_svn.html" class="external-link">install_svn</a></span><span class="op">(</span><span class="st">"svn://r-forge.r-project.org/svnroot/topmodels/pkg/topmodels"</span><span class="op">)</span></code></pre></div>
+<p>where a specific revision can be installed by setting the optional
+argument <code>revision</code>.</p>
 </div>
-<div id="usage" class="section level2">
-<h2 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h2>
-<p>The package <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/"><strong>topmodels</strong></a> provides various routines to easily graphically assess and compare different probabilistic models and model types using <code>ggplot2</code> <span class="citation">(Wickham 2016)</span> and base <em>R</em> graphics:</p>
+<div class="section level2">
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h2>
+<p>The package <a href="https://r-forge.r-project.org/projects/topmodels/pkg/topmodels/" class="external-link"><strong>topmodels</strong></a>
+provides various routines to easily graphically assess and compare
+different probabilistic models and model types using
+<code>ggplot2</code> <span class="citation">(Wickham 2016)</span> and
+base <em>R</em> graphics:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st">"topmodels"</span><span class="op">)</span>
-<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"topmodels"</span><span class="op">)</span>
+<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
 <p><img src="topmodels_files/figure-html/example-rootogram-1.png" width="700"></p>
@@ -155,36 +194,54 @@
 <span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
 <p><img src="topmodels_files/figure-html/example-wormplot-1.png" width="700"></p>
 </div>
-<div id="references" class="section level2 unnumbered">
-<h2 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h2>
-<div id="refs" class="references">
-<div id="ref-Buuren+Fredriks:2001">
-<p>Buuren, Stef van, and Miranda Fredriks. 2001. “Worm Plot: A Simple Diagnostic Device for Modelling Growth Reference Curves.” <em>Statistics in Medicine</em> 20 (8): 1259–77. <a href="https://doi.org/10.1002/sim.746">https://doi.org/10.1002/sim.746</a>.</p>
+<div class="section level2 unnumbered">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Buuren+Fredriks:2001" class="csl-entry">
+Buuren, Stef van, and Miranda Fredriks. 2001. <span>“Worm Plot: A Simple
+Diagnostic Device for Modelling Growth Reference Curves.”</span>
+<em>Statistics in Medicine</em> 20 (8): 1259–77. <a href="https://doi.org/10.1002/sim.746" class="external-link">https://doi.org/10.1002/sim.746</a>.
 </div>
-<div id="ref-Dunn+Smyth:1996">
-<p>Dunn, Peter K., and Gordon K. Smyth. 1996. “Randomized Quantile Residuals.” <em>Journal of Computational and Graphical Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802">https://doi.org/10.2307/1390802</a>.</p>
+<div id="ref-Dunn+Smyth:1996" class="csl-entry">
+Dunn, Peter K., and Gordon K. Smyth. 1996. <span>“Randomized Quantile
+Residuals.”</span> <em>Journal of Computational and Graphical
+Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802" class="external-link">https://doi.org/10.2307/1390802</a>.
 </div>
-<div id="ref-Gneiting+Balabdaoui+Raftery:2007">
-<p>Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007. “Probabilistic Forecasts, Calibration and Sharpness.” <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.</p>
+<div id="ref-Gneiting+Balabdaoui+Raftery:2007" class="csl-entry">
+Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007.
+<span>“Probabilistic Forecasts, Calibration and Sharpness.”</span>
+<em>Journal of the Royal Statistical Society: Series B
+(Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x" class="external-link">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.
 </div>
-<div id="ref-Gneiting+Raftery:2007">
-<p>Gneiting, Tilmann, and Adrian E. Raftery. 2007. “Strictly Proper Scoring Rules, Prediction, and Estimation.” <em>Journal of the American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437">https://doi.org/10.1198/016214506000001437</a>.</p>
+<div id="ref-Gneiting+Raftery:2007" class="csl-entry">
+Gneiting, Tilmann, and Adrian E. Raftery. 2007. <span>“Strictly Proper
+Scoring Rules, Prediction, and Estimation.”</span> <em>Journal of the
+American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437" class="external-link">https://doi.org/10.1198/016214506000001437</a>.
 </div>
-<div id="ref-Kleiber+Zeileis:2016">
-<p>Kleiber, Christian, and Achim Zeileis. 2016. “Visualizing Count Data Regressions Using Rootograms.” <em>The American Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590">https://doi.org/10.1080/00031305.2016.1173590</a>.</p>
+<div id="ref-Kleiber+Zeileis:2016" class="csl-entry">
+Kleiber, Christian, and Achim Zeileis. 2016. <span>“Visualizing Count
+Data Regressions Using Rootograms.”</span> <em>The American
+Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590" class="external-link">https://doi.org/10.1080/00031305.2016.1173590</a>.
 </div>
-<div id="ref-Messner+Mayr+Zeileis:2016">
-<p>Messner, Jakob W., Georg J. Mayr, and Achim Zeileis. 2016. “Heteroscedastic Censored and Truncated Regression with crch.” <em>The R Journal</em> 8 (1): 173–81. <a href="https://doi.org/10.32614/RJ-2016-012">https://doi.org/10.32614/RJ-2016-012</a>.</p>
+<div id="ref-Messner+Mayr+Zeileis:2016" class="csl-entry">
+Messner, Jakob W., Georg J. Mayr, and Achim Zeileis. 2016.
+<span>“Heteroscedastic Censored and Truncated Regression with <span class="nocase">crch</span>.”</span> <em>The R Journal</em> 8 (1):
+173–81. <a href="https://doi.org/10.32614/RJ-2016-012" class="external-link">https://doi.org/10.32614/RJ-2016-012</a>.
 </div>
-<div id="ref-Schlosser+Hothorn+Stauffer+Zeileis:2019">
-<p>Schlosser, Lisa, Torsten Hothorn, Reto Stauffer, and Achim Zeileis. 2019. “Distributional Regression Forests for Probabilistic Precipitation Forecasting in Complex Terrain.” <em>The Annals of Applied Statistics</em> 13 (3): 1564–89. <a href="https://doi.org/10.1214/19-AOAS1247">https://doi.org/10.1214/19-AOAS1247</a>.</p>
+<div id="ref-Schlosser+Hothorn+Stauffer+Zeileis:2019" class="csl-entry">
+Schlosser, Lisa, Torsten Hothorn, Reto Stauffer, and Achim Zeileis.
+2019. <span>“Distributional Regression Forests for Probabilistic
+Precipitation Forecasting in Complex Terrain.”</span> <em>The Annals of
+Applied Statistics</em> 13 (3): 1564–89. <a href="https://doi.org/10.1214/19-AOAS1247" class="external-link">https://doi.org/10.1214/19-AOAS1247</a>.
 </div>
-<div id="ref-Wickham:2016">
-<p>Wickham, Hadley. 2016. <em>ggplot2: Elegant Graphics for Data Analysis</em>. New York: Springer-Verlag. <a href="https://ggplot2.tidyverse.org/">https://ggplot2.tidyverse.org/</a>.</p>
+<div id="ref-Wickham:2016" class="csl-entry">
+Wickham, Hadley. 2016. <em><span class="nocase">ggplot2</span>: Elegant
+Graphics for Data Analysis</em>. New York: Springer-Verlag. <a href="https://ggplot2.tidyverse.org/" class="external-link">https://ggplot2.tidyverse.org/</a>.
 </div>
-<div id="ref-Wilks:2011">
-<p>Wilks, Daniel. 2011. <em>Statistical Methods in the Atmospheric Sciences</em>. 3rd ed. Academic Press.</p>
+<div id="ref-Wilks:2011" class="csl-entry">
+Wilks, Daniel. 2011. <em>Statistical Methods in the Atmospheric
+Sciences</em>. 3rd ed. Academic Press.
 </div>
 </div>
 </div>
@@ -201,11 +258,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Achim Zeileis, Moritz N. Lang, Reto Stauffer.</p>
+  <p></p>
+<p>Developed by Achim Zeileis, Moritz N. Lang, Reto Stauffer.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
@@ -213,6 +272,8 @@
 
   
 
+
+  
 
   </body>
 </html>

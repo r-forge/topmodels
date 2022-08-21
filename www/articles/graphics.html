@@ -30,6 +30,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -42,7 +44,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">topmodels</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2-0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3-0</span>
       </span>
     </div>
 
@@ -52,7 +54,7 @@
   <a href="../articles/topmodels.html">Get started</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -74,7 +76,7 @@
       <a href="../articles/illustration_artificial.html">Illustration: Artificial Data</a>
     </li>
     <li>
-      <a href="../articles/implementation_functions_graphical_evaluation.html">Implementation Overview</a>
+      <a href="../articles/implementation.html">Implementation Overview</a>
     </li>
   </ul>
 </li>
@@ -127,118 +129,281 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
       $('.zoomDiv').css({opacity: '0', width: '0%'}); 
     });
   });
-</script><div id="overview" class="section level2">
-<h2 class="hasAnchor">
-<a href="#overview" class="anchor"></a>Overview</h2>
+</script><div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
 <p>Marginal: Rootogram</p>
-<p>Conditional: PIT histogram, Q-Q plot of randomized residuals, worm plot.</p>
+<p>Conditional: PIT histogram, Q-Q plot of randomized residuals, worm
+plot.</p>
 <p>Notation: Previous section</p>
 <p>Application: FIFA 2018 goals</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span>
-<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span>
+<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="rootogram" class="section level2">
-<h2 class="hasAnchor">
-<a href="#rootogram" class="anchor"></a>Rootogram</h2>
-<p>The rootogram is a graphical tool for assessing the goodness of fit in terms of mariginal calibration of a parametric univariate distributional model, with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span> and <span class="math inline">\(f( \cdot )\)</span> desribing the density or probability mass function. Rootograms evaluate graphically whether observed frequencies <span class="math inline">\(\text{obs}_j\)</span> match the expected frequencies <span class="math inline">\(\text{exp}_j\)</span> by plotting histogram-like rectangles or bars for the observed frequencies and a curve for the fitted frequencies, both on a square-root scale. In the form presented here, it was implemented by <span class="citation">Kleiber and Zeileis (2016)</span> building on work of <span class="citation">Tukey (1977)</span>.</p>
-<p>In the most general form, given an observational vector of a random variable <span class="math inline">\(y_i (i = 1, \ldots, n)\)</span> which is divided into subsets by a set of breakpoints <span class="math inline">\(b_0, b_1, b_2, \dots~\)</span>, the observed and expected frequencies are given by</p>
-<p><span class="math display">\[\text{obs}_j = \sum_{i=1}^{n}w_{i} I(y_i \in (b_j, b_{j+1}]),\]</span> <span class="math display">\[\text{exp}_j = \sum_{i=1}^{n}w\{F(b_{j+1} |
-  \hat{\boldsymbol{\theta}}_{i}) - F(b_{j} | \hat{\boldsymbol{\theta}}_{i})\},\]</span></p>
-<p>with <span class="math inline">\(F( \cdot )\)</span> being the CDF of the modeled distributional model <span class="math inline">\(f( \cdot )\)</span> and <span class="math inline">\(w_i\)</span> being optional observation-specific weights. Whereby, the weights are typically needed either for survey data or for situations with model-based weights <span class="citation">(Kleiber and Zeileis 2016)</span>.</p>
-<p>For a discrete variable <span class="math inline">\(y_i\)</span>, the observed and expected frequencies can be simplified and are given for each integer <span class="math inline">\(j\)</span> by</p>
-<p><span class="math display">\[\text{obs}_j = \sum_{i=1}^{n}I(y_i - j),\]</span> <span class="math display">\[\text{exp}_j = \sum_{i=1}^{n}f(j | \hat{\boldsymbol{\theta}}_{i}),\]</span></p>
-<p>with the indicator variable <span class="math inline">\(I( \cdot )\)</span> <span class="citation">(Kleiber and Zeileis 2016)</span>. As rootograms are best known for count data, the latter form is quite common.</p>
-<p>Different styles of rootograms have been proposed and are extensively discussed in <span class="citation">Kleiber and Zeileis (2016)</span>. As default, they propose a so called “hanging” rootogram, which aligns all deviations along the horizontal axis, as the rectangles are drawn from <span class="math inline">\(\sqrt{exp_j}\)</span> to <span class="math inline">\(\sqrt{exp_j} - \sqrt{obs_j}\)</span>, so that they “hang” from the curve with the expected frequencies <span class="math inline">\(\sqrt{exp_j}\)</span>.</p>
-<p>The concept of comparing observed and expected frequencies graphically was also introduced in the seminal work on assessing calibration and sharpness for a predictive probalilty model by <span class="citation">Gneiting, Balabdaoui, and Raftery (2007)</span> and, building on this, applied to count data by <span class="citation">Czado, Gneiting, and Held (2009)</span>. However, since in both cases either the deviations or the expected and observed frequencies are presented only as lines connecting the respective frequencies, deviations are more difficult to detect compared to the rootograms introduced by <span class="citation">Tukey (1977)</span> and further enhanced by <span class="citation">Kleiber and Zeileis (2016)</span>.</p>
+<div class="section level2">
+<h2 id="rootogram">Rootogram<a class="anchor" aria-label="anchor" href="#rootogram"></a>
+</h2>
+<p>The rootogram is a graphical tool for assessing the goodness of fit
+in terms of mariginal calibration of a parametric univariate
+distributional model, with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} =
+(\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span> and <span class="math inline">\(f( \cdot )\)</span> desribing the density or
+probability mass function. Rootograms evaluate graphically whether
+observed frequencies <span class="math inline">\(\text{obs}_j\)</span>
+match the expected frequencies <span class="math inline">\(\text{exp}_j\)</span> by plotting histogram-like
+rectangles or bars for the observed frequencies and a curve for the
+fitted frequencies, both on a square-root scale. In the form presented
+here, it was implemented by <span class="citation">Kleiber and Zeileis
+(2016)</span> building on work of <span class="citation">Tukey
+(1977)</span>.</p>
+<p>In the most general form, given an observational vector of a random
+variable <span class="math inline">\(y_i (i = 1, \ldots, n)\)</span>
+which is divided into subsets by a set of breakpoints <span class="math inline">\(b_0, b_1, b_2, \dots~\)</span>, the observed and
+expected frequencies are given by</p>
+<p><span class="math display">\[\text{obs}_j = \sum_{i=1}^{n}w_{i} I(y_i
+\in (b_j, b_{j+1}]),\]</span> <span class="math display">\[\text{exp}_j
+= \sum_{i=1}^{n}w\{F(b_{j+1} |
+  \hat{\boldsymbol{\theta}}_{i}) - F(b_{j} |
+\hat{\boldsymbol{\theta}}_{i})\},\]</span></p>
+<p>with <span class="math inline">\(F( \cdot )\)</span> being the CDF of
+the modeled distributional model <span class="math inline">\(f( \cdot
+)\)</span> and <span class="math inline">\(w_i\)</span> being optional
+observation-specific weights. Whereby, the weights are typically needed
+either for survey data or for situations with model-based weights <span class="citation">(Kleiber and Zeileis 2016)</span>.</p>
+<p>For a discrete variable <span class="math inline">\(y_i\)</span>, the
+observed and expected frequencies can be simplified and are given for
+each integer <span class="math inline">\(j\)</span> by</p>
+<p><span class="math display">\[\text{obs}_j = \sum_{i=1}^{n}I(y_i -
+j),\]</span> <span class="math display">\[\text{exp}_j =
+\sum_{i=1}^{n}f(j | \hat{\boldsymbol{\theta}}_{i}),\]</span></p>
+<p>with the indicator variable <span class="math inline">\(I( \cdot
+)\)</span> <span class="citation">(Kleiber and Zeileis 2016)</span>. As
+rootograms are best known for count data, the latter form is quite
+common.</p>
+<p>Different styles of rootograms have been proposed and are extensively
+discussed in <span class="citation">Kleiber and Zeileis (2016)</span>.
+As default, they propose a so called “hanging” rootogram, which aligns
+all deviations along the horizontal axis, as the rectangles are drawn
+from <span class="math inline">\(\sqrt{exp_j}\)</span> to <span class="math inline">\(\sqrt{exp_j} - \sqrt{obs_j}\)</span>, so that they
+“hang” from the curve with the expected frequencies <span class="math inline">\(\sqrt{exp_j}\)</span>.</p>
+<p>The concept of comparing observed and expected frequencies
+graphically was also introduced in the seminal work on assessing
+calibration and sharpness for a predictive probalilty model by <span class="citation">Gneiting, Balabdaoui, and Raftery (2007)</span> and,
+building on this, applied to count data by <span class="citation">Czado,
+Gneiting, and Held (2009)</span>. However, since in both cases either
+the deviations or the expected and observed frequencies are presented
+only as lines connecting the respective frequencies, deviations are more
+difficult to detect compared to the rootograms introduced by <span class="citation">Tukey (1977)</span> and further enhanced by <span class="citation">Kleiber and Zeileis (2016)</span>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-rootogram-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
-<div id="pit-histogram" class="section level2">
-<h2 class="hasAnchor">
-<a href="#pit-histogram" class="anchor"></a>PIT histogram</h2>
-<p>As described in the introduction, to check for probabilistic calibration of a regression model, <span class="citation">Dawid (1984)</span> proposed the use of the probability integral transform (PIT) which is simply the predictive cumulative distribution function (CDF) evaluated at the observations. PIT values have been used under various names <span class="citation">(e.g., Smith 1985; Dunn and Smyth 1996; Brockwell 2007)</span> , to emphasize their similar properties to residuals we follow <span class="citation">Warton, Thibaut, and Wang (2017)</span> and refer to them as PIT residuals from now on.</p>
-<p>For a continuous random variable <span class="math inline">\(y_i (i = 1, \ldots, n)\)</span>, PIT residuals are defined as</p>
-<p><span class="math display">\[u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i)\]</span></p>
-<p>where <span class="math inline">\(F( \cdot )\)</span> denotes the CDF of the modeled distribution <span class="math inline">\(f( \cdot )\)</span> with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span>. If the estimated model is a good approximation to the true data generating process, the observation will be drawn from the predictive distribution and the PIT residuals <span class="math inline">\(u_i\)</span> are approximately uniformly distributed on <span class="math inline">\([0, 1]\)</span>. Plotting the histogram of the PIT residuals and checking for uniformity is therefore a common empirical way of checking for calibration <span class="citation">(Diebold, Gunther, and Tay 1998; Gneiting, Balabdaoui, and Raftery 2007)</span>. Whereas, deviations from uniformity point to underlying forecast errors and model deficiencies: U-shaped histograms refer to underdispersed predictive distributions, inverted U-shaped histograms to overdispersion, and skewed histograms suggest that central tendencies must be biased <span class="citation">(Gneiting, Balabdaoui, and Raftery 2007; Czado, Gneiting, and Held 2009)</span>.</p>
-<p>When considering discrete response distributions or distributions with a discrete component, e.g., in case of censoring, for a random discrete variable <span class="math inline">\(y_i\)</span> the PIT <span class="math inline">\(u_i\)</span> can be generated as a random draw from the interval <span class="math inline">\([F(y_i - 1 | \, \hat{\boldsymbol{\theta}}_i), F(y_i | \,  \hat{\boldsymbol{\theta}}_i)]\)</span>. Even if this leads to some randomness in the graphical representation of PIT residuals, for cases with a high number of observations the impact on the graphical evaluation when repeating the calculations (i.e. drawing new values <span class="math inline">\(u_i\)</span>) is typically rather small. For small data sets, we recommend to increase the number of random draws which significantly reduces the randomness in the graphical display.</p>
-<p>Alternatively, a nonrandom PIT histogram was introduced by <span class="citation">Czado, Gneiting, and Held (2009)</span>, where rather than building on randomized pointwise PIT resdiuals <span class="math inline">\(u_i\)</span> the expected fraction of the CDF along the interval <span class="math inline">\([F(y_i - 1 | \, \hat{\boldsymbol{\theta}}_i), F(y_i | \,  \hat{\boldsymbol{\theta}}_i)]\)</span> is used. This is asympotically equivalent to drawing an infinite number of random PIT residuals.</p>
+<div class="section level2">
+<h2 id="pit-histogram">PIT histogram<a class="anchor" aria-label="anchor" href="#pit-histogram"></a>
+</h2>
+<p>As described in the introduction, to check for probabilistic
+calibration of a regression model, <span class="citation">Dawid
+(1984)</span> proposed the use of the probability integral transform
+(PIT) which is simply the predictive cumulative distribution function
+(CDF) evaluated at the observations. PIT values have been used under
+various names <span class="citation">(e.g., Smith 1985; Dunn and Smyth
+1996; Brockwell 2007)</span> , to emphasize their similar properties to
+residuals we follow <span class="citation">Warton, Thibaut, and Wang
+(2017)</span> and refer to them as PIT residuals from now on.</p>
+<p>For a continuous random variable <span class="math inline">\(y_i (i =
+1, \ldots, n)\)</span>, PIT residuals are defined as</p>
+<p><span class="math display">\[u_i = F(y_i | \,
+\hat{\boldsymbol{\theta}}_i)\]</span></p>
+<p>where <span class="math inline">\(F( \cdot )\)</span> denotes the CDF
+of the modeled distribution <span class="math inline">\(f( \cdot
+)\)</span> with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} =
+(\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span>. If the
+estimated model is a good approximation to the true data generating
+process, the observation will be drawn from the predictive distribution
+and the PIT residuals <span class="math inline">\(u_i\)</span> are
+approximately uniformly distributed on <span class="math inline">\([0,
+1]\)</span>. Plotting the histogram of the PIT residuals and checking
+for uniformity is therefore a common empirical way of checking for
+calibration <span class="citation">(Diebold, Gunther, and Tay 1998;
+Gneiting, Balabdaoui, and Raftery 2007)</span>. Whereas, deviations from
+uniformity point to underlying forecast errors and model deficiencies:
+U-shaped histograms refer to underdispersed predictive distributions,
+inverted U-shaped histograms to overdispersion, and skewed histograms
+suggest that central tendencies must be biased <span class="citation">(Gneiting, Balabdaoui, and Raftery 2007; Czado,
+Gneiting, and Held 2009)</span>.</p>
+<p>When considering discrete response distributions or distributions
+with a discrete component, e.g., in case of censoring, for a random
+discrete variable <span class="math inline">\(y_i\)</span> the PIT <span class="math inline">\(u_i\)</span> can be generated as a random draw
+from the interval <span class="math inline">\([F(y_i - 1 | \,
+\hat{\boldsymbol{\theta}}_i), F(y_i |
+\,  \hat{\boldsymbol{\theta}}_i)]\)</span>. Even if this leads to some
+randomness in the graphical representation of PIT residuals, for cases
+with a high number of observations the impact on the graphical
+evaluation when repeating the calculations (i.e. drawing new values
+<span class="math inline">\(u_i\)</span>) is typically rather small. For
+small data sets, we recommend to increase the number of random draws
+which significantly reduces the randomness in the graphical display.</p>
+<p>Alternatively, a nonrandom PIT histogram was introduced by <span class="citation">Czado, Gneiting, and Held (2009)</span>, where rather
+than building on randomized pointwise PIT resdiuals <span class="math inline">\(u_i\)</span> the expected fraction of the CDF
+along the interval <span class="math inline">\([F(y_i - 1 | \,
+\hat{\boldsymbol{\theta}}_i), F(y_i |
+\,  \hat{\boldsymbol{\theta}}_i)]\)</span> is used. This is
+asympotically equivalent to drawing an infinite number of random PIT
+residuals.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-pithist-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
-<div id="q-q-residuals-plot" class="section level2">
-<h2 class="hasAnchor">
-<a href="#q-q-residuals-plot" class="anchor"></a>Q-Q residuals plot</h2>
-<p>Quantile residuals are simply the inverse cumulative distribution function of a standard normal distribution <span class="math inline">\(\Phi^{-1}\)</span> evaluated at the PIT residuals <span class="math inline">\(u_i (i = 1, \ldots, n)\)</span>, hence, they can be defined as</p>
-<p><span class="math display">\[\hat{r}_i = \Phi^{-1}(F(y_i | \, \hat{\boldsymbol{\theta}}_{i})) = 
+<div class="section level2">
+<h2 id="q-q-residuals-plot">Q-Q residuals plot<a class="anchor" aria-label="anchor" href="#q-q-residuals-plot"></a>
+</h2>
+<p>Quantile residuals are simply the inverse cumulative distribution
+function of a standard normal distribution <span class="math inline">\(\Phi^{-1}\)</span> evaluated at the PIT residuals
+<span class="math inline">\(u_i (i = 1, \ldots, n)\)</span>, hence, they
+can be defined as</p>
+<p><span class="math display">\[\hat{r}_i = \Phi^{-1}(F(y_i | \,
+\hat{\boldsymbol{\theta}}_{i})) =
   \Phi^{-1}(u_i),\]</span></p>
-<p>where <span class="math inline">\(F( \cdot )\)</span> again denotes the cumulative distribution function (CDF) of the modeled distribution <span class="math inline">\(f( \cdot )\)</span> with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} = (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span> <span class="citation">(Dunn and Smyth 1996)</span>. As before, for discrete or partly discrete responses, the approach includes some randomization to achieve continuous <span class="math inline">\(u_i\)</span> values; quantile residuals are therefore often referred to as randomized quantile residuals in the literature <span class="citation">(Dunn and Smyth 1996)</span>.</p>
-<p>In case of a correct model fit, the values <span class="math inline">\(u_i\)</span> are uniformly distributed on the unit interval and the Q-Q residuals should at least approximately be standard normally distributed. Hence, to check for normality, quantile residuals can be graphically compared to theoretical quantiles of the standard normal distribution, where strong deviations from the bisecting line indicate a misspecified model fit.</p>
+<p>where <span class="math inline">\(F( \cdot )\)</span> again denotes
+the cumulative distribution function (CDF) of the modeled distribution
+<span class="math inline">\(f( \cdot )\)</span> with estimated
+parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i} =
+(\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span> <span class="citation">(Dunn and Smyth 1996)</span>. As before, for discrete
+or partly discrete responses, the approach includes some randomization
+to achieve continuous <span class="math inline">\(u_i\)</span> values;
+quantile residuals are therefore often referred to as randomized
+quantile residuals in the literature <span class="citation">(Dunn and
+Smyth 1996)</span>.</p>
+<p>In case of a correct model fit, the values <span class="math inline">\(u_i\)</span> are uniformly distributed on the unit
+interval and the Q-Q residuals should at least approximately be standard
+normally distributed. Hence, to check for normality, quantile residuals
+can be graphically compared to theoretical quantiles of the standard
+normal distribution, where strong deviations from the bisecting line
+indicate a misspecified model fit.</p>
 <p>Mathematically, Q-Q plot consists of the tuples</p>
-<p><span class="math display">\[(z_{(1)},  \hat{r}_{(1)}), \ldots,  (z_{(n)},  \hat{r}_{(n)}),\]</span></p>
-<p>where <span class="math inline">\(\hat{r}_{(i)}\)</span> denotes the <span class="math inline">\(i\)</span>th order statistic of the quantile residuals, so that <span class="math inline">\(\hat{r}_{(1)} \leq \hat{r}_{(2)} \cdot \leq \hat{r}_{(n)}\)</span>, and <span class="math inline">\(z_{(i)}\)</span> is the ordered statistics from the respective standard normal quantiles <span class="math inline">\(\Phi^{-1}( p_i)\)</span>, evaluated at the cumulative proportion <span class="math inline">\(p_i = (i - 0.5) / n\)</span> for <span class="math inline">\(n\)</span> greater <span class="math inline">\(10\)</span>. This graphical evaluation is well known as normal probability plot or normal Q-Q plot <span class="citation">(Hoaglin 2006)</span>. Due to the transformation of the PIT residuals <span class="math inline">\(u_i\)</span> to the normal scale, their extreme values are more widely spread, so that normal Q-Q diagrams are better suited than, for example, PIT histograms to detect violations of the distribution assumption within its tails. An additional possible advantage of Q-Q plots is that they avoid the necessity of defining breakpoints as typically needed for histogram style evaluations <span class="citation">(Klein et al. 2015)</span>.</p>
-<p>But Q-Q plots can also be applied to check if residuals follow any other known distribution, by employing any other inverse cumulative distribution function of interest instead of <span class="math inline">\(\Phi^{-1}\)</span> in the computation and comparing the quantile residuals <span class="math inline">\(\hat{r}_i\)</span> to the respective theoretical quantiles. This is called than a theoretical quantile-quantile plot or Q-Q plot for short <span class="citation">(Friendly 1991)</span>.</p>
+<p><span class="math display">\[(z_{(1)},  \hat{r}_{(1)}),
+\ldots,  (z_{(n)},  \hat{r}_{(n)}),\]</span></p>
+<p>where <span class="math inline">\(\hat{r}_{(i)}\)</span> denotes the
+<span class="math inline">\(i\)</span>th order statistic of the quantile
+residuals, so that <span class="math inline">\(\hat{r}_{(1)} \leq
+\hat{r}_{(2)} \cdot \leq \hat{r}_{(n)}\)</span>, and <span class="math inline">\(z_{(i)}\)</span> is the ordered statistics from
+the respective standard normal quantiles <span class="math inline">\(\Phi^{-1}( p_i)\)</span>, evaluated at the
+cumulative proportion <span class="math inline">\(p_i = (i - 0.5) /
+n\)</span> for <span class="math inline">\(n\)</span> greater <span class="math inline">\(10\)</span>. This graphical evaluation is well
+known as normal probability plot or normal Q-Q plot <span class="citation">(Hoaglin 2006)</span>. Due to the transformation of the
+PIT residuals <span class="math inline">\(u_i\)</span> to the normal
+scale, their extreme values are more widely spread, so that normal Q-Q
+diagrams are better suited than, for example, PIT histograms to detect
+violations of the distribution assumption within its tails. An
+additional possible advantage of Q-Q plots is that they avoid the
+necessity of defining breakpoints as typically needed for histogram
+style evaluations <span class="citation">(Klein et al. 2015)</span>.</p>
+<p>But Q-Q plots can also be applied to check if residuals follow any
+other known distribution, by employing any other inverse cumulative
+distribution function of interest instead of <span class="math inline">\(\Phi^{-1}\)</span> in the computation and
+comparing the quantile residuals <span class="math inline">\(\hat{r}_i\)</span> to the respective theoretical
+quantiles. This is called than a theoretical quantile-quantile plot or
+Q-Q plot for short <span class="citation">(Friendly 1991)</span>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m</span>, confint <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-qqrplot-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
-<div id="worm-plot" class="section level2">
-<h2 class="hasAnchor">
-<a href="#worm-plot" class="anchor"></a>Worm plot</h2>
-<p>As in Q-Q plots, small too medium deviations can be quite hard to detect, untilting the plot by subtracting the theoretical quantiles, makes detecting pattern of departure from a now horizontal line much easier. Mathematically, therefore, the tuples in the plot are</p>
-<p><span class="math display">\[(z_{(1)},  \hat{r}_{(1)} - z_{(1)}), \ldots,  (z_{(n)},  \hat{r}_{(n)} - z_{(n)}),\]</span></p>
-<p>where as before, where <span class="math inline">\(\hat{r}_{(i)}\)</span> denotes the order statistic of the empirical quantile residuals and <span class="math inline">\(z_{(i)}\)</span> the ordered statistics of the respective standard normal quantiles. This so-called de-trended Q-Q plot <span class="citation">(Friendly 1991)</span> is best known by the application of <span class="citation">Buuren and Fredriks (2001)</span>, and is therefore usually referred to as worm plot according to their naming.</p>
+<div class="section level2">
+<h2 id="worm-plot">Worm plot<a class="anchor" aria-label="anchor" href="#worm-plot"></a>
+</h2>
+<p>As in Q-Q plots, small too medium deviations can be quite hard to
+detect, untilting the plot by subtracting the theoretical quantiles,
+makes detecting pattern of departure from a now horizontal line much
+easier. Mathematically, therefore, the tuples in the plot are</p>
+<p><span class="math display">\[(z_{(1)},  \hat{r}_{(1)} - z_{(1)}),
+\ldots,  (z_{(n)},  \hat{r}_{(n)} - z_{(n)}),\]</span></p>
+<p>where as before, where <span class="math inline">\(\hat{r}_{(i)}\)</span> denotes the order statistic
+of the empirical quantile residuals and <span class="math inline">\(z_{(i)}\)</span> the ordered statistics of the
+respective standard normal quantiles. This so-called de-trended Q-Q plot
+<span class="citation">(Friendly 1991)</span> is best known by the
+application of <span class="citation">Buuren and Fredriks (2001)</span>,
+and is therefore usually referred to as worm plot according to their
+naming.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m</span>, confint <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-wormplot-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
-<div id="references" class="section level2 unnumbered">
-<h2 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h2>
-<div id="refs" class="references">
-<div id="ref-Brockwell:2007">
-<p>Brockwell, A.E. 2007. “Universal Residuals: A Multivariate Transformation.” <em>Statistics &amp; Probability Letters</em> 77 (14): 1473–8. <a href="https://doi.org/https://doi.org/10.1016/j.spl.2007.02.008">https://doi.org/https://doi.org/10.1016/j.spl.2007.02.008</a>.</p>
+<div class="section level2 unnumbered">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Brockwell:2007" class="csl-entry">
+Brockwell, A. E. 2007. <span>“Universal Residuals: A Multivariate
+Transformation.”</span> <em>Statistics &amp; Probability Letters</em> 77
+(14): 1473–78. https://doi.org/<a href="https://doi.org/10.1016/j.spl.2007.02.008" class="external-link">https://doi.org/10.1016/j.spl.2007.02.008</a>.
 </div>
-<div id="ref-Buuren+Fredriks:2001">
-<p>Buuren, Stef van, and Miranda Fredriks. 2001. “Worm Plot: A Simple Diagnostic Device for Modelling Growth Reference Curves.” <em>Statistics in Medicine</em> 20 (8): 1259–77. <a href="https://doi.org/10.1002/sim.746">https://doi.org/10.1002/sim.746</a>.</p>
+<div id="ref-Buuren+Fredriks:2001" class="csl-entry">
+Buuren, Stef van, and Miranda Fredriks. 2001. <span>“Worm Plot: A Simple
+Diagnostic Device for Modelling Growth Reference Curves.”</span>
+<em>Statistics in Medicine</em> 20 (8): 1259–77. <a href="https://doi.org/10.1002/sim.746" class="external-link">https://doi.org/10.1002/sim.746</a>.
 </div>
-<div id="ref-Czado+Gneiting+Held:2009">
-<p>Czado, Claudia, Tilmann Gneiting, and Leonhard Held. 2009. “Predictive Model Assessment for Count Data.” <em>Biometrics</em> 65 (4): 1254–61. <a href="https://doi.org/10.1111/j.1541-0420.2009.01191.x">https://doi.org/10.1111/j.1541-0420.2009.01191.x</a>.</p>
+<div id="ref-Czado+Gneiting+Held:2009" class="csl-entry">
+Czado, Claudia, Tilmann Gneiting, and Leonhard Held. 2009.
+<span>“Predictive Model Assessment for Count Data.”</span>
+<em>Biometrics</em> 65 (4): 1254–61. <a href="https://doi.org/10.1111/j.1541-0420.2009.01191.x" class="external-link">https://doi.org/10.1111/j.1541-0420.2009.01191.x</a>.
 </div>
-<div id="ref-Dawid:1984">
-<p>Dawid, A. P. 1984. “Present Position and Potential Developments: Some Personal Views: Statistical Theory: The Prequential Approach.” <em>Journal of the Royal Statistical Society: Series A (General)</em> 147 (2): 278–92. <a href="https://doi.org/10.2307/2981683">https://doi.org/10.2307/2981683</a>.</p>
+<div id="ref-Dawid:1984" class="csl-entry">
+Dawid, A. P. 1984. <span>“Present Position and Potential Developments:
+<span>S</span>ome Personal Views: <span>S</span>tatistical Theory:
+<span>T</span>he Prequential Approach.”</span> <em>Journal of the Royal
+Statistical Society: Series A (General)</em> 147 (2): 278–92. <a href="https://doi.org/10.2307/2981683" class="external-link">https://doi.org/10.2307/2981683</a>.
 </div>
-<div id="ref-Diebold+Gunther+Tay:1998">
-<p>Diebold, Francis X., Todd A. Gunther, and Anthony S. Tay. 1998. “Evaluating Density Forecasts with Applications to Financial Risk Management.” <em>International Economic Review</em> 39 (4): 863–83. <a href="https://doi.org/10.2307/2527342">https://doi.org/10.2307/2527342</a>.</p>
+<div id="ref-Diebold+Gunther+Tay:1998" class="csl-entry">
+Diebold, Francis X., Todd A. Gunther, and Anthony S. Tay. 1998.
+<span>“Evaluating Density Forecasts with Applications to Financial Risk
+Management.”</span> <em>International Economic Review</em> 39 (4):
+863–83. <a href="https://doi.org/10.2307/2527342" class="external-link">https://doi.org/10.2307/2527342</a>.
 </div>
-<div id="ref-Dunn+Smyth:1996">
-<p>Dunn, Peter K., and Gordon K. Smyth. 1996. “Randomized Quantile Residuals.” <em>Journal of Computational and Graphical Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802">https://doi.org/10.2307/1390802</a>.</p>
+<div id="ref-Dunn+Smyth:1996" class="csl-entry">
+Dunn, Peter K., and Gordon K. Smyth. 1996. <span>“Randomized Quantile
+Residuals.”</span> <em>Journal of Computational and Graphical
+Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802" class="external-link">https://doi.org/10.2307/1390802</a>.
 </div>
-<div id="ref-Friendly:1991">
-<p>Friendly, Michael. 1991. <em>SAS System for Statistical Graphics</em>. 1st ed. Cary, NC: SAS Institute Inc.</p>
+<div id="ref-Friendly:1991" class="csl-entry">
+Friendly, Michael. 1991. <em><span>SAS</span> System for Statistical
+Graphics</em>. 1st ed. Cary, NC: SAS Institute Inc.
 </div>
-<div id="ref-Gneiting+Balabdaoui+Raftery:2007">
-<p>Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007. “Probabilistic Forecasts, Calibration and Sharpness.” <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.</p>
+<div id="ref-Gneiting+Balabdaoui+Raftery:2007" class="csl-entry">
+Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007.
+<span>“Probabilistic Forecasts, Calibration and Sharpness.”</span>
+<em>Journal of the Royal Statistical Society: Series B
+(Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x" class="external-link">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.
 </div>
-<div id="ref-Hoaglin:2006">
-<p>Hoaglin, David C. 2006. “Using Quantiles to Study Shape.” In <em>Exploring Data Tables, Trends, and Shapes</em>, 417–60. John Wiley &amp; Sons, Ltd. <a href="https://doi.org/https://doi.org/10.1002/9781118150702.ch10">https://doi.org/https://doi.org/10.1002/9781118150702.ch10</a>.</p>
+<div id="ref-Hoaglin:2006" class="csl-entry">
+Hoaglin, David C. 2006. <span>“Using Quantiles to Study Shape.”</span>
+In <em>Exploring Data Tables, Trends, and Shapes</em>, 417–60. John
+Wiley &amp; Sons, Ltd. https://doi.org/<a href="https://doi.org/10.1002/9781118150702.ch10" class="external-link">https://doi.org/10.1002/9781118150702.ch10</a>.
 </div>
-<div id="ref-Kleiber+Zeileis:2016">
-<p>Kleiber, Christian, and Achim Zeileis. 2016. “Visualizing Count Data Regressions Using Rootograms.” <em>The American Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590">https://doi.org/10.1080/00031305.2016.1173590</a>.</p>
+<div id="ref-Kleiber+Zeileis:2016" class="csl-entry">
+Kleiber, Christian, and Achim Zeileis. 2016. <span>“Visualizing Count
+Data Regressions Using Rootograms.”</span> <em>The American
+Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590" class="external-link">https://doi.org/10.1080/00031305.2016.1173590</a>.
 </div>
-<div id="ref-Klein+Kneib+Lang+Sohn:2015">
-<p>Klein, Nadja, Thomas Kneib, Stefan Lang, and Alexander Sohn. 2015. “Bayesian Structured Additive Distributional Regression with an Application to Regional Income Inequality in Germany.” <em>Annals of Applied Statistics</em> 9: 1024–52. <a href="https://doi.org/10.1214/15-aoas823">https://doi.org/10.1214/15-aoas823</a>.</p>
+<div id="ref-Klein+Kneib+Lang+Sohn:2015" class="csl-entry">
+Klein, Nadja, Thomas Kneib, Stefan Lang, and Alexander Sohn. 2015.
+<span>“<span>B</span>ayesian Structured Additive Distributional
+Regression with an Application to Regional Income Inequality in
+<span>G</span>ermany.”</span> <em>Annals of Applied Statistics</em> 9:
+1024–52. <a href="https://doi.org/10.1214/15-aoas823" class="external-link">https://doi.org/10.1214/15-aoas823</a>.
 </div>
-<div id="ref-Smith:1985">
-<p>Smith, J. Q. 1985. “Diagnostic Checks of Non-Standard Time Series Models.” <em>Journal of Forecasting</em> 4 (3): 283–91. <a href="https://doi.org/https://doi.org/10.1002/for.3980040305">https://doi.org/https://doi.org/10.1002/for.3980040305</a>.</p>
+<div id="ref-Smith:1985" class="csl-entry">
+Smith, J. Q. 1985. <span>“Diagnostic Checks of Non-Standard Time Series
+Models.”</span> <em>Journal of Forecasting</em> 4 (3): 283–91.
+https://doi.org/<a href="https://doi.org/10.1002/for.3980040305" class="external-link">https://doi.org/10.1002/for.3980040305</a>.
 </div>
-<div id="ref-Tukey:1977">
-<p>Tukey, John W. 1977. <em>Exploratory Data Analysis</em>. Addison-Wesley.</p>
+<div id="ref-Tukey:1977" class="csl-entry">
+Tukey, John W. 1977. <em>Exploratory Data Analysis</em>. Addison-Wesley.
 </div>
-<div id="ref-Warton:2017">
-<p>Warton, David I., Loïc Thibaut, and Yi Alice Wang. 2017. “The Pit-Trap—A ‘Model-Free’ Bootstrap Procedure for Inference About Regression Models with Discrete, Multivariate Responses.” <em>PLOS ONE</em> 12 (7): 1–18. <a href="https://doi.org/10.1371/journal.pone.0181790">https://doi.org/10.1371/journal.pone.0181790</a>.</p>
+<div id="ref-Warton:2017" class="csl-entry">
+Warton, David I., Loïc Thibaut, and Yi Alice Wang. 2017. <span>“The
+PIT-Trap—<span>A</span> <span>‘Model-Free’</span> Bootstrap Procedure
+for Inference about Regression Models with Discrete, Multivariate
+Responses.”</span> <em>PLOS ONE</em> 12 (7): 1–18. <a href="https://doi.org/10.1371/journal.pone.0181790" class="external-link">https://doi.org/10.1371/journal.pone.0181790</a>.
 </div>
 </div>
 </div>
@@ -255,11 +420,13 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 
 
       <footer><div class="copyright">
-  <p>Developed by Achim Zeileis, Moritz N. Lang, Reto Stauffer.</p>
+  <p></p>
+<p>Developed by Achim Zeileis, Moritz N. Lang, Reto Stauffer.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
@@ -267,6 +434,8 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 
   
 
+
+  
 
   </body>
 </html>
