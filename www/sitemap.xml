@@ -76,6 +76,9 @@
     <loc>https://topmodels.R-Forge.R-project.org/news/index.html</loc>
   </url>
   <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/crps.Beta.html</loc>
+  </url>
+  <url>
     <loc>https://topmodels.R-Forge.R-project.org/reference/geom_pit_bar.html</loc>
   </url>
   <url>
@@ -131,6 +134,9 @@
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/reference/procast.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/proscore.html</loc>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/reference/qqrplot.html</loc>

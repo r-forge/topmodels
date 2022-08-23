@@ -9,15 +9,15 @@
 #' random variable with cumulative distribution function \eqn{F(y)} and probability
 #' density function \eqn{f(y)}. The actual observation is \eqn{y}.
 #'
-#' **Log-likelihood:** Also known as log-score, logarithmic score, or log-density.
+#' \bold{Log-likelihood:} Also known as log-score, logarithmic score, or log-density.
 #'
 #' \deqn{
-#'   \log f_Y(y)
+#'   \log f(y)
 #' }{
 #'   log(f(y))
 #' }
 #'
-#' **Continuous ranked probability score (CRPS):**
+#' \bold{Continuous ranked probability score (CRPS):}
 #'
 #' \deqn{
 #'   \int_{-\infty}^{\infty} \left( F(x) - 1(x \ge y) \right)^2 \mbox{d} x
@@ -32,17 +32,17 @@
 #' words it is then the sum of the squared deviations between the predicted cumulative
 #' probabilities \eqn{F(x)} and the ideal step function for the actual observation \eqn{y}.
 #'
-#' **Mean absolute error (MAE):**
+#' \bold{Mean absolute error (MAE):}
 #'
 #' \deqn{
-#'   \left( E(Y) - y \right)^2
+#'   \left| E(Y) - y \right|
 #' }{
-#'   (E(Y) - y)^2
+#'   |E(Y) - y|
 #' }
 #'
 #' where \eqn{E(Y)} is the expectation of the predicted random variable \eqn{Y}.
 #'
-#' **Mean squared error (MSE):**
+#' \bold{Mean squared error (MSE):}
 #'
 #' \deqn{
 #'   \left( E(Y) - y \right)^2
@@ -103,6 +103,21 @@
 #' ## prediction using a new data set (final of the tournament)
 #' final <- tail(FIFA2018, 2)
 #' proscore(m, newdata = final, type = c("LogLik", "CRPS", "MAE", "MSE"))
+#'
+#' ## least-squares regression for speed and breaking distance of cars
+#' data("cars", package = "datasets")
+#' m <- lm(dist ~ speed, data = cars)
+#'
+#' ## replicate in-sample residual sum of squares (aka deviance) by taking
+#' ## the sum (rather than the mean) of the squared errors
+#' proscore(m, type = "MSE", aggregate = sum)
+#' deviance(m)
+#'
+#' ## note that the log-likelihood does not match exactly due to using
+#' ## the least-squares rather than the maximum-likelihood estimate of the
+#' ## error variance (divising by n rather than n - k)
+#' proscore(m, type = "loglikelihood", aggregate = sum)
+#' logLik(m)
 #' @export 
 proscore <- function(object, newdata = NULL, na.action = na.pass, type = "loglikelihood", drop = FALSE, aggregate = FALSE, ...) {
   UseMethod("proscore")

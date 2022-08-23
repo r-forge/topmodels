@@ -36,6 +36,13 @@ navbar:
       href: contact.html
 
 reference:
+  - title: "Procast infrastructure"
+    contents: 
+      - procast
+      - proscore
+      - pitresiduals
+      - qresiduals
+      - newresponse
   - title: "Probabilistic model diagnostics"
     contents: 
       - pithist
@@ -43,7 +50,7 @@ reference:
       - reliagram
       - rootogram
       - wormplot
-  - title: "Plotting probabilistic model diagnostic"
+  - title: "Plotting probabilistic model diagnostics"
     contents: 
       - plot.pithist
       - plot.qqrplot
@@ -53,9 +60,6 @@ reference:
       - geom_pithist
       - geom_qqrplot
       - geom_rootogram
-  - title: "Procast infrastructure"
-    contents: 
-      - procast
-      - pitresiduals
-      - qresiduals
-      - newresponse
+  - title: "Additional methods"
+    contents:
+      - crps.Beta
