@@ -1,5 +1,3 @@
-## proscore(object, newdata = ..., na.action = ..., type = "crps")
-
 #' Methods for Evaluating the CRPS of Various Distributions
 #'
 #' Methods to the \code{\link[scoringRules]{crps}} generic function from
