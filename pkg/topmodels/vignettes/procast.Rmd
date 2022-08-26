@@ -9,8 +9,8 @@ bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Probabilistic Forecasting Infrastructure}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteDepends{topmodels,distributions3}
-  %\VignetteKeywords{FIXME}
+  %\VignetteDepends{topmodels,distributions3,crch}
+  %\VignetteKeywords{probabilistic forecasting, scoring rules, probability distributions, quantiles, simulation}
   %\VignettePackage{topmodels}
 ---
 
@@ -36,17 +36,245 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 ```{r preliminaries, echo = FALSE, message = FALSE}
 library("topmodels")
 library("distributions3")
+library("crch")
 options(digits = 4)
 knitr::opts_chunk$set(fig.align = "center")
 ```
 
 ## Overview
 
-FIXME:
+The functionality provided by the `topmodels` package can be broadly placed into three groups:
 
-`prodist()` in `distributions3`?
+1. _Numeric quantities:_ Functions which, based on fitted model objects
+  (like `lm`, `glm`, etc.), compute quantities of interest, such as predicted probabilities, quantiles,
+  residuals, etc.
+2. _Visualizations:_ Functions which can help assess goodness of fit for fitted model objects, leveraging
+  the numeric quantities from above.
+3. _Under the hood:_ Functions which can extract/predict probability distributions as proper S3 objects
+  and provide standard methods for working with these distributions.
+  
+The S3 framework for probability distributions (3. above) is actually set up in the `distributions3` package
+that `topmodels` builds upon. Actually, all numeric and graphical functions (1. and 2. above) have "smart"
+default methods. This means that _if necessary_ methods can be defined for them but all the default methods
+work out of the box if the `distributions3` functionality from 3. is provided. The table below shows
+all of the functions that become directly available when interfacing the `distributions3` infrastructure.
 
-`procast()` generic and methods
+
+| Function             | Description                                                                    |
+|:---------------------|:-------------------------------------------------------------------------------|
+| _Numeric quantities_ |                                                                                |
+| `procast()`          | Probabilistic forecats (probabilities, quantiles, etc.) based on model objects |
+| `proscore()`         | Evaluate scoring rules for procasts                                            |
+| `pitresiduals()`     | Probability integral transform (PIT) residuals                                 |
+| `qresiduals()`       | (Randomized) quantile residuals                                                |
+| _Visualizations_     |                                                                                |
+| `pithist()`          | PIT histograms                                                                 |
+| `qqrplot()`          | Q-Q plots for quantile residuals                                               |
+| `wormplot()`         | Worm plots for quantile residuals                                              |
+| `rootogram()`        | Rootograms of observed and fitted frequencies                                  |
+| `reliagram()`        | (Extended) reliability diagram                                                 |
+| _Under the hood_     |                                                                                |
+| `prodist()`          | Fitted and predicated probability distributions based on model objects         |
+| `Normal()`,          | Probability distribution objects                                               |
+| `Poisson()`, ...     | With methods `pdf()`, `cdf()`, `quantile()`, `mean()`, ...                     |
+
+
+Thus, to connect a new class of models to the `topmodels` tools the following building blocks need to be
+provided:
+
+a. A class with all necessary methods for the probability distribution of the response variable.
+b. A `prodist()` method for the model object, which typically first predicts the parameters and then
+  sets up the distribution object from a.
+  
+Below we illustrate both steps by setting up a so-called "Tobit" model. This is a model with a normally-distributed
+response, left-censored at zero, which can in R be fitted with the `crch()` function from the package
+of the same name (among other packages). For illustration we first set up a new `Tobit()` distributions object
+(which is a special case of the `CensoredNormal()` class provided in `crch`). Subsequently, we add a
+`prodist()` method for `crch` objects.
+
+
+
+## Adding a new distribution
+
+Implementing a new distribution based on the provided utility functions
+Illustration: Tobit distribution
+Note: Tobit() is really just a copy of Normal() with a different class/distribution name
+
+
+Generator function for the distribution object.
+
+```{r}
+Tobit <- function(mu = 0, sigma = 1) {
+  n <- c(length(mu), length(sigma))
+  stopifnot("parameter lengths do not match (only scalars are allowed to be recycled)" =
+    all(n %in% c(1L, max(n))))
+  d <- data.frame(mu = mu, sigma = sigma)
+  class(d) <- c("Tobit", "distribution")
+  return(d)
+}
+```
+
+
+Set up a vector `Y` containing three Tobit distributions:
+
+```{r}
+Y <- Tobit(mu = 1:3, sigma = c(1, 1, 2))
+Y
+```
+
+Extract the underlying parameters:
+
+```{r}
+as.matrix(Y)
+```
+
+Extractor functions for moments of the distribution include
+`mean()`, `variance()`, `skewness()`, `kurtosis()`.
+These can be typically be defined as functions of the list of parameters.
+
+```
+mean.Tobit <- function(x, ...) {
+  m <- x$mu * pnorm(x$mu/x$sigma) + x$sigma * dnorm(x$mu/x$sigma)
+  setNames(m, names(x))
+}
+```
+
+Analogously for other moments, see `distributions3:::variance.Normal` etc.
+
+```{r}
+mean(Y)
+```
+
+The `support()` method should return a matrix of `"min"` and `"max"` for the
+distribution. The `make_support()` function helps to set the right names and
+dimension.
+
+```{r}
+support.Tobit <- function(d, drop = TRUE, ...) {
+  min <- rep(0, length(d))
+  max <- rep(Inf, length(d))
+  make_support(min, max, d, drop = drop)
+}
+support(Y)
+```
+
+
+Evaluating certain functions associated with the distribution, e.g.,
+`pdf()`, `log_pdf()`, `cdf()`, `quantile()`, `random()`, etc. The `apply_dpqr()`
+function helps to call the typical `d`/`p`/`q`/`r` functions (like `dnorm`,
+`pnorm`, etc.) and set suitable names and dimension.
+
+```{r}
+cdf.Tobit <- function(d, x, drop = TRUE, elementwise = NULL, lower.tail = TRUE, log.p = FALSE, ...) {
+  FUN <- function(at, d) {
+    p <- pnorm(at, mean = d$mu, sd = d$sigma, lower.tail = lower.tail, log.p = log.p)
+    p[rep_len(at, length(p)) < 0] <- if(lower.tail) {
+      if(log.p) -Inf else 0
+    } else {
+      if(log.p) 0 else 1
+    }
+    p
+  }
+  apply_dpqr(d = d, FUN = FUN, at = x, type = "probability", elementwise = elementwise, drop = drop)
+}
+```
+
+Evaluate all distribution functions at the same argument (returns vector):
+
+```{r}
+cdf(Y, 0)
+```
+
+Evaluate all distribution functions at several arguments (returns matrix):
+
+```{r}
+cdf(Y, c(0, 5))
+```
+
+Evaluate each distribution function at a different argument (returns vector):
+
+
+```{r}
+cdf(Y, 2:0)
+```
+
+Force evaluation of each distribution function at a different argument (returns vector)
+or at all arguments (returns matrix):
+
+
+```{r}
+cdf(Y, 2:0, elementwise = TRUE)
+cdf(Y, 2:0, elementwise = FALSE)
+```
+
+Drawing `random()` samples also uses `apply_dpqr()` with the argument
+`n` assured to be a positive integer.
+
+
+```{r}
+random.Tobit <- function(x, n = 1L, drop = TRUE, ...) {
+  n <- make_positive_integer(n)
+  if (n == 0L) {
+    return(numeric(0L))
+  }
+  FUN <- function(at, d) {
+    y <- rnorm(n = at, mean = d$mu, sd = d$sigma)
+    y[y < 0] <- 0
+    y
+  }
+  apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
+}
+```
+
+One random sample for each distribution (returns vector):
+Several random samples for each distribution (returns matrix):
+
+```{r}
+random(Y, 1)
+random(Y, 3)
+```
+
+For further analogous methods see the `Normal()` distribution provided
+in `distributions3` or the `CensoredNormal()` distribution in `crch`.
+
+```{r}
+methods(class = "CensoredNormal")
+```
+
+## Adding a new model
+
+location and scale parameters
+
+distributions3 object
+
+```{r}
+prodist.crch <- function(object, newdata = NULL, na.action = na.pass, ...) {
+  par <- predict(object, newdata = newdata, na.action = na.action, type = "parameter", ...)
+  Tobit(mu = setNames(par$location, rownames(par)), sigma = par$scale)
+}
+```
+
+```{r}
+data("RainIbk", package = "crch")
+RainIbk <- sqrt(RainIbk)
+RainIbk$ensmean <- apply(RainIbk[, grep('^rainfc', names(RainIbk))], 1, mean)
+RainIbk$enssd   <- apply(RainIbk[, grep('^rainfc', names(RainIbk))], 1, sd)
+RainIbk <- subset(RainIbk, enssd > 0)
+```
+
+```{r}
+library("crch")
+m <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0)
+```
+
+```{r}
+RainIbk2 <- head(RainIbk, 2)
+prodist(m, newdata = RainIbk2)
+```
+
+```{r}
+procast(m, newdata = RainIbk2, type = "probability", at = 0)
+```
 
 ## References
 
