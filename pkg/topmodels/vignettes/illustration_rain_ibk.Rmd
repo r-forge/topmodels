@@ -68,7 +68,6 @@ variation in the ensemble are omitted:
 
 ```{r crch data}
 data("RainIbk", package = "crch")
-
 RainIbk <- sqrt(RainIbk)
 RainIbk$ensmean <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, mean)
 RainIbk$enssd <- apply(RainIbk[,grep('^rainfc',names(RainIbk))], 1, sd)
