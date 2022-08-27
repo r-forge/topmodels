@@ -72,7 +72,7 @@ all of the functions that become directly available when interfacing the `distri
 | `qqrplot()`          | Q-Q plots for quantile residuals                                               |
 | `wormplot()`         | Worm plots for quantile residuals                                              |
 | `rootogram()`        | Rootograms of observed and fitted frequencies                                  |
-| `reliagram()`        | (Extended) reliability diagram                                                 |
+| `reliagram()`        | (Extended) reliability diagrams                                                |
 | _Under the hood_     |                                                                                |
 | `prodist()`          | Fitted and predicated probability distributions based on model objects         |
 | `Normal()`,          | Probability distribution objects                                               |
@@ -96,12 +96,19 @@ of the same name (among other packages). For illustration we first set up a new 
 
 ## Adding a new distribution
 
-Implementing a new distribution based on the provided utility functions
-Illustration: Tobit distribution
-Note: Tobit() is really just a copy of Normal() with a different class/distribution name
+To illustrate how to set up a `distributions3` constructor function, we employ the "Tobit" model, i.e.,
+a normal distribution, left-censored at zero. Note that in practice we could just use the `CensoredNormal()`
+distribution provided by the `crch()` package (with arbitrary left and/or right censoring) as well as the
+underlying `dcnorm()`, `pcnorm()`, `qcnorm()`, and `rcnorm()` functions. However, here we avoid doing
+so and set up the `Tobit()` class constructor and accompanying methods from scratch, just for illustration.
 
 
-Generator function for the distribution object.
+### Class constructor
+
+First, the constructor (or generator) function for the distribution object should set up a data frame,
+containing the distribution's parameters, with a custom class `"Tobit"` inheriting from `"distribution"`.
+In case of the Tobit distribution, the parameters are the mean `mu` $= \mu$ and standard deviation
+`sigma` $= \sigma$ of the underlying uncensored normal distribution.
 
 ```{r}
 Tobit <- function(mu = 0, sigma = 1) {
@@ -114,19 +121,43 @@ Tobit <- function(mu = 0, sigma = 1) {
 }
 ```
 
-
-Set up a vector `Y` containing three Tobit distributions:
+This is already sufficient for setting up a vector `Y` containing three different Tobit distributions:
 
 ```{r}
 Y <- Tobit(mu = 1:3, sigma = c(1, 1, 2))
 Y
 ```
 
-Extract the underlying parameters:
+Printing, subsetting, and some coercion functions already work due to suitable, flexible methods for
+`"distribution"` objects in general.
 
 ```{r}
+length(Y)
+Y[-2]
 as.matrix(Y)
 ```
+
+
+### Methods
+
+| Function             | Package          | Description                                                                          |
+|:---------------------|:-----------------|:-------------------------------------------------------------------------------------|
+| _Distributional_     |                  |                                                                                      |
+| `pdf()`              | `distributions3` | Probability density function (or probability mass function, typically via `ddist()`) |
+| `log_pdf()`          | `distributions3` | Log-density (or log-likelihood, typically via `ddist(..., log = TRUE)`)              |
+| `cdf()`              | `distributions3` | Cumulative density function (typically via `pdist()`)                                |
+| `quantile()`         | `stats`          | Compute quantiles (typically via `qdist()`)                                          |
+| `random()`           | `distributions3` | Simulate random samples (typically via `rdist()`)                                    |
+| `crps()`             | `scoringRules`   | (Continuous) ranked probability scored (typically via `crps_dist()`)                 |
+| _Moments_            |                  |                                                                                      |
+| `mean()`             | `base`           | Expectation                                                                          |
+| `variance()`         | `distributions3` | Variance                                                                             |
+| `skewness()`         | `distributions3` | Skewness                                                                             |
+| `kurtosis()`         | `distributions3` | Excess kurtosis                                                                      |
+| _Other_              |                  |                                                                                      |
+| `support()`          | `distributions3` | Maximum and minimum of the support of the probability distribution                   |
+
+
 
 Extractor functions for moments of the distribution include
 `mean()`, `variance()`, `skewness()`, `kurtosis()`.
@@ -144,20 +175,6 @@ Analogously for other moments, see `distributions3:::variance.Normal` etc.
 ```{r}
 mean(Y)
 ```
-
-The `support()` method should return a matrix of `"min"` and `"max"` for the
-distribution. The `make_support()` function helps to set the right names and
-dimension.
-
-```{r}
-support.Tobit <- function(d, drop = TRUE, ...) {
-  min <- rep(0, length(d))
-  max <- rep(Inf, length(d))
-  make_support(min, max, d, drop = drop)
-}
-support(Y)
-```
-
 
 Evaluating certain functions associated with the distribution, e.g.,
 `pdf()`, `log_pdf()`, `cdf()`, `quantile()`, `random()`, etc. The `apply_dpqr()`
@@ -207,35 +224,6 @@ cdf(Y, 2:0, elementwise = TRUE)
 cdf(Y, 2:0, elementwise = FALSE)
 ```
 
-Drawing `random()` samples also uses `apply_dpqr()` with the argument
-`n` assured to be a positive integer.
-
-
-```{r}
-random.Tobit <- function(x, n = 1L, drop = TRUE, ...) {
-  n <- make_positive_integer(n)
-  if (n == 0L) {
-    return(numeric(0L))
-  }
-  FUN <- function(at, d) {
-    y <- rnorm(n = at, mean = d$mu, sd = d$sigma)
-    y[y < 0] <- 0
-    y
-  }
-  apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
-}
-```
-
-One random sample for each distribution (returns vector):
-Several random samples for each distribution (returns matrix):
-
-```{r}
-random(Y, 1)
-random(Y, 3)
-```
-
-For further analogous methods see the `Normal()` distribution provided
-in `distributions3` or the `CensoredNormal()` distribution in `crch`.
 
 ```{r}
 methods(class = "CensoredNormal")
@@ -275,6 +263,55 @@ prodist(m, newdata = RainIbk2)
 ```{r}
 procast(m, newdata = RainIbk2, type = "probability", at = 0)
 ```
+
+
+## Further details
+
+Drawing `random()` samples also uses `apply_dpqr()` with the argument
+`n` assured to be a positive integer.
+
+```{r}
+random.Tobit <- function(x, n = 1L, drop = TRUE, ...) {
+  n <- make_positive_integer(n)
+  if (n == 0L) {
+    return(numeric(0L))
+  }
+  FUN <- function(at, d) {
+    y <- rnorm(n = at, mean = d$mu, sd = d$sigma)
+    y[y < 0] <- 0
+    y
+  }
+  apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
+}
+```
+
+One random sample for each distribution (returns vector):
+Several random samples for each distribution (returns matrix):
+
+```{r}
+random(Y, 1)
+random(Y, 3)
+```
+
+For further analogous methods see the `Normal()` distribution provided
+in `distributions3` or the `CensoredNormal()` distribution in `crch`.
+
+
+The `support()` method should return a matrix of `"min"` and `"max"` for the
+distribution. The `make_support()` function helps to set the right names and
+dimension.
+
+```{r}
+support.Tobit <- function(d, drop = TRUE, ...) {
+  min <- rep(0, length(d))
+  max <- rep(Inf, length(d))
+  make_support(min, max, d, drop = drop)
+}
+support(Y)
+```
+
+
+
 
 ## References
 
