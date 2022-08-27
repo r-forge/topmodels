@@ -78,6 +78,9 @@
     <li>
       <a href="../articles/implementation.html">Implementation Overview</a>
     </li>
+    <li>
+      <a href="../articles/procast.html">Probabilistic Forecasting Infrastructure</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -132,13 +135,503 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 </script><div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>FIXME:</p>
-<p><code><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist()</a></code> in <code>distributions3</code>?</p>
-<p><code><a href="../reference/procast.html">procast()</a></code> generic and methods</p>
+<p>The functionality provided by the <code>topmodels</code> package can
+be broadly placed into three groups:</p>
+<ol style="list-style-type: decimal">
+<li>
+<em>Numeric quantities:</em> Functions which, based on fitted model
+objects (like <code>lm</code>, <code>glm</code>, etc.), compute
+quantities of interest, such as predicted probabilities, quantiles,
+residuals, etc.</li>
+<li>
+<em>Visualizations:</em> Functions which can help assess goodness of
+fit for fitted model objects, leveraging the numeric quantities from
+above.</li>
+<li>
+<em>Under the hood:</em> Functions which can extract/predict
+probability distributions as proper S3 objects and provide standard
+methods for working with these distributions.</li>
+</ol>
+<p>The S3 framework for probability distributions (3. above) is actually
+set up in the <code>distributions3</code> package that
+<code>topmodels</code> builds upon. Actually, all numeric and graphical
+functions (1. and 2. above) have “smart” default methods. This means
+that <em>if necessary</em> methods can be defined for them but all the
+default methods work out of the box if the <code>distributions3</code>
+functionality from 3. is provided. The table below shows all of the
+functions that become directly available when interfacing the
+<code>distributions3</code> infrastructure.</p>
+<table class="table">
+<colgroup>
+<col width="21%">
+<col width="78%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Function</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><em>Numeric quantities</em></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/procast.html">procast()</a></code></td>
+<td align="left">Probabilistic forecats (probabilities, quantiles, etc.)
+based on model objects</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/proscore.html">proscore()</a></code></td>
+<td align="left">Evaluate scoring rules for procasts</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/pitresiduals.html">pitresiduals()</a></code></td>
+<td align="left">Probability integral transform (PIT) residuals</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/qresiduals.html">qresiduals()</a></code></td>
+<td align="left">(Randomized) quantile residuals</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Visualizations</em></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/pithist.html">pithist()</a></code></td>
+<td align="left">PIT histograms</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/qqrplot.html">qqrplot()</a></code></td>
+<td align="left">Q-Q plots for quantile residuals</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/wormplot.html">wormplot()</a></code></td>
+<td align="left">Worm plots for quantile residuals</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/rootogram.html">rootogram()</a></code></td>
+<td align="left">Rootograms of observed and fitted frequencies</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/reliagram.html">reliagram()</a></code></td>
+<td align="left">(Extended) reliability diagrams</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Under the hood</em></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist()</a></code></td>
+<td align="left">Fitted and predicated probability distributions based
+on model objects</td>
+</tr>
+<tr class="even">
+<td align="left">
+<code><a href="https://alexpghayes.github.io/distributions3/reference/Normal.html" class="external-link">Normal()</a></code>,</td>
+<td align="left">Probability distribution objects</td>
+</tr>
+<tr class="odd">
+<td align="left">
+<code><a href="https://alexpghayes.github.io/distributions3/reference/Poisson.html" class="external-link">Poisson()</a></code>, …</td>
+<td align="left">With methods <code><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">pdf()</a></code>, <code><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf()</a></code>,
+<code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile()</a></code>, <code><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean()</a></code>, …</td>
+</tr>
+</tbody>
+</table>
+<p>Thus, to connect a new class of models to the <code>topmodels</code>
+tools the following building blocks need to be provided:</p>
+<ol style="list-style-type: lower-alpha">
+<li>A class with all necessary methods for the probability distribution
+of the response variable.</li>
+<li>A <code><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist()</a></code> method for the model object, which
+typically first predicts the parameters and then sets up the
+distribution object from a.</li>
+</ol>
+<p>Below we illustrate both steps by setting up a so-called “Tobit”
+model <span class="citation">(Tobin 1958)</span>. This is a model with a
+normally-distributed response, left-censored at zero, which can in R be
+fitted with the <code><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch()</a></code> function <span class="citation">(Messner, Mayr, and Zeileis 2016)</span> from the
+package of the same name (among other packages). For illustration we
+first set up a new <code>Tobit()</code> distributions object (which is a
+special case of the <code><a href="https://rdrr.io/pkg/crch/man/CensoredNormal.html" class="external-link">CensoredNormal()</a></code> class provided in
+<code>crch</code>). Subsequently, we add a <code><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist()</a></code> method
+for <code>crch</code> objects.</p>
 </div>
 <div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 id="adding-a-new-distribution">Adding a new distribution<a class="anchor" aria-label="anchor" href="#adding-a-new-distribution"></a>
 </h2>
+<p>To illustrate how to set up a <code>distributions3</code> constructor
+function, we employ the “Tobit” model, i.e., a normal distribution,
+left-censored at zero. Note that in practice we could just use the
+<code><a href="https://rdrr.io/pkg/crch/man/CensoredNormal.html" class="external-link">CensoredNormal()</a></code> distribution provided by the
+<code><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch()</a></code> package (with arbitrary left and/or right censoring)
+as well as the underlying <code><a href="https://rdrr.io/pkg/crch/man/cnorm.html" class="external-link">dcnorm()</a></code>, <code><a href="https://rdrr.io/pkg/crch/man/cnorm.html" class="external-link">pcnorm()</a></code>,
+<code><a href="https://rdrr.io/pkg/crch/man/cnorm.html" class="external-link">qcnorm()</a></code>, and <code><a href="https://rdrr.io/pkg/crch/man/cnorm.html" class="external-link">rcnorm()</a></code> functions. However,
+here we avoid doing so and set up the <code>Tobit()</code> class
+constructor and accompanying methods from scratch, just for
+illustration.</p>
+<div class="section level3">
+<h3 id="class-constructor">Class constructor<a class="anchor" aria-label="anchor" href="#class-constructor"></a>
+</h3>
+<p>First, the constructor (or generator) function for the distribution
+object should set up a data frame, containing the distribution’s
+parameters, with a custom class <code>"Tobit"</code> inheriting from
+<code>"distribution"</code>. In case of the Tobit distribution, the
+parameters are the mean <code>mu</code> <span class="math inline">\(=
+\mu\)</span> and standard deviation <code>sigma</code> <span class="math inline">\(= \sigma\)</span> of the underlying uncensored
+normal distribution.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">Tobit</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mu</span> <span class="op">=</span> <span class="fl">0</span>, <span class="va">sigma</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mu</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sigma</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="st">"parameter lengths do not match (only scalars are allowed to be recycled)"</span> <span class="op">=</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">n</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1L</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>mu <span class="op">=</span> <span class="va">mu</span>, sigma <span class="op">=</span> <span class="va">sigma</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tobit"</span>, <span class="st">"distribution"</span><span class="op">)</span>
+  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
+<p>This is already sufficient for setting up a vector <code>Y</code>
+containing three different Tobit distributions:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu">Tobit</span><span class="op">(</span>mu <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, sigma <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>
+<span class="va">Y</span></code></pre></div>
+<pre><code><span class="co">## [1] "Tobit distribution (mu = 1, sigma = 1)"</span>
+<span class="co">## [2] "Tobit distribution (mu = 2, sigma = 1)"</span>
+<span class="co">## [3] "Tobit distribution (mu = 3, sigma = 4)"</span></code></pre>
+<p>Printing, subsetting, and some coercion functions already work due to
+suitable, flexible methods for <code>"distribution"</code> objects in
+general.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 3</span></code></pre>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">Y</span><span class="op">[</span><span class="op">-</span><span class="fl">2</span><span class="op">]</span></code></pre></div>
+<pre><code><span class="co">## [1] "Tobit distribution (mu = 1, sigma = 1)"</span>
+<span class="co">## [2] "Tobit distribution (mu = 3, sigma = 4)"</span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##      mu sigma</span>
+<span class="co">## [1,]  1     1</span>
+<span class="co">## [2,]  2     1</span>
+<span class="co">## [3,]  3     4</span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a>
+</h3>
+<p>Having constructed a distributions object like the
+<code>"Tobit"</code> object <code>Y</code> above, the next step is to
+perform standard tasks on it, such as computing densities,
+probabilities, moments, etc. While in base R the familiar functions of
+type <code>ddist()</code> (density), <code>pdist()</code> (cumulative
+probability), <code>qdist()</code> (quantile), and <code>rdist()</code>
+(random numbers) are typically used (e.g., where <code>dist</code> =
+<code>norm</code> or <code>pois</code> etc.), the
+<code>distributions3</code> employs an object-oriented approach. Thus,
+rather than having the specification of the distribution as part of the
+function name, it is captured in the class of the object. Based on that
+suitable generic functions like <code><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">pdf()</a></code> (density),
+<code><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf()</a></code> (cumulative probability), etc. can be provided for
+each distribution class. See the table below for an overview of generic
+functions and their purpose.</p>
+<table class="table">
+<colgroup>
+<col width="17%">
+<col width="14%">
+<col width="68%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Function</th>
+<th align="left">Package</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><em>Distributional</em></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">pdf()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Probability density function (or probability mass
+function, typically via <code>ddist()</code>)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">log_pdf()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Log-density (or log-likelihood, typically via
+<code>ddist(..., log = TRUE)</code>)</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Cumulative distribution function (typically via
+<code>pdist()</code>)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile()</a></code></td>
+<td align="left"><code>stats</code></td>
+<td align="left">Compute quantiles (typically via
+<code>qdist()</code>)</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/random.html" class="external-link">random()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Simulate random samples (typically via
+<code>rdist()</code>)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="https://rdrr.io/pkg/scoringRules/man/scores.html" class="external-link">crps()</a></code></td>
+<td align="left"><code>scoringRules</code></td>
+<td align="left">(Continuous) ranked probability scored (typically via
+<code>crps_dist()</code>)</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Moments</em></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean()</a></code></td>
+<td align="left"><code>base</code></td>
+<td align="left">Expectation</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/variance.html" class="external-link">variance()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Variance</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/variance.html" class="external-link">skewness()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Skewness</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/variance.html" class="external-link">kurtosis()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Excess kurtosis</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>Other</em></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="https://alexpghayes.github.io/distributions3/reference/support.html" class="external-link">support()</a></code></td>
+<td align="left"><code>distributions3</code></td>
+<td align="left">Maximum and minimum of the support of the probability
+distribution</td>
+</tr>
+</tbody>
+</table>
+<p>In the following we just show how the <code><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean()</a></code> and the
+<code><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf()</a></code> method can be set up and applied. Some further
+details are provided at the end of this section, see also the underlying
+source code in the packages.</p>
+<p>First, the extractor functions for moments of the distribution can be
+typically be defined as functions of the list of parameters stored in
+the object:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">mean.Tobit</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">m</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">$</span><span class="va">mu</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">pnorm</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">mu</span><span class="op">/</span><span class="va">x</span><span class="op">$</span><span class="va">sigma</span><span class="op">)</span> <span class="op">+</span> <span class="va">x</span><span class="op">$</span><span class="va">sigma</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">mu</span><span class="op">/</span><span class="va">x</span><span class="op">$</span><span class="va">sigma</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">m</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
+<p>In a Tobit distribution the expectation is that of the underlying
+uncensored normal distribution (<code>mu</code>), suitably adjusted with
+the cumulative distribution function and probability density function of
+the uncensored distribution. For the three distributions in
+<code>Y</code> this yields:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 1.083 2.008 3.525</span></code></pre>
+<p>In the first two the effect of censoring is rather small, while in
+the third distribution it is more pronounced (due to the higher
+variance).</p>
+<p>For evaluating the usual
+<code>d</code>/<code>p</code>/<code>q</code>/<code>r</code> functions in
+a standardized way, taking care of dimensions and naming etc., the
+<code>distributions3</code> package provides the auxiliary function
+<code><a href="https://alexpghayes.github.io/distributions3/reference/apply_dpqr.html" class="external-link">apply_dpqr()</a></code>:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cdf.Tobit</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span>, <span class="va">x</span>, <span class="va">drop</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">elementwise</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">lower.tail</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">log.p</span> <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">FUN</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">at</span>, <span class="va">d</span><span class="op">)</span> <span class="op">{</span>
+    <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">pnorm</a></span><span class="op">(</span><span class="va">at</span>, mean <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">mu</span>, sd <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">sigma</span>, lower.tail <span class="op">=</span> <span class="va">lower.tail</span>, log.p <span class="op">=</span> <span class="va">log.p</span><span class="op">)</span>
+    <span class="va">p</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep_len</a></span><span class="op">(</span><span class="va">at</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="kw">if</span><span class="op">(</span><span class="va">lower.tail</span><span class="op">)</span> <span class="op">{</span>
+      <span class="kw">if</span><span class="op">(</span><span class="va">log.p</span><span class="op">)</span> <span class="op">-</span><span class="cn">Inf</span> <span class="kw">else</span> <span class="fl">0</span>
+    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+      <span class="kw">if</span><span class="op">(</span><span class="va">log.p</span><span class="op">)</span> <span class="fl">0</span> <span class="kw">else</span> <span class="fl">1</span>
+    <span class="op">}</span>
+    <span class="va">p</span>
+  <span class="op">}</span>
+  <span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/apply_dpqr.html" class="external-link">apply_dpqr</a></span><span class="op">(</span>d <span class="op">=</span> <span class="va">d</span>, FUN <span class="op">=</span> <span class="va">FUN</span>, at <span class="op">=</span> <span class="va">x</span>, type <span class="op">=</span> <span class="st">"probability"</span>, elementwise <span class="op">=</span> <span class="va">elementwise</span>, drop <span class="op">=</span> <span class="va">drop</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
+<p>This can be used to evaluate all distribution functions at the same
+argument (returning a vector by default):</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">0</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 0.15866 0.02275 0.22663</span></code></pre>
+<p>Or to evaluate all distribution functions at several arguments
+(returning a matrix by default):</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##          p_0    p_5</span>
+<span class="co">## [1,] 0.15866 1.0000</span>
+<span class="co">## [2,] 0.02275 0.9987</span>
+<span class="co">## [3,] 0.22663 0.6915</span></code></pre>
+<p>Finally, if the distribution and the argument have the same length,
+the default is to do the evaluating elementwise (always returning a
+vector):</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">0</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 0.8413 0.1587 0.2266</span></code></pre>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">0</span>, elementwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 0.8413 0.1587 0.2266</span></code></pre>
+<p>But the evaluation can also be forced to be carried out for each
+combination of distribution and argument (always returning a
+matrix):</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">0</span>, elementwise <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##         p_2    p_1     p_0</span>
+<span class="co">## [1,] 0.8413 0.5000 0.15866</span>
+<span class="co">## [2,] 0.5000 0.1587 0.02275</span>
+<span class="co">## [3,] 0.4013 0.3085 0.22663</span></code></pre>
+<p>These two additional methods are sufficient for the following
+illustrations. More details are provided below at the end of this
+section.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="adding-a-new-model">Adding a new model<a class="anchor" aria-label="anchor" href="#adding-a-new-model"></a>
+</h2>
+<p>When setting up the procasting infrastructure, the heavy lifting is
+done with the creation of a suitable distribution class and methods.
+Interfacing a new model requires only a new <code><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist()</a></code>
+method for setting up the probability distribution object based on a
+fitted model (and potentially a <code>newdata</code> set). The idea is
+to extract or predict the distribution parameters (<code>mu</code> and
+<code>sigma</code> in case of the Tobit distribution) and subsequently
+call the distribution class constructor (preserving observation names,
+if any).</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">prodist.crch</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">na.action</span> <span class="op">=</span> <span class="va">na.pass</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">par</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">object</span>, newdata <span class="op">=</span> <span class="va">newdata</span>, na.action <span class="op">=</span> <span class="va">na.action</span>, type <span class="op">=</span> <span class="st">"parameter"</span>, <span class="va">...</span><span class="op">)</span>
+  <span class="fu">Tobit</span><span class="op">(</span>mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">par</span><span class="op">$</span><span class="va">location</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">par</span><span class="op">)</span><span class="op">)</span>, sigma <span class="op">=</span> <span class="va">par</span><span class="op">$</span><span class="va">scale</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
+<p>To illustrate how this can be used in practice we fit a
+heteroscedastic Tobit model using the <code><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch()</a></code> function to a
+precipiation dataset from Innsbruck, Austria. As precipitation is often
+zero and never can become negative, a Tobit model is typically a good
+starting point for probabilistic modeling and forecasting. (See FIXME
+for more details.)</p>
+<p>The data can be preprocessed in the following way:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"RainIbk"</span>, package <span class="op">=</span> <span class="st">"crch"</span><span class="op">)</span>
+<span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span>
+<span class="va">RainIbk</span><span class="op">$</span><span class="va">ensmean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span>
+<span class="va">RainIbk</span><span class="op">$</span><span class="va">enssd</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span>
+<span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">RainIbk</span>, <span class="va">enssd</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></code></pre></div>
+<p>And the model is fitted via:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"crch"</span><span class="op">)</span>
+<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></code></pre></div>
+<p>Then, the predicted Tobit distributions for the first two
+observations can be obtained with the <code><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist()</a></code> method
+obtained above:</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">RainIbk2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">RainIbk</span>, <span class="fl">2</span><span class="op">)</span>
+<span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">RainIbk2</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##                                      2000-01-04 </span>
+<span class="co">## "Tobit distribution (mu = 1.205, sigma = 2.16)" </span>
+<span class="co">##                                      2000-01-05 </span>
+<span class="co">## "Tobit distribution (mu = 0.565, sigma = 1.98)"</span></code></pre>
+<p>Then, the <code><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean()</a></code> or <code><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf()</a></code> method could be
+applied to this distribution vector. Alternatively, instead of calling
+these methods “by hand”, we can use the convenience
+<code><a href="../reference/procast.html">procast()</a></code> method to do so:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/procast.html">procast</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">RainIbk2</span>, type <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##             mean</span>
+<span class="co">## 2000-01-04 1.597</span>
+<span class="co">## 2000-01-05 1.105</span></code></pre>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/procast.html">procast</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">RainIbk2</span>, type <span class="op">=</span> <span class="st">"cdf"</span>, at <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##            probability</span>
+<span class="co">## 2000-01-04      0.2888</span>
+<span class="co">## 2000-01-05      0.3878</span></code></pre>
+<p>Instead of <code>"mean"</code> and <code>"cdf"</code>, we could also
+use the aliases <code>"response"</code> and <code>"probability"</code>,
+respectively.</p>
+<p>Similarly, other functions such as <code><a href="../reference/proscore.html">proscore()</a></code>,
+<code><a href="../reference/qresiduals.html">qresiduals()</a></code>, <code><a href="../reference/pithist.html">pithist()</a></code>, or
+<code><a href="../reference/rootogram.html">rootogram()</a></code> can be used once all of the methods from the
+table above are defined.</p>
+</div>
+<div class="section level2">
+<h2 id="further-details">Further details<a class="anchor" aria-label="anchor" href="#further-details"></a>
+</h2>
+<p>Most of the remaining methods for the distribution objects follow the
+same structure as the <code><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean()</a></code> and <code><a href="https://alexpghayes.github.io/distributions3/reference/cdf.html" class="external-link">cdf()</a></code> method
+above, respectively. However, the <code><a href="https://alexpghayes.github.io/distributions3/reference/random.html" class="external-link">random()</a></code> and the
+<code><a href="https://alexpghayes.github.io/distributions3/reference/support.html" class="external-link">support()</a></code> methods are slightly different. Hence, these are
+also briefly illustrated in the following.</p>
+<p>Drawing <code><a href="https://alexpghayes.github.io/distributions3/reference/random.html" class="external-link">random()</a></code> samples also uses
+<code><a href="https://alexpghayes.github.io/distributions3/reference/apply_dpqr.html" class="external-link">apply_dpqr()</a></code> with the argument <code>n</code> which is
+assured to always be a positive integer.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">random.Tobit</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">n</span> <span class="op">=</span> <span class="fl">1L</span>, <span class="va">drop</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/apply_dpqr.html" class="external-link">make_positive_integer</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>
+  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">0L</span><span class="op">)</span> <span class="op">{</span>
+    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span><span class="op">)</span>
+  <span class="op">}</span>
+  <span class="va">FUN</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">at</span>, <span class="va">d</span><span class="op">)</span> <span class="op">{</span>
+    <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">at</span>, mean <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">mu</span>, sd <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">sigma</span><span class="op">)</span>
+    <span class="va">y</span><span class="op">[</span><span class="va">y</span> <span class="op">&lt;</span> <span class="fl">0</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span>
+    <span class="va">y</span>
+  <span class="op">}</span>
+  <span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/apply_dpqr.html" class="external-link">apply_dpqr</a></span><span class="op">(</span>d <span class="op">=</span> <span class="va">x</span>, FUN <span class="op">=</span> <span class="va">FUN</span>, at <span class="op">=</span> <span class="va">n</span>, type <span class="op">=</span> <span class="st">"random"</span>, drop <span class="op">=</span> <span class="va">drop</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
+<p>If <code>drop = TRUE</code> (the default), then one random sample for
+each distribution yields a vector, while several random samples for each
+distribution yields a matrix:</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/random.html" class="external-link">random</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 1.837 1.198 6.466</span></code></pre>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/random.html" class="external-link">random</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">3</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##         r_1   r_2   r_3</span>
+<span class="co">## [1,] 0.9168 2.305 3.712</span>
+<span class="co">## [2,] 0.7647 1.219 1.413</span>
+<span class="co">## [3,] 0.0000 5.057 2.435</span></code></pre>
+<p>The <code><a href="https://alexpghayes.github.io/distributions3/reference/support.html" class="external-link">support()</a></code> method should return a matrix of
+<code>"min"</code> and <code>"max"</code> for the distribution. The
+<code><a href="https://alexpghayes.github.io/distributions3/reference/apply_dpqr.html" class="external-link">make_support()</a></code> function helps to set the right names and
+dimension.</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">support.Tobit</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span>, <span class="va">drop</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">min</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">max</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">Inf</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/apply_dpqr.html" class="external-link">make_support</a></span><span class="op">(</span><span class="va">min</span>, <span class="va">max</span>, <span class="va">d</span>, drop <span class="op">=</span> <span class="va">drop</span><span class="op">)</span>
+<span class="op">}</span>
+<span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/support.html" class="external-link">support</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##      min max</span>
+<span class="co">## [1,]   0 Inf</span>
+<span class="co">## [2,]   0 Inf</span>
+<span class="co">## [3,]   0 Inf</span></code></pre>
+</div>
+<div class="section level2 unnumbered">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Messner+Mayr+Zeileis:2016" class="csl-entry">
+Messner, Jakob W., Georg J. Mayr, and Achim Zeileis. 2016.
+<span>“Heteroscedastic Censored and Truncated Regression with <span class="nocase">crch</span>.”</span> <em>The R Journal</em> 8 (1):
+173–81. <a href="https://doi.org/10.32614/RJ-2016-012" class="external-link">https://doi.org/10.32614/RJ-2016-012</a>.
+</div>
+<div id="ref-Tobin:1958" class="csl-entry">
+Tobin, J. 1958. <span>“Estimation of Relationships for Limited Dependent
+Variables.”</span> <em>Econometrica</em> 26 (1): 24–36. <a href="https://doi.org/10.2307/1907382" class="external-link">https://doi.org/10.2307/1907382</a>.
+</div>
+</div>
 </div>
   </div>
 

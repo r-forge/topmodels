@@ -78,6 +78,9 @@
     <li>
       <a href="../articles/implementation.html">Implementation Overview</a>
     </li>
+    <li>
+      <a href="../articles/procast.html">Probabilistic Forecasting Infrastructure</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -157,7 +160,6 @@ are derived. Furthermore, events with no variation in the ensemble are
 omitted:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"RainIbk"</span>, package <span class="op">=</span> <span class="st">"crch"</span><span class="op">)</span>
-
 <span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span>
 <span class="va">RainIbk</span><span class="op">$</span><span class="va">ensmean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span>
 <span class="va">RainIbk</span><span class="op">$</span><span class="va">enssd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span>
