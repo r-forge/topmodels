@@ -28,6 +28,8 @@ navbar:
           href: articles/illustration_artificial.html
         - text: "Implementation Overview"
           href: articles/implementation.html
+        - text: "Probabilistic Forecasting Infrastructure"
+          href: articles/procast.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"

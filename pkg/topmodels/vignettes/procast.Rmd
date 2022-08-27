@@ -86,8 +86,8 @@ a. A class with all necessary methods for the probability distribution of the re
 b. A `prodist()` method for the model object, which typically first predicts the parameters and then
   sets up the distribution object from a.
   
-Below we illustrate both steps by setting up a so-called "Tobit" model. This is a model with a normally-distributed
-response, left-censored at zero, which can in R be fitted with the `crch()` function from the package
+Below we illustrate both steps by setting up a so-called "Tobit" model [@Tobin:1958]. This is a model with a normally-distributed
+response, left-censored at zero, which can in R be fitted with the `crch()` function [@Messner+Mayr+Zeileis:2016] from the package
 of the same name (among other packages). For illustration we first set up a new `Tobit()` distributions object
 (which is a special case of the `CensoredNormal()` class provided in `crch`). Subsequently, we add a
 `prodist()` method for `crch` objects.
@@ -124,7 +124,7 @@ Tobit <- function(mu = 0, sigma = 1) {
 This is already sufficient for setting up a vector `Y` containing three different Tobit distributions:
 
 ```{r}
-Y <- Tobit(mu = 1:3, sigma = c(1, 1, 2))
+Y <- Tobit(mu = 1:3, sigma = c(1, 1, 4))
 Y
 ```
 
@@ -140,12 +140,22 @@ as.matrix(Y)
 
 ### Methods
 
+Having constructed a distributions object like the `"Tobit"` object `Y` above, the next step is to
+perform standard tasks on it, such as computing densities, probabilities, moments, etc. While in
+base R the familiar functions of type `ddist()` (density), `pdist()` (cumulative probability),
+`qdist()` (quantile), and `rdist()` (random numbers) are typically used (e.g., where `dist` = `norm`
+or `pois` etc.), the `distributions3` employs an object-oriented approach. Thus, rather than having
+the specification of the distribution as part of the function name, it is captured in the class of
+the object. Based on that suitable generic functions like `pdf()` (density), `cdf()` (cumulative
+probability), etc. can be provided for each distribution class. See the table below for an overview
+of generic functions and their purpose.
+
 | Function             | Package          | Description                                                                          |
 |:---------------------|:-----------------|:-------------------------------------------------------------------------------------|
 | _Distributional_     |                  |                                                                                      |
 | `pdf()`              | `distributions3` | Probability density function (or probability mass function, typically via `ddist()`) |
 | `log_pdf()`          | `distributions3` | Log-density (or log-likelihood, typically via `ddist(..., log = TRUE)`)              |
-| `cdf()`              | `distributions3` | Cumulative density function (typically via `pdist()`)                                |
+| `cdf()`              | `distributions3` | Cumulative distribution function (typically via `pdist()`)                           |
 | `quantile()`         | `stats`          | Compute quantiles (typically via `qdist()`)                                          |
 | `random()`           | `distributions3` | Simulate random samples (typically via `rdist()`)                                    |
 | `crps()`             | `scoringRules`   | (Continuous) ranked probability scored (typically via `crps_dist()`)                 |
@@ -157,29 +167,33 @@ as.matrix(Y)
 | _Other_              |                  |                                                                                      |
 | `support()`          | `distributions3` | Maximum and minimum of the support of the probability distribution                   |
 
+In the following we just show how the `mean()` and the `cdf()` method can be set up and applied. Some further details
+are provided at the end of this section, see also the underlying source code in the packages.
 
+First, the extractor functions for moments of the distribution can be typically be defined as functions of the list of
+parameters stored in the object:
 
-Extractor functions for moments of the distribution include
-`mean()`, `variance()`, `skewness()`, `kurtosis()`.
-These can be typically be defined as functions of the list of parameters.
-
-```
+```{r}
 mean.Tobit <- function(x, ...) {
   m <- x$mu * pnorm(x$mu/x$sigma) + x$sigma * dnorm(x$mu/x$sigma)
   setNames(m, names(x))
 }
 ```
 
-Analogously for other moments, see `distributions3:::variance.Normal` etc.
+In a Tobit distribution the expectation is that of the underlying uncensored normal distribution (`mu`),
+suitably adjusted with the cumulative distribution function and probability density function of the
+uncensored distribution. For the three distributions in `Y` this yields:
 
 ```{r}
 mean(Y)
 ```
 
-Evaluating certain functions associated with the distribution, e.g.,
-`pdf()`, `log_pdf()`, `cdf()`, `quantile()`, `random()`, etc. The `apply_dpqr()`
-function helps to call the typical `d`/`p`/`q`/`r` functions (like `dnorm`,
-`pnorm`, etc.) and set suitable names and dimension.
+In the first two the effect of censoring is rather small, while in the third distribution it is more
+pronounced (due to the higher variance).
+
+For evaluating the usual `d`/`p`/`q`/`r` functions in a standardized way, taking care of dimensions
+and naming etc., the `distributions3` package provides the auxiliary function `apply_dpqr()`:
+
 
 ```{r}
 cdf.Tobit <- function(d, x, drop = TRUE, elementwise = NULL, lower.tail = TRUE, log.p = FALSE, ...) {
@@ -196,44 +210,43 @@ cdf.Tobit <- function(d, x, drop = TRUE, elementwise = NULL, lower.tail = TRUE, 
 }
 ```
 
-Evaluate all distribution functions at the same argument (returns vector):
+This can be used to evaluate all distribution functions at the same argument (returning a vector by default):
 
 ```{r}
 cdf(Y, 0)
 ```
 
-Evaluate all distribution functions at several arguments (returns matrix):
+Or to evaluate all distribution functions at several arguments (returning a matrix by default):
 
 ```{r}
 cdf(Y, c(0, 5))
 ```
 
-Evaluate each distribution function at a different argument (returns vector):
-
+Finally, if the distribution and the argument have the same length, the default is to do the evaluating
+elementwise (always returning a vector):
 
 ```{r}
 cdf(Y, 2:0)
+cdf(Y, 2:0, elementwise = TRUE)
 ```
 
-Force evaluation of each distribution function at a different argument (returns vector)
-or at all arguments (returns matrix):
-
+But the evaluation can also be forced to be carried out for each combination of distribution and argument (always returning a matrix):
 
 ```{r}
-cdf(Y, 2:0, elementwise = TRUE)
 cdf(Y, 2:0, elementwise = FALSE)
 ```
 
+These two additional methods are sufficient for the following illustrations. More details are provided below at the
+end of this section.
 
-```{r}
-methods(class = "CensoredNormal")
-```
 
 ## Adding a new model
 
-location and scale parameters
-
-distributions3 object
+When setting up the procasting infrastructure, the heavy lifting is done with the creation of a suitable
+distribution class and methods. Interfacing a new model requires only a new `prodist()` method for setting
+up the probability distribution object based on a fitted model (and potentially a `newdata` set). The idea
+is to extract or predict the distribution parameters (`mu` and `sigma` in case of the Tobit distribution)
+and subsequently call the distribution class constructor (preserving observation names, if any).
 
 ```{r}
 prodist.crch <- function(object, newdata = NULL, na.action = na.pass, ...) {
@@ -241,6 +254,13 @@ prodist.crch <- function(object, newdata = NULL, na.action = na.pass, ...) {
   Tobit(mu = setNames(par$location, rownames(par)), sigma = par$scale)
 }
 ```
+
+To illustrate how this can be used in practice we fit a heteroscedastic Tobit model using
+the `crch()` function to a precipiation dataset from Innsbruck, Austria. As precipitation
+is often zero and never can become negative, a Tobit model is typically a good starting point
+for probabilistic modeling and forecasting. (See FIXME for more details.)
+
+The data can be preprocessed in the following way:
 
 ```{r}
 data("RainIbk", package = "crch")
@@ -250,25 +270,46 @@ RainIbk$enssd   <- apply(RainIbk[, grep('^rainfc', names(RainIbk))], 1, sd)
 RainIbk <- subset(RainIbk, enssd > 0)
 ```
 
+And the model is fitted via:
+
 ```{r}
 library("crch")
 m <- crch(rain ~ ensmean | log(enssd), data = RainIbk, left = 0)
 ```
+
+Then, the predicted Tobit distributions for the first two observations can be obtained with
+the `prodist()` method obtained above:
 
 ```{r}
 RainIbk2 <- head(RainIbk, 2)
 prodist(m, newdata = RainIbk2)
 ```
 
+Then, the `mean()` or `cdf()` method could be applied to this distribution vector.
+Alternatively, instead of calling these methods "by hand", we can use the convenience
+`procast()` method to do so:
+
 ```{r}
-procast(m, newdata = RainIbk2, type = "probability", at = 0)
+procast(m, newdata = RainIbk2, type = "mean")
+procast(m, newdata = RainIbk2, type = "cdf", at = 0)
 ```
+
+Instead of `"mean"` and `"cdf"`, we could also use the aliases `"response"` and `"probability"`,
+respectively.
+
+Similarly, other functions such as `proscore()`, `qresiduals()`, `pithist()`, or `rootogram()`
+can be used once all of the methods from the table above are defined.
 
 
 ## Further details
 
-Drawing `random()` samples also uses `apply_dpqr()` with the argument
-`n` assured to be a positive integer.
+Most of the remaining methods for the distribution objects follow the same structure as
+the `mean()` and `cdf()` method above, respectively. However, the `random()` and the
+`support()` methods are slightly different. Hence, these are also briefly illustrated 
+in the following.
+
+Drawing `random()` samples also uses `apply_dpqr()` with the argument `n` which is assured
+to always be a positive integer.
 
 ```{r}
 random.Tobit <- function(x, n = 1L, drop = TRUE, ...) {
@@ -285,17 +326,13 @@ random.Tobit <- function(x, n = 1L, drop = TRUE, ...) {
 }
 ```
 
-One random sample for each distribution (returns vector):
-Several random samples for each distribution (returns matrix):
+If `drop = TRUE` (the default), then one random sample for each distribution yields a vector,
+while several random samples for each distribution yields a matrix:
 
 ```{r}
 random(Y, 1)
 random(Y, 3)
 ```
-
-For further analogous methods see the `Normal()` distribution provided
-in `distributions3` or the `CensoredNormal()` distribution in `crch`.
-
 
 The `support()` method should return a matrix of `"min"` and `"max"` for the
 distribution. The `make_support()` function helps to set the right names and
@@ -309,8 +346,6 @@ support.Tobit <- function(d, drop = TRUE, ...) {
 }
 support(Y)
 ```
-
-
 
 
 ## References
