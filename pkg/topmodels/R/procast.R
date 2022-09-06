@@ -47,7 +47,8 @@
 #' 
 #' @aliases procast procast_setup
 #' @param object a fitted model object. For the \code{default} method this
-#' needs to have a \code{\link[distributions3]{prodist}} method.
+#' needs to have a \code{\link[distributions3]{prodist}} method (or \code{object}
+#' can inherit from \code{distribution} directly).
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
 #' @param na.action function determining what should be done with missing
@@ -134,7 +135,9 @@ procast.default <- function(object, newdata = NULL, na.action = na.pass,
 
   ## FIXME: how to handle 'size' in binomial family?
   ## extract probability distribution object
-  pd <- if(is.null(newdata)) {
+  pd <- if(inherits(object, "distribution")) {
+    object
+  } else if(is.null(newdata)) {
     distributions3::prodist(object)
   } else {
     distributions3::prodist(object, newdata = newdata, na.action = na.action)
