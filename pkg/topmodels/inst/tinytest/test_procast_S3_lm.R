@@ -9,7 +9,7 @@ m <- lm(dist ~ speed, data = cars)
 
 expect_equal(
   procast(m, drop = TRUE), 
-  qnorm(0.5, m$fitted.values, sd = summary(m)$sigma)
+  qnorm(0.5, m$fitted.values, sd = sqrt(mean(residuals(m)^2)))
 )
 
 expect_equal(
@@ -19,14 +19,14 @@ expect_equal(
 
 expect_equal(
   unique(procast(m, type = "variance", drop = TRUE)),
-  summary(m)$sigma^2
+  mean(residuals(m)^2)
 )
 
 expect_equal(
   procast(m, type = "parameter"),
   data.frame(
     mu = m$fitted.values, 
-    sigma = summary(m)$sigma
+    sigma = sqrt(mean(residuals(m)^2))
   )
 )
 
@@ -35,7 +35,7 @@ expect_equal(
   dnorm(
     0.5,
     m$fitted.values, 
-    summary(m)$sigma
+    sqrt(mean(residuals(m)^2))
   )
 )
 
@@ -44,7 +44,7 @@ expect_equal(
   pnorm(
     0.5,
     m$fitted.values, 
-    summary(m)$sigma
+    sqrt(mean(residuals(m)^2))
   )
 )
 
@@ -57,7 +57,7 @@ expect_equal(
 expect_equal(
   procast(m, drop = FALSE),
   data.frame(
-    quantile = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma)
+    quantile = qnorm(0.5, m$fitted.values, sd = sqrt(mean(residuals(m)^2)))
   )
 )
 
@@ -74,7 +74,7 @@ expect_equal(
   procast(m, type = "parameter", newdata = nd),
   data.frame(
     mu = predict(m, newdata = nd), 
-    sigma = summary(m)$sigma
+    sigma = sqrt(mean(residuals(m)^2))
   )
 )
 
@@ -88,18 +88,18 @@ nd <- data.frame(speed = c(10, 15, 20))
 expect_equal(
   procast(m, at = c(0.25, 0.5, 0.75)),
   data.frame(
-    q_0.25 = qnorm(0.25, m$fitted.values, sd = summary(m)$sigma),
-    q_0.5  = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma),
-    q_0.75 = qnorm(0.75, m$fitted.values, sd = summary(m)$sigma)
+    q_0.25 = qnorm(0.25, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
+    q_0.5  = qnorm(0.50, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
+    q_0.75 = qnorm(0.75, m$fitted.values, sd = sqrt(mean(residuals(m)^2)))
   )
 )
 
 expect_equal(
   procast(m, at = rbind(c(0.25, 0.5, 0.75))),
   data.frame(
-    q_0.25 = qnorm(0.25, m$fitted.values, sd = summary(m)$sigma),
-    q_0.5  = qnorm(0.5, m$fitted.values, sd = summary(m)$sigma),
-    q_0.75 = qnorm(0.75, m$fitted.values, sd = summary(m)$sigma)
+    q_0.25 = qnorm(0.25, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
+    q_0.5  = qnorm(0.50, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
+    q_0.75 = qnorm(0.75, m$fitted.values, sd = sqrt(mean(residuals(m)^2)))
   )
 )
 
@@ -114,7 +114,7 @@ expect_equal(
   procast(m, type = "parameter", newdata = nd),
   data.frame(
     mu = predict(m, newdata = nd), 
-    sigma = summary(m)$sigma
+    sigma = sqrt(mean(residuals(m)^2))
   )
 )
 
@@ -122,6 +122,6 @@ expect_equal(
   procast(m, type = "parameter", newdata = nd, na.action = na.omit),
   data.frame(
     mu = predict(m, newdata = nd, na.action = na.omit), 
-    sigma = summary(m)$sigma
+    sigma = sqrt(mean(residuals(m)^2))
   )
 )

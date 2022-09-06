@@ -1,23 +1,18 @@
 Package: topmodels
 Title: Infrastructure for Forecasting and Assessment of Probabilistic Models
 Version: 0.3-0
-Date: 2022-08-20
-Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org",
-                    comment = c(ORCID = "0000-0003-0918-3766")),
-             person(given = "Moritz N.", family = "Lang", role = "aut", email = "moritz.n.lang@gmail.com", 
-                    comment = c(ORCID = "0000-0002-2533-9903")),
-             person(given = "Reto", family = "Stauffer", role = "aut", email = "reto.stauffer@uibk.ac.at",
-                    comment = c(ORCID = "0000-0002-3798-5507")),
-             person(given = "Christian", family = "Kleiber", role = "ctb", email = "Christian.Kleiber@unibas.ch"),
-             person(given = "Ioannis", family = "Kosmidis", role = "ctb", email = "i.kosmidis@ucl.ac.uk",
-                    comment = c(ORCID = "0000-0003-1556-0302")),
-             person(given = "Jakob", family = "Messner", role = "ctb", email = "jakob.messner@posteo.net",
-                    comment = c(ORCID = "0000-0002-1027-3673")))
+Date: 2022-09-07
+Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org", comment = c(ORCID = "0000-0003-0918-3766")),
+             person(given = "Moritz N.", family = "Lang", role = "aut", email = "moritz.n.lang@gmail.com", comment = c(ORCID = "0000-0002-2533-9903")),
+             person(given = "Reto", family = "Stauffer", role = "aut", email = "reto.stauffer@uibk.ac.at", comment = c(ORCID = "0000-0002-3798-5507")),
+             person(given = "Christian", family = "Kleiber", role = "ctb", email = "Christian.Kleiber@unibas.ch", comment = c(ORCID = "0000-0002-6781-4733")),
+             person(given = "Ioannis", family = "Kosmidis", role = "ctb", email = "i.kosmidis@ucl.ac.uk", comment = c(ORCID = "0000-0003-1556-0302")),
+             person(given = "Jakob", family = "Messner", role = "ctb", email = "jakob.messner@posteo.net", comment = c(ORCID = "0000-0002-1027-3673")))
 Depends: R (>= 3.6.0)
-Imports: graphics, grDevices, grid, stats, utils, colorspace, distributions3, ggplot2
+Imports: graphics, grDevices, grid, stats, utils, colorspace, distributions3 (>= 0.2.1), ggplot2
 Suggests: countreg, crch (>= 1.1-0), disttree, MASS, scoringRules, tibble, tidyr, tinytest
 Description: Unified infrastructure for probabilistic models and distributional regressions:
-             Probabilistic forecasting (procasting for short) in sample and out of sample of probabilities,
+             Probabilistic forecasting (procasting for short) in-sample and out-of-sample of probabilities,
              densities, quantiles, and moments. Diagnostic graphics like rootograms, PIT histograms,
 	     (randomized) quantile residual Q-Q plots, and reliagrams (reliability diagrams).
 License: GPL-2 | GPL-3

@@ -63,7 +63,8 @@ procast_setup(
 }
 \arguments{
 \item{object}{a fitted model object. For the \code{default} method this
-needs to have a \code{\link[distributions3]{prodist}} method.}
+needs to have a \code{\link[distributions3]{prodist}} method (or \code{object}
+can inherit from \code{distribution} directly).}
 
 \item{newdata}{optionally, a data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.}

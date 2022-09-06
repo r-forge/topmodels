@@ -10,7 +10,7 @@ m <- lm(dist ~ speed, data = cars)
 expect_equal(
   qresiduals(m),
   qnorm(pnorm(setNames(cars$dist, rownames(cars)),
-    mean = fitted(m), sd = summary(m)$sigma))
+    mean = fitted(m), sd = sqrt(mean(residuals(m)^2))))
 )
 
 
