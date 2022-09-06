@@ -164,8 +164,10 @@ of generic functions and their purpose.
 | `variance()`         | `distributions3` | Variance                                                                             |
 | `skewness()`         | `distributions3` | Skewness                                                                             |
 | `kurtosis()`         | `distributions3` | Excess kurtosis                                                                      |
-| _Other_              |                  |                                                                                      |
+| _Support_            |                  |                                                                                      |
 | `support()`          | `distributions3` | Maximum and minimum of the support of the probability distribution                   |
+| `is_discrete()`      | `distributions3` | Determine whether a distribution is discrete on its support                          |
+| `is_continuous()`    | `distributions3` | Determine whether a distribution is continuous on its support                        |
 
 In the following we just show how the `mean()` and the `cdf()` method can be set up and applied. Some further details
 are provided at the end of this section, see also the underlying source code in the packages.
@@ -305,7 +307,7 @@ can be used once all of the methods from the table above are defined.
 
 Most of the remaining methods for the distribution objects follow the same structure as
 the `mean()` and `cdf()` method above, respectively. However, the `random()` and the
-`support()` methods are slightly different. Hence, these are also briefly illustrated 
+support-related methods are slightly different. Hence, these are also briefly illustrated 
 in the following.
 
 Drawing `random()` samples also uses `apply_dpqr()` with the argument `n` which is assured
@@ -345,6 +347,22 @@ support.Tobit <- function(d, drop = TRUE, ...) {
   make_support(min, max, d, drop = drop)
 }
 support(Y)
+```
+
+Finally, the `is_discrete()` and `is_continuous()` methods should return `TRUE`
+for distributions that are discrete or continuous, respectively, on the entire
+support. Thus, for mixed discrete-continuous distributions like the Tobit, both
+methods should return `FALSE`:
+
+```{r}
+is_discrete.Tobit <- function(d, ...) {
+  setNames(rep.int(FALSE, length(d)), names(d))
+}
+is_continuous.Tobit <- function(d, ...) {
+  setNames(rep.int(TRUE, length(d)), names(d))
+}
+is_discrete(Y)
+is_continuous(Y)
 ```
 
 
