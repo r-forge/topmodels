@@ -917,8 +917,10 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > ## fit linear regression model with Gaussian distribution 
 > CRCH <- crch(sqrt(rain) ~ sqrtensmean, data = RainIbk, dist = "gaussian")
 > ## same as lm?
-> all.equal(coef(lm(sqrt(rain) ~ sqrtensmean, data = RainIbk)),
-+   head(coef(CRCH), -1))
+> all.equal(
++   coef(lm(sqrt(rain) ~ sqrtensmean, data = RainIbk)),
++   head(coef(CRCH), -1),
++   tol = 1e-6)
 [1] TRUE
 > 
 > ## print
@@ -1115,7 +1117,7 @@ Iteration 1/2000 parameters added 1/42Iteration 2/2000 parameters added 1/42It
 
   Selected formula:
    y ~ V2 + V3 | V4
-<environment: 0x563091b54340>
+<environment: 0x5573201528e8>
 > 
 > CRCH2 <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0 )
 > BOOST <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0,
@@ -1302,7 +1304,7 @@ detaching ‘package:lmtest’, ‘package:zoo’
 
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  4.437 0.065 4.504 0 0 
+Time elapsed:  4.647 0.056 4.702 0 0 
 > grDevices::dev.off()
 null device 
           1 
