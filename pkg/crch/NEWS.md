@@ -9,7 +9,7 @@
   densities, simulating random values, etc.
   
 * Added `prodist()` method for extracting the `distributions3` objects above
-  from fitted `crch` objects.
+  from fitted `crch` objects, either in-sample or out-of-sample.
   
 * Bug fix in the computation of the mean of censored or truncated logistic
   distributions with large (or infinite) censoring/truncation points.
