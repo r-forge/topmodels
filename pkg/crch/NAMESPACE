@@ -74,6 +74,8 @@ S3method("model.frame", "crch")
 S3method("model.matrix", "crch")
 S3method("estfun", "crch")
 S3method("crps", "crch")
+
+## methods for crch.boost
 S3method("plot", "crch.boost")
 S3method("coef", "crch.boost")
 S3method("logLik", "crch.boost")
