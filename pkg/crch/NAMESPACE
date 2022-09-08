@@ -109,6 +109,8 @@ S3method(distributions3::pdf, "CensoredNormal")
 S3method(distributions3::log_pdf, "CensoredNormal")
 S3method(distributions3::cdf, "CensoredNormal")
 S3method(distributions3::support, "CensoredNormal")
+S3method(distributions3::is_discrete, "CensoredNormal")
+S3method(distributions3::is_continuous, "CensoredNormal")
 
 ## methods for TruncatedNormal
 S3method("mean", "TruncatedNormal")
@@ -122,6 +124,8 @@ S3method(distributions3::pdf, "TruncatedNormal")
 S3method(distributions3::log_pdf, "TruncatedNormal")
 S3method(distributions3::cdf, "TruncatedNormal")
 S3method(distributions3::support, "TruncatedNormal")
+S3method(distributions3::is_discrete, "TruncatedNormal")
+S3method(distributions3::is_continuous, "TruncatedNormal")
 
 ## methods for CensoredLogistic
 S3method("mean", "CensoredLogistic")
@@ -135,6 +139,8 @@ S3method(distributions3::pdf, "CensoredLogistic")
 S3method(distributions3::log_pdf, "CensoredLogistic")
 S3method(distributions3::cdf, "CensoredLogistic")
 S3method(distributions3::support, "CensoredLogistic")
+S3method(distributions3::is_discrete, "CensoredLogistic")
+S3method(distributions3::is_continuous, "CensoredLogistic")
 
 ## methods for TruncatedLogistic
 S3method("mean", "TruncatedLogistic")
@@ -148,6 +154,8 @@ S3method(distributions3::pdf, "TruncatedLogistic")
 S3method(distributions3::log_pdf, "TruncatedLogistic")
 S3method(distributions3::cdf, "TruncatedLogistic")
 S3method(distributions3::support, "TruncatedLogistic")
+S3method(distributions3::is_discrete, "TruncatedLogistic")
+S3method(distributions3::is_continuous, "TruncatedLogistic")
 
 ## methods for CensoredStudentsT
 S3method("mean", "CensoredStudentsT")
@@ -161,6 +169,8 @@ S3method(distributions3::pdf, "CensoredStudentsT")
 S3method(distributions3::log_pdf, "CensoredStudentsT")
 S3method(distributions3::cdf, "CensoredStudentsT")
 S3method(distributions3::support, "CensoredStudentsT")
+S3method(distributions3::is_discrete, "CensoredStudentsT")
+S3method(distributions3::is_continuous, "CensoredStudentsT")
 
 ## methods for TruncatedStudentsT
 S3method("mean", "TruncatedStudentsT")
@@ -174,3 +184,5 @@ S3method(distributions3::pdf, "TruncatedStudentsT")
 S3method(distributions3::log_pdf, "TruncatedStudentsT")
 S3method(distributions3::cdf, "TruncatedStudentsT")
 S3method(distributions3::support, "TruncatedStudentsT")
+S3method(distributions3::is_discrete, "TruncatedStudentsT")
+S3method(distributions3::is_continuous, "TruncatedStudentsT")

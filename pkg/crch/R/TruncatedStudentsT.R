@@ -65,3 +65,11 @@ support.TruncatedStudentsT <- function(d, drop = TRUE, ...) {
   stopifnot(requireNamespace("distributions3"))
   distributions3::make_support(d$left, d$right, d, drop = drop)
 }
+
+is_discrete.TruncatedStudentsT <- function(d, ...) {
+  setNames(rep.int(FALSE, length(d)), names(d))
+}
+
+is_continuous.TruncatedStudentsT <- function(d, ...) {
+  setNames(rep.int(TRUE, length(d)), names(d))
+}

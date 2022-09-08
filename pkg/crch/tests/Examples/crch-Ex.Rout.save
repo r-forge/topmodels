@@ -38,6 +38,7 @@ Type 'q()' to quit R.
 > ###   log_pdf.CensoredLogistic cdf.CensoredLogistic
 > ###   quantile.CensoredLogistic random.CensoredLogistic
 > ###   crps.CensoredLogistic support.CensoredLogistic
+> ###   is_discrete.CensoredLogistic is_continuous.CensoredLogistic
 > 
 > ### ** Examples
 > 
@@ -175,6 +176,7 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > ###   skewness.CensoredNormal kurtosis.CensoredNormal pdf.CensoredNormal
 > ###   log_pdf.CensoredNormal cdf.CensoredNormal quantile.CensoredNormal
 > ###   random.CensoredNormal crps.CensoredNormal support.CensoredNormal
+> ###   is_discrete.CensoredNormal is_continuous.CensoredNormal
 > 
 > ### ** Examples
 > 
@@ -313,6 +315,7 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > ###   log_pdf.CensoredStudentsT cdf.CensoredStudentsT
 > ###   quantile.CensoredStudentsT random.CensoredStudentsT
 > ###   crps.CensoredStudentsT support.CensoredStudentsT
+> ###   is_discrete.CensoredStudentsT is_continuous.CensoredStudentsT
 > 
 > ### ** Examples
 > 
@@ -495,6 +498,7 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > ###   log_pdf.TruncatedLogistic cdf.TruncatedLogistic
 > ###   quantile.TruncatedLogistic random.TruncatedLogistic
 > ###   crps.TruncatedLogistic support.TruncatedLogistic
+> ###   is_discrete.TruncatedLogistic is_continuous.TruncatedLogistic
 > 
 > ### ** Examples
 > 
@@ -631,6 +635,7 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > ###   skewness.TruncatedNormal kurtosis.TruncatedNormal pdf.TruncatedNormal
 > ###   log_pdf.TruncatedNormal cdf.TruncatedNormal quantile.TruncatedNormal
 > ###   random.TruncatedNormal crps.TruncatedNormal support.TruncatedNormal
+> ###   is_discrete.TruncatedNormal is_continuous.TruncatedNormal
 > 
 > ### ** Examples
 > 
@@ -769,6 +774,7 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > ###   log_pdf.TruncatedStudentsT cdf.TruncatedStudentsT
 > ###   quantile.TruncatedStudentsT random.TruncatedStudentsT
 > ###   crps.TruncatedStudentsT support.TruncatedStudentsT
+> ###   is_discrete.TruncatedStudentsT is_continuous.TruncatedStudentsT
 > 
 > ### ** Examples
 > 
@@ -1117,7 +1123,7 @@ Iteration 1/2000 parameters added 1/42Iteration 2/2000 parameters added 1/42It
 
   Selected formula:
    y ~ V2 + V3 | V4
-<environment: 0x5573201528e8>
+<environment: 0x55d0439d3d40>
 > 
 > CRCH2 <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0 )
 > BOOST <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0,
@@ -1304,7 +1310,7 @@ detaching ‘package:lmtest’, ‘package:zoo’
 
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  4.647 0.056 4.702 0 0 
+Time elapsed:  4.319 0.051 4.371 0 0 
 > grDevices::dev.off()
 null device 
           1 

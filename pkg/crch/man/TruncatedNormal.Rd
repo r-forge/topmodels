@@ -11,6 +11,8 @@
 \alias{random.TruncatedNormal}
 \alias{crps.TruncatedNormal}
 \alias{support.TruncatedNormal}
+\alias{is_discrete.TruncatedNormal}
+\alias{is_continuous.TruncatedNormal}
 
 \title{Create a Truncated Normal Distribution}
 
@@ -78,6 +80,9 @@ from the cumulative distribution function (CDF), \code{quantile} for quantiles,
 functions provided for the truncated normal distributions in the \pkg{crch}
 package, see \code{\link{dtnorm}}, and the \code{\link[scoringRules]{crps_tnorm}}
 function from the \pkg{scoringRules} package.
+The methods \code{\link[distributions3]{is_discrete}} and \code{\link[distributions3]{is_continuous}}
+can be used to query whether the distributions are discrete on the entire support
+(always \code{FALSE}) or continuous on the entire support (always \code{TRUE}).
 
 See the examples below for an illustration of the workflow for the class and methods.
 }

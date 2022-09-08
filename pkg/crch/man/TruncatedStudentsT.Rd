@@ -11,6 +11,8 @@
 \alias{random.TruncatedStudentsT}
 \alias{crps.TruncatedStudentsT}
 \alias{support.TruncatedStudentsT}
+\alias{is_discrete.TruncatedStudentsT}
+\alias{is_continuous.TruncatedStudentsT}
 
 \title{Create a Truncated Student's T Distribution}
 
@@ -81,6 +83,9 @@ from the cumulative distribution function (CDF), \code{quantile} for quantiles,
 functions provided for the truncated t distributions in the \pkg{crch}
 package, see \code{\link{dtt}}, and the \code{\link[scoringRules]{crps_tt}}
 function from the \pkg{scoringRules} package.
+The methods \code{\link[distributions3]{is_discrete}} and \code{\link[distributions3]{is_continuous}}
+can be used to query whether the distributions are discrete on the entire support
+(always \code{FALSE}) or continuous on the entire support (always \code{TRUE}).
 
 See the examples below for an illustration of the workflow for the class and methods.
 }

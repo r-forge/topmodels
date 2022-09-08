@@ -1,5 +1,8 @@
 # crch 1.1-1
 
+* Added methods for `is_discrete()` and `is_continuous()` for the new distributions3
+  objects.
+
 * Replaced deprecated C function `finite()` with `isfinite()` (again).
 
 

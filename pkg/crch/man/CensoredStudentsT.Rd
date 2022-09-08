@@ -11,6 +11,8 @@
 \alias{random.CensoredStudentsT}
 \alias{crps.CensoredStudentsT}
 \alias{support.CensoredStudentsT}
+\alias{is_discrete.CensoredStudentsT}
+\alias{is_continuous.CensoredStudentsT}
 
 \title{Create a Censored Student's T Distribution}
 
@@ -84,6 +86,10 @@ from the cumulative distribution function (CDF), \code{quantile} for quantiles,
 functions provided for the censored t distributions in the \pkg{crch}
 package, see \code{\link{dct}}, and the \code{\link[scoringRules]{crps_ct}}
 function from the \pkg{scoringRules} package.
+The methods \code{\link[distributions3]{is_discrete}} and \code{\link[distributions3]{is_continuous}}
+can be used to query whether the distributions are discrete on the entire support
+(always \code{FALSE}) or continuous on the entire support (only \code{TRUE} if
+there is no censoring, i.e., if both \code{left} and \code{right} are infinite).
 
 See the examples below for an illustration of the workflow for the class and methods.
 }
