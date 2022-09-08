@@ -1,3 +1,8 @@
+# crch 1.1-1
+
+* Replaced deprecated C function `finite()` with `isfinite()` (again).
+
+
 # crch 1.1-0
 
 * Added support for [distributions3](https://CRAN.R-project.org/package=distributions3)

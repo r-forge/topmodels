@@ -199,12 +199,12 @@ SEXP stlogis_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       dlm = leftptr[i] - muptr[i];
       sdist = (1 - 2 * plogis(-(xptr[i]-muptr[i])/sigmaptr[i], 0.0, 1.0, 1, 0))*(xptr[i]-muptr[i])/sd2 - 1/sigmaptr[i];
       denom = (plogis(drm/sigmaptr[i], 0.0, 1.0, 1, 0) - plogis(dlm/sigmaptr[i], 0.0, 1.0, 1, 0));
-      if(finite(rightptr[i])) {
+      if(isfinite(rightptr[i])) {
         enum1 = drm*dlogis(drm/sigmaptr[i], 0.0, 1.0, 0);
       } else {
         enum1 = 0;
       }
-      if(finite(leftptr[i])) {
+      if(isfinite(leftptr[i])) {
         enum2 = dlm*dlogis(dlm/sigmaptr[i], 0.0, 1.0, 0);
       } else {
         enum2 = 0;
@@ -242,12 +242,12 @@ SEXP htlogis_mu(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = (1 - 2 * plogis(-drm/sigmaptr[i], 0.0, 1.0, 1, 0))/sigmaptr[i];
       } else {
         sdistr = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = (1 - 2 * plogis(-dlm/sigmaptr[i], 0.0, 1.0, 1, 0))/sigmaptr[i];
       } else {
         sdistl = 0;
@@ -288,14 +288,14 @@ SEXP htlogis_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = (1 - 2 * plogis(-drm/sigmaptr[i], 0.0, 1.0, 1, 0))*drm/sd2 - 1/sigmaptr[i];
         drm2 = drm;
       } else {
         sdistr = 0;
         drm2 = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = (1 - 2 * plogis(-dlm/sigmaptr[i], 0.0, 1.0, 1, 0))*dlm/sd2 - 1/sigmaptr[i];
         dlm2 = dlm;
       } else {
@@ -342,14 +342,14 @@ SEXP htlogis_musigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = (1 - 2 * plogis(-drm/sigmaptr[i], 0.0, 1.0, 1, 0))*drm/sd2 - 1/sigmaptr[i];
         drm2 = drm;
       } else {
         sdistr = 0;
         drm2 = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = (1 - 2 * plogis(-dlm/sigmaptr[i], 0.0, 1.0, 1, 0))*dlm/sd2 - 1/sigmaptr[i];
         dlm2 = dlm;
       } else {

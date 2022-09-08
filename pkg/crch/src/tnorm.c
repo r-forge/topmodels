@@ -199,12 +199,12 @@ SEXP stnorm_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
       denom = (pnorm(drm/sigmaptr[i], 0.0, 1.0, 1, 0) - pnorm(dlm/sigmaptr[i], 0.0, 1.0, 1, 0));
-      if(finite(rightptr[i])) {
+      if(isfinite(rightptr[i])) {
         enum1 = drm*dnorm(drm/sigmaptr[i], 0.0, 1.0, 0);
       } else {
         enum1 = 0;
       }
-      if(finite(leftptr[i])) {
+      if(isfinite(leftptr[i])) {
         enum2 = dlm*dnorm(dlm/sigmaptr[i], 0.0, 1.0, 0);
       } else {
         enum2 = 0;
@@ -242,12 +242,12 @@ SEXP htnorm_mu(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = drm / sd2;
       } else {
         sdistr = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = dlm / sd2;
       } else {
         sdistl = 0;
@@ -288,14 +288,14 @@ SEXP htnorm_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = (pow(drm, 2.0) - sd2) / pow(sigmaptr[i], 3.0);
         drm2 = drm;
       } else {
         sdistr = 0;
         drm2 = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = (pow(dlm, 2.0) - sd2) / pow(sigmaptr[i], 3.0);
         dlm2 = dlm;
       } else {
@@ -339,14 +339,14 @@ SEXP htnorm_musigma(SEXP x, SEXP mu, SEXP sigma, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = (pow(drm, 2.0) - sd2) / pow(sigmaptr[i], 3.0);
         drm2 = drm;
       } else {
         sdistr = 0;
         drm2 = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = (pow(dlm, 2.0) - sd2) / pow(sigmaptr[i], 3.0);
         dlm2 = dlm;
       } else {

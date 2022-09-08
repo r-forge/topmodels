@@ -203,12 +203,12 @@ SEXP stt_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right)
       dlm = leftptr[i] - muptr[i];
       sdist = pow((xptr[i] - muptr[i]), 2.0)/ pow(sigmaptr[i], 3.0)* (*dfptr + 1)/ (*dfptr +  pow((xptr[i] - muptr[i]), 2.0)/ sd2) - 1/sigmaptr[i];
       denom = (pt(drm/sigmaptr[i], *dfptr, 1, 0) - pt(dlm/sigmaptr[i], *dfptr, 1, 0));
-      if(finite(rightptr[i])) {
+      if(isfinite(rightptr[i])) {
         enum1 = drm*dt(drm/sigmaptr[i], *dfptr, 0);
       } else {
         enum1 = 0;
       }
-      if(finite(leftptr[i])) {
+      if(isfinite(leftptr[i])) {
         enum2 = dlm*dt(dlm/sigmaptr[i], *dfptr, 0);
       } else {
         enum2 = 0;
@@ -247,12 +247,12 @@ SEXP htt_mu(SEXP x, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = drm/sd2 * (*dfptr + 1) / (*dfptr + pow(drm, 2.0)/sd2);
       } else {
         sdistr = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = dlm/sd2 * (*dfptr + 1) / (*dfptr + pow(dlm, 2.0)/sd2);
       } else {
         sdistl = 0;
@@ -294,14 +294,14 @@ SEXP htt_sigma(SEXP x, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = pow(drm, 2.0)/ pow(sigmaptr[i], 3.0)* (*dfptr + 1)/ (*dfptr +  pow(drm, 2.0)/ sd2) - 1/sigmaptr[i];
         drm2 = drm;
       } else {
         sdistr = 0;
         drm2 = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = pow(dlm, 2.0)/ pow(sigmaptr[i], 3.0)* (*dfptr + 1)/ (*dfptr +  pow(dlm, 2.0)/ sd2) - 1/sigmaptr[i];
         dlm2 = dlm;
       } else {
@@ -348,14 +348,14 @@ SEXP htt_musigma(SEXP x, SEXP mu, SEXP sigma, SEXP df, SEXP left, SEXP right)
       sd2 = pow(sigmaptr[i], 2.0);
       drm = rightptr[i] - muptr[i];
       dlm = leftptr[i] - muptr[i];
-      if(finite(drm)) {
+      if(isfinite(drm)) {
         sdistr = pow(drm, 2.0)/ pow(sigmaptr[i], 3.0)* (*dfptr + 1)/ (*dfptr +  pow(drm, 2.0)/ sd2) - 1/sigmaptr[i];
         drm2 = drm;
       } else {
         sdistr = 0;
         drm2 = 0;
       }
-      if(finite(dlm)) {
+      if(isfinite(dlm)) {
         sdistl = pow(dlm, 2.0)/ pow(sigmaptr[i], 3.0)* (*dfptr + 1)/ (*dfptr +  pow(dlm, 2.0)/ sd2) - 1/sigmaptr[i];
         dlm2 = dlm;
       } else {
