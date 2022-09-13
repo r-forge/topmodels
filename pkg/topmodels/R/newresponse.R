@@ -151,3 +151,11 @@ newresponse.glm <- function(object,
   attr(y, "response_type") <- response_type
   return(y)
 }
+
+#' @rdname newresponse
+#' @method newresponse gamlss
+#' @export
+newresponse.gamlss <- function(object, ...) {
+  stopifnot(requireNamespace("gamlss"))
+  gamlss::predictAll(object, ...)$y
+}

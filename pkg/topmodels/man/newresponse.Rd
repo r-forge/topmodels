@@ -4,6 +4,7 @@
 \alias{newresponse}
 \alias{newresponse.default}
 \alias{newresponse.glm}
+\alias{newresponse.gamlss}
 \title{Extract Observed Responses from New Data}
 \usage{
 newresponse(object, ...)
@@ -11,6 +12,8 @@ newresponse(object, ...)
 \method{newresponse}{default}(object, newdata, na.action = na.pass, ...)
 
 \method{newresponse}{glm}(object, newdata, na.action = na.pass, ...)
+
+\method{newresponse}{gamlss}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model object. For the \code{default} method this
