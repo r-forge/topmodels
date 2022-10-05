@@ -311,7 +311,7 @@ crps.GAMLSS <- function(y, x, drop = TRUE, elementwise = NULL, ...) {
   f <- attr(y, "family")[1L]
   FUN <- switch(EXPR = f,
     "NO"  = function(at, d) scoringRules::crps_norm(y = at, mean = d$mu, sd = d$sigma),
-    "LO"  = function(at, d) scoringRules::crps_logis(y = at, mean = d$mu, sd = d$sigma),
+    "LO"  = function(at, d) scoringRules::crps_logis(y = at, location = d$mu, scale = d$sigma),
     "TF"  = function(at, d) scoringRules::crps_t(y = at, location = d$mu, scale = d$sigma, df = d$nu),
     "LNO" = function(at, d) scoringRules::crps_lnorm(y = at, meanlog = d$mu, sdlog = d$sigma),
     "PO"  = function(at, d) scoringRules::crps_pois(y = at, lambda = d$mu),
