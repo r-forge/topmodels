@@ -1134,6 +1134,7 @@ stat_rootogram <- function(mapping = NULL,
 #' @export
 StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
   required_aes = c("observed", "expected", "mid", "width"),
+  dropped_aes = c("observed", "expected", "mid", "width"),
   compute_group = function(data,
                            scales,
                            scale = c("sqrt", "raw"),
@@ -1289,6 +1290,7 @@ stat_rootogram_expected <- function(mapping = NULL,
 #' @export
 StatRootogramExpected <- ggplot2::ggproto("StatRootogramExpected", ggplot2::Stat,
   required_aes = c("expected", "mid"),
+  dropped_aes = c("expected", "mid"),
   compute_group = function(data,
                            scales,
                            scale = c("sqrt", "raw")) {
@@ -1479,6 +1481,7 @@ stat_rootogram_confint <- function(mapping = NULL,
 #' @export
 StatRootogramConfint <- ggplot2::ggproto("StatRootogramConfint", ggplot2::Stat,
   required_aes = c("observed", "expected", "mid", "width"),
+  dropped_aes = c("observed", "expected", "mid", "width"),
   compute_group = function(data,
                            scales,
                            level = 0.95,

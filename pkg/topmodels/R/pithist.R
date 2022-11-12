@@ -1756,6 +1756,8 @@ stat_pithist <- function(mapping = NULL,
 #' @export
 StatPithist <- ggplot2::ggproto("StatPithist", ggplot2::Stat,
   required_aes = c("x", "y", "width"),
+  dropped_aes = c("width"),  
+  # NOTE: (ML) This is not true for `style == "bar"` but otherwise throws a warning for ggplot2 > 3.4.0.
   compute_group = function(data, scales, freq = FALSE, style = "bar") {
 
     ## transform observed to freq
@@ -2006,6 +2008,7 @@ stat_pithist_expected <- function(mapping = NULL,
 #' @export
 StatPithistExpected <- ggplot2::ggproto("StatPithistExpected", ggplot2::Stat,
   required_aes = c("x", "y", "width"),
+  dropped_aes = "width",
   compute_group = function(data,
                            scales,
                            scale = "uniform",
@@ -2123,6 +2126,8 @@ stat_pithist_confint <- function(mapping = NULL,
 #' @export
 StatPithistConfint <- ggplot2::ggproto("StatPithistConfint", ggplot2::Stat,
   required_aes = c("x", "y", "width"),
+  dropped_aes = c("x", "y", "width"),
+  # NOTE: (ML) This is not true for `style == "line"` but otherwise throws a warning for ggplot2 > 3.4.0.
   compute_group = function(data,
                            scales,
                            scale = "uniform",
@@ -2313,6 +2318,7 @@ stat_pithist_simint <- function(mapping = NULL,
 #' @export
 StatPithistSimint <- ggplot2::ggproto("StatPithistSimint", ggplot2::Stat,
   required_aes = c("x", "ymin", "ymax"),
+  dropped_aes = c("x", "y", "width"),
   optional_aes = c("y", "width"), # TODO: (ML) "y' and "width" actually required for `freq = FALSE`
 
   compute_group = function(data, scales, freq = FALSE) {

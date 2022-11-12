@@ -1001,7 +1001,8 @@ autoplot.reliagram <- function(object,
     },
 
     # tells us what we need
-    required_aes = c("x", "ci_lwr", "ci_upr", "bin_lwr", "bin_upr")
+    required_aes = c("x", "ci_lwr", "ci_upr", "bin_lwr", "bin_upr"),
+    dropped_aes = c("ci_lwr", "ci_upr", "bin_lwr", "bin_upr")
   )
 
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)

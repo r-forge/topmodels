@@ -1471,7 +1471,8 @@ StatQqrplotSimint <- ggplot2::ggproto("StatQqrplotSimint", ggplot2::Stat,
   },
 
   # Tells us what we need
-  required_aes = c("x", "ymin", "ymax")
+  required_aes = c("x", "ymin", "ymax"),
+  dropped_aes = c("ymin", "ymax")
 )
 
 
@@ -1576,7 +1577,8 @@ StatQqrplotRef <- ggplot2::ggproto("StatQqrplotRef", ggplot2::Stat,
   },
 
   # Tells us what we need
-  required_aes = c("x", "y")
+  required_aes = c("x", "y"),
+  dropped_aes = c("x", "y")
 )
 
 
@@ -1673,6 +1675,7 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
 StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
 
   required_aes = c("x", "y"),
+  dropped_aes = c("x", "y"),
 
   compute_group = function(data, 
                            scales, 
@@ -1746,7 +1749,7 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
     # Must make sure that is not NA for specific trafo (due to extension of plot simint)
     idx_na <- is.na(y_out1) | is.na(y_out2)
 
-    if (style == "line") {
+    if (style == "line") { # FIXME: (ML) Remove tidyr dependency
       ## prepare long format with group variable
       d <- as.data.frame(tidyr::pivot_longer(
         data.frame(
