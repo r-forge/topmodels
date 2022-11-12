@@ -155,7 +155,36 @@ newresponse.glm <- function(object,
 #' @rdname newresponse
 #' @method newresponse gamlss
 #' @export
-newresponse.gamlss <- function(object, ...) {
+newresponse.gamlss <- function(object, newdata = newdata, ...) {
   stopifnot(requireNamespace("gamlss"))
-  gamlss::predictAll(object, ...)$y
+
+  ## Get model.frame
+  ## FIXME: (Z) Use expand.model.frame() instead of this hand-crafted code
+  if (missing(newdata) || is.null(newdata)) {
+    mf <- model.frame(object)
+  } else {
+    mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
+  }
+
+  ## Get weights
+  ## FIXME: (ML)
+  ## * Is this so correct and should we do that (needed for rootogram)?
+  ## * What about na.action? What should the weights be for NAs (compare implementation below)?
+  weights <- model.weights(mf)
+  if (is.null(weights)) weights <- rep(1, NROW(mf))
+
+  ## Get response
+  y <- gamlss::predictAll(object, newdata = newdata, ...)$y
+
+  ## Set weights to NA for NAs in response
+  weights[is.na(y)] <- NA
+
+  # -------------------------------------------------------------------
+  # RETURN
+  # -------------------------------------------------------------------
+  ## FIXME: (ML)
+  ## * Not very nice to return attributes here
+  ## * How to guess properly if response is continous?!
+  attr(y, "weights") <- weights
+  return(y)
 }

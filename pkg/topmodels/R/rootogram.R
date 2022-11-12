@@ -238,8 +238,22 @@ rootogram.default <- function(
   ## get data and weights
   y <- newresponse(object, newdata = newdata, na.action = na.pass)
   w <- attr(y, "weights")
-  if (is.null(response_type)) response_type <- attr(y, "response_type")
-  response_type <- match.arg(response_type, c("discrete", "logseries", "continuous"))
+
+  # TODO: (ML) Plan to no use `response_type` arg, but how to handle "logseries"?
+  if (is.null(response_type) && !any(class(object) %in% c("disttree", "distforest"))) { 
+    tmp_prodist <- prodist(object)
+    if (all(distributions3::is_discrete(tmp_prodist))) {
+      response_type <- "discrete" 
+    } else if (all(distributions3::is_continuous(tmp_prodist))) {
+      response_type <- "continuous"
+    } else {
+      response_type <- "mixed"
+    }
+  } else if (is.null(response_type) && any(class(object) %in% c("disttree", "distforest"))) { 
+    response_type <- attr(y, "response_type")
+  }
+   
+  response_type <- match.arg(response_type, c("discrete", "continuous", "mixed", "logseries"))
 
   ## set breaks and midpoints
   ## TODO: (ML) Extend breaks to the left, in case still expected frequency exists.

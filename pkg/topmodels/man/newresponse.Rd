@@ -13,7 +13,7 @@ newresponse(object, ...)
 
 \method{newresponse}{glm}(object, newdata, na.action = na.pass, ...)
 
-\method{newresponse}{gamlss}(object, ...)
+\method{newresponse}{gamlss}(object, newdata = newdata, ...)
 }
 \arguments{
 \item{object}{a fitted model object. For the \code{default} method this
