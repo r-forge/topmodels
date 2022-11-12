@@ -63,7 +63,7 @@ all of the functions that become directly available when interfacing the `distri
 | Function             | Description                                                                    |
 |:---------------------|:-------------------------------------------------------------------------------|
 | _Numeric quantities_ |                                                                                |
-| `procast()`          | Probabilistic forecats (probabilities, quantiles, etc.) based on model objects |
+| `procast()`          | Probabilistic forecasts (probabilities, quantiles, etc.) based on model objects |
 | `proscore()`         | Evaluate scoring rules for procasts                                            |
 | `pitresiduals()`     | Probability integral transform (PIT) residuals                                 |
 | `qresiduals()`       | (Randomized) quantile residuals                                                |
@@ -258,7 +258,7 @@ prodist.crch <- function(object, newdata = NULL, na.action = na.pass, ...) {
 ```
 
 To illustrate how this can be used in practice we fit a heteroscedastic Tobit model using
-the `crch()` function to a precipiation dataset from Innsbruck, Austria. As precipitation
+the `crch()` function to a precipitation dataset from Innsbruck, Austria. As precipitation
 is often zero and never can become negative, a Tobit model is typically a good starting point
 for probabilistic modeling and forecasting. (See FIXME for more details.)
 
