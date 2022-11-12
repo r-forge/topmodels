@@ -2228,15 +2228,15 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
     alpha = NA
   ),
   draw_panel = function(data, panel_params, coord,
-                        linejoin = "mitre", direction = "hv",
-                        style = c("polygon", "line")) {
+                        lineend = "butt", linejoin = "mitre", 
+                        direction = "hv", style = c("polygon", "line")) {
     style <- match.arg(style)
 
     ## Swap NAs in `default_aes` with own defaults
     data <- my_modify_list(data, set_default_aes_pithist_confint(style), force = FALSE)
 
     if (style == "polygon") {
-      ggplot2::GeomRect$draw_panel(data, panel_params, coord, linejoin)
+      ggplot2::GeomRect$draw_panel(data = data, panel_params = panel_params, coord = coord, lineend = lineend, linejoin = linejoin)
     } else { # "line" style
       ## Join two Grobs
       data1 <- transform(data,
