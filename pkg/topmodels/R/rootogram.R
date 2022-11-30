@@ -77,6 +77,7 @@
 #' @param xlab,ylab,main graphical parameters forwarded to
 #' \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}}.
 #' @param \dots further graphical parameters passed to the plotting function.
+#' @param use_devel_version Use the current developing version.
 #'
 #' @return An object of class \code{"rootogram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
@@ -181,6 +182,7 @@ rootogram.default <- function(
                               xlab = NULL,
                               ylab = NULL,
                               main = NULL,
+                              use_devel_version = FALSE,
                               ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -255,25 +257,61 @@ rootogram.default <- function(
    
   response_type <- match.arg(response_type, c("discrete", "continuous", "mixed", "logseries"))
 
-  ## set breaks and midpoints
-  ## TODO: (ML) Extend breaks to the left, in case still expected frequency exists.
-  ## TODO: (Z) Try to get rid of 'response_type'.
-  ## TODO: (RS) Thought the very same while going trough args und sanity checks :).
-  if (is.null(breaks) && response_type == "discrete") {
-    breaks <- -1L:max(y[w > 0]) + 0.5
-  } else if (is.null(breaks) && response_type == "logseries") {
-    breaks <- 0L:max(y[w > 0]) + 0.5
-  } else if (is.null(breaks)) {
-    breaks <- "Sturges"
+  if (!use_devel_version | any(class(object) %in% c("disttree", "distforest"))) {
+    ## set breaks and midpoints
+    ## TODO: (ML) Extend breaks to the left, in case still expected frequency exists.
+    ## TODO: (Z) Try to get rid of 'response_type'.
+    ## TODO: (RS) Thought the very same while going trough args und sanity checks :).
+    if (is.null(breaks) && response_type == "discrete") {
+      breaks <- -1L:max(y[w > 0]) + 0.5
+    } else if (is.null(breaks) && response_type == "logseries") {
+      breaks <- 0L:max(y[w > 0]) + 0.5
+    } else if (is.null(breaks)) {
+      breaks <- "Sturges"
+    }
+
+    breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
+    mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+
+    ## fix pointmasses
+    ## TODO: (ML) Check if that always works or could be improved.
+    breaks[1] <- breaks[1] - 1e-12
+    breaks[length(breaks)] <- breaks[length(breaks)] + 1e-12
+
+  } else {
+    main <- "Developing Version"
+    ## set breakpoints
+    if (is.null(breaks) && response_type == "discrete") {
+      breaks <- seq(min(support(tmp_prodist)) -1L, max(y[w > 0]), by = 1L) + 0.5
+
+    } else if (is.null(breaks) && response_type == "continuous") {
+      breaks <- "Sturges"
+      breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
+
+    } else if (is.null(breaks)) {
+      rng_sup <- range(support(tmp_prodist))
+
+      if (is.finite(rng_sup)[1]) {
+        rng_sup[1] <- rng_sup[1] - 1e-12
+      } else {
+        rng_sup[1] <- floor(quantile(y[w > 0], 0.1) * 2) / 2
+      }
+
+      if (is.finite(rng_sup)[2]) {
+        rng_sup[2] <- rng_sup[2] + 1e-12
+      } else {
+        rng_sup[2] <- ceiling(quantile(y[w > 0], 0.99) * 2) / 2
+      }
+
+      ## TODO: (ML2Z) This can definitely be improved!
+      breaks <- pretty(rng_sup, n = 11)
+      breaks[1] <- rng_sup[1]
+      breaks[length(breaks)] <- rng_sup[2]
+    }
+
+    ## get midpoint
+    mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
   }
-
-  breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
-  mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
-
-  ## fix pointmasses
-  ## TODO: (ML) Check if that always works or could be improved.
-  breaks[1] <- breaks[1] - 1e-12
-  breaks[length(breaks)] <- breaks[length(breaks)] + 1e-12
 
   ## set widths
   ## TODO: (RS2ML) Question: if NULL and discrete/logseries it is set to 0.9,
