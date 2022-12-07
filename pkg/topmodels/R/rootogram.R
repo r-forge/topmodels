@@ -237,9 +237,13 @@ rootogram.default <- function(
   # -------------------------------------------------------------------
   # PREPARE DATA
   # -------------------------------------------------------------------
-  ## get data and weights
+  ## get data
   y <- newresponse(object, newdata = newdata, na.action = na.pass)
+
+  ## get weights
+  frequency_weights <- FALSE
   w <- attr(y, "weights")
+  yw <- if(frequency_weights) rep.int(y, w) else y[w > 0]
 
   # TODO: (ML) Plan to no use `response_type` arg, but how to handle "logseries"?
   if (is.null(response_type) && !any(class(object) %in% c("disttree", "distforest"))) { 
@@ -263,14 +267,14 @@ rootogram.default <- function(
     ## TODO: (Z) Try to get rid of 'response_type'.
     ## TODO: (RS) Thought the very same while going trough args und sanity checks :).
     if (is.null(breaks) && response_type == "discrete") {
-      breaks <- -1L:max(y[w > 0]) + 0.5
+      breaks <- -1L:max(yw) + 0.5
     } else if (is.null(breaks) && response_type == "logseries") {
-      breaks <- 0L:max(y[w > 0]) + 0.5
+      breaks <- 0L:max(yw) + 0.5
     } else if (is.null(breaks)) {
       breaks <- "Sturges"
     }
 
-    breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
+    breaks <- hist(yw, plot = FALSE, breaks = breaks)$breaks
     mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
 
     ## fix pointmasses
@@ -282,11 +286,18 @@ rootogram.default <- function(
     main <- "Developing Version"
     ## set breakpoints
     if (is.null(breaks) && response_type == "discrete") {
-      breaks <- seq(min(support(tmp_prodist)) -1L, max(y[w > 0]), by = 1L) + 0.5
+      breaks <- support(tmp_prodist) + c(-1L, 0L) 
+      if(!is.finite(breaks[1L])) breaks[1L] <- min(yw, na.rm = TRUE) - 1L
+      if(!is.finite(breaks[2L])) breaks[2L] <- max(yw, na.rm = TRUE)
+
+      breaks <- seq(breaks[1L], breaks[2L], by = 1L) + 0.5 
 
     } else if (is.null(breaks) && response_type == "continuous") {
-      breaks <- "Sturges"
-      breaks <- hist(y[w > 0], plot = FALSE, breaks = breaks)$breaks
+      breaks <- support(tmp_prodist)
+      if(!is.finite(breaks[1L])) breaks[1L] <- floor(quantile(yw, 0.1) * 2) / 2
+      if(!is.finite(breaks[2L])) breaks[2L] <- ceiling(quantile(yw, 0.99) * 2) / 2
+
+      breaks <- pretty(breaks, n = grDevices::nclass.Sturges(yw))
 
     } else if (is.null(breaks)) {
       rng_sup <- range(support(tmp_prodist))
@@ -294,17 +305,17 @@ rootogram.default <- function(
       if (is.finite(rng_sup)[1]) {
         rng_sup[1] <- rng_sup[1] - 1e-12
       } else {
-        rng_sup[1] <- floor(quantile(y[w > 0], 0.1) * 2) / 2
+        rng_sup[1] <- floor(quantile(yw, 0.1) * 2) / 2
       }
 
       if (is.finite(rng_sup)[2]) {
         rng_sup[2] <- rng_sup[2] + 1e-12
       } else {
-        rng_sup[2] <- ceiling(quantile(y[w > 0], 0.99) * 2) / 2
+        rng_sup[2] <- ceiling(quantile(yw, 0.99) * 2) / 2
       }
 
       ## TODO: (ML2Z) This can definitely be improved!
-      breaks <- pretty(rng_sup, n = 11)
+      breaks <- pretty(rng_sup, n = grDevices::nclass.Sturges(yw))
       breaks[1] <- rng_sup[1]
       breaks[length(breaks)] <- rng_sup[2]
     }

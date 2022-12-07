@@ -25,6 +25,7 @@ rootogram(object, ...)
   xlab = NULL,
   ylab = NULL,
   main = NULL,
+  use_devel_version = FALSE,
   ...
 )
 }
@@ -76,6 +77,8 @@ or \code{FALSE} which will suppress plotting.}
 
 \item{xlab, ylab, main}{graphical parameters forwarded to
 \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}}.}
+
+\item{use_devel_version}{Use the current developing version.}
 }
 \value{
 An object of class \code{"rootogram"} inheriting from
