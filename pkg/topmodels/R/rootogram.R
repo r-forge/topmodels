@@ -286,18 +286,25 @@ rootogram.default <- function(
     main <- "Developing Version"
     ## set breakpoints
     if (is.null(breaks) && response_type == "discrete") {
-      breaks <- support(tmp_prodist) + c(-1L, 0L) 
-      if(!is.finite(breaks[1L])) breaks[1L] <- min(yw, na.rm = TRUE) - 1L
-      if(!is.finite(breaks[2L])) breaks[2L] <- max(yw, na.rm = TRUE)
+      ## FIXME: (ML) Check if 0.01 is sufficient or conditional on n?!
+      breaks <- range(support(tmp_prodist)) + c(-1L, 0L) 
+      if(!is.finite(breaks[1L])) breaks[1L] <- 
+        pmin(min(yw, na.rm = TRUE), min(quantile(tmp_prodist, 0.01))) - 1L
+
+      if(!is.finite(breaks[2L])) breaks[2L] <- 
+        pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99)))
 
       breaks <- seq(breaks[1L], breaks[2L], by = 1L) + 0.5 
 
     } else if (is.null(breaks) && response_type == "continuous") {
-      breaks <- support(tmp_prodist)
-      if(!is.finite(breaks[1L])) breaks[1L] <- floor(quantile(yw, 0.1) * 2) / 2
-      if(!is.finite(breaks[2L])) breaks[2L] <- ceiling(quantile(yw, 0.99) * 2) / 2
+      breaks <- range(support(tmp_prodist))
+      if(!is.finite(breaks[1L])) breaks[1L] <- 
+        floor(pmin(min(yw, na.rm = TRUE), min(quantile(tmp_prodist, 0.01))))
 
-      breaks <- pretty(breaks, n = grDevices::nclass.Sturges(yw))
+      if(!is.finite(breaks[2L])) breaks[2L] <-
+        ceiling(pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99))))
+
+      breaks <- pretty(breaks, n = grDevices::nclass.Sturges(yw), min.n = 1)
 
     } else if (is.null(breaks)) {
       rng_sup <- range(support(tmp_prodist))
@@ -305,17 +312,16 @@ rootogram.default <- function(
       if (is.finite(rng_sup)[1]) {
         rng_sup[1] <- rng_sup[1] - 1e-12
       } else {
-        rng_sup[1] <- floor(quantile(yw, 0.1) * 2) / 2
+        rng_sup[1] <- floor(pmin(min(yw, na.rm = TRUE), min(quantile(tmp_prodist, 0.01))))
       }
 
       if (is.finite(rng_sup)[2]) {
         rng_sup[2] <- rng_sup[2] + 1e-12
       } else {
-        rng_sup[2] <- ceiling(quantile(yw, 0.99) * 2) / 2
+        rng_sup[2] <- ceiling(pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99))))
       }
 
-      ## TODO: (ML2Z) This can definitely be improved!
-      breaks <- pretty(rng_sup, n = grDevices::nclass.Sturges(yw))
+      breaks <- pretty(rng_sup, n = grDevices::nclass.Sturges(yw), min.n = 1)
       breaks[1] <- rng_sup[1]
       breaks[length(breaks)] <- rng_sup[2]
     }
