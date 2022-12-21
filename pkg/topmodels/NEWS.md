@@ -1,3 +1,9 @@
+# topmodels 0.3-0
+
+* Added `crps.distribution` for numeric approximation/numeric integration to calculate
+  the CRPS for univariate distributins where not analytic solution is available in the
+  `scoringRules` package.
+
 # topmodels 0.2-0
 
 * Version, presented at DAGStat 2022.
