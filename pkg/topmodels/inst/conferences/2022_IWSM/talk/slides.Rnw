@@ -270,7 +270,7 @@ data("RainIbk", package = "crch")
     \pause
 
     \vspace{1em}
-    \textbf{Goal}
+    \textbf{Study goal}
     \begin{itemize}
         \item Estimate three different parametric regression models
         \item Assessing goodness of fit using graphical assessment methods
