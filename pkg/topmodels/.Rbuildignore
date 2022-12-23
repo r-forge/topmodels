@@ -1,3 +1,4 @@
+R/disttree.R
 inst/conferences
 inst/misc
 inst/only_local

@@ -4,15 +4,13 @@
 \alias{procast}
 \alias{procast_setup}
 \alias{procast.default}
-\alias{procast.disttree}
-\alias{procast.distforest}
 \title{Procast: Probabilistic Forecasting}
 \usage{
 procast(
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = "quantile",
+  type = "distribution",
   at = 0.5,
   drop = FALSE,
   ...
@@ -22,42 +20,10 @@ procast(
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = c("quantile", "mean", "variance", "probability", "density", "loglikelihood",
-    "distribution", "parameters", "kurtosis", "skewness"),
+  type = c("distribution", "quantile", "mean", "variance", "probability", "density",
+    "loglikelihood", "parameters", "kurtosis", "skewness"),
   at = 0.5,
   drop = FALSE,
-  ...
-)
-
-procast_setup(
-  pars,
-  FUN,
-  at = NULL,
-  drop = FALSE,
-  type = "procast",
-  elementwise = NULL,
-  ...
-)
-
-\method{procast}{disttree}(
-  object,
-  newdata = NULL,
-  na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability"),
-  at = 0.5,
-  drop = FALSE,
-  use_distfamily = TRUE,
-  ...
-)
-
-\method{procast}{distforest}(
-  object,
-  newdata = NULL,
-  na.action = na.pass,
-  type = c("quantile", "location", "scale", "parameter", "density", "probability"),
-  at = 0.5,
-  drop = FALSE,
-  use_distfamily = TRUE,
   ...
 )
 }
@@ -73,8 +39,8 @@ which to predict. If omitted, the original observations are used.}
 values in \code{newdata}.  The default is to employ \code{NA}.}
 
 \item{type}{character specifying the type of probabilistic forecast to
-compute.  In \code{procast_setup} the \code{type} is only used for nice
-labels of the returned data frame.}
+compute. (Note that \code{type = "probability"} corresponds to cumulative
+probability as in \code{pnorm}, \code{pbinom}, etc.)}
 
 \item{at}{specification of values at which the forecasts should be
 evaluated, typically a numeric vector but possibly also a matrix or data
@@ -86,10 +52,10 @@ dropping the dimension attribute)? If \code{FALSE} a matrix is always returned.}
 
 \item{\dots}{further parameters passed to methods.}
 
-\item{pars}{a data frame of predicted distribution parameters.}
-
 \item{FUN}{function to be used for forecasts. Either of type \code{FUN(pars,
 \dots)} or \code{FUN(at, pars, \dots)}, see details below.}
+
+\item{pars}{a data frame of predicted distribution parameters.}
 
 \item{elementwise}{logical. Should each element of distribution only be evaluated at the
 corresponding element of \code{at} (\code{elementwise = TRUE}) or at all elements
@@ -97,8 +63,6 @@ in \code{at} (\code{elementwise = FALSE}). Elementwise evaluation is only possib
 if the number of observations is length of \code{at} are the same and in that case a vector of
 the same length is returned. Otherwise a matrix is returned. The default is to use
 \code{elementwise = TRUE} if possible, and otherwise \code{elementwise = FALSE}.}
-
-\item{use_distfamily}{For intern use only, will not be supported in the future.}
 }
 \value{
 Either a \code{data.frame} of predictions (in case of multivariate
@@ -124,64 +88,68 @@ Some quantities, e.g., the moments of the distribution (like mean or variance),
 can be computed directly from the predicted parameters of the
 distribution while others require an additional argument \code{at} which the
 distribution is evaluated (e.g., the probability of a quantile or an
-observation of the response.
+observation of the response).
 
 The default \code{procast} method leverages the S3 classes and methods for
-probability distributions from the \pkg{distributions3} package. It proceeds
-in two steps: First, \code{\link[distributions3]{prodist}} is used to obtain the
-predicted probability distribution object. Second, the extractor methods such
-as \code{quantile}, \code{\link[distributions3]{cdf}}, etc. are used to
-compute quantiles, probabilities, etc. from the distribution objects.
+probability distributions from the \pkg{distributions3} package. In a first step
+the predicted probability distribution object is obtained and, by default
+(\code{type = "distribution"}), returned in order to reflect the distributional
+nature of the forecast. For all other \code{type}s (e.g., \code{"mean"},
+\code{"quantile"}, or \code{"density"}), the corresponding extractor methods
+(e.g., \code{mean}, \code{quantile}, or \code{\link[distributions3]{pdf}}) are used to
+compute the desired quantity from the distribution objects. The examples
+provide some worked illustrations.
 
-Therefore, to enable \code{procast} for a certain type of model object, the
-recommended approach is to implement a \code{prodist} method which can then
-be leveraged. However, if the \pkg{distributions3} package does not support
+Package authors or users, who want to enable \code{procast} for new types
+of model objects, only need to provide a suitable \code{\link[distributions3]{prodist}}
+extractor for the predicted probability distribution. Then the default \code{procast}
+works out of the box. However, if the \pkg{distributions3} package does not support
 the necessary probability distribution, then it may also be necessary to
 implement a new distribution objects, see \code{\link[distributions3]{apply_dpqr}}.
-
-Before adopting the \pkg{distributions3} framework as the recommended workflow
-for procasting, the package had taken a different approach which is described
-in the following. Note, however, that this will be discontinued when we have
-converted all procasting methods to the new workflow.
-
-Old workflow: The function \code{procast_setup} is a convenience wrapper that makes setting
-up \code{procast} methods easier for package developers. It takes a data
-frame of predicted parameters \code{pars} and a function \code{FUN} which is
-to be evaluated at the parameters. This can either have the interface
-\code{FUN(pars, \dots)} when the desired quantity can be predicted
-directly from the predicted parameters -- or the interface \code{FUN(at,
-pars, \dots)} if an additional argument \code{at} is needed.
-\code{procast_setup} takes care of suitable expanding \code{at} to the
-dimensions of \code{pars}.
 }
 \examples{
-## linear regression models (homoscedastic Gaussian response)
-m <- lm(dist ~ speed, data = cars)
+## load packages
+library("topmodels")
+library("distributions3")
 
-## medians on observed data
-procast(m)
-procast(m, drop = TRUE)
+## Poisson regression model for FIFA 2018 data:
+## number of goals scored by each team in each game, explained by
+## predicted ability difference of the competing teams
+data("FIFA2018", package = "distributions3")
+m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
 
-## probability integral transform (PIT) on observed data
-procast(m, type = "probability", at = cars$dist)
+## predicted probability distributions for all matches (in sample)
+head(procast(m))
+head(procast(m, drop = TRUE))
 
-## log-likelihood contributions
-procast(m, type = "density", at = cars$dist, log = TRUE)
+## procasts for new data
+## much lower, equal, and much higher ability than opponent
+nd <- data.frame(difference = c(-1, 0, 1))
 
-## log-likelihood sum
-sum(procast(m, type = "density", at = cars$dist, log = TRUE))
+## predicted goal distribution object
+goals <- procast(m, newdata = nd, drop = TRUE)
+goals
+
+## predicted densities/probabilities for scoring 0, 1, ..., 5 goals
+procast(m, newdata = nd, type = "density", at = 0:5)
+## by hand
+pdf(goals, 0:5)
+
+## means and medians
+procast(m, newdata = nd, type = "mean")
+procast(m, newdata = nd, type = "quantile", at = 0.5)
+## by hand
+mean(goals)
+quantile(goals, 0.5)
+
+## evaluate procast elementwise or for all possible combinations
+## of distributions from 'nd' and observations in 'at'
+procast(m, newdata = nd, type = "probability", at = 1:3, elementwise = TRUE)
+procast(m, newdata = nd, type = "probability", at = 1:3, elementwise = FALSE)
+
+## compute in-sample log-likelihood sum via procast
+sum(procast(m, type = "density", at = FIFA2018$goals, log = TRUE))
 logLik(m)
-
-
-## medians on new data
-nd <- data.frame(speed = c(10, 15, 20))
-procast(m, newdata = nd)
-
-## different quantile for each observation
-procast(m, newdata = nd, at = c(0.25, 0.5, 0.75), elementwise = TRUE)
-
-## all combinations of quantiles and observations
-procast(m, newdata = nd, at = c(0.25, 0.5, 0.75), elementwise = FALSE)
 
 }
 \keyword{regression}

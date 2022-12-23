@@ -298,9 +298,7 @@ rootogram.default <- function(
 
     } else if (is.null(breaks) && response_type == "continuous") {
       breaks <- range(support(tmp_prodist))
-      if(!is.finite(breaks[1L])) breaks[1L] <- 
-        floor(pmin(min(yw, na.rm = TRUE), min(quantile(tmp_prodist, 0.01))))
-
+ 
       if(!is.finite(breaks[2L])) breaks[2L] <-
         ceiling(pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99))))
 
