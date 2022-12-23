@@ -2,7 +2,6 @@
 % Please edit documentation in R/procast.R
 \name{procast}
 \alias{procast}
-\alias{procast_setup}
 \alias{procast.default}
 \title{Procast: Probabilistic Forecasting}
 \usage{
@@ -47,17 +46,11 @@ evaluated, typically a numeric vector but possibly also a matrix or data
 frame.  Additionally, \code{at} can be the character string
 \code{"function"} or \code{"list"}, see details below.}
 
-\item{drop}{logical. Should the result be simplified to a vector if possible (by
-dropping the dimension attribute)? If \code{FALSE} a matrix is always returned.}
+\item{drop}{logical. Should forecasts be returned in a data frame (default)
+or (if possible) dropped to a vector, see return value description below.}
 
-\item{\dots}{further parameters passed to methods.}
-
-\item{FUN}{function to be used for forecasts. Either of type \code{FUN(pars,
-\dots)} or \code{FUN(at, pars, \dots)}, see details below.}
-
-\item{pars}{a data frame of predicted distribution parameters.}
-
-\item{elementwise}{logical. Should each element of distribution only be evaluated at the
+\item{\dots}{further parameters passed to methods. In particular, this includes
+the logical argument \code{elementwise = NULL}. Should each element of distribution only be evaluated at the
 corresponding element of \code{at} (\code{elementwise = TRUE}) or at all elements
 in \code{at} (\code{elementwise = FALSE}). Elementwise evaluation is only possible
 if the number of observations is length of \code{at} are the same and in that case a vector of
@@ -65,11 +58,10 @@ the same length is returned. Otherwise a matrix is returned. The default is to u
 \code{elementwise = TRUE} if possible, and otherwise \code{elementwise = FALSE}.}
 }
 \value{
-Either a \code{data.frame} of predictions (in case of multivariate
-forecasts, or if \code{drop = FALSE}, default) or a vector (in case of a
-univariate forecast and additionally \code{drop = TRUE}). Unless \code{at}
-is the character string \code{"function"} or \code{"list"} in which case a
-(list of) function(s) is returned.
+Either a \code{data.frame} of predictions with the same number of rows
+as the \code{newdata} (or the original observations if that is \code{NULL}).
+If \code{drop = TRUE} predictions with just a single column are simplified
+to a vector and predictions with multiple columns to a matrix.
 }
 \description{
 Generic function and methods for computing various kinds of probabilistic
