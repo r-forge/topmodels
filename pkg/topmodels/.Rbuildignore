@@ -1,4 +1,5 @@
 R/disttree.R
+inst/tinytest/test_procast_S3_disttree.R
 inst/conferences
 inst/misc
 inst/only_local
