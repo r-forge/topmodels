@@ -21,7 +21,7 @@ procast(
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = c("distribution", "quantile", "mean", "variance", "probability", "density",
+  type = c("distribution", "mean", "variance", "quantile", "probability", "density",
     "loglikelihood", "parameters", "kurtosis", "skewness"),
   at = 0.5,
   drop = FALSE,
@@ -62,8 +62,8 @@ which to predict. If omitted, the original observations are used.}
 values in \code{newdata}.  The default is to employ \code{NA}.}
 
 \item{type}{character specifying the type of probabilistic forecast to
-compute. (Note that \code{type = "probability"} corresponds to cumulative
-probability as in \code{pnorm}, \code{pbinom}, etc.)}
+compute. Note that \code{type = "probability"} corresponds to cumulative
+probability as in \code{pnorm}, \code{pbinom}, etc.}
 
 \item{at}{specification of values at which the forecasts should be
 evaluated, typically a numeric vector but possibly also a matrix or data

@@ -43,8 +43,8 @@
 #' @param na.action function determining what should be done with missing
 #' values in \code{newdata}.  The default is to employ \code{NA}.
 #' @param type character specifying the type of probabilistic forecast to
-#' compute. (Note that \code{type = "probability"} corresponds to cumulative
-#' probability as in \code{pnorm}, \code{pbinom}, etc.)
+#' compute. Note that \code{type = "probability"} corresponds to cumulative
+#' probability as in \code{pnorm}, \code{pbinom}, etc.
 #' @param at specification of values at which the forecasts should be
 #' evaluated, typically a numeric vector but possibly also a matrix or data
 #' frame.  Additionally, \code{at} can be the character string
@@ -129,10 +129,10 @@ procast <- function(object, newdata = NULL, na.action = na.pass, type = "distrib
 #' @importFrom distributions3 prodist cdf pdf log_pdf variance skewness kurtosis
 #' @export 
 procast.default <- function(object, newdata = NULL, na.action = na.pass,
-  type = c("distribution", "quantile", "mean", "variance", "probability", "density", "loglikelihood", "parameters", "kurtosis", "skewness"),
+  type = c("distribution", "mean", "variance", "quantile", "probability", "density", "loglikelihood", "parameters", "kurtosis", "skewness"),
   at = 0.5, drop = FALSE, ...)
 {
-  ## match type (TODO: also support type = "crps" or even type = FUN?)
+  ## match type
   type <- match.arg(type[1L], c(
     "quantile", "mean", "variance",
     "probability", "cdf",
@@ -143,6 +143,15 @@ procast.default <- function(object, newdata = NULL, na.action = na.pass,
   if(type == "cdf") type <- "probability"
   if(type %in% c("pdf", "pmf")) type <- "density"
   if(type == "log_pdf") type <- "loglikelihood"
+  label <- type
+  
+  ## TODO: one could also support type = function but it's not clear how easy that would really be for the users...
+  ## fargs <- FALSE
+  ## if(!is.function(type)) stop("'type' must either be a character string or a function")
+  ## label <- "user-defined" ## FIXME
+  ## f <- type
+  ## fargs <- length(setdiff(names(formals(f)), "...")) > 1L
+  ## type <- "custom"
 
   ## FIXME: how to handle 'size' in binomial family?
   ## extract probability distribution object
@@ -166,6 +175,7 @@ procast.default <- function(object, newdata = NULL, na.action = na.pass,
     "parameters"    = as.matrix(pd),
     "skewness"      = distributions3::skewness(pd, at, ...),
     "kurtosis"      = distributions3::kurtosis(pd, at, ...)
+    ## "custom"        = if(fargs) f(pd, at, ...) else f(pd, ...)
   )
   
   ## convert to data frame if drop = FALSE
@@ -174,11 +184,11 @@ procast.default <- function(object, newdata = NULL, na.action = na.pass,
   } else {
     if(inherits(pc, "distribution")) {
       pc <- as.data.frame(pc)
-      colnames(pc) <- type
+      colnames(pc) <- label
     }
     if(is.null(dim(pc))) {
       pc <- as.matrix(pc)
-      if(ncol(pc) == 1L) colnames(pc) <- type
+      if(ncol(pc) == 1L) colnames(pc) <- label
     }
     if(!inherits(pc, "data.frame")) pc <- as.data.frame(pc)
   }
