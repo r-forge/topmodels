@@ -3,6 +3,8 @@
 \name{procast}
 \alias{procast}
 \alias{procast.default}
+\alias{procast.lm}
+\alias{procast.glm}
 \title{Procast: Probabilistic Forecasting}
 \usage{
 procast(
@@ -24,6 +26,28 @@ procast(
   at = 0.5,
   drop = FALSE,
   ...
+)
+
+\method{procast}{lm}(
+  object,
+  newdata = NULL,
+  na.action = na.pass,
+  type = "distribution",
+  at = 0.5,
+  drop = FALSE,
+  ...,
+  sigma = "ML"
+)
+
+\method{procast}{glm}(
+  object,
+  newdata = NULL,
+  na.action = na.pass,
+  type = "distribution",
+  at = 0.5,
+  drop = FALSE,
+  ...,
+  dispersion = NULL
 )
 }
 \arguments{
@@ -56,6 +80,21 @@ in \code{at} (\code{elementwise = FALSE}). Elementwise evaluation is only possib
 if the number of observations is length of \code{at} are the same and in that case a vector of
 the same length is returned. Otherwise a matrix is returned. The default is to use
 \code{elementwise = TRUE} if possible, and otherwise \code{elementwise = FALSE}.}
+
+\item{sigma}{character or numeric or \code{NULL}. Specification of the standard
+deviation \code{sigma} to be used for the \code{\link[distributions3]{Normal}} distribution in the
+\code{lm} method. The default \code{"ML"} (or equivalently \code{"MLE"} or \code{NULL})
+uses the maximum likelihood estimate based on the residual sum of squares divided
+by the number of observations, n. Alternatively, \code{sigma = "OLS"} uses the
+least-squares estimate (divided by the residual degrees of freedom, n - k). Finally,
+a concrete numeric value can also be specified in \code{sigma}.}
+
+\item{dispersion}{character or numeric or \code{NULL}. Specification of the
+dispersion parameter in the \code{glm} method. The default \code{NULL}
+(or equivalently \code{"deviance"}) is to use the \code{\link[stats]{deviance}}
+divided by the number of observations, n. Alternatively, \code{dispersion = "Chisquared"}
+uses the Chi-squared statistic divided by the residual degrees of freedom, n - k.
+Finally, a concrete numeric value can also be specified in \code{dispersion}.}
 }
 \value{
 Either a \code{data.frame} of predictions with the same number of rows
