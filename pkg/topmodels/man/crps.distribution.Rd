@@ -22,7 +22,7 @@
 \alias{crps.GAMLSS}
 \title{Methods for Evaluating the CRPS of Probability Distributions}
 \usage{
-crps.distribution(
+\method{crps}{distribution}(
   y,
   x,
   drop = TRUE,
@@ -34,41 +34,41 @@ crps.distribution(
   ...
 )
 
-crps.Beta(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Beta}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Bernoulli(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Bernoulli}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Binomial(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Binomial}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Erlang(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Erlang}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Exponential(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Exponential}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Gamma(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Gamma}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.GEV(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{GEV}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Geometric(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Geometric}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Gumbel(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Gumbel}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.HyperGeometric(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{HyperGeometric}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Logistic(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Logistic}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.LogNormal(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{LogNormal}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.NegativeBinomial(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{NegativeBinomial}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Normal(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Normal}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Poisson(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Poisson}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.StudentsT(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{StudentsT}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.Uniform(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{Uniform}(y, x, drop = TRUE, elementwise = NULL, ...)
 
-crps.GAMLSS(y, x, drop = TRUE, elementwise = NULL, ...)
+\method{crps}{GAMLSS}(y, x, drop = TRUE, elementwise = NULL, ...)
 }
 \arguments{
 \item{y}{A distribution object, e.g., as created by
@@ -178,11 +178,12 @@ library("distributions3")
 X <- Normal(mu = c(0, 1, 2), sigma = c(2, 1, 1))
 x <- c(0, 0, 1)
 
-## evaluate crps using infrastructure from scoringRules
+## evaluate crps
+## using infrastructure from scoringRules (based on closed-form analytic equations)
 library("scoringRules")
 crps(X, x)
 
-## using general distribution method (based on numeric integration)
+## using general distribution method explicitly (based on numeric integration)
 crps.distribution(X, x)
 
 ## analogously for Poisson distribution

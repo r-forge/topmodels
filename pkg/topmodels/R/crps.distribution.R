@@ -96,11 +96,12 @@
 #' X <- Normal(mu = c(0, 1, 2), sigma = c(2, 1, 1))
 #' x <- c(0, 0, 1)
 #'
-#' ## evaluate crps using infrastructure from scoringRules
+#' ## evaluate crps
+#' ## using infrastructure from scoringRules (based on closed-form analytic equations)
 #' library("scoringRules")
 #' crps(X, x)
 #' 
-#' ## using general distribution method (based on numeric integration)
+#' ## using general distribution method explicitly (based on numeric integration)
 #' crps.distribution(X, x)
 #'
 #' ## analogously for Poisson distribution
