@@ -21,29 +21,29 @@
 #' discrete-continuous distribution using \code{\link[distributions3]{is_continuous}}
 #' and \code{\link[distributions3]{is_discrete}}, respectively.
 #'
-#' For continuous and mixed distributions, an equidistant grid of \code{m + 5}
+#' For continuous and mixed distributions, an equidistant grid of \code{gridsize + 5}
 #' probabilities is drawn for which the corresponding \code{quantile}s for each
 #' distribution \code{y} are calculated (including the observation \code{x}). The
 #' calculation of the CRPS then uses a trapezodial approximation for the
-#' numeric integration.  For discrete distributions \code{m} equidistant quantiles are
+#' numeric integration.  For discrete distributions \code{gridsize} equidistant quantiles are
 #' drawn and the corresponding probabilities from the \code{cdf} are calculated for
 #' each distribution \code{y} (including the observation \code{x}) and the CRPS calculated using
-#' numeric integration.  If a grid of size \code{m} is not sufficient to cover
+#' numeric integration.  If the \code{gridsize} is not sufficient to cover
 #' the required range, the method falls back to the procedure used for
 #' continuous distributions to approximate the CRPS.
 #'
 #' The numeric approximation requires to set up a matrix of dimension
-#' \code{length(y) * (m + 5)} (or \code{length(y) * (m + 1)}) which may be very
-#' memory intensive if \code{length(y)} and/or \code{m} are large. Thus, the data is
+#' \code{length(y) * (gridsize + 5)} (or \code{length(y) * (gridsize + 1)}) which may be very
+#' memory intensive if \code{length(y)} and/or \code{gridsize} are large. Thus, the data is
 #' split batches of (approximately) equal size, not larger than \code{batchsize}.
-#' Thus, the memory requirement is reduced to \code{batchsize * (m + 5)} in each step.
+#' Thus, the memory requirement is reduced to \code{batchsize * (gridsize + 5)} in each step.
 #' Hence, a smaller value of \code{batchsize} will reduce memory footprint but will
 #' slightly increase computation time.
 #'
 #' The error (deviation between numerical approximation and analytic solution)
 #' has been shown to be in the order of \code{1e-2} for a series of distributions
-#' tested. Accuracy can be increased by increasing \code{m} and will be lower
-#' for a smaller \code{m}.
+#' tested. Accuracy can be increased by increasing \code{gridsize} and will be lower
+#' for a smaller \code{gridsize}.
 #'
 #' For parallelization of the numeric computations, a suitable \code{applyfun} can be
 #' provided that carries out the integration for each element of \code{y}. To facilitate
@@ -64,7 +64,7 @@
 #'   done element by element (\code{elementwise = TRUE}, yielding a vector)? The
 #'   default of \code{NULL} means that \code{elementwise = TRUE} is used if the
 #'   lengths match and otherwise \code{elementwise = FALSE} is used.
-#' @param m positive size of the grid used to approximate the CDF for
+#' @param gridsize positive size of the grid used to approximate the CDF for
 #'   the numerical calculation of the CRPS.
 #' @param batchsize maximum batch size. Used to split the input into batches.
 #'   Lower values reduce required memory but may increase computation time.
@@ -111,15 +111,15 @@
 #' @useDynLib topmodels, .registration = TRUE
 #' @export crps.distribution
 #' @exportS3Method scoringRules::crps distribution
-crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, m = 500, batchsize = 1e4, applyfun = NULL, cores = NULL, ...) {
+crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 500, batchsize = 1e4, applyfun = NULL, cores = NULL, ...) {
   ## essentially follow apply_dpqr() but try to exploit specific structure of CRPS
 
   ## sanity checks
   stopifnot(inherits(y, "distribution"), is.numeric(x))
   stopifnot(is.null(drop) || isTRUE(drop) || isFALSE(drop))
   stopifnot(is.null(elementwise) || isTRUE(elementwise) || isFALSE(elementwise))
-  stopifnot(is.numeric(m), length(m) == 1L, m >= 2L)
-  m <- as.integer(m)
+  stopifnot(is.numeric(gridsize), length(gridsize) == 1L, gridsize >= 2L)
+  gridsize <- as.integer(gridsize)
   stopifnot(is.numeric(batchsize), length(batchsize) == 1L, batchsize >= 1L)
   stopifnot(is.null(cores) || is.numeric(cores))
   stopifnot(is.null(applyfun) || is.function(applyfun))
@@ -207,12 +207,12 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, m = 500, ba
   discrete <- all(distributions3::is_discrete(y))
   ## If all distributions are discrete: Calculate required grid size.
   ## If this exceeds `m` continuous approximation will be used.
-  ## TODO(R): Split data; use approximation only where grid exceeds m but use
+  ## TODO(R): Split data; use approximation only where grid exceeds gridsize but use
   ##          the discrete (more accurate) approximation for the others?
   if (discrete) {
     xrange <- pmin(range(quantile(y, c(0.001, 0.999)), na.rm = TRUE), range(support(y)))
-    ## If grid size larger m; set `discrete = FALSE` and continue; fallback to discrete case
-    if (diff(xrange) > m) {
+    ## If grid size larger gridsize; set `discrete = FALSE` and continue; fallback to discrete case
+    if (diff(xrange) > gridsize) {
         discrete <- FALSE ## Falling back to continuous mode
         warning("grid size too large; falling back to continuous CRPS approximation")
     } else {
@@ -249,7 +249,7 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, m = 500, ba
   ## Continuous mode
   if (!discrete) {
     ## Drawing one set of probabilities; calculate quantiles for all distributions
-    p <- c(0.001, 0.01, 0.1, 1:(m-1), m - c(0.1, 0.01, 0.001)) / m
+    p <- c(0.001, 0.01, 0.1, 1:(gridsize-1), gridsize - c(0.1, 0.01, 0.001)) / gridsize
     ## Not elementwise: Same observation(s) `x` for all distributions `y`
     if (isFALSE(elementwise)) {
         ## Scoping `batch_id`, `y`, `x`, `p`

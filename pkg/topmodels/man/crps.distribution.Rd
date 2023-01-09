@@ -22,53 +22,53 @@
 \alias{crps.GAMLSS}
 \title{Methods for Evaluating the CRPS of Probability Distributions}
 \usage{
-\method{crps}{distribution}(
+crps.distribution(
   y,
   x,
   drop = TRUE,
   elementwise = NULL,
-  m = 500,
+  gridsize = 500,
   batchsize = 10000,
   applyfun = NULL,
   cores = NULL,
   ...
 )
 
-\method{crps}{Beta}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Beta(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Bernoulli}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Bernoulli(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Binomial}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Binomial(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Erlang}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Erlang(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Exponential}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Exponential(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Gamma}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Gamma(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{GEV}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.GEV(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Geometric}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Geometric(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Gumbel}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Gumbel(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{HyperGeometric}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.HyperGeometric(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Logistic}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Logistic(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{LogNormal}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.LogNormal(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{NegativeBinomial}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.NegativeBinomial(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Normal}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Normal(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Poisson}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Poisson(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{StudentsT}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.StudentsT(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{Uniform}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.Uniform(y, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{crps}{GAMLSS}(y, x, drop = TRUE, elementwise = NULL, ...)
+crps.GAMLSS(y, x, drop = TRUE, elementwise = NULL, ...)
 }
 \arguments{
 \item{y}{A distribution object, e.g., as created by
@@ -86,7 +86,7 @@ done element by element (\code{elementwise = TRUE}, yielding a vector)? The
 default of \code{NULL} means that \code{elementwise = TRUE} is used if the
 lengths match and otherwise \code{elementwise = FALSE} is used.}
 
-\item{m}{positive size of the grid used to approximate the CDF for
+\item{gridsize}{positive size of the grid used to approximate the CDF for
 the numerical calculation of the CRPS.}
 
 \item{batchsize}{maximum batch size. Used to split the input into batches.
@@ -133,29 +133,29 @@ entire support is continuous or whose entire support is discrete, or mixed
 discrete-continuous distribution using \code{\link[distributions3]{is_continuous}}
 and \code{\link[distributions3]{is_discrete}}, respectively.
 
-For continuous and mixed distributions, an equidistant grid of \code{m + 5}
+For continuous and mixed distributions, an equidistant grid of \code{gridsize + 5}
 probabilities is drawn for which the corresponding \code{quantile}s for each
 distribution \code{y} are calculated (including the observation \code{x}). The
 calculation of the CRPS then uses a trapezodial approximation for the
-numeric integration.  For discrete distributions \code{m} equidistant quantiles are
+numeric integration.  For discrete distributions \code{gridsize} equidistant quantiles are
 drawn and the corresponding probabilities from the \code{cdf} are calculated for
 each distribution \code{y} (including the observation \code{x}) and the CRPS calculated using
-numeric integration.  If a grid of size \code{m} is not sufficient to cover
+numeric integration.  If the \code{gridsize} is not sufficient to cover
 the required range, the method falls back to the procedure used for
 continuous distributions to approximate the CRPS.
 
 The numeric approximation requires to set up a matrix of dimension
-\code{length(y) * (m + 5)} (or \code{length(y) * (m + 1)}) which may be very
-memory intensive if \code{length(y)} and/or \code{m} are large. Thus, the data is
+\code{length(y) * (gridsize + 5)} (or \code{length(y) * (gridsize + 1)}) which may be very
+memory intensive if \code{length(y)} and/or \code{gridsize} are large. Thus, the data is
 split batches of (approximately) equal size, not larger than \code{batchsize}.
-Thus, the memory requirement is reduced to \code{batchsize * (m + 5)} in each step.
+Thus, the memory requirement is reduced to \code{batchsize * (gridsize + 5)} in each step.
 Hence, a smaller value of \code{batchsize} will reduce memory footprint but will
 slightly increase computation time.
 
 The error (deviation between numerical approximation and analytic solution)
 has been shown to be in the order of \code{1e-2} for a series of distributions
-tested. Accuracy can be increased by increasing \code{m} and will be lower
-for a smaller \code{m}.
+tested. Accuracy can be increased by increasing \code{gridsize} and will be lower
+for a smaller \code{gridsize}.
 
 For parallelization of the numeric computations, a suitable \code{applyfun} can be
 provided that carries out the integration for each element of \code{y}. To facilitate
