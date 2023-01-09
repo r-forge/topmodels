@@ -19,6 +19,7 @@
 \alias{crps.Poisson}
 \alias{crps.StudentsT}
 \alias{crps.Uniform}
+\alias{crps.GAMLSS}
 \title{Methods for Evaluating the CRPS of Probability Distributions}
 \usage{
 \method{crps}{distribution}(
@@ -66,6 +67,8 @@
 \method{crps}{StudentsT}(y, x, drop = TRUE, elementwise = NULL, ...)
 
 \method{crps}{Uniform}(y, x, drop = TRUE, elementwise = NULL, ...)
+
+\method{crps}{GAMLSS}(y, x, drop = TRUE, elementwise = NULL, ...)
 }
 \arguments{
 \item{y}{A distribution object, e.g., as created by

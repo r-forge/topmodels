@@ -16,7 +16,6 @@
 \alias{is_continuous.GAMLSS}
 \alias{format.GAMLSS}
 \alias{print.GAMLSS}
-\alias{crps.GAMLSS}
 \title{Create a GAMLSS Distribution}
 \usage{
 GAMLSS(family, mu, sigma, tau, nu)
