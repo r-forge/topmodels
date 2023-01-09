@@ -52,7 +52,7 @@ m2 <- crch(dist ~ speed | speed, data = cars)
 nd <- data.frame(speed = c(10, 15, 20))
 
 expect_equal(
-  procast(m2, at = c(0.25, 0.5, 0.75), elementwise = FALSE),
+  procast(m2, type = "quantile", at = c(0.25, 0.5, 0.75), elementwise = FALSE),
   data.frame(
     q_0.25 = predict(m2, type = "quantile", at = 0.25),
     q_0.5  = predict(m2, type = "quantile", at = 0.50),

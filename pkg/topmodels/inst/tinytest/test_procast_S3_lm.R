@@ -8,7 +8,7 @@
 m <- lm(dist ~ speed, data = cars)
 
 expect_equal(
-  procast(m, drop = TRUE), 
+  procast(m, type = "quantile", drop = TRUE), 
   qnorm(0.5, m$fitted.values, sd = sqrt(mean(residuals(m)^2)))
 )
 
@@ -55,7 +55,7 @@ expect_equal(
 # Test procast.lm argument = `drop`
 # --------------------------------------------------------------------
 expect_equal(
-  procast(m, drop = FALSE),
+  procast(m, type = "quantile", drop = FALSE),
   data.frame(
     quantile = qnorm(0.5, m$fitted.values, sd = sqrt(mean(residuals(m)^2)))
   )
@@ -86,7 +86,7 @@ m <- lm(dist ~ speed, data = cars)
 nd <- data.frame(speed = c(10, 15, 20))
 
 expect_equal(
-  procast(m, at = c(0.25, 0.5, 0.75)),
+  procast(m, type = "quantile", at = c(0.25, 0.5, 0.75)),
   data.frame(
     q_0.25 = qnorm(0.25, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
     q_0.5  = qnorm(0.50, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
@@ -95,7 +95,7 @@ expect_equal(
 )
 
 expect_equal(
-  procast(m, at = rbind(c(0.25, 0.5, 0.75))),
+  procast(m, type = "quantile", at = rbind(c(0.25, 0.5, 0.75))),
   data.frame(
     q_0.25 = qnorm(0.25, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
     q_0.5  = qnorm(0.50, m$fitted.values, sd = sqrt(mean(residuals(m)^2))),
