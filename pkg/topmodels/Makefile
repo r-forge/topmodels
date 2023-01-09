@@ -6,7 +6,7 @@
 # Devtools based cmds
 # ---------------------------------------------------
 document:
-	Rscript -e "devtools::document()"
+	Rscript -e "library('scoringRules'); devtools::document()"
 
 install: document
 	Rscript -e "devtools::install()"
