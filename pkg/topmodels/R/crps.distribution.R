@@ -144,7 +144,7 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
   ##   only possible if n = k
   ## * elementwise = NULL: guess the type (default),
   ##   only use TRUE if n = k > 1, and FALSE otherwise
-  if(is.null(elementwise)) elementwise <- k > 1L && k == n && is.null(dim(x))
+  if(is.null(elementwise)) elementwise <- k == 1L || (k > 1L && k == n && is.null(dim(x)))
   if(elementwise && k > 1L && k != n) stop(
     sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
 
@@ -158,7 +158,7 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
   ## handle different types of "x"
   if (k == 0L) {
     return(matrix(numeric(0L), nrow = n, ncol = 0L, dimnames = list(rnam, NULL)))
-  } else if (k == 1L) {
+  } else if (k == 1L & elementwise) {
     x <- rep.int(as.vector(x), n)
   } else if (elementwise) {
     k <- 1L
@@ -261,6 +261,7 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
                 px   <- cdf(y[idx], z)   ## Probabilities at `y[idx](z)`
                 .Call("c_CRPS_numeric", as.numeric(z), px, p, q, TRUE, PACKAGE = "topmodels")
             }
+            print(x)
             return(do.call(cbind, lapply(x, fn)))
         }
         # Iterate over batches first (this way we only have to calculate `q` once per batch
