@@ -20,6 +20,7 @@
 \alias{crps.StudentsT}
 \alias{crps.Uniform}
 \alias{crps.GAMLSS}
+\alias{crps.BAMLSS}
 \title{Methods for Evaluating the CRPS of Probability Distributions}
 \usage{
 \method{crps}{distribution}(
@@ -69,6 +70,8 @@
 \method{crps}{Uniform}(y, x, drop = TRUE, elementwise = NULL, ...)
 
 \method{crps}{GAMLSS}(y, x, drop = TRUE, elementwise = NULL, ...)
+
+\method{crps}{BAMLSS}(y, x, drop = TRUE, elementwise = NULL, ...)
 }
 \arguments{
 \item{y}{A distribution object, e.g., as created by
