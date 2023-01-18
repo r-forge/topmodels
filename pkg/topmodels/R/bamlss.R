@@ -127,7 +127,7 @@ BAMLSS <- function(family, ...) {
   ## set up distribution
   d <- d[, f$names, drop = FALSE]
   class(d) <- c("BAMLSS", "distribution")
-  family(d) <- f
+  attr(d, "family") <- f
   return(d)
 }
 
@@ -408,15 +408,15 @@ prodist.bamlss <- function(object, ..., distributions3 = FALSE) {
   ## check whether distributions3 object is already available
   if(distributions3) {
     rval <- switch(object$family$family,
-      "binomial" = distributions3::Binomial(p = d$pi, size = 1),
-      "gaussian" = distributions3::Normal(mu = d$mu, sigma = d$sigma),
+      "binomial"  = distributions3::Binomial(p = d$pi, size = 1),
+      "gaussian"  = distributions3::Normal(mu = d$mu, sigma = d$sigma),
       "lognormal" = distributions3::LogNormal(log_mu = d$mu, log_sigma = d$sigma),
-      "gpareto" = distributions3::GP(xi = d$xi, sigma = d$sigma),
-      "GEV" = distributions3::GEV(mu = d$mu, sigma = d$sigma, xi = d$xi),
-      "weibull" = distributions3::Weibull(shape = d$alpha, scale = d$lambda),
-      "poisson" = distributions3::Poisson(lambda = d$lambda),
-      "nbinom" = distributions3::NegativeBinomial(mu = d$mu, size = d$theta),
-      "ztnbinom" = distributions3::ZTNegativeBinomial(mu = d$mu, theta = d$theta),
+      "gpareto"   = distributions3::GP(xi = d$xi, sigma = d$sigma),
+      "GEV"       = distributions3::GEV(mu = d$mu, sigma = d$sigma, xi = d$xi),
+      "weibull"   = distributions3::Weibull(shape = d$alpha, scale = d$lambda),
+      "poisson"   = distributions3::Poisson(lambda = d$lambda),
+      "nbinom"    = distributions3::NegativeBinomial(mu = d$mu, size = d$theta),
+      "ztnbinom"  = distributions3::ZTNegativeBinomial(mu = d$mu, theta = d$theta),
       NULL
     )
     if(is.null(rval)) {

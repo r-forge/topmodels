@@ -261,7 +261,6 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
                 px   <- cdf(y[idx], z)   ## Probabilities at `y[idx](z)`
                 .Call("c_CRPS_numeric", as.numeric(z), px, p, q, TRUE, PACKAGE = "topmodels")
             }
-            print(x)
             return(do.call(cbind, lapply(x, fn)))
         }
         # Iterate over batches first (this way we only have to calculate `q` once per batch
@@ -453,7 +452,7 @@ crps.Uniform <- function(y, x, drop = TRUE, elementwise = NULL, ...) {
 #' @exportS3Method scoringRules::crps GAMLSS
 crps.GAMLSS <- function(y, x, drop = TRUE, elementwise = NULL, ...) {
   if(requireNamespace("scoringRules")) {
-    ## manually match gamlss.dist distributions names with scoringRules, if possible
+    ## manually match gamlss.dist distribution names with scoringRules, if possible
     f <- attr(y, "family")[1L]
     FUN <- switch(EXPR = f,
       "NO"  = function(at, d) scoringRules::crps_norm(y = at, mean = d$mu, sd = d$sigma),
@@ -463,11 +462,39 @@ crps.GAMLSS <- function(y, x, drop = TRUE, elementwise = NULL, ...) {
       "PO"  = function(at, d) scoringRules::crps_pois(y = at, lambda = d$mu),
       "BI"  = function(at, d) scoringRules::crps_binom(y = at, prob = d$mu, size = 1L), ## FIXME: size?
       "NBI" = function(at, d) scoringRules::crps_nbinom(y = at, size = 1/d$sigma, mu = d$mu),
-      "NBII"= function(at, d) scoringRules::crps_nbinom(y = at, size = d$mu/d$sigma, mu = d$m),
+      "NBII"= function(at, d) scoringRules::crps_nbinom(y = at, size = d$mu/d$sigma, mu = d$mu),
       "EXP" = function(at, d) scoringRules::crps_exp(y = at, rate = 1/d$mu),
       "GA"  = function(at, d) scoringRules::crps_gamma(y = at, shape = 1/d$sigma^2, scale = d$mu * d$sigma^2),
       "BE"  = function(at, d) scoringRules::crps_beta(y = at, shape1 = d$mu * (1 - d$sigma^2)/(d$sigma^2), shape2 = (1 - d$mu) * (1 - d$sigma^2)/(d$sigma^2)),
       NULL ## FIXME: scoringRules also has gpd, gev, lapl, cnorm, tnorm, ...
+    )
+  } else {
+    FUN <- NULL
+  }
+  if(is.null(FUN)) {
+    ## use crps.distribution() if no closed-form solution from scoringRules is available
+    NextMethod()
+  } else {
+    ## use apply_dpqr() with scoringRules::crps_*() function
+    distributions3::apply_dpqr(d = y, FUN = FUN, at = x, type = "crps", drop = drop, elementwise = elementwise)
+  }
+}
+
+#' @rdname crps.distribution
+#' @exportS3Method scoringRules::crps BAMLSS
+crps.BAMLSS <- function(y, x, drop = TRUE, elementwise = NULL, ...) {
+  if(requireNamespace("scoringRules")) {
+    ## manually match bamlss family distribution names with scoringRules, if possible
+    f <- family(y)$family
+    FUN <- switch(EXPR = f,
+      "binomial"  = function(at, d) scoringRules::crps_binom(y = at, prob = d$pi, size = 1L),
+      "gaussian"  = function(at, d) scoringRules::crps_norm(y = at, mean = d$mu, sd = d$sigma),
+      "lognormal" = function(at, d) scoringRules::crps_lnorm(y = at, meanlog = d$mu, sdlog = d$sigma),
+      "GEV"       = function(at, d) scoringRules::crps_gev(y = at, location = d$mu, scale = d$sigma, shape = d$xi),
+      "gpareto"   = function(at, d) scoringRules::crps_gpd(y = at, scale = d$sigma, shape = d$xi),
+      "poisson"   = function(at, d) scoringRules::crps_pois(y = at, lambda = d$lambda),
+      "nbinom"    = function(at, d) scoringRules::crps_nbinom(y = at, size = d$theta, mu = d$mu),
+      NULL ## FIXME: bamlss and scoringRules can also be matched with different parameterizations for beta, gamma, Gumbel, etc.
     )
   } else {
     FUN <- NULL
