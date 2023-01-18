@@ -5,6 +5,7 @@
 \alias{procast.default}
 \alias{procast.lm}
 \alias{procast.glm}
+\alias{procast.bamlss}
 \title{Procast: Probabilistic Forecasting}
 \usage{
 procast(
@@ -48,6 +49,17 @@ procast(
   drop = FALSE,
   ...,
   dispersion = NULL
+)
+
+\method{procast}{bamlss}(
+  object,
+  newdata = NULL,
+  na.action = na.pass,
+  type = "distribution",
+  at = 0.5,
+  drop = FALSE,
+  ...,
+  distributions3 = FALSE
 )
 }
 \arguments{
