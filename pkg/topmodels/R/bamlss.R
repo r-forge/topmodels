@@ -127,7 +127,7 @@ BAMLSS <- function(family, ...) {
   ## set up distribution
   d <- d[, f$names, drop = FALSE]
   class(d) <- c("BAMLSS", "distribution")
-  attr(d, "family") <- f
+  family(d) <- f
   return(d)
 }
 
@@ -146,7 +146,7 @@ family.BAMLSS <- function(object, ...) {
 #' @usage NULL
 #' @importFrom stats setNames
 mean.BAMLSS <- function(x, ...) {
-  f <- attr(x, "family")
+  f <- family(x)
   if(!("mean" %in% names(f))) stop(sprintf("no mean() function provided by '%s' family", f$family))
   m <- f$mean(x)
   setNames(m, names(x))
@@ -159,7 +159,7 @@ mean.BAMLSS <- function(x, ...) {
 #' @importFrom distributions3 variance
 #' @importFrom stats setNames
 variance.BAMLSS <- function(x, ...) {
-  f <- attr(x, "family")
+  f <- family(x)
   if(!("variance" %in% names(f))) stop(sprintf("no variance() function provided by '%s' family", f$family))
   m <- f$variance(x)
   setNames(m, names(x))
@@ -171,7 +171,7 @@ variance.BAMLSS <- function(x, ...) {
 #' @usage NULL
 #' @importFrom distributions3 skewness
 skewness.BAMLSS <- function(x, ...) {
-  f <- attr(x, "family")
+  f <- family(x)
   if(!("skewness" %in% names(f))) stop(sprintf("no skewness() function provided by '%s' family", f$family))
   m <- f$skewness(x)
   setNames(m, names(x))
@@ -183,7 +183,7 @@ skewness.BAMLSS <- function(x, ...) {
 #' @usage NULL
 #' @importFrom distributions3 kurtosis
 kurtosis.BAMLSS <- function(x, ...) {
-  f <- attr(x, "family")
+  f <- family(x)
   if(!("kurtosis" %in% names(f))) stop(sprintf("no kurtosis() function provided by '%s' family", f$family))
   m <- f$kurtosis(x)
   setNames(m, names(x))
@@ -195,7 +195,7 @@ kurtosis.BAMLSS <- function(x, ...) {
 #' @usage NULL
 #' @importFrom distributions3 random apply_dpqr make_positive_integer
 random.BAMLSS <- function(x, n = 1L, drop = TRUE, ...) {
-  f <- attr(x, "family")
+  f <- family(x)
   if(!("r" %in% names(f))) stop(sprintf("no r() function provided by '%s' family", f$family))
   n <- distributions3::make_positive_integer(n)
   if (n == 0L) return(numeric(0L))
@@ -209,7 +209,7 @@ random.BAMLSS <- function(x, n = 1L, drop = TRUE, ...) {
 #' @export
 #' @usage NULL
 pdf.BAMLSS <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
-  f <- attr(d, "family")
+  f <- family(d)
   if(!("d" %in% names(f))) stop(sprintf("no d() function provided by '%s' family", f$family))
   FUN <- function(at, d) f$d(y = at, par = d, ...)
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "density", drop = drop, elementwise = elementwise)
@@ -221,7 +221,7 @@ pdf.BAMLSS <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 #' @usage NULL
 #' @importFrom distributions3 log_pdf apply_dpqr
 log_pdf.BAMLSS <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
-  f <- attr(d, "family")
+  f <- family(d)
   if(!("d" %in% names(f))) stop(sprintf("no d() function provided by '%s' family", f$family))
   FUN <- function(at, d) f$d(y = at, par = d, log = TRUE, ...)
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "logLik", drop = drop, elementwise = elementwise)
@@ -233,7 +233,7 @@ log_pdf.BAMLSS <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 #' @usage NULL
 #' @importFrom distributions3 cdf apply_dpqr
 cdf.BAMLSS <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
-  f <- attr(d, "family")
+  f <- family(d)
   if(!("p" %in% names(f))) stop(sprintf("no p() function provided by '%s' family", f$family))
   FUN <- function(at, d) f$p(y = at, par = d, ...)
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "probability", drop = drop, elementwise = elementwise)
@@ -246,7 +246,7 @@ cdf.BAMLSS <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 #' @importFrom stats quantile
 #' @importFrom distributions3 apply_dpqr
 quantile.BAMLSS <- function(x, probs, drop = TRUE, elementwise = NULL, ...) {
-  f <- attr(x, "family")
+  f <- family(x)
   if(!("q" %in% names(f))) stop(sprintf("no q() function provided by '%s' family", f$family))
   FUN <- function(at, d) f$q(p = at, par = d, ...)
   distributions3::apply_dpqr(d = x, FUN = FUN, at = probs, type = "quantile", drop = drop, elementwise = elementwise)
@@ -269,8 +269,12 @@ support.BAMLSS <- function(d, drop = TRUE, ...) {
 #' @importFrom distributions3 is_discrete
 #' @importFrom stats setNames
 is_discrete.BAMLSS <- function(d, ...) {
-  f <- attr(d, "family")
-  setNames(rep.int(FALSE, length(d)), names(d)) ## FIXME
+  f <- family(d)
+  if(!("type" %in% names(f))) {
+    warning(sprintf("no 'type' information provided by '%s' family", f$family))
+    f$type <- "unknown"
+  }
+  setNames(rep.int(f$type == "discrete", length(d)), names(d))
 }
 
 #' @rdname BAMLSS
@@ -280,8 +284,12 @@ is_discrete.BAMLSS <- function(d, ...) {
 #' @importFrom distributions3 is_continuous
 #' @importFrom stats setNames
 is_continuous.BAMLSS <- function(d, ...) {
-  f <- attr(d, "family")
-  setNames(rep.int(TRUE, length(d)), names(d)) ## FIXME
+  f <- family(d)
+  if(!("type" %in% names(f))) {
+    warning(sprintf("no 'type' information provided by '%s' family", f$family))
+    f$type <- "unknown"
+  }
+  setNames(rep.int(f$type == "continuous", length(d)), names(d))
 }
 
 #' @rdname BAMLSS
@@ -289,7 +297,7 @@ is_continuous.BAMLSS <- function(d, ...) {
 #' @export
 #' @usage NULL
 format.BAMLSS <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
-  class(x) <- c(paste("BAMLSS", attr(x, "family")$family), "distribution")
+  class(x) <- c(paste("BAMLSS", family(x)$family), "distribution")
   NextMethod()
 }
 
@@ -298,7 +306,7 @@ format.BAMLSS <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
 #' @export
 #' @usage NULL
 print.BAMLSS <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
-  class(x) <- c(paste("BAMLSS", attr(x, "family")$family), "distribution")
+  class(x) <- c(paste("BAMLSS", family(x)$family), "distribution")
   NextMethod()
 }
 
@@ -326,6 +334,10 @@ print.BAMLSS <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
 #' @param object A model object of class \code{\link[bamlss]{bamlss}}.
 #' @param ... Arguments passed on to \code{\link[bamlss]{predict.bamlss}}, 
 #' e.g., \code{newdata}.
+#' @param distributions3 logical. If a dedicated \pkg{distributions3} object
+#' is available (e.g., such as \code{\link[distributions3]{Normal}}) and uses
+#' the same parameterization, should this be used instead of the general
+#' \code{BAMLSS} distribution?
 #' 
 #' @return An object inheriting from \code{distribution}.
 #' 
@@ -391,7 +403,28 @@ print.BAMLSS <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
 #' print(d2)
 #' quantile(d2, c(0.05, 0.5, 0.95))
 #' @export
-prodist.bamlss <- function(object, ...) {
+prodist.bamlss <- function(object, ..., distributions3 = FALSE) {
   d <- predict(object, type = "parameter", drop = FALSE, ...)
+  ## check whether distributions3 object is already available
+  if(distributions3) {
+    rval <- switch(object$family$family,
+      "binomial" = distributions3::Binomial(p = d$pi, size = 1),
+      "gaussian" = distributions3::Normal(mu = d$mu, sigma = d$sigma),
+      "lognormal" = distributions3::LogNormal(log_mu = d$mu, log_sigma = d$sigma),
+      "gpareto" = distributions3::GP(xi = d$xi, sigma = d$sigma),
+      "GEV" = distributions3::GEV(mu = d$mu, sigma = d$sigma, xi = d$xi),
+      "weibull" = distributions3::Weibull(shape = d$alpha, scale = d$lambda),
+      "poisson" = distributions3::Poisson(lambda = d$lambda),
+      "nbinom" = distributions3::NegativeBinomial(mu = d$mu, size = d$theta),
+      "ztnbinom" = distributions3::ZTNegativeBinomial(mu = d$mu, theta = d$theta),
+      NULL
+    )
+    if(is.null(rval)) {
+      warning(sprintf("no dedicated distributions3 object available for '%s' family, using general BAMLSS distribution object instead", object$family$family))
+    } else {
+      return(rval)
+    }
+  }
+  ## otherwise use general BAMLSS distributions3 object
   do.call("BAMLSS", c(list(family = object$family), d))
 }

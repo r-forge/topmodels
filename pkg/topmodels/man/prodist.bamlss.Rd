@@ -4,13 +4,18 @@
 \alias{prodist.bamlss}
 \title{Extracting Fitted or Predicted Probability Distributions from bamlss Models}
 \usage{
-\method{prodist}{bamlss}(object, ...)
+\method{prodist}{bamlss}(object, ..., distributions3 = FALSE)
 }
 \arguments{
 \item{object}{A model object of class \code{\link[bamlss]{bamlss}}.}
 
 \item{...}{Arguments passed on to \code{\link[bamlss]{predict.bamlss}}, 
 e.g., \code{newdata}.}
+
+\item{distributions3}{logical. If a dedicated \pkg{distributions3} object
+is available (e.g., such as \code{\link[distributions3]{Normal}}) and uses
+the same parameterization, should this be used instead of the general
+\code{BAMLSS} distribution?}
 }
 \value{
 An object inheriting from \code{distribution}.
