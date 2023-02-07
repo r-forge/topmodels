@@ -199,6 +199,9 @@ dpqrempirical_prep <- function(x, y) {
 #' @export
 #' @rdname Empirical
 pempirical <- function(q, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE) {
+    lower.tail <- as.logical(lower.tail)[1L]
+    log.p      <- as.logical(log.p)[1L]
+
     tmp <- dpqrempirical_prep(q, y)
     q <- tmp[[1]]; y <- tmp[[2]]
 
@@ -251,8 +254,12 @@ dempirical <- function(x, y, log = FALSE, method = "hist", ...) {
 #' @export
 #' @rdname Empirical
 qempirical <- function(p, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE, ...) {
+    lower.tail <- as.logical(lower.tail)[1L]
+    log.p      <- as.logical(log.p)[1L]
+    na.rm      <- as.logical(na.rm)[1L]
+
     tmp <- dpqrempirical_prep(p, y)
-    p <- tmp[[1]]; y <- tmp[[2]]
+    p <- if (log.p) exp(tmp[[1]]) else tmp[[1]]; y <- tmp[[2]]
 
     # If length(x) equals to 1 apply can be used
     if (length(p) == 1) {
@@ -261,37 +268,38 @@ qempirical <- function(p, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE, ...
         rval <- sapply(seq_len(NROW(y)), function(i) quantile(y[i, ], probs = p[i], na.rm = na.rm, ...)[[1]])
     }
     if (!lower.tail) rval <- 1. - rval
-    return(if (!log.p) rval else log(rval))
+    return(rval)
 }
 
 #' @export
 #' @rdname Empirical
-rempirical <- function(n, y, lower.tail = TRUE, log.p = FALSE, ...) {
+rempirical <- function(n, y, na.rm = TRUE) {
     n <- if (length(n) > 1L) length(n) else as.integer(n)
     stopifnot("invalid arguments" = length(n) == 1L && n >= 0L)
+    na.rm      <- as.logical(na.rm)[1L]
+    na.action <- if (na.rm) na.omit else identity
+
     y <- dpqrempirical_prep(n, y)[[2]]
     if (n == 0L) {
         rval <- vector("numeric")
     } else if (NROW(y) == 1) {
-        rval <- sample(na.omit(y), n, replace = TRUE)
+        rval <- sample(na.action(as.vector(y)), n, replace = TRUE)
     } else {
         nt  <- n %/% NROW(y) + ifelse(n %% NROW(y) == 0, 0L, 1L)
-        rval <- lapply(seq_len(NROW(y)), function(i) sample(na.omit(y[i, ]), nt, replace = TRUE))
-        rval <- head(unlist(rval), n = n)
+        rval <- sapply(seq_len(NROW(y)), function(i) sample(na.action(y[i, ]), nt, replace = TRUE))
+        rval <- head(as.vector(t(rval)), n = n)
     }
     return(rval)
 
 }
 
 #' @export
-#' @rdname Empirical
 mean.Empirical <- function(x, ...) {
   ellipsis::check_dots_used()
   setNames(rowMeans(as.matrix(x), na.rm = TRUE), names(x))
 }
 
 #' @export
-#' @rdname Empirical
 variance.Empirical <- function(x, ...) {
   x <- as.matrix(x)
   setNames(rowSums((x - rowMeans(x, na.rm = TRUE))^2, na.rm = TRUE) / (rowSums(!is.na(x)) - 1), rownames(x))
@@ -302,7 +310,6 @@ variance.Empirical <- function(x, ...) {
 #'        algorithms. See Details for more information.
 #'
 #' @export
-#' @rdname Empirical
 skewness.Empirical <- function(x, type = 1L, ...) {
   type <- as.integer(type)[1]
   stopifnot("invalid 'type' argument" = is.finite(type) && type >= 1L && type <= 3L)
@@ -326,7 +333,6 @@ skewness.Empirical <- function(x, type = 1L, ...) {
 }
 
 #' @export
-#' @rdname Empirical
 kurtosis.Empirical <- function(x, type = 3L, ...) {
   type <- as.integer(type)[1]
   stopifnot("invalid 'type' argument" = is.finite(type) && type >= 1L && type <= 3L)
@@ -366,7 +372,6 @@ kurtosis.Empirical <- function(x, type = 3L, ...) {
 #'   (if `drop = FALSE`).
 #'
 #' @export
-#' @rdname Empirical
 random.Empirical <- function(x, n = 1L, drop = TRUE, ...) {
   n <- make_positive_integer(n)
   if (n == 0L) return(numeric(0L))
@@ -405,14 +410,12 @@ random.Empirical <- function(x, n = 1L, drop = TRUE, ...) {
 #'   object, a matrix with `length(x)` columns containing all possible combinations.
 #'
 #' @export
-#' @rdname Empirical
 pdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   FUN <- function(at, d) dempirical(x = at, y = as.matrix(d), ...)
   apply_dpqr(d = d, FUN = FUN, at = x, type = "density", drop = drop, elementwise = elementwise)
 }
 
 #' @export
-#' @rdname Empirical
 log_pdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   FUN <- function(at, d) dempirical(x = at, y = as.matrix(d), log = TRUE)
   apply_dpqr(d = d, FUN = FUN, at = x, type = "logLik", drop = drop, elementwise = elementwise)
@@ -444,7 +447,6 @@ log_pdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 #'   object, a matrix with `length(x)` columns containing all possible combinations.
 #'
 #' @export
-#' @rdname Empirical
 cdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   FUN <- function(at, d) pempirical(q = at, y = as.matrix(d), ...)
   apply_dpqr(d = d, FUN = FUN, at = x, type = "probability", drop = drop, elementwise = elementwise)
@@ -519,7 +521,6 @@ format.Empirical <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...
 #' matrix with 2 columns containing all minima and maxima.
 #'
 #' @export
-#' @rdname Empirical
 support.Empirical <- function(d, drop = TRUE, ...) {
   ellipsis::check_dots_used()
   minmax <- apply(as.matrix(d), MARGIN = 1, FUN = range, na.rm = TRUE)
@@ -527,14 +528,12 @@ support.Empirical <- function(d, drop = TRUE, ...) {
 }
 
 #' @exportS3Method
-#' @rdname Empirical
 is_discrete.Empirical <- function(d, ...) {
   ellipsis::check_dots_used()
   setNames(rep.int(FALSE, length(d)), names(d))
 }
 
 #' @exportS3Method
-#' @rdname Empirical
 is_continuous.Empirical <- function(d, ...) {
   ellipsis::check_dots_used()
   setNames(rep.int(FALSE, length(d)), names(d))
