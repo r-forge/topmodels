@@ -59,14 +59,17 @@ rempirical(n, y, lower.tail = TRUE, log.p = FALSE, ...)
 
 \item{y}{vector of observations of the empirical distribution with two or more non-missing finite values.}
 
+\item{lower.tail}{logical; if \code{TRUE} (default), probabilities are
+\code{P[X <= x]} otherwise, \code{P[X > x]}.
+or \code{"density"}.}
+
 \item{na.rm}{logical evaluating to \code{TRUE} or \code{FALSE} indicating whether
 \code{NA} values should be stripped before the computation
 proceeds.}
 
 \item{log, log.p}{logical; if \code{TRUE}, probabilities \code{p} are given as \code{log(p)}.}
 
-\item{method}{character; the method to calculate the empirical density. Either \code{"hist"} (default)
-or \code{"density"}.}
+\item{method}{character; the method to calculate the empirical density. Either \code{"hist"} (default)}
 
 \item{...}{Currently not used.}
 

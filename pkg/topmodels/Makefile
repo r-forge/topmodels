@@ -12,7 +12,7 @@ install: document
 	Rscript -e "devtools::install()"
 
 check: document
-	Rscript -e "devtools::check()"
+	Rscript -e "library('distributions3'); library('scoringRules'); devtools::check()"
 
 test: install
 	Rscript -e "tinytest::test_package('topmodels')"

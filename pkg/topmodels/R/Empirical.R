@@ -1,4 +1,13 @@
 
+
+## Should be located in distributions3/R/utils.R
+
+#' @export
+median.distribution <- function(x, na.rm = TRUE, ...) {
+    quantile(x, probs = 0.5, na.rm = na.rm, ...)
+}
+
+
 #' Create an Empirical distribution
 #'
 #' An empirical distribution consists of a series of \code{N} observations
@@ -179,6 +188,8 @@ dpqrempirical_prep <- function(x, y) {
 #' @param y vector of observations of the empirical distribution with two or more non-missing finite values.
 #' @param log,log.p logical; if \code{TRUE}, probabilities \code{p} are given as \code{log(p)}.
 #' @param method character; the method to calculate the empirical density. Either \code{"hist"} (default)
+#' @param lower.tail logical; if \code{TRUE} (default), probabilities are
+#'        \code{P[X <= x]} otherwise, \code{P[X > x]}.
 #'        or \code{"density"}.
 #' @param na.rm logical evaluating to \code{TRUE} or \code{FALSE} indicating whether
 #'        \code{NA} values should be stripped before the computation
@@ -392,8 +403,8 @@ random.Empirical <- function(x, n = 1L, drop = TRUE, ...) {
 #'   vector of length `probs` (if `drop = TRUE`, default) or a `matrix` with
 #'   `length(x)` columns (if `drop = FALSE`). In case of a vectorized distribution
 #'   object, a matrix with `length(x)` columns containing all possible combinations.
-#' @export
 #'
+#' @export
 #' @rdname Empirical
 pdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   FUN <- function(at, d) dempirical(x = at, y = as.matrix(d), ...)
