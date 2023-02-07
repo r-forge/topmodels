@@ -125,6 +125,13 @@ SEXP c_CRPS_numeric(SEXP x, SEXP px, SEXP p, SEXP q, SEXP continuous) {
                 pi_lo = j - 1;                 pi_up = j;
             }
 
+            /* When calculating the CRPS on 'Empirical' distributions the
+             * probability can be NA in case the empirical distribution contains
+             * missing values. As we pre-sort quantiles and probabilities, we only
+             * have to check p_up (probability at the upper end of the current bin).
+             */
+            if (ISNA(pptr[pi_up])) { continue; }
+
             /* Calculating position of lower and upper element along grid for p */
             if (ismatrix_q) {
                 qi_lo = (j - 1) * n + i;       qi_up = j * n + i;
@@ -177,6 +184,7 @@ SEXP c_CRPS_numeric(SEXP x, SEXP px, SEXP p, SEXP q, SEXP continuous) {
                     h      = (h_up * h_up + h_lo * h_lo) * 0.5;
                 } else {
                     h      = (1. - pxptr[ix]);
+                    Rprintf("   h = %.5f    (1 - %.5f) for ix = %d\n", h, pxptr[ix], ix);
                     h      = h * h;
                 }
                 tmp_up = w * h;

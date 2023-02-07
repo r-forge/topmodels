@@ -211,6 +211,7 @@ pempirical <- function(q, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE) {
     } else {
         rval <- sapply(seq_len(NROW(y)), function(i) mean(y[i, ] <= q[i], na.rm = na.rm))
     }
+    rval[is.nan(rval)] <- NA
     if (!lower.tail) rval <- 1. - rval
     return(if (!log.p) rval else log(rval))
 }

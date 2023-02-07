@@ -206,11 +206,48 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
 
   ## calling C function for numeric CRPS calculation
   discrete <- all(distributions3::is_discrete(y))
-  ## If all distributions are discrete: Calculate required grid size.
+
+  ## Special approach for objects of class 'Empirical' where all
+  ## observations will be used as quantiles to be evaluated.
+  if (inherits(y, "Empirical")) {
+
+    ## Not elementwise: Same observation(s) `x` for all distributions `y`
+    if (isFALSE(elementwise)) {
+      ## Scoping `batch_id`, `y`, `x`, `q`
+      batch_fn <- function(i) {
+          idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
+          # Sort quantiles for the current batch
+          q    <- t(apply(as.matrix(y[idx]), 1L, sort, na.last = TRUE))
+          p    <- t(apply(q, 1L, function(x) pempirical(x, x))) ## Calculating quantiles at `q` for `y[idx]`
+          fn <- function(z) {
+              px   <- cdf(y[idx], z)   ## Probabilities at `y[idx](z)`
+              .Call("c_CRPS_numeric", rep(as.numeric(z), length(idx)), px, p, q, FALSE, PACKAGE = "topmodels")
+          }
+          return(do.call(cbind, lapply(x, fn)))
+      }
+      # Iterate over batches first (this way we only have to calculate `q` once per batch
+      # inside `batch_fn()`). Inside `batch_fn()` we then iterate over `z \in x`
+      rval <- do.call(rbind, applyfun(seq_len(batch_n), batch_fn))
+    ## Multiple distributions `y`, one (or multiple) observations `x` evaluated for each `y`
+    } else {
+      ## Scoping `batch_id`, `y`, `x`, `q`
+      batch_fn <- function(i) {
+          idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
+          # Sort quantiles
+          q    <- t(apply(as.matrix(y[idx]), 1L, sort, na.last = TRUE))
+          p    <- t(apply(q, 1L, function(x) pempirical(x, x))) ## Calculating quantiles at `q` for `y[idx]`
+          px   <- cdf(y[idx], x)   ## Probabilities at `y[idx](z)`
+          .Call("c_CRPS_numeric", as.numeric(x[idx]), px, p, q, FALSE, PACKAGE = "topmodels")
+      }
+      rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
+    }
+  }
+
+  ## If all distributions are discrete and not 'Empirical'): Calculate required grid size.
   ## If this exceeds `m` continuous approximation will be used.
   ## TODO(R): Split data; use approximation only where grid exceeds gridsize but use
   ##          the discrete (more accurate) approximation for the others?
-  if (discrete) {
+  if (discrete && !inherits(y, "Empirical")) {
     xrange <- pmin(range(quantile(y, c(0.001, 0.999)), na.rm = TRUE), range(support(y)))
     ## If grid size larger gridsize; set `discrete = FALSE` and continue; fallback to discrete case
     if (diff(xrange) > gridsize) {
@@ -247,8 +284,9 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
       }
     }
   }
+
   ## Continuous mode
-  if (!discrete) {
+  if (!discrete && !inherits(y, "Empirical")) {
     ## Drawing one set of probabilities; calculate quantiles for all distributions
     p <- c(0.001, 0.01, 0.1, 1:(gridsize-1), gridsize - c(0.1, 0.01, 0.001)) / gridsize
     ## Not elementwise: Same observation(s) `x` for all distributions `y`
