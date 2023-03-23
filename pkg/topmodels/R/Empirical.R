@@ -203,7 +203,8 @@ pempirical <- function(q, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE) {
     log.p      <- as.logical(log.p)[1L]
 
     tmp <- dpqrempirical_prep(q, y)
-    q <- tmp[[1]]; y <- tmp[[2]]
+    q <- tmp[[1L]]
+    y <- tmp[[2L]]
 
     # If length(x) equals to 1 apply can be used
     if (length(q) == 1) {
@@ -220,8 +221,9 @@ pempirical <- function(q, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE) {
 #' @rdname Empirical
 dempirical <- function(x, y, log = FALSE, method = "hist", ...) {
     tmp <- dpqrempirical_prep(x, y)
-    x   <- tmp[[1]]; y <- tmp[[2]]
-    log    <- as.logical(log)[1L]
+    x <- tmp[[1L]]
+    y <- tmp[[2L]]
+    log <- as.logical(log)[1L]
     method <- match.arg(method, c("hist", "density"))
 
     # Helper function
@@ -260,7 +262,8 @@ qempirical <- function(p, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE, ...
     na.rm      <- as.logical(na.rm)[1L]
 
     tmp <- dpqrempirical_prep(p, y)
-    p <- if (log.p) exp(tmp[[1]]) else tmp[[1]]; y <- tmp[[2]]
+    p <- if (log.p) exp(tmp[[1L]]) else tmp[[1L]]
+    y <- tmp[[2L]]
 
     # If length(x) equals to 1 apply can be used
     if (length(p) == 1) {
