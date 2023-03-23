@@ -147,30 +147,30 @@ of match, group vs. knockout stage) as well as some further covariates
 that we will revisit later in this document. The data looks like
 this:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##   goals team match type stage logability difference</span>
-<span class="co">## 1     5  RUS     1    A group  0.1530732  0.8638406</span>
-<span class="co">## 2     0  KSA     1    A group -0.7107673 -0.8638406</span>
-<span class="co">## 3     0  EGY     2    A group -0.2066409 -0.4438080</span>
-<span class="co">## 4     1  URU     2    A group  0.2371671  0.4438080</span>
-<span class="co">## 5     3  RUS     3    A group  0.1530732  0.3597142</span>
-<span class="co">## 6     1  EGY     3    A group -0.2066409 -0.3597142</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   goals team match type stage logability difference</span></span>
+<span><span class="co">## 1     5  RUS     1    A group  0.1530732  0.8638406</span></span>
+<span><span class="co">## 2     0  KSA     1    A group -0.7107673 -0.8638406</span></span>
+<span><span class="co">## 3     0  EGY     2    A group -0.2066409 -0.4438080</span></span>
+<span><span class="co">## 4     1  URU     2    A group  0.2371671  0.4438080</span></span>
+<span><span class="co">## 5     3  RUS     3    A group  0.1530732  0.3597142</span></span>
+<span><span class="co">## 6     1  EGY     3    A group -0.2066409 -0.3597142</span></span></code></pre>
 <p>For now, we will focus on the <code>goals</code> variable only. A
 brief summary yields</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
-<span class="co">##   0.000   0.000   1.000   1.297   2.000   6.000</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">##   0.000   0.000   1.000   1.297   2.000   6.000</span></span></code></pre>
 <p>showing that the teams scored between <span class="math inline">\(0\)</span> and <span class="math inline">\(6\)</span> goals per match with an average of
 <span class="math inline">\(\bar y = 1.297\)</span> from the
 observations <span class="math inline">\(y_i\)</span> (<span class="math inline">\(i = 1, \dots, 128\)</span>). The corresponding
 table of observed relative frequencies are:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/proportions.html" class="external-link">prop.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## </span>
-<span class="co">##         0         1         2         3         4         5         6 </span>
-<span class="co">## 0.2578125 0.3750000 0.2500000 0.0781250 0.0156250 0.0156250 0.0078125</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/proportions.html" class="external-link">prop.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">##         0         1         2         3         4         5         6 </span></span>
+<span><span class="co">## 0.2578125 0.3750000 0.2500000 0.0781250 0.0156250 0.0156250 0.0078125</span></span></code></pre>
 <p>(Note that in recent versions of R using <code><a href="https://rdrr.io/r/base/proportions.html" class="external-link">proportions()</a></code>
 rather than <code><a href="https://rdrr.io/r/base/proportions.html" class="external-link">prop.table()</a></code> is recommended.)</p>
 <p>This confirms that goals are relatively rare events in a soccer game
@@ -190,9 +190,9 @@ parameter by using the empirical mean <span class="math inline">\(\hat
 \lambda = \bar y = 1.297\)</span> and set up the corresponding
 distribution object:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">p_const</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/Poisson.html" class="external-link">Poisson</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span><span class="op">)</span>
-<span class="va">p_const</span></code></pre></div>
-<pre><code><span class="co">## [1] "Poisson distribution (lambda = 1.297)"</span></code></pre>
+<code class="sourceCode R"><span><span class="va">p_const</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/Poisson.html" class="external-link">Poisson</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_const</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "Poisson distribution (lambda = 1.297)"</span></span></code></pre>
 <p>This actually corresponds to the maximum likelihood estimator for
 this distribution fitting a generalized linear model (GLM) to the data
 that links the expected number of goals per team/match <span class="math inline">\(\lambda_i\)</span> to the linear predictor <span class="math inline">\(x_i^\top \beta\)</span> with regressor vector
@@ -207,46 +207,46 @@ corresponding inference, predictions, residuals, etc. can be obtained
 using the <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> function from base R with
 <code>family = poisson</code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">m_ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span>
-<span class="va">m_ic</span></code></pre></div>
-<pre><code><span class="co">## </span>
-<span class="co">## Call:  glm(formula = goals ~ 1, family = poisson, data = FIFA2018)</span>
-<span class="co">## </span>
-<span class="co">## Coefficients:</span>
-<span class="co">## (Intercept)  </span>
-<span class="co">##        0.26  </span>
-<span class="co">## </span>
-<span class="co">## Degrees of Freedom: 127 Total (i.e. Null);  127 Residual</span>
-<span class="co">## Null Deviance:       144.2 </span>
-<span class="co">## Residual Deviance: 144.2     AIC: 372.9</span></code></pre>
+<code class="sourceCode R"><span><span class="va">m_ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
+<span><span class="va">m_ic</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Call:  glm(formula = goals ~ 1, family = poisson, data = FIFA2018)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Coefficients:</span></span>
+<span><span class="co">## (Intercept)  </span></span>
+<span><span class="co">##        0.26  </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Degrees of Freedom: 127 Total (i.e. Null);  127 Residual</span></span>
+<span><span class="co">## Null Deviance:       144.2 </span></span>
+<span><span class="co">## Residual Deviance: 144.2     AIC: 372.9</span></span></code></pre>
 <p>The corresponding prediction for the number of goals can be obtained
 manually from the extracted <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> by applying
 <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp()</a></code> (as the inverse of the log-link).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">lambda_zero</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">m_ic</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>
-<span class="va">lambda_zero</span></code></pre></div>
-<pre><code><span class="co">## (Intercept) </span>
-<span class="co">##    1.296875</span></code></pre>
+<code class="sourceCode R"><span><span class="va">lambda_zero</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">m_ic</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">lambda_zero</span></span></code></pre></div>
+<pre><code><span><span class="co">## (Intercept) </span></span>
+<span><span class="co">##    1.296875</span></span></code></pre>
 <p>Or equivalently the <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> function can be used with
 <code>type = "response"</code> in order to get the expected <span class="math inline">\(\hat \lambda_i\)</span> (rather than just the
 linear predictor <span class="math inline">\(x_i^\top \hat
 \beta\)</span> that is predicted by default).</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">m_ic</span>, newdata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>difference <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##        1 </span>
-<span class="co">## 1.296875</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">m_ic</span>, newdata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>difference <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##        1 </span></span>
+<span><span class="co">## 1.296875</span></span></code></pre>
 <p>This yields the same predicted Poisson distribution, identical to
 <span class="math inline">\(p_const\)</span>, for all teams and matches
 in this tournament – most likely an incorrect assumption:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">p_ic</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/Poisson.html" class="external-link">Poisson</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">m_ic</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">p_ic</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##                                       1                                       2 </span>
-<span class="co">## "Poisson distribution (lambda = 1.297)" "Poisson distribution (lambda = 1.297)" </span>
-<span class="co">##                                       3                                       4 </span>
-<span class="co">## "Poisson distribution (lambda = 1.297)" "Poisson distribution (lambda = 1.297)" </span>
-<span class="co">##                                       5                                       6 </span>
-<span class="co">## "Poisson distribution (lambda = 1.297)" "Poisson distribution (lambda = 1.297)"</span></code></pre>
+<code class="sourceCode R"><span><span class="va">p_ic</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/Poisson.html" class="external-link">Poisson</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">m_ic</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">p_ic</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                                       1                                       2 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.297)" "Poisson distribution (lambda = 1.297)" </span></span>
+<span><span class="co">##                                       3                                       4 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.297)" "Poisson distribution (lambda = 1.297)" </span></span>
+<span><span class="co">##                                       5                                       6 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.297)" "Poisson distribution (lambda = 1.297)"</span></span></code></pre>
 <p>To account for different expected performances from the teams in the
 2018 FIFA World Cup, the <code>FIFA2018</code> data provides an
 estimated <code>logability</code> for each team. These have been
@@ -261,18 +261,18 @@ between a team and its opponent is a useful predictor for the number of
 using the regressor vector <span class="math inline">\(x_i^\top = (1,
 \mathtt{difference}_i)\)</span>:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">m_reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span>
-<span class="va">m_reg</span></code></pre></div>
-<pre><code><span class="co">## </span>
-<span class="co">## Call:  glm(formula = goals ~ difference, family = poisson, data = FIFA2018)</span>
-<span class="co">## </span>
-<span class="co">## Coefficients:</span>
-<span class="co">## (Intercept)   difference  </span>
-<span class="co">##      0.2127       0.4134  </span>
-<span class="co">## </span>
-<span class="co">## Degrees of Freedom: 127 Total (i.e. Null);  126 Residual</span>
-<span class="co">## Null Deviance:       144.2 </span>
-<span class="co">## Residual Deviance: 128.7     AIC: 359.4</span></code></pre>
+<code class="sourceCode R"><span><span class="va">m_reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
+<span><span class="va">m_reg</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Call:  glm(formula = goals ~ difference, family = poisson, data = FIFA2018)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Coefficients:</span></span>
+<span><span class="co">## (Intercept)   difference  </span></span>
+<span><span class="co">##      0.2127       0.4134  </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Degrees of Freedom: 127 Total (i.e. Null);  126 Residual</span></span>
+<span><span class="co">## Null Deviance:       144.2 </span></span>
+<span><span class="co">## Residual Deviance: 128.7     AIC: 359.4</span></span></code></pre>
 <p>Here, the slope of <span class="math inline">\(0.413\)</span> can be
 interpreted as an ability elasticity of the number of goals scored. This
 is because the difference of the log-abilities can also be understood as
@@ -287,20 +287,20 @@ vector of all <span class="math inline">\(128\)</span>
 all fitted point estimates <span class="math inline">\((\hat \lambda_1,
 \dots, \hat \lambda_{128})^\top\)</span>:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">p_reg</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/Poisson.html" class="external-link">Poisson</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">m_reg</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">p_reg</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##                                        1 </span>
-<span class="co">## "Poisson distribution (lambda = 1.7680)" </span>
-<span class="co">##                                        2 </span>
-<span class="co">## "Poisson distribution (lambda = 0.8655)" </span>
-<span class="co">##                                        3 </span>
-<span class="co">## "Poisson distribution (lambda = 1.0297)" </span>
-<span class="co">##                                        4 </span>
-<span class="co">## "Poisson distribution (lambda = 1.4862)" </span>
-<span class="co">##                                        5 </span>
-<span class="co">## "Poisson distribution (lambda = 1.4354)" </span>
-<span class="co">##                                        6 </span>
-<span class="co">## "Poisson distribution (lambda = 1.0661)"</span></code></pre>
+<code class="sourceCode R"><span><span class="va">p_reg</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/Poisson.html" class="external-link">Poisson</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">m_reg</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">p_reg</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                                        1 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.7680)" </span></span>
+<span><span class="co">##                                        2 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 0.8655)" </span></span>
+<span><span class="co">##                                        3 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.0297)" </span></span>
+<span><span class="co">##                                        4 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.4862)" </span></span>
+<span><span class="co">##                                        5 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.4354)" </span></span>
+<span><span class="co">##                                        6 </span></span>
+<span><span class="co">## "Poisson distribution (lambda = 1.0661)"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="model-evaluation-marginal-calibration">Model evaluation: Marginal calibration<a class="anchor" aria-label="anchor" href="#model-evaluation-marginal-calibration"></a>
@@ -322,20 +322,20 @@ frequencies by averaging across the expectations per team/match from
 both regression model and compare these with the observed absolute
 frequencies:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span>
-<span class="va">expected_ic</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">pdf</a></span><span class="op">(</span><span class="va">p_ic</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>
-<span class="va">expected_ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">expected_ic</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">observed</span><span class="op">)</span>
-<span class="va">expected_reg</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">pdf</a></span><span class="op">(</span><span class="va">p_reg</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>
-<span class="va">expected_reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">expected_reg</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">observed</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">observed</span>, <span class="va">expected_ic</span>, <span class="va">expected_reg</span><span class="op">)</span> </code></pre></div>
-<pre><code><span class="co">##   observed expected_ic expected_reg</span>
-<span class="co">## 0       33  34.9932527    37.679930</span>
-<span class="co">## 1       48  45.3818746    43.541948</span>
-<span class="co">## 2       32  29.4273093    27.450378</span>
-<span class="co">## 3       10  12.7211806    12.574218</span>
-<span class="co">## 4        2   4.1244453     4.684102</span>
-<span class="co">## 5        2   1.0697780     1.501012</span>
-<span class="co">## 6        1   0.2312281     0.426588</span></code></pre>
+<code class="sourceCode R"><span><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">FIFA2018</span><span class="op">$</span><span class="va">goals</span><span class="op">)</span></span>
+<span><span class="va">expected_ic</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">pdf</a></span><span class="op">(</span><span class="va">p_ic</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
+<span><span class="va">expected_ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">expected_ic</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">observed</span><span class="op">)</span></span>
+<span><span class="va">expected_reg</span> <span class="op">&lt;-</span> <span class="fu">distributions3</span><span class="fu">::</span><span class="fu"><a href="https://alexpghayes.github.io/distributions3/reference/pdf.html" class="external-link">pdf</a></span><span class="op">(</span><span class="va">p_reg</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
+<span><span class="va">expected_reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">expected_reg</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">observed</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">observed</span>, <span class="va">expected_ic</span>, <span class="va">expected_reg</span><span class="op">)</span> </span></code></pre></div>
+<pre><code><span><span class="co">##   observed expected_ic expected_reg</span></span>
+<span><span class="co">## 0       33  34.9932527    37.679930</span></span>
+<span><span class="co">## 1       48  45.3818746    43.541948</span></span>
+<span><span class="co">## 2       32  29.4273093    27.450378</span></span>
+<span><span class="co">## 3       10  12.7211806    12.574218</span></span>
+<span><span class="co">## 4        2   4.1244453     4.684102</span></span>
+<span><span class="co">## 5        2   1.0697780     1.501012</span></span>
+<span><span class="co">## 6        1   0.2312281     0.426588</span></span></code></pre>
 <p>Graphically, this comparison can be shown as a so-called
 <em>rootogram</em> <span class="citation">(Kleiber and Zeileis
 2016)</span> where the gray bars represent the observed frequencies
@@ -344,34 +344,34 @@ function <code><a href="../reference/rootogram.html">rootogram()</a></code>, we 
 plugging in the model objects <code>m_ic</code> and
 <code>m_reg</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m_ic</span>, fitted <span class="op">=</span> <span class="cn">TRUE</span>, style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, ref <span class="op">=</span> <span class="cn">FALSE</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m_reg</span>, fitted <span class="op">=</span> <span class="cn">TRUE</span>, style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, ref <span class="op">=</span> <span class="cn">FALSE</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## A `rootogram` object with `scale = 'raw'` and `style = 'standing'`</span>
-<span class="co">## </span>
-<span class="co">##    observed   expected mid width group</span>
-<span class="co">## 1        33 34.9932527   0   0.9     1</span>
-<span class="co">## 2        48 45.3818746   1   0.9     1</span>
-<span class="co">## 3        32 29.4273093   2   0.9     1</span>
-<span class="co">## 4        10 12.7211806   3   0.9     1</span>
-<span class="co">## 5         2  4.1244453   4   0.9     1</span>
-<span class="co">## 6         2  1.0697780   5   0.9     1</span>
-<span class="co">## 7         1  0.2312281   6   0.9     1</span>
-<span class="co">## 8        33 37.6799296   0   0.9     2</span>
-<span class="co">## 9        48 43.5419481   1   0.9     2</span>
-<span class="co">## 10       32 27.4503775   2   0.9     2</span>
-<span class="co">## 11       10 12.5742178   3   0.9     2</span>
-<span class="co">## 12        2  4.6841019   4   0.9     2</span>
-<span class="co">## 13        2  1.5010116   5   0.9     2</span>
-<span class="co">## 14        1  0.4265880   6   0.9     2</span></code></pre>
+<code class="sourceCode R"><span><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m_ic</span>, fitted <span class="op">=</span> <span class="cn">TRUE</span>, style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, ref <span class="op">=</span> <span class="cn">FALSE</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m_reg</span>, fitted <span class="op">=</span> <span class="cn">TRUE</span>, style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, ref <span class="op">=</span> <span class="cn">FALSE</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## A `rootogram` object with `scale = 'raw'` and `style = 'standing'`</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##    observed   expected mid width group</span></span>
+<span><span class="co">## 1        33 34.9932527   0   0.9     1</span></span>
+<span><span class="co">## 2        48 45.3818746   1   0.9     1</span></span>
+<span><span class="co">## 3        32 29.4273093   2   0.9     1</span></span>
+<span><span class="co">## 4        10 12.7211806   3   0.9     1</span></span>
+<span><span class="co">## 5         2  4.1244453   4   0.9     1</span></span>
+<span><span class="co">## 6         2  1.0697780   5   0.9     1</span></span>
+<span><span class="co">## 7         1  0.2312281   6   0.9     1</span></span>
+<span><span class="co">## 8        33 37.6799296   0   0.9     2</span></span>
+<span><span class="co">## 9        48 43.5419481   1   0.9     2</span></span>
+<span><span class="co">## 10       32 27.4503775   2   0.9     2</span></span>
+<span><span class="co">## 11       10 12.5742178   3   0.9     2</span></span>
+<span><span class="co">## 12        2  4.6841019   4   0.9     2</span></span>
+<span><span class="co">## 13        2  1.5010116   5   0.9     2</span></span>
+<span><span class="co">## 14        1  0.4265880   6   0.9     2</span></span></code></pre>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="illustration_fifa_2018_files/figure-html/unnamed-chunk-12-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>Further, in order to stabilize the variances of the discrepancies,
 i.e., putting more focus on discrepancies for small frequencies, we can
 show the frequencies on a square root scale:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span>, scale <span class="op">=</span> <span class="st">"sqrt"</span><span class="op">)</span>  <span class="co"># FIXME: (ML) names got lost</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span>, scale <span class="op">=</span> <span class="st">"sqrt"</span><span class="op">)</span>  <span class="co"># FIXME: (ML) names got lost</span></span></code></pre></div>
 <p><img src="illustration_fifa_2018_files/figure-html/unnamed-chunk-13-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>In a second step, we employ a so-called <em>hanging rootogram</em>
 where bars representing the square-root of the observed frequencies are
@@ -382,7 +382,7 @@ intercept-only model <code>m_ic</code> and the full probabilistic model
 <code>m_reg</code>. For both models the differences are reasonably close
 to zero indicating a rather good marginal fit:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span>, scale <span class="op">=</span> <span class="st">"sqrt"</span>, style <span class="op">=</span> <span class="st">"hanging"</span>, ref <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>  <span class="co"># FIXME: (ML) names got lost</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span>, scale <span class="op">=</span> <span class="st">"sqrt"</span>, style <span class="op">=</span> <span class="st">"hanging"</span>, ref <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>  <span class="co"># FIXME: (ML) names got lost</span></span></code></pre></div>
 <p><img src="illustration_fifa_2018_files/figure-html/unnamed-chunk-14-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>So far we have only evaluated the marginal calibration comparing
 whether the observed frequencies match the frequencies expected by
@@ -413,7 +413,7 @@ continuous predictive distributions <span class="math inline">\(F( \cdot
 uniformity is therefore a common empirical way of checking for
 calibration:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m_reg</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m_reg</span><span class="op">)</span></span></code></pre></div>
 <p><img src="illustration_fifa_2018_files/figure-html/unnamed-chunk-15-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>To focus more on violations of the distributional assumption in the
 tails of the distribution, PIT residuals can also be transformed to the
@@ -422,7 +422,7 @@ values to be spread more widely, so that less values are included in the
 outer intervals. However, this has the drawback that detecting
 misspecification is more complicated than checking for uniformity:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m_reg</span>, trafo <span class="op">=</span> <span class="va">qnorm</span>, type <span class="op">=</span> <span class="st">"random"</span>, simint <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co"># `type = "expected"` does not work, check!</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m_reg</span>, trafo <span class="op">=</span> <span class="va">qnorm</span>, type <span class="op">=</span> <span class="st">"random"</span>, simint <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co"># `type = "expected"` does not work, check!</span></span></code></pre></div>
 <p><img src="illustration_fifa_2018_files/figure-html/unnamed-chunk-16-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>Discretization, i.e., the representation of values in intervals, has
 the advantage that it usually improves the readability of graphical
@@ -432,14 +432,14 @@ misspecifications of relatively few but extreme values in the outer
 tails of the distribution. Here, classical <em>Q-Q plots</em> are
 clearly superior to PIT histograms:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m_reg</span>, confint <span class="op">=</span> <span class="st">"line"</span>, simint <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m_reg</span>, confint <span class="op">=</span> <span class="st">"line"</span>, simint <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="illustration_fifa_2018_files/figure-html/unnamed-chunk-17-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>Since small to medium deviations are nevertheless difficult to detect
 in <em>Q-Q plots</em>, untilting the plot makes detecting pattern of
 departure from a now horizontal line much easier. Here, expected
 quantiles are subtracted from the observed quantiles:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m_reg</span>, confint <span class="op">=</span> <span class="st">"line"</span>, simint <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m_reg</span>, confint <span class="op">=</span> <span class="st">"line"</span>, simint <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="illustration_fifa_2018_files/figure-html/unnamed-chunk-18-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>This so-called de-trended <em>Q-Q plot</em> is best known as <em>worm
 plot</em> <span class="citation">(Buuren and Fredriks 2001)</span>.</p>
@@ -517,7 +517,7 @@ Universität Innsbruck. <a href="https://EconPapers.RePEc.org/RePEc:inn:wpaper:2
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

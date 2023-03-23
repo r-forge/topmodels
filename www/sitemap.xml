@@ -76,7 +76,19 @@
     <loc>https://topmodels.R-Forge.R-project.org/news/index.html</loc>
   </url>
   <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/BAMLSS.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/Empirical.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/GAMLSS.html</loc>
+  </url>
+  <url>
     <loc>https://topmodels.R-Forge.R-project.org/reference/crps.Beta.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/crps.distribution.html</loc>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/reference/geom_pit_bar.html</loc>
@@ -134,6 +146,12 @@
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/reference/procast.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/prodist.bamlss.html</loc>
+  </url>
+  <url>
+    <loc>https://topmodels.R-Forge.R-project.org/reference/prodist.gamlss.html</loc>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/reference/proscore.html</loc>

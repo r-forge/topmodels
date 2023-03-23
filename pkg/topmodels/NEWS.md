@@ -1,8 +1,12 @@
 # topmodels 0.3-0
 
-* Added `crps.distribution` method for numeric approximation/numeric integration to calculate
+* Added `crps.distribution()` method for numeric approximation/numeric integration to calculate
   the CRPS for univariate distributions where no analytic solution is available in the
   `scoringRules` package.
+
+* Added several distribution/model interfaces, namely: `GAMLSS()`, `BAMLSS()`, and `Empirical()`.
+  However, these may be removed again in `topmodels` and be contributed to packages `gamlss.dist`,
+  `bamlss`, and `distributions3` instead.
 
 
 # topmodels 0.2-0

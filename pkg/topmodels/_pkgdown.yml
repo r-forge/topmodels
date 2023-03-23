@@ -45,6 +45,7 @@ reference:
       - pitresiduals
       - qresiduals
       - newresponse
+      - crps.distribution
   - title: "Probabilistic model diagnostics"
     contents: 
       - pithist
@@ -62,6 +63,10 @@ reference:
       - geom_pithist
       - geom_qqrplot
       - geom_rootogram
-  - title: "Additional methods"
+  - title: "Interfacs to models/distributions"
     contents:
-      - crps.Beta
+      - GAMLSS
+      - prodist.gamlss
+      - BAMLSS
+      - prodist.bamlss
+      - Empirical

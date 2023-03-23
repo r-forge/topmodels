@@ -89,27 +89,28 @@ returned, depending on whether the package <code>ggplot2</code> is loaded.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">rootogram</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for default</span>
-<span class="fu">rootogram</span><span class="op">(</span>
-  <span class="va">object</span>,
-  newdata <span class="op">=</span> <span class="cn">NULL</span>,
-  plot <span class="op">=</span> <span class="cn">TRUE</span>,
-  class <span class="op">=</span> <span class="cn">NULL</span>,
-  response_type <span class="op">=</span> <span class="cn">NULL</span>,
-  breaks <span class="op">=</span> <span class="cn">NULL</span>,
-  width <span class="op">=</span> <span class="cn">NULL</span>,
-  style <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hanging"</span>, <span class="st">"standing"</span>, <span class="st">"suspended"</span><span class="op">)</span>,
-  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sqrt"</span>, <span class="st">"raw"</span><span class="op">)</span>,
-  expected <span class="op">=</span> <span class="cn">TRUE</span>,
-  confint <span class="op">=</span> <span class="cn">TRUE</span>,
-  ref <span class="op">=</span> <span class="cn">TRUE</span>,
-  xlab <span class="op">=</span> <span class="cn">NULL</span>,
-  ylab <span class="op">=</span> <span class="cn">NULL</span>,
-  main <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rootogram</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for default</span></span>
+<span><span class="fu">rootogram</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  class <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  response_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  breaks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  style <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hanging"</span>, <span class="st">"standing"</span>, <span class="st">"suspended"</span><span class="op">)</span>,</span>
+<span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sqrt"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
+<span>  expected <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  confint <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ref <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  main <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  use_devel_version <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -117,11 +118,17 @@ returned, depending on whether the package <code>ggplot2</code> is loaded.</p>
     <dl><dt>object</dt>
 <dd><p>an object from which an rootogram can be extracted with
 <code><a href="procast.html">procast</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further graphical parameters passed to the plotting function.</p></dd>
+
+
 <dt>newdata</dt>
 <dd><p>an optional data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.</p></dd>
+
+
 <dt>plot</dt>
 <dd><p>logical or character. Should the <code>plot</code> or <code>autoplot</code> method be called to
 draw the computed extended reliability diagram? Logical
@@ -129,54 +136,90 @@ draw the computed extended reliability diagram? Logical
 type of plot conditional if the package <code>ggplot2</code> is loaded.
 Alternatively <code>"base"</code> or <code>"ggplot2"</code> can be specified to
 explicitly choose the type of plot.</p></dd>
+
+
 <dt>class</dt>
 <dd><p>should the invisible return value be either a <code>data.frame</code>
 or a <code>tbl_df</code>. Can be set to <code>"data.frame"</code> or <code>"tibble"</code> to
 explicitly specify the return class, or to <code>NULL</code> (default) in which
 case the return class is conditional on whether the package <code>"tibble"</code>
 is loaded.</p></dd>
+
+
 <dt>response_type</dt>
 <dd><p>character. To set the default values for <code>breaks</code> and
 <code>widths</code>.  Currently different defaults are available for <code>"discrete"</code>
 and <code>"continous"</code> response distribution, as well as for the special case of a
 <code>"logseries"</code> response.</p></dd>
+
+
 <dt>breaks</dt>
 <dd><p><code>NULL</code> (default) or numeric to manually specify the breaks for
 the rootogram intervals. A single numeric (larger <code>0</code>) specifies the number of breaks
 to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.</p></dd>
+
+
 <dt>width</dt>
 <dd><p><code>NULL</code> (default) or single positive numeric. Width of the histogram bars.</p></dd>
+
+
 <dt>style</dt>
 <dd><p>character specifying the syle of rootogram (see 'Details').</p></dd>
+
+
 <dt>scale</dt>
 <dd><p>character specifying whether <code>"raw"</code> frequencies or their square
 roots (<code>"sqrt"</code>; default) should be drawn.</p></dd>
+
+
 <dt>expected</dt>
 <dd><p>logical or character. Should the expected (fitted) frequencies be plotted?
 Can be set to <code>"both"</code> (same as <code>TRUE</code>; default), <code>"line"</code>, <code>"point"</code>,
 or <code>FALSE</code> which will suppress plotting.</p></dd>
+
+
 <dt>confint</dt>
 <dd><p>logical, defaults to <code>TRUE</code>. Should confident intervals be drawn?</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>logical, defaults to <code>TRUE</code>. Should a reference line be plotted?</p></dd>
+
+
 <dt>xlab, ylab, main</dt>
 <dd><p>graphical parameters forwarded to
 <code><a href="plot.rootogram.html">plot.rootogram</a></code> or <code><a href="plot.rootogram.html">autoplot.rootogram</a></code>.</p></dd>
+
+
+<dt>use_devel_version</dt>
+<dd><p>Use the current developing version.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>"rootogram"</code> inheriting from
-<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code>with the following variables:</p>
+    
+
+<p>An object of class <code>"rootogram"</code> inheriting from
+<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code></p>
+
+
+<p>with the following variables:</p>
 <dl><dt>observed</dt>
 <dd><p>observed frequencies,</p></dd>
+
 <dt>expected</dt>
 <dd><p>expected (fitted) frequencies,</p></dd>
+
 <dt>mid</dt>
 <dd><p>histogram interval midpoints on the x-axis,</p></dd>
+
 <dt>width</dt>
 <dd><p>widths of the histogram bars,</p></dd>
+
 <dt>confint_lwr, confint_upr</dt>
 <dd><p>lower and upper confidence interval bound.</p></dd>
+ 
+
 </dl><p>Additionally, <code>style</code>, <code>scale</code>, <code>expected</code>, <code>confint</code>,
 <code>ref</code>, <code>xlab</code>, <code>ylab</code>, amd <code>main</code> are stored as attributes.</p>
     </div>
@@ -221,19 +264,19 @@ ISBN 0201076160.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## plots and output</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## number of deaths by horsekicks in Prussian army (Von Bortkiewicz 1898)</span></span>
-<span class="r-in"><span class="va">deaths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">109</span>, <span class="fl">65</span>, <span class="fl">22</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## fit glm model</span></span>
-<span class="r-in"><span class="va">m1_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">deaths</span> <span class="op">~</span> <span class="fl">1</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">rootogram</span><span class="op">(</span><span class="va">m1_pois</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## plots and output</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## number of deaths by horsekicks in Prussian army (Von Bortkiewicz 1898)</span></span></span>
+<span class="r-in"><span><span class="va">deaths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">109</span>, <span class="fl">65</span>, <span class="fl">22</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## fit glm model</span></span></span>
+<span class="r-in"><span><span class="va">m1_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">deaths</span> <span class="op">~</span> <span class="fl">1</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rootogram</span><span class="op">(</span><span class="va">m1_pois</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rootogram-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## inspect output (without plotting)</span></span>
-<span class="r-in"><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">r1</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## inspect output (without plotting)</span></span></span>
+<span class="r-in"><span><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r1</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> A `rootogram` object with `scale = 'sqrt'` and `style = 'hanging'`</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    observed   expected mid width</span>
@@ -242,43 +285,43 @@ ISBN 0201076160.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3  4.690416  4.4964526   2   0.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4  1.732051  2.0275628   3   0.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5  1.000000  0.7917886   4   0.9</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## combine plots</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r1</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, expected_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## combine plots</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r1</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, expected_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rootogram-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span class="r-in"><span class="co">## different styles</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## artificial data from negative binomial (mu = 3, theta = 2)</span></span>
-<span class="r-in"><span class="co">## and Poisson (mu = 3) distribution</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1090</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="fl">100</span>, mu <span class="op">=</span> <span class="fl">3</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## glm method: fitted values via glm()</span></span>
-<span class="r-in"><span class="va">m2_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## correctly specified Poisson model fit</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m2_pois</span>, style <span class="op">=</span> <span class="st">"standing"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>, <span class="fl">4.8</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Standing"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#-------------------------------------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co">## different styles</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## artificial data from negative binomial (mu = 3, theta = 2)</span></span></span>
+<span class="r-in"><span><span class="co">## and Poisson (mu = 3) distribution</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1090</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="fl">100</span>, mu <span class="op">=</span> <span class="fl">3</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## glm method: fitted values via glm()</span></span></span>
+<span class="r-in"><span><span class="va">m2_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## correctly specified Poisson model fit</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m2_pois</span>, style <span class="op">=</span> <span class="st">"standing"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>, <span class="fl">4.8</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Standing"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rootogram-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m2_pois</span>, style <span class="op">=</span> <span class="st">"hanging"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>, <span class="fl">4.8</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Hanging"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m2_pois</span>, style <span class="op">=</span> <span class="st">"hanging"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>, <span class="fl">4.8</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Hanging"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rootogram-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="va">r3</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m2_pois</span>, style <span class="op">=</span> <span class="st">"suspended"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>, <span class="fl">4.8</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Suspended"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">r3</span> <span class="op">&lt;-</span> <span class="fu">rootogram</span><span class="op">(</span><span class="va">m2_pois</span>, style <span class="op">=</span> <span class="st">"suspended"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>, <span class="fl">4.8</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Suspended"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rootogram-5.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span class="r-in"><span class="co">## linear regression with normal/Gaussian response: anorexia data</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"anorexia"</span>, package <span class="op">=</span> <span class="st">"MASS"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">m3_gauss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">Postwt</span> <span class="op">~</span> <span class="va">Prewt</span> <span class="op">+</span> <span class="va">Treat</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="va">Prewt</span><span class="op">)</span>, family <span class="op">=</span> <span class="va">gaussian</span>, data <span class="op">=</span> <span class="va">anorexia</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## plot rootogram as "ggplot2" graphic</span></span>
-<span class="r-in"><span class="fu">rootogram</span><span class="op">(</span><span class="va">m3_gauss</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#-------------------------------------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co">## linear regression with normal/Gaussian response: anorexia data</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"anorexia"</span>, package <span class="op">=</span> <span class="st">"MASS"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">m3_gauss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">Postwt</span> <span class="op">~</span> <span class="va">Prewt</span> <span class="op">+</span> <span class="va">Treat</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="va">Prewt</span><span class="op">)</span>, family <span class="op">=</span> <span class="va">gaussian</span>, data <span class="op">=</span> <span class="va">anorexia</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## plot rootogram as "ggplot2" graphic</span></span></span>
+<span class="r-in"><span><span class="fu">rootogram</span><span class="op">(</span><span class="va">m3_gauss</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rootogram-6.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -294,7 +337,7 @@ ISBN 0201076160.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

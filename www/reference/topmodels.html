@@ -89,41 +89,51 @@ before they are returned within a single list, depending on whether the package
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">topmodels</span><span class="op">(</span>
-  <span class="va">object</span>,
-  plot <span class="op">=</span> <span class="cn">TRUE</span>,
-  class <span class="op">=</span> <span class="cn">NULL</span>,
-  newdata <span class="op">=</span> <span class="cn">NULL</span>,
-  na.action <span class="op">=</span> <span class="va">na.pass</span>,
-  which <span class="op">=</span> <span class="cn">NULL</span>,
-  ask <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.interactive.html" class="external-link">dev.interactive</a></span><span class="op">(</span><span class="op">)</span>,
-  spar <span class="op">=</span> <span class="cn">TRUE</span>,
-  single_page <span class="op">=</span> <span class="cn">NULL</span>,
-  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">topmodels</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  class <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na.action <span class="op">=</span> <span class="va">na.pass</span>,</span>
+<span>  which <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ask <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.interactive.html" class="external-link">dev.interactive</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  spar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  single_page <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>An object supported by <code>"procast"</code>.</p></dd>
+
+
 <dt>plot</dt>
 <dd><p>Should the <code>plot</code> or <code>autoplot</code> method be called to
 draw all chosen plots? Either set <code>plot</code> expicitly to <code>"base"</code> vs.
 <code>"ggplot2"</code> to choose the type of plot, or for a logical <code>plot</code> argument
 it's chosen conditional if the package <code>ggplot2</code> is loaded.</p></dd>
+
+
 <dt>class</dt>
 <dd><p>Should the invisible return value be either a <code>data.frame</code>
 or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
 <code>"tibble"</code>, or for <code>NULL</code> it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></dd>
+
+
 <dt>newdata</dt>
 <dd><p>optionally, a data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.</p></dd>
+
+
 <dt>na.action</dt>
 <dd><p>function determining what should be done with missing
 values in <code>newdata</code>.  The default is to employ <code>NA</code>.</p></dd>
+
+
 <dt>which</dt>
 <dd><p>Character or integer, selects the type of plot:
 <code>"rootogram"</code> graphically compares (square roots) of empirical
@@ -133,25 +143,38 @@ uniform distribution, <code>"reliagram"</code> shows a reliability diagram for
 assessing the reliability of a fitted probabilistic distributional forecast,
 <code>"qqrplot"</code> shows a quantile-quantile plot of quantile residuals, and
 <code>"wormplot"</code> shows a worm plot using quantile resiudals.</p></dd>
+
+
 <dt>ask</dt>
 <dd><p>For multiple plots, the user is asked to show the next plot. Argument is
 ignored for <code>ggplot2</code> style graphics.</p></dd>
+
+
 <dt>spar</dt>
 <dd><p>Should graphical parameters be set? Will be ignored for
 <code>ggplot2</code> style graphics.</p></dd>
+
+
 <dt>single_page</dt>
 <dd><p>Logical. Should all plots be shown on a single page? Only
 choice for <code>ggplot2</code> style graphics.</p></dd>
+
+
 <dt>envir</dt>
 <dd><p>environment, default is <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame()</a></code></p></dd>
+
+
 <dt>...</dt>
 <dd><p>Arguments to be passed to <code><a href="rootogram.html">rootogram</a></code>,
 <code><a href="pithist.html">pithist</a></code>, <code><a href="reliagram.html">reliagram</a></code>, <code><a href="qqrplot.html">qqrplot</a></code>, and
 <code><a href="wormplot.html">wormplot</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list containing the objects plotted conditional on the arguemnt <code>which</code>.</p>
+    
+
+<p>A list containing the objects plotted conditional on the arguemnt <code>which</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -166,20 +189,20 @@ choice for <code>ggplot2</code> style graphics.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">CrabSatellites2</span> <span class="op">&lt;-</span> <span class="va">CrabSatellites</span><span class="op">[</span><span class="va">CrabSatellites</span><span class="op">$</span><span class="va">satellites</span> <span class="op">&lt;=</span> <span class="fl">1</span>, <span class="op">]</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites2</span>, family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## ggplot2 graphics</span></span>
-<span class="r-in"><span class="fu">topmodels</span><span class="op">(</span><span class="va">m1</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">CrabSatellites2</span> <span class="op">&lt;-</span> <span class="va">CrabSatellites</span><span class="op">[</span><span class="va">CrabSatellites</span><span class="op">$</span><span class="va">satellites</span> <span class="op">&lt;=</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites2</span>, family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ggplot2 graphics</span></span></span>
+<span class="r-in"><span><span class="fu">topmodels</span><span class="op">(</span><span class="va">m1</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="topmodels-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu">topmodels</span><span class="op">(</span><span class="va">m2</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">topmodels</span><span class="op">(</span><span class="va">m2</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="topmodels-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -194,7 +217,7 @@ choice for <code>ggplot2</code> style graphics.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

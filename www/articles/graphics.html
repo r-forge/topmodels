@@ -141,8 +141,8 @@ plot.</p>
 <p>Notation: Previous section</p>
 <p>Application: FIFA 2018 goals</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span>
-<span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="rootogram">Rootogram<a class="anchor" aria-label="anchor" href="#rootogram"></a>
@@ -198,7 +198,7 @@ the deviations or the expected and observed frequencies are presented
 only as lines connecting the respective frequencies, deviations are more
 difficult to detect compared to the rootograms introduced by <span class="citation">Tukey (1977)</span> and further enhanced by <span class="citation">Kleiber and Zeileis (2016)</span>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-rootogram-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
@@ -254,7 +254,7 @@ along the interval <span class="math inline">\([F(y_i - 1 | \,
 asympotically equivalent to drawing an infinite number of random PIT
 residuals.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-pithist-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
@@ -308,7 +308,7 @@ comparing the quantile residuals <span class="math inline">\(\hat{r}_i\)</span> 
 quantiles. This is called than a theoretical quantile-quantile plot or
 Q-Q plot for short <span class="citation">(Friendly 1991)</span>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m</span>, confint <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m</span>, confint <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-qqrplot-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
@@ -328,7 +328,7 @@ application of <span class="citation">Buuren and Fredriks (2001)</span>,
 and is therefore usually referred to as worm plot according to their
 naming.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m</span>, confint <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m</span>, confint <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="graphics_files/figure-html/fifa-wormplot-1.png" width="528" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2 unnumbered">
@@ -429,7 +429,7 @@ Responses.”</span> <em>PLOS ONE</em> 12 (7): 1–18. <a href="https://doi.org/
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

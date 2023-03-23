@@ -89,28 +89,28 @@ package <code>ggplot2</code> is loaded.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">wormplot</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for default</span>
-<span class="fu">wormplot</span><span class="op">(</span>
-  <span class="va">object</span>,
-  newdata <span class="op">=</span> <span class="cn">NULL</span>,
-  plot <span class="op">=</span> <span class="cn">TRUE</span>,
-  class <span class="op">=</span> <span class="cn">NULL</span>,
-  detrend <span class="op">=</span> <span class="cn">TRUE</span>,
-  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"uniform"</span><span class="op">)</span>,
-  nsim <span class="op">=</span> <span class="fl">1L</span>,
-  delta <span class="op">=</span> <span class="cn">NULL</span>,
-  confint <span class="op">=</span> <span class="cn">TRUE</span>,
-  simint <span class="op">=</span> <span class="cn">TRUE</span>,
-  simint_level <span class="op">=</span> <span class="fl">0.95</span>,
-  simint_nrep <span class="op">=</span> <span class="fl">250</span>,
-  single_graph <span class="op">=</span> <span class="cn">FALSE</span>,
-  xlab <span class="op">=</span> <span class="st">"Theoretical quantiles"</span>,
-  ylab <span class="op">=</span> <span class="st">"Deviation"</span>,
-  main <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wormplot</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for default</span></span>
+<span><span class="fu">wormplot</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  class <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  detrend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"uniform"</span><span class="op">)</span>,</span>
+<span>  nsim <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  delta <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  simint <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  simint_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  simint_nrep <span class="op">=</span> <span class="fl">250</span>,</span>
+<span>  single_graph <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">"Theoretical quantiles"</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="st">"Deviation"</span>,</span>
+<span>  main <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -118,52 +118,83 @@ package <code>ggplot2</code> is loaded.</p>
     <dl><dt>object</dt>
 <dd><p>an object from which probability integral transforms can be
 extracted using the generic function <code><a href="procast.html">procast</a></code>.</p></dd>
+
+
 <dt>newdata</dt>
 <dd><p>optionally, a data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.</p></dd>
+
+
 <dt>plot</dt>
 <dd><p>Should the <code>plot</code> or <code>autoplot</code> method be called to
 draw the computed Q-Q plot? Either set <code>plot</code> expicitly to <code>"base"</code> vs.
 <code>"ggplot2"</code> to choose the type of plot, or for a logical <code>plot</code> argument
 it's chosen conditional if the package <code>ggplot2</code> is loaded.</p></dd>
+
+
 <dt>class</dt>
 <dd><p>Should the invisible return value be either a <code>data.frame</code>
 or a <code>tibble</code>. Either set <code>class</code> expicitly to <code>"data.frame"</code> vs.
 <code>"tibble"</code>, or for <code>NULL</code> it's chosen automatically conditional if the package
 <code>tibble</code> is loaded.</p></dd>
+
+
 <dt>detrend</dt>
 <dd><p>logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?</p></dd>
+
+
 <dt>scale</dt>
 <dd><p>On which scale should the quantile residuals be shown: on the probability scale 
 (<code>"uniform"</code>) or on the normal scale (<code>"normal"</code>).</p></dd>
+
+
 <dt>nsim, delta</dt>
 <dd><p>arguments passed to <code>qresiduals</code>.</p></dd>
+
+
 <dt>confint</dt>
 <dd><p>logical or character string describing the type for plotting `c("polygon", "line")`.
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 quantile residuals are visualized.</p></dd>
+
+
 <dt>simint</dt>
 <dd><p>logical. In case of discrete distributions, should the simulation
 (confidence) interval due to the randomization be visualized?</p></dd>
+
+
 <dt>simint_level</dt>
 <dd><p>numeric. The confidence level required for calculating the simulation
 (confidence) interval due to the randomization.</p></dd>
+
+
 <dt>simint_nrep</dt>
 <dd><p>numeric. The repetition number of simulated quantiles for calculating the
 simulation (confidence) interval due to the randomization.</p></dd>
+
+
 <dt>single_graph</dt>
 <dd><p>logical. Should all computed extended reliability
 diagrams be plotted in a single graph?</p></dd>
+
+
 <dt>xlab, ylab, main, ...</dt>
 <dd><p>graphical parameters passed to
 <code><a href="plot.qqrplot.html">plot.qqrplot</a></code> or <code><a href="plot.qqrplot.html">autoplot.qqrplot</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>"qqrplot"</code> inheriting from
-<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code>with the following variables:</p>
+    
+
+<p>An object of class <code>"qqrplot"</code> inheriting from
+<code>"data.frame"</code> or <code>"tibble"</code> conditional on the argument <code>class</code></p>
+
+
+<p>with the following variables:</p>
 <dl><dt>x</dt>
 <dd><p>theoretical quantiles,</p></dd>
+
 <dt>y</dt>
 <dd><p>deviations between theoretical and empirical quantiles.</p></dd>
 </dl><p>In case of
@@ -202,30 +233,30 @@ Medicine</em>, <b>20</b>, 1259--1277. <a href="https://doi.org/10.1002/sim.746" 
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">## speed and stopping distances of cars</span></span>
-<span class="r-in"><span class="va">m1_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## compute and plot wormplot</span></span>
-<span class="r-in"><span class="fu">wormplot</span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## speed and stopping distances of cars</span></span></span>
+<span class="r-in"><span><span class="va">m1_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## compute and plot wormplot</span></span></span>
+<span class="r-in"><span><span class="fu">wormplot</span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="wormplot-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span class="r-in"><span class="co">## determinants for male satellites to nesting horseshoe crabs</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## linear poisson model</span></span>
-<span class="r-in"><span class="va">m1_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">m2_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## compute and plot wormplot as base graphic</span></span>
-<span class="r-in"><span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu">wormplot</span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu">wormplot</span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## plot combined wormplot as "ggplot2" graphic</span></span>
-<span class="r-in"><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">w1</span>, <span class="va">w2</span><span class="op">)</span>, single_graph <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#-------------------------------------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co">## determinants for male satellites to nesting horseshoe crabs</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## linear poisson model</span></span></span>
+<span class="r-in"><span><span class="va">m1_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m2_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## compute and plot wormplot as base graphic</span></span></span>
+<span class="r-in"><span><span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu">wormplot</span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu">wormplot</span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## plot combined wormplot as "ggplot2" graphic</span></span></span>
+<span class="r-in"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">w1</span>, <span class="va">w2</span><span class="op">)</span>, single_graph <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="wormplot-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -240,7 +271,7 @@ Medicine</em>, <b>20</b>, 1259--1277. <a href="https://doi.org/10.1002/sim.746" 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

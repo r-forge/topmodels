@@ -1,5 +1,5 @@
-pandoc: 2.17.1.1
-pkgdown: 2.0.3
+pandoc: 2.19.2
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   goodness_of_fit: goodness_of_fit.html
@@ -10,7 +10,7 @@ articles:
   implementation: implementation.html
   procast: procast.html
   topmodels: topmodels.html
-last_built: 2022-08-27T23:54Z
+last_built: 2023-03-23T22:54Z
 urls:
   reference: https://topmodels.R-Forge.R-project.org/reference
   article: https://topmodels.R-Forge.R-project.org/articles

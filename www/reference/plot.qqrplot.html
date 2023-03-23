@@ -83,136 +83,169 @@ returned by <code>link{qqrplot}</code>.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for qqrplot</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  single_graph <span class="op">=</span> <span class="cn">FALSE</span>,
-  detrend <span class="op">=</span> <span class="cn">NULL</span>,
-  simint <span class="op">=</span> <span class="cn">NULL</span>,
-  confint <span class="op">=</span> <span class="cn">NULL</span>,
-  confint_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pointwise"</span>, <span class="st">"simultaneous"</span>, <span class="st">"tail-sensitive"</span><span class="op">)</span>,
-  confint_level <span class="op">=</span> <span class="fl">0.95</span>,
-  ref <span class="op">=</span> <span class="cn">NULL</span>,
-  ref_identity <span class="op">=</span> <span class="cn">TRUE</span>,
-  ref_probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">)</span>,
-  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,
-  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,
-  xlab <span class="op">=</span> <span class="cn">NULL</span>,
-  ylab <span class="op">=</span> <span class="cn">NULL</span>,
-  main <span class="op">=</span> <span class="cn">NULL</span>,
-  axes <span class="op">=</span> <span class="cn">TRUE</span>,
-  box <span class="op">=</span> <span class="cn">TRUE</span>,
-  col <span class="op">=</span> <span class="st">"black"</span>,
-  pch <span class="op">=</span> <span class="fl">19</span>,
-  simint_col <span class="op">=</span> <span class="st">"black"</span>,
-  simint_alpha <span class="op">=</span> <span class="fl">0.2</span>,
-  confint_col <span class="op">=</span> <span class="st">"black"</span>,
-  confint_lty <span class="op">=</span> <span class="fl">2</span>,
-  confint_lwd <span class="op">=</span> <span class="fl">1.25</span>,
-  ref_col <span class="op">=</span> <span class="st">"black"</span>,
-  ref_lty <span class="op">=</span> <span class="fl">2</span>,
-  ref_lwd <span class="op">=</span> <span class="fl">1.25</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for qqrplot</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  detrend <span class="op">=</span> <span class="cn">NULL</span>,
-  simint <span class="op">=</span> <span class="cn">FALSE</span>,
-  col <span class="op">=</span> <span class="st">"black"</span>,
-  pch <span class="op">=</span> <span class="fl">19</span>,
-  simint_col <span class="op">=</span> <span class="st">"black"</span>,
-  simint_alpha <span class="op">=</span> <span class="fl">0.2</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for qqrplot</span>
-<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  single_graph <span class="op">=</span> <span class="cn">FALSE</span>,
-  detrend <span class="op">=</span> <span class="cn">NULL</span>,
-  simint <span class="op">=</span> <span class="cn">NULL</span>,
-  confint <span class="op">=</span> <span class="cn">NULL</span>,
-  confint_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pointwise"</span>, <span class="st">"simultaneous"</span>, <span class="st">"tail-sensitive"</span><span class="op">)</span>,
-  confint_level <span class="op">=</span> <span class="fl">0.95</span>,
-  ref <span class="op">=</span> <span class="cn">NULL</span>,
-  ref_identity <span class="op">=</span> <span class="cn">TRUE</span>,
-  ref_probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">)</span>,
-  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,
-  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,
-  xlab <span class="op">=</span> <span class="cn">NULL</span>,
-  ylab <span class="op">=</span> <span class="cn">NULL</span>,
-  main <span class="op">=</span> <span class="cn">NULL</span>,
-  legend <span class="op">=</span> <span class="cn">FALSE</span>,
-  theme <span class="op">=</span> <span class="cn">NULL</span>,
-  alpha <span class="op">=</span> <span class="cn">NA</span>,
-  colour <span class="op">=</span> <span class="st">"black"</span>,
-  fill <span class="op">=</span> <span class="cn">NA</span>,
-  shape <span class="op">=</span> <span class="fl">19</span>,
-  size <span class="op">=</span> <span class="fl">2</span>,
-  stroke <span class="op">=</span> <span class="fl">0.5</span>,
-  simint_fill <span class="op">=</span> <span class="st">"black"</span>,
-  simint_alpha <span class="op">=</span> <span class="fl">0.2</span>,
-  confint_colour <span class="op">=</span> <span class="cn">NULL</span>,
-  confint_fill <span class="op">=</span> <span class="cn">NULL</span>,
-  confint_size <span class="op">=</span> <span class="cn">NULL</span>,
-  confint_linetype <span class="op">=</span> <span class="cn">NULL</span>,
-  confint_alpha <span class="op">=</span> <span class="cn">NULL</span>,
-  ref_colour <span class="op">=</span> <span class="st">"black"</span>,
-  ref_size <span class="op">=</span> <span class="fl">0.5</span>,
-  ref_linetype <span class="op">=</span> <span class="fl">2</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for qqrplot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  single_graph <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  detrend <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  simint <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pointwise"</span>, <span class="st">"simultaneous"</span>, <span class="st">"tail-sensitive"</span><span class="op">)</span>,</span>
+<span>  confint_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  ref <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ref_identity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ref_probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">)</span>,</span>
+<span>  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  main <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  axes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  box <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  pch <span class="op">=</span> <span class="fl">19</span>,</span>
+<span>  simint_col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  simint_alpha <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  confint_col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  confint_lty <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  confint_lwd <span class="op">=</span> <span class="fl">1.25</span>,</span>
+<span>  ref_col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  ref_lty <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  ref_lwd <span class="op">=</span> <span class="fl">1.25</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for qqrplot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  detrend <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  simint <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  pch <span class="op">=</span> <span class="fl">19</span>,</span>
+<span>  simint_col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  simint_alpha <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for qqrplot</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  single_graph <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  detrend <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  simint <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pointwise"</span>, <span class="st">"simultaneous"</span>, <span class="st">"tail-sensitive"</span><span class="op">)</span>,</span>
+<span>  confint_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  ref <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ref_identity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ref_probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">)</span>,</span>
+<span>  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  main <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  theme <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  colour <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  shape <span class="op">=</span> <span class="fl">19</span>,</span>
+<span>  size <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  stroke <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  simint_fill <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  simint_alpha <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  confint_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint_fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint_linetype <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  confint_alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ref_colour <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  ref_size <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  ref_linetype <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x, object</dt>
 <dd><p>an object of class <code>qqrplot</code> as returned by <code><a href="qqrplot.html">qqrplot</a></code>.</p></dd>
+
+
 <dt>single_graph</dt>
 <dd><p>logical, defaults to <code>FALSE</code>. In case of multiple Q-Q residual plots:
 should all be drawn in a single graph?</p></dd>
+
+
 <dt>detrend</dt>
 <dd><p>logical. Should the qqrplot be detrended, i.e, plotted as a
 `wormplot()`? If <code>NULL</code> (default) this is extracted from <code>x</code>/<code>object</code>.</p></dd>
+
+
 <dt>simint</dt>
 <dd><p>logical or quantile specification. Should the simint of
 quantiles of the randomized quantile residuals be visualized?</p></dd>
+
+
 <dt>confint</dt>
 <dd><p>logical or character string describing the style for plotting `c("polygon", "line")`.</p></dd>
+
+
 <dt>confint_type</dt>
 <dd><p>character. Should <code>"pointwise"</code> or <code>"simultaneous"</code> confidence intervals
 of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
 on the Kolmogorov-Smirnov test.</p></dd>
+
+
 <dt>confint_level</dt>
 <dd><p>numeric. The confidence level required, defaults to <code>0.95</code>.</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>logical. Should a reference line be plotted?</p></dd>
+
+
 <dt>ref_identity, ref_probs</dt>
 <dd><p>Should the identity line be plotted as reference 
 and otherwise which probabilities should be used for defining the reference line?</p></dd>
+
+
 <dt>xlim, ylim, axes, box</dt>
 <dd><p>additional graphical
 parameters for base plots, whereby <code>x</code> is a object of class <code>qqrplot</code>.</p></dd>
+
+
 <dt>xlab, ylab, main, ...</dt>
 <dd><p>graphical plotting parameters passed to
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></code> or <code><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></code>,
 respectively.</p></dd>
+
+
 <dt>col, pch</dt>
 <dd><p>graphical parameters for the main part of the base plot.</p></dd>
+
+
 <dt>simint_col, simint_alpha, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd</dt>
 <dd><p>Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.</p></dd>
+
+
 <dt>legend</dt>
 <dd><p>logical. Should a legend be added in the <code>ggplot2</code> style
 graphic?</p></dd>
+
+
 <dt>theme</dt>
 <dd><p>name of the `ggplot2` theme to be used. If <code>theme = NULL</code>, the <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></code> is employed.</p></dd>
+
+
 <dt>colour, fill, alpha, shape, size, stroke</dt>
 <dd><p>graphical parameters passed to <code>ggplot2</code> 
 style plots.</p></dd>
+
+
 <dt>simint_fill, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype</dt>
 <dd><p>Further graphical parameters for the `confint` and `simint` line/polygon using <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></code>.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -240,60 +273,60 @@ Residuals.” <em>Journal of Computational and Graphical Statistics</em>,
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">## speed and stopping distances of cars</span></span>
-<span class="r-in"><span class="va">m1_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## compute and plot qqrplot</span></span>
-<span class="r-in"><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## speed and stopping distances of cars</span></span></span>
+<span class="r-in"><span><span class="va">m1_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## compute and plot qqrplot</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.qqrplot-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## customize colors</span></span>
-<span class="r-in"><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span>, plot <span class="op">=</span> <span class="st">"base"</span>, ref_col <span class="op">=</span> <span class="st">"blue"</span>, lty <span class="op">=</span> <span class="fl">2</span>, pch <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## add separate model</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st">"crch"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">m1_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span> <span class="op">|</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">2</span>, simint <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## customize colors</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span>, plot <span class="op">=</span> <span class="st">"base"</span>, ref_col <span class="op">=</span> <span class="st">"blue"</span>, lty <span class="op">=</span> <span class="fl">2</span>, pch <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## add separate model</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st">"crch"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">m1_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span> <span class="op">|</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">2</span>, simint <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-plt img"><img src="plot.qqrplot-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st">"crch"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## precipitation observations and forecasts for Innsbruck</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"RainIbk"</span>, package <span class="op">=</span> <span class="st">"crch"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">RainIbk</span><span class="op">$</span><span class="va">ensmean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">RainIbk</span><span class="op">$</span><span class="va">enssd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">RainIbk</span>, <span class="va">enssd</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## linear model w/ constant variance estimation</span></span>
-<span class="r-in">  <span class="va">m2_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span>, data <span class="op">=</span> <span class="va">RainIbk</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## logistic censored model </span></span>
-<span class="r-in">  <span class="va">m2_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span>, dist <span class="op">=</span> <span class="st">"logistic"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## compute qqrplots</span></span>
-<span class="r-in">  <span class="va">qq2_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_lm</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">qq2_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## plot in single graph</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">qq2_lm</span>, <span class="va">qq2_crch</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, simint_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, single_graph <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#-------------------------------------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st">"crch"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## precipitation observations and forecasts for Innsbruck</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"RainIbk"</span>, package <span class="op">=</span> <span class="st">"crch"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">RainIbk</span><span class="op">$</span><span class="va">ensmean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">RainIbk</span><span class="op">$</span><span class="va">enssd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">RainIbk</span>, <span class="va">enssd</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## linear model w/ constant variance estimation</span></span></span>
+<span class="r-in"><span>  <span class="va">m2_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span>, data <span class="op">=</span> <span class="va">RainIbk</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## logistic censored model </span></span></span>
+<span class="r-in"><span>  <span class="va">m2_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html" class="external-link">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span>, dist <span class="op">=</span> <span class="st">"logistic"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## compute qqrplots</span></span></span>
+<span class="r-in"><span>  <span class="va">qq2_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_lm</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">qq2_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## plot in single graph</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">qq2_lm</span>, <span class="va">qq2_crch</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, simint_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, single_graph <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-plt img"><img src="plot.qqrplot-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span class="r-in"><span class="co">## determinants for male satellites to nesting horseshoe crabs</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## linear poisson model</span></span>
-<span class="r-in"><span class="va">m3_pois</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## compute and plot qqrplot as "ggplot2" graphic</span></span>
-<span class="r-in"><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m3_pois</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#-------------------------------------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co">## determinants for male satellites to nesting horseshoe crabs</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## linear poisson model</span></span></span>
+<span class="r-in"><span><span class="va">m3_pois</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## compute and plot qqrplot as "ggplot2" graphic</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m3_pois</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.qqrplot-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -308,7 +341,7 @@ Residuals.” <em>Journal of Computational and Graphical Statistics</em>,
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

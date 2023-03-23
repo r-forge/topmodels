@@ -83,26 +83,26 @@ for fitted or predicted probability distributions from (regression) models.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">proscore</span><span class="op">(</span>
-  <span class="va">object</span>,
-  newdata <span class="op">=</span> <span class="cn">NULL</span>,
-  na.action <span class="op">=</span> <span class="va">na.pass</span>,
-  type <span class="op">=</span> <span class="st">"loglikelihood"</span>,
-  drop <span class="op">=</span> <span class="cn">FALSE</span>,
-  aggregate <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for default</span>
-<span class="fu">proscore</span><span class="op">(</span>
-  <span class="va">object</span>,
-  newdata <span class="op">=</span> <span class="cn">NULL</span>,
-  na.action <span class="op">=</span> <span class="va">na.pass</span>,
-  type <span class="op">=</span> <span class="st">"loglikelihood"</span>,
-  drop <span class="op">=</span> <span class="cn">FALSE</span>,
-  aggregate <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">proscore</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na.action <span class="op">=</span> <span class="va">na.pass</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"loglikelihood"</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  aggregate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for default</span></span>
+<span><span class="fu">proscore</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na.action <span class="op">=</span> <span class="va">na.pass</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"loglikelihood"</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  aggregate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -111,30 +111,45 @@ for fitted or predicted probability distributions from (regression) models.</p>
 <dd><p>a fitted model object. For the <code>default</code> method this
 needs to have a <code><a href="https://alexpghayes.github.io/distributions3/reference/prodist.html" class="external-link">prodist</a></code> and a
 <code><a href="newresponse.html">newresponse</a></code> method.</p></dd>
+
+
 <dt>newdata</dt>
 <dd><p>optionally, a data frame in which to look for variables with
 which to predict and from which to obtain the response variable.
 If omitted, the original observations are used.</p></dd>
+
+
 <dt>na.action</dt>
 <dd><p>function determining what should be done with missing
 values in <code>newdata</code>.  The default is to employ <code>NA</code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>character specifying the type of score to compute. Avaible types:
 <code>"loglikelihood"</code> (or equivalently <code>"logs"</code> or <code>"log_pdf"</code>),
 <code>"CRPS"</code> (or equivalently <code>"RPS"</code>), <code>"MAE"</code>, and <code>"MSE"</code>.
 Upper or lower case spellings can be used interchangably.</p></dd>
+
+
 <dt>drop</dt>
 <dd><p>logical. Should scores be returned in a data frame (default)
 or (if possible) dropped to a vector.</p></dd>
+
+
 <dt>aggregate</dt>
 <dd><p>logical or function to be used for aggregating scores across
 observations. Setting <code>aggregate = TRUE</code> corresponds to using <code>mean</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further parameters passed to the <code>aggregate</code> function (if any).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Either a <code>data.frame</code> of scores (if <code>drop = FALSE</code>, default) or
+    
+
+<p>Either a <code>data.frame</code> of scores (if <code>drop = FALSE</code>, default) or
 a named numeric vector (if <code>drop = TRUE</code> and the scores are not a matrix).
 The names are the <code>type</code> specified by the user (i.e., are not canonicalized
 by partial matching etc.).</p>
@@ -180,52 +195,52 @@ data frame, or aggregated (e.g., by using <code>mean</code>, <code>sum</code>, o
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Poisson regression model for FIFA 2018 data:</span></span>
-<span class="r-in"><span class="co">## number of goals scored by each team in each game, explained by</span></span>
-<span class="r-in"><span class="co">## predicted ability difference of the competing teams</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## in-sample log-likelihood</span></span>
-<span class="r-in"><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"loglik"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Poisson regression model for FIFA 2018 data:</span></span></span>
+<span class="r-in"><span><span class="co">## number of goals scored by each team in each game, explained by</span></span></span>
+<span class="r-in"><span><span class="co">## predicted ability difference of the competing teams</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## in-sample log-likelihood</span></span></span>
+<span class="r-in"><span><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"loglik"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      loglik</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 -177.6971</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 'log Lik.' -177.6971 (df=2)</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## compute mean of all available scores</span></span>
-<span class="r-in"><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LogS"</span>, <span class="st">"CRPS"</span>, <span class="st">"MAE"</span>, <span class="st">"MSE"</span><span class="op">)</span>, aggregate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## compute mean of all available scores</span></span></span>
+<span class="r-in"><span><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LogS"</span>, <span class="st">"CRPS"</span>, <span class="st">"MAE"</span>, <span class="st">"MSE"</span><span class="op">)</span>, aggregate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        LogS      CRPS       MAE      MSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 -1.388258 0.5619936 0.8320441 1.162032</span>
-<span class="r-in"><span class="co">## note that "LogS" and "loglik" above are both matched to using</span></span>
-<span class="r-in"><span class="co">## the log-likelihood but the user-supplied spelling is preserved</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## prediction using a new data set (final of the tournament)</span></span>
-<span class="r-in"><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">FIFA2018</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">final</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LogLik"</span>, <span class="st">"CRPS"</span>, <span class="st">"MAE"</span>, <span class="st">"MSE"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co">## note that "LogS" and "loglik" above are both matched to using</span></span></span>
+<span class="r-in"><span><span class="co">## the log-likelihood but the user-supplied spelling is preserved</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## prediction using a new data set (final of the tournament)</span></span></span>
+<span class="r-in"><span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">FIFA2018</span>, <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">final</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LogLik"</span>, <span class="st">"CRPS"</span>, <span class="st">"MAE"</span>, <span class="st">"MSE"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        LogLik      CRPS      MAE      MSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 127 -2.891437 1.7744030 2.395589 5.738845</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 128 -1.741564 0.7205361 1.046213 1.094561</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## least-squares regression for speed and breaking distance of cars</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"cars"</span>, package <span class="op">=</span> <span class="st">"datasets"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## replicate in-sample residual sum of squares (aka deviance) by taking</span></span>
-<span class="r-in"><span class="co">## the sum (rather than the mean) of the squared errors</span></span>
-<span class="r-in"><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"MSE"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## least-squares regression for speed and breaking distance of cars</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"cars"</span>, package <span class="op">=</span> <span class="st">"datasets"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## replicate in-sample residual sum of squares (aka deviance) by taking</span></span></span>
+<span class="r-in"><span><span class="co">## the sum (rather than the mean) of the squared errors</span></span></span>
+<span class="r-in"><span><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"MSE"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        MSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 11353.52</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/deviance.html" class="external-link">deviance</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/deviance.html" class="external-link">deviance</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11353.52</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## note that the log-likelihood does not match exactly due to using</span></span>
-<span class="r-in"><span class="co">## the least-squares rather than the maximum-likelihood estimate of the</span></span>
-<span class="r-in"><span class="co">## error variance (divising by n rather than n - k)</span></span>
-<span class="r-in"><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"loglikelihood"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## note that the log-likelihood does not match exactly due to using</span></span></span>
+<span class="r-in"><span><span class="co">## the least-squares rather than the maximum-likelihood estimate of the</span></span></span>
+<span class="r-in"><span><span class="co">## error variance (divising by n rather than n - k)</span></span></span>
+<span class="r-in"><span><span class="fu">proscore</span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"loglikelihood"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   loglikelihood</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      -206.599</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     -206.5784</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 'log Lik.' -206.5784 (df=3)</span>
 </code></pre></div>
     </div>
@@ -241,7 +256,7 @@ data frame, or aggregated (e.g., by using <code>mean</code>, <code>sum</code>, o
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

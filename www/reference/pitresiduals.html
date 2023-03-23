@@ -81,19 +81,19 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pitresiduals</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for default</span>
-<span class="fu">pitresiduals</span><span class="op">(</span>
-  <span class="va">object</span>,
-  newdata <span class="op">=</span> <span class="cn">NULL</span>,
-  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"uniform"</span>, <span class="st">"normal"</span><span class="op">)</span>,
-  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random"</span>, <span class="st">"quantile"</span><span class="op">)</span>,
-  nsim <span class="op">=</span> <span class="fl">1L</span>,
-  delta <span class="op">=</span> <span class="cn">NULL</span>,
-  prob <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pitresiduals</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for default</span></span>
+<span><span class="fu">pitresiduals</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"uniform"</span>, <span class="st">"normal"</span><span class="op">)</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random"</span>, <span class="st">"quantile"</span><span class="op">)</span>,</span>
+<span>  nsim <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  delta <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prob <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -103,34 +103,51 @@
 either a specification of probabilities (vector or 2-dimensional matrix of
 probabilities) or an object from which the these can be obtained with
 <code><a href="procast.html">procast</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further parameters passed to methods.</p></dd>
+
+
 <dt>newdata</dt>
 <dd><p>optionally, a data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.</p></dd>
+
+
 <dt>scale</dt>
 <dd><p>On which scale should the PIT residuals be shown; on the probability scale 
 (<code>"uniform"</code>) or on the normal scale (<code>"normal"</code>).</p></dd>
+
+
 <dt>type</dt>
 <dd><p>character specifying whether - in the case of discrete response
 distributions - randomized quantile residuals or their corresponding
 quantiles should be computed.</p></dd>
+
+
 <dt>nsim</dt>
 <dd><p>numeric. The number of simulated randomized quantile residuals
 per observation (for <code>type = "numeric"</code>).</p></dd>
+
+
 <dt>delta</dt>
 <dd><p>numeric. The minimal difference to compute the range of
 proabilities corresponding to each observation according to get (randomized)
 quantile residuals.  For <code>NULL</code>, the minimal observed difference in the
 resonse divided by <code>5e-6</code> is used.</p></dd>
+
+
 <dt>prob</dt>
 <dd><p>numeric. The probabilities at which quantile residuals should be
 computed (for <code>type = "quantile"</code>), defaulting to the median
 (<code>0.5</code>).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A vector or matrix of PIT residuals.</p>
+    
+
+<p>A vector or matrix of PIT residuals.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -175,27 +192,27 @@ Multivariate Responses”. <em>PLOS ONE</em>, <b>12</b>(7), 1--18.
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">## linear regression models (homoscedastic Gaussian response)</span></span>
-<span class="r-in"><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">pitresiduals</span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## linear regression models (homoscedastic Gaussian response)</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">pitresiduals</span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          1          2          3          4          5          6          7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.59882104 0.77948845 0.34947760 0.78337763 0.55481406 0.30573228 0.40380744 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.60081531 0.78417002 0.34652997 0.78808978 0.55593700 0.30206903 0.40186398 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          8          9         10         11         12         13         14 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.60898167 0.78722684 0.28630373 0.56001935 0.15506020 0.26603741 0.35764644 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.61117045 0.79196758 0.28235827 0.56124732 0.15012467 0.26182583 0.35484277 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         15         16         17         18         19         20         21 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.45831809 0.31192384 0.51187296 0.51187296 0.79103581 0.22780511 0.46180709 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.45746181 0.30835554 0.51211771 0.51211772 0.79580317 0.22318530 0.46102201 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         22         23         24         25         26         27         28 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.92848877 0.99715432 0.08197447 0.15822377 0.79355266 0.19287583 0.36422901 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.93252054 0.99761426 0.07771442 0.15328579 0.79833667 0.18801555 0.36154336 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         29         30         31         32         33         34         35 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.13071076 0.27329840 0.51888085 0.23314913 0.57212322 0.93085744 0.97737792 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.12585715 0.26917859 0.51926989 0.22857810 0.57359364 0.93483116 0.97950682 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         36         37         38         39         40         41         42 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.08466918 0.23449593 0.76001388 0.02937176 0.19772705 0.27770161 0.37085188 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.08035724 0.22993764 0.76451836 0.02686025 0.19289134 0.27363944 0.36828670 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         43         44         45         46         47         48         49 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.57556956 0.42435457 0.10996563 0.32922254 0.83852321 0.85392752 0.99751523 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.57710851 0.42281412 0.10528373 0.32593113 0.84346190 0.85884627 0.99792760 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         50 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.60932787 </span>
-<span class="r-in"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.61152323 </span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -210,7 +227,7 @@ Multivariate Responses”. <em>PLOS ONE</em>, <b>12</b>(7), 1--18.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

@@ -79,7 +79,7 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="procast.html">procast()</a></code> <code><a href="procast.html">procast_setup()</a></code> </p>
+          <p><code><a href="procast.html">procast()</a></code> </p>
         </td>
         <td><p>Procast: Probabilistic Forecasting</p></td>
       </tr><tr><td>
@@ -98,6 +98,10 @@
           <p><code><a href="newresponse.html">newresponse()</a></code> </p>
         </td>
         <td><p>Extract Observed Responses from New Data</p></td>
+      </tr><tr><td>
+          <p><code><a href="crps.distribution.html">crps(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Beta&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Bernoulli&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Binomial&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Erlang&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Exponential&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Gamma&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;GEV&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Geometric&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Gumbel&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;HyperGeometric&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Logistic&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;LogNormal&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;NegativeBinomial&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Normal&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Poisson&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;StudentsT&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;Uniform&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;GAMLSS&gt;</i>)</a></code> <code><a href="crps.distribution.html">crps(<i>&lt;BAMLSS&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Methods for Evaluating the CRPS of Probability Distributions</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="probabilistic-model-diagnostics">Probabilistic model diagnostics <a href="#probabilistic-model-diagnostics" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p>
@@ -159,13 +163,29 @@
         </td>
         <td><p><code>geom_*</code> and <code>stat_*</code> for Producing PIT Histograms with `ggplot2`</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h2 id="additional-methods">Additional methods <a href="#additional-methods" class="anchor" aria-hidden="true"></a></h2>
+          <h2 id="interfacs-to-models-distributions">Interfacs to models/distributions <a href="#interfacs-to-models-distributions" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="crps.Beta.html">crps(<i>&lt;Beta&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Bernoulli&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Binomial&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Erlang&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Exponential&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Gamma&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;GEV&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Geometric&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Gumbel&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;HyperGeometric&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Logistic&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;LogNormal&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;NegativeBinomial&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Normal&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Poisson&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;StudentsT&gt;</i>)</a></code> <code><a href="crps.Beta.html">crps(<i>&lt;Uniform&gt;</i>)</a></code> </p>
+          <p><code><a href="GAMLSS.html">GAMLSS()</a></code> </p>
         </td>
-        <td><p>Methods for Evaluating the CRPS of Various Distributions</p></td>
+        <td><p>Create a GAMLSS Distribution</p></td>
+      </tr><tr><td>
+          <p><code><a href="prodist.gamlss.html">prodist(<i>&lt;gamlss&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracting Fitted or Predicted Probability Distributions from gamlss Models</p></td>
+      </tr><tr><td>
+          <p><code><a href="BAMLSS.html">BAMLSS()</a></code> </p>
+        </td>
+        <td><p>Create a BAMLSS Distribution</p></td>
+      </tr><tr><td>
+          <p><code><a href="prodist.bamlss.html">prodist(<i>&lt;bamlss&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracting Fitted or Predicted Probability Distributions from bamlss Models</p></td>
+      </tr><tr><td>
+          <p><code><a href="Empirical.html">Empirical()</a></code> <code><a href="Empirical.html">pempirical()</a></code> <code><a href="Empirical.html">dempirical()</a></code> <code><a href="Empirical.html">qempirical()</a></code> <code><a href="Empirical.html">rempirical()</a></code> <code><a href="Empirical.html">quantile(<i>&lt;Empirical&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Create an Empirical distribution</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -179,7 +199,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
