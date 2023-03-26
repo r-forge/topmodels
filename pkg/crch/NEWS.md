@@ -1,3 +1,7 @@
+# crch 1.1-2
+
+* fixed crps generic method consistency
+
 # crch 1.1-1
 
 * Added methods for `is_discrete()` and `is_continuous()` for the new distributions3

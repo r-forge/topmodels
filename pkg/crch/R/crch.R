@@ -827,9 +827,9 @@ vcov.crch <- function(object, model = c("full", "location", "scale", "df"), ...)
 
 logLik.crch <- function(object, ...) structure(object$loglik, df = sum(sapply(object$coefficients, length)), class = "logLik")
 
-crps.crch <- function(object, newdata = NULL, average = TRUE, ...) {
-  if(length(object$crps)) {
-    object$crps
+crps.crch <- function(y, newdata = NULL, average = TRUE, ...) {
+  if(length(y$crps)) {
+    y$crps
   } else {
 #    stopifnot(requireNamespace("scoringRules"))
 #    family <- switch(object$dist, 
@@ -843,7 +843,7 @@ crps.crch <- function(object, newdata = NULL, average = TRUE, ...) {
 #    right <- object$cens$right
 #    rval <- scoringRules::crps(y, family = family, location = location, df = df,
 #      scale = scale, lower = left, upper = right, lmass = mass, umass = mass)
-    rval <- predict(object, newdata = newdata, type = "crps", at = "response")
+    rval <- predict(y, newdata = newdata, type = "crps", at = "response")
     if(average) rval <- mean(rval)
     rval
   }
