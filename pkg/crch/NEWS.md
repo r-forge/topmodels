@@ -1,6 +1,7 @@
 # crch 1.1-2
 
-* fixed crps generic method consistency
+* Fixed name of first argument in `crps()` method to be consistent with the generic.
+
 
 # crch 1.1-1
 
