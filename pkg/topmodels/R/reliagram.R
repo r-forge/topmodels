@@ -86,7 +86,7 @@
 #' \code{xlab}, \code{ylab}, \code{main}, and \code{treshold},
 #' \code{confint_level}, as well as the total and the decomposed Brier Score 
 #' (\code{bs, rel, res, unc}) are stored as attributes.
-#' @note Note that there is also a \code{\link[verification]{reliability.plot}} function in the
+#' @note Note that there is also a \code{reliability.plot} function in the
 #' \pkg{verification} package. However, it only works for numeric
 #' forecast probabilities and numeric observed relative frequencies, hence a function has been
 #' created here.
