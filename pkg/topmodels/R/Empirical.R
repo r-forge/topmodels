@@ -182,7 +182,7 @@ dpqrempirical_prep <- function(x, y) {
     return(list(x, y))
 }
 
-#' @param x,q vector of quantiles.
+#' @param q vector of quantiles.
 #' @param p vector of probabilities.
 #' @param y vector of observations of the empirical distribution with two or more non-missing finite values.
 #' @param log,log.p logical; if \code{TRUE}, probabilities \code{p} are given as \code{log(p)}.
