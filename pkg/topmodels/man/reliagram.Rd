@@ -113,7 +113,7 @@ diagrams by \code{c}/\code{rbind}, which creates a set of reliability diagrams
 that can then be plotted in one go.
 }
 \note{
-Note that there is also a \code{\link[verification]{reliability.plot}} function in the
+Note that there is also a \code{reliability.plot} function in the
 \pkg{verification} package. However, it only works for numeric
 forecast probabilities and numeric observed relative frequencies, hence a function has been
 created here.

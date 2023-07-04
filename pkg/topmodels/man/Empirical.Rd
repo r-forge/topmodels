@@ -6,6 +6,9 @@
 \alias{dempirical}
 \alias{qempirical}
 \alias{rempirical}
+\alias{mean.Empirical}
+\alias{variance.Empirical}
+\alias{skewness.Empirical}
 \alias{quantile.Empirical}
 \title{Create an Empirical distribution}
 \usage{
@@ -19,11 +22,18 @@ qempirical(p, y, lower.tail = TRUE, log.p = FALSE, na.rm = TRUE, ...)
 
 rempirical(n, y, na.rm = TRUE)
 
+\method{mean}{Empirical}(x, ...)
+
+\method{variance}{Empirical}(x, ...)
+
+\method{skewness}{Empirical}(x, type = 1L, ...)
+
 \method{quantile}{Empirical}(x, probs, drop = TRUE, elementwise = NULL, ...)
 }
 \arguments{
-\item{x}{a numeric vector, list of numeric vectors, numeric matrix,
-or data.frame. See 'Details' for more information.}
+\item{x}{an object of class \code{Empirical} (see [Empirical()]).}
+
+\item{q}{vector of quantiles.}
 
 \item{y}{vector of observations of the empirical distribution with two or more non-missing finite values.}
 
@@ -47,6 +57,9 @@ possible errors.}
 
 \item{n}{The number of samples to draw. Defaults to `1L`.}
 
+\item{type}{integer between \code{1L} and \code{3L} (default) selecting one of three
+algorithms. See Details for more information.}
+
 \item{probs}{A vector of probabilities.}
 
 \item{drop}{logical. Should the result be simplified to a vector if possible?}
@@ -57,8 +70,6 @@ Or, if \code{x} and \code{probs} have the same length, should the evaluation be
 done element by element (\code{elementwise = TRUE}, yielding a vector)? The
 default of \code{NULL} means that \code{elementwise = TRUE} is used if the
 lengths match and otherwise \code{elementwise = FALSE} is used.}
-
-\item{x, q}{vector of quantiles.}
 }
 \value{
 An `Empirical` object.
@@ -186,8 +197,7 @@ d5
 \references{
 Joanes DN and Gill CA (1998). \dQuote{Comparing Measures of
 Sample Skewness and Kurtosis.} \emph{Journal of the Royal Statistical
-Society. Series D (The Statistician)}, \bold{47}(1), 183--189.
-\url{http://www.jstor.org/stable/2988433}.
+Society D}, \bold{47}(1), 183--189. \doi{10.1111/1467-9884.00122}
 }
 \seealso{
 Other Empirical distribution: 

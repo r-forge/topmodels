@@ -107,6 +107,11 @@ dispersion parameter in the \code{glm} method. The default \code{NULL}
 divided by the number of observations, n. Alternatively, \code{dispersion = "Chisquared"}
 uses the Chi-squared statistic divided by the residual degrees of freedom, n - k.
 Finally, a concrete numeric value can also be specified in \code{dispersion}.}
+
+\item{distributions3}{logical. If a dedicated \pkg{distributions3} object
+is available (e.g., such as \code{\link[distributions3]{Normal}}) and uses
+the same parameterization, should this be used instead of the general
+\code{\link[bamlss]{BAMLSS}} distribution?}
 }
 \value{
 Either a \code{data.frame} of predictions with the same number of rows

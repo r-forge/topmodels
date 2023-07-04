@@ -297,12 +297,14 @@ rempirical <- function(n, y, na.rm = TRUE) {
 }
 
 #' @export
+#' @rdname Empirical
 mean.Empirical <- function(x, ...) {
   ## ellipsis::check_dots_used()
   setNames(rowMeans(as.matrix(x), na.rm = TRUE), names(x))
 }
 
 #' @export
+#' @rdname Empirical
 variance.Empirical <- function(x, ...) {
   x <- as.matrix(x)
   setNames(rowSums((x - rowMeans(x, na.rm = TRUE))^2, na.rm = TRUE) / (rowSums(!is.na(x)) - 1), rownames(x))
@@ -311,8 +313,8 @@ variance.Empirical <- function(x, ...) {
 #' @param x an object of class \code{Empirical} (see [Empirical()]).
 #' @param type integer between \code{1L} and \code{3L} (default) selecting one of three
 #'        algorithms. See Details for more information.
-#'
 #' @export
+#' @rdname Empirical
 skewness.Empirical <- function(x, type = 1L, ...) {
   type <- as.integer(type)[1]
   stopifnot("invalid 'type' argument" = is.finite(type) && type >= 1L && type <= 3L)
