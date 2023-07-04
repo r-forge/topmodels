@@ -69,8 +69,7 @@ median.distribution <- function(x, na.rm = TRUE, ...) {
 #'
 #' @references Joanes DN and Gill CA (1998). \dQuote{Comparing Measures of
 #' Sample Skewness and Kurtosis.} \emph{Journal of the Royal Statistical
-#' Society. Series D (The Statistician)}, \bold{47}(1), 183--189.
-#' \url{http://www.jstor.org/stable/2988433}.
+#' Society D}, \bold{47}(1), 183--189. \doi{10.1111/1467-9884.00122}
 #'
 #' @examples
 #'
