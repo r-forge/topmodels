@@ -298,7 +298,7 @@ rempirical <- function(n, y, na.rm = TRUE) {
 
 #' @export
 mean.Empirical <- function(x, ...) {
-  ellipsis::check_dots_used()
+  ## ellipsis::check_dots_used()
   setNames(rowMeans(as.matrix(x), na.rm = TRUE), names(x))
 }
 
@@ -525,19 +525,19 @@ format.Empirical <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...
 #'
 #' @export
 support.Empirical <- function(d, drop = TRUE, ...) {
-  ellipsis::check_dots_used()
+  ## ellipsis::check_dots_used()
   minmax <- apply(as.matrix(d), MARGIN = 1, FUN = range, na.rm = TRUE)
   make_support(minmax[1, ], minmax[2, ], d, drop = drop)
 }
 
 #' @exportS3Method
 is_discrete.Empirical <- function(d, ...) {
-  ellipsis::check_dots_used()
+  ## ellipsis::check_dots_used()
   setNames(rep.int(FALSE, length(d)), names(d))
 }
 
 #' @exportS3Method
 is_continuous.Empirical <- function(d, ...) {
-  ellipsis::check_dots_used()
+  ## ellipsis::check_dots_used()
   setNames(rep.int(FALSE, length(d)), names(d))
 }
