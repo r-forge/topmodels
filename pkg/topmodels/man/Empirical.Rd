@@ -9,6 +9,7 @@
 \alias{mean.Empirical}
 \alias{variance.Empirical}
 \alias{skewness.Empirical}
+\alias{kurtosis.Empirical}
 \alias{quantile.Empirical}
 \title{Create an Empirical distribution}
 \usage{
@@ -27,6 +28,8 @@ rempirical(n, y, na.rm = TRUE)
 \method{variance}{Empirical}(x, ...)
 
 \method{skewness}{Empirical}(x, type = 1L, ...)
+
+\method{kurtosis}{Empirical}(x, type = 3L, ...)
 
 \method{quantile}{Empirical}(x, probs, drop = TRUE, elementwise = NULL, ...)
 }

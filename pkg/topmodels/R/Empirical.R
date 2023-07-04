@@ -338,6 +338,7 @@ skewness.Empirical <- function(x, type = 1L, ...) {
 }
 
 #' @export
+#' @rdname Empirical
 kurtosis.Empirical <- function(x, type = 3L, ...) {
   type <- as.integer(type)[1]
   stopifnot("invalid 'type' argument" = is.finite(type) && type >= 1L && type <= 3L)
