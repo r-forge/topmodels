@@ -223,6 +223,10 @@ procast.glm <- function(object, newdata = NULL, na.action = na.pass, type = "dis
 #' @rdname procast
 #' @method procast bamlss
 #' @export 
+#' @param distributions3 logical. If a dedicated \pkg{distributions3} object
+#' is available (e.g., such as \code{\link[distributions3]{Normal}}) and uses
+#' the same parameterization, should this be used instead of the general
+#' \code{\link[bamlss]{BAMLSS}} distribution?
 procast.bamlss <- function(object, newdata = NULL, na.action = na.pass, type = "distribution", at = 0.5, drop = FALSE, ..., distributions3 = FALSE) {
   object <- if(is.null(newdata)) {
     distributions3::prodist(object, distributions3 = distributions3)
