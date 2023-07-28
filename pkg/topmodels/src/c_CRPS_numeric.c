@@ -184,7 +184,7 @@ SEXP c_CRPS_numeric(SEXP x, SEXP px, SEXP p, SEXP q, SEXP continuous) {
                     h      = (h_up * h_up + h_lo * h_lo) * 0.5;
                 } else {
                     h      = (1. - pxptr[ix]);
-                    Rprintf("   h = %.5f    (1 - %.5f) for ix = %d\n", h, pxptr[ix], ix);
+                    /*Rprintf("   h = %.5f    (1 - %.5f) for ix = %d\n", h, pxptr[ix], ix);*/
                     h      = h * h;
                 }
                 tmp_up = w * h;
