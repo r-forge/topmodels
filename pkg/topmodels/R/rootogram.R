@@ -58,14 +58,11 @@
 #' explicitly specify the return class, or to \code{NULL} (default) in which
 #' case the return class is conditional on whether the package \code{"tibble"}
 #' is loaded.
-#' @param response_type character. To set the default values for \code{breaks} and
-#' \code{widths}.  Currently different defaults are available for \code{"discrete"}
-#' and \code{"continous"} response distribution, as well as for the special case of a
-#' \code{"logseries"} response.
 #' @param breaks \code{NULL} (default) or numeric to manually specify the breaks for
 #' the rootogram intervals. A single numeric (larger \code{0}) specifies the number of breaks
 #' to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.
 #' @param width \code{NULL} (default) or single positive numeric. Width of the histogram bars.
+#' Will be ignored for non-discrete distributions.
 #' @param style character specifying the syle of rootogram (see 'Details').
 #' @param scale character specifying whether \code{"raw"} frequencies or their square
 #' roots (\code{"sqrt"}; default) should be drawn.
@@ -77,7 +74,6 @@
 #' @param xlab,ylab,main graphical parameters forwarded to
 #' \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}}.
 #' @param \dots further graphical parameters passed to the plotting function.
-#' @param use_devel_version Use the current developing version.
 #'
 #' @return An object of class \code{"rootogram"} inheriting from
 #' \code{"data.frame"} or \code{"tibble"} conditional on the argument \code{class}
@@ -169,7 +165,6 @@ rootogram.default <- function(
                               newdata = NULL,
                               plot = TRUE,
                               class = NULL,
-                              response_type = NULL,
                               breaks = NULL,
                               width = NULL,
 
@@ -182,7 +177,6 @@ rootogram.default <- function(
                               xlab = NULL,
                               ylab = NULL,
                               main = NULL,
-                              use_devel_version = FALSE,
                               ...) {
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
@@ -245,9 +239,26 @@ rootogram.default <- function(
   w <- attr(y, "weights")
   yw <- if(frequency_weights) rep.int(y, w) else y[w > 0]
 
-  # TODO: (ML) Plan to no use `response_type` arg, but how to handle "logseries"?
-  if (is.null(response_type) && !any(class(object) %in% c("disttree", "distforest"))) { 
-    tmp_prodist <- prodist(object)
+  ## Getting distributions (required method)
+  tmp_prodist <- prodist(object)
+
+  ## Helper functions to check available support for some S3methods
+  hasS3method <- function(method, classes) {
+    any(sapply(classes, function(cls) {
+      tryCatch(is.function(getS3method(method, class = cls)), error = function(e) FALSE)
+    }))
+  }
+  hasS3 <- c("is_discrete", "is_continuous", "support")
+  hasS3 <- setNames(lapply(hasS3, function(x) hasS3method(x, class(tmp_prodist))), hasS3)
+
+  ## If the distribution does not provide methods for
+  ## is_discrete, is_continuous and support, we assume
+  ## a 'mixed' distribution and set the support to the
+  ## range of the quantiles of the distributions.
+  if (!hasS3$is_discrete & !hasS3$is_continuous & !hasS3$support & is.null(breaks)) {
+    response_type   <- "mixed"
+    dist_support    <- range(quantile(tmp_prodist, probs = c(0.01, 0.99), elementwise = FALSE))
+  } else {
     if (all(distributions3::is_discrete(tmp_prodist))) {
       response_type <- "discrete" 
     } else if (all(distributions3::is_continuous(tmp_prodist))) {
@@ -255,39 +266,21 @@ rootogram.default <- function(
     } else {
       response_type <- "mixed"
     }
-  } else if (is.null(response_type) && any(class(object) %in% c("disttree", "distforest"))) { 
-    response_type <- attr(y, "response_type")
+    ## Get support range for the distributions
+    dist_support <- range(support(tmp_prodist))
   }
-   
-  response_type <- match.arg(response_type, c("discrete", "continuous", "mixed", "logseries"))
+  if (any(is.na(dist_support))) stop("invalid support for distributions, got NA")
 
-  if (!use_devel_version | any(class(object) %in% c("disttree", "distforest"))) {
-    ## set breaks and midpoints
-    ## TODO: (ML) Extend breaks to the left, in case still expected frequency exists.
-    ## TODO: (Z) Try to get rid of 'response_type'.
-    ## TODO: (RS) Thought the very same while going trough args und sanity checks :).
-    if (is.null(breaks) && response_type == "discrete") {
-      breaks <- -1L:max(yw) + 0.5
-    } else if (is.null(breaks) && response_type == "logseries") {
-      breaks <- 0L:max(yw) + 0.5
-    } else if (is.null(breaks)) {
-      breaks <- "Sturges"
-    }
-
-    breaks <- hist(yw, plot = FALSE, breaks = breaks)$breaks
-    mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
-
-    ## fix pointmasses
-    ## TODO: (ML) Check if that always works or could be improved.
-    breaks[1] <- breaks[1] - 1e-12
-    breaks[length(breaks)] <- breaks[length(breaks)] + 1e-12
-
+  ## checking/setting breakpoints
+  if (!is.null(breaks)) {
+      breaks <- sort(breaks[!is.na(breaks) & is.finite(breaks)])
+      stopifnot("number of non-finite non-missing breaks must be >= 3" = length(breaks) >= 3)
+      if (sum(yw >= min(breaks) & yw <= max(breaks)) == 0)
+          stop("no observations within breaks defined")
   } else {
-    main <- "Developing Version"
-    ## set breakpoints
-    if (is.null(breaks) && response_type == "discrete") {
+    if (response_type == "discrete") {
       ## FIXME: (ML) Check if 0.01 is sufficient or conditional on n?!
-      breaks <- range(support(tmp_prodist)) + c(-1L, 0L) 
+      breaks <- dist_support + c(-1L, 0L) 
       if(!is.finite(breaks[1L])) breaks[1L] <- 
         pmin(min(yw, na.rm = TRUE), min(quantile(tmp_prodist, 0.01))) - 1L
 
@@ -296,46 +289,55 @@ rootogram.default <- function(
 
       breaks <- seq(breaks[1L], breaks[2L], by = 1L) + 0.5 
 
-    } else if (is.null(breaks) && response_type == "continuous") {
-      breaks <- range(support(tmp_prodist))
+    } else if (response_type == "continuous") {
+      breaks <- dist_support
  
+      if(!is.finite(breaks[1L])) breaks[1L] <-
+        floor(pmin(min(yw, na.rm = TRUE), min(quantile(tmp_prodist, 0.01))))
       if(!is.finite(breaks[2L])) breaks[2L] <-
         ceiling(pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99))))
 
       breaks <- pretty(breaks, n = grDevices::nclass.Sturges(yw), min.n = 1)
 
-    } else if (is.null(breaks)) {
-      rng_sup <- range(support(tmp_prodist))
+    } else {
+      rng_sup <- dist_support
 
-      if (is.finite(rng_sup)[1]) {
-        rng_sup[1] <- rng_sup[1] - 1e-12
-      } else {
+      if (is.infinite(rng_sup)[1]) {
         rng_sup[1] <- floor(pmin(min(yw, na.rm = TRUE), min(quantile(tmp_prodist, 0.01))))
       }
 
-      if (is.finite(rng_sup)[2]) {
-        rng_sup[2] <- rng_sup[2] + 1e-12
-      } else {
+      if (is.infinite(rng_sup)[2]) {
         rng_sup[2] <- ceiling(pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99))))
       }
 
       breaks <- pretty(rng_sup, n = grDevices::nclass.Sturges(yw), min.n = 1)
-      breaks[1] <- rng_sup[1]
-      breaks[length(breaks)] <- rng_sup[2]
-    }
+      breaks_delta <- unique(diff(breaks))
 
-    ## get midpoint
-    mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+      ## making pretty bins prettier; ensure that all bins are
+      ## of equal width (breaks_delta) if not limited by the support of the
+      ## distribution (dist_support)
+      if (is.infinite(dist_support[1])) {
+          breaks[1] <- breaks[2] - breaks_delta
+      } else {
+          breaks[1] <- rng_sup[1] - 1e-12 # - delta needed to account for possible point mass
+      }
+      if (is.infinite(dist_support[2])) {
+          breaks[length(breaks)] <- breaks[length(breaks) - 1] + breaks_delta
+      } else {
+          breaks[length(breaks)] <- rng_sup[2] + 1e-12 # + delta needed to account for possible point mass
+      }
+
+    }
   }
 
+  ## get midpoint
+  mid <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+
   ## set widths
-  ## TODO: (RS2ML) Question: if NULL and discrete/logseries it is set to 0.9,
-  ##       if NULL to 1. What else? There is no default fallback.
-  ##       There should be a dedicated 'else'.
-  if (is.null(width) && (response_type == "discrete" || response_type == "logseries")) {
+  if (is.null(width) && response_type == "discrete") {
     width <- 0.9
-  } else if (is.null(width)) {
-    width <- 1
+  } else if (!response_type == "discrete") {
+    width <- 1 ## overrules user-argument in case the distribution is non-discrete
   }
 
   # -------------------------------------------------------------------
@@ -343,14 +345,16 @@ rootogram.default <- function(
   # -------------------------------------------------------------------
   ## expected frequencies (part1)
   p <- procast(object, newdata = newdata, na.action = na.pass, type = "probability",
-    drop = FALSE, at = breaks, elementwise = FALSE)
+               drop = FALSE, at = breaks, elementwise = FALSE)
   p <- p[, -1L, drop = FALSE] - p[, -ncol(p), drop = FALSE]
 
-  ## TODO: (ML) Sometime neg. expected occurs (see example for underdispersed model fit).
+  ## NOTE: Setting small negative expected values to 0.0; Occurs infrequently,
+  ##       e.g., compare "underdispersive model fits"
   p[abs(p) < sqrt(.Machine$double.eps)] <- 0
 
   ## handle NAs
-  ## TODO: (ML) Maybe allow arg `na.action` in the future.
+  ## TODO(@Z): Maybe allow arg `na.action` in the future.
+  ##           Discuss; does keeping any NAs make any sense in this situation?
   idx_not_na <- as.logical(complete.cases(y) * complete.cases(p))
   y <- y[idx_not_na]
   p <- p[idx_not_na, ]
@@ -374,14 +378,14 @@ rootogram.default <- function(
   )
 
   ## add attributes
-  attr(rval, "style") <- style
-  attr(rval, "scale") <- scale
+  attr(rval, "style")    <- style
+  attr(rval, "scale")    <- scale
   attr(rval, "expected") <- expected
-  attr(rval, "confint") <- confint
-  attr(rval, "ref") <- ref
-  attr(rval, "xlab") <- xlab
-  attr(rval, "ylab") <- ylab
-  attr(rval, "main") <- main
+  attr(rval, "confint")  <- confint
+  attr(rval, "ref")      <- ref
+  attr(rval, "xlab")     <- xlab
+  attr(rval, "ylab")     <- ylab
+  attr(rval, "main")     <- main
 
   ## set class to data.frame or tibble
   if (class == "data.frame") {
@@ -419,8 +423,7 @@ c.rootogram <- function(...) {
   }
 
   ## remove temporary the class (needed below for `c()`)
-  ## TODO: (ML) Rewrite by, e.g., employing `lapply()`.
-  for (i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "rootogram"]
+  rval <- lapply(rval, function(x) structure(x, class = class(x)[!class(x) == "rootogram"]))
 
   ## convert always to data.frame
   if (class == "tibble") {
@@ -1862,7 +1865,6 @@ summary.rootogram <- function(object,
 print.rootogram <- function(x, ...) {
 
   ## get arg `style` and `scale`
-  scale <- style <- NULL # needed for `use_arg_from_attributes()` # FIXME: (ML) Still needed?!
   style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
 

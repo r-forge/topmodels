@@ -45,10 +45,6 @@ expect_error(rootogram(m1, class = "foo"),            info = "invalid argument f
 expect_error(rootogram(m1, scale = 1),                info = "scale must be character")
 expect_error(rootogram(m1, scale = character(0)),     info = "zero-length scale not allowed")
 expect_error(rootogram(m1, scale = "foo"),            info = "invalid argument for scale")
-expect_error(rootogram(m1, response_type = 1),             info = "response_type must be NULL or single character")
-expect_error(rootogram(m1, response_type = letters),       info = "response_type must be NULL or single character")
-expect_error(rootogram(m1, response_type = character(0)),  info = "response_type must be NULL or single character")
-expect_error(rootogram(m1, response_type = "Foo"),         info = "invalid argument for response_type")
 
 # breaks and width
 expect_error(rootogram(m1, breaks = c(TRUE, FALSE)),  info = "breaks must be NULL or numeric")
@@ -128,12 +124,17 @@ expect_true(all(sapply(tmp, function(x) all(diff(x$mid) > 0))),
             info = "rootogram midpoints should be unique and increasing!")
 expect_true(all(sapply(tmp, function(x) all(x$width > 0))),
             info = "rootogram width should be greater than 0")
-expect_true(all(sapply(tmp, function(x) all.equal(x$width, rep(min(x$width), length(x$width))))),
-            info = "rootogram width should be equal for all bins!")
 expect_true(all(sapply(tmp, function(x) all(is.finite(x$observed) & x$observed >= 0))),
             info = "rootogram observed must be finite greater greater or equal than 0")
 expect_true(all(sapply(tmp, function(x) all(is.finite(x$expected) & x$expected >= 0))),
             info = "rootogram expected must be finite greater greater or equal than 0")
+rm(tmp)
+
+# Same test but only for non-censored models (which allow for having
+# non-uniform bin sizes)
+tmp <- list(r1, r3, tbl_r1, tbl_r3)
+expect_true(all(sapply(tmp, function(x) all.equal(x$width, rep(min(x$width), length(x$width))))),
+            info = "rootogram width should be equal for all bins!")
 rm(tmp)
 
 # Test that the attributes contain the same information.
@@ -146,9 +147,11 @@ tmp_get_attr <- function(x, drop = "class") {
 expect_identical(tmp_get_attr(r1), tmp_get_attr(tbl_r1))
 expect_identical(tmp_get_attr(r2), tmp_get_attr(tbl_r2))
 expect_identical(tmp_get_attr(r3), tmp_get_attr(tbl_r3))
-# Same is true for r1/r2 except the 'main' title differs (name of the original object)
-expect_identical(tmp_get_attr(r1, drop = c("class", "main")), tmp_get_attr(r2, drop = c("class", "main")))
-# p3 contains a different data set; thus 'counts' and 'row.names' must differ, but the rest is the same
+
+# As these models are based on different data sets (and distributions) some
+# attributes must differ, others must be the same. Testing for all ! in "drop"
+expect_identical(tmp_get_attr(r1, drop = c("class", "main", "row.names", "xlab")),
+                 tmp_get_attr(r2, drop = c("class", "main", "row.names", "xlab")))
 expect_identical(tmp_get_attr(r1, drop = c("class", "main", "row.names", "xlab")),
                  tmp_get_attr(r3, drop = c("class", "main", "row.names", "xlab")))
 rm(tmp_get_attr)
@@ -207,3 +210,7 @@ expect_true(all(sapply(tmp, function(x) isTRUE(attr(x, "confint")))))
 expect_true(all(sapply(tmp, function(x) isTRUE(attr(x, "ref")))))
 
 
+# TODO(R): Additional tests for `breaks` if set by user.
+# error if too short
+# check handling of NA/Inf/-Inf
+# error when breaks do not cover any observations

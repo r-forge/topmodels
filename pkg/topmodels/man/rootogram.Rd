@@ -14,7 +14,6 @@ rootogram(object, ...)
   newdata = NULL,
   plot = TRUE,
   class = NULL,
-  response_type = NULL,
   breaks = NULL,
   width = NULL,
   style = c("hanging", "standing", "suspended"),
@@ -25,7 +24,6 @@ rootogram(object, ...)
   xlab = NULL,
   ylab = NULL,
   main = NULL,
-  use_devel_version = FALSE,
   ...
 )
 }
@@ -51,16 +49,12 @@ explicitly specify the return class, or to \code{NULL} (default) in which
 case the return class is conditional on whether the package \code{"tibble"}
 is loaded.}
 
-\item{response_type}{character. To set the default values for \code{breaks} and
-\code{widths}.  Currently different defaults are available for \code{"discrete"}
-and \code{"continous"} response distribution, as well as for the special case of a
-\code{"logseries"} response.}
-
 \item{breaks}{\code{NULL} (default) or numeric to manually specify the breaks for
 the rootogram intervals. A single numeric (larger \code{0}) specifies the number of breaks
 to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.}
 
-\item{width}{\code{NULL} (default) or single positive numeric. Width of the histogram bars.}
+\item{width}{\code{NULL} (default) or single positive numeric. Width of the histogram bars.
+Will be ignored for non-discrete distributions.}
 
 \item{style}{character specifying the syle of rootogram (see 'Details').}
 
@@ -77,8 +71,6 @@ or \code{FALSE} which will suppress plotting.}
 
 \item{xlab, ylab, main}{graphical parameters forwarded to
 \code{\link{plot.rootogram}} or \code{\link{autoplot.rootogram}}.}
-
-\item{use_devel_version}{Use the current developing version.}
 }
 \value{
 An object of class \code{"rootogram"} inheriting from
