@@ -31,6 +31,7 @@
   confint_col = "black",
   confint_lty = 2,
   confint_lwd = 1.25,
+  confint_alpha = NULL,
   ref_col = "black",
   ref_lty = 2,
   ref_lwd = 1.25,

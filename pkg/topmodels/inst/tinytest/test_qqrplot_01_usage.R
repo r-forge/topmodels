@@ -75,9 +75,10 @@ expect_error(qqrplot(m1, simint_level = 1+1e10),    info = "simint_level must be
 expect_error(qqrplot(m1, simint_level = 1:2 / 10),  info = "simint_level must be length 1")
 
 # simint_nrep: forwarded to pitresiduals()
-expect_error(qqrplot(m1, simint_nrep = "3"),        info = "simint_nrep must be numeric")
-expect_error(qqrplot(m1, simint_nrep = 10:20),      info = "simint_nrep must be length 1")
-expect_error(qqrplot(m1, simint_nrep = 0),          info = "simint_nrep must be >= 1")
+# note: must be a "continuous" model (else this is not tested)
+expect_error(qqrplot(m2, simint_nrep = "3"),        info = "simint_nrep must be numeric")
+expect_error(qqrplot(m2, simint_nrep = 10:20),      info = "simint_nrep must be length 1")
+expect_error(qqrplot(m2, simint_nrep = 0),          info = "simint_nrep must be >= 1")
 
 # confint
 expect_error(qqrplot(m1, confint = "TRUE"),          info = "confint must be logical")

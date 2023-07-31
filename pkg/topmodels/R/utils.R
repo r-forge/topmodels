@@ -17,6 +17,19 @@ set_minimum_transparency <- function(col, alpha_min) {
   return(col)
 }
 
+#' Helper functions to check available support for some S3methods
+#'
+#' @param methods character, name of the method (e.g., is_continuous, print, ...)
+#' @classes character vector of length > 0, classes to check.
+#'
+#' @return Returns TRUE if the method exists for one of the given classes, else FALSE.
+#'
+#' @importFrom utils getS3method
+hasS3method <- function(method, classes) {
+  any(sapply(classes, function(cls) {
+    tryCatch(is.function(getS3method(method, class = cls)), error = function(e) FALSE)
+  }))
+}
 
 annotation_custom2 <- function(grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) {
   ggplot2::layer(
@@ -53,7 +66,7 @@ use_arg_from_attributes <- function(object,
 
   ## check input
   stopifnot(is.character(arg_name), length(arg_name) == 1)
-  stopifnot(is.null(default) || length(default) == 1)
+  stopifnot(is.null(default) || length(default) >= 1)
 
   ## helper_function
   is_fun_or_unique <- function(x) {
@@ -79,13 +92,13 @@ use_arg_from_attributes <- function(object,
   ## conditional return
   if (force_single) {
     if (is.null(arg_fun) && is.null(arg_attr)) {
-      rval <- default
+      rval <- default[1L]
     } else if (is.null(arg_fun) && !is_fun_or_unique(arg_attr)) {
       message(sprintf(
         " * as arg `%s`'s definition is not unique w/i object's attributes, using the default (\"%s\")",
-        arg_name, default
+        arg_name, default[1L]
       ))
-      rval <- default
+      rval <- default[1L]
     } else if (is.null(arg_fun)) {
       rval <- if (is.function(arg_attr)) arg_attr else arg_attr[[1]]
     } else {
@@ -175,4 +188,48 @@ set_aes_helper_geoms <- function(aes_geom, aes_arg, aes_default = NULL) {
     } 
   }
   aes_geom
+}
+
+# Convert Wide to Long Format
+#
+# Converting wide \code{data.frame} to long format for the functionality
+# needed in topmodels (base R).
+#
+# @param x data.frame
+# @param id_cols character vector of length >= 1; columns to be kept as is, used
+#        for grouping.
+# @param keep_cols \code{NULL} or character, columns to keep (as is).
+# @param values_from character of length 1, name of the column from which the
+#        values should be taken.
+# @param names_to character of length 1, name of the variable to store the original
+#        variable name (\code{values_from}).
+# @param values_to character of length 1, name of the variable to store the data.
+# @param check logical, if \code{TRUE} a series of sanity checks are performed.
+#
+# @return Returns the reshaped \code{data.frame}.
+#
+# @author Reto
+wide_to_long <- function(x, id_cols, keep_cols, values_from, names_to, values_to, check = FALSE) {
+    stopifnot(isTRUE(check) || isFALSE(check))
+    if (check) {
+        stopifnot(is.data.frame(x))
+        stopifnot(is.character(values_from))
+        stopifnot(is.character(names_to) && length(names_to) == 1)
+        stopifnot(is.character(values_to) && length(values_to) == 1)
+        stopifnot(all(id_cols %in% names(x)), values_from %in% names(x))
+        stopifnot(is.null(keep_cols) || is.character(keep_cols))
+        if (is.character(keep_cols)) stopifnot(all(keep_cols %in% names(x)))
+    }
+
+    # Splitting the data
+    x <- split(x[c(id_cols, keep_cols, values_from)], interaction(x[id_cols], drop = TRUE))
+    # Scoping various elements
+    fn <- function(y, vf) {
+        y <- cbind(y[, c(id_cols, keep_cols), drop = FALSE], vf, y[, vf])
+        names(y)[ncol(y) - 1:0] <- c(names_to, values_to)
+        return(y)
+    }
+    x <- do.call(rbind, lapply(values_from, function(vf) do.call(rbind, lapply(x, fn, vf = vf))))
+    return(structure(transform(x, group = as.character(group)),
+                     row.names = seq_len(nrow(x)))) # Reset row names
 }

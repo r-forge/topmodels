@@ -186,23 +186,24 @@ qqrplot.default <- function(
   scale <- match.arg(scale)
 
   # If character; check if allowed
-  if (is.character(confint)) confint <- match.arg(confint, c("line", "polygon"))
+  if (is.character(confint)) confint <- match.arg(confint, c("line", "polygon", "none"))
 
   ## guess plotting flavor
   if (is.logical(plot)) {
       plot <- ifelse(isFALSE(plot), "none", if ("ggplot2" %in% .packages()) "ggplot2" else "base")
   }
   plot <- try(match.arg(plot, c("none", "base", "ggplot2")), silent = TRUE)
-  if (inherits(plot, "try-error"))
+  if (inherits(plot, "try-error")) {
     stop("`plot` must be logical `TRUE`/`FALSE` or one of \"none\", \"base\", or \"ggplot2\"")
-
+  }
   ## guess output class
   if (is.null(class)) {
     class <- if ("tibble" %in% .packages()) "tibble" else "data.frame"
   }
   class <- try(match.arg(class, c("tibble", "data.frame")), silent = TRUE)
-  if (inherits(class, "try-error"))
+  if (inherits(class, "try-error")) {
     stop("`class` must be `NULL` or one of \"tibble\", \"data.frame\"")
+  }
 
   # -------------------------------------------------------------------
   # COMPUTATION OF QUANTILE RESIDUALS
@@ -220,9 +221,13 @@ qqrplot.default <- function(
   }
   qthe <- apply(qres, 2L, q2q)
 
+  ## If we can identify the distribution as a fully continuous
+  ## distribution, simint is disabled (not needed).
+  tmp_prodist <- prodist(object)
+  if (hasS3method("is_continuous", class(tmp_prodist)) && all(is_continuous(tmp_prodist))) simint <- FALSE
+
   ## compute rg interval
-  ## FIXME: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
-  ## FIXME: (ML) Return all in the same order w/o x values (same for additional nsim) -> might be an error
+  ## TODO: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   if (!isFALSE(simint)) {
     tmp <- qresiduals(object,
       newdata = newdata, scale = scale, type = "random", nsim = simint_nrep,
@@ -235,13 +240,16 @@ qqrplot.default <- function(
     qthe_rg_lwr <- q2q(qres_rg_lwr)
     qthe_rg_upr <- q2q(qres_rg_upr)
 
-    ## FIXME: (ML) Improve workaround to get simint only for discrete values
+    ## This is a fallback for "continuous" distributions where the 
+    ## method "is_continuous()" does not exist. If lower/upper bound
+    ## are 'nearly identical' -> disable simint.
     if (isTRUE(all.equal(qres_rg_lwr, qres_rg_upr, tol = .Machine$double.eps^0.4))) {
       qres_rg_lwr <- NULL
       qres_rg_upr <- NULL
       qthe_rg_lwr <- NULL
       qthe_rg_upr <- NULL
-      simint <- FALSE
+      simint      <- FALSE
+      nsim        <- 1L
     }
   } else {
     qres_rg_lwr <- NULL
@@ -257,6 +265,7 @@ qqrplot.default <- function(
   # OUTPUT AND OPTIONAL PLOTTING
   # -------------------------------------------------------------------
   ## collect everything as data.frame (for detrend TRUE/FALSE)
+  ## Results in 'wormplot'
   if (!detrend) {
     if (any(vapply(
       list(qres_rg_lwr, qres_rg_upr, qthe_rg_lwr, 1),
@@ -352,8 +361,7 @@ c.qqrplot <- function(...) {
   }
 
   ## remove temporary the class (needed below for `c()`)
-  ## FIXME: (ML) Rewrite by, e.g., employing `lapply()`
-  for (i in 1:length(rval)) class(rval[[i]]) <- class(rval[[i]])[!class(rval[[i]]) %in% "qqrplot"]
+  rval <- lapply(rval, function(x) structure(x, class = class(x)[!class(x) == "qqrplot"]))
 
   ## convert always to data.frame
   if (class == "tibble") {
@@ -562,7 +570,7 @@ plot.qqrplot <- function(x,
                          single_graph = FALSE,
                          detrend = NULL,
                          simint = NULL,
-                         confint = NULL,  # FIXME: (ML) Implement different plotting styles
+                         confint = NULL,  # TODO: (ML) Implement different plotting styles
                          confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
                          confint_level = 0.95,
                          ref = NULL,
@@ -582,6 +590,7 @@ plot.qqrplot <- function(x,
                          confint_col = "black",
                          confint_lty = 2,
                          confint_lwd = 1.25,
+                         confint_alpha = NULL,
                          ref_col = "black",
                          ref_lty = 2,
                          ref_lwd = 1.25,
@@ -593,7 +602,7 @@ plot.qqrplot <- function(x,
   detrend <- use_arg_from_attributes(x, "detrend", default = FALSE, force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
   simint <- use_arg_from_attributes(x, "simint", default = TRUE, force_single = FALSE)
-  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = FALSE)
+  confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(x, "ref", default = TRUE, force_single = FALSE)
 
   ## sanity checks
@@ -614,10 +623,16 @@ plot.qqrplot <- function(x,
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
   stopifnot(all(sapply(ylim, function(x) is.numeric(x) || is.na(x))))
 
+  ## determine which confint should be plotted
+  stopifnot(isTRUE(confint) || isFALSE(confint) || (is.character(confint) && length(confint) == 1))
+  if (is.logical(confint)) confint <- if (confint) "line" else "none"
+  confint <- match.arg(confint, c("polygon", "line", "none"))
+
   ## match arguments
   scale <- match.arg(scale, c("normal", "uniform"))
   confint_type <- match.arg(confint_type)
 
+  ## TODO: Implement additional confidence intervals
   if (detrend && confint_type != "pointwise") {
     warning('For detrended Q-Q Plots only pointwise confidence intervals are currently implemented, set accordingly."`')
     confint_type <- "pointwise"
@@ -636,27 +651,16 @@ plot.qqrplot <- function(x,
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
   # -------------------------------------------------------------------
-  ## determine which confint should be plotted
-  if (is.logical(confint)) {
-    confint <- ifelse(confint,
-      "line",
-      "none"
-    )
-  }
-  ## FIXME: (ML) Implemnt style polygon
-  if (any(confint == "polygon")) {
-    confint[confint == "polygon"] <- "line"
-    warning("confint style polygon not yet implemented in base plots, set to `confint = 'line'`")
-  }
-  stopifnot(all(confint %in% c("polygon", "line", "none")))
 
   ## recycle arguments for plotting to match the number of groups
   if (is.list(xlim)) xlim <- as.data.frame(do.call("rbind", xlim))
   if (is.list(ylim)) ylim <- as.data.frame(do.call("rbind", ylim))
+  if (is.null(confint_alpha)) confint_alpha <- if (confint == "polygon") 0.2 else 1
   plot_arg <- data.frame(1:n, simint, ref, confint,
     xlim1 = xlim[[1]], xlim2 = xlim[[2]], ylim1 = ylim[[1]], ylim2 = ylim[[2]],
     col, pch, axes, box,
-    simint_col, simint_alpha, confint_col, confint_lty, confint_lwd, ref_col, ref_lty, ref_lwd
+    simint_col, simint_alpha, confint_col, confint_lty, confint_lwd, confint_alpha,
+    ref_col, ref_lty, ref_lwd
   )[, -1]
 
   ## annotation
@@ -671,15 +675,9 @@ plot.qqrplot <- function(x,
     if (is.null(main)) main <- if (detrend) "Worm plot" else "Q-Q residuals plot"
 
   } else {
-    xlab <- use_arg_from_attributes(x, "xlab", default = "Theoretical quantiles", force_single = FALSE)
-    ylab <- use_arg_from_attributes(x, "ylab",
-      default = if (detrend) "Deviation" else "Quantile residuals",
-      force_single = FALSE
-    )
-    main <- use_arg_from_attributes(x, "main", # FIXME: (ML) Different in pithist()
-      default = if (detrend) "Wormplot" else "Q-Q residuals plot", 
-      force_single = FALSE
-    )
+    xlab <- use_arg_from_attributes(x, "xlab", default = rep("Theoretical quantiles", 2), force_single = FALSE)
+    ylab <- use_arg_from_attributes(x, "ylab", default = rep(if (detrend) "Deviation" else "Quantile residuals", n), force_single = FALSE)
+    main <- use_arg_from_attributes(x, "main", default = paste(if (detrend) "Wormplot Model" else "Q-Q residuals plot model", seq_len(n)), force_single = FALSE)
   }
 
   ## fix `ylabel` according to possible new `detrend`
@@ -690,8 +688,10 @@ plot.qqrplot <- function(x,
 
   ## fix `main` according to possible new `detrend`
   if (main_missing) {
-    main[(!detrend & main == "Wormplot")] <- "Q-Q residuals plot"
-    main[(detrend & main == "Q-Q residuals plot")] <- "Wormplot"
+    idx <- !detrend & grepl("Wormplot", main)
+    main[idx] <- gsub("Wormplot", "Q-Q residuals plot", main[idx])
+    idx <- detrend & grepl("Q-Q residuals plot", main)
+    main[idx] <- gsub("Q-Q residuals plot", "Wormplot", main[idx])
   }
 
   # -------------------------------------------------------------------
@@ -703,37 +703,46 @@ plot.qqrplot <- function(x,
     j <- unique(d$group)
 
     ## get xlim and ylim (needs data for all groups) 
-    ## TODO: (ML) In case of an object q/ simint but simint = FALSE incorrect ylim
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j])) 
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j])) 
 
+    ## Calculate the x limits. If singlegraph = FALSE,
+    ## xlim based on d, else on x (overall)
+    col_regex <- c("expected(_[0-9]+)?", if (plot_arg$simint[j]) "simint_expected" else NULL)
+    col_regex <- sprintf("^(%s)$", paste(col_regex, collapse = "|"))
     if (any(xlim_idx) && !single_graph) {
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- 
         range(
-          as.matrix(d[grepl("expected|simint_expected", names(d))]), 
+          as.matrix(d[grepl(col_regex, names(d))]), 
           finite = TRUE
         )[xlim_idx]
     } else if (any(xlim_idx) && single_graph) {
       plot_arg[j, c("xlim1", "xlim2")[xlim_idx]] <- 
         range(
-          as.matrix(x[grepl("expected|simint_expected", names(x))]), 
+          as.matrix(x[grepl(col_regex, names(x))]), 
           finite = TRUE
         )[xlim_idx]
     }
+    rm(col_regex)
 
+    ## Calculate the y limits. If singlegraph = FALSE,
+    ## ylim based on d, else on x (overall)
+    col_regex <- c("observed(_[0-9]+)?", if (plot_arg$simint[j]) "simint_observed.*" else NULL)
+    col_regex <- sprintf("^(%s)$", paste(col_regex, collapse = "|"))
     if (any(ylim_idx) && !single_graph) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
         range(
-          as.matrix(d[grepl("observed|simint_observed_lwr|simint_observed_upr", names(d))]), 
+          as.matrix(d[grepl(col_regex, names(d))]), 
           finite = TRUE
         )[ylim_idx]
     } else if (any(ylim_idx) && single_graph) {
       plot_arg[j, c("ylim1", "ylim2")[ylim_idx]] <-
         range(
-          as.matrix(x[grepl("observed|simint_observed_lwr|simint_observed_upr", names(x))]), 
+          as.matrix(x[grepl(col_regex, names(x))]), 
           finite = TRUE
         )[ylim_idx]
     }
+    rm(col_regex)
 
     ## trigger plot
     if (j == 1 || (!single_graph && j > 1)) {
@@ -756,8 +765,16 @@ plot.qqrplot <- function(x,
       idx <- order(d$simint_expected)
       x_pol <- c(d$simint_expected[idx], d$simint_expected[rev(idx)])
       y_pol <- c(d$simint_observed_lwr[idx], d$simint_observed_upr[rev(idx)])
-      x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
-      y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
+
+      ## Avoid infinite values if it happens to not break the plot.
+      if (any(is.infinite(x_pol))) {
+          warning("infinite theoretical quantile drawn; limited to +/- 100 for plotting")
+          x_pol[is.infinite(x_pol)] <- 100 * sign(x_pol[is.infinite(x_pol)])
+      }
+      if (any(is.infinite(y_pol))) {
+          warning("infinite sample quantile drawn; limited to +/- 100 for plotting")
+          y_pol[is.infinite(y_pol)] <- 100 * sign(y_pol[is.infinite(y_pol)])
+      }
 
       polygon(
         x_pol,
@@ -770,7 +787,7 @@ plot.qqrplot <- function(x,
     ## compute intercept and slope of reference line
     if (j == 1 || (!single_graph && j > 1)) {
 
-      ## FIXME: (ML) Update once `distributions3` or alternative is working
+      ## Quantile function for scale transformation
       if (scale == "uniform") {
         qFun <- identity
       } else {
@@ -779,11 +796,11 @@ plot.qqrplot <- function(x,
 
       if (!detrend) {
         if (!ref_identity) {
-          y_tmp <- quantile(d[grepl("^y$|y_0", names(d))], ref_probs, names = FALSE, na.rm = TRUE)
+          y_tmp <- quantile(d[grepl("^observed(_[0-9]+)?$", names(d))],
+                            ref_probs, names = FALSE, na.rm = TRUE)
           x_tmp <- qFun(ref_probs)
           slope <- diff(y_tmp) / diff(x_tmp)
           intercept <- y_tmp[1L] - slope * x_tmp[1L]
-
         } else { 
           slope = 1
           intercept = 0
@@ -806,52 +823,52 @@ plot.qqrplot <- function(x,
 
       ## plot confidence lines
       if (plot_arg$confint[j] == "line") {
-        curve(
+        lapply(c("lower", "upper"), function(lowerupper) curve(
           compute_qqrplot_confint(
             x,
             n = NROW(d),
             scale = scale,
             type = confint_type,
             level = confint_level,
-            which = "lower",
+            which = lowerupper,
             slope = slope,
             intercept = intercept
           ),
-          col = plot_arg$confint_col[j],
+          col = set_minimum_transparency(plot_arg$confint_col[j],
+                                         alpha_min = plot_arg$confint_alpha[j]),
           lty = plot_arg$confint_lty[j],
           lwd = plot_arg$confint_lwd[j],
           from = plot_arg$xlim1[j],
           to = plot_arg$xlim2[j],
           add = TRUE
-        )
-        curve(
-          compute_qqrplot_confint(
-            x,
-            n = NROW(d),
-            scale = scale,
-            type = confint_type,
-            level = confint_level,
-            which = "upper",
-            slope = slope,
-            intercept = intercept
-          ),
-          col = plot_arg$confint_col[j],
-          lty = plot_arg$confint_lty[j],
-          lwd = plot_arg$confint_lwd[j],
-          from = plot_arg$xlim1[j],
-          to = plot_arg$xlim2[j],
-          add = TRUE
-        )
+        ))
+      ## Draw confint as polygon
+      } else if (plot_arg$confint[j] == "polygon") {
+        xx  <- seq(plot_arg$xlim1[j], plot_arg$xlim2[j], length.out = 201)
+        tmp <- setNames(lapply(c("lower", "upper"), function(lowerupper) {
+                    compute_qqrplot_confint(
+                      x = xx,
+                      n = NROW(d),
+                      scale = scale,
+                      type = confint_type,
+                      level = confint_level,
+                      which = lowerupper,
+                      slope = slope,
+                      intercept = intercept
+                    )
+                }), c("lower", "upper"))
+        polygon(c(xx, rev(xx)), c(tmp$lower, rev(tmp$upper)),
+                border = NA,
+                col = set_minimum_transparency(plot_arg$confint_col[j],
+                                               alpha_min = plot_arg$confint_alpha[j]))
+        rm(xx, tmp)
       }
     }
 
-    ## add qq plot
-    for (i in 1L:ncol(d[grepl("^observed$|observed_[0-9]", names(d))])) {
-      points.default(
-        d[grepl("expected", names(d))][, i],
-        d[grepl("observed", names(d))][, i],
-        col = plot_arg$col[j], pch = plot_arg$pch[j], ...
-      )
+    ## Adding qq plot (qq plots if nsim > 1)
+    for (cn in names(d)[grep("^expected(_[0-9]+)?$", names(d))]) {
+        points.default(d[[cn]], d[[gsub("^expected", "observed", cn)]],
+                       col = plot_arg$col[j], pch = plot_arg$pch[j], ...)
     }
   }
 
@@ -918,8 +935,15 @@ points.qqrplot <- function(x,
       idx <- order(d$simint_expected)
       x_pol <- c(d$simint_expected[idx], d$simint_expected[rev(idx)])
       y_pol <- c(d$simint_observed_lwr[idx], d$simint_observed_upr[rev(idx)])
-      x_pol[!is.finite(x_pol)] <- 100 * sign(x_pol[!is.finite(x_pol)]) # TODO: (ML) needed?
-      y_pol[!is.finite(y_pol)] <- 100 * sign(y_pol[!is.finite(y_pol)]) # TODO: (ML) needed?
+      ## Avoid infinite values if it happens to not break the plot.
+      if (any(is.infinite(x_pol))) {
+          warning("infinite theoretical quantile drawn; limited to +/- 100 for plotting")
+          x_pol[is.infinite(x_pol)] <- 100 * sign(x_pol[is.infinite(x_pol)])
+      }
+      if (any(is.infinite(y_pol))) {
+          warning("infinite sample quantile drawn; limited to +/- 100 for plotting")
+          y_pol[is.infinite(y_pol)] <- 100 * sign(y_pol[is.infinite(y_pol)])
+      }
 
       polygon(
         x_pol,
@@ -929,13 +953,11 @@ points.qqrplot <- function(x,
       )
     }
 
-    ## add qq plot
-    for (i in 1L:ncol(d[grepl("^observed$|observed_[0-9]", names(d))])) {
-      points.default(
-        d[grepl("expected", names(d))][, i],
-        d[grepl("observed", names(d))][, i],
-        col = plot_arg$col[j], pch = plot_arg$pch[j], ...
-      )
+    ## Adding qq plot (qq plots if nsim > 1)
+    for (cn in names(d)[grep("^expected(_[0-9]+)?$", names(d))]) {
+        print(cn)
+        points.default(d[[cn]], d[[gsub("^expected", "observed", cn)]],
+                       col = plot_arg$col[j], pch = plot_arg$pch[j], ...)
     }
   }
 
@@ -1051,9 +1073,9 @@ autoplot.qqrplot <- function(object,
   }
 
   ## get main and into the right length (must be done after handling of `title`)
-  main <- use_arg_from_attributes(object, "main", default = "model", force_single = FALSE)
+  main <- use_arg_from_attributes(object, "main",
+                                  default = paste("Model", seq_len(n)), force_single = FALSE)
   stopifnot(is.character(main))
-  main <- make.names(rep_len(main, n), unique = TRUE)
 
   ## prepare grouping
   object$group <- factor(object$group, levels = 1L:n, labels = main)
@@ -1069,22 +1091,45 @@ autoplot.qqrplot <- function(object,
   }
   confint <- match.arg(confint, c("polygon", "line", "none"))
 
-  ## Get a long data.frame with all x and y simulations
-  ## FIXME: (ML) This must be done in base and somehow nicer
-  object_long <- tidyr::pivot_longer(object,
-    cols = names(object)[grepl("^expected$|expected_[0-9]", names(object))],
-    names_to = "expected_sim", values_to = "expected"
-  )
-  object_long <- tidyr::pivot_longer(object_long,
-    cols = names(object_long)[grepl("^observed$|observed_[0-9]", names(object_long))],
-    names_to = "observed_sim", values_to = "observed"
-  )
-  object_long <- object_long[which(gsub("expected", "", object_long$expected_sim) == gsub("observed", "", object_long$observed_sim)), ]
-  object_long$observed_sim <- NULL
-  object_long <- as.data.frame(object_long)
 
-  ## FIXME: (ML) Improve somehow (see fixme above)
-  names(object)[grepl("^expected_1$|^observed_1$", names(object))] <- c("expected", "observed")
+  # Convert wide to long format.
+  # Split by: group
+  # Keep (const): simint_observed_lwr simint_observed_upr simint_expected, group
+  # Convert: ^expected(_[0-9]+)$ to 'expected'
+  # Append: original column name (^expected(_[0-9]+)$) as 'expected_sim'
+  cols      <- names(object)[grep("^expected(_[0-9]+)$", names(object))]
+
+  # If nsim == 1
+  if (length(cols) == 0) {
+      object_long <- object
+  # Else convert wide to long format for gg
+  } else {
+    keep_cols <- c("simint_observed_lwr", "simint_observed_upr", "simint_expected")
+    object_long <- wide_to_long(object,
+                                id_cols     = c("group"),
+                                keep_cols   = keep_cols,
+                                values_from = cols,
+                                names_to    = "expected_sim",
+                                values_to   = "expected", check = TRUE)
+
+    # Convert '^observed(_[0-9]+)$' the very same way, but simply
+    # keep $observed and append to object_long.
+    object_long$observed <- wide_to_long(object,
+                                id_cols     = "group",
+                                keep_cols   = NULL,
+                                values_from = gsub("^expected", "observed", cols),
+                                names_to    = "observed_sim",
+                                values_to   = "observed")$observed
+
+    # Modify "object", only keep c(expected_1, observed_1) as c(expected, observed)
+    # if nsim > 1, or keep c(expected, observed) as is.
+    if (sum(grepl("^expected_[0-9]+$", names(object)) > 0)) {
+        keep   <- names(object)[!grepl("^(observed|expected)_[0-9]+$", names(object))]
+        object <- cbind(object[, keep, drop = FALSE],
+                        observed = object$observed_1,
+                        expected = object$expected_1)
+    }
+  }
 
   ## set plotting aes
   aes_ref <- set_aes_helper_geoms(
@@ -1184,7 +1229,8 @@ autoplot.qqrplot <- function(object,
       alpha = "group", colour = "group", fill = "group", 
       shape = "group", size = "group"), data = object_long, stroke = stroke
     )
-  ## FIXME: (ML) alpha is not correctly represented in the legend 
+  ## FIXME: alpha is not correctly represented in the legend
+  ##  Bug in ggplot2?
   ##  (compare: https://stackoverflow.com/q/69634268/6583972?sem=2)
 
   ## set the colors, shapes, etc.
@@ -1376,7 +1422,7 @@ geom_qqrplot <- function(mapping = NULL, data = NULL, stat = "identity",
 #' @export
 GeomQqrplot <- ggplot2::ggproto("GeomQqrplot", ggplot2::Geom,
   required_aes = c("x", "y"),
-  non_missing_aes = c("size", "shape", "colour"), # TODO: (ML) what is that for?
+  non_missing_aes = c("size", "shape", "colour"), # must exist after processing steps
   default_aes = ggplot2::aes(
     shape = 19, colour = "black", size = 2,
     fill = NA, alpha = NA, stroke = 0.5
@@ -1700,7 +1746,7 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
       ## Make sure simint is not NA and add default ggplot2 expansion
       simint[is.na(simint)] <- scales$x$dimension()[is.na(simint)]
       simint <- simint + c(-1, 1) * diff(simint) * 0.05 
-      ## FIXME: (ML) Better idea how to get the scales of the plot?
+      ## TODO: (ML) Better idea how to get the scales of the plot?
       xseq <- seq(simint[1], simint[2], length.out = n) # alternative: xseq <- trafo(ppoints(xseq))
 
       if (scales$x$is_discrete()) {
@@ -1719,6 +1765,7 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
       identity = identity,
       probs = probs,
       scale = scale)$slope
+
     intercept <- StatQqrplotRef$compute_group(
       data = data,
       scales = scales,
@@ -1749,7 +1796,9 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
     # Must make sure that is not NA for specific trafo (due to extension of plot simint)
     idx_na <- is.na(y_out1) | is.na(y_out2)
 
-    if (style == "line") { # FIXME: (ML) Remove tidyr dependency
+    if (style == "line") {
+      ## TODO(R): Should be possible to do without tidyr relatively
+      ##          easily as this is the last tidyr dependency for now (?)
       ## prepare long format with group variable
       d <- as.data.frame(tidyr::pivot_longer(
         data.frame(
@@ -1822,9 +1871,9 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
 #' @export
 GeomQqrplotConfint <- ggplot2::ggproto("GeomQqrplotConfint", ggplot2::Geom,
 
-  required_aes = c("x_noaes", "y_noaes"),  # TODO: (ML) For ref = identity, would theoret. work w/o `x` and `y`
+  required_aes = c("x_noaes", "y_noaes"),  # NOTE: (ML) For ref = identity, would theoret. work w/o `x` and `y`
 
-  # FIXME: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
+  # NOTE: (ML) Does not vary for style; this is a copy of `GeomPolygon$handle_na()`
   handle_na = function(data, params) {
     data
   },
@@ -1915,7 +1964,8 @@ compute_qqrplot_confint <- function(x,
   }
 
   if (type == "tail-sensitive" && scale == "uniform") {
-    # FIXME: (ML) Is this possible?
+    ## FIXME: (ML) Is this possible? Maybe obsolete if we are able
+    ## to implement the Einbeck 2021 alternative KIs
     warning('tail-sensitive confidence intervals are not implemented for uniform scale: \n * `type` set to `"simultaneous"`')
     type <- "simultaneous"
   }
@@ -1939,7 +1989,9 @@ compute_qqrplot_confint <- function(x,
 
   } else if (type == "simultaneous") {
     p <- pFun(x)
-    epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))  # FIXME: (ML) Use exact Komogorov quantile. Exported?
+    ## FIXME: (ML) Use exact Komogorov quantile. Exported? Maybe
+    ##        obsolete if we are able to implement the Einbeck 2021 alternative KIs
+    epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))
     lp <- pmax(p - epsilon, rep(0, length(p)))
     up <- pmin(p + epsilon, rep(1, length(p)))
     lower <- intercept + slope * qFun(lp)
@@ -1947,6 +1999,7 @@ compute_qqrplot_confint <- function(x,
 
   } else { # tail sensitive
 
+    ## FIXME: (ML) May possibly also become obsolete
     warning("The implementation of tail-sensitive confidence intervals is not yet tested and are currently not suggested to be used.")
 
     B <- 1000 # number of simulations

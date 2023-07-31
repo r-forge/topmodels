@@ -782,7 +782,17 @@ plot.pithist <- function(x,
   stopifnot(isTRUE(single_graph) || isFALSE(single_graph))
   stopifnot(isTRUE(freq) || isFALSE(freq))
   stopifnot(isTRUE(expected) || isFALSE(expected))
-  stopifnot(isTRUE(confint) || isFALSE(confint) || confint %in% c("polygon", "line", "none"))
+
+  ## Checking/translating 'confint' types
+  stopifnot(isTRUE(confint) || isFALSE(confint) || (is.character(confint) && length(confint) == 1))
+  if (isTRUE(confint)) {
+      confint <- if (style == "bar") "line" else "polygon"
+  } else if (isFALSE(confint)) {
+      confint <- "none"
+  }
+  confint <- match.arg(confint, c("polygon", "line", "none"))
+
+  ## determine which confint should be plotted
   stopifnot(
     is.numeric(confint_level),
     length(confint_level) == 1,
@@ -831,20 +841,11 @@ plot.pithist <- function(x,
     style <- "line"
   }
 
-  ## determine which confint should be plotted
-  if (is.logical(confint)) {
-    confint <- ifelse(confint,
-      if (style == "bar") "line" else "polygon", 
-      "none"
-    )
-  }
-  stopifnot(all(confint %in% c("polygon", "line", "none")))
-
   ## determine other arguments conditional on `style` and `type`
   if (is.null(lwd)) lwd <- if (style == "bar") 1 else 2
   if (is.null(confint_col)) confint_col <- if (style == "bar") 2 else "black"
   # FIXME: (ML) Check this again May 2nd.
-  if (is.null(confint_alpha)) confint_alpha <- if (single_graph && any(confint == "line")) 1 else 0.2 / n
+  if (is.null(confint_alpha)) confint_alpha <- if (single_graph && confint == "line") 1 else 0.2 / n
   if (is.null(expected_col)) expected_col <- if (style == "bar") 2 else "black"
   if (is.null(expected_lty)) expected_lty <- if (style == "bar") 1 else 2
 
@@ -869,18 +870,12 @@ plot.pithist <- function(x,
   ## prepare annotation
   if (single_graph) {
     xlab <- use_arg_from_attributes(x, "xlab", default = "PIT", force_single = TRUE)
-    ylab <- use_arg_from_attributes(x, "ylab",
-      default = if (freq) "Frequency" else "Density",
-      force_single = TRUE
-    )
+    ylab <- use_arg_from_attributes(x, "ylab", default = if (freq) "Frequency" else "Density", force_single = TRUE)
     if (is.null(main)) main <- "PIT histogram"
   } else {
-    xlab <- use_arg_from_attributes(x, "xlab", default = "PIT", force_single = FALSE)
-    ylab <- use_arg_from_attributes(x, "ylab",
-      default = if (freq) "Frequency" else "Density",
-      force_single = FALSE
-    )
-    main <- use_arg_from_attributes(x, "main", default = "model", force_single = FALSE)
+    xlab <- use_arg_from_attributes(x, "xlab", default = rep("PIT", n), force_single = FALSE)
+    ylab <- use_arg_from_attributes(x, "ylab", default = rep(if (freq) "Frequency" else "Density", n), force_single = FALSE)
+    main <- use_arg_from_attributes(x, "main", default = paste("Model", seq_len(n)), force_single = FALSE)
   }
 
   ## fix `ylabel` according to possible new `freq`

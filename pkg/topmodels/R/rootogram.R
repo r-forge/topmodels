@@ -242,12 +242,7 @@ rootogram.default <- function(
   ## Getting distributions (required method)
   tmp_prodist <- prodist(object)
 
-  ## Helper functions to check available support for some S3methods
-  hasS3method <- function(method, classes) {
-    any(sapply(classes, function(cls) {
-      tryCatch(is.function(getS3method(method, class = cls)), error = function(e) FALSE)
-    }))
-  }
+  # Check if these methods exist
   hasS3 <- c("is_discrete", "is_continuous", "support")
   hasS3 <- setNames(lapply(hasS3, function(x) hasS3method(x, class(tmp_prodist))), hasS3)
 
