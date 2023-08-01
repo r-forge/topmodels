@@ -259,7 +259,10 @@ qqrplot.default <- function(
   }
 
   ## labels
-  if (is.null(main)) main <- deparse(substitute(object))
+  if (is.null(main)) {
+      # Checking for class name required when called via do.call(qqrplot, ...)
+      main <- if (inherits(substitute(object), "name")) deparse(substitute(object)) else "object"
+  }
 
   # -------------------------------------------------------------------
   # OUTPUT AND OPTIONAL PLOTTING
@@ -866,9 +869,11 @@ plot.qqrplot <- function(x,
     }
 
     ## Adding qq plot (qq plots if nsim > 1)
-    for (cn in names(d)[grep("^expected(_[0-9]+)?$", names(d))]) {
+    for (cn in (cnames <- names(d)[grep("^expected(_[0-9]+)?$", names(d))])) {
         points.default(d[[cn]], d[[gsub("^expected", "observed", cn)]],
-                       col = plot_arg$col[j], pch = plot_arg$pch[j], ...)
+                       col = set_minimum_transparency(plot_arg$col[j],
+                                  alpha_min = 1 / length(cnames)),
+                       pch = plot_arg$pch[j], ...)
     }
   }
 
@@ -1077,8 +1082,7 @@ autoplot.qqrplot <- function(object,
                                   default = paste("Model", seq_len(n)), force_single = FALSE)
   stopifnot(is.character(main))
 
-  ## prepare grouping
-  object$group <- factor(object$group, levels = 1L:n, labels = main)
+  object$group <- factor(object$group, levels = 1L:n, labels = make_unique(main))
 
   # ------------------------------------------------------------------- 
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING 

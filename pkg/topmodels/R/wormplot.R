@@ -131,6 +131,10 @@ wormplot.default <- function(object,
                              ...) {
 
   scale <- match.arg(scale)
+  if (is.null(main)) {
+      # Checking for class name required when called via do.call(wormplot, ...)
+      main <- if (inherits(substitute(object), "name")) deparse(substitute(object)) else "object"
+  }
 
   ## TODO: (ML) Like this, only with arg detrend or with call/eval (latter difficulties with tinytest)
   qqrplot(object,

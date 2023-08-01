@@ -7,6 +7,8 @@
 hasS3method(method, classes)
 }
 \arguments{
+\item{classes}{character vector of length > 0, classes to check.}
+
 \item{methods}{character, name of the method (e.g., is_continuous, print, ...)}
 }
 \value{

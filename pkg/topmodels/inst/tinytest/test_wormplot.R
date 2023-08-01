@@ -42,10 +42,10 @@ defaults <- list(m,
 set.seed(123)
 expect_silent(w3 <- do.call(wormplot, defaults))
 
-
 # Performing tests on the return objects
 expect_true(attr(w1, "detrend"))
 expect_identical(w1, w2)
+attr(w3, "main") <- attr(w1, "main") # else not identical
 expect_identical(w1, w3)
 
 # Checking y label and x label

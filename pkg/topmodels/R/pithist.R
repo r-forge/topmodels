@@ -232,7 +232,8 @@ pithist.default <- function(
 
   ## default annotation
   if (is.null(main)) {
-    main <- deparse(substitute(object))
+      # Checking for class name required when called via do.call(pithist, ...)
+      main <- if (inherits(substitute(object), "name")) deparse(substitute(object)) else "object"
   }
 
   ## guess plotting flavor
@@ -1446,7 +1447,7 @@ autoplot.pithist <- function(object,
   main <- make.names(rep_len(main, n), unique = TRUE)
 
   ## prepare grouping
-  object$group <- factor(object$group, levels = 1L:n, labels = main)
+  object$group <- factor(object$group, levels = 1L:n, labels = make_unique(main))
 
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING

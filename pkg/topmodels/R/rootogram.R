@@ -987,7 +987,7 @@ autoplot.rootogram <- function(object,
   main <- make.names(rep_len(main, n), unique = TRUE)
 
   ## prepare grouping
-  object$group <- factor(object$group, levels = 1L:n, labels = main)
+  object$group <- factor(object$group, levels = 1L:n, labels = make_unique(main))
 
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
