@@ -19,6 +19,9 @@ test: install
 testwarn: install
 	Rscript -e "tinytest::test_package('topmodels'); warnings()"
 
+bamlsstest: install
+	Rscript -e "tinytest::test_package('topmodels', testdir = 'tinytest_bamlss')"
+
 coverage: install
 	Rscript -e 'covr::report(covr::package_coverage(), file = "../coverage.html")'
 
