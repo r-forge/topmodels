@@ -1801,20 +1801,13 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
     idx_na <- is.na(y_out1) | is.na(y_out2)
 
     if (style == "line") {
-      ## TODO(R): Should be possible to do without tidyr relatively
-      ##          easily as this is the last tidyr dependency for now (?)
       ## prepare long format with group variable
-      d <- as.data.frame(tidyr::pivot_longer(
-        data.frame(
-          x_noaes = x_trans,  
-          y1 = y_out1,
-          y2 = y_out2
-        )[!idx_na, ],
-        cols = c(y1, y2),
-        names_to = "topbottom",
-        values_to = "y_noaes",
-        names_prefix = "y"
-      ))
+      d <- with(list(x_noaes = x_trans[!idx_na], y1 = y_out1[!idx_na], y2 = y_out2[!idx_na]), {
+        n <- length(x_noaes)
+        data.frame(x_noaes   = rep(x_noaes, each = 2),
+                   topbottom = rep(1:2, n),
+                   y_noaes   = as.numeric(rbind(y1, y2))) 
+      })
       rbind(subset(d, subset = topbottom == 1), c(NA, NA, NA), subset(d, subset = topbottom == 2))
 
     } else {

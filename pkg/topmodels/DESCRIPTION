@@ -1,7 +1,7 @@
 Package: topmodels
 Title: Infrastructure for Forecasting and Assessment of Probabilistic Models
 Version: 0.3-0
-Date: 2023-07-14
+Date: 2023-08-01
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org", comment = c(ORCID = "0000-0003-0918-3766")),
              person(given = "Moritz N.", family = "Lang", role = "aut", email = "moritz.n.lang@gmail.com", comment = c(ORCID = "0000-0002-2533-9903")),
              person(given = "Reto", family = "Stauffer", role = "aut", email = "reto.stauffer@uibk.ac.at", comment = c(ORCID = "0000-0002-3798-5507")),
@@ -10,7 +10,7 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
              person(given = "Jakob", family = "Messner", role = "ctb", email = "jakob.messner@posteo.net", comment = c(ORCID = "0000-0002-1027-3673")))
 Depends: R (>= 3.6.0)
 Imports: graphics, grDevices, grid, stats, utils, colorspace, distributions3 (>= 0.2.1), ggplot2
-Suggests: bamlss (>= 1.2-1), countreg, crch (>= 1.1-0), gamlss, gamlss.dist, MASS, scoringRules, tibble, tidyr, tinytest, digest
+Suggests: bamlss (>= 1.2-1), countreg, crch (>= 1.1-0), gamlss, gamlss.dist, MASS, scoringRules, tibble, tinytest, digest
 Description: Unified infrastructure for probabilistic models and distributional regressions:
              Probabilistic forecasting of in-sample and out-of-sample of probabilities,
              densities, quantiles, and moments. Probabilistic scoring via log-score (log-likelihood),
