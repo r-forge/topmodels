@@ -1,11 +1,11 @@
 # --------------------------------------------------------------------
 # Testing bamlss family distrubiton3 functionality
-# gaussian_bamlss: Normal distribution
+# cnorm_bamlss: Non-censored censored normal distribution
 # --------------------------------------------------------------------
 
 # TODO(R): Possible improvements
 # - Currently families accept invalid parameters (e.g.,
-#   the gaussian_bamlss accepts negative sigmas)
+#   the cnorm_bamlss accepts negative sigmas)
 if (interactive()) { library("tinytest") }
 
 suppressPackageStartupMessages(library("topmodels"))
