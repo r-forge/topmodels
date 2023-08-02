@@ -6,6 +6,7 @@
 \alias{procast.lm}
 \alias{procast.glm}
 \alias{procast.bamlss}
+\alias{procast.disttree}
 \title{Procast: Probabilistic Forecasting}
 \usage{
 procast(
@@ -52,6 +53,17 @@ procast(
 )
 
 \method{procast}{bamlss}(
+  object,
+  newdata = NULL,
+  na.action = na.pass,
+  type = "distribution",
+  at = 0.5,
+  drop = FALSE,
+  ...,
+  distributions3 = FALSE
+)
+
+\method{procast}{disttree}(
   object,
   newdata = NULL,
   na.action = na.pass,
@@ -111,7 +123,7 @@ Finally, a concrete numeric value can also be specified in \code{dispersion}.}
 \item{distributions3}{logical. If a dedicated \pkg{distributions3} object
 is available (e.g., such as \code{\link[distributions3]{Normal}}) and uses
 the same parameterization, should this be used instead of the general
-\code{\link[bamlss]{BAMLSS}} distribution?}
+\code{\link[disttree]{DISTTREE}} distribution?}
 }
 \value{
 Either a \code{data.frame} of predictions with the same number of rows
