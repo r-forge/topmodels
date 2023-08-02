@@ -183,6 +183,8 @@ pitresiduals.default <- function(object,
       nam <- rownames(object)
 
       ## FIXME: (ML) Alternative computation, which is test below.
+      ## NOTE: (R) Fails if object[, 1L] is > than object[, 2L] tinytest_bamlss/test_topmodels.R
+      ##           contains an example (cnorm_bamlss case)
       object2 <- sapply(prob, function(x) qunif(x, min = object[, 1L], max = object[, 2L]))
 
       object <- object[, 1L]  %*% t(1 - prob) + object[, 2L] %*% t(prob)

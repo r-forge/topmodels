@@ -75,7 +75,7 @@ expect_equal(quantile(d, 0.99), qnorm(0.99, par$mu, par$sigma))
 # Support
 names(d) <- LETTERS[seq_len(length(d))] # Used later
 expect_silent(supp <- support(d))
-expect_true(is.matrix(supp) && identical(dim(supp), c(length(d), length(par))))
+expect_true(is.matrix(supp) && identical(dim(supp), c(length(d), 2L)))
 expect_identical(colnames(supp), c("min", "max"))
 expect_identical(rownames(supp), names(d))
 expect_true(all(supp[, "min"] == -Inf))
@@ -88,7 +88,7 @@ expect_identical(id, setNames(rep(FALSE, length(d)), names(d)))
 expect_identical(ic, setNames(rep(FALSE, length(d)), names(d)))
 
 get_regex <- function(name, par) {
-    reg_float <- "[\\+\\-\\.0-9]+"
+    reg_float <- "[\\+-\\.0-9]+"
     reg_par   <- sprintf("%s\\s=\\s{1,}%s", names(par), reg_float)
     sprintf("^BAMLSS %s distribution \\(%s\\)$", name, paste(reg_par, collapse = ", "))
 }
