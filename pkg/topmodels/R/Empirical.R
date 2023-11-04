@@ -377,7 +377,9 @@ kurtosis.Empirical <- function(x, type = 3L, ...) {
 #'   vector of length `n` (if `drop = TRUE`, default) or a `matrix` with `n` columns
 #'   (if `drop = FALSE`).
 #'
-#' @export
+#' @importFrom distributions3 random apply_dpqr make_positive_integer
+#' @exportS3Method
+#' @rdname Empirical
 random.Empirical <- function(x, n = 1L, drop = TRUE, ...) {
   n <- make_positive_integer(n)
   if (n == 0L) return(numeric(0L))
@@ -415,13 +417,17 @@ random.Empirical <- function(x, n = 1L, drop = TRUE, ...) {
 #'   `length(x)` columns (if `drop = FALSE`). In case of a vectorized distribution
 #'   object, a matrix with `length(x)` columns containing all possible combinations.
 #'
+#' @importFrom distributions3 pdf
 #' @export
+#' @rdname Empirical
 pdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   FUN <- function(at, d) dempirical(x = at, y = as.matrix(d), ...)
   apply_dpqr(d = d, FUN = FUN, at = x, type = "density", drop = drop, elementwise = elementwise)
 }
 
+#' @importFrom distributions3 log_pdf
 #' @export
+#' @rdname Empirical
 log_pdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   FUN <- function(at, d) dempirical(x = at, y = as.matrix(d), log = TRUE)
   apply_dpqr(d = d, FUN = FUN, at = x, type = "logLik", drop = drop, elementwise = elementwise)
@@ -452,7 +458,9 @@ log_pdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 #'   `length(x)` columns (if `drop = FALSE`). In case of a vectorized distribution
 #'   object, a matrix with `length(x)` columns containing all possible combinations.
 #'
+#' @importFrom distributions3 cdf
 #' @export
+#' @rdname Empirical
 cdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   FUN <- function(at, d) pempirical(q = at, y = as.matrix(d), ...)
   apply_dpqr(d = d, FUN = FUN, at = x, type = "probability", drop = drop, elementwise = elementwise)
@@ -472,7 +480,6 @@ cdf.Empirical <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 #' intervals.
 #'
 #' @inherit Empirical examples
-#' @inheritParams random.Empirical
 #'
 #' @param probs A vector of probabilities.
 #' @param drop logical. Should the result be simplified to a vector if possible?
@@ -501,7 +508,7 @@ quantile.Empirical <- function(x, probs, drop = TRUE, elementwise = NULL, ...) {
   apply_dpqr(d = x, FUN = FUN, at = probs, type = "quantile", drop = drop, elementwise = elementwise)
 }
 
-#' @export
+#' @exportS3Method
 format.Empirical <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
   if (length(x) < 1L) return(character(0))
   n <- names(x)
@@ -526,19 +533,23 @@ format.Empirical <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...
 #' or a `matrix` with 2 columns. In case of a vectorized distribution object, a
 #' matrix with 2 columns containing all minima and maxima.
 #'
-#' @export
+#' @importFrom distributions3 support make_support
+#' @exportS3Method
+#' @rdname Empirical
 support.Empirical <- function(d, drop = TRUE, ...) {
   ## ellipsis::check_dots_used()
   minmax <- apply(as.matrix(d), MARGIN = 1, FUN = range, na.rm = TRUE)
   make_support(minmax[1, ], minmax[2, ], d, drop = drop)
 }
 
+#' @importFrom distributions3 is_discrete
 #' @exportS3Method
 is_discrete.Empirical <- function(d, ...) {
   ## ellipsis::check_dots_used()
   setNames(rep.int(FALSE, length(d)), names(d))
 }
 
+#' @importFrom distributions3 is_continuous
 #' @exportS3Method
 is_continuous.Empirical <- function(d, ...) {
   ## ellipsis::check_dots_used()

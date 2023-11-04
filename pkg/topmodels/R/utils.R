@@ -19,7 +19,7 @@ set_minimum_transparency <- function(col, alpha_min) {
 
 #' Helper functions to check available support for some S3methods
 #'
-#' @param methods character, name of the method (e.g., is_continuous, print, ...)
+#' @param method character, name of the method (e.g., is_continuous, print, ...)
 #' @param classes character vector of length > 0, classes to check.
 #'
 #' @return Returns TRUE if the method exists for one of the given classes, else FALSE.

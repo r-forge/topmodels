@@ -10,7 +10,12 @@
 \alias{variance.Empirical}
 \alias{skewness.Empirical}
 \alias{kurtosis.Empirical}
+\alias{random.Empirical}
+\alias{pdf.Empirical}
+\alias{log_pdf.Empirical}
+\alias{cdf.Empirical}
 \alias{quantile.Empirical}
+\alias{support.Empirical}
 \title{Create an Empirical distribution}
 \usage{
 Empirical(x)
@@ -31,10 +36,21 @@ rempirical(n, y, na.rm = TRUE)
 
 \method{kurtosis}{Empirical}(x, type = 3L, ...)
 
+\method{random}{Empirical}(x, n = 1L, drop = TRUE, ...)
+
+\method{pdf}{Empirical}(d, x, drop = TRUE, elementwise = NULL, ...)
+
+\method{log_pdf}{Empirical}(d, x, drop = TRUE, elementwise = NULL, ...)
+
+\method{cdf}{Empirical}(d, x, drop = TRUE, elementwise = NULL, ...)
+
 \method{quantile}{Empirical}(x, probs, drop = TRUE, elementwise = NULL, ...)
+
+\method{support}{Empirical}(d, drop = TRUE, ...)
 }
 \arguments{
-\item{x}{an object of class \code{Empirical} (see [Empirical()]).}
+\item{x}{A vector of elements whose cumulative probabilities you would
+like to determine given the distribution `d`.}
 
 \item{q}{vector of quantiles.}
 
@@ -52,9 +68,7 @@ proceeds.}
 
 \item{method}{character; the method to calculate the empirical density. Either \code{"hist"} (default)}
 
-\item{...}{Arguments to be passed to \code{\link[stats]{qnorm}}.
-Unevaluated arguments will generate a warning to catch mispellings or other
-possible errors.}
+\item{...}{Currently not used.}
 
 \item{p}{vector of probabilities.}
 
@@ -63,9 +77,9 @@ possible errors.}
 \item{type}{integer between \code{1L} and \code{3L} (default) selecting one of three
 algorithms. See Details for more information.}
 
-\item{probs}{A vector of probabilities.}
-
 \item{drop}{logical. Should the result be simplified to a vector if possible?}
+
+\item{d}{An `Empirical` object created by a call to [Empirical()].}
 
 \item{elementwise}{logical. Should each distribution in \code{x} be evaluated
 at all elements of \code{probs} (\code{elementwise = FALSE}, yielding a matrix)?
@@ -73,24 +87,54 @@ Or, if \code{x} and \code{probs} have the same length, should the evaluation be
 done element by element (\code{elementwise = TRUE}, yielding a vector)? The
 default of \code{NULL} means that \code{elementwise = TRUE} is used if the
 lengths match and otherwise \code{elementwise = FALSE} is used.}
+
+\item{probs}{A vector of probabilities.}
 }
 \value{
 An `Empirical` object.
+
+In case of a single distribution object or `n = 1`, either a numeric
+  vector of length `n` (if `drop = TRUE`, default) or a `matrix` with `n` columns
+  (if `drop = FALSE`).
+
+In case of a single distribution object, either a numeric
+  vector of length `probs` (if `drop = TRUE`, default) or a `matrix` with
+  `length(x)` columns (if `drop = FALSE`). In case of a vectorized distribution
+  object, a matrix with `length(x)` columns containing all possible combinations.
+
+In case of a single distribution object, either a numeric
+  vector of length `probs` (if `drop = TRUE`, default) or a `matrix` with
+  `length(x)` columns (if `drop = FALSE`). In case of a vectorized distribution
+  object, a matrix with `length(x)` columns containing all possible combinations.
 
 In case of a single distribution object, either a numeric
   vector of length `probs` (if `drop = TRUE`, default) or a `matrix` with
   `length(probs)` columns (if `drop = FALSE`). In case of a vectorized
   distribution object, a matrix with `length(probs)` columns containing all
   possible combinations.
+
+In case of a single distribution object, a numeric vector of length 2
+with the minimum and maximum value of the support (if `drop = TRUE`, default)
+or a `matrix` with 2 columns. In case of a vectorized distribution object, a
+matrix with 2 columns containing all minima and maxima.
 }
 \description{
 An empirical distribution consists of a series of \code{N} observations
 out of a typically unknown distribution, i.e., a random sample 'X'.
 
+Draws \code{n} random values from the empirical ensemble
+with replacement.
+
+Please see the documentation of [Empirical()] for some properties
+of the empircal ensemble distribution, as well as extensive examples
+showing to how calculate p-values and confidence intervals.
+
 Please see the documentation of [Empirical()] for some properties
 of the Empirical distribution, as well as extensive examples
 showing to how calculate p-values and confidence intervals.
 `quantile()`
+
+TODO(RETO): Check description
 }
 \details{
 The creation function [Empirical()] allows for a variety of different objects
@@ -202,9 +246,6 @@ Joanes DN and Gill CA (1998). \dQuote{Comparing Measures of
 Sample Skewness and Kurtosis.} \emph{Journal of the Royal Statistical
 Society D}, \bold{47}(1), 183--189. \doi{10.1111/1467-9884.00122}
 }
-\seealso{
-Other Empirical distribution: 
-\code{\link{cdf.Empirical}()}
-}
 \concept{Empirical distribution}
+\concept{Normal distribution}
 \concept{distributions}

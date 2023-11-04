@@ -123,7 +123,7 @@ Finally, a concrete numeric value can also be specified in \code{dispersion}.}
 \item{distributions3}{logical. If a dedicated \pkg{distributions3} object
 is available (e.g., such as \code{\link[distributions3]{Normal}}) and uses
 the same parameterization, should this be used instead of the general
-\code{\link[disttree]{DISTTREE}} distribution?}
+\code{disttree} distribution?}
 }
 \value{
 Either a \code{data.frame} of predictions with the same number of rows

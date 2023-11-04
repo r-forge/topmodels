@@ -7,9 +7,9 @@
 hasS3method(method, classes)
 }
 \arguments{
-\item{classes}{character vector of length > 0, classes to check.}
+\item{method}{character, name of the method (e.g., is_continuous, print, ...)}
 
-\item{methods}{character, name of the method (e.g., is_continuous, print, ...)}
+\item{classes}{character vector of length > 0, classes to check.}
 }
 \value{
 Returns TRUE if the method exists for one of the given classes, else FALSE.
