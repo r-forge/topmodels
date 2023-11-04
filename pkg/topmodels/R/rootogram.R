@@ -159,6 +159,7 @@ rootogram <- function(object, ...) {
 #' @rdname rootogram
 #' @method rootogram default
 #' @export
+#' @importFrom distributions3 is_discrete is_continuous
 rootogram.default <- function(
                               ## computation arguments
                               object,
@@ -254,9 +255,9 @@ rootogram.default <- function(
     response_type   <- "mixed"
     dist_support    <- range(quantile(tmp_prodist, probs = c(0.01, 0.99), elementwise = FALSE))
   } else {
-    if (all(distributions3::is_discrete(tmp_prodist))) {
+    if (all(is_discrete(tmp_prodist))) {
       response_type <- "discrete" 
-    } else if (all(distributions3::is_continuous(tmp_prodist))) {
+    } else if (all(is_continuous(tmp_prodist))) {
       response_type <- "continuous"
     } else {
       response_type <- "mixed"
