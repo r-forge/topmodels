@@ -1,4 +1,4 @@
-pandoc: 2.19.2
+pandoc: 3.1.6
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
@@ -10,7 +10,7 @@ articles:
   implementation: implementation.html
   procast: procast.html
   topmodels: topmodels.html
-last_built: 2023-03-23T22:54Z
+last_built: 2023-12-07T09:57Z
 urls:
   reference: https://topmodels.R-Forge.R-project.org/reference
   article: https://topmodels.R-Forge.R-project.org/articles
