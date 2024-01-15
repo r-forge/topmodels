@@ -86,7 +86,7 @@ for survey data or for situations with model-based weights
 For a discrete variable $y_i$, the observed and expected frequencies can be
 simplified and are given for each integer $j$ by
 
-$$\text{obs}_j = \sum_{i=1}^{n}I(y_i - j),$$
+$$\text{obs}_j = \sum_{i=1}^{n}I(y_i = j),$$
 $$\text{exp}_j = \sum_{i=1}^{n}f(j | \hat{\boldsymbol{\theta}}_{i}),$$
 
 with the indicator variable $I( \cdot )$ [@Kleiber+Zeileis:2016]. As rootograms are
