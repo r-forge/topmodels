@@ -116,9 +116,10 @@ X <- TruncatedNormal(
 )
 X
 
-## compute mean of the truncated distribution
+## compute mean and variance of the truncated distribution
 mean(X)
-## higher moments (variance, skewness, kurtosis) are not implemented yet
+variance(X)
+## higher moments (skewness, kurtosis) are not implemented yet
 
 ## support interval (minimum and maximum)
 support(X)

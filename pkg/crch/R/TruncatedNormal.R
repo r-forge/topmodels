@@ -12,7 +12,8 @@ mean.TruncatedNormal <- function(x, ...) {
 }
 
 variance.TruncatedNormal <- function(x, ...) {
-  stop("not yet implemented")
+  s <- sdtnorm(mean = x$mu, sd = x$sigma, left = x$left, right = x$right)
+  setNames(s^2, names(x))
 }
 
 skewness.TruncatedNormal <- function(x, ...) {

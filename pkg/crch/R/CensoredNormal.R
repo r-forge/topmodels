@@ -12,7 +12,8 @@ mean.CensoredNormal <- function(x, ...) {
 }
 
 variance.CensoredNormal <- function(x, ...) {
-  stop("not yet implemented")
+  s <- sdcnorm(mean = x$mu, sd = x$sigma, left = x$left, right = x$right)
+  setNames(s^2, names(x))
 }
 
 skewness.CensoredNormal <- function(x, ...) {
