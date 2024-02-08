@@ -99,12 +99,52 @@ htnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
   hess
 }
 
-
-## Expectation
-etnorm <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
-  rmm <- (right-mean)/sd
-  lmm <- (left-mean)/sd
-  pncens <- pnorm(rmm)-pnorm(lmm)
-  rval <- mean + sd*(dnorm(lmm) - dnorm(rmm))/pncens
-  rval
+.erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
+.erfc <- function(x) 2 * pnorm(x * sqrt(2), lower = FALSE)
+.erfcx <- function(x) 2 * pnorm(x * sqrt(2), lower = FALSE) * exp(x^2)
+.F1 <- function(x, y) {
+    delta <- exp(x^2 - y^2)
+    fx <- is.finite(x)
+    fy <- is.finite(y)
+    sx <- sign(x)
+    sy <- sign(y)
+    ifelse(fx & !fy, sy / .erfcx(sy * x),
+    ifelse(!fx & fy, sx / .erfcx(sx * y),
+    ifelse(abs(x) > y & y >= 0, (exp(-y^2) - exp(-x^2)) / (.erf(x) - .erf(y)),
+    ifelse(x < 0 & y < 0, (1 - delta) / (delta * .erfcx(-y) - .erfcx(-x)),
+    ifelse(x > 0 & y > 0, (1 - delta) / (.erfcx(x) - delta * .erfcx(y)),
+    (1 - delta) * exp(-x^2) / (.erf(y) - .erf(x)))))))
 }
+.F2 <- function(x, y) {
+    delta <- exp(x^2 - y^2)
+    fx <- is.finite(x)
+    fy <- is.finite(y)
+    sx <- sign(x)
+    sy <- sign(y)
+    ifelse(fx & !fy, sy * x / .erfcx(sy * x),
+    ifelse(!fx & fy, sx * y / .erfcx(sx * y),
+    ifelse(abs(x) > y & y >= 0, (y * exp(-y^2) - x * exp(-x^2)) / (.erf(x) - .erf(y)),
+    ifelse(x < 0 & y < 0, (x - y * delta) / (delta * .erfcx(-y) - .erfcx(-x)),
+    ifelse(x > 0 & y > 0, (x - y * delta) / (.erfcx(x) - delta * .erfcx(y)),
+    (x - y * delta) * exp(-x^2) / (.erf(y) - .erf(x)))))))
+}
+
+
+## Using the expressions in
+## https://github.com/cossio/TruncatedNormal.jl/blob/fc904152f2da11a257e3ccdd3e49ef118b81d437/notes/normal.pdf
+## to avoid catastrophic cancellation
+
+etnorm <- function (mean = 0, sd = 1, left = -Inf, right = Inf) {
+    rmm <- (right - mean) / sd / sqrt(2)
+    lmm <- (left - mean) / sd / sqrt(2)
+    ifelse(rmm == Inf & lmm == -Inf, mean,
+           mean + sqrt(2 / pi) * .F1(lmm, rmm) * sd)
+}
+
+sdtnorm <- function (mean = 0, sd = 1, left = -Inf, right = Inf) {
+    rmm <- (right - mean) / sd / sqrt(2)
+    lmm <- (left - mean) / sd / sqrt(2)
+    ifelse(rmm == Inf & lmm == -Inf, sd,
+           sd * sqrt(1 + 2 / sqrt(pi) * .F2(lmm, rmm) - 2 / pi * (.F1(lmm, rmm))^2))
+}
+
