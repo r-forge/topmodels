@@ -1,3 +1,9 @@
+# crch 1.1-3
+
+* Improved implementations of expectation and variance of censored and truncated
+  normal distributions (contributed by Ioannis Kosmidis).
+
+
 # crch 1.1-2
 
 * Fixed name of first argument in `crps()` method to be consistent with the generic.
