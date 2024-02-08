@@ -103,3 +103,20 @@ ecnorm <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
     pnorm(lmm)*left^(is.finite(left)) + 
     pnorm(rmm, lower.tail = FALSE)*right^(is.finite(right))
 }
+
+
+## Standard deviation
+sdcnorm <- function(mean = 0, sd = 1, left = -Inf, right = Inf) {
+    rmm <- (right - mean) / sd
+    lmm <- (left - mean) / sd
+    pl <- pnorm(lmm)
+    pr <- pnorm(rmm, lower.tail = FALSE)
+    pm <- 1 - pr - pl
+    E <- etnorm(mean = mean, sd = sd, left = left, right = right)
+    V <- sdtnorm(mean = mean, sd = sd, left = left, right = right)^2
+    left <- left^is.finite(left)
+    right <- right^is.finite(right)
+    rval <- left^2 * pl * (1 - pl) + right^2 * pr * (1 - pr) - 2 * left * right * pl * pr +
+        E^2 * pm * (1 - pm) - 2 * E * pm * (left * pl + right * pr) + V * pm
+    sqrt(rval)
+}
