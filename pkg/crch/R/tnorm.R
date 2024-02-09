@@ -100,8 +100,8 @@ htnorm <- function(x, mean = 0, sd = 1, left = -Inf, right = Inf,
 }
 
 .erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
-.erfc <- function(x) 2 * pnorm(x * sqrt(2), lower = FALSE)
-.erfcx <- function(x) 2 * pnorm(x * sqrt(2), lower = FALSE) * exp(x^2)
+.erfc <- function(x) 2 * pnorm(x * sqrt(2), lower.tail = FALSE)
+.erfcx <- function(x) 2 * pnorm(x * sqrt(2), lower.tail = FALSE) * exp(x^2)
 .F1 <- function(x, y) {
     delta <- exp(x^2 - y^2)
     fx <- is.finite(x)
