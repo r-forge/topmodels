@@ -1,0 +1,891 @@
+\documentclass[11pt,t,usepdftitle=false,aspectratio=169]{beamer}
+\usetheme[license, url, foot]{uibk}
+\renewcommand{\hrulefill}{}
+
+\title{Visualizing Goodness of Fit of Probabilistic Regression Models}
+\author{Achim Zeileis}
+\URL{https://topmodels.R-Forge.R-project.org/}
+\gdef\myheaderimage{../2023_WU/topmodels_header.png}
+
+%% Define colors
+\definecolor{HighlightOrange}{rgb}{0.9490196,0.5725490,0.0000000}
+\definecolor{HighlightBlue}{rgb}{0.4784314,0.7490196,0.9803922}
+\definecolor{forestred}{RGB}{206,73,81}
+\definecolor{treegreen}{RGB}{0,143,0}
+\definecolor{lightblue}{RGB}{34,151,230}
+\definecolor{lightorange}{RGB}{255,165,0}
+
+%% Create appendix with no page numbering
+\newcommand{\backupbegin}{
+   \newcounter{finalframe}
+   \setcounter{finalframe}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \setcounter{framenumber}{\value{finalframe}}
+}
+
+%% need no \usepackage{Sweave}
+\SweaveOpts{engine=R, eps=FALSE, keep.source=TRUE}
+<<preliminaries, echo=FALSE, results=hide>>=
+options(prompt = "R> ", continue = "+  ", useFancyQuotes = FALSE, width = 70, digits = 4)
+set.seed(7)
+library("topmodels")
+library("distributions3")
+library("ggplot2")
+theme_set(theme_bw())
+rd <- "#b52267"
+rdt <- colorspace::adjust_transparency(rd, 0.3)
+@
+
+
+\begin{document}
+\section{A Toolbox for Probabilistic Regression Models}
+
+
+%-------------------------------------------------------------------
+\subsection{Overview}
+%-------------------------------------------------------------------
+
+% \begin{frame}
+% \frametitle{Overview}
+% 
+% \begin{itemize}
+%   \item Probabilistic regression models
+%   \item Illustrations
+%   \begin{itemize}
+%     \item Goals in 2018 FIFA World Cup
+%     \item 3-day precipitation sums in Innsbruck, Austria
+%   \end{itemize}
+%   \item Goodness of fit
+%   \begin{itemize}
+%     \item Scoring rules
+%     \item Probability integral transform, quantile residuals
+%     \item Rootogram, PIT histogram, \dots
+%   \end{itemize}
+%   \item Software infrastructure
+%   \begin{itemize}
+%     \item \emph{topmodels}
+%     \item \emph{distributions3}
+%   \end{itemize}
+% \end{itemize}
+% 
+% \end{frame}
+
+%-------------------------------------------------------------------
+\subsection{Probabilistic regression models}
+%-------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Probabilistic regression models}
+
+\textbf{Classical approach:} Model conditional expectation $\mathsf{E}(y_i | \boldsymbol{x}_i) = \mu_i$ ($i = 1, \dots n$).
+
+\medskip
+
+\textbf{Regression model:} $\displaystyle \mu_i ~=~ r(\boldsymbol{x}_i)$
+
+\medskip
+
+\visible<6->{\textbf{Often:} Full conditional probability distribution is of interest.}
+
+\medskip
+
+<<dgp, echo=FALSE, results=hide>>=
+nobs <- 200
+x <- seq(-1, 1, length.out = nobs)
+xx <- x/2 + 0.5
+mu_lm <- 0.5 * x
+mu_gam <- x^3
+mu_tree <- ifelse(x < -2/6, 0.5, ifelse(x < 2/6, 2, 1))
+mu_forest <- ifelse(xx < 0.27, 0.5, ifelse(xx < 0.39, 0.5 + 1.5 * (plogis((xx - 0.33)/6 * 700)), 1 + (1 - plogis(12 * (2 * (xx - 0.2) - 1)))))
+sigma_const <- 0.3
+sigma_gamlss <- 0.1 + exp(-(2 * x)^2)/2
+sigma_tree <- ifelse(x < -2/6, 0.5, ifelse(x < 2/6, 0.3, 0.1))
+err_const <- rnorm(nobs, 0, 0.3)
+err_gamlss <- rnorm(nobs, 0, sigma_gamlss)
+err_tree <- rnorm(nobs, 0, sigma_tree)
+@
+
+\setkeys{Gin}{width=0.3\textwidth}
+
+\only<2-6>{%
+<<model_lm, fig=TRUE, echo=FALSE>>=
+par(mar = c(4, 0, 2, 4))
+plot(x, mu_lm + err_const, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+box(lwd = 5)
+lines(x, mu_lm, col = rd, lwd = 7)
+mtext("LM, GLM", side = 1, line = 2, cex = 2)
+@
+}%
+\only<7->{%
+<<distmodel_lm, fig=TRUE, echo=FALSE>>=
+par(mar = c(4, 0, 2, 4))
+plot(x, mu_lm + err_const, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+polygon(c(x, rev(x)), c(mu_lm + qnorm(0.95) * sigma_const, rev(mu_lm + qnorm(0.05) * sigma_const)), col = rdt, border = "transparent")
+box(lwd = 5)
+lines(x, mu_lm, col = rd, lwd = 7)
+mtext("Normal (G)LM w/ constant variance", side = 1, line = 2, cex = 2)
+@
+}%
+\only<3-7>{%
+<<model_gam, fig=TRUE, echo=FALSE>>=
+par(mar = c(4, 0, 2, 4))
+plot(x, mu_gam + err_const, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+box(lwd = 5)
+lines(x, mu_gam, col = rd, lwd = 7)
+mtext("GAM", side = 1, line = 2, cex = 2)
+@
+}%
+\only<8->{%
+<<distmodel_gam, fig=TRUE, echo=FALSE>>=
+par(mar = c(4, 0, 2, 4))
+plot(x, mu_gam + err_gamlss, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+polygon(c(x, rev(x)), c(mu_gam + qnorm(0.95) * sigma_gamlss, rev(mu_gam + qnorm(0.05) * sigma_gamlss)), col = rdt, border = "transparent")
+box(lwd = 5)
+lines(x, mu_gam, col = rd, lwd = 7)
+mtext("GAMLSS", side = 1, line = 2, cex = 2)
+@
+}%
+\only<4>{%
+<<model_tree, fig=TRUE, echo=FALSE>>=
+par(mar = c(4, 0, 2, 4))
+plot(x, mu_tree + err_const, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+box(lwd = 5)
+lines(x, mu_tree, col = rd, lwd = 7)
+mtext("Regression tree", side = 1, line = 2, cex = 2)
+@
+}%
+\only<5-8>{%
+<<model_forest, fig=TRUE, echo=FALSE>>=
+par(mar = c(4, 0, 2, 4))
+plot(x, mu_forest + err_const, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+box(lwd = 5)
+lines(x, mu_forest, col = rd, lwd = 7)
+mtext("Random forest", side = 1, line = 2, cex = 2)
+@
+}%
+%% \only<9>{%
+%% <<distmodel_tree, fig=TRUE, echo=FALSE>>=
+%% par(mar = c(4, 0, 2, 4))
+%% plot(x, mu_tree + err_tree, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+%% polygon(c(x, rev(x)), c(mu_tree + qnorm(0.95) * sigma_tree, rev(mu_tree + qnorm(0.05) * sigma_tree)), col = rdt, border = "transparent")
+%% box(lwd = 5)
+%% lines(x, mu_tree, col = rd, lwd = 7)
+%% mtext("Distributional tree", side = 1, line = 2, cex = 2)
+%% @
+%% }%
+\only<9>{%
+<<distmodel_forest, fig=TRUE, echo=FALSE>>=
+par(mar = c(4, 0, 2, 4))
+plot(x, mu_forest + err_gamlss, xaxt = "n", yaxt = "n", ann = FALSE, col = "slategray", pch = 19)
+polygon(c(x, rev(x)), c(mu_forest + qnorm(0.95) * sigma_gamlss, rev(mu_forest + qnorm(0.05) * sigma_gamlss)), col = rdt, border = "transparent")
+box(lwd = 5)
+lines(x, mu_forest, col = rd, lwd = 7)
+mtext("Distributional forest", side = 1, line = 2, cex = 2)
+@
+}%
+
+\end{frame}
+
+\setkeys{Gin}{width=0.65\textwidth}
+
+\begin{frame}
+\frametitle{Probabilistic regression models}
+
+\textbf{Formally:} Fit distribution with cumulative distribution function $F(y_i | \boldsymbol{\theta}_{i})$
+and parameter vector $\boldsymbol{\theta}_{i}$ for each observation $y_i$.
+
+\bigskip
+\pause
+
+\textbf{Forecasting:} $\hat{\boldsymbol{\theta}_i }= \hat{\boldsymbol{r}}(\boldsymbol{x}_i)$.
+\begin{itemize}
+  \item Model fit typically yields distribution parameters.
+  \item Implies all other aspects of the distribution $F(\cdot | \boldsymbol{\theta}_{i})$.
+  \item Thus: Moments, quantiles, probabilities, \dots
+\end{itemize}
+
+\end{frame}
+
+
+%-------------------------------------------------------------------
+\subsection{Illustration: Goals in the 2018 FIFA World Cup}
+%-------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Illustration: Goals in the 2018 FIFA World Cup}
+
+\textbf{Response:} Goals scored by the two teams in all 64 matches.
+
+\bigskip
+
+\textbf{Covariates:} Basic match information and prediction of team (log-)abilities (based on bookmakers odds).
+
+\bigskip
+
+<<>>=
+data("FIFA2018", package = "distributions3")
+tail(FIFA2018, 2)
+@
+
+\bigskip
+
+\textbf{Model:} Poisson GLM with mean $\lambda_i$ using log link.
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Illustration: Goals in the 2018 FIFA World Cup}
+
+\textbf{In R:}
+
+\smallskip
+
+<<>>=
+m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
+@
+
+\bigskip
+
+\textbf{Forecasting:} In-sample for simplicity.
+
+\smallskip
+
+<<>>=
+tail(procast(m), 2)
+@
+
+\bigskip
+\pause
+
+\textbf{Implies:}
+\begin{itemize}
+  \item Probabilities for match results (assuming independence of goals).
+  \item Corresponding probabilities for win/draw/lose.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Illustration: Goals in the 2018 FIFA World Cup}
+
+\textbf{Example:} Probabilities for final France-Croatia. \visible<2>{Result 4-2.}
+
+\vspace{0.25em}
+\setkeys{Gin}{width=0.65\textwidth}
+
+\begin{center}
+\only<1>{
+<<final1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+idx <- c(127, 128)
+df <- data.frame(group =  FIFA2018$team[idx])
+df <- cbind(df, procast(m, type = "density", at = 0:6)[idx, ])
+df <- tidyr::pivot_longer(df, cols = d_0:d_6, names_prefix = "^d_", names_to = "goals")
+df$observed <- factor(0, levels = c(0, 1), label = c("no", "yes"))
+df[df$group == "FRA" & df$goals == "4", "observed"] <- "yes"
+df[df$group == "CRO" & df$goals == "2", "observed"] <- "yes"
+df$group <- factor(df$group, levels = c("FRA", "CRO"))
+
+df_text <- data.frame(
+  label = sprintf("lambda == %s", round(fitted(m)[idx], 2)),
+  group =  factor(FIFA2018$team[idx], levels = c("FRA", "CRO"))
+)
+
+gg1 <- ggplot(df, aes(x = goals, y = value, group = group)) + 
+  geom_col(aes(fill = observed)) + 
+  xlab("Goals") + 
+  ylab("Probability") + 
+  facet_grid(group ~ .) +
+  theme_bw() + guides(fill = "none") +
+  geom_text(
+    data    = df_text,
+    mapping = aes(x = Inf, y = Inf, label = label),
+    hjust   = 1.2,
+    vjust   = 2,
+    parse = TRUE
+  )
+
+gg1 + scale_fill_manual(values = c("darkgray", "darkgray"))
+@
+}%
+\only<2>{
+<<final2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+gg1 + scale_fill_manual(values = c("lightgray", "gray40"))
+@
+}
+\end{center}
+
+\end{frame}
+
+
+
+%-------------------------------------------------------------------
+\subsection{Goodness of fit}
+%-------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Goodness of fit}
+
+\textbf{Idea:}
+\begin{itemize}
+  \item Use visualizations instead of just summing up scores.
+  \item Gain more insights graphically.
+  \item Reveal different types of model misspecification.
+\end{itemize}
+
+\bigskip
+\pause 
+
+\textbf{Questions:} Graphics are not new but novel unifying view.
+\begin{itemize}
+\item What are useful elements of such graphics?
+\item What are relative (dis)advantages?
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Goodness of fit}
+
+\textbf{Ideas:} Illustrated for FIFA Poisson model.
+
+\bigskip
+
+\setkeys{Gin}{width=0.9\textwidth}
+
+\begin{columns}[T]
+\begin{column}{0.33\textwidth}
+\only<1>{
+<<fifa_goodness1a, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+rootogram(m, style = "standing", scale = "raw", fill = "darkgray", fitted = FALSE, xlab = "Goals", confint = FALSE, expected = FALSE)
+@
+
+Marginal calibration:
+\begin{itemize}
+\item[-] Observed frequencies.
+\end{itemize}
+}
+\only<2->{
+<<fifa_goodness1b, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+rootogram(m, style = "standing", scale = "raw", fill = "darkgray", col = "black", fitted = TRUE, xlab = "Goals", confint = FALSE, expected = TRUE)
+@
+
+Marginal calibration:
+\begin{itemize}
+\item[-] Observed frequencies.
+\item[-] Compare: Expected.
+\end{itemize}
+}
+\end{column}
+
+\pause
+\pause
+
+\begin{column}{0.33\textwidth}
+<<fifa_goodness2, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+set.seed(0)
+pithist(m, type = "expected", scale = "uniform", fill = "darkgray", alpha = 1, col = "black",
+  confint = FALSE, simint = FALSE, xlab = "Probability integral transform (PIT)")
+@
+
+Probabilistic calibration:
+\begin{itemize}
+\item[-] Probability integral $u_i = F(y_i \mid \hat{\boldsymbol{\theta}}_i)$.
+\item[-] Compare: Uniform.
+\end{itemize}
+
+\end{column}
+
+\pause
+
+\begin{column}{0.33\textwidth}
+<<fifa_goodness3, fig=TRUE, echo=FALSE, height=2.3, width=3.2>>=
+set.seed(0)
+pithist(m, type = "expected", scale = "normal",
+  xlim = c(-3, 3), fill = "darkgray", col = "black", alpha = 1, xlab = "Randomized quantile residuals",
+  breaks = 14, confint = FALSE, simint = FALSE)
+@
+
+Probabilistic calibration:
+\begin{itemize}
+\item[-] Quantile residuals $\Phi^{-1}(u_i)$.
+\item[-] Compare: Normal
+\end{itemize}
+
+\end{column}
+\end{columns}
+
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Goodness of fit: Marginal calibration}
+
+\only<1>{\textbf{Observed vs.\ expected frequencies:} Standing, with reference line.}%
+\only<2>{\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:} Standing, with reference line.}%
+\only<3>{\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:} Hanging.}%
+\only<4>{\textbf{$\sqrt{\text{Observed}}$ vs. $\sqrt{\text{expected}}$ frequencies:} Hanging, with confidence interval.}%
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+\only<1>{%
+<<rootogram1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+observed <- table(FIFA2018$goals)
+expected <- m |>
+  procast(type = "density", at = 0:6) |>
+  colSums() |>
+  setNames(0:6)
+autoplot(rootogram(m, plot = FALSE, style = "standing", scale = "raw", confint = FALSE, xlab = "Goals", ylab = "Frequency", main = "")) + 
+  scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
+@
+}%
+\only<2>{%
+<<rootogram2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+autoplot(rootogram(m, plot = FALSE, style = "standing", confint = FALSE, xlab = "Goals", main = "", ylim = c(-0.9, 7))) + 
+  scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
+@
+}%
+\only<3>{%
+<<rootogram3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+autoplot(rootogram(m, plot = FALSE, style = "hanging", confint = FALSE, xlab = "Goals", main = "", ylim = c(-0.9, 7))) + 
+  scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
+@
+}%
+\only<4>{%
+<<rootogram4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+autoplot(rootogram(m, plot = FALSE, style = "hanging", confint = TRUE, xlab = "Goals", main = "", ylim = c(-0.9, 7))) + 
+  scale_x_continuous(breaks = 0:6, expand = c(0.01, 0.01))
+@
+}%
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Goodness of fit: Marginal calibration}
+
+\textbf{Rootogram:}
+\begin{itemize}
+\item Frequencies on raw or square-root scale.
+\item Hanging, standing, or suspended styled rootograms.
+\end{itemize}
+
+\bigskip
+\pause
+
+\textbf{Overall:}
+\begin{itemize}
+\item \emph{Advantage:} Scale of observations is natural, direct interpretation.
+\item \emph{Disadvantage:} Needs to be compared with a combination of distributions.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Goodness of fit: Probabilistic calibration}
+
+\only<1>{\textbf{PIT:} Randomization 1a.}%
+\only<2>{\textbf{PIT:} Randomization 1a, with reference line.}%
+\only<3>{\textbf{PIT:} Randomization 1a, with reference line and confidence interval.}%
+\only<4>{\textbf{PIT:} Randomization 1b.}%
+\only<5>{\textbf{PIT:} Randomization 1c.}%
+\only<6>{\textbf{PIT:} Randomization 1c, with simulation intervals.}%
+\only<7>{\textbf{PIT:} 10 random draws.}%
+\only<8>{\textbf{PIT:} 100 random draws.}%
+\only<9>{\textbf{PIT:} Expected.}%
+\only<10>{\textbf{Randomized quantile residuals:} Expected.}%
+\only<11>{\textbf{Randomized quantile residuals:} Expected, with reference.}%
+\only<12>{\textbf{Observed vs.\ expected quantiles:} Q-Q plot.}%
+\only<13>{\textbf{Observed vs.\ expected quantiles:} Detrended Q-Q plot (worm plot).}%
+\phantom{R,q}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+\only<1>{%
+<<pithist1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(3)
+pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = FALSE, simint = FALSE, confint = FALSE, alpha = 1, ylim = c(NA, 1.788086), plot = "ggplot2")
+@
+}%
+\only<2>{%
+<<pithist2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(3)
+pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = FALSE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, plot = "ggplot2")
+@
+}%
+\only<3>{%
+<<pithist3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(3)
+pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
+@
+}%
+\only<4>{%
+<<pithist4, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(2)
+pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
+@
+}%
+\only<5>{%
+<<pithist5, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(5)
+pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = FALSE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
+@
+}%
+\only<6>{%
+<<pithist6, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(5)
+pithist(m, nsim = 1, type = "random", fill = "darkgray", col = "black", expected = TRUE, simint = TRUE, confint = TRUE, alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1, plot = "ggplot2")
+@
+}%
+\only<7>{%
+<<pithist7, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(10)
+pithist(m, nsim = 10, type = "random", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1,  plot = "ggplot2")
+@
+}%
+\only<8>{%
+<<pithist8, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(10)
+pithist(m, nsim = 100, type = "random", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1,  plot = "ggplot2")
+@
+}%
+\only<9>{%
+<<pithist9, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(10)
+pithist(m, type = "expected", fill = "darkgray", col = "black", alpha = 1, ylim = c(NA, 1.788086), ref_size = 1, confint_size = 1,  plot = "ggplot2")
+@
+}%
+\only<10>{%
+<<pithist10, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(1000)
+pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type = "random", scale = "normal", xlim = c(-3.5, 3.5), fill = "darkgray", col = "black", alpha = 1, expected = FALSE, confint = FALSE,  plot = "ggplot2", ylim = c(NA, 0.515625))
+@
+}%
+\only<11>{%
+<<pithist11, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(1000)
+pithist(m, breaks = seq(-5.5, 5.5, by = 0.5), simint = FALSE, nsim = 1000, type = "random", scale = "normal", xlim = c(-3.5, 3.5), fill = "darkgray", col = "black", alpha = 1, ref_size = 1, confint_size = 1,  plot = "ggplot2", ylim = c(NA, 0.515625))
+@
+}%
+\only<12>{%
+<<pithist12, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(3)
+qqrplot(m, ref_linetype = 1, confint = "line", simint = FALSE)
+@
+}%
+\only<13>{%
+<<pithist13, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+set.seed(3)
+wormplot(m, ref_linetype = 1, confint = "line", simint = FALSE)
+@
+}%
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Goodness of fit: Probabilistic calibration}
+
+\textbf{PIT histogram:}
+\begin{itemize}
+\item Probability scale or transformed to normal scale.
+\item Randomized or expected for discrete distributions.
+\end{itemize}
+
+\bigskip
+\pause
+
+\textbf{Q-Q residuals plot:}
+\begin{itemize}
+\item Normal or uniform scale.
+\item Detrended Q-Q plot (worm plot).
+\end{itemize}
+
+\bigskip
+\pause
+
+\textbf{Overall:}
+\begin{itemize}
+\item \emph{Advantage:} Comparison with only one distribution (uniform or normal).
+\item \emph{Disadvantages:} Scale is not so natural. May require randomization.
+\end{itemize}
+
+\end{frame}
+
+
+
+%-------------------------------------------------------------------
+\subsection{Illustration: Loss aversion in adolescents}
+%-------------------------------------------------------------------
+
+<<model_loss, eval=TRUE, echo=FALSE, results=hide>>=
+data("LossAversion", package = "betareg")
+
+## linear model (OLS)
+la_gr <- lm(invest ~ grade * (arrangement + age) + male, data = LossAversion)
+
+## extended-support beta mixture
+library("betareg")
+la_brx <- betareg(invest ~ grade * (arrangement + age) + male | arrangement + male + grade, data = LossAversion)
+@
+
+\begin{frame}[fragile]
+\frametitle{Illustration: Loss aversion in adolescents}
+
+\textbf{Experiment:} Behaviour of adolescents (mostly 11--19).
+\begin{itemize}
+\item \emph{Setup:} Nine rounds of a lottery with positive expectation.
+\item \emph{Response:} Proportion of invested points across all rounds.
+\item \emph{Covariates:} Arrangement (single vs.\ team), gender, age.
+\end{itemize}
+
+\bigskip
+\pause
+
+\textbf{Models:} 
+\begin{itemize}
+\item Ordinary least squares, interpreted as homoscedastic Gaussian model.
+\item Extended-support beta mixture regression (with point masses for $0$ and $1$).
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Illustration: Loss aversion in adolescents}
+
+\textbf{Rootogram:}
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+\only<1>{%
+<<loss_rootogram1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+rootogram(la_gr, breaks = -6:16/10, xlab = "Investment proportion")
+@
+}%
+\only<2>{%
+<<loss_rootogram2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+rootogram(la_brx, xlab = "Investment proportion")
+@
+}%
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Illustration: Loss aversion in adolescents}
+
+\textbf{PIT histogram:}
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+\only<1>{%
+<<loss_pithist1, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+p1 <- pithist(la_gr, ylim = c(0, 1.35))
+@
+}%
+\only<2>{%
+<<loss_pithist2, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+p2 <- pithist(la_brx, ylim = c(0, 1.35))
+@
+}%
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Illustration: Loss aversion in adolescents}
+
+\textbf{PIT histogram:}
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<loss_pithist3, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+ggplot2::autoplot(c(p1, p2), colour = c(3, 4), style = "line", single_graph = TRUE, confint_fill = 1, confint_alpha = 0.1, size = 1, confint = "polygon", expected = FALSE, ylim = c(0, 1.35))
+@
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Illustration: Loss aversion in adolescents}
+
+\textbf{Q-Q residual plot:}
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<loss_qqrplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+q1 <- qqrplot(la_gr, plot = FALSE)
+q2 <- qqrplot(la_brx, plot = FALSE)
+ggplot2::autoplot(c(q1, q2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
+@
+\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Illustration: Loss aversion in adolescents}
+
+\textbf{Q-Q residual plot:} Detrended.
+
+\vspace{0.25em}
+
+\begin{center}
+\setkeys{Gin}{width=0.65\textwidth}
+<<loss_wormplot, fig=TRUE, echo=FALSE, height=4.5, width=6.3>>=
+w1 <- wormplot(la_gr, plot = FALSE)
+w2 <- wormplot(la_brx, plot = FALSE)
+ggplot2::autoplot(c(w1, w2), colour = c(3, 4), alpha = 0.8, single_graph = TRUE, simint = FALSE, confint ="polygon")
+@
+\end{center}
+\end{frame}
+
+
+%-------------------------------------------------------------------
+\subsection{Software}
+%-------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Software: topmodels}
+
+\textbf{R package:} \emph{topmodels}. Forecasting and assessment of probabilistic models.
+
+\bigskip
+
+\textbf{Not yet on CRAN:} \url{https://topmodels.R-Forge.R-project.org/}
+
+\bigskip
+
+\textbf{Visualizations:}
+
+\medskip
+
+\begin{tabular}{ll}
+\code{rootogram()} & Rootograms of observed and fitted frequencies\\
+\code{pithist()}   & PIT histograms\\
+\code{qqrplot()}   & Q-Q plots for quantile residuals\\
+\code{wormplot()}  & Worm plots for quantile residuals\\
+\code{reliagram()} & (Extended) reliability diagrams
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Software: topmodels}
+
+\textbf{Numeric quantities:}
+
+\medskip
+
+\begin{tabular}{ll}
+\code{procast()}      & Probabilistic forecasts (probabilities, quantiles, etc.)\\
+\code{proscore()}     & Evaluate scoring rules for procasts\\
+\code{pitresiduals()} & Probability integral transform (PIT) residuals\\
+\code{qresiduals()}   & (Randomized) quantile residuals
+\end{tabular}
+
+\bigskip
+\pause
+
+\textbf{Object orientation:}
+\begin{itemize}
+  \item Work with distribution objects (vectorized) from \emph{distributions3}.
+  \item Model classes like \code{lm}, \code{glm}, \code{gamlss}, \code{bamlss}, \code{hurdle}, \code{zeroinfl}, \dots
+  \item New model classes can be easily added if distribution can be extracted.
+\end{itemize}
+
+\end{frame}
+
+
+%-------------------------------------------------------------------
+\subsection{References}
+%-------------------------------------------------------------------
+
+
+\begin{frame}
+\frametitle{References}
+
+\scriptsize
+
+Lang MN, Zeileis A, Stauffer R, \emph{et al.} (2023).
+\dquote{topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models.}
+\emph{R package version 0.3-0}.
+\url{https://topmodels.R-Forge.R-project.org/}
+
+\medskip
+
+Hayes A, Moller-Trane R, Jordan D, Northrop P, Lang MN, Zeileis A, \emph{et al.} (2022).
+\dquote{distributions3: Probability Distributions as S3 Objects.}
+\emph{R package version 0.2.1}.
+\url{https://alexpghayes.github.io/distributions3/}
+
+\bigskip
+
+Czado C, Gneiting T, Held L (2009).
+\dquote{Predictive Model Assessment for Count Data.}
+\emph{Biometrics}, \textbf{65}(4), 1254--1261.
+\doi{10.1111/j.1541-0420.2009.01191.x}
+
+\medskip
+
+Kleiber C, Zeileis A (2016).  
+\dquote{Visualizing Count Data Regressions Using Rootograms.} 
+\emph{The American Statistician}, 
+\textbf{70}(3), 296--303.
+\doi{10.1080/00031305.2016.1173590}
+
+\bigskip
+
+Zeileis A, Leitner C, Hornik K (2018)
+\dquote{Probabilistic Forecasts for the 2018 {FIFA} World Cup Based on the Bookmaker Consensus Model.}
+Working Paper 2018-09. Working Papers in Economics; Statistics, Research Platform Empirical; Experimental Economics, Universit\"at Innsbruck. \url{https://EconPapers.RePEc.org/RePEc:inn:wpaper:2018-09}.
+
+\medskip
+
+Gl\"atzle-R\"utzler D, Sutter M, Zeileis A (2015).
+\dquote{No Myopic Loss Aversion in Adolescents? An Experimental Note.}
+\emph{Journal of Economic Behavior \& Organization},
+\textbf{111}, 169--176.
+\doi{10.1016/j.jebo.2014.12.021}
+
+\end{frame}
+
+
+%-------------------------------------------------------------------
+\subsection{Contact}
+%-------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Contact}
+
+\small
+
+\textbf{Mastodon:} \href{https://fosstodon.org/@zeileis}{\tt @zeileis@fosstodon.org}
+
+\smallskip
+
+\textbf{X/Twitter:} \href{https://twitter.com/AchimZeileis}{\tt @AchimZeileis}
+
+\smallskip
+
+\textbf{Web:} \url{https://www.zeileis.org/}
+
+\end{frame}
+
+\end{document}
