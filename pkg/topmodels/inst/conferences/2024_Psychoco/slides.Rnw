@@ -656,6 +656,11 @@ la_brx <- betareg(invest ~ grade * (arrangement + age) + male | arrangement + ma
 \item Extended-support beta mixture regression (with point masses for $0$ and $1$).
 \end{itemize}
 
+\bigskip
+\pause
+
+\textbf{Goodness of fit:} Similar fitted means but rather different distributions.
+
 \end{frame}
 
 
