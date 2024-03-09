@@ -19,19 +19,21 @@
 \alias{crps.Poisson}
 \alias{crps.StudentsT}
 \alias{crps.Uniform}
+\alias{crps.XBetaX}
 \alias{crps.GAMLSS}
 \alias{crps.BAMLSS}
-\title{Methods for Evaluating the CRPS of Probability Distributions}
+\title{Method for Numerically Evaluating the CRPS of Probability Distributions}
 \usage{
 crps.distribution(
   y,
   x,
   drop = TRUE,
   elementwise = NULL,
-  gridsize = 500,
-  batchsize = 10000,
+  gridsize = 500L,
+  batchsize = 10000L,
   applyfun = NULL,
   cores = NULL,
+  method = NULL,
   ...
 )
 
@@ -69,6 +71,8 @@ crps.StudentsT(y, x, drop = TRUE, elementwise = NULL, ...)
 
 crps.Uniform(y, x, drop = TRUE, elementwise = NULL, ...)
 
+crps.XBetaX(y, x, drop = TRUE, elementwise = NULL, method = "cdf", ...)
+
 crps.GAMLSS(y, x, drop = TRUE, elementwise = NULL, ...)
 
 crps.BAMLSS(y, x, drop = TRUE, elementwise = NULL, ...)
@@ -105,6 +109,13 @@ function unless the \code{cores} argument is specified (see below).}
 except on Windows where \code{\link[parallel]{parLapply}} with
 \code{makeCluster(cores)} is used.}
 
+\item{method}{character. Should the grid be set up on the observation scale
+and \code{method = "cdf"} be used to compute the corresponding probabilities?
+Or should the grid be set up on the probability scale and \code{method = "quantile"}
+be used to compute the corresponding observations? By default, \code{"cdf"}
+is used for discrete observations whose range is smaller than the \code{gridsize}
+and \code{"quantile"} otherwise.}
+
 \item{...}{currently not used.}
 }
 \value{
@@ -114,8 +125,8 @@ In case of a single distribution object, either a numeric
   object, a matrix with \code{length(x)} columns containing all possible combinations.
 }
 \description{
-Methods to the \code{\link[scoringRules]{crps}} generic function from
-the \pkg{scoringRules} package for evaluating the (continuous) ranked probability
+Method to the \code{\link[scoringRules]{crps}} generic function from
+the \pkg{scoringRules} package for numerically evaluating the (continuous) ranked probability
 score (CRPS) of any probability \pkg{distributions3} object.
 }
 \details{
@@ -131,21 +142,28 @@ objects leverages \code{\link[scoringRules]{crps_norm}} rather than relying on
 numeric integration.
 
 The general method for any \code{distribution} object uses the following strategy
-for numerical CRPS computation. It distinguishes distributions whose
-entire support is continuous or whose entire support is discrete, or mixed
-discrete-continuous distribution using \code{\link[distributions3]{is_continuous}}
-and \code{\link[distributions3]{is_discrete}}, respectively.
+for numerical CRPS computation. By default (if the \code{method} argument is \code{NULL}),
+it distinguishes distributions whose entire support is continuous, or whose entire
+support is discrete, or mixed discrete-continuous distribution using
+\code{\link[distributions3]{is_continuous}} and \code{\link[distributions3]{is_discrete}},
+respectively.
 
 For continuous and mixed distributions, an equidistant grid of \code{gridsize + 5}
 probabilities is drawn for which the corresponding \code{quantile}s for each
 distribution \code{y} are calculated (including the observation \code{x}). The
-calculation of the CRPS then uses a trapezodial approximation for the
-numeric integration.  For discrete distributions \code{gridsize} equidistant quantiles are
-drawn and the corresponding probabilities from the \code{cdf} are calculated for
-each distribution \code{y} (including the observation \code{x}) and the CRPS calculated using
-numeric integration.  If the \code{gridsize} is not sufficient to cover
-the required range, the method falls back to the procedure used for
-continuous distributions to approximate the CRPS.
+calculation of the CRPS then uses a trapezoidal approximation for the
+numeric integration.  For discrete distributions, \code{gridsize} equidistant quantiles
+(in steps of 1) are drawn and the corresponding probabilities from the \code{cdf}
+are calculated for each distribution \code{y} (including the observation \code{x})
+and the CRPS calculated using numeric integration.  If the \code{gridsize} in steps of 1 is not
+sufficient to cover the required range, the method falls back to the procedure used for
+continuous and mixed distributions to approximate the CRPS.
+
+If the \code{method} argument is set to either \code{"cdf"} or \code{"quantile"},
+then the specific strategy for setting up the grid of observations and corresponding
+probabilities can be enforced. This can be useful if for a certain distribution
+class, only a \code{cdf} or only a \code{quantile} method is available or only
+one of them is numerically stable or computationally efficient etc.
 
 The numeric approximation requires to set up a matrix of dimension
 \code{length(y) * (gridsize + 5)} (or \code{length(y) * (gridsize + 1)}) which may be very

@@ -23,7 +23,7 @@ if (require("crch")) {
 
     expect_true(inherits(d, "distribution"),
                 info = "Checking return type of CensoredNormal(4, 2, left = 0)")
-    expect_silent(crps <- topmodels:::crps.distribution(d, x),
+    expect_silent(crps <- crps.distribution(d, x),
                 info = "Silent execution of crps.distribution(d, x)")
     expect_true(is.vector(crps),                              info = "Return is vector")
     expect_true(is.double(crps),                              info = "Return is double")
@@ -31,7 +31,7 @@ if (require("crch")) {
     expect_equal(crps_analyt, crps, tol = 0.005,              info = "Result within tolerance")
 
     # Drop = FALSE
-    expect_silent(crpsM <- topmodels:::crps.distribution(d, x, drop = F),
+    expect_silent(crpsM <- crps.distribution(d, x, drop = FALSE),
                   info = "Silent execution of crps(d, x, drop = FALSE)")
     expect_true(is.matrix(crpsM),                             info = "Return is matrix")
     expect_true(is.double(crpsM),                             info = "Return is double")
@@ -55,7 +55,7 @@ if (require("crch")) {
     expect_true(inherits(d, "distribution"),                  info = "Checking return type of Normal(mu, sd)")
     crps_analyt <- crps(d, x)                                 # Ground truth
 
-    expect_silent(crps <- topmodels:::crps.distribution(d, x),
+    expect_silent(crps <- crps.distribution(d, x),
                   info = "Silent execution of crps.distribution(d, x)")
     expect_true(is.vector(crps),                              info = "Return is vector")
     expect_true(is.double(crps),                              info = "Return is double")

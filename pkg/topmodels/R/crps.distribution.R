@@ -1,7 +1,7 @@
-#' Methods for Evaluating the CRPS of Probability Distributions
+#' Method for Numerically Evaluating the CRPS of Probability Distributions
 #'
-#' Methods to the \code{\link[scoringRules]{crps}} generic function from
-#' the \pkg{scoringRules} package for evaluating the (continuous) ranked probability
+#' Method to the \code{\link[scoringRules]{crps}} generic function from
+#' the \pkg{scoringRules} package for numerically evaluating the (continuous) ranked probability
 #' score (CRPS) of any probability \pkg{distributions3} object.
 #'
 #' The (continuous) ranked probability score (CRPS) for (univariate) probability
@@ -16,21 +16,28 @@
 #' numeric integration.
 #'
 #' The general method for any \code{distribution} object uses the following strategy
-#' for numerical CRPS computation. It distinguishes distributions whose
-#' entire support is continuous or whose entire support is discrete, or mixed
-#' discrete-continuous distribution using \code{\link[distributions3]{is_continuous}}
-#' and \code{\link[distributions3]{is_discrete}}, respectively.
+#' for numerical CRPS computation. By default (if the \code{method} argument is \code{NULL}),
+#' it distinguishes distributions whose entire support is continuous, or whose entire
+#' support is discrete, or mixed discrete-continuous distribution using
+#' \code{\link[distributions3]{is_continuous}} and \code{\link[distributions3]{is_discrete}},
+#' respectively.
 #'
 #' For continuous and mixed distributions, an equidistant grid of \code{gridsize + 5}
 #' probabilities is drawn for which the corresponding \code{quantile}s for each
 #' distribution \code{y} are calculated (including the observation \code{x}). The
-#' calculation of the CRPS then uses a trapezodial approximation for the
-#' numeric integration.  For discrete distributions \code{gridsize} equidistant quantiles are
-#' drawn and the corresponding probabilities from the \code{cdf} are calculated for
-#' each distribution \code{y} (including the observation \code{x}) and the CRPS calculated using
-#' numeric integration.  If the \code{gridsize} is not sufficient to cover
-#' the required range, the method falls back to the procedure used for
-#' continuous distributions to approximate the CRPS.
+#' calculation of the CRPS then uses a trapezoidal approximation for the
+#' numeric integration.  For discrete distributions, \code{gridsize} equidistant quantiles
+#' (in steps of 1) are drawn and the corresponding probabilities from the \code{cdf}
+#' are calculated for each distribution \code{y} (including the observation \code{x})
+#' and the CRPS calculated using numeric integration.  If the \code{gridsize} in steps of 1 is not
+#' sufficient to cover the required range, the method falls back to the procedure used for
+#' continuous and mixed distributions to approximate the CRPS.
+#'
+#' If the \code{method} argument is set to either \code{"cdf"} or \code{"quantile"},
+#' then the specific strategy for setting up the grid of observations and corresponding
+#' probabilities can be enforced. This can be useful if for a certain distribution
+#' class, only a \code{cdf} or only a \code{quantile} method is available or only
+#' one of them is numerically stable or computationally efficient etc.
 #'
 #' The numeric approximation requires to set up a matrix of dimension
 #' \code{length(y) * (gridsize + 5)} (or \code{length(y) * (gridsize + 1)}) which may be very
@@ -76,6 +83,12 @@
 #'   \code{\link[parallel]{mclapply}} with the desired number of \code{cores},
 #'   except on Windows where \code{\link[parallel]{parLapply}} with
 #'   \code{makeCluster(cores)} is used.
+#' @param method character. Should the grid be set up on the observation scale
+#'   and \code{method = "cdf"} be used to compute the corresponding probabilities?
+#'   Or should the grid be set up on the probability scale and \code{method = "quantile"}
+#'   be used to compute the corresponding observations? By default, \code{"cdf"}
+#'   is used for discrete observations whose range is smaller than the \code{gridsize}
+#'   and \code{"quantile"} otherwise.
 #' @param ... currently not used.
 #'
 #' @return In case of a single distribution object, either a numeric
@@ -112,7 +125,7 @@
 #' @useDynLib topmodels, .registration = TRUE
 #' @export crps.distribution
 #' @exportS3Method scoringRules::crps distribution
-crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 500, batchsize = 1e4, applyfun = NULL, cores = NULL, ...) {
+crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 500L, batchsize = 1e4L, applyfun = NULL, cores = NULL, method = NULL, ...) {
   ## essentially follow apply_dpqr() but try to exploit specific structure of CRPS
 
   ## sanity checks
@@ -179,7 +192,7 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
   ## handle zero-length distribution vector
   if (n == 0L) return(matrix(numeric(0L), nrow = 0L, ncol = k, dimnames = list(NULL, cnam)))
 
-  ## Define apply functions for parallelization; code by Achim Zeileis
+  ## define apply functions for parallelization
   if(is.null(applyfun)) {
     applyfun <- if(is.null(cores)) {
       lapply
@@ -204,11 +217,21 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
                 })(cores, length(y), batchsize)
   batch_id <- if (batch_n == 1) rep(1L, length(y)) else rep(seq_len(batch_n), each = ceiling(length(y) / batch_n))[seq_along(y)]
 
-  ## calling C function for numeric CRPS calculation
+  ## selecting default method
+  xrange <- range(support(y), na.rm = TRUE)
+  if(!is.finite(xrange[1L])) xrange[1L] <- min(quantile(y, 0.0001), na.rm = TRUE)
+  if(!is.finite(xrange[2L])) xrange[2L] <- max(quantile(y, 0.9999), na.rm = TRUE)
   discrete <- all(distributions3::is_discrete(y))
+  if(is.null(method)) {
+    method <- if(discrete && (diff(xrange) <= gridsize)) "cdf" else "quantile"
+  }
+  ## TODO(R): Split data in discrete case; using "quantile" approximation only where
+  ##          xrange exceeds gridsize but use the more accurate "cdf" approximation
+  ##          for the others?
 
   ## Special approach for objects of class 'Empirical' where all
   ## observations will be used as quantiles to be evaluated.
+  ## FIXME: Move this to crps.Empirical() ??
   if (inherits(y, "Empirical")) {
 
     ## Not elementwise: Same observation(s) `x` for all distributions `y`
@@ -243,19 +266,14 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
     }
   }
 
-  ## If all distributions are discrete and not 'Empirical'): Calculate required grid size.
-  ## If this exceeds `m` continuous approximation will be used.
-  ## TODO(R): Split data; use approximation only where grid exceeds gridsize but use
-  ##          the discrete (more accurate) approximation for the others?
-  if (discrete && !inherits(y, "Empirical")) {
-    xrange <- pmin(range(quantile(y, c(0.001, 0.999)), na.rm = TRUE), range(support(y)))
-    ## If grid size larger gridsize; set `discrete = FALSE` and continue; fallback to discrete case
-    if (diff(xrange) > gridsize) {
-        discrete <- FALSE ## Falling back to continuous mode
-        warning("grid size too large; falling back to continuous CRPS approximation")
-    } else {
+  ## cdf method: set up observations and compute probabilities via cdf()
+  if ((method == "cdf") && !inherits(y, "Empirical")) {
       ## Drawing one set of quantiles; calculate probabilities for all distributions
-      q <- seq(xrange[1], xrange[2] + 1, by = 1.0)
+      q <- if(discrete && (diff(xrange) <= gridsize)) {
+        seq(xrange[1L], xrange[2L] + 1, by = 1.0)
+      } else {
+        seq(xrange[1L], xrange[2L], length.out = gridsize)
+      }
       ## Not elementwise: Same observation(s) `x` for all distributions `y`
       if (isFALSE(elementwise)) {
         ## Scoping `batch_id`, `y`, `x`, `q`
@@ -282,13 +300,12 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
         }
         rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
       }
-    }
   }
 
-  ## Continuous mode
-  if (!discrete && !inherits(y, "Empirical")) {
+  ## quantile method: set up probabilities and compute observations via quantile()
+  if ((method == "quantile") && !inherits(y, "Empirical")) {
     ## Drawing one set of probabilities; calculate quantiles for all distributions
-    p <- c(0.001, 0.01, 0.1, 1:(gridsize-1), gridsize - c(0.1, 0.01, 0.001)) / gridsize
+    p <- c(0.001, 0.01, 0.1, 1L:(gridsize - 1L), gridsize - c(0.1, 0.01, 0.001)) / gridsize
     ## Not elementwise: Same observation(s) `x` for all distributions `y`
     if (isFALSE(elementwise)) {
         ## Scoping `batch_id`, `y`, `x`, `p`
@@ -484,6 +501,12 @@ crps.Uniform <- function(y, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("scoringRules"))
   FUN <- function(at, d) scoringRules::crps_unif(y = at, min = d$a, max = d$b)
   distributions3::apply_dpqr(d = y, FUN = FUN, at = x, type = "crps", drop = drop, elementwise = elementwise)
+}
+
+#' @rdname crps.distribution
+#' @exportS3Method scoringRules::crps XBetaX
+crps.XBetaX <- function(y, x, drop = TRUE, elementwise = NULL, method = "cdf", ...) {
+  crps.distribution(y = y, x = x, drop = drop, elementwise = elementwise, method = method, ...)
 }
 
 #' @rdname crps.distribution

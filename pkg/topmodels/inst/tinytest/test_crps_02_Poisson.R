@@ -19,15 +19,15 @@ expect_silent(d <- Poisson(22.5),                          info = "Setting up Po
 expect_inherits(d, "distribution",                         info = "Checking return type of Poisson(22.5)(")
 crps_analyt <- crps(d, x)                                  # Ground truth
 
-expect_silent(crps <- topmodels:::crps.distribution(d, x),
+expect_silent(crps <- crps.distribution(d, x),
               info = "Silent execution of crps.distribution(d, x)")
 expect_true(is.vector(crps),                               info = "Return is vector")
 expect_true(is.double(crps),                               info = "Return is double")
 expect_identical(length(crps), length(x),                  info = "Matrix of length(x)")
 expect_equal(crps_analyt, crps, tol = 0.005,               info = "Result within tolerance")
 
-# Drop = FALSE
-expect_silent(crpsM <- topmodels:::crps.distribution(d, x, drop = F),
+# drop = FALSE
+expect_silent(crpsM <- crps.distribution(d, x, drop = FALSE),
               info = "Silent execution of crps(d, x, drop = FALSE)")
 expect_true(is.matrix(crpsM),                              info = "Return is matrix")
 expect_true(is.double(crpsM),                              info = "Return is double")
@@ -47,7 +47,7 @@ expect_silent(d <- Poisson(lambda),                        info = "Setting up Po
 expect_inherits(d, "distribution",                         info = "Checking return type of Poisson(lambda)")
 crps_analyt <- crps(d, x)                                  # Ground truth
 
-expect_silent(crps <- topmodels:::crps.distribution(d, x),
+expect_silent(crps <- crps.distribution(d, x),
               info = "Silent execution of crps.distribution(d, x)")
 expect_true(is.vector(crps),                               info = "Return is vector")
 expect_true(is.double(crps),                               info = "Return is double")
@@ -63,11 +63,13 @@ set.seed(1234)
 
 expect_silent(d <- Poisson(c(1:2, 1000)),                  info = "Setting up Poisson(c(1:2, 1000))")
 expect_inherits(d, "distribution",                         info = "Checking return type of Poisson(c(1:2, 10000))")
-crps_analyt <- crps(d, 1:2)                   # Ground truth
+crps_analyt <- crps(d, 1:2)                                # Ground truth
 
-expect_warning(crps <- topmodels:::crps.distribution(d, 1:2),
-               pattern = "^grid size too large; falling back to continuous CRPS approximation$",
-               info = "Show fallback warning")
+## expect_warning(crps <- crps.distribution(d, 1:2),
+##                pattern = "^grid size too large; falling back to continuous CRPS approximation$",
+##                info = "Show fallback warning")
+expect_silent(crps <- crps.distribution(d, 1:2),
+              info = "Silent execution of crps.distribution(d, 1:2)")
 expect_inherits(crps, "matrix",                            info = "Return is matrix")
 expect_true(is.double(crps),                               info = "Return is double")
 expect_identical(dim(crps), dim(crps_analyt),              info = "Matrix of dimension (2 x 3)")
