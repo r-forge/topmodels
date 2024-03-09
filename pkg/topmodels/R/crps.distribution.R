@@ -279,9 +279,9 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
         ## Scoping `batch_id`, `y`, `x`, `q`
         batch_fn <- function(i) {
             idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
-            p    <- cdf(y[idx], q)       ## Calculating quantiles at `q` for `y[idx]`
+            p    <- cdf(y[idx], q, elementwise = FALSE)      ## Calculating quantiles at `q` for `y[idx]`
             fn <- function(z) {
-                px   <- cdf(y[idx], z)   ## Probabilities at `y[idx](z)`
+                px   <- cdf(y[idx], z, elementwise = FALSE)  ## Probabilities at `y[idx](z)`
                 .Call("c_CRPS_numeric", as.numeric(z), px, p, q, FALSE, PACKAGE = "topmodels")
             }
             return(do.call(cbind, lapply(x, fn)))
@@ -294,8 +294,8 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
         ## Scoping `batch_id`, `y`, `x`, `q`
         batch_fn <- function(i) {
             idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
-            p    <- cdf(y[idx], q)       ## Calculating quantiles at `p` for `y[idx]`
-            px   <- cdf(y[idx], x[idx])  ## Probability at `x[idx]`
+            p    <- cdf(y[idx], q, elementwise = FALSE)      ## Calculating quantiles at `p` for `y[idx]`
+            px   <- cdf(y[idx], x[idx], elementwise = TRUE)  ## Probability at `x[idx]`
             .Call("c_CRPS_numeric", as.numeric(x[idx]), px, p, q, FALSE, PACKAGE = "topmodels")
         }
         rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
@@ -311,9 +311,9 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
         ## Scoping `batch_id`, `y`, `x`, `p`
         batch_fn <- function(i) {
             idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
-            q    <- quantile(y[idx], p)  ## Calculating quantiles at `p` for `y[idx]`
+            q    <- quantile(y[idx], p, elementwise = FALSE) ## Calculating quantiles at `p` for `y[idx]`
             fn <- function(z) {
-                px   <- cdf(y[idx], z)   ## Probabilities at `y[idx](z)`
+                px   <- cdf(y[idx], z, elementwise = FALSE)  ## Probabilities at `y[idx](z)`
                 .Call("c_CRPS_numeric", as.numeric(z), px, p, q, TRUE, PACKAGE = "topmodels")
             }
             return(do.call(cbind, lapply(x, fn)))
@@ -326,8 +326,8 @@ crps.distribution <- function(y, x, drop = TRUE, elementwise = NULL, gridsize = 
         ## Scoping `batch_id`, `y`, `x`, `p`
         batch_fn <- function(i) {
             idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
-            q    <- quantile(y[idx], p)  ## Calculating quantiles at `p` for `y[idx]`
-            px   <- cdf(y[idx], x[idx])  ## Probabilities at `y[idx](x[idx])`
+            q    <- quantile(y[idx], p, elementwise = FALSE) ## Calculating quantiles at `p` for `y[idx]`
+            px   <- cdf(y[idx], x[idx], elementwise = TRUE)  ## Probabilities at `y[idx](x[idx])`
             .Call("c_CRPS_numeric", as.numeric(x[idx]), px, p, q, TRUE, PACKAGE = "topmodels")
         }
         rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
