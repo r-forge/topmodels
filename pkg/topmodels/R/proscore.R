@@ -6,8 +6,9 @@
 #' The function \code{proscore} provides a unified framework for scoring
 #' probabilistic forecasts (in-sample or out-of-sample). The following scores
 #' are currently available, using the following notation: \eqn{Y} is the predicted
-#' random variable with cumulative distribution function \eqn{F(y)} and probability
-#' density function \eqn{f(y)}. The actual observation is \eqn{y}.
+#' random variable with cumulative distribution function \eqn{F(\cdot)}{F(.)} and probability
+#' density function \eqn{f(\cdot)}{f(.)}. The corresponding expectation and variance are denoted
+#' by \eqn{E(Y)} and \eqn{V(Y)}. The actual observation is \eqn{y}.
 #'
 #' \bold{Log-likelihood:} Also known as log-score, logarithmic score, or log-density.
 #'
@@ -35,19 +36,25 @@
 #' \bold{Mean absolute error (MAE):}
 #'
 #' \deqn{
-#'   \left| E(Y) - y \right|
+#'   \left| y - E(Y) \right|
 #' }{
-#'   |E(Y) - y|
+#'   |y - E(Y)|
 #' }
-#'
-#' where \eqn{E(Y)} is the expectation of the predicted random variable \eqn{Y}.
 #'
 #' \bold{Mean squared error (MSE):}
 #'
 #' \deqn{
-#'   \left( E(Y) - y \right)^2
+#'   \left( y - E(Y) \right)^2
 #' }{
-#'   (E(Y) - y)^2
+#'   (y - E(Y))^2
+#' }
+#'
+#' \bold{Dawid-Sebastiani score (DSS):}
+#'
+#' \deqn{
+#'   \frac{\left( y - E(Y) \right)^2}{V(Y)} + \log(V(Y))
+#' }{
+#'   (y - E(Y))^2/V(Y) + log(V(Y))
 #' }
 #'
 #' Internally, the default \code{proscore} method first computes the fitted/predicted
@@ -70,8 +77,10 @@
 #' values in \code{newdata}.  The default is to employ \code{NA}.
 #' @param type character specifying the type of score to compute. Avaible types:
 #' \code{"loglikelihood"} (or equivalently \code{"logs"} or \code{"log_pdf"}),
-#' \code{"CRPS"} (or equivalently \code{"RPS"}), \code{"MAE"}, and \code{"MSE"}.
-#' Upper or lower case spellings can be used interchangably.
+#' \code{"CRPS"} (or equivalently \code{"RPS"}), \code{"MAE"}, \code{"MSE"},
+#' \code{"DSS"} (or equivalently \code{"Dawid-Sebastiani"}).
+#' Upper or lower case spellings can be used interchangably, hyphens or underscores
+#' can be included or omitted.
 #' @param drop logical. Should scores be returned in a data frame (default)
 #' or (if possible) dropped to a vector.
 #' @param aggregate logical or function to be used for aggregating scores across
@@ -96,13 +105,13 @@
 #' logLik(m)
 #'
 #' ## compute mean of all available scores
-#' proscore(m, type = c("LogS", "CRPS", "MAE", "MSE"), aggregate = TRUE)
+#' proscore(m, type = c("LogS", "CRPS", "MAE", "MSE", "DSS"), aggregate = TRUE)
 #' ## note that "LogS" and "loglik" above are both matched to using
 #' ## the log-likelihood but the user-supplied spelling is preserved
 #'
 #' ## prediction using a new data set (final of the tournament)
 #' final <- tail(FIFA2018, 2)
-#' proscore(m, newdata = final, type = c("LogLik", "CRPS", "MAE", "MSE"))
+#' proscore(m, newdata = final, type = c("LogLik", "CRPS", "MAE", "MSE", "DSS"))
 #'
 #' ## least-squares regression for speed and breaking distance of cars
 #' data("cars", package = "datasets")
@@ -130,13 +139,16 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
 {
   ## match type
   otype <- type
-  type <- sapply(tolower(type), match.arg, c(
-    "loglikelihood", "logs", "log_pdf",
+  type <- gsub("-|_", "", tolower(type))
+  type <- sapply(type, match.arg, c(
+    "loglikelihood", "logs", "logpdf",
     "crps", "rps",
     "mae",
-    "mse"))
-  if(any(type %in% c("logs", "log_pdf"))) type[type %in% c("logs", "log_pdf")] <- "loglikelihood"
+    "mse",
+    "dss", "dawidsebastiani"))
+  if(any(type %in% c("logs", "logpdf"))) type[type %in% c("logs", "logpdf")] <- "loglikelihood"
   if(any(type %in% c("rps"))) type[type %in% c("rps")] <- "crps"
+  if(any(type %in% c("dawidsebastiani"))) type[type %in% c("dawidsebastiani")] <- "dss"
   if(any(dup <- duplicated(type))) {
     otype <- otype[!dup]
     type <- type[!dup]
@@ -145,6 +157,7 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
   if("crps" %in% type) stopifnot(requireNamespace("scoringRules"))
 
   ## FIXME: how to handle 'size' in binomial family?
+
   ## extract probability distribution object
   pd <- if(is.null(newdata)) {
     distributions3::prodist(object)
@@ -158,9 +171,10 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
   ## evaluate type of proscore
   ps <- list()
   if("loglikelihood" %in% type) ps$loglikelihood <- distributions3::log_pdf(pd, y, drop = TRUE)
-  if("crps" %in% type) ps$crps <- scoringRules::crps(pd, y, drop = TRUE)
-  if("mae" %in% type) ps$mae <- abs(mean(pd, drop = TRUE) - y)
-  if("mse" %in% type) ps$mse <- (mean(pd, drop = TRUE) - y)^2
+  if("crps" %in% type) ps$crps <- drop(scoringRules::crps(pd, y))
+  if("mae" %in% type) ps$mae <- drop(abs(mean(pd) - y))
+  if("mse" %in% type) ps$mse <- drop((mean(pd) - y)^2)
+  if("dss" %in% type) ps$dss <- drop((mean(pd) - y)^2/variance(pd) + log(variance(pd)))
   ps <- ps[type]
 
   ## aggregate if desired

@@ -39,8 +39,10 @@ values in \code{newdata}.  The default is to employ \code{NA}.}
 
 \item{type}{character specifying the type of score to compute. Avaible types:
 \code{"loglikelihood"} (or equivalently \code{"logs"} or \code{"log_pdf"}),
-\code{"CRPS"} (or equivalently \code{"RPS"}), \code{"MAE"}, and \code{"MSE"}.
-Upper or lower case spellings can be used interchangably.}
+\code{"CRPS"} (or equivalently \code{"RPS"}), \code{"MAE"}, \code{"MSE"},
+\code{"DSS"} (or equivalently \code{"Dawid-Sebastiani"}).
+Upper or lower case spellings can be used interchangably, hyphens or underscores
+can be included or omitted.}
 
 \item{drop}{logical. Should scores be returned in a data frame (default)
 or (if possible) dropped to a vector.}
@@ -64,8 +66,9 @@ for fitted or predicted probability distributions from (regression) models.
 The function \code{proscore} provides a unified framework for scoring
 probabilistic forecasts (in-sample or out-of-sample). The following scores
 are currently available, using the following notation: \eqn{Y} is the predicted
-random variable with cumulative distribution function \eqn{F(y)} and probability
-density function \eqn{f(y)}. The actual observation is \eqn{y}.
+random variable with cumulative distribution function \eqn{F(\cdot)}{F(.)} and probability
+density function \eqn{f(\cdot)}{f(.)}. The corresponding expectation and variance are denoted
+by \eqn{E(Y)} and \eqn{V(Y)}. The actual observation is \eqn{y}.
 
 \bold{Log-likelihood:} Also known as log-score, logarithmic score, or log-density.
 
@@ -93,19 +96,25 @@ probabilities \eqn{F(x)} and the ideal step function for the actual observation 
 \bold{Mean absolute error (MAE):}
 
 \deqn{
-  \left| E(Y) - y \right|
+  \left| y - E(Y) \right|
 }{
-  |E(Y) - y|
+  |y - E(Y)|
 }
-
-where \eqn{E(Y)} is the expectation of the predicted random variable \eqn{Y}.
 
 \bold{Mean squared error (MSE):}
 
 \deqn{
-  \left( E(Y) - y \right)^2
+  \left( y - E(Y) \right)^2
 }{
-  (E(Y) - y)^2
+  (y - E(Y))^2
+}
+
+\bold{Dawid-Sebastiani score (DSS):}
+
+\deqn{
+  \frac{\left( y - E(Y) \right)^2}{V(Y)} + \log(V(Y))
+}{
+  (y - E(Y))^2/V(Y) + log(V(Y))
 }
 
 Internally, the default \code{proscore} method first computes the fitted/predicted
@@ -129,13 +138,13 @@ proscore(m, type = "loglik", aggregate = sum)
 logLik(m)
 
 ## compute mean of all available scores
-proscore(m, type = c("LogS", "CRPS", "MAE", "MSE"), aggregate = TRUE)
+proscore(m, type = c("LogS", "CRPS", "MAE", "MSE", "DSS"), aggregate = TRUE)
 ## note that "LogS" and "loglik" above are both matched to using
 ## the log-likelihood but the user-supplied spelling is preserved
 
 ## prediction using a new data set (final of the tournament)
 final <- tail(FIFA2018, 2)
-proscore(m, newdata = final, type = c("LogLik", "CRPS", "MAE", "MSE"))
+proscore(m, newdata = final, type = c("LogLik", "CRPS", "MAE", "MSE", "DSS"))
 
 ## least-squares regression for speed and breaking distance of cars
 data("cars", package = "datasets")
