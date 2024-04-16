@@ -232,13 +232,23 @@ rootogram.default <- function(
   # -------------------------------------------------------------------
   # PREPARE DATA
   # -------------------------------------------------------------------
-  ## get data
+  ## get data and weights
   y <- newresponse(object, newdata = newdata, na.action = na.pass)
+  w <- model.weights(y)
+  y[["(weights)"]] <- NULL
+  if (ncol(y) > 1L) stop("multivariate responses not supported yet")
+  y <- y[[1L]]
 
-  ## get weights
+  ## handle frequency weights in the future?
   frequency_weights <- FALSE
-  w <- attr(y, "weights")
-  yw <- if(frequency_weights) rep.int(y, w) else y[w > 0]
+  if (is.null(w)) {
+    yw <- y
+    w <- rep.int(1L, length(y))
+  } else if(frequency_weights) {
+    yw <- rep.int(y, w)
+  } else {
+    yw <- y[w > 0]
+  }
 
   ## Getting distributions (required method)
   tmp_prodist <- prodist(object)

@@ -207,7 +207,11 @@ reliagram.default <- function(object,
   # PREPARE DATA
   # -------------------------------------------------------------------
   ## get data and threshold(s)
-  y <- newresponse(object, newdata = newdata)
+  y <- newresponse(object, newdata = newdata, na.action = na.pass)
+  y[["(weights)"]] <- NULL
+  if (ncol(y) > 1L) stop("multivariate responses not supported yet")
+  y <- y[[1L]]
+
   if (is.null(thresholds)) {
     thresholds <- quantile(y, probs = quantiles, na.rm = TRUE)
     thresholds <- as.numeric(thresholds)
@@ -1284,23 +1288,3 @@ add_hist_reliagram <- function(n,
 
   text(xpos + width / 2, ypos + 1.1 * height, font = 2, cex = 0.8, main)
 }
-
-## FIXME: (ML) Idea to setup up a crch specific reliagram:
-##   * Set threshold to censor point
-##   * Only programming outline
-# reliagram.crch <- function(object,
-#                           newdata = NULL,
-#                           breaks = seq(0, 1, by = 0.1),
-#                           thresholds = NULL,
-#                           ...) {
-#   if((missing(newdata) || is.null(newdata)) && !is.null(object$y)) {
-#     y <- object$y
-#   } else {
-#     y <- newresponse(object, newdata = newdata)
-#   }
-#
-#   if(is.null(thresholds)) thresholds <- object$left
-#
-#   ## call reliagram
-#   reliagram(object, breaks = breaks, thresholds = thresholds, y = y, ...)
-# }

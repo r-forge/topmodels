@@ -125,7 +125,10 @@ pitresiduals.default <- function(object,
     ## FIXME: (ML) Implement correct NA handling: 
     ## * In newresponse() for y
     ## * Which is used for at w/i procast()
-    y <- newresponse(object, newdata = newdata)
+    y <- newresponse(object, newdata = newdata, na.action = na.action)
+    y[["(weights)"]] <- NULL
+    if (ncol(y) > 1L) stop("multivariate responses not supported yet")
+    y <- y[[1L]]
   
     ## to keep the attributes
     ## FIXME: (ML) in countreg its `at = cbind(y - 1L, y)`, why the difference?

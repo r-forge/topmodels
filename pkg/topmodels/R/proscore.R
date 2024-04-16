@@ -167,6 +167,9 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
   
   ## extract newresponse
   y <- newresponse(object, newdata = newdata, na.action = na.action)
+  y[["(weights)"]] <- NULL
+  if (ncol(y) > 1L) stop("multivariate responses not supported yet")
+  y <- y[[1L]]
   
   ## evaluate type of proscore
   ps <- list()

@@ -1,12 +1,22 @@
 #' Extract Observed Responses from New Data
 #' 
-#' Generic function and methods for computing (randomized) quantile residuals.
+#' Generic function and methods for extracting response variables from new data
+#' based on fitted model objects.
 #' 
-#' This is a convenience function to accompany \code{\link{procast}}, e.g., for
-#' computing predicted probabilities at the observed responses (also known as
-#' the probability integral transform, PIT).
+#' \code{newresponse} is a convenience function that supports functions like
+#' \code{\link{proscore}} or \code{\link{pitresiduals}} which assess
+#' discrepancies between predictions/forecasts on new data and the corresponding
+#' observed response variables.
+#'
+#' The function takes an approach that is similar to many \code{\link[stats]{predict}}
+#' methods which rebuild the \code{\link[stats]{model.frame}} after dropping the
+#' response from the \code{\link[stats]{terms}} of a model object. However, here
+#' only the response variable is preserved and all explanatory variables are dropped.
+#' Missing values values are typically preserved (i.e., using \code{\link[stats]{na.pass}}).
+#'
+#' If the new \code{model.frame} contains a variable \code{"(weights)"},
+#' it is preserved along with the response variable(s).
 #' 
-#' @aliases newresponse newresponse.default newresponse.glm
 #' @param object a fitted model object. For the \code{default} method this
 #' needs to needs to be \code{formula}-based so that
 #' \code{\link[stats]{model.frame}} can be used to extract the response from
@@ -14,17 +24,29 @@
 #' be used to set up the response on \code{newdata}.
 #' @param newdata optionally, a data frame in which to look for variables with
 #' which to predict. If omitted, the original observations are used.
-#' @param na.action function determining what should be done with missing
-#' values in \code{newdata}.  The default is to employ \code{NA}.
-#' @param \dots further parameters passed to methods.
-#' @return A vector of new responses.
-#' @seealso \code{\link[stats]{terms}}, \code{\link[stats]{model.frame}}
-#' @keywords regression
-#' @examples
+#' @param na.action function determining how to handle missing
+#' values in \code{newdata}, by default these are preserved.
+#' @param \dots further arguments passed to methods.
+#' @param initialize logical. Should the response variable from \code{\link[stats]{glm}}
+#' objects be initialized using the corresponding expression from the \code{family}?
+#' If \code{NULL} (the default), the initialization is only used for \code{\link[stats]{binomial}}
+#' and \code{\link[stats]{quasibinomial}} families.
 #' 
-#' ## linear regression models (homoscedastic Gaussian response)
+#' @return A \code{data.frame} (\code{model.frame}) containing the response variable
+#' (and optionally a variable with \code{"(weights)"}).
+#' 
+#' @seealso \code{\link[stats]{terms}}, \code{\link[stats]{model.frame}}
+#' 
+#' @keywords regression
+#' 
+#' @examples
+#' ## linear regression model
 #' m <- lm(dist ~ speed, data = cars)
+#' 
+#' ## extract response variable on data used for model fitting 
 #' newresponse(m)
+#' 
+#' ## extract response variable on "new" data
 #' newresponse(m, newdata = cars[1:3, ])
 #' 
 #' @export
@@ -35,57 +57,29 @@ newresponse <- function(object, ...) {
 #' @rdname newresponse
 #' @method newresponse default
 #' @export
-newresponse.default <- function(object,
-                                newdata,
-                                na.action = na.pass,
-                                ...) {
-  # -------------------------------------------------------------------
-  # SET UP PRELIMINARIES
-  # -------------------------------------------------------------------
-  ## Sanity checks
-  ## * `newaction` w/i `model.frame()`
-  stopifnot(
-    "`object` must be a (model) OO object:\n  * you have supplied a base object" =
-      is.object(object),
-    !all(class(object) == "list"),
-    "`object` must be a (model) OO object:\n  * you have supplied an object of the single class `data.frame`" =
-      !all(class(object) == "data.frame"),
-    "`object` must be a (model) OO object:\n  * you have supplied a numeric" =
-      !is.numeric(object) # TODO: (ML) is this case already caught by `is.object()`?
-  )
-
-  # -------------------------------------------------------------------
-  # PREPARE RESPONSE
-  # -------------------------------------------------------------------
-  ## Get model.frame
-  ## FIXME: (Z) Use expand.model.frame() instead of this hand-crafted code
+newresponse.default <- function(object, newdata, na.action = na.pass, ...) {
+  ## extract model.frame (after dropping explanatory variables)
   if (missing(newdata) || is.null(newdata)) {
-    mf <- model.frame(object)
+    mf <- model.frame(object, ...)
+    mt <- try(terms(mf), silent = TRUE)
+    if(inherits(mt, "try-error") || !inherits(mt, "terms")) mt <- try(terms(object), silent = TRUE)
+    if(inherits(mt, "try-error") || !inherits(mt, "terms")) stop("terms() cannot be extracted from object")
   } else {
-    mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
+    mt <- try(terms(object), silent = TRUE)
+    if(inherits(mt, "try-error") || !inherits(mt, "terms")) stop("terms() cannot be extracted from object")
+    mt <- update(mt, . ~ 1)
+    mf <- model.frame(mt, newdata, na.action = na.action, ...)
+    mt <- terms(mf)
   }
 
-  ## Get weights
-  ## FIXME: (ML)
-  ## * Is this so correct and should we do that (needed for rootogram)?
-  ## * What about na.action? What should the weights be for NAs (compare implementation below)?
-  weights <- model.weights(mf)
-  if (is.null(weights)) weights <- rep(1, NROW(mf))
-
-  ## Get response
-  y <- model.response(mf)
-
-  ## Set weights to NA for NAs in response
-  weights[is.na(y)] <- NA
-
-  # -------------------------------------------------------------------
-  # RETURN
-  # -------------------------------------------------------------------
-  ## FIXME: (ML)
-  ## * Not very nice to return attributes here
-  ## * How to guess properly if response is continous?!
-  attr(y, "response_type") <- "continuous"
-  attr(y, "weights") <- weights
+  ## response column
+  y <- names(mf)[attr(mt, "response")]
+  
+  ## weights (if any)
+  if("(weights)" %in% names(mf)) y <- c(y, "(weights)")
+  
+  ## return model.frame subset
+  y <- mf[, y, drop = FALSE]
   return(y)
 }
 
@@ -93,98 +87,27 @@ newresponse.default <- function(object,
 #' @rdname newresponse
 #' @method newresponse glm
 #' @export
-newresponse.glm <- function(object,
-                            newdata,
-                            na.action = na.pass,
-                            ...) {
-  # -------------------------------------------------------------------
-  # SET UP PRELIMINARIES
-  # -------------------------------------------------------------------
-  ## Sanity checks
-  ## * `newaction` w/i `model.frame()`
-
-  # -------------------------------------------------------------------
-  # PREPARE RESPONSE
-  # -------------------------------------------------------------------
-  ## Get model.frame
-  ## FIXME: (Z) use expand.model.frame() instead of this hand-crafted code
-  if (missing(newdata) || is.null(newdata)) {
-    mf <- model.frame(object)
+newresponse.glm <- function(object, newdata, na.action = na.pass, initialize = NULL, ...) {
+  newy <- if (missing(newdata) || is.null(newdata)) {
+    newresponse.default(object, ...)
   } else {
-    mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
+    newresponse.default(object, newdata = newdata, na.action = na.action, ...)
   }
 
-  ## Get weights
-  ## FIXME: (ML)
-  ## * Is this so correct and should we do that (needed for rootogram)?
-  ## * What about na.action? What should the weights be for NAs (compare implementation below)?
-  weights <- model.weights(mf)
-  if (is.null(weights)) weights <- rep(1, NROW(mf))
-
-  ## Get response
-  y <- model.response(mf)
-
-  ## Set weights to NA for NAs in response
-  weights[is.na(y)] <- NA
-
-  ## Initialize family to get nobs and n
-  nobs <- nobs(object)
-  etastart <- NULL
-  mustart <- NULL
-  n <- NULL
-  eval(object$family$initialize)
-
-  ## Get response type
-  ## FIXME: (ML) This could/should be improved
-  if (object$family$family %in% "gaussian") {
-    response_type <- "continuous"
-  } else {
-    response_type <- "discrete"
+  ## initialize response via family
+  binom <- !is.null(object$family) && inherits(object$family, "family") && object$family$family %in% c("binomial", "quasibinomial")
+  if (is.null(initialize)) initialize <- binom
+  if (initialize) {
+    y <- newy[[1L]]
+    weights <- newy[["(weights)"]]
+    nobs <- nobs(object)
+    etastart <- NULL
+    mustart <- NULL
+    n <- NULL
+    eval(object$family$initialize)
+    if (binom) y <- round(y * n) ## FIXME: "correct" transformation?
+    newy[[1L]] <- y
   }
-
-  # -------------------------------------------------------------------
-  # RETURN
-  # -------------------------------------------------------------------
-  attr(y, "nobs") <- nobs
-  attr(y, "n") <- n
-  attr(y, "weights") <- weights
-  attr(y, "response_type") <- response_type
-  return(y)
-}
-
-#' @rdname newresponse
-#' @method newresponse gamlss
-#' @export
-newresponse.gamlss <- function(object, newdata = newdata, ...) {
-  stopifnot(requireNamespace("gamlss"))
-
-  ## Get model.frame
-  ## FIXME: (Z) Use expand.model.frame() instead of this hand-crafted code
-  if (missing(newdata) || is.null(newdata)) {
-    mf <- model.frame(object)
-  } else {
-    mf <- model.frame(update(terms(object), . ~ 1), newdata, na.action = na.action, ...)
-  }
-
-  ## Get weights
-  ## FIXME: (ML)
-  ## * Is this so correct and should we do that (needed for rootogram)?
-  ## * What about na.action? What should the weights be for NAs (compare implementation below)?
-  weights <- model.weights(mf)
-  if (is.null(weights)) weights <- rep(1, NROW(mf))
-
-  ## Get response
-  y <- gamlss::predictAll(object, newdata = newdata, ...)$y
-
-  ## Set weights to NA for NAs in response
-  weights[is.na(y)] <- NA
-
-  # -------------------------------------------------------------------
-  # RETURN
-  # -------------------------------------------------------------------
-  ## FIXME: (ML)
-  ## * Not very nice to return attributes here
-  ## * How to guess properly if response is continous?!
-  attr(y, "weights") <- weights
-  return(y)
+  
+  return(newy)
 }

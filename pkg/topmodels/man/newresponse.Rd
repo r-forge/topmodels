@@ -4,16 +4,13 @@
 \alias{newresponse}
 \alias{newresponse.default}
 \alias{newresponse.glm}
-\alias{newresponse.gamlss}
 \title{Extract Observed Responses from New Data}
 \usage{
 newresponse(object, ...)
 
 \method{newresponse}{default}(object, newdata, na.action = na.pass, ...)
 
-\method{newresponse}{glm}(object, newdata, na.action = na.pass, ...)
-
-\method{newresponse}{gamlss}(object, newdata = newdata, ...)
+\method{newresponse}{glm}(object, newdata, na.action = na.pass, initialize = NULL, ...)
 }
 \arguments{
 \item{object}{a fitted model object. For the \code{default} method this
@@ -22,30 +19,50 @@ needs to needs to be \code{formula}-based so that
 the original data the model was fitted to or \code{\link[stats]{terms}} can
 be used to set up the response on \code{newdata}.}
 
-\item{\dots}{further parameters passed to methods.}
+\item{\dots}{further arguments passed to methods.}
 
 \item{newdata}{optionally, a data frame in which to look for variables with
 which to predict. If omitted, the original observations are used.}
 
-\item{na.action}{function determining what should be done with missing
-values in \code{newdata}.  The default is to employ \code{NA}.}
+\item{na.action}{function determining how to handle missing
+values in \code{newdata}, by default these are preserved.}
+
+\item{initialize}{logical. Should the response variable from \code{\link[stats]{glm}}
+objects be initialized using the corresponding expression from the \code{family}?
+If \code{NULL} (the default), the initialization is only used for \code{\link[stats]{binomial}}
+and \code{\link[stats]{quasibinomial}} families.}
 }
 \value{
-A vector of new responses.
+A \code{data.frame} (\code{model.frame}) containing the response variable
+(and optionally a variable with \code{"(weights)"}).
 }
 \description{
-Generic function and methods for computing (randomized) quantile residuals.
+Generic function and methods for extracting response variables from new data
+based on fitted model objects.
 }
 \details{
-This is a convenience function to accompany \code{\link{procast}}, e.g., for
-computing predicted probabilities at the observed responses (also known as
-the probability integral transform, PIT).
+\code{newresponse} is a convenience function that supports functions like
+\code{\link{proscore}} or \code{\link{pitresiduals}} which assess
+discrepancies between predictions/forecasts on new data and the corresponding
+observed response variables.
+
+The function takes an approach that is similar to many \code{\link[stats]{predict}}
+methods which rebuild the \code{\link[stats]{model.frame}} after dropping the
+response from the \code{\link[stats]{terms}} of a model object. However, here
+only the response variable is preserved and all explanatory variables are dropped.
+Missing values values are typically preserved (i.e., using \code{\link[stats]{na.pass}}).
+
+If the new \code{model.frame} contains a variable \code{"(weights)"},
+it is preserved along with the response variable(s).
 }
 \examples{
-
-## linear regression models (homoscedastic Gaussian response)
+## linear regression model
 m <- lm(dist ~ speed, data = cars)
+
+## extract response variable on data used for model fitting 
 newresponse(m)
+
+## extract response variable on "new" data
 newresponse(m, newdata = cars[1:3, ])
 
 }
