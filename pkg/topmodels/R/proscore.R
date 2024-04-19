@@ -81,10 +81,10 @@
 #' \code{"DSS"} (or equivalently \code{"Dawid-Sebastiani"}).
 #' Upper or lower case spellings can be used interchangably, hyphens or underscores
 #' can be included or omitted.
-#' @param drop logical. Should scores be returned in a data frame (default)
-#' or (if possible) dropped to a vector.
 #' @param aggregate logical or function to be used for aggregating scores across
-#' observations. Setting \code{aggregate = TRUE} corresponds to using \code{mean}.
+#' observations. Setting \code{aggregate = TRUE} (the default) corresponds to using \code{mean}.
+#' @param drop logical. Should scores be returned in a data frame (default)
+#' or (if possible) dropped to a vector?
 #' @param \dots further parameters passed to the \code{aggregate} function (if any).
 #'
 #' @return Either a \code{data.frame} of scores (if \code{drop = FALSE}, default) or
@@ -128,25 +128,27 @@
 #' proscore(m, type = "loglikelihood", aggregate = sum)
 #' logLik(m)
 #' @export 
-proscore <- function(object, newdata = NULL, na.action = na.pass, type = "loglikelihood", drop = FALSE, aggregate = FALSE, ...) {
+proscore <- function(object, newdata = NULL, ...) {
   UseMethod("proscore")
 }
 
 #' @rdname proscore
 #' @importFrom distributions3 prodist log_pdf
 #' @export 
-proscore.default <- function(object, newdata = NULL, na.action = na.pass, type = "loglikelihood", drop = FALSE, aggregate = FALSE, ...)
+proscore.default <- function(object, newdata = NULL, na.action = na.pass, type = c("logs", "crps"), aggregate = TRUE, drop = FALSE, ...)
 {
   ## match type
   otype <- type
   type <- gsub("-|_", "", tolower(type))
   type <- sapply(type, match.arg, c(
-    "loglikelihood", "logs", "logpdf",
+    "logs", "logscore",
+    "loglikelihood", "logpdf",
     "crps", "rps",
     "mae",
     "mse",
     "dss", "dawidsebastiani"))
-  if(any(type %in% c("logs", "logpdf"))) type[type %in% c("logs", "logpdf")] <- "loglikelihood"
+  if(any(type %in% c("logscore"))) type[type %in% c("logscore")] <- "logs"
+  if(any(type %in% c("logpdf"))) type[type %in% c("logpdf")] <- "loglikelihood"
   if(any(type %in% c("rps"))) type[type %in% c("rps")] <- "crps"
   if(any(type %in% c("dawidsebastiani"))) type[type %in% c("dawidsebastiani")] <- "dss"
   if(any(dup <- duplicated(type))) {
@@ -160,9 +162,9 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
 
   ## extract probability distribution object
   pd <- if(is.null(newdata)) {
-    distributions3::prodist(object)
+    prodist(object)
   } else {
-    distributions3::prodist(object, newdata = newdata, na.action = na.action)
+    prodist(object, newdata = newdata, na.action = na.action)
   }
   
   ## extract newresponse
@@ -173,11 +175,17 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
   
   ## evaluate type of proscore
   ps <- list()
-  if("loglikelihood" %in% type) ps$loglikelihood <- distributions3::log_pdf(pd, y, drop = TRUE)
+  if("loglikelihood" %in% type) ps$logs <- -log_pdf(pd, y, drop = TRUE)
+  if("loglikelihood" %in% type) ps$loglikelihood <- log_pdf(pd, y, drop = TRUE)
   if("crps" %in% type) ps$crps <- drop(scoringRules::crps(pd, y))
   if("mae" %in% type) ps$mae <- drop(abs(mean(pd) - y))
   if("mse" %in% type) ps$mse <- drop((mean(pd) - y)^2)
   if("dss" %in% type) ps$dss <- drop((mean(pd) - y)^2/variance(pd) + log(variance(pd)))
+
+  ## FIXME: negative inteval-censored log-likelihood (NILL)  
+  ## delta <- 1
+  ## if("nill" %in% type) ps$nill <- log(delta) - log(cdf(pd, y + delta/2) - cdf(pd, y - delta/2))
+
   ps <- ps[type]
 
   ## aggregate if desired

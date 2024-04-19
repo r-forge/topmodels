@@ -5,23 +5,15 @@
 \alias{proscore.default}
 \title{Scoring Probabilistic Forecasts}
 \usage{
-proscore(
-  object,
-  newdata = NULL,
-  na.action = na.pass,
-  type = "loglikelihood",
-  drop = FALSE,
-  aggregate = FALSE,
-  ...
-)
+proscore(object, newdata = NULL, ...)
 
 \method{proscore}{default}(
   object,
   newdata = NULL,
   na.action = na.pass,
-  type = "loglikelihood",
+  type = c("logs", "crps"),
+  aggregate = TRUE,
   drop = FALSE,
-  aggregate = FALSE,
   ...
 )
 }
@@ -34,6 +26,8 @@ needs to have a \code{\link[distributions3]{prodist}} and a
 which to predict and from which to obtain the response variable.
 If omitted, the original observations are used.}
 
+\item{\dots}{further parameters passed to the \code{aggregate} function (if any).}
+
 \item{na.action}{function determining what should be done with missing
 values in \code{newdata}.  The default is to employ \code{NA}.}
 
@@ -44,13 +38,11 @@ values in \code{newdata}.  The default is to employ \code{NA}.}
 Upper or lower case spellings can be used interchangably, hyphens or underscores
 can be included or omitted.}
 
-\item{drop}{logical. Should scores be returned in a data frame (default)
-or (if possible) dropped to a vector.}
-
 \item{aggregate}{logical or function to be used for aggregating scores across
-observations. Setting \code{aggregate = TRUE} corresponds to using \code{mean}.}
+observations. Setting \code{aggregate = TRUE} (the default) corresponds to using \code{mean}.}
 
-\item{\dots}{further parameters passed to the \code{aggregate} function (if any).}
+\item{drop}{logical. Should scores be returned in a data frame (default)
+or (if possible) dropped to a vector?}
 }
 \value{
 Either a \code{data.frame} of scores (if \code{drop = FALSE}, default) or
