@@ -4,6 +4,7 @@
 \alias{newresponse}
 \alias{newresponse.default}
 \alias{newresponse.glm}
+\alias{newresponse.distribution}
 \title{Extract Observed Responses from New Data}
 \usage{
 newresponse(object, ...)
@@ -11,6 +12,8 @@ newresponse(object, ...)
 \method{newresponse}{default}(object, newdata, na.action = na.pass, ...)
 
 \method{newresponse}{glm}(object, newdata, na.action = na.pass, initialize = NULL, ...)
+
+\method{newresponse}{distribution}(object, newdata, ...)
 }
 \arguments{
 \item{object}{a fitted model object. For the \code{default} method this
@@ -46,7 +49,7 @@ based on fitted model objects.
 discrepancies between predictions/forecasts on new data and the corresponding
 observed response variables.
 
-The function takes an approach that is similar to many \code{\link[stats]{predict}}
+The default method takes an approach that is similar to many \code{\link[stats]{predict}}
 methods which rebuild the \code{\link[stats]{model.frame}} after dropping the
 response from the \code{\link[stats]{terms}} of a model object. However, here
 only the response variable is preserved and all explanatory variables are dropped.
@@ -54,6 +57,12 @@ Missing values values are typically preserved (i.e., using \code{\link[stats]{na
 
 If the new \code{model.frame} contains a variable \code{"(weights)"},
 it is preserved along with the response variable(s).
+
+A method for \code{distribution} objects is provided which expects that
+\code{newdata} is essentially already the corresponding new response.
+Thus, it needs to be a vector (or data frame) of the same length as \code{distribution}.
+If it is not a data frame, yet, it is transformed to one but no further
+modifications are made.
 }
 \examples{
 ## linear regression model

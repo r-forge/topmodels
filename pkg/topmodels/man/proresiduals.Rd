@@ -12,7 +12,7 @@ proresiduals(object, ...)
   newdata = NULL,
   type = c("quantile", "pit", "pearson", "response"),
   random = TRUE,
-  nsim = 1L,
+  prob = NULL,
   delta = NULL,
   ...
 )
@@ -30,14 +30,13 @@ which to predict. If omitted, the original observations are used.}
 residuals should be computed.}
 
 \item{random}{logical or numeric. Should random residuals be computed for \code{type = "quantile"}
- and \code{"pit"}? The default is \code{TRUE} and If set to \code{FALSE} mid-quantile
-residuals are computed. This corresponds to the median of the uniform distribution
-in every probability interval. Additionally, \code{random} can be set to (a vector of)
-quantile(s) that should be computed in each interval (with the median \code{random = 0.5}
-being equivalent to \code{random = FALSE}).}
+and \code{"pit"}? The default is \code{TRUE} and if set to \code{FALSE}, fixed
+quantiles given at the probabilities in \code{prob} are used (defaulting to mid-quantiles).
+If \code{random > 1}, then multiple random replications of quantile or PIT
+residuals are computed.}
 
-\item{nsim}{numeric. The number of simulated randomized quantile or PIT residuals
-per observation.}
+\item{prob}{numeric. Fixed probabilities for the quantile or PIT residuals when
+\code{random = FALSE}.}
 
 \item{delta}{numeric. The minimal difference to compute the range of
 proabilities corresponding to each observation according to get (randomized)
@@ -46,9 +45,9 @@ resonse divided by \code{5e-6} is used.}
 }
 \value{
 A vector or matrix of residuals. A matrix of residuals is returned
-if more than replication of quantile or PIT residuals is computed (for non-continuous
-data). This is the case if either \code{random = TRUE} and \code{nsim > 1} or
-if \code{random} is a numeric vector with more than one non-random quantile.
+if more than one replication of quantile or PIT residuals is computed (for non-continuous
+data), i.e., if either \code{random > 1} or \code{random = FALSE} and
+\code{length(prob) > 1}.
 }
 \description{
 Generic function and default method for (randomized) quantile residuals, PIT,
@@ -107,11 +106,11 @@ nd <- data.frame(goals = c(1, 1, 1), difference = c(-1, 0, 1))
 set.seed(0)
 proresiduals(m, newdata = nd, type = "quantile")
 set.seed(0)
-proresiduals(m, newdata = nd, type = "quantile", nsim = 5L)
+proresiduals(m, newdata = nd, type = "quantile", random = 5)
 
 ## underlying probability integral transform (PIT) without transformation to normal
 set.seed(0)
-proresiduals(m, newdata = nd, type = "pit", nsim = 5L)
+proresiduals(m, newdata = nd, type = "pit", random = 5)
 
 ## raw response residuals (observation - expected mean)
 proresiduals(m, newdata = nd, type = "response")
@@ -123,7 +122,7 @@ proresiduals(m, newdata = nd, type = "response")
 proresiduals(m, newdata = nd, type = "quantile", random = FALSE)
 
 ## minimum/median/maximum quantile residuals
-proresiduals(m, newdata = nd, type = "quantile", random = c(0, 0.5, 1))
+proresiduals(m, newdata = nd, type = "quantile", random = FALSE, prob = c(0, 0.5, 1))
 }
 \references{
 Dawid AP (1984).
