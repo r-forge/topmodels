@@ -8,7 +8,7 @@
 #' discrepancies between predictions/forecasts on new data and the corresponding
 #' observed response variables.
 #'
-#' The function takes an approach that is similar to many \code{\link[stats]{predict}}
+#' The default method takes an approach that is similar to many \code{\link[stats]{predict}}
 #' methods which rebuild the \code{\link[stats]{model.frame}} after dropping the
 #' response from the \code{\link[stats]{terms}} of a model object. However, here
 #' only the response variable is preserved and all explanatory variables are dropped.
@@ -16,6 +16,12 @@
 #'
 #' If the new \code{model.frame} contains a variable \code{"(weights)"},
 #' it is preserved along with the response variable(s).
+#' 
+#' A method for \code{distribution} objects is provided which expects that
+#' \code{newdata} is essentially already the corresponding new response.
+#' Thus, it needs to be a vector (or data frame) of the same length as \code{distribution}.
+#' If it is not a data frame, yet, it is transformed to one but no further
+#' modifications are made.
 #' 
 #' @param object a fitted model object. For the \code{default} method this
 #' needs to needs to be \code{formula}-based so that
@@ -110,4 +116,21 @@ newresponse.glm <- function(object, newdata, na.action = na.pass, initialize = N
   }
   
   return(newy)
+}
+
+#' @rdname newresponse
+#' @method newresponse distribution
+#' @export
+newresponse.distribution <- function(object, newdata, ...) {
+  if (missing(newdata) || is.null(newdata) || NROW(newdata) != length(object)) {
+    stop("for a distribution 'object' the 'newdata' needs to be a vector (or data frame) of the same length")
+  }
+  if (!is.data.frame(newdata)) {
+    newy <- data.frame(y = seq_along(object))
+    names(newy) <- deparse(substitute(newdata))
+    newy[[1L]] <- newdata
+    return(newy)
+  } else {
+    return(newdata)
+  }
 }
