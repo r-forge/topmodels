@@ -124,7 +124,7 @@
 #' proresiduals(m, newdata = nd, type = "quantile", random = FALSE, prob = c(0, 0.5, 1))
 #' 
 #' ## compute residuals by manually obtaining distribution and response
-#' proresiduals(procast(m, newdata = nd, drop = TRUE), nd$goals)
+#' ## proresiduals(procast(m, newdata = nd, drop = TRUE), nd$goals)
 
 #' @export
 proresiduals <- function(object, ...) {
@@ -153,11 +153,13 @@ proresiduals.default <- function(object, newdata = NULL, type = c("quantile", "p
   pd <- if (is.null(newdata)) prodist(object, ...) else prodist(object, newdata = newdata, ...)
 
   # number of random replications (if applicable)
+  if (!missing(random) && type %in% c("pearson", "response")) warning(sprintf("argument 'random' ignored for %s residuals", type))
   stopifnot(length(random) == 1L, is.logical(random) || is.numeric(random))
   nc <- as.integer(random)
   random <- nc > 0L
 
   ## quantile probabilities: sampled randomly vs. specified by prob
+  if (!missing(prob) && type %in% c("pearson", "response")) warning(sprintf("argument 'prob' ignored for %s residuals", type))
   if (random) {
     if (!is.null(prob)) warning(sprintf("argument 'prob' ignored for 'random' %s residuals", type))
     clab <- 1L:nc
@@ -179,8 +181,6 @@ proresiduals.default <- function(object, newdata = NULL, type = c("quantile", "p
 
   ## simple special cases: raw response or Pearson residuals
   if (type %in% c("pearson", "response")) {
-    if (!missing(random)) warning(sprintf("argument 'random' ignored for %s residuals", type))
-    if (!missing(prob)) warning(sprintf("argument 'prob' ignored for %s residuals", type))
     res <- y - mean(pd)
     if (type == "pearson") res <- res/sqrt(variance(pd))
     return(res)

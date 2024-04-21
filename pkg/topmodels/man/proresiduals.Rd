@@ -124,7 +124,7 @@ proresiduals(m, newdata = nd, type = "quantile", random = FALSE)
 proresiduals(m, newdata = nd, type = "quantile", random = FALSE, prob = c(0, 0.5, 1))
 
 ## compute residuals by manually obtaining distribution and response
-proresiduals(procast(m, newdata = nd, drop = TRUE), nd$goals)
+## proresiduals(procast(m, newdata = nd, drop = TRUE), nd$goals)
 }
 \references{
 Dawid AP (1984).
