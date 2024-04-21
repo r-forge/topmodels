@@ -44,23 +44,22 @@
 #' @param type character indicating whether quantile (default), PIT, Pearson, or raw response
 #'   residuals should be computed.
 #' @param random logical or numeric. Should random residuals be computed for \code{type = "quantile"}
-#'   and \code{"pit"}? The default is \code{TRUE} and If set to \code{FALSE} mid-quantile
-#'  residuals are computed. This corresponds to the median of the uniform distribution
-#'  in every probability interval. Additionally, \code{random} can be set to (a vector of)
-#'  quantile(s) that should be computed in each interval (with the median \code{random = 0.5}
-#'  being equivalent to \code{random = FALSE}).
-#' @param nsim numeric. The number of simulated randomized quantile or PIT residuals
-#' per observation.
+#'   and \code{"pit"}? The default is \code{TRUE} and if set to \code{FALSE}, fixed
+#'   quantiles given at the probabilities in \code{prob} are used (defaulting to mid-quantiles).
+#'   If \code{random > 1}, then multiple random replications of quantile or PIT
+#'   residuals are computed.
+#' @param prob numeric. Fixed probabilities for the quantile or PIT residuals when
+#'   \code{random = FALSE}.
 #' @param delta numeric. The minimal difference to compute the range of
-#' proabilities corresponding to each observation according to get (randomized)
-#' quantile residuals.  For \code{NULL}, the minimal observed difference in the
-#' resonse divided by \code{5e-6} is used.
+#'   proabilities corresponding to each observation according to get (randomized)
+#'   quantile residuals.  For \code{NULL}, the minimal observed difference in the
+#'   resonse divided by \code{5e-6} is used.
 #' @param \dots further parameters passed to methods.
 #'
 #' @return A vector or matrix of residuals. A matrix of residuals is returned
-#' if more than replication of quantile or PIT residuals is computed (for non-continuous
-#' data). This is the case if either \code{random = TRUE} and \code{nsim > 1} or
-#' if \code{random} is a numeric vector with more than one non-random quantile.
+#' if more than one replication of quantile or PIT residuals is computed (for non-continuous
+#' data), i.e., if either \code{random > 1} or \code{random = FALSE} and
+#' \code{length(prob) > 1}.
 #'
 #' @seealso \code{\link[stats]{qnorm}}, \code{\link{qqrplot}}
 #'
@@ -107,11 +106,11 @@
 #' set.seed(0)
 #' proresiduals(m, newdata = nd, type = "quantile")
 #' set.seed(0)
-#' proresiduals(m, newdata = nd, type = "quantile", nsim = 5L)
+#' proresiduals(m, newdata = nd, type = "quantile", random = 5)
 #' 
 #' ## underlying probability integral transform (PIT) without transformation to normal
 #' set.seed(0)
-#' proresiduals(m, newdata = nd, type = "pit", nsim = 5L)
+#' proresiduals(m, newdata = nd, type = "pit", random = 5)
 #' 
 #' ## raw response residuals (observation - expected mean)
 #' proresiduals(m, newdata = nd, type = "response")
@@ -123,7 +122,7 @@
 #' proresiduals(m, newdata = nd, type = "quantile", random = FALSE)
 #' 
 #' ## minimum/median/maximum quantile residuals
-#' proresiduals(m, newdata = nd, type = "quantile", random = c(0, 0.5, 1))
+#' proresiduals(m, newdata = nd, type = "quantile", random = FALSE, prob = c(0, 0.5, 1))
 
 #' @export
 proresiduals <- function(object, ...) {
@@ -135,11 +134,11 @@ proresiduals <- function(object, ...) {
 #' @importFrom distributions3 prodist cdf is_continuous
 #' @export
 proresiduals.default <- function(object, newdata = NULL, type = c("quantile", "pit", "pearson", "response"),
-  random = TRUE, nsim = 1L, delta = NULL, ...) {
+  random = TRUE, prob = NULL, delta = NULL, ...) {
 
   ## type of residuals
   type <- match.arg(tolower(as.character(type))[1L], c("quantile", "pit", "pearson", "response", "raw"))
-  if (type == "response") type <- "response"
+  if (type == "raw") type <- "response"
 
   ## extract observed response
   y <- newresponse(object, newdata = newdata, na.action = na.pass)
@@ -150,53 +149,48 @@ proresiduals.default <- function(object, newdata = NULL, type = c("quantile", "p
   ## predicted distribution
   pd <- if (is.null(newdata)) prodist(object, ...) else prodist(object, newdata = newdata, ...)
 
-  ## Pearson or raw response residuals
-  if (type %in% c("pearson", "response")) {
+  ## simple cases: raw response or Pearson residuals or continuous quantile or PIT residuals
+  if (type %in% c("pearson", "response") || all(is_continuous(pd))) {
     ## sanity checks
-    if (!missing(random)) warning(sprintf("argument 'random' ignored for %s residuals", type))
-    if (!missing(nsim)) warning(sprintf("argument 'nsim' ignored for %s residuals", type))
-    if (!missing(delta)) warning(sprintf("argument 'delta' ignored for %s residuals", type))
-  
-    ## raw response residuals
-    res <- y - mean(pd)
+    type2 <- if (type %in% c("quantile", "pit")) paste("continuous", type) else type
+    if (!missing(random)) warning(sprintf("argument 'random' ignored for %s residuals", type2))
+    if (!missing(prob)) warning(sprintf("argument 'prob' ignored for %s residuals", type2))
+    if (!missing(delta)) warning(sprintf("argument 'delta' ignored for %s residuals", type2))
 
-    ## standardize
-    if (type == "pearson") res <- res/sqrt(variance(pd))
-
-    ## return
-    return(res)  
-  }
-  
-  ## otherwise: obtain PIT and optionally transform to normal scale
-
-  ## continuous case is easy
-  if (all(is_continuous(pd))) {
-    ## probability integral transform
-    res <- cdf(pd, y, elementwise = TRUE)
-    ## optionally map to normal scale
-    if (type == "quantile") res <- qnorm(res)
+    ## compute residuals
+    res <- switch(type,
+      "quantile" = qnorm(cdf(pd, y, elementwise = TRUE)),
+      "pit"      = cdf(pd, y, elementwise = TRUE),
+      "pearson"  = (y - mean(pd))/sqrt(variance(pd)),
+      "response" = y - mean(pd),
+    )
     return(res)
   }
+  
+  ## otherwise: obtain some PIT flavor for distribution with point masses and optionally transform to normal scale
+
+  ## number of observations
+  n <- NROW(y)
 
   # random vs. quantile PIT
-  stopifnot(length(random) >= 1L, is.logical(random) || is.numeric(random))
-  if (is.numeric(random)) {
-    qunif <- random
-    random <- FALSE
-    if (any(qunif < 0) || any(qunif > 1)) stop("non-random quantiles must be in [0, 1]")
-  } else {
-    qunif <- if (random) NULL else 0.5
-  }
+  stopifnot(length(random) == 1L, is.logical(random) || is.numeric(random))
+  nc <- as.integer(random)
+  random <- nc > 0L
 
+  ## quantile probabilities: sampled randomly vs. specified by prob
   if (random) {
-    ## number of random simulations
-    stopifnot(is.numeric(nsim), length(nsim) == 1L, nsim >= 1L)
-    nsim <- as.integer(nsim)
+    if (!is.null(prob)) warning(sprintf("argument 'prob' ignored for 'random' %s residuals", type))
+    prob <- runif(n * nc)
+    clab <- 1L:nc
   } else {
-    ## otherwise use nsim for number of deterministic quantiles
-    if (!missing(nsim)) warning(sprintf("argument 'nsim' ignored for non-randomized %s residuals", type))
-    nsim <- length(qunif)
+    if (is.null(prob)) prob <- 0.5
+    prob <- as.numeric(prob)
+    if (any(prob < 0) || any(prob > 1)) stop("'prob' for non-random quantiles must be in [0, 1]")
+    clab <- format(prob, digits = 3L, trim = TRUE, drop0trailing = TRUE)
+    nc <- length(prob)
+    prob <- rep.int(prob, rep.int(n, nc))
   }
+  prob <- matrix(prob, nrow = n, ncol = nc, dimnames = list(names(y), paste("r", clab, sep = "_")))
 
   ## minimal distance for observation to the left of y
   stopifnot(is.null(delta) || (is.numeric(delta) && length(delta) == 1 && delta > 0.0))
@@ -206,24 +200,16 @@ proresiduals.default <- function(object, newdata = NULL, type = c("quantile", "p
     if (length(y_unique) > 1L) delta <- pmax(min(diff(y_unique)) / 5e6, delta)
   }
 
-  ## matrix of quantiles
-  n <- NROW(y)
-  if (is.null(qunif)) {
-    qunif <- runif(n * nsim)
-    qlab <- 1L:nsim
-  } else {
-    qlab <- format(qunif, digits = 3L, trim = TRUE, drop0trailing = TRUE)
-    qunif <- rep.int(qunif, rep.int(n, nsim))
-  }
-  qunif <- matrix(qunif, nrow = n, ncol = nsim, dimnames = list(names(y), paste("r", qlab, sep = "_")))
-  ## drop dimension if possible
-  if (nsim == 1L) qunif <- qunif[, 1L]
-
-  ## probability integral transform: interpolate between CDF left of y and at y
+  ## probability integral transform: CDF at y and supremum left of y
   pit_y   <- cdf(pd, y, elementwise = TRUE)
   pit_sup <- cdf(pd, y - delta, elementwise = TRUE)
-  if (!all(is_discrete(pd)) && any(icont <- abs(pit_y - pit_sup) < .Machine$double.eps^0.33)) pit_sup[icont] <- pit_y[icont]
-  res <- (1 - qunif) * pit_sup + qunif * pit_y
+  
+  ## no interpolation necessary for y observations with continous CDF
+  if (!all(is_discrete(pd)) && any(icont <- abs(pit_y - pit_sup) < .Machine$double.eps^0.33)) prob[icont, ] <- 1
+
+  ## interpolate between PIT values, drop dimension if possible
+  if (nc == 1L) prob <- prob[, 1L]
+  res <- (1 - prob) * pit_sup + prob * pit_y
 
   ## for quantile residuals: map to normal scale
   if (type == "quantile") res <- qnorm(res)
