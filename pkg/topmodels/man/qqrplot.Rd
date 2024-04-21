@@ -53,7 +53,7 @@ Should the qqrplot be detrended, i.e, plotted as a \code{\link{wormplot}}?}
 \item{scale}{character. On which scale should the quantile residuals be
 shown: on the probability scale (\code{"uniform"}) or on the normal scale (\code{"normal"}).}
 
-\item{nsim, delta}{arguments passed to \code{\link{qresiduals}}.}
+\item{nsim, delta}{arguments passed to \code{\link{proresiduals}}.}
 
 \item{simint}{logical. In case of discrete distributions, should the simulation
 (confidence) interval due to the randomization be visualized?}
@@ -106,7 +106,7 @@ Q-Q residuals plots draw quantile residuals (by default on the standard normal
 scale) against theoretical quantiles from the same distribution.
 Alternatively, quantile residuals can also be compared on the uniform scale
 (\code{scale = "uniform"}) using no transformation.  For computation,
-\code{\link{qqrplot}} leverages the function \code{\link{qresiduals}} employing
+\code{\link{qqrplot}} leverages the function \code{\link{proresiduals}} employing
 the \code{\link{procast}} generic.
 
 Additional options are offered for models with discrete responses where
@@ -154,6 +154,6 @@ Residuals.} \emph{Journal of Computational and Graphical Statistics},
 }
 \seealso{
 \code{\link{plot.qqrplot}}, \code{\link{wormplot}},
-\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+\code{\link{proresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}

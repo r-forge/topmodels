@@ -4,7 +4,7 @@
 #' based on fitted model objects.
 #' 
 #' \code{newresponse} is a convenience function that supports functions like
-#' \code{\link{proscore}} or \code{\link{pitresiduals}} which assess
+#' \code{\link{proscore}} or \code{\link{proresiduals}} which assess
 #' discrepancies between predictions/forecasts on new data and the corresponding
 #' observed response variables.
 #'

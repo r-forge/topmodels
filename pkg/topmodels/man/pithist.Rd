@@ -131,12 +131,8 @@ i.e., the value that the predictive CDF attains at the observation, with a
 uniform distribution. For a well calibrated model fit, the PIT will have a
 standard uniform distribution.
 For computation, \code{\link{pithist}} leverages the function
-\code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
+\code{\link{proresiduals}} employing the \code{\link{procast}} generic and then
 essentially draws a \code{\link[graphics]{hist}}.
-
-In case of discrete distributions the PIT can be either drawn randomly from the
-corresponding interval or distributed proportionally in the histogram, whereby
-the latter is not yet supported.
 
 In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 pithist objects, it is also possible to combine two (or more) PIT histograms by
@@ -189,6 +185,6 @@ Series B (Statistical Methodology)}. \bold{69}(2), 243--268.
 \doi{10.1111/j.1467-9868.2007.00587.x}
 }
 \seealso{
-\code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
+\code{\link{plot.pithist}}, \code{\link{proresiduals}}, \code{\link{procast}}
 }
 \keyword{hplot}

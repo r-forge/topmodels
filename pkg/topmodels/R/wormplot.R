@@ -23,7 +23,7 @@
 #' Worm plots (de-trended Q-Q plots) draw deviations of quantile residuals (by
 #' default: transformed to standard normal scale) and theoretical quantiles from
 #' the same distribution against the same theoretical quantiles. For computation,
-#' \code{\link{wormplot}} leverages the function \code{\link{qresiduals}}
+#' \code{\link{wormplot}} leverages the function \code{\link{proresiduals}}
 #' employing the \code{\link{procast}}.
 #' 
 #' Additional options are offered for models with discrete responses where
@@ -50,7 +50,7 @@
 #' @param detrend logical. Should the qqrplot be detrended, i.e, plotted as a `wormplot()`?
 #' @param scale On which scale should the quantile residuals be shown: on the probability scale 
 #' (\code{"uniform"}) or on the normal scale (\code{"normal"}).
-#' @param nsim,delta arguments passed to \code{qresiduals}.
+#' @param nsim,delta arguments passed to \code{proresiduals}.
 #' @param confint logical or character string describing the type for plotting `c("polygon", "line")`.
 #' If not set to `FALSE`, the pointwise confidence interval of the (randomized)
 #' quantile residuals are visualized.
@@ -75,7 +75,7 @@
 #' the (\code{scale}) and wether a \code{detrended} Q-Q residuals plot
 #' was computed are stored as attributes.
 #' @seealso \code{\link{qqrplot}}, \code{\link{plot.qqrplot}}, \code{\link{qqrplot}}, 
-#' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' \code{\link{proresiduals}}, \code{\link[stats]{qqnorm}}
 #' @references van Buuren S and Fredriks M (2001). \dQuote{Worm plot: simple diagnostic
 #' device for modelling growth reference curves}. \emph{Statistics in
 #' Medicine}, \bold{20}, 1259--1277. \doi{10.1002/sim.746}

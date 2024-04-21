@@ -33,21 +33,20 @@ residuals should be computed.}
 and \code{"pit"}? The default is \code{TRUE} and if set to \code{FALSE}, fixed
 quantiles given at the probabilities in \code{prob} are used (defaulting to mid-quantiles).
 If \code{random > 1}, then multiple random replications of quantile or PIT
-residuals are computed.}
+residuals are computed. For other residual types \code{random} has no effect.}
 
 \item{prob}{numeric. Fixed probabilities for the quantile or PIT residuals when
 \code{random = FALSE}.}
 
 \item{delta}{numeric. The minimal difference to compute the range of
 proabilities corresponding to each observation according to get (randomized)
-quantile residuals.  For \code{NULL}, the minimal observed difference in the
-resonse divided by \code{5e-6} is used.}
+\code{"quantile"} or \code{"pit"} residuals.  For \code{NULL}, the minimal observed difference in the
+resonse divided by \code{5e-6} is used. Ignored for continuous distributions.}
 }
 \value{
 A vector or matrix of residuals. A matrix of residuals is returned
-if more than one replication of quantile or PIT residuals is computed (for non-continuous
-data), i.e., if either \code{random > 1} or \code{random = FALSE} and
-\code{length(prob) > 1}.
+if more than one replication of quantile or PIT residuals is computed, i.e., if either
+\code{random > 1} or \code{random = FALSE} and \code{length(prob) > 1}.
 }
 \description{
 Generic function and default method for (randomized) quantile residuals, PIT,
@@ -81,7 +80,7 @@ desired in linear regression models), \code{"quantile"} residuals, proposed by D
 Smyth (1996), additionally transform the PIT residuals by the standard normal quantile function.
 
 As quantile residuals and PIT residuals are subject to randomness for discrete
-(and also mixed discrete-continuous) distributions), it is sometimes
+(and also mixed discrete-continuous) distributions, it is sometimes
 useful to explore the extent of the random variation by obtaining multiple replications.
 In \code{proresiduals} this can be achieved by setting \code{nsim}.
 
@@ -123,6 +122,9 @@ proresiduals(m, newdata = nd, type = "quantile", random = FALSE)
 
 ## minimum/median/maximum quantile residuals
 proresiduals(m, newdata = nd, type = "quantile", random = FALSE, prob = c(0, 0.5, 1))
+
+## compute residuals by manually obtaining distribution and response
+proresiduals(procast(m, newdata = nd, drop = TRUE), nd$goals)
 }
 \references{
 Dawid AP (1984).

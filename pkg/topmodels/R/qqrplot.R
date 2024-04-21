@@ -35,7 +35,7 @@
 #' scale) against theoretical quantiles from the same distribution.
 #' Alternatively, quantile residuals can also be compared on the uniform scale
 #' (\code{scale = "uniform"}) using no transformation.  For computation,
-#' \code{\link{qqrplot}} leverages the function \code{\link{qresiduals}} employing
+#' \code{\link{qqrplot}} leverages the function \code{\link{proresiduals}} employing
 #' the \code{\link{procast}} generic.
 #' 
 #' Additional options are offered for models with discrete responses where
@@ -66,7 +66,7 @@
 #' Should the qqrplot be detrended, i.e, plotted as a \code{\link{wormplot}}?
 #' @param scale character. On which scale should the quantile residuals be
 #' shown: on the probability scale (\code{"uniform"}) or on the normal scale (\code{"normal"}).
-#' @param nsim,delta arguments passed to \code{\link{qresiduals}}.
+#' @param nsim,delta arguments passed to \code{\link{proresiduals}}.
 #' @param simint logical. In case of discrete distributions, should the simulation
 #' (confidence) interval due to the randomization be visualized?
 #' @param simint_level numeric. The confidence level required for calculating
@@ -101,7 +101,7 @@
 #' and \code{detrended} used to create the plot.
 #'
 #' @seealso \code{\link{plot.qqrplot}}, \code{\link{wormplot}},
-#' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' \code{\link{proresiduals}}, \code{\link[stats]{qqnorm}}
 #'
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},
@@ -171,9 +171,9 @@ qqrplot.default <- function(
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
   ## sanity checks
-  ## * `object`, `newdata`, `delta w/i `qresiduals()`
+  ## * `object`, `newdata`, `delta w/i `proresiduals()`
   ## * `simint` w/i `polygon()`
-  ## * `delta` w/i `qresiduals()`
+  ## * `delta` w/i `proresiduals()`
   ## * `...` in `plot()` and `autoplot()`
   stopifnot(isTRUE(detrend) || isFALSE(detrend))
   stopifnot(is.numeric(simint_level), length(simint_level) == 1, simint_level >= 0, simint_level <= 1)
@@ -183,7 +183,7 @@ qqrplot.default <- function(
   stopifnot(isTRUE(plot) || isFALSE(plot) || (is.character(plot) && length(plot) == 1L))
   stopifnot(is.null(class) || (is.character(class) && length(class) == 1L))
   stopifnot(isTRUE(confint) || isFALSE(confint) || (is.character(confint) && length(confint) == 1))
-  scale <- match.arg(scale)
+  scale <- match.arg(scale[1L], c("normal", "uniform"))
 
   # If character; check if allowed
   if (is.character(confint)) confint <- match.arg(confint, c("line", "polygon", "none"))
@@ -208,9 +208,8 @@ qqrplot.default <- function(
   # -------------------------------------------------------------------
   # COMPUTATION OF QUANTILE RESIDUALS
   # -------------------------------------------------------------------
-  qres <- qresiduals(object,
-    newdata = newdata, scale = scale, type = "random", nsim = nsim, delta = delta
-  )
+  rtyp <- if (scale == "normal") "quantile" else "pit"
+  qres <- proresiduals(object, newdata = newdata, type = rtyp, random = nsim, delta = delta)
   if (is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
 
   ## compute corresponding quantiles on the transformed scale (default: normal)
@@ -229,10 +228,7 @@ qqrplot.default <- function(
   ## compute rg interval
   ## TODO: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   if (!isFALSE(simint)) {
-    tmp <- qresiduals(object,
-      newdata = newdata, scale = scale, type = "random", nsim = simint_nrep,
-      delta = delta
-    )
+    tmp <- proresiduals(object, newdata = newdata, type = rtyp, random = simint_nrep, delta = delta)
     simint_prob <- (1 - simint_level) / 2
     simint_prob <- c(simint_prob, 1 - simint_prob)
     qres_rg_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = simint_prob[1], na.rm = TRUE)
@@ -510,7 +506,7 @@ rbind.qqrplot <- c.qqrplot
 #' @param simint_fill,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
 #'
 #' @seealso \code{\link{qqrplot}}, \code{\link{wormplot}},
-#' \code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+#' \code{\link{proresiduals}}, \code{\link[stats]{qqnorm}}
 #'
 #' @references Dunn KP, Smyth GK (1996). \dQuote{Randomized Quantile
 #' Residuals.} \emph{Journal of Computational and Graphical Statistics},

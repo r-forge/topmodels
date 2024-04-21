@@ -65,10 +65,10 @@ expect_identical(NROW(CrabSatellites), NROW(q3n), info = "testing dimension 1 (n
 # TODO: (RS2ML) Not sure if this works across different OSs!!!
 # NOTE: (RS) Switching to sha1, <https://cran.r-project.org/web/packages/digest/vignettes/sha1.html>
 # --------------------------------------------------------------------
-expect_identical(digest::sha1(q1u, 8, 7), "aa5d782459744c08b284c24f456f15a872a38a56")
-expect_identical(digest::sha1(q1n, 8, 7), "329a2506dc4c8ecccac263c3c86616f734e644d1")
-expect_identical(digest::sha1(q2u, 8, 7), "0884c326282442f88a6532dd18e4f2860a058874")
-expect_identical(digest::sha1(q2n, 8, 7), "071bd96cc7a0644c7ebb54216985686da6eedba4")
+expect_identical(digest::sha1(q1u, 8, 7), "3b7a8db00c0a257b495a8fcbf9bfd25ff92ed5e2")
+expect_identical(digest::sha1(q1n, 8, 7), "f7bccf502a8cbac2dd687f823a5fee0641776016")
+expect_identical(digest::sha1(q2u, 8, 7), "51f52c2c702c9f321fce5cf916fd74ee63181232")
+expect_identical(digest::sha1(q2n, 8, 7), "4dcf3499331ecd42620151c61d41365e41be9d19")
 expect_identical(digest::sha1(q3u, 8, 7), "f0053b11699eec966534e6937bce3f9ed6076383")
 expect_identical(digest::sha1(q3n, 8, 7), "1e3d4881360d1208b4470311cc3f8994bf749925")
 

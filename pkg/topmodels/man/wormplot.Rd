@@ -49,7 +49,7 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 \item{scale}{On which scale should the quantile residuals be shown: on the probability scale 
 (\code{"uniform"}) or on the normal scale (\code{"normal"}).}
 
-\item{nsim, delta}{arguments passed to \code{qresiduals}.}
+\item{nsim, delta}{arguments passed to \code{proresiduals}.}
 
 \item{confint}{logical or character string describing the type for plotting `c("polygon", "line")`.
 If not set to `FALSE`, the pointwise confidence interval of the (randomized)
@@ -93,7 +93,7 @@ package \code{ggplot2} is loaded.
 Worm plots (de-trended Q-Q plots) draw deviations of quantile residuals (by
 default: transformed to standard normal scale) and theoretical quantiles from
 the same distribution against the same theoretical quantiles. For computation,
-\code{\link{wormplot}} leverages the function \code{\link{qresiduals}}
+\code{\link{wormplot}} leverages the function \code{\link{proresiduals}}
 employing the \code{\link{procast}}.
 
 Additional options are offered for models with discrete responses where
@@ -135,6 +135,6 @@ Medicine}, \bold{20}, 1259--1277. \doi{10.1002/sim.746}
 }
 \seealso{
 \code{\link{qqrplot}}, \code{\link{plot.qqrplot}}, \code{\link{qqrplot}}, 
-\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+\code{\link{proresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}

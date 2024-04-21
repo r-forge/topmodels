@@ -207,6 +207,6 @@ Residuals.} \emph{Journal of Computational and Graphical Statistics},
 }
 \seealso{
 \code{\link{qqrplot}}, \code{\link{wormplot}},
-\code{\link{qresiduals}}, \code{\link[stats]{qqnorm}}
+\code{\link{proresiduals}}, \code{\link[stats]{qqnorm}}
 }
 \keyword{hplot}

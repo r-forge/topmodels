@@ -60,13 +60,12 @@ expect_error(qqrplot(m1, scale = "foo"),            info = "invalid argument for
 expect_error(qqrplot(m1, nsim = "3"),               info = "simint must be NULL, TRUE, or FALSE")
 expect_error(qqrplot(m1, nsim = c(TRUE, FALSE)),    info = "simint must be NULL, TRUE, or FALSE")
 expect_error(qqrplot(m1, nsim = 2:3),               info = "simint must be of length 1")
-expect_error(qqrplot(m1, nsim = 0),                 info = "simint must be positive")
 
 # delta: forwarded to pitresiduals()
-expect_error(qqrplot(m1, delta = TRUE),              info = "delta must be numeric")
-expect_error(qqrplot(m1, delta = "1"),               info = "delta must be numeric")
-expect_error(qqrplot(m1, delta = 1:3),               info = "delta must be of length 1")
-expect_error(qqrplot(m1, delta = 0),                 info = "delta must be > 0.0")
+expect_error(qqrplot(m3, delta = TRUE),              info = "delta must be numeric")
+expect_error(qqrplot(m3, delta = "1"),               info = "delta must be numeric")
+expect_error(qqrplot(m3, delta = 1:3),               info = "delta must be of length 1")
+expect_error(qqrplot(m3, delta = 0),                 info = "delta must be > 0.0")
 
 # simint_level
 expect_error(qqrplot(m1, simint_level = "0.5"),     info = "simint_level must be numeric")

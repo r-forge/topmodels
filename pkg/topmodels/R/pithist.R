@@ -11,8 +11,6 @@
 # - Cut probabilities at breaks -> (m-1) groups and draw histogram
 # - In case of point masses either use a random draw
 #   or distribute evenly across relevant intervals
-# - Random draws could be drawn by hist() (current solution)
-#   but proportional distribution requires drawing rectangles by hand
 # - Add confidence interval as well.
 # - Instead of shaded rectangles plus reference line and CI lines
 #   support shaded CI plus step lines
@@ -39,12 +37,8 @@
 #' uniform distribution. For a well calibrated model fit, the PIT will have a
 #' standard uniform distribution.
 #' For computation, \code{\link{pithist}} leverages the function
-#' \code{\link{qresiduals}} employing the \code{\link{procast}} generic and then
+#' \code{\link{proresiduals}} employing the \code{\link{procast}} generic and then
 #' essentially draws a \code{\link[graphics]{hist}}.
-#'
-#' In case of discrete distributions the PIT can be either drawn randomly from the
-#' corresponding interval or distributed proportionally in the histogram, whereby
-#' the latter is not yet supported.
 #'
 #' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 #' pithist objects, it is also possible to combine two (or more) PIT histograms by
@@ -119,7 +113,7 @@
 #' Additionally, \code{freq}, \code{xlab}, \code{ylab}, \code{main}, and
 #' \code{confint_level} are stored as attributes.
 #'
-#' @seealso \code{\link{plot.pithist}}, \code{\link{qresiduals}}, \code{\link{procast}}
+#' @seealso \code{\link{plot.pithist}}, \code{\link{proresiduals}}, \code{\link{procast}}
 #'
 #' @references
 #' Agresti A, Coull AB (1998). \dQuote{Approximate is Better than ``Exact''
@@ -204,7 +198,7 @@ pithist.default <- function(
   # -------------------------------------------------------------------
   ## sanity checks
   ## * `object` and `newdata` w/i `newrepsone()`
-  ## * `delta w/i `qresiduals()`
+  ## * `delta w/i `proresiduals()`
   ## * `expected`, `confint`, `...` w/i `plot()` and `autoplot()`
   stopifnot(is.null(breaks) || (is.numeric(breaks) && length(breaks) > 0 && is.null(dim(breaks))))
   if (length(breaks) == 1) stopifnot(breaks >= 1)
@@ -221,9 +215,9 @@ pithist.default <- function(
   stopifnot(isTRUE(confint) || isFALSE(confint))
 
   ## match arguments
-  style <- match.arg(style)
-  type <- match.arg(type)
-  scale <- match.arg(scale)
+  style <- match.arg(tolower(style[1L]), c("bar", "line"))
+  type <- match.arg(tolower(type[1L]), c("expected", "random"))
+  scale <- match.arg(tolower(scale[1L]), c("uniform", "normal"))
 
   ## determine other arguments conditional on `style` and `type`
   if (is.null(simint)) {
@@ -259,23 +253,10 @@ pithist.default <- function(
   n <- NROW(newresponse(object, newdata = newdata)) # solely to get n for computing breaks
   if (is.null(breaks)) breaks <- c(4, 10, 20, 25)[cut(n, c(0, 50, 5000, 1000000, Inf))]
 
-  # -------------------------------------------------------------------
-  if (type == "proportional") {
+  if (type == "random") {
     # -------------------------------------------------------------------
-    ## TODO: (ML)
-    ## * implement proportional over the inteverals (e.g., below censoring point)
-    ## * confusing naming, as `type` in `qresiduals()` must be `random` or `quantile`
-    ## NOTE: (RS) Cannot be tested as we currently don't allow type = "proportional"
-    ##       (see @param; match.arg(type)).
-    stop("not yet implemented")
-
-    # -------------------------------------------------------------------
-  } else if (type == "random") {
-    # -------------------------------------------------------------------
-    p <- qresiduals(object,
-      newdata = newdata, scale = scale, delta = delta,
-      type = "random", nsim = nsim
-    )
+    rtyp <- if (scale == "normal") "quantile" else "pit"
+    p <- proresiduals(object, newdata = newdata, type = rtyp, delta = delta, random = nsim)
 
     ## get breaks: part 2
     ## TODO: (ML) maybe use xlim instead or `0` and `1`
@@ -294,10 +275,8 @@ pithist.default <- function(
     if (!isFALSE(simint)) {
       ## helper function for calculating simulation interval
       compute_simint <- function(object, newdata, scale, delta, nsim, breaks) {
-        simint_p <- qresiduals(object,
-          newdata = newdata, scale = scale, delta = delta,
-          type = "random", nsim = nsim
-        )
+        rtyp <- if (scale == "normal") "quantile" else "pit"
+        simint_p <- proresiduals(object, newdata = newdata, type = rtyp, delta = delta, random = nsim)
 
         ## TODO: (ML) Maybe nicer workaround to get not values outside breaks
         simint_p[simint_p < min(breaks)] <- min(breaks)
@@ -325,23 +304,12 @@ pithist.default <- function(
     ## compare "nonrandom" in Czado et al. (2009)
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
-    p <- qresiduals(object,
-      newdata = newdata, scale = "uniform", delta = delta,
-      type = "quantile", prob = c(0, 1)
-    )
-
-    ## TODO: (ML) Adapt by employing `distributions3`.
-    if (scale == "uniform") {
-      qFun <- identity
-      pFun <- punif
-    } else {
-      qFun <- qnorm
-      pFun <- pnorm
-    }
+    p <- proresiduals(object, newdata = newdata, type = "pit", delta = delta, random = FALSE, prob = c(0, 1))
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
-    F <- if (all(abs(p[, 2L] - p[, 1L]) < sqrt(.Machine$double.eps))) {
-      function(u) as.numeric(pFun(u) >= p[, 1L])
+    pFun <- if (scale == "uniform") punif else pnorm
+    F <- if (all(abs(p[, 2L] - p[, 1L]) < .Machine$double.eps^0.33)) {
+      function(u) as.numeric(pFun(u) >= p[, 2L])
       ## TODO: (Z) Check inequality sign to cover include.lowest/right options.
     } else {
       #function(u) punif(u, min = p[, 1L], max = p[, 2L]) # original 
@@ -350,14 +318,7 @@ pithist.default <- function(
     }
 
     ## get breaks: part 2
-    ## TODO: (ML) Improve this educated guess.
-    tmp_range <- range(
-      c(
-        qFun(0), qFun(0.000001), qFun(0.0001), qFun(0.001), qFun(0.005), qFun(0.01), 
-        qFun(0.99), qFun(0.995), qFun(0.999), qFun(0.9999), qFun(0.999999), qFun(1)
-      ), 
-      finite = TRUE
-    )
+    tmp_range <- if (scale == "uniform") c(0, 1) else c(-4, 4)
     if (length(breaks) == 1L) breaks <- seq(tmp_range[1], tmp_range[2], length.out = breaks + 1L)
 
     ## equation 3 and computation of probability for each interval (f_j)
