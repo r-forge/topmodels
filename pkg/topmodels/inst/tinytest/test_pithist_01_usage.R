@@ -25,7 +25,7 @@ expect_silent(m3 <- glm(satellites ~ width + color, data = CrabSatellites, famil
 expect_error(pithist(1),            info = "Main object is not a model object")
 expect_error(pithist(NA),           info = "Main object is not a model object")
 
-# newdata: forwarded to `pitresiduals()`
+# newdata: forwarded to proresiduals()
 expect_error(pithist(m1, newdata = 3),              info = "newdata of wrong class")
 expect_error(pithist(m1, newdata = NA),             info = "newdata of wrong class")
 
@@ -62,7 +62,7 @@ expect_error(pithist(m1, breaks = matrix(1, nrow = 3, ncol = 1)), info = "breaks
 expect_error(pithist(m1, breaks = numeric(0)),      info = "breaks invalid length (must be 2 or more)")
 expect_error(pithist(m1, breaks = .99),             info = "breaks invalid; if single numeric it must be >= 1")
 
-# simint; not tested, tested by pitresiduals() if used
+# simint; not tested, tested by proresiduals() if used
 
 # simint_level
 expect_error(pithist(m1, simint_level = "0.5"),     info = "simint_level must be numeric")
@@ -75,7 +75,7 @@ expect_error(pithist(m1, simint_nrep = "3"),        info = "simint_nrep must be 
 expect_error(pithist(m1, simint_nrep = 10:20),      info = "simint_nrep must be length 1")
 expect_error(pithist(m1, simint_nrep = 0),          info = "simint_nrep must be >= 1")
 
-# delta: forwarded to pitresiduals()
+# delta: forwarded to proresiduals()
 expect_error(pithist(m1, delta = TRUE),              info = "delta must be numeric")
 expect_error(pithist(m1, delta = "1"),               info = "delta must be numeric")
 expect_error(pithist(m1, delta = 1:3),               info = "delta must be of length 1")

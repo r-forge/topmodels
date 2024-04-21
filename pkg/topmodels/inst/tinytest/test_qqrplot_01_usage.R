@@ -61,7 +61,7 @@ expect_error(qqrplot(m1, nsim = "3"),               info = "simint must be NULL,
 expect_error(qqrplot(m1, nsim = c(TRUE, FALSE)),    info = "simint must be NULL, TRUE, or FALSE")
 expect_error(qqrplot(m1, nsim = 2:3),               info = "simint must be of length 1")
 
-# delta: forwarded to pitresiduals()
+# delta: forwarded to proresiduals()
 expect_error(qqrplot(m3, delta = TRUE),              info = "delta must be numeric")
 expect_error(qqrplot(m3, delta = "1"),               info = "delta must be numeric")
 expect_error(qqrplot(m3, delta = 1:3),               info = "delta must be of length 1")
@@ -73,7 +73,7 @@ expect_error(qqrplot(m1, simint_level = -1e10),     info = "simint_level must be
 expect_error(qqrplot(m1, simint_level = 1+1e10),    info = "simint_level must be <= 1")
 expect_error(qqrplot(m1, simint_level = 1:2 / 10),  info = "simint_level must be length 1")
 
-# simint_nrep: forwarded to pitresiduals()
+# simint_nrep: forwarded to proresiduals()
 # note: must be a "continuous" model (else this is not tested)
 expect_error(qqrplot(m2, simint_nrep = "3"),        info = "simint_nrep must be numeric")
 expect_error(qqrplot(m2, simint_nrep = 10:20),      info = "simint_nrep must be length 1")

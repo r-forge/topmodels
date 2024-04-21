@@ -26,7 +26,7 @@ expect_error(rootogram(1),          info = "Main object is not a model object")
 expect_error(rootogram(NA),         info = "Main object is not a model object")
 
 
-# newdata: forwarded to `pitresiduals()`
+# newdata
 expect_error(rootogram(m1, newdata = 3),              info = "newdata of wrong class")
 expect_error(rootogram(m1, newdata = NA),             info = "newdata of wrong class")
 
