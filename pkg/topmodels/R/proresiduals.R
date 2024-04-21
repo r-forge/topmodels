@@ -123,6 +123,9 @@
 #' 
 #' ## minimum/median/maximum quantile residuals
 #' proresiduals(m, newdata = nd, type = "quantile", random = FALSE, prob = c(0, 0.5, 1))
+#' 
+#' ## compture residuals from manually obtain distribution and response
+#' proresiduals(procast(m, newdata = nd, drop = TRUE), nd$goals)
 
 #' @export
 proresiduals <- function(object, ...) {
@@ -155,7 +158,6 @@ proresiduals.default <- function(object, newdata = NULL, type = c("quantile", "p
     type2 <- if (type %in% c("quantile", "pit")) paste("continuous", type) else type
     if (!missing(random)) warning(sprintf("argument 'random' ignored for %s residuals", type2))
     if (!missing(prob)) warning(sprintf("argument 'prob' ignored for %s residuals", type2))
-    if (!missing(delta)) warning(sprintf("argument 'delta' ignored for %s residuals", type2))
 
     ## compute residuals
     res <- switch(type,
