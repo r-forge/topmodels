@@ -10,7 +10,17 @@
 #' density function \eqn{f(\cdot)}{f(.)}. The corresponding expectation and variance are denoted
 #' by \eqn{E(Y)} and \eqn{V(Y)}. The actual observation is \eqn{y}.
 #'
-#' \bold{Log-likelihood:} Also known as log-score, logarithmic score, or log-density.
+#' \bold{Log-score:} Also known as logarithmic score. This is the negative log-likelihood
+#' where the negative sign has the effect that smaller values indicate a better fit.
+#'
+#' \deqn{
+#'   -\log f(y)
+#' }{
+#'   -log(f(y))
+#' }
+#'
+#' \bold{Log-likelihood:} Also known as log-density. Clearly, this is equivalent to the
+#' log-score above but using the conventional sign where bigger values indicate a better fit.
 #'
 #' \deqn{
 #'   \log f(y)
@@ -76,11 +86,12 @@
 #' @param na.action function determining what should be done with missing
 #' values in \code{newdata}.  The default is to employ \code{NA}.
 #' @param type character specifying the type of score to compute. Avaible types:
-#' \code{"loglikelihood"} (or equivalently \code{"logs"} or \code{"log_pdf"}),
+#' \code{"logs"} (or equivalently \code{"log-score"}),
+#' \code{"loglikelihood"} (or equivalently \code{"log_pdf"}),
 #' \code{"CRPS"} (or equivalently \code{"RPS"}), \code{"MAE"}, \code{"MSE"},
 #' \code{"DSS"} (or equivalently \code{"Dawid-Sebastiani"}).
 #' Upper or lower case spellings can be used interchangably, hyphens or underscores
-#' can be included or omitted.
+#' can be included or omitted. Setting \code{type = NULL} yields all available scores.
 #' @param aggregate logical or function to be used for aggregating scores across
 #' observations. Setting \code{aggregate = TRUE} (the default) corresponds to using \code{mean}.
 #' @param drop logical. Should scores be returned in a data frame (default)
@@ -100,33 +111,35 @@
 #' data("FIFA2018", package = "distributions3")
 #' m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
 #' 
-#' ## in-sample log-likelihood
+#' ## default: in-sample mean log-score and CRPS
+#' proscore(m)
+#'
+#' ## element-wise score using a new data set (final of the tournament)
+#' final <- tail(FIFA2018, 2)
+#' proscore(m, newdata = final, aggregate = FALSE)
+#'
+#' ## replicate in-sample log-likelihood
 #' proscore(m, type = "loglik", aggregate = sum)
 #' logLik(m)
 #'
 #' ## compute mean of all available scores
-#' proscore(m, type = c("LogS", "CRPS", "MAE", "MSE", "DSS"), aggregate = TRUE)
-#' ## note that "LogS" and "loglik" above are both matched to using
-#' ## the log-likelihood but the user-supplied spelling is preserved
+#' proscore(m, type = NULL)
 #'
-#' ## prediction using a new data set (final of the tournament)
-#' final <- tail(FIFA2018, 2)
-#' proscore(m, newdata = final, type = c("LogLik", "CRPS", "MAE", "MSE", "DSS"))
+#' ## upper vs. lower case spelling is matched internally but preserved in output
+#' proscore(m, type = c("logs", "crps"))
+#' proscore(m, type = c("Log-score", "CRPS"))
 #'
 #' ## least-squares regression for speed and breaking distance of cars
 #' data("cars", package = "datasets")
 #' m <- lm(dist ~ speed, data = cars)
 #'
-#' ## replicate in-sample residual sum of squares (aka deviance) by taking
-#' ## the sum (rather than the mean) of the squared errors
-#' proscore(m, type = "MSE", aggregate = sum)
-#' deviance(m)
-#'
-#' ## note that the log-likelihood does not match exactly due to using
-#' ## the least-squares rather than the maximum-likelihood estimate of the
-#' ## error variance (divising by n rather than n - k)
-#' proscore(m, type = "loglikelihood", aggregate = sum)
+#' ## replicate in-sample log-likelihood and residual sum of squares
+#' ## (aka deviance) by taking the sum (rather than the mean) of the
+#' ## log-density and squared errors, respectively
+#' proscore(m, type = c("loglik", "MSE"), aggregate = sum)
 #' logLik(m)
+#' deviance(m)
+
 #' @export 
 proscore <- function(object, newdata = NULL, ...) {
   UseMethod("proscore")
@@ -138,6 +151,7 @@ proscore <- function(object, newdata = NULL, ...) {
 proscore.default <- function(object, newdata = NULL, na.action = na.pass, type = c("logs", "crps"), aggregate = TRUE, drop = FALSE, ...)
 {
   ## match type
+  if (is.null(type)) type <- c("logs", "loglikelihood", "crps", "mae", "mse", "dss")
   otype <- type
   type <- gsub("-|_", "", tolower(type))
   type <- sapply(type, match.arg, c(
@@ -156,8 +170,6 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
     type <- type[!dup]
   }
 
-  if("crps" %in% type) stopifnot(requireNamespace("scoringRules"))
-
   ## FIXME: how to handle 'size' in binomial family?
 
   ## extract probability distribution object
@@ -175,9 +187,12 @@ proscore.default <- function(object, newdata = NULL, na.action = na.pass, type =
   
   ## evaluate type of proscore
   ps <- list()
-  if("loglikelihood" %in% type) ps$logs <- -log_pdf(pd, y, drop = TRUE)
+  if("logs" %in% type) ps$logs <- -log_pdf(pd, y, drop = TRUE)
   if("loglikelihood" %in% type) ps$loglikelihood <- log_pdf(pd, y, drop = TRUE)
-  if("crps" %in% type) ps$crps <- drop(scoringRules::crps(pd, y))
+  if("crps" %in% type) {
+    crps_fun <- if (requireNamespace("scoringRules")) scoringRules::crps else crps.distribution
+    ps$crps <- drop(crps_fun(pd, y))
+  }
   if("mae" %in% type) ps$mae <- drop(abs(mean(pd) - y))
   if("mse" %in% type) ps$mse <- drop((mean(pd) - y)^2)
   if("dss" %in% type) ps$dss <- drop((mean(pd) - y)^2/variance(pd) + log(variance(pd)))

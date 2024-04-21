@@ -32,11 +32,12 @@ If omitted, the original observations are used.}
 values in \code{newdata}.  The default is to employ \code{NA}.}
 
 \item{type}{character specifying the type of score to compute. Avaible types:
-\code{"loglikelihood"} (or equivalently \code{"logs"} or \code{"log_pdf"}),
+\code{"logs"} (or equivalently \code{"log-score"}),
+\code{"loglikelihood"} (or equivalently \code{"log_pdf"}),
 \code{"CRPS"} (or equivalently \code{"RPS"}), \code{"MAE"}, \code{"MSE"},
 \code{"DSS"} (or equivalently \code{"Dawid-Sebastiani"}).
 Upper or lower case spellings can be used interchangably, hyphens or underscores
-can be included or omitted.}
+can be included or omitted. Setting \code{type = NULL} yields all available scores.}
 
 \item{aggregate}{logical or function to be used for aggregating scores across
 observations. Setting \code{aggregate = TRUE} (the default) corresponds to using \code{mean}.}
@@ -62,7 +63,17 @@ random variable with cumulative distribution function \eqn{F(\cdot)}{F(.)} and p
 density function \eqn{f(\cdot)}{f(.)}. The corresponding expectation and variance are denoted
 by \eqn{E(Y)} and \eqn{V(Y)}. The actual observation is \eqn{y}.
 
-\bold{Log-likelihood:} Also known as log-score, logarithmic score, or log-density.
+\bold{Log-score:} Also known as logarithmic score. This is the negative log-likelihood
+where the negative sign has the effect that smaller values indicate a better fit.
+
+\deqn{
+  -\log f(y)
+}{
+  -log(f(y))
+}
+
+\bold{Log-likelihood:} Also known as log-density. Clearly, this is equivalent to the
+log-score above but using the conventional sign where bigger values indicate a better fit.
 
 \deqn{
   \log f(y)
@@ -125,32 +136,33 @@ data frame, or aggregated (e.g., by using \code{mean}, \code{sum}, or \code{summ
 data("FIFA2018", package = "distributions3")
 m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
 
-## in-sample log-likelihood
+## default: in-sample mean log-score and CRPS
+proscore(m)
+
+## element-wise score using a new data set (final of the tournament)
+final <- tail(FIFA2018, 2)
+proscore(m, newdata = final, aggregate = FALSE)
+
+## replicate in-sample log-likelihood
 proscore(m, type = "loglik", aggregate = sum)
 logLik(m)
 
 ## compute mean of all available scores
-proscore(m, type = c("LogS", "CRPS", "MAE", "MSE", "DSS"), aggregate = TRUE)
-## note that "LogS" and "loglik" above are both matched to using
-## the log-likelihood but the user-supplied spelling is preserved
+proscore(m, type = NULL)
 
-## prediction using a new data set (final of the tournament)
-final <- tail(FIFA2018, 2)
-proscore(m, newdata = final, type = c("LogLik", "CRPS", "MAE", "MSE", "DSS"))
+## upper vs. lower case spelling is matched internally but preserved in output
+proscore(m, type = c("logs", "crps"))
+proscore(m, type = c("Log-score", "CRPS"))
 
 ## least-squares regression for speed and breaking distance of cars
 data("cars", package = "datasets")
 m <- lm(dist ~ speed, data = cars)
 
-## replicate in-sample residual sum of squares (aka deviance) by taking
-## the sum (rather than the mean) of the squared errors
-proscore(m, type = "MSE", aggregate = sum)
-deviance(m)
-
-## note that the log-likelihood does not match exactly due to using
-## the least-squares rather than the maximum-likelihood estimate of the
-## error variance (divising by n rather than n - k)
-proscore(m, type = "loglikelihood", aggregate = sum)
+## replicate in-sample log-likelihood and residual sum of squares
+## (aka deviance) by taking the sum (rather than the mean) of the
+## log-density and squared errors, respectively
+proscore(m, type = c("loglik", "MSE"), aggregate = sum)
 logLik(m)
+deviance(m)
 }
 \keyword{regression}
