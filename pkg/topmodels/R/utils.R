@@ -17,14 +17,14 @@ set_minimum_transparency <- function(col, alpha_min) {
   return(col)
 }
 
-#' Helper functions to check available support for some S3methods
-#'
-#' @param method character, name of the method (e.g., is_continuous, print, ...)
-#' @param classes character vector of length > 0, classes to check.
-#'
-#' @return Returns TRUE if the method exists for one of the given classes, else FALSE.
-#'
-#' @importFrom utils getS3method
+# Helper functions to check available support for some S3methods
+#
+# @param method character, name of the method (e.g., is_continuous, print, ...)
+# @param classes character vector of length > 0, classes to check.
+#
+# @return Returns TRUE if the method exists for one of the given classes, else FALSE.
+#
+# @importFrom utils getS3method
 hasS3method <- function(method, classes) {
   any(sapply(classes, function(cls) {
     tryCatch(is.function(getS3method(method, class = cls)), error = function(e) FALSE)
@@ -235,19 +235,19 @@ wide_to_long <- function(x, id_cols, keep_cols, values_from, names_to, values_to
 }
 
 
-#' Make Elements in Character Vector Unique
-#'
-#' Takes an existing character vector and ensures that all elements are unique
-#' by adding 1, 2, 3, ... for those elements which are not unique. Used in a series
-#' of plots to ensure that the grouping works as expected (must have unique names).
-#'
-#' @param x character vector.
-#'
-#' @return Returns a character vector of the same length with possibly modified
-#' elements. If all elements in \code{x} are uinque, the return value is identical
-#' with the original vector \code{x}.
-#'
-#' @author Reto
+# Make Elements in Character Vector Unique
+#
+# Takes an existing character vector and ensures that all elements are unique
+# by adding 1, 2, 3, ... for those elements which are not unique. Used in a series
+# of plots to ensure that the grouping works as expected (must have unique names).
+#
+# @param x character vector.
+#
+# @return Returns a character vector of the same length with possibly modified
+# elements. If all elements in \code{x} are uinque, the return value is identical
+# with the original vector \code{x}.
+#
+# @author Reto
 make_unique <- function(x) {
     stopifnot(is.character(x))
     if (anyDuplicated(x)) {
