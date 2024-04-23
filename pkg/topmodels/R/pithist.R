@@ -2203,8 +2203,8 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
         y = ymax
       )
       grid::grobTree(
-        ggplot2::GeomStep$draw_panel(data1, panel_params, coord, direction),
-        ggplot2::GeomStep$draw_panel(data2, panel_params, coord, direction)
+        ggplot2::GeomStep$draw_panel(data = data1, panel_params = panel_params, coord = coord, direction = direction),
+        ggplot2::GeomStep$draw_panel(data = data2, panel_params = panel_params, coord = coord, direction = direction)
       )
     }
   },
