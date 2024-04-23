@@ -35,10 +35,17 @@
   `BAMLSS()` is now in `bamlss`, and `Empirical()` is still in `topmodels` for
   now.
 
+* New wrapper function `promodel()` that adds the class `"promodel"` (for
+  probabilistic model) to an existing model object so that `predict()`
+  dispatches to `procast()` and `residuals()` dispatches to `proresiduals()`.
+  This facilitates using model functionality based on the standard `predict()`
+  and `residuals()` methods like `marginaleffects`.
+
 
 # topmodels 0.2-0
 
-* New version, presented at DAGStat 2022.
+* New version, presented at DAGStat 2022 and at useR! 2022 (together with
+  `distributions3`).
 
 * Some conceptual changes in the generation of graphical evaluation tools for
   both base R and `ggplot2` style graphics.

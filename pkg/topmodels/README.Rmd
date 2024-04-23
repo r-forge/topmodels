@@ -11,14 +11,14 @@ knitr::opts_chunk$set(
 # Infrastructure for Forecasting and Assessment of Probabilistic Models <img src="man/figures/logo_hex.png" align="right" alt="" width="180px" style="padding: 0 0 0 0.5em;" />
 
 Unified infrastructure for probabilistic models and distributional regressions:
-Computation of probabilities, densities, scores, and Hessians.
-Probabilistic forecasting. Diagnostic graphics such as rootograms, PIT histograms,
-reliagrams (reliability diagrams), (randomized) quantile residual Q-Q plots,
-and worm plots.
+Probabilistic forecasting of in-sample and out-of-sample of probabilities,
+densities, quantiles, and moments. Probabilistic residuals and scoring via log-score (or log-likelihood),
+(continuous) ranked probability score, etc. Diagnostic graphics like rootograms, PIT histograms,
+(randomized) quantile residual Q-Q plots, and reliagrams (reliability diagrams).
 
 Modular object-oriented implementation with support for many model objects, including
 `lm`, `glm`, `glm.nb`, `gamlss`, `bamlss`, `hurdle`, `zeroinfl`, `zerotrunc`, `crch`,
-and more to come.
+`betareg()`, and more to come.
 
 ```{r topmodels, include = FALSE}
 library("topmodels")

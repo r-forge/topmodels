@@ -7,7 +7,7 @@ template:
     image:
       src: logo.png
     twitter:
-      creator: "@MoritzNLang"
+      creator: "@AchimZeileis"
       card: summary
 
 navbar:
@@ -41,32 +41,32 @@ reference:
   - title: "Procast infrastructure"
     contents: 
       - procast
+      - proresiduals
       - proscore
-      - pitresiduals
-      - qresiduals
+      - promodel
       - newresponse
       - crps.distribution
   - title: "Probabilistic model diagnostics"
     contents: 
+      - rootogram
       - pithist
       - qqrplot
-      - reliagram
-      - rootogram
       - wormplot
+      - reliagram
   - title: "Plotting probabilistic model diagnostics"
     contents: 
+      - plot.rootogram
       - plot.pithist
       - plot.qqrplot
       - plot.reliagram
-      - plot.rootogram
-      - topmodels
+      - geom_rootogram
       - geom_pithist
       - geom_qqrplot
-      - geom_rootogram
+      - topmodels
   - title: "Interfacs to models/distributions"
     contents:
-      - GAMLSS
-      - prodist.gamlss
-      - BAMLSS
-      - prodist.bamlss
       - Empirical
+  - title: "Data sets"
+    contents:
+      - SerumPotassium
+      - VolcanoHeights
