@@ -1,31 +1,60 @@
 # topmodels 0.3-0
 
-* Added `crps.distribution()` method for numeric approximation/numeric integration to calculate
-  the CRPS for univariate distributions where no analytic solution is available in the
+* Entire package now leverages `distributions3` for object-oriented computations
+  on distributions fitted/predicted by various kinds of models.
+  
+* In particular, `procast()` first obtains `prodist()` (probability distribution)
+  and then applies the standard methods for computing densities, probabilities,
+  quantiles, and moments.
+  
+* Similarly, `proresiduals()` obtains the predicted distributions and compares
+  with the `newresponse()` to obtain (randomized) quantile residuals by default.
+  Alternatively, PIT residuals or Pearson residuals as well as raw response
+  residuals are available. The function `proresiduals()` also replaces both
+  `pitresiduals()` and `qresiduals()` which were provided by earler versions of
+  `topmodels`.
+  
+* Via the same approach `proscore()` implements various kinds of scoring rules,
+  in particular log-score (negative log-likelihood), (continuous) ranked
+  probability score (CRPS), mean absolute error (MAE), mean squared error (MSE),
+  and the Dawid-Sebastiani-Score (DSS). The standard log-likelihood (without
+  sign change) is also available.
+  
+* For the CRPS one can either leverage the functions from the `scoringRules`
+  package (if available) or the new `crps.distribution()` method for numeric
+  approximation/numeric integration to calculate the CRPS for univariate
+  distributions. This is also used when no analytic solution is available in the
   `scoringRules` package.
 
-* Added several distribution/model interfaces, namely: `GAMLSS()`, `BAMLSS()`, and `Empirical()`.
-  However, these may be removed again in `topmodels` and be contributed to packages `gamlss.dist`,
-  `bamlss`, and `distributions3` instead.
+* The graphical functions `rootogram()`, `pithist()`, `qqrplot()`, `wormplot()`,
+  and `reliagram()` are also switched to the new infrastructure based on
+  `distributions3`, notably via `procast()` and `proresiduals()`.
+
+* New distribution/model interfaces were added first in `topmodels` but some
+  subsequently moved to other packages: `GAMLSS()` is now in `gamlss.dist`,
+  `BAMLSS()` is now in `bamlss`, and `Empirical()` is still in `topmodels` for
+  now.
 
 
 # topmodels 0.2-0
 
-* Version, presented at DAGStat 2022.
+* New version, presented at DAGStat 2022.
 
-* Some conceptual changes in the generation of graphical evaluation tools for both base *R* and
-  `ggplot2` style graphics.
+* Some conceptual changes in the generation of graphical evaluation tools for
+  both base R and `ggplot2` style graphics.
 
-* `autoplot()` builds now on newly written `geom_*()` and `stat_*()` functions. 
+* `autoplot()` builds now on newly written `geom_*()` and `stat_*()` functions.
 
 
 # topmodels 0.1-0
 
 * First version, presented at useR! 2021.
 
-* Diagnostic graphics for Q-Q plots of randomized residuals, PIT (probability integral transform)
-  histograms, reliability diagrams, wormplots, and rootograms. All graphical evaluations can be
-  rendered both in base *R* graphics and `ggplot2`.
+* Diagnostic graphics for Q-Q plots of randomized residuals, PIT (probability
+  integral transform) histograms, reliability diagrams, wormplots, and
+  rootograms. All graphical evaluations can be rendered both in base R graphics
+  and `ggplot2`.
 
-* Basic probabilistic forecasting infrastructure for `lm`, `crch`, `disttree` and `glm` model
-  classes. Not all families and forecasting types are fully supported yet.
+* Basic probabilistic forecasting infrastructure for `lm`, `crch`, `disttree`
+  and `glm` model classes. Not all families and forecasting types are fully
+  supported yet.

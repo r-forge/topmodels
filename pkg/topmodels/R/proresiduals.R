@@ -22,20 +22,22 @@
 #' (see Warton 2007) are simply the expected cumulative distribution (CDF) evaluated at the
 #' observations (Dawid, 1984). For discrete distributions, a uniform random value is drawn
 #' from the range of probabilities between the CDF at the observation and the supremum
-#' of the CDF left of it. If the model fits well the PIT residuals should be uniformly
+#' of the CDF to the left of it. If the model fits well the PIT residuals should be uniformly
 #' distributed.
 #'
 #' In order to obtain normally distributed residuals for well-fitting models (like often
 #' desired in linear regression models), \code{"quantile"} residuals, proposed by Dunn and
 #' Smyth (1996), additionally transform the PIT residuals by the standard normal quantile function.
 #'
-#' As quantile residuals and PIT residuals are subject to randomness for discrete
-#' (and also mixed discrete-continuous) distributions, it is sometimes
+#' As quantile residuals and PIT residuals are subject to randomness for discrete distributions
+#' (and also for mixed discrete-continuous distributions), it is sometimes
 #' useful to explore the extent of the random variation by obtaining multiple replications.
-#' In \code{proresiduals} this can be achieved by setting \code{nsim}.
+#' In \code{proresiduals} this can be achieved by setting \code{random > 1}.
 #'
-#' Alternatively, the randomness can be suppressed by always obtaining mid-quantile
-#' residuals, see Feng et al. (2020, or some other fixed quantile of each probability interval.
+#' Alternatively, the randomness can be suppressed via \code{random = FALSE} and then only
+#' one (or more) fixed quantile(s) of each probability interval is returned. The default is
+#' \code{prob = 0.5} which corresponds to mid-quantile residuals (see Feng et al. 2020). Another
+#' common setting is \code{prob = c(0, 1)} which yields the range of possible residuals.
 #'
 #' @param object an object for which a \code{\link[topmodels]{newresponse}} and a
 #'   \code{\link[distributions3]{prodist}} method is available.
