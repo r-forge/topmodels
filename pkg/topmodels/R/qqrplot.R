@@ -145,6 +145,7 @@ qqrplot <- function(object, ...) {
 
 #' @rdname qqrplot
 #' @method qqrplot default
+#' @importFrom utils getS3method
 #' @export
 qqrplot.default <- function(
                             ## computation arguments
