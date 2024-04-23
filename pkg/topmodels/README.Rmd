@@ -18,7 +18,7 @@ densities, quantiles, and moments. Probabilistic residuals and scoring via log-s
 
 Modular object-oriented implementation with support for many model objects, including
 `lm`, `glm`, `glm.nb`, `gamlss`, `bamlss`, `hurdle`, `zeroinfl`, `zerotrunc`, `crch`,
-`betareg()`, and more to come.
+`betareg`, and more to come.
 
 ```{r topmodels, include = FALSE}
 library("topmodels")
@@ -33,19 +33,19 @@ hex <- c("#b52267", "#2c2c2b", "#999999", "#f8f8f8")
 set.seed(0)
 ```
 
-```{r rootogram, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+```{r rootogram, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.0, fig.align = "center", dev = "svg"}
 autoplot(rootogram(m, plot = FALSE), expected_colour = hex[1], colour = hex[2], fill = hex[3]) + theme_minimal()
 ```
 
-```{r pithist, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+```{r pithist, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.0, fig.align = "center", dev = "svg"}
 autoplot(pithist(m, plot = FALSE), confint_colour = hex[1], colour = hex[2], fill = hex[3], expected_colour = hex[1]) + theme_minimal()
 ```
 
-```{r reliagram, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+```{r reliagram, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.0, fig.align = "center", dev = "svg"}
 autoplot(reliagram(m, plot = FALSE), colour = hex[1], fill = hex[2], ref_colour = hex[2], ref_linetype = 1, ref_size = 1.2) + theme_minimal()
 ```
 
-```{r qqrplot, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.5, fig.align = "center", dev = "svg"}
+```{r qqrplot, echo = FALSE, fig.show = "hide", fig.width = 4.2, fig.height = 4.0, fig.align = "center", dev = "svg"}
 autoplot(qqrplot(m, plot = FALSE), alpha = 1, colour = hex[2], confint_colour = hex[2], simint_fill = hex[3], ref_colour = hex[1], ref_linetype = 1, ref_size = 1.2) + theme_minimal()
 ```
 

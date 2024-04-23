@@ -12,7 +12,7 @@ densities, quantiles, and moments. Probabilistic residuals and scoring via log-s
 
 Modular object-oriented implementation with support for many model objects, including
 `lm`, `glm`, `glm.nb`, `gamlss`, `bamlss`, `hurdle`, `zeroinfl`, `zerotrunc`, `crch`,
-`betareg()`, and more to come.
+`betareg`, and more to come.
 
 
 
