@@ -63,10 +63,9 @@ all of the functions that become directly available when interfacing the `distri
 | Function             | Description                                                                    |
 |:---------------------|:-------------------------------------------------------------------------------|
 | _Numeric quantities_ |                                                                                |
-| `procast()`          | Probabilistic forecasts (probabilities, quantiles, etc.) based on model objects |
+| `procast()`          | Probabilistic forecasts (probabilities, quantiles, etc.) based on model objects|
 | `proscore()`         | Evaluate scoring rules for procasts                                            |
-| `pitresiduals()`     | Probability integral transform (PIT) residuals                                 |
-| `qresiduals()`       | (Randomized) quantile residuals                                                |
+| `proresiduals()`     | Residuals for probabilistic regression models (quantile, PIT, Pearson, ...)    |
 | _Visualizations_     |                                                                                |
 | `pithist()`          | PIT histograms                                                                 |
 | `qqrplot()`          | Q-Q plots for quantile residuals                                               |
@@ -299,7 +298,7 @@ procast(m, newdata = RainIbk2, type = "cdf", at = 0)
 Instead of `"mean"` and `"cdf"`, we could also use the aliases `"response"` and `"probability"`,
 respectively.
 
-Similarly, other functions such as `proscore()`, `qresiduals()`, `pithist()`, or `rootogram()`
+Similarly, other functions such as `proscore()`, `proresiduals()`, `pithist()`, or `rootogram()`
 can be used once all of the methods from the table above are defined.
 
 
