@@ -20,12 +20,12 @@ expect_equal(
 m2 <- glm(dist ~ speed, data = cars, family = poisson)
 
 expect_equal(
-  proresiduals(m2, random = FALSE, prob = 1),
+  proresiduals(m2, prob = 1),
   qnorm(ppois(setNames(cars$dist, rownames(cars)), lambda = fitted(m2)))
 )
 
 expect_equal(
-  proresiduals(m2, random = FALSE, prob = 0),
+  proresiduals(m2, prob = 0),
   qnorm(ppois(setNames(cars$dist, rownames(cars)) - 1, fitted(m2)))
 )
 
@@ -37,11 +37,11 @@ cars$dist30 <- pmax(cars$dist, 30)
 m3 <- crch(dist30 ~ speed | speed, left = 30, data = cars)
 
 expect_equal(
-  proresiduals(m3, random = FALSE, prob = 1),
+  proresiduals(m3, prob = 1),
   qnorm(predict(m3, type = "probability", at = cars$dist30))
 )
 
 expect_equal(
-  proresiduals(m3, random = FALSE, prob = 0),
+  proresiduals(m3, prob = 0),
   qnorm(predict(m3, type = "probability", at = cars$dist30 - sqrt(.Machine$double.eps)))
 )

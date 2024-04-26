@@ -210,7 +210,7 @@ qqrplot.default <- function(
   # COMPUTATION OF QUANTILE RESIDUALS
   # -------------------------------------------------------------------
   rtyp <- if (scale == "normal") "quantile" else "pit"
-  qres <- proresiduals(object, newdata = newdata, type = rtyp, random = nsim, delta = delta)
+  qres <- proresiduals(object, newdata = newdata, type = rtyp, nsim = nsim, delta = delta)
   if (is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
 
   ## compute corresponding quantiles on the transformed scale (default: normal)
@@ -229,7 +229,7 @@ qqrplot.default <- function(
   ## compute rg interval
   ## TODO: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   if (!isFALSE(simint)) {
-    tmp <- proresiduals(object, newdata = newdata, type = rtyp, random = simint_nrep, delta = delta)
+    tmp <- proresiduals(object, newdata = newdata, type = rtyp, nsim = simint_nrep, delta = delta)
     simint_prob <- (1 - simint_level) / 2
     simint_prob <- c(simint_prob, 1 - simint_prob)
     qres_rg_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = simint_prob[1], na.rm = TRUE)

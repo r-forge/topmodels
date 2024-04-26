@@ -11,7 +11,7 @@ proresiduals(object, ...)
   object,
   newdata = NULL,
   type = c("quantile", "pit", "pearson", "response"),
-  random = TRUE,
+  nsim = NULL,
   prob = NULL,
   delta = NULL,
   ...
@@ -29,14 +29,12 @@ which to predict. If omitted, the original observations are used.}
 \item{type}{character indicating whether quantile (default), PIT, Pearson, or raw response
 residuals should be computed.}
 
-\item{random}{logical or numeric. Should random residuals be computed for \code{type = "quantile"}
-and \code{"pit"}? The default is \code{TRUE} and if set to \code{FALSE}, fixed
-quantiles given at the probabilities in \code{prob} are used (defaulting to mid-quantiles).
-If \code{random > 1}, then multiple random replications of quantile or PIT
-residuals are computed. For other residual types \code{random} has no effect.}
+\item{nsim}{integer. The number of randomly simulated residuals of \code{type = "quantile"}
+or \code{"pit"}. By default one simulation is returned.}
 
-\item{prob}{numeric. Fixed probabilities for the quantile or PIT residuals when
-\code{random = FALSE}.}
+\item{prob}{numeric. Instead of simulating the probabilities (between 0 and 1) for
+\code{type = "quantile"} or \code{"pit"}, a vector of probabilities can be specified,
+e.g., \code{prob = 0.5} corresponding to mid-quantile residuals.}
 
 \item{delta}{numeric. The minimal difference to compute the range of
 proabilities corresponding to each observation according to get (randomized)
@@ -81,49 +79,37 @@ Smyth (1996), additionally transform the PIT residuals by the standard normal qu
 
 As quantile residuals and PIT residuals are subject to randomness for discrete distributions
 (and also for mixed discrete-continuous distributions), it is sometimes
-useful to explore the extent of the random variation by obtaining multiple replications.
-In \code{proresiduals} this can be achieved by setting \code{random > 1}.
-
-Alternatively, the randomness can be suppressed via \code{random = FALSE} and then only
-one (or more) fixed quantile(s) of each probability interval is returned. The default is
-\code{prob = 0.5} which corresponds to mid-quantile residuals (see Feng et al. 2020). Another
-common setting is \code{prob = c(0, 1)} which yields the range of possible residuals.
+useful to explore the extent of the random variation. This can be done either by
+obtaining multiple replications (via \code{nsim}) or by computing fixed quantiles
+of each probability interval such as \code{prob = 0.5} (corresponding to mid-quantile residuals,
+see Feng et al. 2020). Another common setting is \code{prob = c(0, 1)} yielding the range of
+possible residuals.
 }
 \examples{
 ## Poisson GLM for FIFA 2018 data
 data("FIFA2018", package = "distributions3")
 m <- glm(goals ~ difference, data = FIFA2018, family = poisson)
 
-## random quantile residuals
+## random quantile residuals (on original data)
 proresiduals(m)
-
-## Pearson residuals
-proresiduals(m, type = "pearson")
 
 ## various flavors of residuals on small new data
 nd <- data.frame(goals = c(1, 1, 1), difference = c(-1, 0, 1))
 
-## random quantile residuals
-set.seed(0)
+## quantile residuals: random (1 sample), random (5 samples), mid-quantile (non-random)
 proresiduals(m, newdata = nd, type = "quantile")
-set.seed(0)
-proresiduals(m, newdata = nd, type = "quantile", random = 5)
+proresiduals(m, newdata = nd, type = "quantile", nsim = 5)
+proresiduals(m, newdata = nd, type = "quantile", prob = 0.5)
 
-## underlying probability integral transform (PIT) without transformation to normal
-set.seed(0)
-proresiduals(m, newdata = nd, type = "pit", random = 5)
+## PIT residuals (without transformation to normal): random vs. minimum/maximum quantile
+proresiduals(m, newdata = nd, type = "pit", nsim = 5)
+proresiduals(m, newdata = nd, type = "pit", prob = c(0, 1))
 
 ## raw response residuals (observation - expected mean)
 proresiduals(m, newdata = nd, type = "response")
 
-## standardized Pearson residuals (additionally divide by standard deviation)
-proresiduals(m, newdata = nd, type = "response")
-
-## (non-random) mid-quantile residuals
-proresiduals(m, newdata = nd, type = "quantile", random = FALSE)
-
-## minimum/median/maximum quantile residuals
-proresiduals(m, newdata = nd, type = "quantile", random = FALSE, prob = c(0, 0.5, 1))
+## standardized Pearson residuals (response residuals divided by standard deviation)
+proresiduals(m, newdata = nd, type = "pearson")
 
 ## compute residuals by manually obtaining distribution and response
 ## proresiduals(procast(m, newdata = nd, drop = TRUE), nd$goals)

@@ -256,7 +256,7 @@ pithist.default <- function(
   if (type == "random") {
     # -------------------------------------------------------------------
     rtyp <- if (scale == "normal") "quantile" else "pit"
-    p <- proresiduals(object, newdata = newdata, type = rtyp, delta = delta, random = nsim)
+    p <- proresiduals(object, newdata = newdata, type = rtyp, delta = delta, nsim = nsim)
 
     ## get breaks: part 2
     ## TODO: (ML) maybe use xlim instead or `0` and `1`
@@ -276,7 +276,7 @@ pithist.default <- function(
       ## helper function for calculating simulation interval
       compute_simint <- function(object, newdata, scale, delta, nsim, breaks) {
         rtyp <- if (scale == "normal") "quantile" else "pit"
-        simint_p <- proresiduals(object, newdata = newdata, type = rtyp, delta = delta, random = nsim)
+        simint_p <- proresiduals(object, newdata = newdata, type = rtyp, delta = delta, nsim = nsim)
 
         ## TODO: (ML) Maybe nicer workaround to get not values outside breaks
         simint_p[simint_p < min(breaks)] <- min(breaks)
@@ -304,7 +304,7 @@ pithist.default <- function(
     ## compare "nonrandom" in Czado et al. (2009)
 
     ## minimum and maximum PIT for each observation (P_x-1 and P_x)
-    p <- proresiduals(object, newdata = newdata, type = "pit", delta = delta, random = FALSE, prob = c(0, 1))
+    p <- proresiduals(object, newdata = newdata, type = "pit", delta = delta, prob = c(0, 1))
 
     ## equation 2: CDF for each PIT (continuous vs. discrete)
     pFun <- if (scale == "uniform") punif else pnorm
