@@ -204,7 +204,12 @@ rootogram.default <- function(
 
   ## default annotation
   if (is.null(xlab)) {
-    xlab <- as.character(attr(terms(object), "variables"))[2L]
+    mt <- try(terms(object), silent = TRUE)    
+    xlab <- if(inherits(mt, "try-error")) {
+      ""
+    } else {
+      as.character(attr(mt, "variables"))[2L]
+    }
   }
   if (is.null(ylab)) {
     ylab <- if (scale == "raw") "Frequency" else "sqrt(Frequency)"
