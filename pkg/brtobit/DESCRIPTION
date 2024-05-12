@@ -8,7 +8,7 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
 	     person(given = "Christian", family = "Kleiber", role = "ctb", email = "Christian.Kleiber@unibas.ch", comment = c(ORCID = "0000-0002-6781-4733")))
 Depends: R (>= 3.6.0)
 Imports: stats, crch, sandwich
-Suggests: memisc
+Suggests: distributions3, memisc
 Description: Tobit models are regression models with a Gaussian response variable left-censored at zero, constant latent variance,
   and a latent mean that depends on covariates through a linear predictor. As an alternative to plain maximum likelihood estimation,
   the adjusted score equations of Kosmidis and Firth (2010) <doi:10.1214/10-ejs579> are utilized to obtain bias-reduced estimates of

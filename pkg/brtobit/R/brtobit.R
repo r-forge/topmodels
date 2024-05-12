@@ -351,7 +351,7 @@ predict.brtobit <- function(object, newdata = NULL,
     n <- if(is.null(newdata)) object$nobs else NROW(newdata)
   }
   if(type != "response") {
-    scale <- object$coefficients[length(object$coefficients)]
+    scale <- sqrt(object$coefficients[length(object$coefficients)])
     scale <- rep.int(scale, n) 
   }
 
@@ -360,8 +360,8 @@ predict.brtobit <- function(object, newdata = NULL,
     "response" = location,
     "scale" = scale,
     "parameter" = data.frame(location, scale),
-    "probability" = pnorm(at, mean = location, sd = scale),
-    "quantile" = pmax(0, qnorm(at, mean = location, sd = scale))
+    "probability" = pcnorm(at, mean = location, sd = scale, left = 0),
+    "quantile" = qcnorm(at, mean = location, sd = scale, left = 0)
   )
   return(rval)
 }
@@ -445,3 +445,10 @@ getSummary.brtobit <- function(obj, alpha = 0.05, ...) {
 ##   "N" = "($N:d)"
 ## ))
 
+prodist.brtobit <- function(object, ...) {
+  ## location and scale parameters
+  par <- predict(object, type = "parameter", ...)
+
+  ## distributions3 object
+  crch::CensoredNormal(mu = setNames(par$location, rownames(par)), sigma = par$scale, left = 0)
+}

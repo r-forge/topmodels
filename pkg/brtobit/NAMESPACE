@@ -1,10 +1,11 @@
-importFrom("crch", "dcnorm")
+importFrom("crch", "dcnorm", "pcnorm", "qcnorm")
 importFrom("sandwich", "bread", "estfun")
 importFrom("stats",
   "dnorm", "pnorm", "qnorm",
   "lm.fit", ".getXlevels", "printCoefmat",
   "AIC", "BIC", "coef", "predict", "vcov",
-  "delete.response", "model.frame", "model.matrix", "model.response", "na.pass", "terms")
+  "delete.response", "model.frame", "model.matrix", "model.response", "na.pass", "terms",
+  "setNames")
 
 export(
   "brtobit",
@@ -25,3 +26,4 @@ S3method("summary", "brtobit")
 S3method("print", "summary.brtobit")
 S3method("vcov", "brtobit")
 S3method(memisc::getSummary, "brtobit")
+S3method(distributions3::prodist, "brtobit")

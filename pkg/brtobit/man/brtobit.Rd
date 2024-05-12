@@ -7,6 +7,7 @@
 \alias{vcov.brtobit}
 \alias{fitted.brtobit}
 \alias{predict.brtobit}
+\alias{prodist.brtobit}
 
 \alias{print.brtobit}
 \alias{summary.brtobit}
@@ -79,8 +80,10 @@ brtobit_control(fsmaxit = 100, start = NULL, epsilon = 1e-08, type = "BR", ...)
   \code{\link[base]{print}}, \code{\link[base]{summary}}, \code{\link[stats]{coef}}, 
   \code{\link[stats]{vcov}}, \code{\link[stats]{logLik}}, \code{\link[stats]{predict}}, 
   \code{\link[stats]{model.frame}}, \code{\link[stats]{model.matrix}},
-  \code{\link[sandwich]{bread}} (from the \pkg{sandwich} package), and
-  \code{\link[memisc]{getSummary}} (from the \pkg{memisc} package, enabling \code{\link[memisc]{mtable}}).
+  \code{\link[sandwich]{bread}} (from the \pkg{sandwich} package),
+  \code{\link[memisc]{getSummary}} (from the \pkg{memisc} package, enabling \code{\link[memisc]{mtable}}), and
+  \code{\link[distributions3]{prodist}} (from the \pkg{distributions3} package, enabling
+  various methods and graphics from the \pkg{topmodels} packages).
   
   In the future we intend to extend the implementation to heteroscedastic tobit
   models in the \code{\link[crch]{crch}} package (Messner, Mayr, Zeileis 2016).
