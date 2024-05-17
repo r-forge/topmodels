@@ -374,8 +374,9 @@ rootogram.default <- function(
   ## observed frequencies
   val_observed <- as.vector(xtabs(w ~ cut(y, breaks, include.lowest = TRUE)))
 
-  ## expected frequencies (part2)
-  val_expected <- colSums(p * w)
+  ## frequencies and expected frequencies (part2)
+  frequencies <- p * w
+  val_expected <- colSums(frequencies)
 
   # -------------------------------------------------------------------
   # OUTPUT AND OPTIONAL PLOTTING
@@ -387,6 +388,7 @@ rootogram.default <- function(
     mid = mid,
     width = diff(breaks) * width
   )
+  rval$frequencies <- t(frequencies)
 
   ## add attributes
   attr(rval, "style")    <- style
