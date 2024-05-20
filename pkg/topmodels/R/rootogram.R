@@ -58,9 +58,9 @@
 #' explicitly specify the return class, or to \code{NULL} (default) in which
 #' case the return class is conditional on whether the package \code{"tibble"}
 #' is loaded.
-#' @param breaks \code{NULL} (default) or numeric to manually specify the breaks for
-#' the rootogram intervals. A single numeric (larger \code{0}) specifies the number of breaks
-#' to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.
+#' @param breaks \code{NULL} (default) or numeric vector to specifying the breaks for
+#' the rootogram intervals. A single numeric (larger than \code{0}) specifies the number of breaks
+#' to be chosen via \code{\link{pretty}} (except for discrete distributions).
 #' @param width \code{NULL} (default) or single positive numeric. Width of the histogram bars.
 #' Will be ignored for non-discrete distributions.
 #' @param style character specifying the syle of rootogram (see 'Details').
@@ -266,7 +266,7 @@ rootogram.default <- function(
   ## is_discrete, is_continuous and support, we assume
   ## a 'mixed' distribution and set the support to the
   ## range of the quantiles of the distributions.
-  if (!hasS3$is_discrete & !hasS3$is_continuous & !hasS3$support & is.null(breaks)) {
+  if (!hasS3$is_discrete & !hasS3$is_continuous & !hasS3$support & length(breaks) <= 1L) {
     response_type   <- "mixed"
     dist_support    <- range(quantile(tmp_prodist, probs = c(0.01, 0.99), elementwise = FALSE))
   } else {
@@ -283,6 +283,12 @@ rootogram.default <- function(
   if (any(is.na(dist_support))) stop("invalid support for distributions, got NA")
 
   ## checking/setting breakpoints
+  if (length(breaks) == 1L) {
+    n_breaks <- breaks
+    breaks <- NULL
+  } else {
+    n_breaks <- grDevices::nclass.Sturges(yw)
+  }
   if (!is.null(breaks)) {
       breaks <- sort(breaks[!is.na(breaks) & is.finite(breaks)])
       stopifnot("number of non-finite non-missing breaks must be >= 3" = length(breaks) >= 3)
@@ -308,7 +314,7 @@ rootogram.default <- function(
       if(!is.finite(breaks[2L])) breaks[2L] <-
         ceiling(pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99))))
 
-      breaks <- pretty(breaks, n = grDevices::nclass.Sturges(yw), min.n = 1)
+      breaks <- pretty(breaks, n = n_breaks, min.n = 1)
 
     } else {
       rng_sup <- dist_support
@@ -321,7 +327,7 @@ rootogram.default <- function(
         rng_sup[2] <- ceiling(pmax(max(yw, na.rm = TRUE), max(quantile(tmp_prodist, 0.99))))
       }
 
-      breaks <- pretty(rng_sup, n = grDevices::nclass.Sturges(yw), min.n = 1)
+      breaks <- pretty(rng_sup, n = n_breaks, min.n = 1)
       breaks_delta <- unique(diff(breaks))
 
       ## making pretty bins prettier; ensure that all bins are
@@ -388,7 +394,7 @@ rootogram.default <- function(
     mid = mid,
     width = diff(breaks) * width
   )
-  rval$frequencies <- t(frequencies)
+  rval$distribution <- t(frequencies)
 
   ## add attributes
   attr(rval, "style")    <- style
@@ -435,8 +441,13 @@ c.rootogram <- function(...) {
     class <- "data.frame"
   }
 
-  ## remove temporary the class (needed below for `c()`)
-  rval <- lapply(rval, function(x) structure(x, class = class(x)[!class(x) == "rootogram"]))
+  ## remove some classes temporarily (needed below for c() and rbind())
+  dist <- vector(mode = "list", length = length(rval))
+  for (i in seq_along(rval)) {
+    class(rval[[i]]) <- setdiff(class(rval[[i]]), "rootogram")
+    dist[[i]] <- rval[[i]][["distribution"]]
+    rval[[i]][["distribution"]] <- NULL
+  }
 
   ## convert always to data.frame
   if (class == "tibble") {
@@ -507,6 +518,15 @@ c.rootogram <- function(...) {
   n <- unlist(n)
   rval$group <- if (length(n) < 2L) NULL else rep.int(seq_along(n), n)
 
+  ## combine distributions (fill with 0s if necessary
+  if (!is.null(dist)) {
+    nr <- c(0, cumsum(vapply(dist, NROW, 0)))
+    nc <- vapply(dist, NCOL, 0)
+    rval$distribution <- matrix(0, nrow = nrow(rval), ncol = max(nc),
+      dimnames = list(NULL, colnames(dist[[which.max(nc)]])))
+    for(i in seq_along(dist)) rval$distribution[(nr[i] + 1L):nr[i + 1L], 1L:nc[i]] <- dist[[i]]
+  }
+
   ## add attributes
   attr(rval, "style") <- style
   attr(rval, "scale") <- scale
@@ -559,7 +579,7 @@ rbind.rootogram <- c.rootogram
 #' @param ref logical. Should a reference line be plotted?
 #' @param confint logical. Should confident intervals be drawn?
 #' @param confint_level numeric. The confidence level required.
-#' @param confint_type character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized. 
+#' @param confint_type character. Should \code{"pointwise"}, \code{"simultaneous"}, or \code{"tukey"} confidence intervals be visualized?
 #' @param confint_nrep numeric. The repetition number of simulation for computing the confidence intervals.
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the histogram style part of the base plot.
@@ -649,7 +669,7 @@ plot.rootogram <- function(x,
                            ref = NULL,
                            confint = NULL,
                            confint_level = 0.95,
-                           confint_type = c("pointwise", "simultaneous"),
+                           confint_type = c("pointwise", "simultaneous", "tukey"),
                            confint_nrep = 1000,
                            xlim = c(NA, NA),
                            ylim = c(NA, NA),
@@ -897,7 +917,7 @@ autoplot.rootogram <- function(object,
                                ref = NULL,
                                confint = NULL,
                                confint_level = 0.95,
-                               confint_type = c("pointwise", "simultaneous"),
+                               confint_type = c("pointwise", "simultaneous", "tukey"),
                                confint_nrep = 1000,
                                xlim = c(NA, NA),
                                ylim = c(NA, NA),
@@ -1253,7 +1273,7 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #' @param scale character specifying whether values should be transformed to the square root scale (not checking for original scale, so maybe applied again).
 #' @param linestyle Character string defining one of `"both"`, `"line"` or `"point"`.
 #' @param level numeric. The confidence level required.
-#' @param type character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized. 
+#' @param type character. Should \code{"pointwise"}, \code{"simultaneous"}, or \code{"tukey"} confidence intervals be visualized?
 #' @param nrep numeric. The repetition number of simulation for computing the confidence intervals.
 #' @param rootogram_style character specifying the syle of rootogram.
 #' @examples
@@ -1529,7 +1549,7 @@ stat_rootogram_confint <- function(mapping = NULL,
                                    inherit.aes = TRUE,
                                    level = 0.95,
                                    nrep = 1000,
-                                   type = c("pointwise", "simultaneous"),
+                                   type = c("pointwise", "simultaneous", "tukey"),
                                    scale = c("sqrt", "raw"),
                                    rootogram_style =  c("hanging", "standing", "suspended"),
                                    ...) {
@@ -1608,7 +1628,7 @@ geom_rootogram_confint <- function(mapping = NULL,
                                    inherit.aes = TRUE,
                                    level = 0.95,
                                    nrep = 1000,
-                                   type = c("pointwise", "simultaneous"),
+                                   type = c("pointwise", "simultaneous", "tukey"),
                                    scale = c("sqrt", "raw"),
                                    rootogram_style =  c("hanging", "standing", "suspended"),
                                    ...) {
@@ -1684,7 +1704,127 @@ GeomRootogramConfint <- ggplot2::ggproto("GeomRootogramConfint", ggplot2::Geom,
 # -------------------------------------------------------------------
 # HELPER FUNCTIONS FOR GETTING AN EXTENDED ROOTOGRAM OBJECT
 # -------------------------------------------------------------------
+#' @importFrom distributions3 is_discrete is_continuous PoissonBinomial
 compute_rootogram_confint <- function(object,
+                                      observed,
+                                      expected,
+                                      mid,
+                                      width,
+                                      level = 0.95,
+                                      nrep = 1000,
+                                      type = c("pointwise", "simultaneous", "tukey"),
+                                      scale = c("sqrt", "raw"),
+                                      style = c("hanging", "standing", "suspended"),
+                                      ...) {
+
+  ## checks
+  scale <- match.arg(scale, c("sqrt", "raw"))
+  type <- match.arg(type, c("pointwise", "simultaneous", "tukey"))
+  style <- match.arg(style, c("hanging", "standing", "suspended"))
+  stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+  stopifnot(is.numeric(nrep), length(nrep) == 1, nrep >= 0)
+
+  ## both type = "pointwise" and "simultaneous" only available with distribution object
+  if (!missing(object)) {
+    object_available <- TRUE
+    dist <- PoissonBinomial(object$distribution)
+  } else {
+    object_available <- FALSE
+    if (type != "tukey") message("without full rootogram 'object' only tukey intervals are available")
+    type <- "tukey"
+    dist <- NULL
+  }
+
+  ## two-sided alpha at level
+  alpha <- c((1 - level)/2, 1 - (1 - level)/2)
+
+  ## number of original observations
+  if (object_available) {
+    n <- length(unclass(dist))
+    m <- object$mid
+  } else {
+    n <- Inf
+    m <- mid
+  }
+
+  ## raw expected
+  if (object_available) {
+    y <- object$expected
+    if (attr(object, "scale") == "sqrt") y <- y^2
+  } else {
+    y <- expected
+    if (scale == "sqrt") y <- y^2
+  }
+
+  if (type == "pointwise") {
+
+    ## extract exact quantiles
+    x <- quantile(dist, alpha, elementwise = FALSE, drop = FALSE, ...)
+    rownames(x) <- m
+
+    ## compute midquantiles
+    midapprox <- function(i, j) {
+      xij <- pmax(0L, pmin(n, x[i, j] + (-1L:1L)))
+      pij <- cdf(dist[i], xij, elementwise = FALSE, ...)
+      midp <- pij - diff(c(0, pij))/2
+      approx(midp, xij, alpha[j], rule = 2)$y
+    }
+    for(i in 1L:nrow(x)) for(j in 1L:2L) x[i, j] <- midapprox(i, j)
+
+    ## transform wrt scale and style
+    if (scale == "sqrt") {
+      y <- sqrt(y)
+      x <- sqrt(x)
+    }
+    if (style != "standing") x <- y - x[, 2L:1L]
+
+  } else if (type == "simultaneous") {
+
+    ## random observations under distribution
+    ytab <- random(dist, nrep)
+    rownames(ytab) <- m
+    
+    ## scale if necessary
+    if (scale == "sqrt") {
+      y <- sqrt(y)
+      ytab <- sqrt(ytab)
+    }
+
+    ## simultaneous quantiles
+    x <- c(
+      quantile(apply(y - ytab, 2L, min), alpha[1L]),
+      quantile(apply(y - ytab, 2L, max), alpha[2L])
+    )
+    x <- matrix(rep(x, each = length(m)), ncol = 2L)
+    if (style == "standing") {
+      x <- y + x
+      x[] <- pmax(0, pmin(if (scale == "raw") n else sqrt(n), x))
+    }
+
+  } else if (type == "tukey") {
+  
+    ## Tukey intervals always the same, irrespective of level
+    if (abs(level - 0.95) > .Machine$double.eps^0.7) warning("'tukey' confidence intervals do not have a specific 'level'")
+  
+    ## for hanging or suspended rootogram the confidence intervals are all (-1, 1)
+    x <- matrix(rep(c(-1, 1), each = length(m)), ncol = 2L,
+      dimnames = list(m, c("lwr", "upr")))
+
+    ## if type is standing or scale is raw need to convert
+    if (scale == "raw" || style == "standing") {      
+      ## first convert to raw standing interval and then compute other flavors (if necessary)
+      x <- (sqrt(y) + x)^2
+      x[] <- pmax(0, pmin(n, x))
+      if (scale == "sqrt" && style == "standing") x <- sqrt(x)
+      if (scale == "raw" && style != "standing") x <- y - x[, 2L:1L]
+    }
+
+  }
+
+  data.frame(confint_lwr = x[, 1L], confint_upr = x[, 2L])
+}
+
+compute_rootogram_confint_orig <- function(object,
                                       observed,
                                       expected,
                                       mid,
@@ -1786,7 +1926,7 @@ summary.rootogram <- function(object,
                               scale = NULL,
                               style = NULL,
                               confint_level = 0.95,
-                              confint_type = c("pointwise", "simultaneous"),
+                              confint_type = c("pointwise", "simultaneous", "tukey"),
                               confint_nrep = 1000,
                               extend = TRUE,
                               ...) {
@@ -1864,11 +2004,11 @@ summary.rootogram <- function(object,
   attr(rval, "main") <- attr(object, "main")
 
   ## return as `data.frame` or `tibble`
-  if ("data.frame" %in% class(object)) {
-    class(rval) <- c("rootogram", "data.frame")
-  } else {
+  if ("tbl" %in% class(object)) {
     rval <- tibble::as_tibble(rval)
     class(rval) <- c("rootogram", class(rval))
+  } else {
+    class(rval) <- c("rootogram", "data.frame")
   }
 
   rval
@@ -1876,7 +2016,6 @@ summary.rootogram <- function(object,
 
 #' @export
 print.rootogram <- function(x, ...) {
-
   ## get arg `style` and `scale`
   style <- use_arg_from_attributes(x, "style", default = NULL, force_single = TRUE)
   scale <- use_arg_from_attributes(x, "scale", default = NULL, force_single = TRUE)
@@ -1884,27 +2023,15 @@ print.rootogram <- function(x, ...) {
   ## return custom print statement
   if (is.null(scale) || is.null(style)) {
     cat("A `rootogram` object without mandatory attributes `scale` and `style`\n\n")
-  } else if (all(c("ymin", "ymax") %in% names(x))) {
-    cat(
-      paste0(
-        sprintf(
-          "A `rootogram` object with `scale = \"%s\"` and `style = \"%s\"`",
-          scale,
-          style
-        ),
-        " with columns: `ymin` and `ymax`\n\n"
-      )
-    )
   } else {
-    cat(
-      sprintf(
-        "A `rootogram` object with `scale = '%s'` and `style = '%s'`\n\n",
-        scale,
-        style
-      )
-    )
+    dist <- if ("distribution" %in% names(x)) "\n(column `distribution` not shown)" else ""
+    cat(sprintf('A `rootogram` object with `scale = "%s"` and `style = "%s"`%s\n\n',
+      scale, style, dist))
   }
 
   ## call next print method
+  x_orig <- x
+  x <- x[, names(x) != "distribution"]
   NextMethod()
+  invisible(x_orig)
 }

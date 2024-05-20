@@ -13,7 +13,7 @@
   ref = NULL,
   confint = NULL,
   confint_level = 0.95,
-  confint_type = c("pointwise", "simultaneous"),
+  confint_type = c("pointwise", "simultaneous", "tukey"),
   confint_nrep = 1000,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -48,7 +48,7 @@
   ref = NULL,
   confint = NULL,
   confint_level = 0.95,
-  confint_type = c("pointwise", "simultaneous"),
+  confint_type = c("pointwise", "simultaneous", "tukey"),
   confint_nrep = 1000,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -96,7 +96,7 @@ roots (default) should be drawn.}
 
 \item{confint_level}{numeric. The confidence level required.}
 
-\item{confint_type}{character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized.}
+\item{confint_type}{character. Should \code{"pointwise"}, \code{"simultaneous"}, or \code{"tukey"} confidence intervals be visualized?}
 
 \item{confint_nrep}{numeric. The repetition number of simulation for computing the confidence intervals.}
 

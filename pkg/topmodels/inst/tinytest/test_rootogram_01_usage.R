@@ -117,7 +117,7 @@ expect_true(all(sapply(list(tbl_r1, tbl_r2, tbl_r3), function(x) inherits(x, "tb
 tmp <- list(r1, r2, r3, tbl_r1, tbl_r2, tbl_r3)
 expect_true(all(sapply(tmp, function(x) class(x)[1] == "rootogram")),
             info = "Missing \"rootogram\" as main class for at least one object returned by rootogram()")
-expected_names <- c("observed", "expected", "mid", "width")
+expected_names <- c("observed", "expected", "mid", "width", "distribution")
 expect_true(all(sapply(tmp, function(x) all(sort(expected_names) == sort(names(x))))),
             info = "Unexpected/missing variables in object returned by rootogram()")
 expect_true(all(sapply(tmp, function(x) all(diff(x$mid) > 0))),

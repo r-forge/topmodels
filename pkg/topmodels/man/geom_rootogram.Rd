@@ -95,7 +95,7 @@ stat_rootogram_confint(
   inherit.aes = TRUE,
   level = 0.95,
   nrep = 1000,
-  type = c("pointwise", "simultaneous"),
+  type = c("pointwise", "simultaneous", "tukey"),
   scale = c("sqrt", "raw"),
   rootogram_style = c("hanging", "standing", "suspended"),
   ...
@@ -111,7 +111,7 @@ geom_rootogram_confint(
   inherit.aes = TRUE,
   level = 0.95,
   nrep = 1000,
-  type = c("pointwise", "simultaneous"),
+  type = c("pointwise", "simultaneous", "tukey"),
   scale = c("sqrt", "raw"),
   rootogram_style = c("hanging", "standing", "suspended"),
   ...
@@ -229,7 +229,7 @@ give the stat as \code{"count"}.
 
 \item{nrep}{numeric. The repetition number of simulation for computing the confidence intervals.}
 
-\item{type}{character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals be visualized.}
+\item{type}{character. Should \code{"pointwise"}, \code{"simultaneous"}, or \code{"tukey"} confidence intervals be visualized?}
 
 \item{rootogram_style}{character specifying the syle of rootogram.}
 }

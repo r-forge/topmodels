@@ -30,6 +30,15 @@
   and `reliagram()` are also switched to the new infrastructure based on
   `distributions3`, notably via `procast()` and `proresiduals()`.
 
+* The pointwise and simultaneous confidence intervals in `rootogram()` now rely
+  on the exact `PoissonBinomial()` distribution (now available in `distributions3`)
+  rather than its binomial approximation.
+  
+* In addition to pointwise and simultaneous confidence intervals for `rootogram()`,
+  `"tukey"` confidence intervals are now available which simply correspond to
+  limits of -1 and 1 for hanging or suspended rootograms. For other flavors of
+  rootograms these limits are transformed correspondingly.
+
 * New distribution/model interfaces were added first in `topmodels` but some
   subsequently moved to other packages: `GAMLSS()` is now in `gamlss.dist`,
   `BAMLSS()` is now in `bamlss`, and `Empirical()` is still in `topmodels` for
