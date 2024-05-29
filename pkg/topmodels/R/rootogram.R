@@ -1026,6 +1026,8 @@ autoplot.rootogram <- function(object,
 
   ## prepare grouping
   object$group <- factor(object$group, levels = 1L:n, labels = make_unique(main))
+  object <- object |> 
+    tidyr::nest(distribution = distribution) # FIXME: (ML) Implement in base - of course ;)
 
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
@@ -1047,7 +1049,8 @@ autoplot.rootogram <- function(object,
       expected = "expected",
       mid = "mid",
       width = "width",
-      group = "group"
+      group = "group",
+      distribution = "distribution"
     )
   )
 
@@ -1583,8 +1586,8 @@ stat_rootogram_confint <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 StatRootogramConfint <- ggplot2::ggproto("StatRootogramConfint", ggplot2::Stat,
-  required_aes = c("observed", "expected", "mid", "width"),
-  dropped_aes = c("observed", "expected", "mid", "width"),
+  required_aes = c("observed", "expected", "mid", "width", "distribution"),
+  dropped_aes = c("observed", "expected", "mid", "width", "distribution"),
   compute_group = function(data,
                            scales,
                            level = 0.95,
@@ -1592,6 +1595,8 @@ StatRootogramConfint <- ggplot2::ggproto("StatRootogramConfint", ggplot2::Stat,
                            type = "pointwise",
                            scale = "sqrt",
                            rootogram_style = "hanging") {
+
+    str(data$distribution)  # TODO: (ML) Quick check if all there
 
     ## compute ci interval
     ci <- compute_rootogram_confint(
