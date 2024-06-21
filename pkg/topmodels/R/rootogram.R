@@ -1026,8 +1026,7 @@ autoplot.rootogram <- function(object,
 
   ## prepare grouping
   object$group <- factor(object$group, levels = 1L:n, labels = make_unique(main))
-  object <- object |> 
-    tidyr::nest(distribution = distribution) # FIXME: (ML) Implement in base - of course ;)
+  object$distribution <- split(object$distribution, 1L:nrow(object)) ## split up $distribution for ggplot2::aes
 
   # -------------------------------------------------------------------
   # PREPARE AND DEFINE ARGUMENTS FOR PLOTTING
@@ -1598,10 +1597,7 @@ StatRootogramConfint <- ggplot2::ggproto("StatRootogramConfint", ggplot2::Stat,
 
     ## compute ci interval
     ci <- compute_rootogram_confint(
-      observed = data$observed,
-      expected = data$expected,
-      mid = data$mid,
-      width = data$width,
+      object = data,
       level = level,
       nrep = nrep,
       type = type,
@@ -1709,10 +1705,6 @@ GeomRootogramConfint <- ggplot2::ggproto("GeomRootogramConfint", ggplot2::Geom,
 # -------------------------------------------------------------------
 #' @importFrom distributions3 is_discrete is_continuous PoissonBinomial
 compute_rootogram_confint <- function(object,
-                                      observed,
-                                      expected,
-                                      mid,
-                                      width,
                                       level = 0.95,
                                       nrep = 1000,
                                       type = c("pointwise", "simultaneous", "tukey"),
@@ -1727,37 +1719,25 @@ compute_rootogram_confint <- function(object,
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
   stopifnot(is.numeric(nrep), length(nrep) == 1, nrep >= 0)
 
-  ## both type = "pointwise" and "simultaneous" only available with distribution object
-  if (!missing(object)) {
-    object_available <- TRUE
-    dist <- PoissonBinomial(object$distribution)
-  } else {
-    object_available <- FALSE
-    if (type != "tukey") message("without full rootogram 'object' only tukey intervals are available")
-    type <- "tukey"
-    dist <- NULL
+  ## extract Poisson-Binomial distribution
+  dist <- object$distribution
+  if(is.list(dist)) { ## $distribution was split up for ggplot2::aes
+    dist <- do.call("rbind", dist)
+    colnames(dist) <- paste0("p", 1L:ncol(dist))
   }
+  dist <- PoissonBinomial(dist)
 
   ## two-sided alpha at level
   alpha <- c((1 - level)/2, 1 - (1 - level)/2)
 
   ## number of original observations
-  if (object_available) {
-    n <- length(unclass(dist))
-    m <- object$mid
-  } else {
-    n <- Inf
-    m <- mid
-  }
+  n <- length(unclass(dist))
+  m <- object$mid
 
   ## raw expected
-  if (object_available) {
-    y <- object$expected
-    if (attr(object, "scale") == "sqrt") y <- y^2
-  } else {
-    y <- expected
-    if (scale == "sqrt") y <- y^2
-  }
+  y <- object$expected
+  if (missing(scale)) scale <- attr(object, "scale")
+  if (scale == "sqrt") y <- y^2
 
   if (type == "pointwise") {
 
