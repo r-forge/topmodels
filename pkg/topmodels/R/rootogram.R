@@ -1596,8 +1596,6 @@ StatRootogramConfint <- ggplot2::ggproto("StatRootogramConfint", ggplot2::Stat,
                            scale = "sqrt",
                            rootogram_style = "hanging") {
 
-    str(data$distribution)  # TODO: (ML) Quick check if all there
-
     ## compute ci interval
     ci <- compute_rootogram_confint(
       observed = data$observed,
