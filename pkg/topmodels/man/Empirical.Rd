@@ -16,7 +16,7 @@
 \alias{cdf.Empirical}
 \alias{quantile.Empirical}
 \alias{support.Empirical}
-\title{Create an Empirical distribution}
+\title{Create an Empirical Distribution}
 \usage{
 Empirical(x)
 

@@ -8,7 +8,7 @@ median.distribution <- function(x, na.rm = TRUE, ...) {
 }
 
 
-#' Create an Empirical distribution
+#' Create an Empirical Distribution
 #'
 #' An empirical distribution consists of a series of \code{N} observations
 #' out of a typically unknown distribution, i.e., a random sample 'X'.
