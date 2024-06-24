@@ -1297,10 +1297,10 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 )
 
 
-#' \code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`
+#' \code{geom_*} and \code{stat_*} for Producing Rootograms with `ggplot2`
 #'
 #' Various \code{geom_*} and \code{stat_*} used within
-#' \code{\link[ggplot2]{autoplot}} for producing PIT histograms.
+#' \code{\link[ggplot2]{autoplot}} for producing rootograms.
 #'
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_point

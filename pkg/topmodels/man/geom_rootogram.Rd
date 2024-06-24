@@ -16,7 +16,7 @@
 \alias{StatRootogramConfint}
 \alias{geom_rootogram_confint}
 \alias{GeomRootogramConfint}
-\title{\code{geom_*} and \code{stat_*} for Producing PIT Histograms with `ggplot2`}
+\title{\code{geom_*} and \code{stat_*} for Producing Rootograms with `ggplot2`}
 \format{
 An object of class \code{GeomRootogramExpected} (inherits from \code{GeomPath}, \code{Geom}, \code{ggproto}, \code{gg}) of length 3.
 }
@@ -235,7 +235,7 @@ give the stat as \code{"count"}.
 }
 \description{
 Various \code{geom_*} and \code{stat_*} used within
-\code{\link[ggplot2]{autoplot}} for producing PIT histograms.
+\code{\link[ggplot2]{autoplot}} for producing rootograms.
 }
 \examples{
 if (require("ggplot2")) {
