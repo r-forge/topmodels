@@ -32,9 +32,18 @@
 #' expected curve (default), \code{"standing"} on the (like bars in barplot),
 #' or drawn as a \code{"suspended"} histogram of deviations.
 #'
+#' Rootograms are associated with the work of John W. Tukey (see Tukey 1977)
+#' and were originally proposed for assessing the goodness of fit of univariate
+#' distributions. See Friendly (2000) for a software implementation, in particular
+#' geared towards count data models. Kleiber and Zeileis (2016) extend it to
+#' regression models for count data, essentially by replacing the expected
+#' frequencies of a univariate distribution by the sum of the expected frequencies
+#' from the different conditional distributions for all observations.
+#'
 #' The function \code{\link{rootogram}} leverages the \code{\link{procast}}
 #' generic in order to compute all necessary coordinates based on observed and
-#' expected (fitted) frequencies.
+#' expected (fitted) frequencies. It is thus not only applicable to count data
+#' regressions but to all (regression) models that are supported by \code{procast}.
 #'
 #' In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 #' rootogram objects, it is also possible to combine two (or more) rootograms by
@@ -93,16 +102,16 @@
 #' created here.
 #'
 #' @seealso \code{\link{plot.rootogram}}, \code{\link{procast}}
+#'
 #' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
-#' Institute, Cary, ISBN 1580256600.
+#' Institute, Cary.
 #'
 #' Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
 #' Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
-#' \doi{10.1080/00031305.2016.1173590}.
+#' \doi{10.1080/00031305.2016.1173590}
 #'
-#' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading,
-#' ISBN 0201076160.
-#'
+#' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
+#' 
 #' @keywords hplot
 #' @examples
 #' ## plots and output
@@ -560,14 +569,28 @@ rbind.rootogram <- c.rootogram
 #' computed by \code{link{rootogram}}.
 #'
 #' Rootograms graphically compare (square roots) of empirical frequencies with
-#' expected (fitted) frequencies from a probability model.
-#'
-#' Rootograms graphically compare frequencies of empirical distributions and
-#' expected (fitted) probability models. For the observed distribution the histogram is
+#' expected (fitted) frequencies from a probability model. For the observed distribution the histogram is
 #' drawn on a square root scale (hence the name) and superimposed with a line
 #' for the expected frequencies. The histogram can be \code{"standing"} on the
 #' x-axis (as usual), or \code{"hanging"} from the expected (fitted) curve, or a
 #' \code{"suspended"} histogram of deviations can be drawn.
+#'
+#' Rootograms are associated with the work of John W. Tukey (see Tukey 1977)
+#' and were originally proposed for assessing the goodness of fit of univariate
+#' distributions and extended by Kleiber and Zeileis (2016) to regression setups.
+#'
+#' As the expected distribution is typically a sum of different conditional
+#' distributions in regression models, the \code{"pointwise"} confidence intervals
+#' for each bin can be computed from mid-quantiles of a Poisson-Binomial distribution
+#' (Wilson and Einbeck 2021). Corresponding \code{"simultaneous"} confidence intervals
+#' for all bins can be obtained via simulation from the Poisson-Binomial distributions.
+#' As the pointwise confidence intervals are typically not substantially different from
+#' the warning limits of Tukey (1972, p. 61), set at +/- 1, these \code{"tukey"} intervals
+#' are used by default.
+#'
+#' Note that for computing the exact \code{"pointwise"} intervals from the Poisson-Binomial
+#' distribution, the \pkg{PoissonBinomial} needs to be installed. Otherwise, a warning
+#' is issueed and a normal approximation is used.
 #'
 #' @aliases plot.rootogram autoplot.rootogram
 #'
@@ -579,7 +602,7 @@ rbind.rootogram <- c.rootogram
 #' @param ref logical. Should a reference line be plotted?
 #' @param confint logical. Should confident intervals be drawn?
 #' @param confint_level numeric. The confidence level required.
-#' @param confint_type character. Should \code{"pointwise"}, \code{"simultaneous"}, or \code{"tukey"} confidence intervals be visualized?
+#' @param confint_type character. Should \code{"tukey"}, \code{"pointwise"}, or \code{"simultaneous"} confidence intervals be visualized?
 #' @param confint_nrep numeric. The repetition number of simulation for computing the confidence intervals.
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the histogram style part of the base plot.
@@ -590,15 +613,25 @@ rbind.rootogram <- c.rootogram
 #' @param expected_col,expected_pch,expected_lty,expected_lwd,ref_col,ref_lty,ref_lwd,expected_colour,expected_size,expected_linetype,expected_alpha,expected_fill,expected_stroke,expected_shape,ref_colour,ref_size,ref_linetype,ref_alpha,confint_col,confint_lty,confint_lwd,confint_colour,confint_size,confint_linetype,confint_alpha Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
-#' @references Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
-#' Institute, Cary.
 #'
-#' Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
+#' @references Kleiber C, Zeileis A (2016). \dQuote{Visualizing Count Data Regressions
 #' Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
-#' c("\\Sexpr[results=rd,stage=build]{tools:::Rd_expr_doi(\"#1\")}",
-#' "10.1080/00031305.2016.1173590")\Sexpr{tools:::Rd_expr_doi("10.1080/00031305.2016.1173590")}.
+#' \doi{10.1080/00031305.2016.1173590}
 #'
+#' Tukey JW (1972), \dQuote{Some Graphic and Semigraphic Displays,}
+#' in \emph{Statistical Papers in Honor of George W. Snedecor,} pp.293--316.
+#' Bancroft TA (Ed.). Iowa State University Press, Ames.
+#' Reprinted in William S. Cleveland (Ed.) (1988).
+#' \emph{The Collected Works of John W. Tukey, Volume V. Graphics: 1965--1985,}
+#' Wadsworth & Brooks/Cole, Pacific Grove.
+#' 
 #' Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
+#' 
+#' Wilson P, Einbeck J (2021).
+#' \dQuote{A Graphical Tool for Assessing the Suitability of a Count Regression Model},
+#' \emph{Austrian Journal of Statistics}, \bold{50}(1), 1--23.
+#' \doi{10.17713/ajs.v50i1.921}
+#' 
 #' @keywords hplot
 #' @examples
 #'
@@ -669,7 +702,7 @@ plot.rootogram <- function(x,
                            ref = NULL,
                            confint = NULL,
                            confint_level = 0.95,
-                           confint_type = c("pointwise", "simultaneous", "tukey"),
+                           confint_type = c("tukey", "pointwise", "simultaneous"),
                            confint_nrep = 1000,
                            xlim = c(NA, NA),
                            ylim = c(NA, NA),
@@ -917,7 +950,7 @@ autoplot.rootogram <- function(object,
                                ref = NULL,
                                confint = NULL,
                                confint_level = 0.95,
-                               confint_type = c("pointwise", "simultaneous", "tukey"),
+                               confint_type = c("tukey", "pointwise", "simultaneous"),
                                confint_nrep = 1000,
                                xlim = c(NA, NA),
                                ylim = c(NA, NA),
@@ -1275,7 +1308,7 @@ StatRootogram <- ggplot2::ggproto("StatRootogram", ggplot2::Stat,
 #' @param scale character specifying whether values should be transformed to the square root scale (not checking for original scale, so maybe applied again).
 #' @param linestyle Character string defining one of `"both"`, `"line"` or `"point"`.
 #' @param level numeric. The confidence level required.
-#' @param type character. Should \code{"pointwise"}, \code{"simultaneous"}, or \code{"tukey"} confidence intervals be visualized?
+#' @param type character. Should \code{"tukey"}, \code{"pointwise"}, or \code{"simultaneous"} confidence intervals be visualized?
 #' @param nrep numeric. The repetition number of simulation for computing the confidence intervals.
 #' @param rootogram_style character specifying the syle of rootogram.
 #' @examples
@@ -1551,7 +1584,7 @@ stat_rootogram_confint <- function(mapping = NULL,
                                    inherit.aes = TRUE,
                                    level = 0.95,
                                    nrep = 1000,
-                                   type = c("pointwise", "simultaneous", "tukey"),
+                                   type = c("tukey", "pointwise", "simultaneous"),
                                    scale = c("sqrt", "raw"),
                                    rootogram_style =  c("hanging", "standing", "suspended"),
                                    ...) {
@@ -1627,7 +1660,7 @@ geom_rootogram_confint <- function(mapping = NULL,
                                    inherit.aes = TRUE,
                                    level = 0.95,
                                    nrep = 1000,
-                                   type = c("pointwise", "simultaneous", "tukey"),
+                                   type = c("tukey", "pointwise", "simultaneous"),
                                    scale = c("sqrt", "raw"),
                                    rootogram_style =  c("hanging", "standing", "suspended"),
                                    ...) {
@@ -1707,14 +1740,14 @@ GeomRootogramConfint <- ggplot2::ggproto("GeomRootogramConfint", ggplot2::Geom,
 compute_rootogram_confint <- function(object,
                                       level = 0.95,
                                       nrep = 1000,
-                                      type = c("pointwise", "simultaneous", "tukey"),
+                                      type = c("tukey", "pointwise", "simultaneous"),
                                       scale = c("sqrt", "raw"),
                                       style = c("hanging", "standing", "suspended"),
                                       ...) {
 
   ## checks
   scale <- match.arg(scale, c("sqrt", "raw"))
-  type <- match.arg(type, c("pointwise", "simultaneous", "tukey"))
+  type <- match.arg(type, c("tukey", "pointwise", "simultaneous"))
   style <- match.arg(style, c("hanging", "standing", "suspended"))
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
   stopifnot(is.numeric(nrep), length(nrep) == 1, nrep >= 0)
@@ -1909,7 +1942,7 @@ summary.rootogram <- function(object,
                               scale = NULL,
                               style = NULL,
                               confint_level = 0.95,
-                              confint_type = c("pointwise", "simultaneous", "tukey"),
+                              confint_type = c("tukey", "pointwise", "simultaneous"),
                               confint_nrep = 1000,
                               extend = TRUE,
                               ...) {

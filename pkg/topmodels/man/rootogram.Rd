@@ -49,9 +49,9 @@ explicitly specify the return class, or to \code{NULL} (default) in which
 case the return class is conditional on whether the package \code{"tibble"}
 is loaded.}
 
-\item{breaks}{\code{NULL} (default) or numeric to manually specify the breaks for
-the rootogram intervals. A single numeric (larger \code{0}) specifies the number of breaks
-to be automatically chosen, multiple numeric values are interpreted as manually specified breaks.}
+\item{breaks}{\code{NULL} (default) or numeric vector to specifying the breaks for
+the rootogram intervals. A single numeric (larger than \code{0}) specifies the number of breaks
+to be chosen via \code{\link{pretty}} (except for discrete distributions).}
 
 \item{width}{\code{NULL} (default) or single positive numeric. Width of the histogram bars.
 Will be ignored for non-discrete distributions.}
@@ -100,9 +100,18 @@ for the expected frequencies. The histogram can be \code{"hanging"} from the
 expected curve (default), \code{"standing"} on the (like bars in barplot),
 or drawn as a \code{"suspended"} histogram of deviations.
 
+Rootograms are associated with the work of John W. Tukey (see Tukey 1977)
+and were originally proposed for assessing the goodness of fit of univariate
+distributions. See Friendly (2000) for a software implementation, in particular
+geared towards count data models. Kleiber and Zeileis (2016) extend it to
+regression models for count data, essentially by replacing the expected
+frequencies of a univariate distribution by the sum of the expected frequencies
+from the different conditional distributions for all observations.
+
 The function \code{\link{rootogram}} leverages the \code{\link{procast}}
 generic in order to compute all necessary coordinates based on observed and
-expected (fitted) frequencies.
+expected (fitted) frequencies. It is thus not only applicable to count data
+regressions but to all (regression) models that are supported by \code{procast}.
 
 In addition to the \code{plot} and \code{\link[ggplot2]{autoplot}} method for
 rootogram objects, it is also possible to combine two (or more) rootograms by
@@ -164,14 +173,13 @@ rootogram(m3_gauss, plot = "ggplot2")
 }
 \references{
 Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
-Institute, Cary, ISBN 1580256600.
+Institute, Cary.
 
 Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
 Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
-\doi{10.1080/00031305.2016.1173590}.
+\doi{10.1080/00031305.2016.1173590}
 
-Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading,
-ISBN 0201076160.
+Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
 }
 \seealso{
 \code{\link{plot.rootogram}}, \code{\link{procast}}

@@ -13,7 +13,7 @@
   ref = NULL,
   confint = NULL,
   confint_level = 0.95,
-  confint_type = c("pointwise", "simultaneous", "tukey"),
+  confint_type = c("tukey", "pointwise", "simultaneous"),
   confint_nrep = 1000,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -48,7 +48,7 @@
   ref = NULL,
   confint = NULL,
   confint_level = 0.95,
-  confint_type = c("pointwise", "simultaneous", "tukey"),
+  confint_type = c("tukey", "pointwise", "simultaneous"),
   confint_nrep = 1000,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -96,7 +96,7 @@ roots (default) should be drawn.}
 
 \item{confint_level}{numeric. The confidence level required.}
 
-\item{confint_type}{character. Should \code{"pointwise"}, \code{"simultaneous"}, or \code{"tukey"} confidence intervals be visualized?}
+\item{confint_type}{character. Should \code{"tukey"}, \code{"pointwise"}, or \code{"simultaneous"} confidence intervals be visualized?}
 
 \item{confint_nrep}{numeric. The repetition number of simulation for computing the confidence intervals.}
 
@@ -121,14 +121,28 @@ computed by \code{link{rootogram}}.
 }
 \details{
 Rootograms graphically compare (square roots) of empirical frequencies with
-expected (fitted) frequencies from a probability model.
-
-Rootograms graphically compare frequencies of empirical distributions and
-expected (fitted) probability models. For the observed distribution the histogram is
+expected (fitted) frequencies from a probability model. For the observed distribution the histogram is
 drawn on a square root scale (hence the name) and superimposed with a line
 for the expected frequencies. The histogram can be \code{"standing"} on the
 x-axis (as usual), or \code{"hanging"} from the expected (fitted) curve, or a
 \code{"suspended"} histogram of deviations can be drawn.
+
+Rootograms are associated with the work of John W. Tukey (see Tukey 1977)
+and were originally proposed for assessing the goodness of fit of univariate
+distributions and extended by Kleiber and Zeileis (2016) to regression setups.
+
+As the expected distribution is typically a sum of different conditional
+distributions in regression models, the \code{"pointwise"} confidence intervals
+for each bin can be computed from mid-quantiles of a Poisson-Binomial distribution
+(Wilson and Einbeck 2021). Corresponding \code{"simultaneous"} confidence intervals
+for all bins can be obtained via simulation from the Poisson-Binomial distributions.
+As the pointwise confidence intervals are typically not substantially different from
+the warning limits of Tukey (1972, p. 61), set at +/- 1, these \code{"tukey"} intervals
+are used by default.
+
+Note that for computing the exact \code{"pointwise"} intervals from the Poisson-Binomial
+distribution, the \pkg{PoissonBinomial} needs to be installed. Otherwise, a warning
+is issueed and a normal approximation is used.
 }
 \examples{
 
@@ -193,15 +207,23 @@ r4c_pois <- rootogram(m4_pois, style = "suspended", ylim = c(-2.2, 4.8), main = 
 par(mfrow = c(1, 1))
 }
 \references{
-Friendly M (2000), \emph{Visualizing Categorical Data}. SAS
-Institute, Cary.
-
-Kleiber C, Zeileis A (2016).  \dQuote{Visualizing Count Data Regressions
+Kleiber C, Zeileis A (2016). \dQuote{Visualizing Count Data Regressions
 Using Rootograms.} \emph{The American Statistician}, \bold{70}(3), 296--303.
-c("\\Sexpr[results=rd,stage=build]{tools:::Rd_expr_doi(\"#1\")}",
-"10.1080/00031305.2016.1173590")\Sexpr{tools:::Rd_expr_doi("10.1080/00031305.2016.1173590")}.
+\doi{10.1080/00031305.2016.1173590}
+
+Tukey JW (1972), \dQuote{Some Graphic and Semigraphic Displays,}
+in \emph{Statistical Papers in Honor of George W. Snedecor,} pp.293--316.
+Bancroft TA (Ed.). Iowa State University Press, Ames.
+Reprinted in William S. Cleveland (Ed.) (1988).
+\emph{The Collected Works of John W. Tukey, Volume V. Graphics: 1965--1985,}
+Wadsworth & Brooks/Cole, Pacific Grove.
 
 Tukey JW (1977). \emph{Exploratory Data Analysis}. Addison-Wesley, Reading.
+
+Wilson P, Einbeck J (2021).
+\dQuote{A Graphical Tool for Assessing the Suitability of a Count Regression Model},
+\emph{Austrian Journal of Statistics}, \bold{50}(1), 1--23.
+\doi{10.17713/ajs.v50i1.921}
 }
 \seealso{
 \code{\link{rootogram}}, \code{\link{procast}}
