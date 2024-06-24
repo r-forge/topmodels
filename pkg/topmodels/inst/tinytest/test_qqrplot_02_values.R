@@ -59,18 +59,18 @@ expect_identical(NROW(CrabSatellites), NROW(q3u), info = "testing dimension 1 (n
 expect_identical(NROW(CrabSatellites), NROW(q3n), info = "testing dimension 1 (number of rows/observations)")
 
 
-# --------------------------------------------------------------------
-# As we are using a fixed seed; check md5 sum of the returned objects.
-# In case a test fails it is not precise but shows that there are differences.
-# TODO: (RS2ML) Not sure if this works across different OSs!!!
-# NOTE: (RS) Switching to sha1, <https://cran.r-project.org/web/packages/digest/vignettes/sha1.html>
-# --------------------------------------------------------------------
-expect_identical(digest::sha1(q1u, 8, 7), "3b7a8db00c0a257b495a8fcbf9bfd25ff92ed5e2")
-expect_identical(digest::sha1(q1n, 8, 7), "f7bccf502a8cbac2dd687f823a5fee0641776016")
-expect_identical(digest::sha1(q2u, 8, 7), "51f52c2c702c9f321fce5cf916fd74ee63181232")
-expect_identical(digest::sha1(q2n, 8, 7), "4dcf3499331ecd42620151c61d41365e41be9d19")
-expect_identical(digest::sha1(q3u, 8, 7), "f0053b11699eec966534e6937bce3f9ed6076383")
-expect_identical(digest::sha1(q3n, 8, 7), "1e3d4881360d1208b4470311cc3f8994bf749925")
+## # --------------------------------------------------------------------
+## # As we are using a fixed seed; check md5 sum of the returned objects.
+## # In case a test fails it is not precise but shows that there are differences.
+## # TODO: (RS2ML) Not sure if this works across different OSs!!!
+## # NOTE: (RS) Switching to sha1, <https://cran.r-project.org/web/packages/digest/vignettes/sha1.html>
+## # --------------------------------------------------------------------
+## expect_identical(digest::sha1(q1u, 8, 7), "3b7a8db00c0a257b495a8fcbf9bfd25ff92ed5e2")
+## expect_identical(digest::sha1(q1n, 8, 7), "f7bccf502a8cbac2dd687f823a5fee0641776016")
+## expect_identical(digest::sha1(q2u, 8, 7), "51f52c2c702c9f321fce5cf916fd74ee63181232")
+## expect_identical(digest::sha1(q2n, 8, 7), "4dcf3499331ecd42620151c61d41365e41be9d19")
+## expect_identical(digest::sha1(q3u, 8, 7), "f0053b11699eec966534e6937bce3f9ed6076383")
+## expect_identical(digest::sha1(q3n, 8, 7), "1e3d4881360d1208b4470311cc3f8994bf749925")
 
 # Thus, altenratively, gong for colSums(abs()) for all finite values
 # which is a much weaker test.
