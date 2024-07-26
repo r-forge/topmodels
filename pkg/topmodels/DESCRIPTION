@@ -9,7 +9,7 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
              person(given = "Ioannis", family = "Kosmidis", role = "ctb", email = "i.kosmidis@ucl.ac.uk", comment = c(ORCID = "0000-0003-1556-0302")),
              person(given = "Jakob", family = "Messner", role = "ctb", email = "jakob.messner@posteo.net", comment = c(ORCID = "0000-0002-1027-3673")))
 Depends: R (>= 3.6.0)
-Imports: graphics, grDevices, grid, stats, utils, colorspace, distributions3 (>= 0.2.1), ggplot2
+Imports: graphics, grDevices, grid, stats, utils, colorspace, distributions3 (>= 0.2.1.9000), ggplot2
 Suggests: bamlss (>= 1.2-1), countreg, crch (>= 1.1-1), digest, gamlss (>= 5.4-20), gamlss.dist (>= 6.1-1), MASS, PoissonBinomial, scoringRules, tibble, tinytest
 Description: Unified infrastructure for probabilistic models and distributional regressions:
              Probabilistic forecasting of in-sample and out-of-sample of probabilities,
