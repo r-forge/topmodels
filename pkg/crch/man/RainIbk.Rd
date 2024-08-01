@@ -9,7 +9,7 @@ reforecasts (Hamill et al. 2013) and observations from SYNOP station Innsbruck
 Airport (11120) from 2000-01-01 to 2013-09-17.
 }
 
-\usage{data("RainIbk")}
+\usage{data("RainIbk", package = "crch")}
 
 \format{
   A data frame with 4977 rows. The first column (\code{rain}) are 3 days
@@ -19,23 +19,23 @@ Airport (11120) from 2000-01-01 to 2013-09-17.
 }
 
 \source{
-Observations: http://www.ogimet.com/synops.phtml.en
+Observations: \url{https://www.ogimet.com/synops.phtml.en}
 
-Reforecasts: http://www.esrl.noaa.gov/psd/forecasts/reforecast2/
+Reforecasts: \url{https://psl.noaa.gov/forecasts/reforecast2/}
 }
 
 \references{
   Hamill TM, Bates GT, Whitaker JS, Murray DR, Fiorino M, Galarneau Jr TJ,
     Zhu Y, Lapenta W (2013). NOAA's Second-Generation Global Medium-Range
     Ensemble Reforecast Data Set. \emph{Bulletin of the American Meteorological
-    Society}, 94(10), 1553-1565.
+    Society}, \bold{94}(10), 1553-1565.
 }
 
 \examples{
 ## Spread skill relationship ##
 
 ## load and prepare data
-data(RainIbk)
+data("RainIbk", package = "crch")
 
 ## mean and standard deviation of square root transformed ensemble forecasts
 RainIbk$sqrtensmean <- 

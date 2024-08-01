@@ -1,7 +1,7 @@
 \name{crch.control}
 \alias{crch.control}
 
-\title{Auxiliary Function for Controlling crch Fitting}
+\title{Control Options for crch Models}
 
 \description{
   Auxiliary function for \code{crch} fitting. Specifies a list of values passed

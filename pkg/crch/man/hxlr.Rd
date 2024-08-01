@@ -81,7 +81,7 @@ predict the scale of the latent logistic distribution.
 \seealso{\code{\link{predict.hxlr}}, \code{\link[ordinal]{clm}}}
 
 \examples{
-data("RainIbk")
+data("RainIbk", package = "crch")
 ## mean and standard deviation of square root transformed ensemble forecasts
 RainIbk$sqrtensmean <- 
   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)

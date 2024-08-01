@@ -5,7 +5,7 @@
 \alias{print.summary.crch.boost}
 \alias{logLik.crch.boost}
 
-\title{Methods for boosted CRCH Objects}
+\title{Methods for Boosted crch Models}
 
 \description{
 Methods for extracting information from fitted \code{crch.boost} objects.
@@ -39,6 +39,6 @@ Methods for extracting information from fitted \code{crch.boost} objects.
   \code{"crch.boost"} objects .
 }
 
-\seealso{\code{\link{crch.boost}},\code{\link{coef.crch}}}
+\seealso{\code{\link{crch.boost}}, \code{\link{coef.crch}}}
 
 \keyword{regression}

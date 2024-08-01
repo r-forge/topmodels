@@ -62,7 +62,7 @@ The censored t distribution has probability density function (PDF) \eqn{f(x)}:
 \tabular{ll}{
 \eqn{T((left - \mu)/\sigma)} \tab if \eqn{x \le left}\cr
 \eqn{1 - T((right - \mu)/\sigma)} \tab if \eqn{x \ge right}\cr
-\eqn{\tau((x - \mu)/\sigma)/\sigma} \tab if \eqn{left < x < right}
+\eqn{\tau((x - \mu)/\sigma)/\sigma} \tab otherwise
 }
      
 where \eqn{T} and \eqn{\tau} are the cumulative distribution function

@@ -56,8 +56,8 @@ point (with \code{-Inf} corresponding to untruncated), and the
 
 The truncated normal distribution has probability density function (PDF):
 
-\deqn{f(x) = 1/\sigma \phi((x - \mu)/\sigma) / 
-  (\Phi((right - \mu)/\sigma) - \Phi((left - \mu)/\sigma))}
+\deqn{f(x) = 1/\sigma \phi((x - \mu)/\sigma) / (\Phi((right - \mu)/\sigma) - \Phi((left - \mu)/\sigma))}
+
 for \eqn{left \le x \le right}, and 0 otherwise,
 where \eqn{\Phi} and \eqn{\phi} are the cumulative distribution function
 and probability density function of the standard normal distribution

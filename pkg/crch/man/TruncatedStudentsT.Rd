@@ -59,8 +59,8 @@ and the \code{right} truncation point (with \code{Inf} corresponding to untrunca
 
 The truncated t distribution has probability density function (PDF) \eqn{f(x)}:
 
-\deqn{f(x) = 1/\sigma \tau((x - \mu)/\sigma) / 
-  (T((right - \mu)/\sigma) - T((left - \mu)/\sigma))}
+\deqn{f(x) = 1/\sigma \tau((x - \mu)/\sigma) / (T((right - \mu)/\sigma) - T((left - \mu)/\sigma))}
+
 for \eqn{left \le x \le right}, and 0 otherwise,
 where \eqn{T} and \eqn{\tau} are the cumulative distribution function
 and probability density function of the standard t distribution with

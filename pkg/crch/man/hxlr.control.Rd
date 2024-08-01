@@ -1,7 +1,7 @@
 \name{hxlr.control}
 \alias{hxlr.control}
 
-\title{Auxiliary Function for Controlling HXLR Fitting}
+\title{Control Options for hxlr Models}
 
 \description{
   Auxiliary function for \code{hxlr} fitting. Specifies a list of values passed

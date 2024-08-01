@@ -3,7 +3,7 @@
 \alias{fitted.hxlr}
 
 
-\title{Predict/Fitted Values for HXLR Fits}
+\title{Predictions for Fitted hxlr Models}
 
 \description{
 Obtains various types of predictions/fitted values for heteroscedastic

@@ -1,7 +1,7 @@
 \name{plot.crch.boost}
 \alias{plot.crch.boost}
 
-\title{Plot coefficient paths of boosted CRCH objects.}
+\title{Visualizing Coefficient Paths for Boosted crch Models}
 
 \description{
 Plot paths of coefficients or log-likelihood contributions for \code{crch.boost} models.

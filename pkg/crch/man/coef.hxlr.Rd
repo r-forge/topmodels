@@ -8,7 +8,7 @@
 \alias{terms.hxlr}
 
 
-\title{Methods for HXLR Objects}
+\title{Methods for Fitted hxlr Models}
 
 \description{
 Methods for extracting information from fitted \code{hxlr} 

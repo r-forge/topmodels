@@ -1,7 +1,7 @@
 \name{predict.crch.boost}
 \alias{predict.crch.boost}
 
-\title{Predicted/Fitted Values for boosted CRCH Fits}
+\title{Predictions for Boosted crch Models}
 
 \description{
 Obtains various types of predictions for \code{crch.boost} models.

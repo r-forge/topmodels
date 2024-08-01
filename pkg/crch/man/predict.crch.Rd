@@ -2,7 +2,7 @@
 \alias{predict.crch}
 \alias{prodist.crch}
 
-\title{Predicted/Fitted Values for CRCH Fits}
+\title{Predictions for Fitted crch Models}
 
 \description{
 Obtains various types of predictions for \code{crch} models.

@@ -59,7 +59,7 @@ The censored logistic distribution has probability density function (PDF) \eqn{f
 \tabular{ll}{
 \eqn{\Lambda((left - \mu)/\sigma)} \tab if \eqn{x \le left}\cr
 \eqn{1 - \Lambda((right - \mu)/\sigma)} \tab if \eqn{x \ge right}\cr
-\eqn{\lambda((x - \mu)/\sigma)/\sigma} \tab if \eqn{left < x < right}
+\eqn{\lambda((x - \mu)/\sigma)/\sigma} \tab otherwise
 }
      
 where \eqn{\Lambda} and \eqn{\lambda} are the cumulative distribution function

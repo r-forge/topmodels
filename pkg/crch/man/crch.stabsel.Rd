@@ -1,7 +1,7 @@
 \name{crch.stabsel}
 \alias{crch.stabsel}
 
-\title{Auxiliary functions to perform stability selection using boosting.}
+\title{Auxiliary Functions for Stability Selection Using Boosting}
 
 \description{
    Auxilirary function which allows to do stability selection on heteroscedastic

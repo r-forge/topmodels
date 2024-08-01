@@ -14,7 +14,7 @@
 \alias{estfun.crch}
 \alias{crps.crch}
 
-\title{Methods for CRCH Objects}
+\title{Methods for Fitted crch Models}
 
 \description{
 Methods for extracting information from fitted \code{crch} objects.

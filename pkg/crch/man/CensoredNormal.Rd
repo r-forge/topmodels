@@ -59,7 +59,7 @@ The censored normal distribution has probability density function (PDF) \eqn{f(x
 \tabular{ll}{
 \eqn{\Phi((left - \mu)/\sigma)} \tab if \eqn{x \le left}\cr
 \eqn{1 - \Phi((right - \mu)/\sigma)} \tab if \eqn{x \ge right}\cr
-\eqn{\phi((x - \mu)/\sigma)/\sigma} \tab if \eqn{left < x < right}
+\eqn{\phi((x - \mu)/\sigma)/\sigma} \tab otherwise
 }
 
 where \eqn{\Phi} and \eqn{\phi} are the cumulative distribution function
