@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.53">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Jakob W. Messner">
+<meta name="author" content="Georg J. Mayr">
+<meta name="author" content="Achim Zeileis">
+<title>Heteroscedastic Censored and Truncated Regression with crch – crch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../crch.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+<meta property="og:title" content="Heteroscedastic Censored and Truncated Regression with crch – crch">
+<meta property="og:description" content="This introduction to the R package crch is a (slightly) modified version of Messner, Mayr, and Zeileis (2016), published in The R Journal.
+The crch package provides functions for maximum likelihood estimation of censored or truncated regression models with conditional heteroscedasticity along with suitable standard methods to summarize the fitted models and compute predictions, residuals, etc. The supported distributions include left- or right-censored or truncated Gaussian, logistic, or student-t distributions with potentially different sets of regressors for modeling the conditional location and scale. The models and their R implementation are introduced and illustrated by numerical weather prediction tasks using precipitation data for Innsbruck (Austria).">
+<meta property="og:image" content="https://topmodels.R-Forge.R-project.org/crch/vignettes/crch.png">
+<meta property="og:site_name" content="crch">
+<meta name="twitter:title" content="Heteroscedastic Censored and Truncated Regression with crch – crch">
+<meta name="twitter:description" content="This introduction to the R package crch is a (slightly) modified version of Messner, Mayr, and Zeileis (2016), published in The R Journal.
+The crch package provides functions for maximum likelihood estimation of censored or truncated regression models with conditional heteroscedasticity along with suitable standard methods to summarize the fitted models and compute predictions, residuals, etc. The supported distributions include left- or right-censored or truncated Gaussian, logistic, or student-t distributions with potentially different sets of regressors for modeling the conditional location and scale. The models and their R implementation are introduced and illustrated by numerical weather prediction tasks using precipitation data for Innsbruck (Austria).">
+<meta name="twitter:image" content="https://topmodels.R-Forge.R-project.org/crch/vignettes/crch.png">
+<meta name="twitter:image:alt" content="crch: Censored Regression with Conditional Heteroscedasticity">
+<meta name="twitter:site" content="@AchimZeileis">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../crch-wide.png" alt="crch logo" class="navbar-logo"></a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Get started</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-documentation" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Documentation</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">
+<li>
+    <a class="dropdown-item" href="../man/crch.html">
+ <span class="dropdown-text">Heteroscedastic censored and truncated regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/hxlr.html">
+ <span class="dropdown-text">Heteroscedastic extended logistic regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/RainIbk.html">
+ <span class="dropdown-text">Data sets</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/cnorm.html">
+ <span class="dropdown-text">Distributions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/CensoredNormal.html">
+ <span class="dropdown-text">distributions3 objects</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-articles" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Articles</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-articles">
+<li>
+    <a class="dropdown-item" href="../vignettes/crch.html">
+ <span class="dropdown-text">Heteroscedastic Censored and Truncated Regression with crch</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../NEWS.html"> 
+<span class="menu-text">News</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../CITATION.html"> 
+<span class="menu-text">Citation</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../contact.html"> 
+<span class="menu-text">Contact</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels"> <i class="bi bi-code" role="img" aria-label="topmodels @ R-Forge">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#sec-intro" id="toc-sec-intro" class="nav-link active" data-scroll-target="#sec-intro"><span class="header-section-number">1</span> Introduction</a></li>
+  <li>
+<a href="#sec-models" id="toc-sec-models" class="nav-link" data-scroll-target="#sec-models"><span class="header-section-number">2</span> Regression models</a>
+  <ul class="collapse">
+<li><a href="#censored-regression-tobit" id="toc-censored-regression-tobit" class="nav-link" data-scroll-target="#censored-regression-tobit"><span class="header-section-number">2.1</span> Censored regression (tobit)</a></li>
+  <li><a href="#truncated-regression" id="toc-truncated-regression" class="nav-link" data-scroll-target="#truncated-regression"><span class="header-section-number">2.2</span> Truncated regression</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-impl" id="toc-sec-impl" class="nav-link" data-scroll-target="#sec-impl"><span class="header-section-number">3</span> R implementation</a></li>
+  <li><a href="#sec-examples" id="toc-sec-examples" class="nav-link" data-scroll-target="#sec-examples"><span class="header-section-number">4</span> Example</a></li>
+  <li><a href="#sec-summary" id="toc-sec-summary" class="nav-link" data-scroll-target="#sec-summary"><span class="header-section-number">5</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header"><h1 class="title display-7">Heteroscedastic Censored and Truncated Regression with crch</h1>
+<p class="author">Jakob W. Messner</p>
+<p class="author">Georg J. Mayr</p>
+<p class="author">Achim Zeileis</p>
+
+<div class="abstract">
+<div class="abstract-title">Abstract</div>
+<p>This introduction to the R package <strong>crch</strong> is a (slightly) modified version of <span class="citation" data-cites="messner2016">Messner, Mayr, and Zeileis (<a href="#ref-messner2016" role="doc-biblioref">2016</a>)</span>, published in <em>The R Journal</em>.<br>
+The <strong>crch</strong> package provides functions for maximum likelihood estimation of censored or truncated regression models with conditional heteroscedasticity along with suitable standard methods to summarize the fitted models and compute predictions, residuals, etc. The supported distributions include left- or right-censored or truncated Gaussian, logistic, or student-t distributions with potentially different sets of regressors for modeling the conditional location and scale. The models and their R implementation are introduced and illustrated by numerical weather prediction tasks using precipitation data for Innsbruck (Austria).</p>
+</div>
+</header><section id="sec-intro" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="sec-intro">
+<span class="header-section-number">1</span> Introduction</h2>
+<p>Censored or truncated response variables occur in a variety of applications. Censored data arise if exact values are only reported in a restricted range. Data may fall outside this range but are reported at the range limits. In contrast, if data outside this range are omitted completely we call it truncated. E.g., consider wind measurements with an instrument that needs a certain minimum wind speed to start working. If wind speeds below this minimum are recorded as <span class="math inline">\(\le\)</span><em>minimum</em> the data is censored. If only wind speeds exceeding this limit are reported and those below are omitted the data is truncated. Even if the generating process is not as clear, censoring or truncation can be useful to consider limited data such as precipitation observations.</p>
+<p>The tobit <span class="citation" data-cites="tobin1958">(<a href="#ref-tobin1958" role="doc-biblioref">Tobin 1958</a>)</span> and truncated regression <span class="citation" data-cites="cragg1971">(<a href="#ref-cragg1971" role="doc-biblioref">Cragg 1971</a>)</span> models are common linear regression models for censored and truncated conditionally normally distributed responses respectively.<br>
+Beside truncated data, truncated regression is also used in two-part models <span class="citation" data-cites="cragg1971">(<a href="#ref-cragg1971" role="doc-biblioref">Cragg 1971</a>)</span> for censored type data: A binary (e.g., probit) regression model fits the exceedance probability of the lower limit and a truncated regression model fits the value given the lower limit is exceeded.</p>
+<p>Usually linear models like the tobit or truncated regression models assume homoscedasticity which means that the variance of an underlying normal distribution does not depend on covariates. However, sometimes this assumption does not hold and models that can consider conditional heteroscedasticity should be used. Such models have been proposed, e.g., for generalized linear models <span class="citation" data-cites="nelder1987">(<a href="#ref-nelder1987" role="doc-biblioref">Nelder and Pregibon 1987, smyth1989</a>)</span>, generalized additive models <span class="citation" data-cites="rigby1996">(<a href="#ref-rigby1996" role="doc-biblioref">Robert A. Rigby and Stasinopoulos 1996, rigby2005</a>)</span>, or beta regression <span class="citation" data-cites="cribarineto2010">(<a href="#ref-cribarineto2010" role="doc-biblioref">Cribari-Neto and Zeileis 2010</a>)</span>. There also exist several R packages with functions implementing the above models, e.g., <strong>dglm</strong> <span class="citation" data-cites="dunn2014">(<a href="#ref-dunn2014" role="doc-biblioref">Dunn, Smyth, and Corty 2023</a>)</span>, <strong>glmx</strong> <span class="citation" data-cites="zeileis2013">(<a href="#ref-zeileis2013" role="doc-biblioref">Zeileis, Koenker, and Doebler 2023</a>)</span>, <strong>gamlss</strong> <span class="citation" data-cites="rigby2005">(<a href="#ref-rigby2005" role="doc-biblioref">R. A. Rigby and Stasinopoulos 2005</a>)</span>, <strong>betareg</strong> <span class="citation" data-cites="zeileis2012">(<a href="#ref-zeileis2012" role="doc-biblioref">Grün, Kosmidis, and Zeileis 2012</a>)</span> amongst others.</p>
+<p>The <strong>crch</strong> package provides functions to fit censored and truncated regression models that consider conditional heteroscedasticity. It has a convenient interface to estimate these models with maximum likelihood and provides several methods for analysis and prediction. In addition to the typical conditional Gaussian distribution assumptions it also allows for logistic and student-t distributions with heavier tails.</p>
+<p>The outline of the paper is as follows. <a href="#sec-models" class="quarto-xref">Section&nbsp;2</a> describes the censored and truncated regression models, and <a href="#sec-impl" class="quarto-xref">Section&nbsp;3</a> presents their R implementation. <a href="#sec-examples" class="quarto-xref">Section&nbsp;4</a> illustrates the package functions with numerical weather prediction data of precipitation in Innsbruck (Austria) and finally <a href="#sec-summary" class="quarto-xref">Section&nbsp;5</a> summarizes the paper.</p>
+</section><section id="sec-models" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="sec-models">
+<span class="header-section-number">2</span> Regression models</h2>
+<p>For both, censored and truncated regression, a normalized latent response <span class="math inline">\((y^*-\mu)/\sigma\)</span> is assumed to follow a certain distribution <span class="math inline">\(D\)</span></p>
+<p><span class="math display">\[
+  \frac{y^*-\mu}{\sigma} \sim  D
+\]</span></p>
+<p>The location parameter <span class="math inline">\(\mu\)</span> and a link function of the scale parameter <span class="math inline">\(g(\sigma)\)</span> are assumed to relate linearly to covariates <span class="math inline">\(\mathbf{x} = (1, x_1,
+x_2, \ldots)^\top\)</span> and <span class="math inline">\(\mathbf{z} = (1, z_1, z_2, \ldots)^\top\)</span>:</p>
+<p><span id="eq-musigma"><span class="math display">\[
+\begin{eqnarray}
+    \mu &amp;= &amp;\mathbf{x}^{\top}\beta \\
+    g(\sigma) &amp; = &amp; \mathbf{z}^{\top}\gamma
+\end{eqnarray}
+\tag{1}\]</span></span></p>
+<p>where <span class="math inline">\(\beta=(\beta_0, \beta_1, \beta_2, \ldots)^\top\)</span> and <span class="math inline">\(\gamma=(\gamma_0,
+\gamma_1, \gamma_2, \ldots)^\top\)</span> are coefficient vectors. The link function <span class="math inline">\(g(\cdot):\mathbb{R}^+ \mapsto \mathbb{R}\)</span> is a strictly increasing and twice differentiable function; e.g., the logarithm (i.e., ) is a well suited function. Although they only map to <span class="math inline">\(\mathbb{R}^+\)</span>, the identity <span class="math inline">\(g(\sigma) = \sigma\)</span> or the quadratic function <span class="math inline">\(g(\sigma)=\sigma^2\)</span> can be usefull as well. However, problems in the numerical optimization can occur.</p>
+<p>Commonly <span class="math inline">\(D\)</span> is the standard normal distribution so that <span class="math inline">\(y^*\)</span> is assumed to be normally distributed with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. <span class="math inline">\(D\)</span> might also be assumed to be a standard logistic or a student-t distribution if heavier tails are required. The tail weight of the student-t distribution can be controlled by the degrees of freedom <span class="math inline">\(\nu\)</span> which can either be set to a certain value or estimated as an additional parameter. To assure positive values, <span class="math inline">\(\log(\nu)\)</span> is modeled in the latter case.</p>
+<p><span id="eq-dfest"><span class="math display">\[
+  \log(\nu) = \delta
+\tag{2}\]</span></span></p>
+<section id="censored-regression-tobit" class="level3" data-number="2.1"><h3 data-number="2.1" class="anchored" data-anchor-id="censored-regression-tobit">
+<span class="header-section-number">2.1</span> Censored regression (tobit)</h3>
+<p>The exact values of censored responses are only known in an interval defined by <span class="math inline">\(\text{left}\)</span> and <span class="math inline">\(\text{right}\)</span>. Observation outside this interval are mapped to the interval limits</p>
+<p><span class="math display">\[
+  y = \begin{cases} \text{left} &amp; y^* \le \text{left} \\
+    y^* &amp; \text{left} &lt; y^* &lt; \text{right}\\
+    \text{right} &amp; y^* \ge \text{right} \end{cases}
+\]</span></p>
+<p>The coefficients <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\gamma\)</span>, and <span class="math inline">\(\delta\)</span> (<a href="#eq-musigma" class="quarto-xref">Equation&nbsp;1</a> and <a href="#eq-dfest" class="quarto-xref">Equation&nbsp;2</a>)) can be estimated by maximizing the sum over the data set of the log-likelihood function <span class="math inline">\(\log(f_{\text{cens}}(y, \mu, \sigma))\)</span>, where</p>
+<p><span class="math display">\[
+  f_{\text{cens}}(y, \mu, \sigma) =  
+    \begin{cases} F\left(\frac{\text{left} - \mu}{\sigma}\right)
+      &amp; y \le \text{left} \\
+    f\left(\frac{y - \mu}{\sigma}\right)
+      &amp; \text{left} &lt; y &lt; \text{right} \\
+    \left(1 - F\left(\frac{\text{right} - \mu}{\sigma}\right)\right)
+      &amp; y \ge \text{right} \end{cases}
+\]</span></p>
+<p><span class="math inline">\(F()\)</span> and <span class="math inline">\(f()\)</span> are the cumulative distribution function and the probability density function of <span class="math inline">\(D\)</span>, respectively. If <span class="math inline">\(D\)</span> is the normal distribution this model is a heteroscedastic variant of the tobit model <span class="citation" data-cites="tobin1958">(<a href="#ref-tobin1958" role="doc-biblioref">Tobin 1958</a>)</span>.</p>
+</section><section id="truncated-regression" class="level3" data-number="2.2"><h3 data-number="2.2" class="anchored" data-anchor-id="truncated-regression">
+<span class="header-section-number">2.2</span> Truncated regression</h3>
+<p>Truncated responses occur when latent responses below or above some thresholds are omitted.</p>
+<p><span class="math display">\[
+  y = y^*|\text{left} &lt; y^* &lt; \text{right}
+\]</span></p>
+<p>Then <span class="math inline">\(y\)</span> follows a truncated distribution with probability density function</p>
+<p><span class="math display">\[
+  f_{\text{tr}}(y, \mu, \sigma) =
+    \frac{f\left(\frac{y - \mu}{\sigma}\right)}
+    {F\left(\frac{\text{right} - \mu}{\sigma}\right) -
+    F\left(\frac{\text{left} - \mu}{\sigma}\right)}
+\]</span></p>
+<p>In that case the coefficients <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\gamma\)</span>, and <span class="math inline">\(\delta\)</span> can be estimated by maximizing the sum over the data set of the log-likelihood function</p>
+<p><span class="math display">\[
+  \log(f_{\text{tr}}(y, \mu, \sigma))
+\]</span></p>
+</section></section><section id="sec-impl" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="sec-impl">
+<span class="header-section-number">3</span> R implementation</h2>
+<p>The models from the previous section can both be fitted with the <code><a href="https://rdrr.io/pkg/crch/man/crch.html">crch()</a></code> function provided by the <strong>crch</strong> package. This function takes a formula and data, sets up the likelihood function, gradients and Hessian matrix and uses <code><a href="https://rdrr.io/r/stats/optim.html">optim()</a></code> to maximize the likelihood. It returns an 3 object for which various standard methods are available. We tried to build an interface as similar to <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> as possible to facilitate the usage.</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">crch</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, <span class="va">subset</span>, <span class="va">na.action</span>, <span class="va">weights</span>, <span class="va">offset</span>, link.scale <span class="op">=</span> <span class="st">"log"</span>, </span>
+<span>  dist <span class="op">=</span> <span class="st">"gaussian"</span>, df <span class="op">=</span> <span class="cn">NULL</span>, left <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, right <span class="op">=</span> <span class="cn">Inf</span>, truncated <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"ml"</span>, control <span class="op">=</span> <span class="fu">crch.control</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
+<span>  model <span class="op">=</span> <span class="cn">TRUE</span>, x <span class="op">=</span> <span class="cn">FALSE</span>, y <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here <code>formula</code>, <code>data</code>, <code>na.action</code>, <code>weights</code>, and <code>offset</code> have their standard model frame meanings <span class="citation" data-cites="chambers1992">(e.g., <a href="#ref-chambers1992" role="doc-biblioref">Chambers and Hastie 1992</a>)</span>. However, as provided in the <strong>Formula</strong> package <span class="citation" data-cites="zeileis2010">(<a href="#ref-zeileis2010" role="doc-biblioref">Zeileis and Croissant 2010</a>)</span> <code>formula</code> can have two parts separated by <code>|</code> where the first part defines the location model and the second part the scale model. E.g., with <code>y ~ x1 + x2 | z1 + z2</code> the location model is specified by <code>y ~ x1 + x2</code> and the scale model by <code>~ z1 + z2</code>. Known offsets can be specified for the location model by <code>offset</code> or for both, the location and scale model, inside <code>formula</code>, i.e., <code>y ~ x1 + x2 + offset(x3) | z1 + z2 + offset(z3)</code>.</p>
+<p>The link function <span class="math inline">\(g(\cdot)\)</span> for the scale model can be specified by <code>link.scale</code>. The default is <code>"log"</code>, also supported are <code>"identity"</code> and <code>"quadratic"</code>. Furthermore, an arbitrary link function can be specified by supplying an object of class <code>"link-glm"</code> containing <code>linkfun</code>, <code>linkinv</code>, <code>mu.eta</code>, and <code>name</code>. Furthermore it must contain the second derivative <code>dmu.deta</code> if analytical Hessians are employed.</p>
+<p><code>dist</code> specifies the used distribution. Currently supported are <code>"gaussian"</code> (the default), <code>"logistic"</code>, and <code>"student"</code>. If <code>dist = "student"</code> the degrees of freedom can be set by the <code>df</code> argument. If set to <code>NULL</code> (the default) the degrees of freedom are estimated by maximum likelihood (<a href="#eq-dfest" class="quarto-xref">Equation&nbsp;2</a>).</p>
+<p><code>left</code> and <code>right</code> define the lower and upper censoring or truncation points respectively. The logical argument <code>truncated</code> defines whether a censored or truncated model is estimated. Note that also a wrapper function <code><a href="https://rdrr.io/pkg/crch/man/crch.html">trch()</a></code> exists that is equivalent to <code><a href="https://rdrr.io/pkg/crch/man/crch.html">crch()</a></code> but with default <code>truncated = TRUE</code>.</p>
+<p>With <code>type = "ml"</code> maximum likelihood estimation is carried out with the R function <code><a href="https://rdrr.io/r/stats/optim.html">optim()</a></code> using control options specified in <code><a href="https://rdrr.io/pkg/crch/man/crch.control.html">crch.control()</a></code>. By default the <code>"BFGS"</code> method is applied. If no starting values are supplied, coefficients from <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> are used as starting values for the location part. For the scale model the intercept is initialized with the link function of the residual standard deviation from <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> and the remaining scale coefficients are initialized with 0. If the degrees of freedom of a distribution are estimated they are initialized by 10. For the distribution with estimated degrees of freedom the covariance matrix estimate is derived from the numerical Hessian returned by <code><a href="https://rdrr.io/r/stats/optim.html">optim()</a></code>. For fixed degrees of freedom and Gaussian and logistic distributions the covariance matrix is derived analytically. However, by setting <code>hessian = TRUE</code> the numerical Hessian can be employed for those models as well.</p>
+<p>As alternative estimation methods <code>type = "crps"</code> and/or <code>control = crch.boost(...)</code> are available. With <code>type = "crps"</code> the objective function is the minimum continuous ranked probability score (CRPS) as a more robust alternative to maximum likelihood. With <code>control</code> options set by <code><a href="https://rdrr.io/pkg/crch/man/crch.boost.html">crch.boost()</a></code> boosting is used for estimation, i.e., where the iterations in the fitting of the model are stopped early (offering various criteria for selecting the number of iterations automatically). Moreover, a convenience interface <code><a href="https://rdrr.io/pkg/crch/man/crch.stabsel.html">crch.stabsel()</a></code> for stability selection based on boosted <code><a href="https://rdrr.io/pkg/crch/man/crch.html">crch()</a></code> models is provided.</p>
+<p>Finally <code>model</code>, <code>y</code>, and <code>x</code> specify whether the model frame, response, or model matrix are returned.</p>
+<p>The returned model fit of class <code>"crch"</code> (and additionally <code>"crch.boost"</code> if the model is fitted by boosting) is a list similar to <code>"glm"</code> objects. Some components like <code>coefficients</code> are lists with elements for location, scale, and degrees of freedom. The package also provides a set of extractor methods for <code>"crch"</code> objects that are listed in <a href="#tbl-methods" class="quarto-xref">Table&nbsp;1</a>.</p>
+<div id="tbl-methods" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Functions and methods for objects of class <code>"crch"</code>.
+</figcaption><div aria-describedby="tbl-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 77%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/base/print.html">print()</a></code></td>
+<td style="text-align: left;">Print function call and estimated coefficients.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/base/summary.html">summary()</a></code></td>
+<td style="text-align: left;">Standard regression output (coefficient estimates, standard errors, partial Wald tests). Returns an object of class <code>"summary.crch"</code> containing summary statistics which has a <code><a href="https://rdrr.io/r/base/print.html">print()</a></code> method.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/stats/coef.html">coef()</a></code></td>
+<td style="text-align: left;">Extract model coefficients where <code>model</code> specifies whether a single vector containing all coefficients (<code>"full"</code>) or the coefficients for the location (<code>"location"</code>), scale (<code>"scale"</code>) or degrees of freedom (<code>"df"</code>) are returned.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/stats/vcov.html">vcov()</a></code></td>
+<td style="text-align: left;">Variance-covariance matrix of the estimated coefficients.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code></td>
+<td style="text-align: left;">Predictions for new data where <code>"type"</code> controls whether location (<code>"response"</code>/<code>"location"</code>), scale (<code>"scale"</code>) or quantiles (<code>"quantile"</code>) are predicted. Quantile probabilities are specified by <code>at</code>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/stats/fitted.values.html">fitted()</a></code></td>
+<td style="text-align: left;">Fitted values for observed data where <code>"type"</code> controls whether location (<code>"location"</code>) or scale (<code>"scale"</code>) values are returned.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/stats/residuals.html">residuals()</a></code></td>
+<td style="text-align: left;">Extract various types of residuals where <code>type</code> can be <code>"standardized"</code> (default), <code>"pearson"</code>, <code>"response"</code>, or <code>"quantile"</code>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/stats/terms.html">terms()</a></code></td>
+<td style="text-align: left;">Extract terms of model components.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/stats/logLik.html">logLik()</a></code></td>
+<td style="text-align: left;">Extract fitted log-likelihood.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Additional to the <code><a href="https://rdrr.io/pkg/crch/man/crch.html">crch()</a></code> function and corresponding methods the <strong>crch</strong> package also provides probability density, cumulative distribution, random number, and quantile functions for censored and truncated normal, logistic, and student-t distributions. Furthermore it also provides a function <code><a href="https://rdrr.io/pkg/crch/man/hxlr.html">hxlr()</a></code> (heteroscedastic extended logistic regression) to fit heteroscedastic interval-censored regression models <span class="citation" data-cites="messner2013a">(<a href="#ref-messner2013a" role="doc-biblioref">Messner, Zeileis, Mayr, et al. 2014</a>)</span>.</p>
+<p>Note that alternative to <code><a href="https://rdrr.io/pkg/crch/man/crch.html">crch()</a></code> heteroscedastic censored and truncated models could also be fitted by the R package <strong>gamlss</strong> <span class="citation" data-cites="rigby2005">(<a href="#ref-rigby2005" role="doc-biblioref">R. A. Rigby and Stasinopoulos 2005</a>)</span> with the add-on packages <strong>gamlss.cens</strong> and <strong>gamlss.tr</strong>. However, for the special case of linear censored of truncated regression models with Gaussian, logistic, or student-t distribution <strong>crch</strong> provides a fast and convenient interface and various useful methods for analysis and prediction. Also, <strong>crch</strong> provides the alternative fitting methods minimum CRPS estimation, boosting, and stability selection.</p>
+</section><section id="sec-examples" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="sec-examples">
+<span class="header-section-number">4</span> Example</h2>
+<p>This section shows a weather forecast example application of censored and truncated regression models fitted with <code><a href="https://rdrr.io/pkg/crch/man/crch.html">crch()</a></code>. Weather forecasts are usually based on numerical weather prediction (NWP) models that take the current state of the atmosphere and compute future weather by numerically simulating the most important atmospheric processes. However, because of uncertain initial conditions and unknown or unresolved processes these numerical predictions are always subject to errors. To estimate these errors, many weather centers provide so called ensemble forecasts: several NWP runs that use different initial conditions and model formulations. Unfortunately these ensemble forecasts cannot consider all error sources so that they are often still biased and uncalibrated. Thus they are often calibrated and corrected for systematic errors by statistical post-processing.</p>
+<p>One popular post-processing method is heteroscedastic linear regression where the ensemble mean is used as regressor for the location and the ensemble standard deviation or variance is used as regressor for the scale <span class="citation" data-cites="gneiting2005">(e.g., <a href="#ref-gneiting2005" role="doc-biblioref">Gneiting et al. 2005</a>)</span>. Because not all meteorological variables can be assumed to be normally distributed this idea has also been extended to other distributions including truncated regression for wind <span class="citation" data-cites="thorarinsdottir2010">(<a href="#ref-thorarinsdottir2010" role="doc-biblioref">Thorarinsdottir and Gneiting 2010</a>)</span> and censored regression for wind power <span class="citation" data-cites="messner2014b">(<a href="#ref-messner2014b" role="doc-biblioref">Messner, Zeileis, Broecker, et al. 2014</a>)</span> or precipitation <span class="citation" data-cites="messner2014">(<a href="#ref-messner2014" role="doc-biblioref">Messner, Mayr, et al. 2014</a>)</span>.</p>
+<p>The following example applies heteroscedastic censored regression with a logistic distribution assumption to precipitation data in Innsbruck (Austria). Furthermore, a two-part model tests whether the occurrence of precipitation and the precipitation amount are driven by the same process.</p>
+<p>First, the <strong>crch</strong> package is loaded together with an included precipitation data set with forecasts and observations for Innsbruck (Austria)</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/crch/">"crch"</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"RainIbk"</span>, package <span class="op">=</span> <span class="st">"crch"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>data.frame</code> <code>RainIbk</code> contains observed 3 day-accumulated precipitation amounts (<code>rain</code>) and the corresponding 11 member ensemble forecasts of total accumulated precipitation amount between 5 and 8 days in advance (<code>rainfc.1</code>, <code>rainfc.2</code>, <span class="math inline">\(\ldots\)</span> <code>rainfc.11</code>). The rownames are the end date of the 3 days over which the precipitation amounts are accumulated respectively; i.e., the respective forecasts are issued 8 days before these dates.</p>
+<p>In previous studies it has been shown that it is of advantage to model the square root of precipitation rather than precipitation itself. Thus all precipitation amounts are square rooted before ensemble mean and standard deviation are derived. Furthermore, events with no variation in the ensemble are omitted:</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span></span>
+<span><span class="va">RainIbk</span><span class="op">$</span><span class="va">ensmean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
+<span><span class="va">RainIbk</span><span class="op">$</span><span class="va">enssd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">'^rainfc'</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span></span>
+<span><span class="va">RainIbk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">RainIbk</span>, <span class="va">enssd</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A scatterplot of <code>rain</code> against <code>ensmean</code></p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/gray.html">gray</a></span><span class="op">(</span><span class="fl">0</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>indicates a linear relationship that differs from a 1-to-1 relationship (<a href="#fig-scatter" class="quarto-xref">Figure&nbsp;1</a>). Precipitation is clearly non-negative with many zero observations. Thus censored regression or a two-part model are suitable to estimate this relationship.</p>
+<p>First we fit a logistic censored model for <code>rain</code> with <code>ensmean</code> as regressor for the location and <code>log(enssd)</code> as regressor for the scale.</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">CRCH</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  dist <span class="op">=</span> <span class="st">"logistic"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">CRCH</span><span class="op">)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Call:</span></span>
+<span><span class="co">## crch(formula = rain ~ ensmean | log(enssd), data = RainIbk, </span></span>
+<span><span class="co">##     dist = "logistic", left = 0)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Standardized residuals:</span></span>
+<span><span class="co">##    Min     1Q Median     3Q    Max </span></span>
+<span><span class="co">## -3.578 -0.655  0.167  1.119  7.499 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Coefficients (location model):</span></span>
+<span><span class="co">##             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">## (Intercept)  -0.8527     0.0690   -12.3   &lt;2e-16 ***</span></span>
+<span><span class="co">## ensmean       0.7869     0.0192    41.0   &lt;2e-16 ***</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Coefficients (scale model with log link):</span></span>
+<span><span class="co">##             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">## (Intercept)   0.1174     0.0146    8.05  8.6e-16 ***</span></span>
+<span><span class="co">## log(enssd)    0.2705     0.0350    7.72  1.1e-14 ***</span></span>
+<span><span class="co">## ---</span></span>
+<span><span class="co">## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Distribution: logistic</span></span>
+<span><span class="co">## Log-likelihood: -8.92e+03 on 4 Df</span></span>
+<span><span class="co">## Number of iterations in BFGS optimization: 15</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Both, <code>ensmean</code> and <code>log(enssd)</code> are highly significant according to the Wald test performed by the <code><a href="https://rdrr.io/r/base/summary.html">summary()</a></code> method. The location model is also shown in <a href="#fig-scatter" class="quarto-xref">Figure&nbsp;1</a>:</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">CRCH</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-scatter" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="crch_files/figure-html/fig-scatter-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Square rooted precipitation amount against ensemble mean forecasts. A line with intercept 0 and slope 1 is shown in red and the censored regression fit in blue.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>If we compare this model to a constant scale model (tobit model with logistic distribution)</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">CR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span>, dist <span class="op">=</span> <span class="st">"logistic"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html">AIC</a></span><span class="op">(</span><span class="va">CR</span>, <span class="va">CRCH</span><span class="op">)</span>, BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html">BIC</a></span><span class="op">(</span><span class="va">CR</span>, <span class="va">CRCH</span><span class="op">)</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">##      df   AIC   BIC</span></span>
+<span><span class="co">## CR    3 17906 17925</span></span>
+<span><span class="co">## CRCH  4 17850 17876</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>we see that the scale model clearly improves the fit regarding AIC and BIC.</p>
+<p>A comparison of the logistic model with a Gaussian and a student-t model</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">CRCHgau</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  dist <span class="op">=</span> <span class="st">"gaussian"</span><span class="op">)</span></span>
+<span><span class="va">CRCHstud</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  dist <span class="op">=</span> <span class="st">"student"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html">AIC</a></span><span class="op">(</span><span class="va">CRCH</span>, <span class="va">CRCHgau</span>, <span class="va">CRCHstud</span><span class="op">)</span></span>
+<span><span class="co">##          df   AIC</span></span>
+<span><span class="co">## CRCH      4 17850</span></span>
+<span><span class="co">## CRCHgau   4 17897</span></span>
+<span><span class="co">## CRCHstud  5 17851</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>confirms the logistic distribution assumption. Note, that with the estimated degrees of freedom of 9.56 the student-t distribution resembles the (scaled) logistic distribution quite well (see <a href="#fig-dist" class="quarto-xref">Figure&nbsp;2</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="crch_files/figure-html/fig-dist-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Probability density functions of a student-t distribution with 9.56 degrees of freedom, a logistic, and a normal distribution. The densities of the logistic and normal distribution are scaled to facilitate comparison.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>In the censored model the occurrence of precipitation and precipitation amount are assumed to be driven by the same process. To test this assumption we compare the censored model with a two-part model consisting of a heteroscedastic logit model and a truncated regression model with logistic distribution assumption. For the heteroscedastic logit model we use <code><a href="https://rdrr.io/pkg/glmx/man/hetglm.html">hetglm()</a></code> from the <strong>glmx</strong> package and for the truncated model we employ the <code><a href="https://rdrr.io/pkg/crch/man/crch.html">crch()</a></code> function with the argument <code>truncated = TRUE</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st">"glmx"</span><span class="op">)</span></span>
+<span><span class="va">BIN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmx/man/hetglm.html">hetglm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html">I</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">TRCH</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html">crch</a></span><span class="op">(</span><span class="va">rain</span><span class="op">~</span><span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, subset <span class="op">=</span> <span class="va">rain</span> <span class="op">&gt;</span> <span class="fl">0</span>, </span>
+<span>  left <span class="op">=</span> <span class="fl">0</span>, dist <span class="op">=</span> <span class="st">"logistic"</span>, truncated <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the heteroscedastic logit model, the intercept of the scale model is not identified. Thus, the location coefficients of the censored and truncated regression models have to be scaled to compare them with the logit model.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="st">"CRCH"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">CRCH</span>, <span class="st">"location"</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">CRCH</span>, <span class="st">"scale"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">CRCH</span>, <span class="st">"scale"</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>, </span>
+<span>  <span class="st">"BIN"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">BIN</span><span class="op">)</span>, </span>
+<span>  <span class="st">"TRCH"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">TRCH</span>, <span class="st">"location"</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">TRCH</span>, <span class="st">"scale"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">TRCH</span>, <span class="st">"scale"</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">##                 CRCH      BIN    TRCH</span></span>
+<span><span class="co">## (Intercept) -0.75818 -1.01817 0.26354</span></span>
+<span><span class="co">## ensmean      0.69967  0.77891 0.54560</span></span>
+<span><span class="co">## log(enssd)   0.27055  0.45399 0.23262</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The different (scaled) coefficients indicate that different processes drive the occurrence of precipitation and precipitation amount. This is also confirmed by AIC and BIC that are clearly better for the two-part model than for the censored model:</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">loglik</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Censored"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/logLik.html">logLik</a></span><span class="op">(</span><span class="va">CRCH</span><span class="op">)</span>, <span class="st">"Two-Part"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/logLik.html">logLik</a></span><span class="op">(</span><span class="va">BIN</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/logLik.html">logLik</a></span><span class="op">(</span><span class="va">TRCH</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">7</span><span class="op">)</span></span>
+<span><span class="va">aic</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">2</span> <span class="op">*</span> <span class="va">loglik</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">df</span></span>
+<span><span class="va">bic</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">2</span> <span class="op">*</span> <span class="va">loglik</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">RainIbk</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="va">df</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">df</span>, AIC <span class="op">=</span> <span class="va">aic</span>, BIC <span class="op">=</span> <span class="va">bic</span><span class="op">)</span></span>
+<span><span class="co">##          df   AIC   BIC</span></span>
+<span><span class="co">## Censored  4 17850 17876</span></span>
+<span><span class="co">## Two-Part  7 17745 17790</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we can use the fitted models to predict future precipitation. Therefore assume that the current NWP forecast of square rooted precipitation has an ensemble mean of 1.8 and an ensemble standard deviation of 0.9. A median precipitation forecast of the censored model can then easily be computed with</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">newdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>ensmean <span class="op">=</span> <span class="fl">1.8</span>, enssd <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">CRCH</span>, <span class="va">newdata</span>, type <span class="op">=</span> <span class="st">"quantile"</span>, at <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span></span>
+<span><span class="co">##       1 </span></span>
+<span><span class="co">## 0.31774</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note, that the prediction has to be squared since all models fit the square root of precipitation. In the two-part model the probability to stay below a threshold <span class="math inline">\(q\)</span> is composed of</p>
+<p><span class="math display">\[
+  P(y \le q) = 1-P(y &gt; 0) + P(y&gt;0) \cdot P(y \le q|y&gt;0)
+\]</span></p>
+<p>Thus median precipitation equals the <span class="math inline">\((P(y &gt; 0) - 0.5)/P(y&gt;0)\)</span>-quantile of the truncated distribution.</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">BIN</span>, <span class="va">newdata</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">TRCH</span>, <span class="va">newdata</span>, type <span class="op">=</span> <span class="st">"quantile"</span>, at <span class="op">=</span> <span class="op">(</span><span class="va">p</span> <span class="op">-</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">/</span><span class="va">p</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span></span>
+<span><span class="co">##      1 </span></span>
+<span><span class="co">## 0.4157</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Probabilities to exceed, e.g., 5mm can be predicted with cumulative distribution functions (e.g., <code><a href="https://rdrr.io/pkg/crch/man/clogis.html">pclogis()</a></code>, <code><a href="https://rdrr.io/pkg/crch/man/tlogis.html">ptlogis()</a></code>) that are also provided in the <strong>crch</strong> package.</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">CRCH</span>, <span class="va">newdata</span>, type <span class="op">=</span> <span class="st">"location"</span><span class="op">)</span></span>
+<span><span class="va">sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">CRCH</span>, <span class="va">newdata</span>, type <span class="op">=</span> <span class="st">"scale"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/crch/man/clogis.html">pclogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, <span class="va">mu</span>, <span class="va">sigma</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span>, left <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co">## [1] 0.17798</span></span>
+<span></span>
+<span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">TRCH</span>, <span class="va">newdata</span>, type <span class="op">=</span> <span class="st">"location"</span><span class="op">)</span></span>
+<span><span class="va">sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">TRCH</span>, <span class="va">newdata</span>, type <span class="op">=</span> <span class="st">"scale"</span><span class="op">)</span></span>
+<span><span class="va">p</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/tlogis.html">ptlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, <span class="va">mu</span>, <span class="va">sigma</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span>, left <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co">##       1 </span></span>
+<span><span class="co">## 0.21087</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note, that <code><a href="https://rdrr.io/pkg/crch/man/clogis.html">pclogis()</a></code> could also be replaced by <code><a href="https://rdrr.io/r/stats/Logistic.html">plogis()</a></code> since they are equivalent between <span class="math inline">\(\text{left}\)</span> and <span class="math inline">\(\text{right}\)</span>.</p>
+<p>Clearly, other types of model misspecification or model generalization (depending on the point of view) for the classical tobit model are possible. In addition to heteroscedasticity, the type of response distribution, and the presence of hurdle effects as explored in the application here, further aspects might have to be addressed by the model. Especially in economics and the social sciences sample selection effects might be present in the two-part model which can be addressed (in the homoscedastic normal case) using the R packages <strong>sampleSelection</strong> <span class="citation" data-cites="toomet2008">(<a href="#ref-toomet2008" role="doc-biblioref">Toomet and Henningsen 2008</a>)</span> or <strong>mhurdle</strong> <span class="citation" data-cites="croissant2013">(<a href="#ref-croissant2013" role="doc-biblioref">Croissant, Carlevaro, and Hoareau 2024</a>)</span>. Furthermore, the scale link function or potential nonlinearities in the regression functions could be assessed, e.g., using the <strong>gamlss</strong> suite of packages <span class="citation" data-cites="stasinopoulos2007">(<a href="#ref-stasinopoulos2007" role="doc-biblioref">Stasinopoulos and Rigby 2007</a>)</span>.</p>
+</section><section id="sec-summary" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="sec-summary">
+<span class="header-section-number">5</span> Summary</h2>
+<p>Censored and truncated response models are common in econometrics and other statistical applications. However, often the homoscedasticity assumption of these models is not fulfilled. This paper presented the <strong>crch</strong> package that provides functions to fit censored or truncated regression models with conditional heteroscedasticity. It supports Gaussian, logistic or student-t distributed censored or truncated responses and provides various convenient methods for analysis and prediction. To illustrate the package we showed that heteroscedastic censored and truncated models are well suited to improve precipitation forecasts.</p>
+</section><section id="references" class="level2 unnumbered">
+
+
+
+</section><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-chambers1992" class="csl-entry" role="listitem">
+Chambers, J. M., and T. J. Hastie. 1992. <em>Statistical Models in <span>S</span></em>. London: Chapman &amp; Hall.
+</div>
+<div id="ref-cragg1971" class="csl-entry" role="listitem">
+Cragg, John G. 1971. <span>“Some Statistical Models for Limited Dependent Variables with Application to the Demand for Durable Goods.”</span> <em>Econometrica</em> 39 (5): 829–44. <a href="https://doi.org/10.2307/1909582">https://doi.org/10.2307/1909582</a>.
+</div>
+<div id="ref-cribarineto2010" class="csl-entry" role="listitem">
+Cribari-Neto, Francisco, and Achim Zeileis. 2010. <span>“Beta Regression in <span>R</span>.”</span> <em>Journal of Statistical Software</em> 34 (2): 1–24. <a href="https://doi.org/10.18637/jss.v034.i02">https://doi.org/10.18637/jss.v034.i02</a>.
+</div>
+<div id="ref-croissant2013" class="csl-entry" role="listitem">
+Croissant, Yves, Fabrizio Carlevaro, and Stephane Hoareau. 2024. <em>Mhurdle: Multiple Hurdle Tobit Models</em>. <a href="https://doi.org/10.32614/CRAN.package.mhurdle">https://doi.org/10.32614/CRAN.package.mhurdle</a>.
+</div>
+<div id="ref-dunn2014" class="csl-entry" role="listitem">
+Dunn, Peter K, Gordon K Smyth, and Robert W. Corty. 2023. <em><span class="nocase">dglm</span>: Double Generalized Linear Models</em>. <a href="https://doi.org/10.32614/CRAN.package.dglm">https://doi.org/10.32614/CRAN.package.dglm</a>.
+</div>
+<div id="ref-gneiting2005" class="csl-entry" role="listitem">
+Gneiting, Tilmann, Adrian E. Raftery, Anton H. Westveld, and Tom Goldman. 2005. <span>“Calibrated Probabilistic Forecasting Using Ensemble Model Output Statistics and Minimum <span>CRPS</span> Estimation.”</span> <em>Monthly Weather Review</em> 133 (5): 1098–118. <a href="https://doi.org/10.1175/MWR2904.1">https://doi.org/10.1175/MWR2904.1</a>.
+</div>
+<div id="ref-zeileis2012" class="csl-entry" role="listitem">
+Grün, Bettina, Ioannis Kosmidis, and Achim Zeileis. 2012. <span>“Extended Beta Regression in <span>R</span>: Shaken, Stirred, Mixed, and Partitioned.”</span> <em>Journal of Statistical Software</em> 48 (11): 1–25. <a href="https://doi.org/10.18637/jss.v048.i11">https://doi.org/10.18637/jss.v048.i11</a>.
+</div>
+<div id="ref-messner2014" class="csl-entry" role="listitem">
+Messner, Jakob W., Georg J. Mayr, Daniel S. Wilks, and Achim Zeileis. 2014. <span>“Extending Extended Logistic Regression: Extended Vs.&nbsp;Separate Vs.&nbsp;Ordered Vs.&nbsp;Censored.”</span> <em>Monthly Weather Review</em> 142: 3003–14. <a href="https://doi.org/10.1175/MWR-D-13-00355.1">https://doi.org/10.1175/MWR-D-13-00355.1</a>.
+</div>
+<div id="ref-messner2016" class="csl-entry" role="listitem">
+Messner, Jakob W., Georg J. Mayr, and Achim Zeileis. 2016. <span>“Heteroscedastic Censored and Truncated Regression with <span class="nocase">crch</span>.”</span> <em>The R Journal</em> 8 (1): 173–81. <a href="https://doi.org/10.32614/RJ-2016-012">https://doi.org/10.32614/RJ-2016-012</a>.
+</div>
+<div id="ref-messner2014b" class="csl-entry" role="listitem">
+Messner, Jakob W., Achim Zeileis, Jochen Broecker, and Georg J. Mayr. 2014. <span>“Probabilistic Wind Power Forecasts with an Inverse Power Curve Transformation and Censored Regression.”</span> <em>Wind Energy</em> 17 (11): 1753–66. <a href="https://doi.org/10.1002/we.1666">https://doi.org/10.1002/we.1666</a>.
+</div>
+<div id="ref-messner2013a" class="csl-entry" role="listitem">
+Messner, Jakob W., Achim Zeileis, Georg J. Mayr, and Daniel S. Wilks. 2014. <span>“Heteroscedastic Extended Logistic Regression for Post-Processing of Ensemble Guidance.”</span> <em>Monthly Weather Review</em> 142: 448–56. <a href="https://doi.org/10.1175/MWR-D-13-00271.1">https://doi.org/10.1175/MWR-D-13-00271.1</a>.
+</div>
+<div id="ref-nelder1987" class="csl-entry" role="listitem">
+Nelder, J. A., and D. Pregibon. 1987. <span>“An Extended Quasi-Likelihood Function.”</span> <em>Biometrika</em> 74 (2): 221–32. <a href="https://doi.org/10.2307/2336136">https://doi.org/10.2307/2336136</a>.
+</div>
+<div id="ref-rigby2005" class="csl-entry" role="listitem">
+Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+</div>
+<div id="ref-rigby1996" class="csl-entry" role="listitem">
+Rigby, Robert A., and D. Mikis Stasinopoulos. 1996. <span>“Mean and Dispersion Additive Models.”</span> In <em>Statistical Theory and Computational Aspects of Smoothing</em>, edited by Wolfgang Härdle and Michael G. Schimek, 215–30. Contributions to Statistics. Physica-Verlag. <a href="https://doi.org/10.1007/978-3-642-48425-4_16">https://doi.org/10.1007/978-3-642-48425-4_16</a>.
+</div>
+<div id="ref-stasinopoulos2007" class="csl-entry" role="listitem">
+Stasinopoulos, D., and Robert Rigby. 2007. <span>“Generalized Additive Models for Location Scale and Shape (GAMLSS) in <span>R</span>.”</span> <em>Journal of Statistical Software</em> 23 (7): 1–46. <a href="https://doi.org/10.18637/jss.v023.i07">https://doi.org/10.18637/jss.v023.i07</a>.
+</div>
+<div id="ref-thorarinsdottir2010" class="csl-entry" role="listitem">
+Thorarinsdottir, Thordis L., and Tilmann Gneiting. 2010. <span>“Probabilistic Forecasts of Wind Speed: Ensemble Model Output Statistics by Using Heteroscedastic Censored Regression.”</span> <em>Journal of the Royal Statistical Society A</em> 173 (2): 371–88. <a href="https://doi.org/10.1111/j.1467-985X.2009.00616.x">https://doi.org/10.1111/j.1467-985X.2009.00616.x</a>.
+</div>
+<div id="ref-tobin1958" class="csl-entry" role="listitem">
+Tobin, J. 1958. <span>“Estimation of Relationships for Limited Dependent Variables.”</span> <em>Econometrica</em> 26 (1): 24–36. <a href="https://doi.org/10.2307/1907382">https://doi.org/10.2307/1907382</a>.
+</div>
+<div id="ref-toomet2008" class="csl-entry" role="listitem">
+Toomet, Ott, and Arne Henningsen. 2008. <span>“Sample Selection Models in <span>R</span>: Package <span class="nocase">sampleSelection</span>.”</span> <em>Journal of Statistical Software</em> 27 (7). <a href="https://doi.org/10.18637/jss.v027.i07">https://doi.org/10.18637/jss.v027.i07</a>.
+</div>
+<div id="ref-zeileis2010" class="csl-entry" role="listitem">
+Zeileis, Achim, and Yves Croissant. 2010. <span>“Extended Model Formulas in <span>R</span>: Multiple Parts and Multiple Responses.”</span> <em>Journal of Statistical Software</em> 34 (1): 1–13. <a href="https://doi.org/10.18637/jss.v034.i01">https://doi.org/10.18637/jss.v034.i01</a>.
+</div>
+<div id="ref-zeileis2013" class="csl-entry" role="listitem">
+Zeileis, Achim, Roger Koenker, and Philipp Doebler. 2023. <em><span class="nocase">glmx</span>: Generalized Linear Models Extended</em>. <a href="https://doi.org/10.32614/CRAN.package.glmx">https://doi.org/10.32614/CRAN.package.glmx</a>.
+</div>
+</div></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/topmodels\.R-Forge\.R-project\.org\/crch\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
