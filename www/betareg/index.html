@@ -241,33 +241,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">br</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://betareg.R-Forge.R-project.org/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">br</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; betareg(formula = accuracy ~ dyslexia * iq | dyslexia + iq, data = ReadingSkills)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Quantile residuals:</span></span>
-<span><span class="co">#&gt;     Min      1Q  Median      3Q     Max </span></span>
-<span><span class="co">#&gt; -2.3625 -0.5872  0.3026  0.9425  1.5874 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Coefficients (mean model with logit link):</span></span>
-<span><span class="co">#&gt;             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)   1.1232     0.1428   7.864 3.73e-15 ***</span></span>
-<span><span class="co">#&gt; dyslexia     -0.7416     0.1428  -5.195 2.04e-07 ***</span></span>
-<span><span class="co">#&gt; iq            0.4864     0.1331   3.653 0.000259 ***</span></span>
-<span><span class="co">#&gt; dyslexia:iq  -0.5813     0.1327  -4.381 1.18e-05 ***</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Phi coefficients (precision model with log link):</span></span>
-<span><span class="co">#&gt;             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)   3.3044     0.2227  14.835  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; dyslexia      1.7466     0.2623   6.658 2.77e-11 ***</span></span>
-<span><span class="co">#&gt; iq            1.2291     0.2672   4.600 4.23e-06 ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Type of estimator: ML (maximum likelihood)</span></span>
-<span><span class="co">#&gt; Log-likelihood:  65.9 on 7 Df</span></span>
-<span><span class="co">#&gt; Pseudo R-squared: 0.5756</span></span>
-<span><span class="co">#&gt; Number of iterations: 25 (BFGS) + 1 (Fisher scoring)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">## </span></span>
+<span><span class="co">## Call:</span></span>
+<span><span class="co">## betareg(formula = accuracy ~ dyslexia * iq | dyslexia + iq, data = ReadingSkills)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Quantile residuals:</span></span>
+<span><span class="co">##     Min      1Q  Median      3Q     Max </span></span>
+<span><span class="co">## -2.3625 -0.5872  0.3026  0.9425  1.5874 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Coefficients (mean model with logit link):</span></span>
+<span><span class="co">##             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">## (Intercept)   1.1232     0.1428   7.864 3.73e-15 ***</span></span>
+<span><span class="co">## dyslexia     -0.7416     0.1428  -5.195 2.04e-07 ***</span></span>
+<span><span class="co">## iq            0.4864     0.1331   3.653 0.000259 ***</span></span>
+<span><span class="co">## dyslexia:iq  -0.5813     0.1327  -4.381 1.18e-05 ***</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Phi coefficients (precision model with log link):</span></span>
+<span><span class="co">##             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">## (Intercept)   3.3044     0.2227  14.835  &lt; 2e-16 ***</span></span>
+<span><span class="co">## dyslexia      1.7466     0.2623   6.658 2.77e-11 ***</span></span>
+<span><span class="co">## iq            1.2291     0.2672   4.600 4.23e-06 ***</span></span>
+<span><span class="co">## ---</span></span>
+<span><span class="co">## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Type of estimator: ML (maximum likelihood)</span></span>
+<span><span class="co">## Log-likelihood:  65.9 on 7 Df</span></span>
+<span><span class="co">## Pseudo R-squared: 0.5756</span></span>
+<span><span class="co">## Number of iterations: 25 (BFGS) + 1 (Fisher scoring)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The regression summary shows that <code>accuracy</code> increases with <code>iq</code> for the control group but not for the dyslexic group (even slightly decreases). This can be brought out more clearly graphically. This also highlights that the model employs a logit link so that the fitted curves always remain within (0, 1).</p>
 <div class="cell">

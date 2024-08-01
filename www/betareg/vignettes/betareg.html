@@ -298,7 +298,7 @@ Figure&nbsp;1: Probability density functions for beta distributions with varying
 </div>
 </div>
 <p>The idea underlying beta regression models dates back to earlier approaches such as <span class="citation" data-cites="betareg:Williams:1982">Williams (<a href="#ref-betareg:Williams:1982" role="doc-biblioref">1982</a>)</span> or <span class="citation" data-cites="betareg:Prentice:1986">Prentice (<a href="#ref-betareg:Prentice:1986" role="doc-biblioref">1986</a>)</span>. The initial motivation was to model binomial random variables with extra variation. The model postulated for the (discrete) variate of interest included a more flexible variation structure determined by independent beta-distributed variables which are related to a set of independent variables through a regression structure. However, unlike the more recent literature, the main focus was to model binomial random variables. Our interest in what follows will be more closely related to the recent literature, i.e., modeling continous random variables that assume values in <span class="math inline">\((0,1)\)</span>, such as rates, proportions, and concentration or inequality indices (e.g., Gini).</p>
-<p>In this paper, we describe the <strong>betareg</strong> package which can be used to perform inference in both fixed and variable dispersion beta regressions. The package is implemented in the R system for statistical computing <span class="citation" data-cites="betareg:R:2009">(<a href="#ref-betareg:R:2009" role="doc-biblioref"> Core Team 2024</a>)</span> and available from the Comprehensive R Archive Network (CRAN) at <a href="http://CRAN.R-project.org/package=betareg" class="uri">http://CRAN.R-project.org/package=betareg</a>. The initial version of the package was written by <span class="citation" data-cites="betareg:Simas+Rocha:2006">Simas and Rocha (<a href="#ref-betareg:Simas+Rocha:2006" role="doc-biblioref">2006</a>)</span> up to version 1.2 which was orphaned and archived on CRAN in mid-2009. Starting from version 2.0-0, Achim Zeileis took over maintenance after rewriting/extending the package’s functionality.</p>
+<p>In this paper, we describe the <strong>betareg</strong> package which can be used to perform inference in both fixed and variable dispersion beta regressions. The package is implemented in the R system for statistical computing <span class="citation" data-cites="betareg:R:2009">(<a href="#ref-betareg:R:2009" role="doc-biblioref">R Core Team 2024</a>)</span> and available from the Comprehensive R Archive Network (CRAN) at <a href="http://CRAN.R-project.org/package=betareg" class="uri">http://CRAN.R-project.org/package=betareg</a>. The initial version of the package was written by <span class="citation" data-cites="betareg:Simas+Rocha:2006">Simas and Rocha (<a href="#ref-betareg:Simas+Rocha:2006" role="doc-biblioref">2006</a>)</span> up to version 1.2 which was orphaned and archived on CRAN in mid-2009. Starting from version 2.0-0, Achim Zeileis took over maintenance after rewriting/extending the package’s functionality.</p>
 <p>The paper unfolds as follows: <a href="#sec-model" class="quarto-xref">Section&nbsp;2</a> outlines the theory underlying the beta regression model before <a href="#sec-implementation" class="quarto-xref">Section&nbsp;3</a> describes its implementation in R. <a href="#sec-illustrations" class="quarto-xref">Section&nbsp;4</a> and <a href="#sec-replications" class="quarto-xref">Section&nbsp;5</a> provide various empirical applications: The former focuses on illustrating various aspects of beta regressions in practice while the latter provides further replications of previously published empirical research. Finally, <a href="#sec-conclusion" class="quarto-xref">Section&nbsp;6</a> contains concluding remarks and directions for future research and implementation.</p>
 </section><section id="sec-model" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="sec-model">
 <span class="header-section-number">2</span> Beta regression</h2>
@@ -356,7 +356,7 @@ Here, <span class="math inline">\(g(\cdot): (0,1) \mapsto
 <span class="header-section-number">3</span> Implementation in R</h2>
 <p>To turn the conceptual model from the previous section into computational tools in R, it helps to emphasize some properties of the model: It is a standard maximum likelihood (ML) task for which there is no closed-form solution but numerical optimization is required. Furthermore, the model shares some properties (such as linear predictor, link function, dispersion parameter) with generalized linear models <span class="citation" data-cites="betareg:McCullagh+Nelder:1989">(GLMS, <a href="#ref-betareg:McCullagh+Nelder:1989" role="doc-biblioref">McCullagh and Nelder 1989</a>)</span>, but it is not a special case of this framework (not even for fixed dispersion). There are various models with implementations in R that have similar features – here, we specifically reuse some of the ideas employed for generalized count data regression by <span class="citation" data-cites="betareg:Zeileis+Kleiber+Jackman:2008">Zeileis, Kleiber, and Jackman (<a href="#ref-betareg:Zeileis+Kleiber+Jackman:2008" role="doc-biblioref">2008</a>)</span>.</p>
 <p>The main model-fitting function in <strong>betareg</strong> is <code>betareg()</code> which takes a fairly standard approach for implementing ML regression models in R: <code>formula</code> plus <code>data</code> is used for model and data specification, then the likelihood and corresponding gradient (or estimating function) is set up, <code><a href="https://rdrr.io/r/stats/optim.html">optim()</a></code> is called for maximizing the likelihood, and finally an object of S3 class <code>"betareg"</code> is returned for which a large set of methods to standard generics is available. The workhorse function is <code>betareg.fit()</code> which provides the core computations without <code>formula</code>-related data pre- and post-processing. <strong>Update:</strong> Recently, <code>betareg()</code> has been extended to optionally include an additional Fisher scoring iteration after the <code><a href="https://rdrr.io/r/stats/optim.html">optim()</a></code> optimization in order to improve the ML result (or apply a bias correction or reduction).</p>
-<p>The model-fitting function <code>betareg()</code> and its associated class are designed to be as similar as possible to the standard <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> function <span class="citation" data-cites="betareg:R:2009">(<a href="#ref-betareg:R:2009" role="doc-biblioref"> Core Team 2024</a>)</span> for fitting GLMs. An important difference is that there are potentially two equations for mean and precision (<a href="#eq-meanprecision" class="quarto-xref">Equation&nbsp;4</a>), and consequently two regressor matrices, two linear predictors, two sets of coefficients, etc. In this respect, the design of <code>betareg()</code> is similar to the functions described by <span class="citation" data-cites="betareg:Zeileis+Kleiber+Jackman:2008">Zeileis, Kleiber, and Jackman (<a href="#ref-betareg:Zeileis+Kleiber+Jackman:2008" role="doc-biblioref">2008</a>)</span> for fitting zero-inflation and hurdle models which also have two model components. The arguments of <code>betareg()</code> are</p>
+<p>The model-fitting function <code>betareg()</code> and its associated class are designed to be as similar as possible to the standard <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> function <span class="citation" data-cites="betareg:R:2009">(<a href="#ref-betareg:R:2009" role="doc-biblioref">R Core Team 2024</a>)</span> for fitting GLMs. An important difference is that there are potentially two equations for mean and precision (<a href="#eq-meanprecision" class="quarto-xref">Equation&nbsp;4</a>), and consequently two regressor matrices, two linear predictors, two sets of coefficients, etc. In this respect, the design of <code>betareg()</code> is similar to the functions described by <span class="citation" data-cites="betareg:Zeileis+Kleiber+Jackman:2008">Zeileis, Kleiber, and Jackman (<a href="#ref-betareg:Zeileis+Kleiber+Jackman:2008" role="doc-biblioref">2008</a>)</span> for fitting zero-inflation and hurdle models which also have two model components. The arguments of <code>betareg()</code> are</p>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">betareg</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, <span class="va">subset</span>, <span class="va">na.action</span>, <span class="va">weights</span>, <span class="va">offset</span>,</span>
 <span>  link <span class="op">=</span> <span class="st">"logit"</span>, link.phi <span class="op">=</span> <span class="cn">NULL</span>, control <span class="op">=</span> <span class="fu">betareg.control</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
@@ -873,19 +873,16 @@ Figure&nbsp;8: Structural change tests for artificial data <code>y2</code> with 
 
 </section><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-betareg:Breusch+Pagan:1979" class="csl-entry" role="listitem">
-Breusch, T. S., and A. R. Pagan. 1979. <span>“A Simple Test for Heteroscedasticity and Random Coefficient Variation.”</span> <em>Econometrica</em> 47: 1287–94. <a href="https://doi.org/10.2307/1911963">https://doi.org/10.2307/1911963</a>.
+Breusch, Trevor S., and Adrian R. Pagan. 1979. <span>“A Simple Test for Heteroscedasticity and Random Coefficient Variation.”</span> <em>Econometrica</em> 47: 1287–94. <a href="https://doi.org/10.2307/1911963">https://doi.org/10.2307/1911963</a>.
 </div>
 <div id="ref-betareg:Chambers+Hastie:1992" class="csl-entry" role="listitem">
-Chambers, John M., and Trevor J. Hastie, eds. 1992. <em>Statistical Models in </em>. London: Chapman &amp; Hall.
-</div>
-<div id="ref-betareg:R:2009" class="csl-entry" role="listitem">
-Core Team. 2024. <em>: <span>A</span> Language and Environment for Statistical Computing</em>. Vienna: Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.
+Chambers, John M., and Trevor J. Hastie, eds. 1992. <em>Statistical Models in <span>S</span></em>. London: Chapman &amp; Hall.
 </div>
 <div id="ref-betareg:Cribari-Neto+Lima:2007" class="csl-entry" role="listitem">
 Cribari-Neto, Francisco, and Leonardo B. Lima. 2007. <span>“A Misspecification Test for Beta Regressions.”</span>
 </div>
 <div id="ref-betareg:Cribari-Neto+Zeileis:2010" class="csl-entry" role="listitem">
-Cribari-Neto, Francisco, and Achim Zeileis. 2010. <span>“Beta Regression in .”</span> <em>Journal of Statistical Software</em> 34 (2): 1–24. <a href="https://doi.org/10.18637/jss.v034.i02">https://doi.org/10.18637/jss.v034.i02</a>.
+Cribari-Neto, Francisco, and Achim Zeileis. 2010. <span>“Beta Regression in <span>R</span>.”</span> <em>Journal of Statistical Software</em> 34 (2): 1–24. <a href="https://doi.org/10.18637/jss.v034.i02">https://doi.org/10.18637/jss.v034.i02</a>.
 </div>
 <div id="ref-betareg:Espinheira+Ferrari+Cribari-Neto:2008b" class="csl-entry" role="listitem">
 Espinheira, PatrL., Silvia L. P. Ferrari, and Francisco Cribari-Neto. 2008a. <span>“Influence Diagnostics in Beta Regression.”</span> <em>Computational Statistics &amp; Data Analysis</em> 52 (9): 4417–31. <a href="https://doi.org/10.1016/j.csda.2008.02.028">https://doi.org/10.1016/j.csda.2008.02.028</a>.
@@ -897,13 +894,13 @@ Espinheira, PatrL., Silvia L. P. Ferrari, and Francisco Cribari-Neto. 2008a. <sp
 Ferrari, Silvia L. P., and Francisco Cribari-Neto. 2004. <span>“Beta Regression for Modelling Rates and Proportions.”</span> <em>Journal of Applied Statistics</em> 31 (7): 799–815. <a href="https://doi.org/10.1080/0266476042000214501">https://doi.org/10.1080/0266476042000214501</a>.
 </div>
 <div id="ref-betareg:Fox+Weisberg:2019" class="csl-entry" role="listitem">
-Fox, John, and Sanford Weisberg. 2019. <em>An Companion to Applied Regression</em>. 3rd ed. Thousand Oaks, CA: Sage Publications.
+Fox, John, and Sanford Weisberg. 2019. <em>An <span>R</span> Companion to Applied Regression</em>. 3rd ed. Thousand Oaks, CA: Sage Publications.
 </div>
 <div id="ref-betareg:Griffiths+Hill+Judge:1993" class="csl-entry" role="listitem">
 Griffiths, William E., R. Carter Hill, and George G. Judge. 1993. <em>Learning and Practicing Econometrics</em>. New York: John Wiley &amp; Sons.
 </div>
 <div id="ref-betareg:Gruen+Kosmidis+Zeileis:2012" class="csl-entry" role="listitem">
-Grün, Bettina, Ioannis Kosmidis, and Achim Zeileis. 2012. <span>“Extended Beta Regression in : Shaken, Stirred, Mixed, and Partitioned.”</span> <em>Journal of Statistical Software</em> 48 (11): 1–25. <a href="https://doi.org/10.18637/jss.v048.i11">https://doi.org/10.18637/jss.v048.i11</a>.
+Grün, Bettina, Ioannis Kosmidis, and Achim Zeileis. 2012. <span>“Extended Beta Regression in <span>R</span>: Shaken, Stirred, Mixed, and Partitioned.”</span> <em>Journal of Statistical Software</em> 48 (11): 1–25. <a href="https://doi.org/10.18637/jss.v048.i11">https://doi.org/10.18637/jss.v048.i11</a>.
 </div>
 <div id="ref-betareg:Kieschnick+McCullough:2003" class="csl-entry" role="listitem">
 Kieschnick, Robert, and Bruce D. McCullough. 2003. <span>“Regression Analysis of Variates Observed on <span class="math inline">\((0, 1)\)</span>: Percentages, Proportions and Fractions.”</span> <em>Statistical Modelling</em> 3 (3): 193–213. <a href="https://doi.org/10.1191/1471082x03st053oa">https://doi.org/10.1191/1471082x03st053oa</a>.
@@ -912,10 +909,10 @@ Kieschnick, Robert, and Bruce D. McCullough. 2003. <span>“Regression Analysis 
 Koenker, Roger. 1981. <span>“A Note on Studentizing a Test for Heteroscedasticity.”</span> <em>Journal of Econometrics</em> 17: 107–12. <a href="https://doi.org/10.1016/0304-4076(81)90062-2">https://doi.org/10.1016/0304-4076(81)90062-2</a>.
 </div>
 <div id="ref-betareg:McCullagh+Nelder:1989" class="csl-entry" role="listitem">
-McCullagh, P., and John A. Nelder. 1989. <em>Generalized Linear Models</em>. 2nd ed. London: Chapman &amp; Hall.
+McCullagh, Peter, and John A. Nelder. 1989. <em>Generalized Linear Models</em>. 2nd ed. London: Chapman &amp; Hall.
 </div>
 <div id="ref-betareg:Mittelhammer+Judge+Miller:2000" class="csl-entry" role="listitem">
-Mittelhammer, R. C., G. G. Judge, and D. J. Miller. 2000. <em>Econometric Foundations</em>. New York: Cambridge University Press.
+Mittelhammer, Ron C., George G. Judge, and Douglas J. Miller. 2000. <em>Econometric Foundations</em>. New York: Cambridge University Press.
 </div>
 <div id="ref-betareg:Nocedal+Wright:1999" class="csl-entry" role="listitem">
 Nocedal, Jorge, and Stephen J. Wright. 1999. <em>Numerical Optimization</em>. New York: Springer-Verlag. <a href="https://doi.org/10.1007/b98874">https://doi.org/10.1007/b98874</a>.
@@ -927,22 +924,25 @@ Ospina, R., Francisco Cribari-Neto, and K. L. P. Vasconcellos. 2006. <span>“Im
 Prater, Nilon H. 1956. <span>“Estimate Gasoline Yields from Crudes.”</span> <em>Petroleum Refiner</em> 35 (5): 236–38. <a href="https://doi.org/10.1021/cen-v034n040.p4816a">https://doi.org/10.1021/cen-v034n040.p4816a</a>.
 </div>
 <div id="ref-betareg:Prentice:1986" class="csl-entry" role="listitem">
-Prentice, R. L. 1986. <span>“Binary Regression Using an Extended Beta-Binomial Distribution, with Discussion of Correlation Induced by Covariate Measurement.”</span> <em>Journal of the American Statistical Association</em> 81 (394): 321–27. <a href="https://doi.org/10.2307/2289219">https://doi.org/10.2307/2289219</a>.
+Prentice, Ross L. 1986. <span>“Binary Regression Using an Extended Beta-Binomial Distribution, with Discussion of Correlation Induced by Covariate Measurement.”</span> <em>Journal of the American Statistical Association</em> 81 (394): 321–27. <a href="https://doi.org/10.2307/2289219">https://doi.org/10.2307/2289219</a>.
+</div>
+<div id="ref-betareg:R:2009" class="csl-entry" role="listitem">
+R Core Team. 2024. <em><span>R</span>: <span>A</span> Language and Environment for Statistical Computing</em>. Vienna: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.
 </div>
 <div id="ref-betareg:Ramsey:1969" class="csl-entry" role="listitem">
-Ramsey, J. B. 1969. <span>“Tests for Specification Error in Classical Linear Least Squares Regression Analysis.”</span> <em>Journal of the Royal Statistical Society B</em> 31: 350–71. <a href="https://doi.org/10.1111/j.2517-6161.1969.tb00796.x">https://doi.org/10.1111/j.2517-6161.1969.tb00796.x</a>.
+Ramsey, James B. 1969. <span>“Tests for Specification Error in Classical Linear Least Squares Regression Analysis.”</span> <em>Journal of the Royal Statistical Society B</em> 31: 350–71. <a href="https://doi.org/10.1111/j.2517-6161.1969.tb00796.x">https://doi.org/10.1111/j.2517-6161.1969.tb00796.x</a>.
 </div>
 <div id="ref-betareg:Rocha+Cribari-Neto:2009" class="csl-entry" role="listitem">
-Rocha, Andr’ea V., and Francisco Cribari-Neto. 2009. <span>“Beta Autoregressive Moving Average Models.”</span> <em>Test</em> 18: 529–45. <a href="https://doi.org/10.1007/s11749-008-0112-z">https://doi.org/10.1007/s11749-008-0112-z</a>.
+Rocha, Andréa V., and Francisco Cribari-Neto. 2009. <span>“Beta Autoregressive Moving Average Models.”</span> <em>Test</em> 18: 529–45. <a href="https://doi.org/10.1007/s11749-008-0112-z">https://doi.org/10.1007/s11749-008-0112-z</a>.
 </div>
 <div id="ref-betareg:Rocha+Simas:2010" class="csl-entry" role="listitem">
-Rocha, Andr’ea V., and Alexandre B. Simas. 2010. <span>“Influence Diagnostics in a General Class of Beta Regression Models.”</span> <em>Test</em> 20: 95–119. <a href="https://doi.org/10.1007/s11749-010-0189-z">https://doi.org/10.1007/s11749-010-0189-z</a>.
+Rocha, Andréa V., and Alexandre B. Simas. 2010. <span>“Influence Diagnostics in a General Class of Beta Regression Models.”</span> <em>Test</em> 20: 95–119. <a href="https://doi.org/10.1007/s11749-010-0189-z">https://doi.org/10.1007/s11749-010-0189-z</a>.
 </div>
 <div id="ref-betareg:Simas+Barreto-Souza+Rocha:2010" class="csl-entry" role="listitem">
-Simas, Alexandre B., Wagner Barreto-Souza, and Andr’ea V. Rocha. 2010. <span>“Improved Estimators for a General Class of Beta Regression Models.”</span> <em>Computational Statistics &amp; Data Analysis</em> 54 (2): 348–66. <a href="https://doi.org/10.1016/j.csda.2009.08.017">https://doi.org/10.1016/j.csda.2009.08.017</a>.
+Simas, Alexandre B., Wagner Barreto-Souza, and Andréa V. Rocha. 2010. <span>“Improved Estimators for a General Class of Beta Regression Models.”</span> <em>Computational Statistics &amp; Data Analysis</em> 54 (2): 348–66. <a href="https://doi.org/10.1016/j.csda.2009.08.017">https://doi.org/10.1016/j.csda.2009.08.017</a>.
 </div>
 <div id="ref-betareg:Simas+Rocha:2006" class="csl-entry" role="listitem">
-Simas, Alexandre B., and Andr’ea V. Rocha. 2006. <em>: Beta Regression</em>. <a href="https://CRAN.R-project.org/src/contrib/Archive/betareg/">https://CRAN.R-project.org/src/contrib/Archive/betareg/</a>.
+Simas, Alexandre B., and Andréa V. Rocha. 2006. <em><span class="nocase">betareg</span>: Beta Regression</em>. <a href="https://CRAN.R-project.org/src/contrib/Archive/betareg/">https://CRAN.R-project.org/src/contrib/Archive/betareg/</a>.
 </div>
 <div id="ref-betareg:Smithson+Verkuilen:2006" class="csl-entry" role="listitem">
 Smithson, Michael, and Jay Verkuilen. 2006. <span>“A Better Lemon Squeezer? Maximum-Likelihood Regression with Beta-Distributed Dependent Variables.”</span> <em>Psychological Methods</em> 11 (1): 54–71. <a href="https://doi.org/10.1037/1082-989x.11.1.54">https://doi.org/10.1037/1082-989x.11.1.54</a>.
@@ -966,16 +966,16 @@ Zeileis, Achim. 2004. <span>“Econometric Computing with <span>HC</span> and <s
 ———. 2006b. <span>“Object-Oriented Computation of Sandwich Estimators.”</span> <em>Journal of Statistical Software</em> 16 (9): 1–16. <a href="https://doi.org/10.18637/jss.v016.i09">https://doi.org/10.18637/jss.v016.i09</a>.
 </div>
 <div id="ref-betareg:Zeileis+Croissant:2010" class="csl-entry" role="listitem">
-Zeileis, Achim, and Yves Croissant. 2010. <span>“Extended Model Formulas in : Multiple Parts and Multiple Responses.”</span> <em>Journal of Statistical Software</em> 34 (1): 1–13. <a href="https://doi.org/10.18637/jss.v034.i01">https://doi.org/10.18637/jss.v034.i01</a>.
+Zeileis, Achim, and Yves Croissant. 2010. <span>“Extended Model Formulas in <span>R</span>: Multiple Parts and Multiple Responses.”</span> <em>Journal of Statistical Software</em> 34 (1): 1–13. <a href="https://doi.org/10.18637/jss.v034.i01">https://doi.org/10.18637/jss.v034.i01</a>.
 </div>
 <div id="ref-betareg:Zeileis+Hothorn:2002" class="csl-entry" role="listitem">
-Zeileis, Achim, and Torsten Hothorn. 2002. <span>“Diagnostic Checking in Regression Relationships.”</span><em> News</em> 2 (3): 7–10. <a href="https://doi.org/10.32614/CRAN.package.lmtest">https://doi.org/10.32614/CRAN.package.lmtest</a>.
+Zeileis, Achim, and Torsten Hothorn. 2002. <span>“Diagnostic Checking in Regression Relationships.”</span> <em>R News</em> 2 (3): 7–10. <a href="https://doi.org/10.32614/CRAN.package.lmtest">https://doi.org/10.32614/CRAN.package.lmtest</a>.
 </div>
 <div id="ref-betareg:Zeileis+Kleiber+Jackman:2008" class="csl-entry" role="listitem">
-Zeileis, Achim, Christian Kleiber, and Simon Jackman. 2008. <span>“Regression Models for Count Data in .”</span> <em>Journal of Statistical Software</em> 27 (8): 1–25. <a href="https://doi.org/10.18637/jss.v027.i08">https://doi.org/10.18637/jss.v027.i08</a>.
+Zeileis, Achim, Christian Kleiber, and Simon Jackman. 2008. <span>“Regression Models for Count Data in <span>R</span>.”</span> <em>Journal of Statistical Software</em> 27 (8): 1–25. <a href="https://doi.org/10.18637/jss.v027.i08">https://doi.org/10.18637/jss.v027.i08</a>.
 </div>
 <div id="ref-betareg:Zeileis+Leisch+Hornik:2002" class="csl-entry" role="listitem">
-Zeileis, Achim, Friedrich Leisch, Kurt Hornik, and Christian Kleiber. 2002. <span>“: <span>A</span>n Package for Testing for Structural Change in Linear Regression Models.”</span> <em>Journal of Statistical Software</em> 7 (2): 1–38. <a href="https://doi.org/10.18637/jss.v007.i02">https://doi.org/10.18637/jss.v007.i02</a>.
+Zeileis, Achim, Friedrich Leisch, Kurt Hornik, and Christian Kleiber. 2002. <span>“<span class="nocase">strucchange</span>: <span>A</span>n <span>R</span> Package for Testing for Structural Change in Linear Regression Models.”</span> <em>Journal of Statistical Software</em> 7 (2): 1–38. <a href="https://doi.org/10.18637/jss.v007.i02">https://doi.org/10.18637/jss.v007.i02</a>.
 </div>
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 <ol>
