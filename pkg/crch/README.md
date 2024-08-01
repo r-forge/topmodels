@@ -16,16 +16,16 @@ for censored regression with conditional heteroscedasticity.
 
 A number of different estimation methods can be used:
 
-- Maximum likelihood estimation.
-- Minimum CRPS estimation.
-- Boosting and stability selection.
+-   Maximum likelihood estimation.
+-   Minimum CRPS estimation.
+-   Boosting and stability selection.
 
 The underlying infrastructure for various probability distributions
 encompasses:
 
-- Censored or truncated normal, logistic, and Student-t distributions.
-- Corresponding d/p/q/r functions.
-- `distributions3` objects.
+-   Censored or truncated normal, logistic, and Student-t distributions.
+-   Corresponding d/p/q/r functions.
+-   `distributions3` objects.
 
 Heteroscedastic extended logistic regression (HXLR) via cumulative link
 models for ordinal data, obtained by interval-censoring continuous data,

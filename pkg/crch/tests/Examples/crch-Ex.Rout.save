@@ -459,7 +459,7 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > ## Spread skill relationship ##
 > 
 > ## load and prepare data
-> data(RainIbk)
+> data("RainIbk", package = "crch")
 > 
 > ## mean and standard deviation of square root transformed ensemble forecasts
 > RainIbk$sqrtensmean <- 
@@ -918,7 +918,7 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > 
 > ### ** Examples
 > 
-> data("RainIbk")
+> data("RainIbk", package = "crch")
 > ## mean and standard deviation of square root transformed ensemble forecasts
 > RainIbk$sqrtensmean <- 
 +   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
@@ -1127,7 +1127,7 @@ Iteration 1/2000 parameters added 1/42Iteration 2/2000 parameters added 1/42It
 
   Selected formula:
    y ~ V2 + V3 | V4
-<environment: 0x55f9a819c090>
+<environment: 0x55e756547468>
 > 
 > CRCH2 <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0 )
 > BOOST <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0,
@@ -1152,7 +1152,7 @@ Iteration 1/2000 parameters added 1/42Iteration 2/2000 parameters added 1/42It
 > 
 > ### ** Examples
 > 
-> data("RainIbk")
+> data("RainIbk", package = "crch")
 > ## mean and standard deviation of square root transformed ensemble forecasts
 > RainIbk$sqrtensmean <- 
 +   apply(sqrt(RainIbk[,grep('^rainfc',names(RainIbk))]), 1, mean)
@@ -1314,7 +1314,7 @@ detaching ‘package:lmtest’, ‘package:zoo’
 
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  4.138 0.049 4.188 0 0 
+Time elapsed:  6.23 0.077 6.309 0 0 
 > grDevices::dev.off()
 null device 
           1 
