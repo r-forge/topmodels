@@ -99,15 +99,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta property="og:title" content="crch">
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/crch/crch.png">
 <meta property="og:site_name" content="crch">
-<meta property="og:image:height" content="75">
-<meta property="og:image:width" content="75">
+<meta property="og:image:height" content="120">
+<meta property="og:image:width" content="120">
 <meta name="twitter:title" content="crch">
 <meta name="twitter:image" content="https://topmodels.R-Forge.R-project.org/crch/crch.png">
 <meta name="twitter:image:alt" content="crch: Censored Regression with Conditional Heteroscedasticity">
 <meta name="twitter:site" content="@AchimZeileis">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image-height" content="75">
-<meta name="twitter:image-width" content="75">
+<meta name="twitter:image-height" content="120">
+<meta name="twitter:image-width" content="120">
 </head>
 <body class="nav-fixed">
 
@@ -201,13 +201,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
 <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
+  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
   <li><a href="#illustration" id="toc-illustration" class="nav-link" data-scroll-target="#illustration">Illustration</a></li>
   </ul>
 </li>
   </ul></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm --><section id="crch-heteroscedastic-censored-and-truncated-regression" class="level1"><h1>crch: Heteroscedastic Censored and Truncated Regression</h1>
+<main class="content" id="quarto-document-content"><!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm --><p><img src="https://topmodels.R-Forge.R-project.org/crch/crch.png" align="right" alt="countreg logo" width="120"></p>
+<section id="crch-heteroscedastic-censored-and-truncated-regression" class="level1"><h1>crch: Heteroscedastic Censored and Truncated Regression</h1>
 <section id="overview" class="level2"><h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>The package <code>crch</code> provides various regression models for continuous or mixed discrete-continuous data with right- and/or left-censoring or truncation of the response. The models use separate linear predictors for the mean/location and variance/scale parameters and can thus incorporate heteroscedasticity (conditional on regressors). This has prompted the package name <code>crch</code> (pronounced like <em>search</em>) which stands for censored regression with conditional heteroscedasticity.</p>
 <p>A number of different estimation methods can be used:</p>
@@ -229,6 +231,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"crch"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The latest development version can be installed from R-universe:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"crch"</span>, repos <span class="op">=</span> <span class="st">"https://zeileis.R-universe.dev"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
+<p>The package is available under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">General Public License version 3</a> or <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">version 2</a></p>
 </section><section id="illustration" class="level2"><h2 class="anchored" data-anchor-id="illustration">Illustration</h2>
 <p>An illustration for censored regression from atmospheric sciences is rain forecasting. Here, the observed response data are 3 day-accumulated precipitation amounts over 13 years (2000–2013) at Innsbruck airport. The covariates are obtained from numerical weather predictions (GEFS reforecasts). Package and data can be loaded via:</p>
 <div class="cell">
