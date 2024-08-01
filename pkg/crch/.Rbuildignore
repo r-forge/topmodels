@@ -8,3 +8,8 @@ inst/paper
 inst/glmnetsource
 R/test.R
 
+^docs$
+^altdoc$
+^_quarto$
+^README\.qmd$
+^contact\.qmd$

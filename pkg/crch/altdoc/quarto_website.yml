@@ -1,0 +1,137 @@
+project:
+  type: website
+  output-dir: ../../../www/crch/
+
+website:
+  title: crch
+  site-url: https://topmodels.R-Forge.R-project.org/crch/
+  favicon: crch.png
+  image: crch.png
+  open-graph:
+    image: crch.png
+  twitter-card:
+    site: '@AchimZeileis'
+    card-style: summary
+    image: crch.png
+    image-alt: 'crch: Censored Regression with Conditional Heteroscedasticity'
+  navbar:
+    logo: "crch-wide.png"
+    logo-alt: "crch logo"
+    title: false
+    pinned: false
+    search: true
+    left:
+      - text: Get started
+        file: index.qmd
+      - text: Documentation
+        menu:
+        - text: Heteroscedastic censored and truncated regression
+          file: man/crch.qmd
+        - text: Heteroscedastic extended logistic regression
+          file: man/hxlr.qmd
+        - text: Data sets
+          file: man/RainIbk.qmd
+        - text: Distributions
+          file: man/cnorm.qmd
+        - text: distributions3 objects
+          file: man/CensoredNormal.qmd
+      - text: Articles
+        menu:
+        - text: "Heteroscedastic Censored and Truncated Regression with crch"
+          file: vignettes/crch.qmd
+      - text: News
+        file: NEWS.md
+      - text: Citation
+        file: CITATION.md
+    right:
+      - text: Contact
+        file: contact.qmd
+      - icon: code
+        href: https://R-Forge.R-project.org/projects/topmodels
+        aria-label: topmodels @ R-Forge
+  sidebar:
+    - id: documentation
+      title: "Documentation"
+      style: "floating"
+      collapse-level: 1
+      contents:
+        - section: Heteroscedastic censored and truncated regression
+          contents:
+            - text: crch
+              file: man/crch.qmd
+            - text: crch.control
+              file: man/crch.control.qmd
+            - text: coef.crch
+              file: man/coef.crch.qmd
+            - text: predict.crch
+              file: man/predict.crch.qmd
+            - text: crch.boost
+              file: man/crch.boost.qmd
+            - text: crch.stabsel
+              file: man/crch.stabsel.qmd
+            - text: coef.crch.boost
+              file: man/coef.crch.boost.qmd
+            - text: plot.crch.boost
+              file: man/plot.crch.boost.qmd
+            - text: predict.crch.boost
+              file: man/predict.crch.boost.qmd
+        - section: Heteroscedastic extended logistic regression
+          contents:
+            - text: hxlr
+              file: man/hxlr.qmd
+            - text: hxlr.control
+              file: man/hxlr.control.qmd
+            - text: coef.hxlr
+              file: man/coef.hxlr.qmd
+            - text: predict.hxlr
+              file: man/predict.hxlr.qmd
+        - section: Data sets
+          contents:
+            - text: RainIbk
+              file: man/RainIbk.qmd
+        - section: Distributions
+          contents:
+            - text: cnorm
+              file: man/cnorm.qmd
+            - text: clogis
+              file: man/clogis.qmd
+            - text: ct
+              file: man/ct.qmd
+            - text: tnorm
+              file: man/tnorm.qmd
+            - text: tlogis
+              file: man/tlogis.qmd
+            - text: tt
+              file: man/tt.qmd
+        - section: distributions3 objects
+          contents:
+            - text: CensoredNormal
+              file: man/CensoredNormal.qmd
+            - text: CensoredLogistic
+              file: man/CensoredLogistic.qmd
+            - text: CensoredStudentsT
+              file: man/CensoredStudentsT.qmd
+            - text: TruncatedNormal
+              file: man/TruncatedNormal.qmd
+            - text: TruncatedLogistic
+              file: man/TruncatedLogistic.qmd
+            - text: TruncatedStudentsT
+              file: man/TruncatedStudentsT.qmd
+
+format:
+  html:
+    toc: true
+    theme:
+      - cosmo
+      - custom.scss
+    number-sections: false
+    fontsize: 110%
+    fontcolor: '#333333'
+    linkcolor: '#b52267'
+    code-link: true
+    code-copy: true
+    code-overflow: scroll
+    title-block-style: none
+    grid:
+      sidebar-width: 340px
+      margin-width: 340px
