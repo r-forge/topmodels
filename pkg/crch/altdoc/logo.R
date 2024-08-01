@@ -1,9 +1,9 @@
-png("crch.png", height = 75, width = 75, bg = "transparent")
+png("crch.png", height = 120, width = 120, bg = "transparent")
 par(mar = rep(0, 4))
 x <- seq(-2, 3, by = 0.01)
 plot(x, dlogis(x), type = "l", lwd = 1, col = "#2c2c2b", axes = FALSE, xlab = "", ylab = "")
 polygon(c(x[1], x[x <= -0.5], -0.5), c(dlogis(tail(x, 1)), dlogis(x[x <= -0.5]), dlogis(tail(x, 1))), border = "#b52267", col = "#b52267", lwd = 5)
-lines(x, dlogis(x), type = "l", lwd = 5, col = "#2c2c2b")
+lines(x, dlogis(x), type = "l", lwd = 9, col = "#2c2c2b")
 dev.off()
 
 ## png("crch-raw.png", height = 75, width = 260, bg = "transparent")

@@ -2,6 +2,8 @@
 
 <!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
 
+<img src="https://topmodels.R-Forge.R-project.org/crch/crch.png" align="right" alt="countreg logo" width="120" />
+
 # crch: Heteroscedastic Censored and Truncated Regression
 
 ## Overview
@@ -44,6 +46,12 @@ The latest development version can be installed from R-universe:
 ``` r
 install.packages("crch", repos = "https://zeileis.R-universe.dev")
 ```
+
+## License
+
+The package is available under the [General Public License version
+3](https://www.gnu.org/licenses/gpl-3.0.html) or [version
+2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 ## Illustration
 
