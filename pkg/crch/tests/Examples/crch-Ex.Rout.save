@@ -1,7 +1,7 @@
 
-R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
-Copyright (C) 2022 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -216,10 +216,12 @@ The following object is masked from ‘package:grDevices’:
 [2] "CensoredNormal distribution (mu = 1, sigma = 1, left =    0, right = Inf)"
 [3] "CensoredNormal distribution (mu = 1, sigma = 2, left =    0, right =   5)"
 > 
-> ## compute mean of the censored distribution
+> ## compute mean and variance of the censored distribution
 > mean(X)
 [1] 0.000000 1.083315 1.378612
-> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> variance(X)
+[1] 1.0000000 0.7510878 2.0679838
+> ## higher moments (skewness, kurtosis) are not implemented yet
 > 
 > ## support interval (minimum and maximum)
 > support(X)
@@ -675,10 +677,12 @@ The following object is masked from ‘package:grDevices’:
 [2] "TruncatedNormal distribution (mu = 1, sigma = 1, left =    0, right = Inf)"
 [3] "TruncatedNormal distribution (mu = 1, sigma = 2, left =    0, right =   5)"
 > 
-> ## compute mean of the truncated distribution
+> ## compute mean and variance of the truncated distribution
 > mean(X)
 [1] 0.000000 1.287600 1.891488
-> ## higher moments (variance, skewness, kurtosis) are not implemented yet
+> variance(X)
+[1] 1.0000000 0.6296863 1.5063753
+> ## higher moments (skewness, kurtosis) are not implemented yet
 > 
 > ## support interval (minimum and maximum)
 > support(X)
@@ -907,7 +911,8 @@ detaching ‘package:scoringRules’, ‘package:distributions3’
 > flush(stderr()); flush(stdout())
 > 
 > ### Name: crch
-> ### Title: Censored Regression with Conditional Heteroscedasticy
+> ### Title: Censored and Truncated Regression with Conditional
+> ###   Heteroscedasticy
 > ### Aliases: crch trch crch.fit
 > ### Keywords: regression
 > 
@@ -1001,7 +1006,7 @@ CRCH4  4 17867.35
 > flush(stderr()); flush(stdout())
 > 
 > ### Name: crch.boost
-> ### Title: Auxiliary functions to fit 'crch' models via boosting.
+> ### Title: Auxiliary Functions for Boosting crch Models
 > ### Aliases: crch.boost crch.boost.fit
 > ### Keywords: regression
 > 
@@ -1073,8 +1078,7 @@ Log-likelihood: -384.1 on 7 Df
 > flush(stderr()); flush(stdout())
 > 
 > ### Name: crch.stabsel
-> ### Title: Auxiliary functions to perform stability selection using
-> ###   boosting.
+> ### Title: Auxiliary Functions for Stability Selection Using Boosting
 > ### Aliases: crch.stabsel
 > ### Keywords: regression
 > 
@@ -1123,7 +1127,7 @@ Iteration 1/2000 parameters added 1/42Iteration 2/2000 parameters added 1/42It
 
   Selected formula:
    y ~ V2 + V3 | V4
-<environment: 0x55d0439d3d40>
+<environment: 0x55f9a819c090>
 > 
 > CRCH2 <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0 )
 > BOOST <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0,
@@ -1310,7 +1314,7 @@ detaching ‘package:lmtest’, ‘package:zoo’
 
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  4.319 0.051 4.371 0 0 
+Time elapsed:  4.138 0.049 4.188 0 0 
 > grDevices::dev.off()
 null device 
           1 
