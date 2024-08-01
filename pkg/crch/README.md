@@ -101,28 +101,28 @@ prediction ensemble.
 
 ``` r
 summary(m_hclog)
-#> 
-#> Call:
-#> crch::crch(formula = rain ~ ensmean | log(enssd), data = RainIbk, dist = "logistic", 
-#>     left = 0)
-#> 
-#> Standardized residuals:
-#>     Min      1Q  Median      3Q     Max 
-#> -3.5780 -0.6554  0.1673  1.1189  7.4990 
-#> 
-#> Coefficients (location model):
-#>             Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept) -0.85266    0.06903  -12.35   <2e-16 ***
-#> ensmean      0.78686    0.01921   40.97   <2e-16 ***
-#> 
-#> Coefficients (scale model with log link):
-#>             Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)  0.11744    0.01460   8.046 8.58e-16 ***
-#> log(enssd)   0.27055    0.03503   7.723 1.14e-14 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
-#> 
-#> Distribution: logistic
-#> Log-likelihood: -8921 on 4 Df
-#> Number of iterations in BFGS optimization: 15
+## 
+## Call:
+## crch::crch(formula = rain ~ ensmean | log(enssd), data = RainIbk, dist = "logistic", 
+##     left = 0)
+## 
+## Standardized residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.5780 -0.6554  0.1673  1.1189  7.4990 
+## 
+## Coefficients (location model):
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept) -0.85266    0.06903  -12.35   <2e-16 ***
+## ensmean      0.78686    0.01921   40.97   <2e-16 ***
+## 
+## Coefficients (scale model with log link):
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)  0.11744    0.01460   8.046 8.58e-16 ***
+## log(enssd)   0.27055    0.03503   7.723 1.14e-14 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Distribution: logistic
+## Log-likelihood: -8921 on 4 Df
+## Number of iterations in BFGS optimization: 15
 ```
