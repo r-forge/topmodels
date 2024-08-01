@@ -1,14 +1,14 @@
 ---
 title: "Illustration: Precipitation Forecasts in Innsbruck"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Illustration: Precipitation Forecasts in Innsbruck}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{topmodels,crch,ggplot2}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}

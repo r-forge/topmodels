@@ -1,14 +1,14 @@
 ---
 title: "Probabilistic Forecasting Infrastructure"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Probabilistic Forecasting Infrastructure}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{topmodels,distributions3,crch}
   %\VignetteKeywords{probabilistic forecasting, scoring rules, probability distributions, quantiles, simulation}
   %\VignettePackage{topmodels}

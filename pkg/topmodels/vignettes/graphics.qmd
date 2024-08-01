@@ -1,14 +1,14 @@
 ---
 title: "Graphics for Assessing Goodness of Fit"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Graphics for Assessing Goodness of Fit}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{topmodels,distributions3}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}

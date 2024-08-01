@@ -1,14 +1,14 @@
 ---
 title: "Implementation Overview"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Implmentation Overview}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{topmodels}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}

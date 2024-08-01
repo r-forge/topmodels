@@ -1,14 +1,14 @@
 ---
 title: "Illustration: Artificial Data"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Illustration: Artificial Data}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{topmodels,crch,MASS,rmutil,sn}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}

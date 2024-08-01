@@ -1,14 +1,14 @@
 ---
 title: "Illustration: Goals in the 2018 FIFA World Cup"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Illustration: Goals in the 2018 FIFA World Cup}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{topmodels,distributions3,ggplot2}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}

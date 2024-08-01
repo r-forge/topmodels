@@ -14,3 +14,8 @@ TODO.pdf
 ^contact\.md$
 ^logo*\.png$
 ^vignettes$
+
+^docs$
+^altdoc$
+^_quarto$
+^README\.qmd$

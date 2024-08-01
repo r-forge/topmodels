@@ -1,14 +1,14 @@
 ---
 title: "Goodness of Fit of Probabilistic Regression Models"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Goodness of Fit of Probabilistic Regression Models}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{topmodels,distributions3}
   %\VignetteKeywords{FIXME}
   %\VignettePackage{topmodels}
