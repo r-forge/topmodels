@@ -265,30 +265,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The summary output of the censored model shows that not only the mean of the rain observations but also their standard deviation significantly depends on the corresponding quantities from the numerical weather prediction ensemble.</p>
 <div class="cell">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">m_hclog</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; crch::crch(formula = rain ~ ensmean | log(enssd), data = RainIbk, dist = "logistic", </span></span>
-<span><span class="co">#&gt;     left = 0)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Standardized residuals:</span></span>
-<span><span class="co">#&gt;     Min      1Q  Median      3Q     Max </span></span>
-<span><span class="co">#&gt; -3.5780 -0.6554  0.1673  1.1189  7.4990 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Coefficients (location model):</span></span>
-<span><span class="co">#&gt;             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept) -0.85266    0.06903  -12.35   &lt;2e-16 ***</span></span>
-<span><span class="co">#&gt; ensmean      0.78686    0.01921   40.97   &lt;2e-16 ***</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Coefficients (scale model with log link):</span></span>
-<span><span class="co">#&gt;             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)  0.11744    0.01460   8.046 8.58e-16 ***</span></span>
-<span><span class="co">#&gt; log(enssd)   0.27055    0.03503   7.723 1.14e-14 ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Distribution: logistic</span></span>
-<span><span class="co">#&gt; Log-likelihood: -8921 on 4 Df</span></span>
-<span><span class="co">#&gt; Number of iterations in BFGS optimization: 15</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">## </span></span>
+<span><span class="co">## Call:</span></span>
+<span><span class="co">## crch::crch(formula = rain ~ ensmean | log(enssd), data = RainIbk, dist = "logistic", </span></span>
+<span><span class="co">##     left = 0)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Standardized residuals:</span></span>
+<span><span class="co">##     Min      1Q  Median      3Q     Max </span></span>
+<span><span class="co">## -3.5780 -0.6554  0.1673  1.1189  7.4990 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Coefficients (location model):</span></span>
+<span><span class="co">##             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">## (Intercept) -0.85266    0.06903  -12.35   &lt;2e-16 ***</span></span>
+<span><span class="co">## ensmean      0.78686    0.01921   40.97   &lt;2e-16 ***</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Coefficients (scale model with log link):</span></span>
+<span><span class="co">##             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">## (Intercept)  0.11744    0.01460   8.046 8.58e-16 ***</span></span>
+<span><span class="co">## log(enssd)   0.27055    0.03503   7.723 1.14e-14 ***</span></span>
+<span><span class="co">## ---</span></span>
+<span><span class="co">## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Distribution: logistic</span></span>
+<span><span class="co">## Log-likelihood: -8921 on 4 Df</span></span>
+<span><span class="co">## Number of iterations in BFGS optimization: 15</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
