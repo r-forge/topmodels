@@ -1,0 +1,142 @@
+project:
+  type: website
+  output-dir: ../../../www/topmodels/
+
+website:
+  title: topmodels
+  site-url: https://topmodels.R-Forge.R-project.org/topmodels/
+  favicon: topmodels.png
+  image: topmodels.png
+  open-graph:
+    image: topmodels.png
+  twitter-card:
+    site: '@AchimZeileis'
+    card-style: summary
+    image: topmodels.png
+    image-alt: 'topmodels: Infrastructure for Forecasting and Assessment of Probabilistic Models'
+  navbar:
+    logo: "topmodels-wide.png"
+    logo-alt: "topmodels logo"
+    title: false
+    pinned: false
+    search: true
+    left:
+      - text: Get started
+        file: vignettes/topmodels.qmd
+      - text: Documentation
+        menu:
+        - text: "Procast infrastructure"
+          file: man/procast.qmd
+        - text: "Probabilistic model diagnostics"
+          file: man/rootogram.qmd
+        - text: "Plotting probabilistic model diagnostics"
+          file: man/plot.rootogram.qmd
+        - text: "Interfacs to models/distributions"
+          file: man/Empirical.qmd
+        - text: "Data sets"
+          file: man/SerumPotassium.qmd
+      - text: Vignettes
+        menu:
+        - text: "Goodness of Fit of Probabilistic Regression Models"
+          file: vignettes/goodness_of_fit.qmd
+        - text: "Graphics for Assessing Goodness of Fit"
+          file: vignettes/graphics.qmd
+        - text: "Illustration: Goals in the 2018 FIFA World Cup"
+          file: vignettes/illustration_fifa_2018.qmd
+        - text: "Illustration: Precipitation Forecasts in Innsbruck"
+          file: vignettes/illustration_rain_ibk.qmd
+        - text: "Illustration: Artificial Data"
+          file: vignettes/illustration_artificial.qmd
+        - text: "Implementation Overview"
+          file: vignettes/implementation.qmd
+        - text: "Probabilistic Forecasting Infrastructure"
+          file: vignettes/procast.qmd
+      - text: News
+        file: NEWS.md
+      - text: Citation
+        file: CITATION.md
+    right:
+      - text: Contact
+        file: contact.qmd
+      - icon: code
+        href: https://R-Forge.R-project.org/projects/topmodels
+        aria-label: topmodels @ R-Forge
+  sidebar:
+    - id: documentation
+      title: "Documentation"
+      style: "floating"
+      collapse-level: 1
+      contents:
+        - section: "Procast infrastructure"
+          contents: 
+            - text: procast
+              file: man/procast.qmd
+            - text: proresiduals
+              file: man/proresiduals.qmd
+            - text: proscore
+              file: man/proscore.qmd
+            - text: promodel
+              file: man/promodel.qmd
+            - text: newresponse
+              file: man/newresponse.qmd
+            - text: crps.distribution
+              file: man/crps.distribution.qmd
+        - section: "Probabilistic model diagnostics"
+          contents: 
+            - text: rootogram
+              file: man/rootogram.qmd
+            - text: pithist
+              file: man/pithist.qmd
+            - text: qqrplot
+              file: man/qqrplot.qmd
+            - text: wormplot
+              file: man/wormplot.qmd
+            - text: reliagram
+              file: man/reliagram.qmd
+        - section: "Plotting probabilistic model diagnostics"
+          contents: 
+            - text: plot.rootogram
+              file: man/plot.rootogram.qmd
+            - text: plot.pithist
+              file: man/plot.pithist.qmd
+            - text: plot.qqrplot
+              file: man/plot.qqrplot.qmd
+            - text: plot.reliagram
+              file: man/plot.reliagram.qmd
+            - text: geom_rootogram
+              file: man/geom_rootogram.qmd
+            - text: geom_pithist
+              file: man/geom_pithist.qmd
+            - text: geom_qqrplot
+              file: man/geom_qqrplot.qmd
+            - text: topmodels
+              file: man/topmodels.qmd
+        - section: "Interfacs to models/distributions"
+          contents:
+            - text: Empirical
+              file: man/Empirical.qmd
+        - section: "Data sets"
+          contents:
+            - text: SerumPotassium
+              file: man/SerumPotassium.qmd
+            - text: VolcanoHeights
+              file: man/VolcanoHeights.qmd
+
+
+format:
+  html:
+    toc: true
+    theme:
+      - cosmo
+      - custom.scss
+    number-sections: false
+    fontsize: 110%
+    fontcolor: '#333333'
+    linkcolor: '#b52267'
+    code-link: true
+    code-copy: true
+    code-overflow: scroll
+    title-block-style: none
+    grid:
+      sidebar-width: 340px
+      margin-width: 340px

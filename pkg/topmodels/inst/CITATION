@@ -1,0 +1,15 @@
+## R >= 2.8.0 passes package metadata to citation().
+if(!exists("meta") || is.null(meta)) meta <- packageDescription("topmodels")
+year <- sub("-.*", "", meta$Date)
+note <- sprintf("R package version %s", meta$Version)
+
+bibentry(bibtype = "Manual",
+         title   = "{topmodels}: Infrastructure for Forecasting and Assessment of Probabilistic Models",
+         author  = c(person(given = "Achim", family = "Zeileis", comment = c(ORCID = "0000-0003-0918-3766")),
+                     person(given = c("Moritz", "N."), family = "Lang", comment = c(ORCID = "0000-0002-2533-9903")),
+                     person(given = "Reto", family = "Stauffer", comment = c(ORCID = "0000-0002-3798-5507")),),
+         year    = year,
+         note    = note,
+         url     = "https://R-Forge.R-project.org/projects/topmodels/",
+         header  = "To cite topmodels in publications use:"
+)

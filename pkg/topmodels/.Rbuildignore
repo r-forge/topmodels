@@ -6,15 +6,7 @@ inst/only_local
 TODO.md
 TODO.pdf
 ^Makefile$
-^pkgdown$
-^_pkgdown\.yml$
-^README\.Rmd$
-^README\.md$
-^README\.html$
-^contact\.md$
-^logo*\.png$
 ^vignettes$
-
 ^docs$
 ^altdoc$
 ^_quarto$

@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-<img src="http://topmodels.R-Forge.R-project.org/reference/figures/logo_hex.png" align="right" alt="" width="150"/>
+<img src="https://topmodels.R-Forge.R-project.org/topmodels/topmodels.png" align="right" alt="" width="150"/>
 
 # Infrastructure for Forecasting and Assessment of Probabilistic Models
 
