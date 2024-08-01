@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.53">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Basics – countreg</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../countreg.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+<meta property="og:title" content="Basics – countreg">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://topmodels.R-Forge.R-project.org/countreg/vignettes/countreg.png">
+<meta property="og:site_name" content="countreg">
+<meta name="twitter:title" content="Basics – countreg">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://topmodels.R-Forge.R-project.org/countreg/vignettes/countreg.png">
+<meta name="twitter:image:alt" content="countreg: Count Data Regression in R">
+<meta name="twitter:site" content="@AchimZeileis">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../countreg-wide.png" alt="countreg logo" class="navbar-logo"></a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Get started</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-documentation" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Documentation</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">
+<li>
+    <a class="dropdown-item" href="../nbreg.qmd">
+ <span class="dropdown-text">Negative binomial regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/hurdle.html">
+ <span class="dropdown-text">Hurdle models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/zeroinfl.html">
+ <span class="dropdown-text">Zero-inflated models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/zerotrunc.html">
+ <span class="dropdown-text">Zero-truncated models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/FLXMRnegbin.html">
+ <span class="dropdown-text">Finite mixtures, boosting, GLMs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/disptest.html">
+ <span class="dropdown-text">Diagnostic tests</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/CrabSatellites.html">
+ <span class="dropdown-text">Data sets</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/binom.html">
+ <span class="dropdown-text">Distribution extensions</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Vignettes</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">
+<li>
+    <a class="dropdown-item" href="../vignettes/intro.html">
+ <span class="dropdown-text">Introduction</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/basics.html">
+ <span class="dropdown-text">Basics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/zero-augmented.html">
+ <span class="dropdown-text">Zero-augmented models</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../NEWS.html"> 
+<span class="menu-text">News</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../CITATION.html"> 
+<span class="menu-text">Citation</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../contact.qmd"> 
+<span class="menu-text">Contact</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/countreg"> <i class="bi bi-code" role="img" aria-label="countreg @ R-Forge">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#generalized-linear-models" id="toc-generalized-linear-models" class="nav-link active" data-scroll-target="#generalized-linear-models"><span class="header-section-number">1</span> Generalized linear models</a></li>
+  <li><a href="#poisson-model" id="toc-poisson-model" class="nav-link" data-scroll-target="#poisson-model"><span class="header-section-number">2</span> Poisson Model</a></li>
+  <li><a href="#quasi-poisson-model" id="toc-quasi-poisson-model" class="nav-link" data-scroll-target="#quasi-poisson-model"><span class="header-section-number">3</span> Quasi-Poisson model</a></li>
+  <li><a href="#negative-binomial-models" id="toc-negative-binomial-models" class="nav-link" data-scroll-target="#negative-binomial-models"><span class="header-section-number">4</span> Negative binomial models</a></li>
+  <li>
+<a href="#sec-illustrations" id="toc-sec-illustrations" class="nav-link" data-scroll-target="#sec-illustrations"><span class="header-section-number">5</span> Illustrations</a>
+  <ul class="collapse">
+<li><a href="#poisson-regression" id="toc-poisson-regression" class="nav-link" data-scroll-target="#poisson-regression"><span class="header-section-number">5.1</span> Poisson regression</a></li>
+  <li><a href="#quasi-poisson-regression" id="toc-quasi-poisson-regression" class="nav-link" data-scroll-target="#quasi-poisson-regression"><span class="header-section-number">5.2</span> Quasi-Poisson regression</a></li>
+  <li><a href="#negative-binomial-regression" id="toc-negative-binomial-regression" class="nav-link" data-scroll-target="#negative-binomial-regression"><span class="header-section-number">5.3</span> Negative binomial regression</a></li>
+  </ul>
+</li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header"><h1 class="title display-7">Basics</h1>
+
+</header><div class="hidden">
+<p><span class="math display">\[
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\VAR}{\mathsf{VAR}}
+\newcommand{\COV}{\mathsf{COV}}
+\newcommand{\Prob}{\mathsf{P}}
+\]</span></p>
+</div>
+<section id="generalized-linear-models" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="generalized-linear-models">
+<span class="header-section-number">1</span> Generalized linear models</h2>
+<p>The basic count data regression models can be represented and understood using the GLM framework that emerged in the statistical literature in the early 1970s <span class="citation" data-cites="countreg:Nelder+Wedderburn:1972">(<a href="#ref-countreg:Nelder+Wedderburn:1972" role="doc-biblioref">Nelder and Wedderburn 1972</a>)</span>. In the following, we briefly sketch some important aspects relating to the unifying conceptual properties and their implementation in R—for a detailed theoretical account of GLMs see <span class="citation" data-cites="countreg:McCullagh+Nelder:1989">McCullagh and Nelder (<a href="#ref-countreg:McCullagh+Nelder:1989" role="doc-biblioref">1989</a>)</span>.</p>
+<p>GLMs describe the dependence of a scalar variable <span class="math inline">\(y_i\)</span> (<span class="math inline">\(i = 1, \dots, n\)</span>) on a vector of regressors <span class="math inline">\(x_i\)</span>. The conditional distribution of <span class="math inline">\(y_i | x_i\)</span> is a linear exponential family with probability density function <span id="eq-family"><span class="math display">\[
+f(y; \lambda, \phi) \quad = \quad
+                              \exp \left( \frac{y \cdot \lambda - b(\lambda)}{\phi} +
+                              c(y, \phi) \right),
+\tag{1}\]</span></span> where <span class="math inline">\(\lambda\)</span> is the canonical parameter that depends on the regressors via a linear predictor and <span class="math inline">\(\phi\)</span> is a dispersion parameter that is often known. The functions <span class="math inline">\(b(\cdot)\)</span> and <span class="math inline">\(c(\cdot)\)</span> are known and determine which member of the family is used, e.g., the normal, binomial or Poisson distribution. Conditional mean and variance of <span class="math inline">\(y_i\)</span> are given by <span class="math inline">\(\E[y_i \, | \, x_i] = \mu_i = b'(\lambda_i)\)</span> and <span class="math inline">\(\VAR[y_i \, | \, x_i] = \phi \cdot b''(\lambda_i)\)</span>. Thus, up to a scale or dispersion parameter <span class="math inline">\(\phi\)</span>, the distribution of <span class="math inline">\(y_i\)</span> is determined by its mean. Its variance is proportional to <span class="math inline">\(V(\mu) = b''(\lambda(\mu))\)</span>, also called variance function.</p>
+<p>The dependence of the conditional mean <span class="math inline">\(\E[y_i \, | \, x_i] = \mu_i\)</span> on the regressors <span class="math inline">\(x_i\)</span> is specified via <span id="eq-mean"><span class="math display">\[
+g(\mu_i) \quad = \quad x_i^\top \beta,
+\tag{2}\]</span></span> where <span class="math inline">\(g(\cdot)\)</span> is a known link function and <span class="math inline">\(\beta\)</span> is the vector of regression coefficients which are typically estimated by maximum likelihood (ML) using the iterative weighted least squares (IWLS) algorithm.</p>
+<p>Instead of viewing GLMs as models for the full likelihood (as determined by Equation <a href="#eq-family" class="quarto-xref">1</a>), they can also be regarded as regression models for the mean only (as specified in Equation <a href="#eq-mean" class="quarto-xref">2</a>) where the estimating functions used for fitting the model are derived from a particular family. As illustrated in the remainder of this section, the estimating function point of view is particularly useful for relaxing the assumptions imposed by the Poisson likelihood.</p>
+R provides a very flexible implementation of the general GLM framework in the function <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> <span class="citation" data-cites="countreg:Chambers+Hastie:1992">(<a href="#ref-countreg:Chambers+Hastie:1992" role="doc-biblioref">Chambers and Hastie 1992</a>)</span> contained in the <strong>stats</strong> package. Its most important arguments are
+<p>where <code>formula</code> plus <code>data</code> is the now standard way of specifying regression relationships in R/S introduced in <span class="citation" data-cites="countreg:Chambers+Hastie:1992">Chambers and Hastie (<a href="#ref-countreg:Chambers+Hastie:1992" role="doc-biblioref">1992</a>)</span>. The remaining arguments in the first line (<code>subset</code>, <code>na.action</code>, <code>weights</code>, and <code>offset</code>) are also standard for setting up formula-based regression models in R/S. The arguments in the second line control aspects specific to GLMs while the arguments in the last line specify which components are returned in the fitted model object (of class <code>glm</code> which inherits from <code>lm</code>). By default the model frame (<code>model</code>) and the vector <span class="math inline">\((y_1, \dots, y_n)^\top\)</span> (<code>y</code>) but not the model matrix (<code>x</code>, containing <span class="math inline">\(x_1, \dots, x_n\)</span> combined row-wise) are included. The <code>family</code> argument specifies the link <span class="math inline">\(g(\mu)\)</span> and variance function <span class="math inline">\(V(\mu)\)</span> of the model, <code>start</code> can be used to set starting values for <span class="math inline">\(\beta\)</span>, and <code>control</code> contains control parameters for the IWLS algorithm. For further arguments to <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> (including alternative specifications of starting values) see <code><a href="https://rdrr.io/r/stats/glm.html">?glm</a></code>. The high-level <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> interface relies on the function <code><a href="https://rdrr.io/r/stats/glm.html">glm.fit()</a></code> which carries out the actual model fitting (without taking a formula-based input or returning classed output).</p>
+<p>For <code>glm</code> objects, a set of standard methods (including <code><a href="https://rdrr.io/r/base/print.html">print()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code>, <code><a href="https://rdrr.io/r/stats/logLik.html">logLik()</a></code> and many others) are provided. Inference can easily be performed using the <code><a href="https://rdrr.io/r/base/summary.html">summary()</a></code> method for assessing the regression coefficients via partial Wald tests or the <code><a href="https://rdrr.io/r/stats/anova.html">anova()</a></code> method for comparing nested models via an analysis of deviance. These inference functions are complemented by further generic inference functions in contributed packages: e.g., <strong>lmtest</strong> <span class="citation" data-cites="countreg:Zeileis+Hothorn:2002">(<a href="#ref-countreg:Zeileis+Hothorn:2002" role="doc-biblioref">Zeileis and Hothorn 2002</a>)</span> provides a <code>coeftest()</code> function that also computes partial Wald tests but allows for specification of alternative (robust) standard errors. Similarly, <code>waldtest()</code> from <strong>lmtest</strong> and <code>linearHypothesis()</code> from <strong>car</strong> <span class="citation" data-cites="countreg:Fox:2002">(<a href="#ref-countreg:Fox:2002" role="doc-biblioref">Fox 2002</a>)</span> assess nested models via Wald tests (using different specifications for the nested models). Finally, <code>lrtest()</code> from <strong>lmtest</strong> compares nested models via likelihood ratio (LR) tests based on an interface similar to <code>waldtest()</code> and <code><a href="https://rdrr.io/r/stats/anova.html">anova()</a></code>.</p>
+</section><section id="poisson-model" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="poisson-model">
+<span class="header-section-number">2</span> Poisson Model</h2>
+<p>The simplest distribution used for modeling count data is the Poisson distribution with probability density function <span id="eq-Poisson"><span class="math display">\[
+f(y; \mu) \quad = \quad \frac{\exp(-\mu) \cdot \mu^{y}}{y!},
+\tag{3}\]</span></span> which is of type (<a href="#eq-family" class="quarto-xref">1</a>) and thus Poisson regression is a special case of the GLM framework. The canonical link is <span class="math inline">\(g(\mu) = \log(\mu)\)</span> resulting in a log-linear relationship between mean and linear predictor. The variance in the Poisson model is identical to the mean, thus the dispersion is fixed at <span class="math inline">\(\phi = 1\)</span> and the variance function is <span class="math inline">\(V(\mu) = \mu\)</span>.</p>
+<p>In R, this can easily be specified in the <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> call just by setting <code>family = poisson</code> (where the default log link could also be changed in the <code><a href="https://rdrr.io/r/stats/family.html">poisson()</a></code> call).</p>
+<p>In practice, the Poisson model is often useful for describing the mean <span class="math inline">\(\mu_i\)</span> but underestimates the variance in the data, rendering all model-based tests liberal. One way of dealing with this is to use the same estimating functions for the mean, but to base inference on the more robust sandwich covariance matrix estimator. In R, this estimator is provided by the <code>sandwich()</code> function in the <strong>sandwich</strong> package <span class="citation" data-cites="countreg:Zeileis:2004 countreg:Zeileis:2006">(<a href="#ref-countreg:Zeileis:2004" role="doc-biblioref">Zeileis 2004</a>, <a href="#ref-countreg:Zeileis:2006" role="doc-biblioref">2006</a>)</span>.</p>
+</section><section id="quasi-poisson-model" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="quasi-poisson-model">
+<span class="header-section-number">3</span> Quasi-Poisson model</h2>
+<p>Another way of dealing with over-dispersion is to use the mean regression function and the variance function from the Poisson GLM but to leave the dispersion parameter <span class="math inline">\(\phi\)</span> unrestricted. Thus, <span class="math inline">\(\phi\)</span> is not assumed to be fixed at <span class="math inline">\(1\)</span> but is estimated from the data. This strategy leads to the same coefficient estimates as the standard Poisson model but inference is adjusted for over-dispersion. Consequently, both models (quasi-Poisson and sandwich-adjusted Poisson) adopt the estimating function view of the Poisson model and do <em>not</em> correspond to models with fully specified likelihoods.</p>
+<p>In R, the quasi-Poisson model with estimated dispersion parameter can also be fitted with the <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> function, simply setting <code>family = quasipoisson</code>.</p>
+</section><section id="negative-binomial-models" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="negative-binomial-models">
+<span class="header-section-number">4</span> Negative binomial models</h2>
+<p>A third way of modeling over-dispersed count data is to assume a negative binomial (NB) distribution for <span class="math inline">\(y_i | x_i\)</span> which can arise as a gamma mixture of Poisson distributions. One parameterization of its probability density function is <span id="eq-negbin"><span class="math display">\[
+f(y; \mu, \theta) \quad = \quad \frac{\Gamma(y + \theta)}{\Gamma(\theta) \cdot y!} \cdot
+                            \frac{\mu^{y} \cdot \theta^\theta}{(\mu + \theta)^{y + \theta}},
+\tag{4}\]</span></span> with mean <span class="math inline">\(\mu\)</span> and shape parameter <span class="math inline">\(\theta\)</span>; <span class="math inline">\(\Gamma(\cdot)\)</span> is the gamma function. For every fixed <span class="math inline">\(\theta\)</span>, this is of type (<a href="#eq-family" class="quarto-xref">1</a>) and thus is another special case of the GLM framework. It also has <span class="math inline">\(\phi = 1\)</span> but with variance function <span class="math inline">\(V(\mu) = \mu + \frac{\mu^2}{\theta}\)</span>.</p>
+<p>Package <strong>MASS</strong> <span class="citation" data-cites="countreg:Venables+Ripley:2002">(<a href="#ref-countreg:Venables+Ripley:2002" role="doc-biblioref">Venables and Ripley 2002</a>)</span> provides the family function <code>negative.binomial()</code> that can directly be plugged into <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> provided the argument <code>theta</code> is specified. One application would be the geometric model, the special case where <span class="math inline">\(\theta = 1\)</span>, which can consequently be fitted in R by setting <code>family = negative.binomial(theta = 1)</code> in the <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code> call.</p>
+<p>If <span class="math inline">\(\theta\)</span> is not known but to be estimated from the data, the negative binomial model is not a special case of the general GLM—however, an ML fit can easily be computed re-using GLM methodology by iterating estimation of <span class="math inline">\(\beta\)</span> given <span class="math inline">\(\theta\)</span> and vice versa. This leads to ML estimates for both <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\theta\)</span> which can be computed using the function <code>glm.nb()</code> from the package <strong>MASS</strong>. It returns a model of class <code>negbin</code> inheriting from <code>glm</code> for which appropriate methods to the generic functions described above are again available.</p>
+</section><section id="sec-illustrations" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="sec-illustrations">
+<span class="header-section-number">5</span> Illustrations</h2>
+<p>In the following, we illustrate all models described above by applying them to a cross-sectional data set from health economics. Before the parametric models are fitted, a basic exploratory analysis of the data set is carried out that addresses some problems typically encountered when visualizing count data. At the end of the section, all fitted models are compared highlighting that the modelled mean function is similar but the fitted likelihood is different and thus, the models differ with respect to explaining over-dispersion.</p>
+<p><span class="citation" data-cites="countreg:Deb+Trivedi:1997">Deb and Trivedi (<a href="#ref-countreg:Deb+Trivedi:1997" role="doc-biblioref">1997</a>)</span> analyze data on 4406 individuals, aged 66 and over, who are covered by Medicare, a public insurance program. Originally obtained from the US National Medical Expenditure Survey (NMES) for 1987/88, the data are available from the data archive of the <em>Journal of Applied Econometrics</em> at <a href="https://journaldata.zbw.eu/dataset/demand-for-medical-care-by-the-elderly-a-finite-mixture-approach" class="uri">https://journaldata.zbw.eu/dataset/demand-for-medical-care-by-the-elderly-a-finite-mixture-approach</a>. It was prepared for the R package <strong>AER</strong> accompanying <span class="citation" data-cites="countreg:Kleiber+Zeileis:2008">Kleiber and Zeileis (<a href="#ref-countreg:Kleiber+Zeileis:2008" role="doc-biblioref">2008</a>)</span> and is also available as <code>DebTrivedi.rda</code> in the <em>Journal of Statistical Software</em> together with <span class="citation" data-cites="countreg:Zeileis:2006">Zeileis (<a href="#ref-countreg:Zeileis:2006" role="doc-biblioref">2006</a>)</span>. The objective is to model the demand for medical care—as captured by the number of physician/non-physician office and hospital outpatient visits—by the covariates available for the patients. Here, we adopt the number of physician office visits <code>visits</code> as the dependent variable and use the health status variables<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <code>health</code> (self-perceived health status), <code>chronic</code> (number of chronic conditions), as well as the socio-economic variables <code>gender</code>, <code>school</code> (number of years of education), and <code>insurance</code> (private insurance indicator) as regressors. For convenience, we select the variables used from the full data set:</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"NMES1988"</span>, package <span class="op">=</span> <span class="st">"AER"</span><span class="op">)</span></span>
+<span><span class="va">dt</span> <span class="op">&lt;-</span> <span class="va">NMES1988</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">8</span>, <span class="fl">13</span>, <span class="fl">15</span>, <span class="fl">18</span><span class="op">)</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To obtain a first overview of the dependent variable, we employ a histogram of the observed count frequencies. In R various tools could be used, e.g., <code>hist(dt$visits, breaks = 0:90 - 0.5)</code> for a histogram with rectangles or</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">dt</span><span class="op">$</span><span class="va">visits</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>(see <a href="#fig-visits" class="quarto-xref">Figure&nbsp;1</a>) for a histogram with lines which brings out the extremely large counts somewhat better. The histogram illustrates that the marginal distribution exhibits both substantial variation and a rather large number of zeros.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-visits" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="p">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-visits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="basics_files/figure-html/fig-visits-1.png" class="img-fluid figure-img" data-fig-pos="p" width="480">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-visits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Frequency distribution for number of physician office visits.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-bad-good" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="p">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-bad-good-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="basics_files/figure-html/fig-bad-good-1.png" class="img-fluid figure-img" data-fig-pos="p" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bad-good-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Bivariate explorative displays for number of physician office visits plotted against number of chronic conditions.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>A natural second step in the exploratory analysis is to look at pairwise bivariate displays of the dependent variable against each of the regressors bringing out the partial relationships. In R, such bivariate displays can easily be generated with the <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot()</a></code> method for formulas, e.g., via <code>plot(y ~ x)</code>. This chooses different types of displays depending on the combination of quantitative and qualitative variables as dependent or regressor variable, respectively. However, count variables are treated as all numerical variables and therefore the command</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">visits</span> <span class="op">~</span> <span class="va">chronic</span>, data <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>produces a simple scatterplot as shown in the left panel of <a href="#fig-bad-good" class="quarto-xref">Figure&nbsp;2</a>. This is clearly not useful as both variables are count variables producing numerous ties in the bivariate distribution and thus obscuring a large number of points in the display. To overcome the problem, it is useful to group the number of chronic conditions into a factor with levels <code>0',</code>1’, <code>2', and</code>3 or more’ and produce a boxplot instead of a scatterplot. Furthermore, the picture is much clearer if the dependent variable is log-transformed (just as all count regression models discussed above also use a log link by default). As there are zero counts as well, we use a convenience function <code>clog()</code> providing a continuity-corrected logarithm.</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">clog</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For transforming a count variable to a factor (for visualization purposes only), we define another convenience function <code>cfac()</code></p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cfac</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">breaks</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">breaks</span><span class="op">)</span><span class="op">)</span> <span class="va">breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">10</span><span class="op">/</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cut.html">cut</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">breaks</span>, include.lowest <span class="op">=</span> <span class="cn">TRUE</span>, right <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">breaks</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">breaks</span><span class="op">)</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html">diff</a></span><span class="op">(</span><span class="va">breaks</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"-"</span>, <span class="va">breaks</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">breaks</span><span class="op">)</span><span class="op">)</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span>, <span class="st">"+"</span><span class="op">)</span>, <span class="st">""</span><span class="op">)</span>,</span>
+<span>    sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>which by default tries to take an educated guess how to choose the breaks between the categories. Clearly, the resulting exploratory display of the transformed variables produced by</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">clog</span><span class="op">(</span><span class="va">visits</span><span class="op">)</span> <span class="op">~</span> <span class="fu">cfac</span><span class="op">(</span><span class="va">chronic</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>(shown in the right panel of <a href="#fig-bad-good" class="quarto-xref">Figure&nbsp;2</a>) brings out much better how the number of doctor visits increases with the number of chronic conditions.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-visits2" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="p">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-visits2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="basics_files/figure-html/fig-visits2-1.png" class="img-fluid figure-img" data-fig-pos="p" width="624">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-visits2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Number of physician office visits plotted against regressors used.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Analogous displays for the number of physician office visits against all regressors can be produced via</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">clog</span><span class="op">(</span><span class="va">visits</span><span class="op">)</span> <span class="op">~</span> <span class="va">health</span>, data <span class="op">=</span> <span class="va">dt</span>, varwidth <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">clog</span><span class="op">(</span><span class="va">visits</span><span class="op">)</span> <span class="op">~</span> <span class="fu">cfac</span><span class="op">(</span><span class="va">chronic</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">clog</span><span class="op">(</span><span class="va">visits</span><span class="op">)</span> <span class="op">~</span> <span class="va">insurance</span>, data <span class="op">=</span> <span class="va">dt</span>, varwidth <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">clog</span><span class="op">(</span><span class="va">visits</span><span class="op">)</span> <span class="op">~</span> <span class="va">gender</span>, data <span class="op">=</span> <span class="va">dt</span>, varwidth <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">cfac</span><span class="op">(</span><span class="va">visits</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">6</span>, <span class="fl">10</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">~</span> <span class="va">school</span>, data <span class="op">=</span> <span class="va">dt</span>, breaks <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and are shown (with slightly enhanced labeling) in <a href="#fig-visits2" class="quarto-xref">Figure&nbsp;3</a>. The last plot uses a different type of display. Here, the dependent count variable is not log-transformed but grouped into a factor and then a spinogram is produced. This also groups the regressor (as in a histogram) and then produces a highlighted mosaic plot. All displays show that the number of doctor visits increases or decreases with the regressors as expected: <code>visits</code> decreases with the general health status but increases with the number of chronic conditions or hospital stays. The median number of visits is also slightly higher for patients with a private insurance and higher level of education. It is slightly lower for male compared to female patients. The overall impression from all displays is that the changes in the mean can only explain a modest amount of variation in the data.</p>
+<section id="poisson-regression" class="level3" data-number="5.1"><h3 data-number="5.1" class="anchored" data-anchor-id="poisson-regression">
+<span class="header-section-number">5.1</span> Poisson regression</h3>
+<p>As a first attempt to capture the relationship between the number of physician office visits and all regressors—described in R by the formula <code>visits ~ .</code>—in a parametric regression model, we fit the basic Poisson regression model</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fm_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">visits</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">dt</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and obtain the coefficient estimates along with associated partial Wald tests</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">fm_pois</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = visits ~ ., family = poisson, data = dt)
+
+Coefficients:
+                 Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)      1.034542   0.023857  43.364   &lt;2e-16 ***
+healthpoor       0.318205   0.017479  18.205   &lt;2e-16 ***
+healthexcellent -0.379045   0.030291 -12.514   &lt;2e-16 ***
+chronic          0.168793   0.004471  37.755   &lt;2e-16 ***
+gendermale      -0.108014   0.012943  -8.346   &lt;2e-16 ***
+school           0.025754   0.001843  13.972   &lt;2e-16 ***
+insuranceyes     0.216007   0.016872  12.803   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 26943  on 4405  degrees of freedom
+Residual deviance: 23808  on 4399  degrees of freedom
+AIC: 36597
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p>All coefficient estimates confirm the results from the exploratory analysis in <a href="#fig-visits2" class="quarto-xref">Figure&nbsp;3</a>. All coefficients are highly significant with the health variables leading to somewhat larger Wald statistics compared to the socio-economic variables. However, the Wald test results might be too optimistic due to a misspecification of the likelihood. As the exploratory analysis suggested that over-dispersion is present in this data set, we re-compute the Wald tests using sandwich standard errors via</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">coeftest</span><span class="op">(</span><span class="va">fm_pois</span>, vcov <span class="op">=</span> <span class="va">sandwich</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+z test of coefficients:
+
+                  Estimate Std. Error z value  Pr(&gt;|z|)    
+(Intercept)      1.0345418  0.0648436 15.9544 &lt; 2.2e-16 ***
+healthpoor       0.3182048  0.0555787  5.7253 1.032e-08 ***
+healthexcellent -0.3790454  0.0777311 -4.8764 1.081e-06 ***
+chronic          0.1687932  0.0121860 13.8514 &lt; 2.2e-16 ***
+gendermale      -0.1080145  0.0357357 -3.0226  0.002506 ** 
+school           0.0257542  0.0051316  5.0187 5.202e-07 ***
+insuranceyes     0.2160070  0.0430293  5.0200 5.167e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>All regressors are still significant but the standard errors seem to be more appropriate. This will also be confirmed by the following models that deal with over-dispersion (and excess zeros) in a more formal way.</p>
+</section><section id="quasi-poisson-regression" class="level3" data-number="5.2"><h3 data-number="5.2" class="anchored" data-anchor-id="quasi-poisson-regression">
+<span class="header-section-number">5.2</span> Quasi-Poisson regression</h3>
+<p>The quasi-Poisson model</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fm_qpois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">visits</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">dt</span>, family <span class="op">=</span> <span class="va">quasipoisson</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>leads to an estimated dispersion of <span class="math inline">\(\hat \phi = 6.98\)</span> which is clearly larger than <span class="math inline">\(1\)</span> confirming that over-dispersion is present in the data.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> The resulting partial Wald tests of the coefficients are rather similar to the results obtained from the Poisson regression with sandwich standard errors, leading to the same conclusions. As before, they can be obtained via</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">fm_qpois</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The output is suppressed here and is presented in tabular form in <a href="#tbl-summary" class="quarto-xref">Table&nbsp;1</a>.</p>
+</section><section id="negative-binomial-regression" class="level3" data-number="5.3"><h3 data-number="5.3" class="anchored" data-anchor-id="negative-binomial-regression">
+<span class="header-section-number">5.3</span> Negative binomial regression</h3>
+<p>A more formal way to accommodate over-dispersion in a count data regression model is to use a negative binomial model, as in</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fm_nbin</span> <span class="op">&lt;-</span> <span class="fu">glm.nb</span><span class="op">(</span><span class="va">visits</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">fm_nbin</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As shown in <a href="#tbl-summary" class="quarto-xref">Table&nbsp;1</a>, both regression coefficients and standard errors are rather similar to the quasi-Poisson and the sandwich-adjusted Poisson results above. Thus, in terms of predicted means all three models give very similar results; the associated partial Wald tests also lead to the same conclusions.</p>
+<p>One advantage of the negative binomial model is that it is associated with a formal likelihood so that information criteria are readily available. Furthermore, the expected number of zeros can be computed from the fitted densities via <span class="math inline">\(\sum_i f(0, \hat \mu_i, \hat \theta)\)</span>.</p>
+<div class="cell">
+<div id="tbl-summary" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Summary of fitted count regression models for NMES data: coefficient estimates from count model (with standard errors in parantheses) , number of estimated parameters, maximized log-likelihood, AIC, BIC and expected number of zeros (sum of fitted densities evaluated at zero). The observed number of zeros is 683 in 4406 observations.
+</figcaption><div aria-describedby="tbl-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+ 
+
+  
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tinytable_ul40rbgy9r15zrjnfnt3</title>
+<style>
+.table td.tinytable_css_vt99bil3629nsp2wjzyu, .table th.tinytable_css_vt99bil3629nsp2wjzyu {    border-bottom: solid 0.1em #d3d8dc; }
+.table td.tinytable_css_e3vfqnxcuo0f2jpovcrz, .table th.tinytable_css_e3vfqnxcuo0f2jpovcrz {    text-align: left; }
+.table td.tinytable_css_s55rbsflw3pnsxqrxfrl, .table th.tinytable_css_s55rbsflw3pnsxqrxfrl {    text-align: center; }
+.table td.tinytable_css_o69qeuwiizyxvmuiiuai, .table th.tinytable_css_o69qeuwiizyxvmuiiuai {    text-align: center; }
+.table td.tinytable_css_q0xrb615uywn9treyn2n, .table th.tinytable_css_q0xrb615uywn9treyn2n {    text-align: center; }
+.table td.tinytable_css_98zhvcagltele414nlyk, .table th.tinytable_css_98zhvcagltele414nlyk {    text-align: center; }
+.table td.tinytable_css_bt1qoape01lihfpsgog3, .table th.tinytable_css_bt1qoape01lihfpsgog3 {    border-bottom: solid 0.05em black; }
+    </style>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script id="MathJax-script" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+    </script><div class="container">
+      <table class="table table-borderless" id="tinytable_ul40rbgy9r15zrjnfnt3" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col"> </th>
+                <th scope="col">ML-Pois</th>
+                <th scope="col">Adj-Pois</th>
+                <th scope="col">Quasi-Pois</th>
+                <th scope="col">NB</th>
+              </tr></thead>
+<tbody>
+<tr>
+<td>(Intercept)                </td>
+                  <td>1.035     </td>
+                  <td>1.035     </td>
+                  <td>1.035  </td>
+                  <td>0.940     </td>
+                </tr>
+<tr>
+<td>                           </td>
+                  <td>(0.024)   </td>
+                  <td>(0.065)   </td>
+                  <td>(0.063)</td>
+                  <td>(0.055)   </td>
+                </tr>
+<tr>
+<td>healthpoor                 </td>
+                  <td>0.318     </td>
+                  <td>0.318     </td>
+                  <td>0.318  </td>
+                  <td>0.368     </td>
+                </tr>
+<tr>
+<td>                           </td>
+                  <td>(0.017)   </td>
+                  <td>(0.056)   </td>
+                  <td>(0.046)</td>
+                  <td>(0.049)   </td>
+                </tr>
+<tr>
+<td>healthexcellent            </td>
+                  <td>-0.379    </td>
+                  <td>-0.379    </td>
+                  <td>-0.379 </td>
+                  <td>-0.374    </td>
+                </tr>
+<tr>
+<td>                           </td>
+                  <td>(0.030)   </td>
+                  <td>(0.078)   </td>
+                  <td>(0.080)</td>
+                  <td>(0.062)   </td>
+                </tr>
+<tr>
+<td>chronic                    </td>
+                  <td>0.169     </td>
+                  <td>0.169     </td>
+                  <td>0.169  </td>
+                  <td>0.196     </td>
+                </tr>
+<tr>
+<td>                           </td>
+                  <td>(0.004)   </td>
+                  <td>(0.012)   </td>
+                  <td>(0.012)</td>
+                  <td>(0.012)   </td>
+                </tr>
+<tr>
+<td>gendermale                 </td>
+                  <td>-0.108    </td>
+                  <td>-0.108    </td>
+                  <td>-0.108 </td>
+                  <td>-0.115    </td>
+                </tr>
+<tr>
+<td>                           </td>
+                  <td>(0.013)   </td>
+                  <td>(0.036)   </td>
+                  <td>(0.034)</td>
+                  <td>(0.032)   </td>
+                </tr>
+<tr>
+<td>school                     </td>
+                  <td>0.026     </td>
+                  <td>0.026     </td>
+                  <td>0.026  </td>
+                  <td>0.027     </td>
+                </tr>
+<tr>
+<td>                           </td>
+                  <td>(0.002)   </td>
+                  <td>(0.005)   </td>
+                  <td>(0.005)</td>
+                  <td>(0.004)   </td>
+                </tr>
+<tr>
+<td>insuranceyes               </td>
+                  <td>0.216     </td>
+                  <td>0.216     </td>
+                  <td>0.216  </td>
+                  <td>0.250     </td>
+                </tr>
+<tr>
+<td>                           </td>
+                  <td>(0.017)   </td>
+                  <td>(0.043)   </td>
+                  <td>(0.045)</td>
+                  <td>(0.040)   </td>
+                </tr>
+<tr>
+<td>AIC                        </td>
+                  <td>36597.0   </td>
+                  <td>36597.0   </td>
+                  <td>       </td>
+                  <td>24469.9   </td>
+                </tr>
+<tr>
+<td>BIC                        </td>
+                  <td>36641.7   </td>
+                  <td>36641.7   </td>
+                  <td>       </td>
+                  <td>24521.0   </td>
+                </tr>
+<tr>
+<td>Log.Lik.                   </td>
+                  <td>-18291.494</td>
+                  <td>-18291.494</td>
+                  <td>       </td>
+                  <td>-12226.953</td>
+                </tr>
+<tr>
+<td>no. of parameters          </td>
+                  <td>7         </td>
+                  <td>7         </td>
+                  <td>8      </td>
+                  <td>8         </td>
+                </tr>
+<tr>
+<td>$\sum_{i} \hat{f}_{i}(0)$</td>
+                  <td>46        </td>
+                  <td>          </td>
+                  <td>       </td>
+                  <td>618       </td>
+                </tr>
+</tbody>
+</table>
+</div>
+
+    <script>
+      function styleCell_tinytable_x9283yiew62ovar65g1w(i, j, css_id) {
+        var table = document.getElementById("tinytable_ul40rbgy9r15zrjnfnt3");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_ul40rbgy9r15zrjnfnt3');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_tinytable_x9283yiew62ovar65g1w(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_ul40rbgy9r15zrjnfnt3");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 0, 'tinytable_css_vt99bil3629nsp2wjzyu') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 1, 'tinytable_css_vt99bil3629nsp2wjzyu') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 2, 'tinytable_css_vt99bil3629nsp2wjzyu') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 3, 'tinytable_css_vt99bil3629nsp2wjzyu') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 4, 'tinytable_css_vt99bil3629nsp2wjzyu') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(1, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(2, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(3, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(4, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(5, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(6, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(7, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(8, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(9, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(10, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(11, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(12, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(13, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(15, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(16, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(17, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(18, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(19, 0, 'tinytable_css_e3vfqnxcuo0f2jpovcrz') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(1, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(2, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(3, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(4, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(5, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(6, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(7, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(8, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(9, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(10, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(11, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(12, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(13, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(15, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(16, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(17, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(18, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(19, 1, 'tinytable_css_s55rbsflw3pnsxqrxfrl') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(1, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(2, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(3, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(4, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(5, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(6, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(7, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(8, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(9, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(10, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(11, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(12, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(13, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(15, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(16, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(17, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(18, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(19, 2, 'tinytable_css_o69qeuwiizyxvmuiiuai') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(1, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(2, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(3, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(4, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(5, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(6, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(7, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(8, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(9, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(10, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(11, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(12, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(13, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(15, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(16, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(17, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(18, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(19, 3, 'tinytable_css_q0xrb615uywn9treyn2n') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(0, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(1, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(2, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(3, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(4, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(5, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(6, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(7, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(8, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(9, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(10, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(11, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(12, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(13, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(15, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(16, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(17, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(18, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(19, 4, 'tinytable_css_98zhvcagltele414nlyk') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 0, 'tinytable_css_bt1qoape01lihfpsgog3') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 1, 'tinytable_css_bt1qoape01lihfpsgog3') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 2, 'tinytable_css_bt1qoape01lihfpsgog3') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 3, 'tinytable_css_bt1qoape01lihfpsgog3') })
+window.addEventListener('load', function () { styleCell_tinytable_x9283yiew62ovar65g1w(14, 4, 'tinytable_css_bt1qoape01lihfpsgog3') })
+    </script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+
+
+
+</section></section><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-countreg:Chambers+Hastie:1992" class="csl-entry" role="listitem">
+Chambers, John M., and Trevor J. Hastie, eds. 1992. <em>Statistical Models in <span>S</span></em>. London: Chapman &amp; Hall.
+</div>
+<div id="ref-countreg:Deb+Trivedi:1997" class="csl-entry" role="listitem">
+Deb, Partha, and Pravin K. Trivedi. 1997. <span>“Demand for Medical Care by the Elderly: A Finite Mixture Approach.”</span> <em>Journal of Applied Econometrics</em> 12: 313–36.
+</div>
+<div id="ref-countreg:Fox:2002" class="csl-entry" role="listitem">
+Fox, John. 2002. <em>An <span>R</span> and <span>S-PLUS</span> Companion to Applied Regression</em>. Thousand Oaks, CA: Sage Publications.
+</div>
+<div id="ref-countreg:Kleiber+Zeileis:2008" class="csl-entry" role="listitem">
+Kleiber, Christian, and Achim Zeileis. 2008. <em>Applied Econometrics with <span>R</span></em>. New York: Springer-Verlag.
+</div>
+<div id="ref-countreg:McCullagh+Nelder:1989" class="csl-entry" role="listitem">
+McCullagh, P., and John A. Nelder. 1989. <em>Generalized Linear Models</em>. 2nd ed. London: Chapman &amp; Hall.
+</div>
+<div id="ref-countreg:Nelder+Wedderburn:1972" class="csl-entry" role="listitem">
+Nelder, J. A., and R. W. M. Wedderburn. 1972. <span>“Generalized Linear Models.”</span> <em>Journal of the Royal Statistical Society A</em> 135: 370–84.
+</div>
+<div id="ref-countreg:Venables+Ripley:2002" class="csl-entry" role="listitem">
+Venables, William N., and Brian D. Ripley. 2002. <em>Modern Applied Statistics with <span>S</span></em>. 4th ed. New York: Springer-Verlag.
+</div>
+<div id="ref-countreg:Zeileis:2004" class="csl-entry" role="listitem">
+Zeileis, Achim. 2004. <span>“Econometric Computing with <span>HC</span> and <span>HAC</span> Covariance Matrix Estimators.”</span> <em>Journal of Statistical Software</em> 11 (10): 1–17. <a href="http://www.jstatsoft.org/v11/i10/">http://www.jstatsoft.org/v11/i10/</a>.
+</div>
+<div id="ref-countreg:Zeileis:2006" class="csl-entry" role="listitem">
+———. 2006. <span>“Object-Oriented Computation of Sandwich Estimators.”</span> <em>Journal of Statistical Software</em> 16 (9): 1–16. <a href="http://www.jstatsoft.org/v16/i09/">http://www.jstatsoft.org/v16/i09/</a>.
+</div>
+<div id="ref-countreg:Zeileis+Hothorn:2002" class="csl-entry" role="listitem">
+Zeileis, Achim, and Torsten Hothorn. 2002. <span>“Diagnostic Checking in Regression Relationships.”</span> <em><span>R</span> News</em> 2 (3): 7–10. <a href="http://CRAN.R-project.org/doc/Rnews/">http://CRAN.R-project.org/doc/Rnews/</a>.
+</div>
+<div id="ref-countreg:Zeileis+Kleiber+Jackman:2008" class="csl-entry" role="listitem">
+Zeileis, Achim, Christian Kleiber, and Simon Jackman. 2008. <span>“Regression Models for Count Data in <span>R</span>.”</span> <em>Journal of Statistical Software</em> 27 (8): 1–25. <a href="http://www.jstatsoft.org/v27/i08/">http://www.jstatsoft.org/v27/i08/</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>In addition to the variables considered here, <span class="citation" data-cites="countreg:Zeileis+Kleiber+Jackman:2008">Zeileis, Kleiber, and Jackman (<a href="#ref-countreg:Zeileis+Kleiber+Jackman:2008" role="doc-biblioref">2008</a>)</span> also employ <code>hospital</code>, the number of hospital days. As this is more appropriately used as a dependent variable for medical care rather than a regressor, it is omitted from the analysis here.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Alternatively, over-dispersion can be confirmed by comparison of the log-likelihoods of the Poisson and negative binomial model.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/topmodels\.R-Forge\.R-project\.org\/countreg\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

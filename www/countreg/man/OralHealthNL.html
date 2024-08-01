@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.53">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>oralhealthnl – countreg</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../countreg.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<meta property="og:title" content="countreg">
+<meta property="og:image" content="https://topmodels.R-Forge.R-project.org/countreg/man/countreg.png">
+<meta property="og:site_name" content="countreg">
+<meta name="twitter:title" content="countreg">
+<meta name="twitter:image" content="https://topmodels.R-Forge.R-project.org/countreg/man/countreg.png">
+<meta name="twitter:image:alt" content="countreg: Count Data Regression in R">
+<meta name="twitter:site" content="@AchimZeileis">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../countreg-wide.png" alt="countreg logo" class="navbar-logo"></a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Get started</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-documentation" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Documentation</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">
+<li>
+    <a class="dropdown-item" href="../nbreg.qmd">
+ <span class="dropdown-text">Negative binomial regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/hurdle.html">
+ <span class="dropdown-text">Hurdle models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/zeroinfl.html">
+ <span class="dropdown-text">Zero-inflated models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/zerotrunc.html">
+ <span class="dropdown-text">Zero-truncated models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/FLXMRnegbin.html">
+ <span class="dropdown-text">Finite mixtures, boosting, GLMs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/disptest.html">
+ <span class="dropdown-text">Diagnostic tests</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/CrabSatellites.html">
+ <span class="dropdown-text">Data sets</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/binom.html">
+ <span class="dropdown-text">Distribution extensions</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Vignettes</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">
+<li>
+    <a class="dropdown-item" href="../vignettes/intro.html">
+ <span class="dropdown-text">Introduction</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/basics.html">
+ <span class="dropdown-text">Basics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/zero-augmented.html">
+ <span class="dropdown-text">Zero-augmented models</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../NEWS.html"> 
+<span class="menu-text">News</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../CITATION.html"> 
+<span class="menu-text">Citation</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../contact.qmd"> 
+<span class="menu-text">Contact</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/countreg"> <i class="bi bi-code" role="img" aria-label="countreg @ R-Forge">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/CrabSatellites.html">Data sets</a></li><li class="breadcrumb-item"><a href="../man/OralHealthNL.html">OralHealthNL</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Negative binomial regression</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/nbreg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">nbreg</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/nbreg.control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">nbreg.control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/predict.nbreg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">predict.nbreg</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Hurdle models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/hurdle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">hurdle</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/hurdle.control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">hurdle.control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/predict.hurdle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">predict.hurdle</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Zero-inflated models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/zeroinfl.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">zeroinfl</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/zeroinfl.control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">zeroinfl.control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/predict.zeroinfl.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">predict.zeroinfl</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Zero-truncated models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/zerotrunc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">zerotrunc</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/zerotrunc.control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">zerotrunc.control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/predict.zerotrunc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">predict.zerotrunc</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Finite mixtures, boosting, GLMs</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/FLXMRnegbin.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FLXMRnegbin</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/MBnegbin.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MBnegbin</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/ztpoisson.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ztpoisson</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Diagnostic tests</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/disptest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">disptest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/hurdletest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">hurdletest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/zitest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">zitest</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Data sets</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/CrabSatellites.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CrabSatellites</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/GSOEP.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GSOEP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/OralHealthNL.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">OralHealthNL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/TakeoverBids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TakeoverBids</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Distribution extensions</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/binom.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Binomial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/pois.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Poisson</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/nbinom.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Negative binomial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/hpois.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hurdle Poisson</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/hnbinom.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hurdle negative binomial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/zipois.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Zero-inflated Poisson</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/zinbinom.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Zero-inflated negative binomial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/ztpois.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Zero-truncated Poisson</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/ztnbinom.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Zero-truncated negative binomial</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li>
+<a href="#oral-health-in-children-in-the-netherlands" id="toc-oral-health-in-children-in-the-netherlands" class="nav-link active" data-scroll-target="#oral-health-in-children-in-the-netherlands">Oral Health in Children in The Netherlands</a>
+  <ul class="collapse">
+<li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#format" id="toc-format" class="nav-link" data-scroll-target="#format">Format</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
+  <li><a href="#source" id="toc-source" class="nav-link" data-scroll-target="#source">Source</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  </ul>
+</li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><section id="oral-health-in-children-in-the-netherlands" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="oral-health-in-children-in-the-netherlands">Oral Health in Children in The Netherlands</h2>
+<section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
+<p>Data from a study on oral health status and the preventive dental behaviors of 9-year-old children in The Netherlands.</p>
+</section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<pre><code class="language-R">data("OralHealthNL")</code></pre>
+</section><section id="format" class="level3"><h3 class="anchored" data-anchor-id="format">Format</h3>
+<p>A data frame containing 440 observations on 8 variables.</p>
+<dl>
+<dt>
+dmfs
+</dt>
+<dd>
+Numeric index of decayed, missing, and filled surfaces (DMFS) in deciduous teeth.
+</dd>
+<dt>
+education
+</dt>
+<dd>
+Factor indicating whether the highest completed education level of the mother is <code>“high”</code> (senior general secondary education, HAVO, or higher) or <code>“low”</code>.
+</dd>
+<dt>
+gender
+</dt>
+<dd>
+Factor indicating gender of the child (<code>“female”</code> or <code>“male”</code>).
+</dd>
+<dt>
+ethnicity
+</dt>
+<dd>
+Factor indicating whether the mother is <code>“immigrant”</code> (born abroad) or <code>“native”</code> (born in The Netherlands).
+</dd>
+<dt>
+brushing
+</dt>
+<dd>
+Factor indicating whether the frequency of brushing teeth is <code>“&lt; 2”</code> or <code>“&gt;= 2”</code> times per day.
+</dd>
+<dt>
+breakfast
+</dt>
+<dd>
+Factor indicating whether the frequency of having breakfast is <code>“7”</code> or <code>“&lt; 7”</code> days per week.
+</dd>
+<dt>
+fooddrink
+</dt>
+<dd>
+Factor indicating whether the frequency of food and drinks in addition to the three main meals is <code>“&lt;= 7”</code> or <code>“&gt; 7”</code> times per day.
+</dd>
+<dt>
+corah
+</dt>
+<dd>
+Factor indicating whether Corah’s Dental Anxiety score is <code>“&lt; 13”</code> or <code>“&gt;= 13”</code> (see also below).
+</dd>
+</dl></section><section id="details" class="level3"><h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>The data are from the study “Oral Health in Children and Adolescents in The Netherlands” (Schuller et al.&nbsp;2011). The aim of this study was to describe the oral health status and the preventive dental behaviors of children from different age groups (Dusseldorp et al.&nbsp;2015). Here, the subset of children at the age of 9 years is provided as analyzed by Hofstetter et al.&nbsp;(2016).</p>
+<p>The data collection consisted of a clinical oral examination and a questionnaire survey, using a repeated cross-sectional design. Data contained information about demographic variables (ethnicity and educational level), nutrition, children’s dental attendance, oral self-care, and dental anxiety. The score on Corah’s Dental Anxiety Questionnaire was used as a measure of dental anxiety. This questionnaire consists of four questions with answer categories from 1 (low anxiety) to 5 (high anxiety). A total Corah score was computed by taking the sum of the four items and then dichotomized into ‘lower than 13’ and ‘higher than or equal to 13’.</p>
+</section><section id="source" class="level3"><h3 class="anchored" data-anchor-id="source">Source</h3>
+<p>Supplementary materials for Hofstetter et al.&nbsp;(2016). <a href="https://doi.org/10.1159/000448197">doi:10.1159/000448197</a></p>
+</section><section id="references" class="level3"><h3 class="anchored" data-anchor-id="references">References</h3>
+<p>Dusseldorp E, Kamphuis M, Schuller AA (2015). “Impact of Lifestyle Factors on Caries Experience in Three Different Age Groups: 9, 15, and 21-Year-Olds”, <em>Community Dentistry and Oral Epidemiology</em>, <b>43</b>(1), 9–16. <a href="https://doi.org/10.1111/cdoe.12123">doi:10.1111/cdoe.12123</a></p>
+<p>Hofstetter H, Dusseldorp E, Zeileis A, Schuller AA (2016). “Modeling Caries Experience: Advantages of the Use of the Hurdle Model”, <em>Caries Research</em>, <b>50</b>(6), 517–526. <a href="https://doi.org/10.1159/000448197">doi:10.1159/000448197</a></p>
+<p>Schuller AA, Poorterman JHG, van Kempen CPF, Dusseldorp E, van Dommelen P, Verrips GHW (2011). <em>Kies voor tanden: Een onderzoek naar mondgezondheid en preventief tandheelkundig gedrag van jeugdigen. Tussenmeting 2009, een vervolg op de reeks TJZ-onderzoeken</em>. TNO, Leiden.</p>
+</section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st">"countreg"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Load data and omit NAs and one dmfs outlier</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"OralHealthNL"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">OralHealthNL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  dmfs education gender ethnicity brushing breakfast fooddrink corah
+1    1       low   male    native     &gt;= 2         7      &lt;= 7  &lt;NA&gt;
+2    0      high   male    native     &gt;= 2         7      &lt;= 7  &lt;NA&gt;
+3    6      high female    native     &gt;= 2         7      &lt;= 7  &lt; 13
+4    9       low female    native     &gt;= 2         7       &gt; 7  &lt; 13
+5    0      high female    native      &lt; 2         7      &lt;= 7  &lt;NA&gt;
+6    0       low   male    native     &gt;= 2         7      &lt;= 7  &lt; 13</code></pre>
+</div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">OralHealthNL</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">OralHealthNL</span>, <span class="va">dmfs</span> <span class="op">&lt;</span> <span class="fl">40</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Visualization: Is dmfs &gt; 0?</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">dmfs</span> <span class="op">&gt;</span> <span class="fl">0</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"&gt; 0"</span>, <span class="st">"= 0"</span><span class="op">)</span><span class="op">)</span> <span class="op">~</span> <span class="va">.</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">OralHealthNL</span>, ylab <span class="op">=</span> <span class="st">"dmfs"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Count: How large is log(dmfs) given dmfs &gt; 0?</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="OralHealthNL_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dmfs</span><span class="op">)</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">OralHealthNL</span>, subset <span class="op">=</span> <span class="va">dmfs</span> <span class="op">&gt;</span> <span class="fl">0</span>, ylab <span class="op">=</span> <span class="st">"dmfs"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Relevel the factor variables so that non-risk group is the reference</span></span>
+<span><span class="va">OralHealthNL</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html">transform</a></span><span class="op">(</span><span class="va">OralHealthNL</span>,</span>
+<span>  ethnicity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/relevel.html">relevel</a></span><span class="op">(</span><span class="va">ethnicity</span>, ref <span class="op">=</span> <span class="st">"native"</span><span class="op">)</span>,</span>
+<span>  brushing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/relevel.html">relevel</a></span><span class="op">(</span><span class="va">brushing</span>, ref <span class="op">=</span> <span class="st">"&gt;= 2"</span><span class="op">)</span>,</span>
+<span>  breakfast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/relevel.html">relevel</a></span><span class="op">(</span><span class="va">breakfast</span>, ref <span class="op">=</span> <span class="st">"7"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Count regression models</span></span>
+<span><span class="va">zinb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/countreg/man/zeroinfl.html">zeroinfl</a></span><span class="op">(</span><span class="va">dmfs</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">OralHealthNL</span>, dist <span class="op">=</span> <span class="st">"negbin"</span><span class="op">)</span></span>
+<span><span class="va">zip</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/countreg/man/zeroinfl.html">zeroinfl</a></span><span class="op">(</span><span class="va">dmfs</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">OralHealthNL</span>, dist <span class="op">=</span> <span class="st">"poisson"</span><span class="op">)</span></span>
+<span><span class="va">hnb</span>  <span class="op">&lt;-</span>   <span class="fu"><a href="https://rdrr.io/pkg/countreg/man/hurdle.html">hurdle</a></span><span class="op">(</span><span class="va">dmfs</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">OralHealthNL</span>, dist <span class="op">=</span> <span class="st">"negbin"</span><span class="op">)</span></span>
+<span><span class="va">hp</span>   <span class="op">&lt;-</span>   <span class="fu"><a href="https://rdrr.io/pkg/countreg/man/hurdle.html">hurdle</a></span><span class="op">(</span><span class="va">dmfs</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">OralHealthNL</span>, dist <span class="op">=</span> <span class="st">"poisson"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Model comparisons (Table 3)</span></span>
+<span><span class="co">## Information criteria</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html">AIC</a></span><span class="op">(</span><span class="va">hnb</span>, <span class="va">zinb</span>, <span class="va">hp</span>, <span class="va">zip</span><span class="op">)</span>, BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html">BIC</a></span><span class="op">(</span><span class="va">hnb</span>, <span class="va">zinb</span>, <span class="va">hp</span>, <span class="va">zip</span><span class="op">)</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     df      AIC      BIC
+hnb  17 1710.477 1778.161
+zinb 17 1712.954 1780.638
+hp   16 1969.529 2033.232
+zip  16 1969.571 2033.274</code></pre>
+</div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Negative binomial vs. Poisson</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st">"lmtest"</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/lmtest/man/lrtest.html">lrtest</a></span><span class="op">(</span><span class="va">hnb</span>, <span class="va">hp</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Likelihood ratio test
+
+Model 1: dmfs ~ .
+Model 2: dmfs ~ .
+  #Df  LogLik Df  Chisq Pr(&gt;Chisq)    
+1  17 -838.24                         
+2  16 -968.76 -1 261.05  &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st">"lmtest"</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/lmtest/man/lrtest.html">lrtest</a></span><span class="op">(</span><span class="va">zinb</span>, <span class="va">zip</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Likelihood ratio test
+
+Model 1: dmfs ~ .
+Model 2: dmfs ~ .
+  #Df  LogLik Df  Chisq Pr(&gt;Chisq)    
+1  17 -839.48                         
+2  16 -968.79 -1 258.62  &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Zero-inflation vs. hurdle</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st">"nonnest2"</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/nonnest2/man/vuongtest.html">vuongtest</a></span><span class="op">(</span><span class="va">zinb</span>, <span class="va">hnb</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Model 1 
+ Class: zeroinfl 
+ Call: zeroinfl(formula = dmfs ~ ., data = OralHealthNL, dist = "negbin")
+
+Model 2 
+ Class: hurdle 
+ Call: hurdle(formula = dmfs ~ ., data = OralHealthNL, dist = "negbin")
+
+Variance test 
+  H0: Model 1 and Model 2 are indistinguishable 
+  H1: Model 1 and Model 2 are distinguishable 
+    w2 = 0.001,   p = 0.382
+
+Non-nested likelihood ratio test 
+  H0: Model fits are equal for the focal population 
+  H1A: Model 1 fits better than Model 2 
+    z = -2.511,   p = 0.994
+  H1B: Model 2 fits better than Model 1 
+    z = -2.511,   p = 0.006015</code></pre>
+</div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Coefficients, odds ratios, and rate ratios</span></span>
+<span><span class="co">## Negative binomial hurdle model (Table 3)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">hnb</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+hurdle(formula = dmfs ~ ., data = OralHealthNL, dist = "negbin")
+
+Pearson residuals:
+    Min      1Q  Median      3Q     Max 
+-1.0564 -0.6754 -0.4458  0.3831  4.2094 
+
+Count model coefficients (truncated negbin with log link):
+                   Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)         1.29286    0.13110   9.861  &lt; 2e-16 ***
+educationlow        0.30434    0.12956   2.349  0.01883 *  
+gendermale          0.05017    0.12481   0.402  0.68772    
+ethnicityimmigrant  0.33572    0.15078   2.227  0.02598 *  
+brushing&lt; 2         0.37770    0.14319   2.638  0.00835 ** 
+breakfast&lt; 7        0.13758    0.18510   0.743  0.45732    
+fooddrink&gt; 7       -0.08250    0.19674  -0.419  0.67497    
+corah&gt;= 13          0.38452    0.22072   1.742  0.08148 .  
+Log(theta)          0.51214    0.18669   2.743  0.00608 ** 
+Zero hurdle model coefficients (binomial with logit link):
+                    Estimate Std. Error z value Pr(&gt;|z|)   
+(Intercept)         -0.32742    0.19784  -1.655  0.09794 . 
+educationlow         0.40429    0.21393   1.890  0.05877 . 
+gendermale          -0.04384    0.21348  -0.205  0.83729   
+ethnicityimmigrant   0.48796    0.29112   1.676  0.09371 . 
+brushing&lt; 2          0.26244    0.26812   0.979  0.32766   
+breakfast&lt; 7         1.25730    0.47601   2.641  0.00826 **
+fooddrink&gt; 7         0.98360    0.45653   2.155  0.03120 * 
+corah&gt;= 13          16.14670  865.49661   0.019  0.98512   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Theta: count = 1.6689
+Number of iterations in BFGS optimization: 17 
+Log-likelihood: -838.2 on 17 Df</code></pre>
+</div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html">confint</a></span><span class="op">(</span><span class="va">hnb</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                             2.5 %   97.5 %
+count_(Intercept)        2.8176305 4.710609
+count_educationlow       1.0516938 1.747675
+count_gendermale         0.8232799 1.342851
+count_ethnicityimmigrant 1.0410117 1.879962
+count_brushing&lt; 2        1.1019136 1.931618
+count_breakfast&lt; 7       0.7983455 1.649344
+count_fooddrink&gt; 7       0.6261915 1.354050
+count_corah&gt;= 13         0.9530647 2.263966
+zero_(Intercept)         0.4890990 1.062205
+zero_educationlow        0.9851189 2.278641
+zero_gendermale          0.6298696 1.454358
+zero_ethnicityimmigrant  0.9206978 2.882191
+zero_brushing&lt; 2         0.7686977 2.198867
+zero_breakfast&lt; 7        1.3831085 8.937661
+zero_fooddrink&gt; 7        1.0928891 6.542907
+zero_corah&gt;= 13          0.0000000      Inf</code></pre>
+</div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Negative binomial zero-inflated model (Table 4)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">hnb</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+hurdle(formula = dmfs ~ ., data = OralHealthNL, dist = "negbin")
+
+Pearson residuals:
+    Min      1Q  Median      3Q     Max 
+-1.0564 -0.6754 -0.4458  0.3831  4.2094 
+
+Count model coefficients (truncated negbin with log link):
+                   Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)         1.29286    0.13110   9.861  &lt; 2e-16 ***
+educationlow        0.30434    0.12956   2.349  0.01883 *  
+gendermale          0.05017    0.12481   0.402  0.68772    
+ethnicityimmigrant  0.33572    0.15078   2.227  0.02598 *  
+brushing&lt; 2         0.37770    0.14319   2.638  0.00835 ** 
+breakfast&lt; 7        0.13758    0.18510   0.743  0.45732    
+fooddrink&gt; 7       -0.08250    0.19674  -0.419  0.67497    
+corah&gt;= 13          0.38452    0.22072   1.742  0.08148 .  
+Log(theta)          0.51214    0.18669   2.743  0.00608 ** 
+Zero hurdle model coefficients (binomial with logit link):
+                    Estimate Std. Error z value Pr(&gt;|z|)   
+(Intercept)         -0.32742    0.19784  -1.655  0.09794 . 
+educationlow         0.40429    0.21393   1.890  0.05877 . 
+gendermale          -0.04384    0.21348  -0.205  0.83729   
+ethnicityimmigrant   0.48796    0.29112   1.676  0.09371 . 
+brushing&lt; 2          0.26244    0.26812   0.979  0.32766   
+breakfast&lt; 7         1.25730    0.47601   2.641  0.00826 **
+fooddrink&gt; 7         0.98360    0.45653   2.155  0.03120 * 
+corah&gt;= 13          16.14670  865.49661   0.019  0.98512   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Theta: count = 1.6689
+Number of iterations in BFGS optimization: 17 
+Log-likelihood: -838.2 on 17 Df</code></pre>
+</div>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html">confint</a></span><span class="op">(</span><span class="va">zinb</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              2.5 %    97.5 %
+count_(Intercept)        2.87728799 4.7399839
+count_educationlow       1.05358981 1.7408558
+count_gendermale         0.83032458 1.3392020
+count_ethnicityimmigrant 1.03700891 1.8491811
+count_brushing&lt; 2        1.08222465 1.8760869
+count_breakfast&lt; 7       0.81383157 1.6536956
+count_fooddrink&gt; 7       0.63596745 1.3590801
+count_corah&gt;= 13         1.01247274 2.3333949
+zero_(Intercept)         0.67229117 1.6908065
+zero_educationlow        0.43459181 1.1554917
+zero_gendermale          0.66228485 1.7408712
+zero_ethnicityimmigrant  0.32595659 1.2220538
+zero_brushing&lt; 2         0.42567249 1.4411974
+zero_breakfast&lt; 7        0.06835275 0.8785863
+zero_fooddrink&gt; 7        0.08307571 1.0765754
+zero_corah&gt;= 13          0.00000000       Inf</code></pre>
+</div>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Rootograms (top left: Figure 1)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">OralHealthNL</span><span class="op">$</span><span class="va">dmfs</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>,</span>
+<span>  breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">23</span> <span class="op">-</span> <span class="fl">0.5</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">22.5</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">"dmfs"</span>, main <span class="op">=</span> <span class="st">"Normal distribution"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">hnb</span>,</span>
+<span>  style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>,</span>
+<span>  width <span class="op">=</span> <span class="fl">1</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">22.5</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">"dmfs"</span>, main <span class="op">=</span> <span class="st">"Negative binomial hurdle model"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">OralHealthNL</span><span class="op">$</span><span class="va">dmfs</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">23</span> <span class="op">-</span> <span class="fl">0.5</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">22.5</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">"dmfs"</span>, main <span class="op">=</span> <span class="st">"Normal distribution"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">hnb</span>,</span>
+<span>  width <span class="op">=</span> <span class="fl">1</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">22.5</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">"dmfs"</span>, main <span class="op">=</span> <span class="st">"Negative binomial hurdle model"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="OralHealthNL_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="OralHealthNL_files/figure-html/unnamed-chunk-1-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Number of zeros</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>dmfs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">OralHealthNL</span><span class="op">$</span><span class="va">dmfs</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  ZINB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">zinb</span>, type <span class="op">=</span> <span class="st">"density"</span>, at <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  Hurdle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">hnb</span>, type <span class="op">=</span> <span class="st">"density"</span>, at <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    dmfs     ZINB   Hurdle 
+176.0000 177.1231 176.0000 </code></pre>
+</div>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Correlation of observations and fitted means</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>dmfs <span class="op">=</span> <span class="va">OralHealthNL</span><span class="op">$</span><span class="va">dmfs</span>,</span>
+<span>  ZINB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html">fitted</a></span><span class="op">(</span><span class="va">zinb</span><span class="op">)</span>, HNB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html">fitted</a></span><span class="op">(</span><span class="va">hnb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          dmfs     ZINB       HNB
+dmfs 1.0000000 0.348679 0.3490063
+ZINB 0.3486790 1.000000 0.9997870
+HNB  0.3490063 0.999787 1.0000000</code></pre>
+</div>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Bias-reduced logistic regression (due to separation)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st"><a href="https://github.com/ikosmidis/brglm2">"brglm2"</a></span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="va">br</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">dmfs</span> <span class="op">==</span> <span class="fl">0</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"= 0"</span>, <span class="st">"&gt; 0"</span><span class="op">)</span><span class="op">)</span> <span class="op">~</span> <span class="va">.</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">OralHealthNL</span>, family <span class="op">=</span> <span class="va">binomial</span>, method <span class="op">=</span> <span class="st">"brglmFit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/lmtest/man/coeftest.html">coeftest</a></span><span class="op">(</span><span class="va">br</span><span class="op">)</span>, digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+z test of coefficients:
+
+                   Estimate Std. Error z value Pr(&gt;|z|)  
+(Intercept)           -0.32       0.20    -1.6     0.10  
+educationlow           0.40       0.21     1.9     0.06 .
+gendermale            -0.04       0.21    -0.2     0.84  
+ethnicityimmigrant     0.47       0.29     1.6     0.10  
+brushing&lt; 2            0.26       0.27     1.0     0.34  
+breakfast&lt; 7           1.19       0.46     2.6     0.01 *
+fooddrink&gt; 7           0.93       0.45     2.1     0.04 *
+corah&gt;= 13             3.33       1.48     2.3     0.02 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+
+
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/topmodels\.R-Forge\.R-project\.org\/countreg\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
