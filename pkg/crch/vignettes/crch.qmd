@@ -88,8 +88,8 @@ homoscedasticity which means that the variance of an underlying normal
 distribution does not depend on covariates.
 However, sometimes this assumption does not hold and models that can consider
 conditional heteroscedasticity should be used. Such models have been proposed,
-e.g., for generalized linear models [@nelder1987, smyth1989], generalized
-additive models [@rigby1996, rigby2005], or beta regression
+e.g., for generalized linear models [@nelder1987, @smyth1989], generalized
+additive models [@rigby1996, @rigby2005], or beta regression
 [@cribarineto2010]. There also exist several R packages with functions
 implementing the above models, e.g., **dglm** [@dunn2014], 
 **glmx** [@zeileis2013], **gamlss** [@rigby2005], 
