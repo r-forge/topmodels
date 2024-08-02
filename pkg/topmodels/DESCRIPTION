@@ -18,6 +18,6 @@ Description: Unified infrastructure for probabilistic models and distributional 
 	     (randomized) quantile residual Q-Q plots, and reliagrams (reliability diagrams).
 License: GPL-2 | GPL-3
 Encoding: UTF-8
-URL: https://topmodels.R-Forge.R-project.org/
+URL: https://topmodels.R-Forge.R-project.org/topmodels/
 Additional_repositories: https://zeileis.R-universe.dev
 RoxygenNote: 7.3.1
