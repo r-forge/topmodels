@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.53">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Goodness of Fit of Probabilistic Regression Models – topmodels</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../topmodels.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+<meta property="og:title" content="Goodness of Fit of Probabilistic Regression Models – topmodels">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://topmodels.R-Forge.R-project.org/topmodels/vignettes/topmodels.png">
+<meta property="og:site_name" content="topmodels">
+<meta name="twitter:title" content="Goodness of Fit of Probabilistic Regression Models – topmodels">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://topmodels.R-Forge.R-project.org/topmodels/vignettes/topmodels.png">
+<meta name="twitter:image:alt" content="topmodels: Infrastructure for Forecasting and Assessment of Probabilistic Models">
+<meta name="twitter:site" content="@AchimZeileis">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../topmodels-wide.png" alt="topmodels logo" class="navbar-logo"></a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../vignettes/topmodels.html"> 
+<span class="menu-text">Get started</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-documentation" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Documentation</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">
+<li>
+    <a class="dropdown-item" href="../man/procast.html">
+ <span class="dropdown-text">Procast infrastructure</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/rootogram.html">
+ <span class="dropdown-text">Probabilistic model diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/plot.rootogram.html">
+ <span class="dropdown-text">Plotting probabilistic model diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/Empirical.html">
+ <span class="dropdown-text">Interfacs to models/distributions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/SerumPotassium.html">
+ <span class="dropdown-text">Data sets</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Vignettes</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">
+<li>
+    <a class="dropdown-item" href="../vignettes/goodness_of_fit.html">
+ <span class="dropdown-text">Goodness of Fit of Probabilistic Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/graphics.html">
+ <span class="dropdown-text">Graphics for Assessing Goodness of Fit</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/illustration_fifa_2018.html">
+ <span class="dropdown-text">Illustration: Goals in the 2018 FIFA World Cup</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/illustration_rain_ibk.html">
+ <span class="dropdown-text">Illustration: Precipitation Forecasts in Innsbruck</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/illustration_artificial.html">
+ <span class="dropdown-text">Illustration: Artificial Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/implementation.html">
+ <span class="dropdown-text">Implementation Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/procast.html">
+ <span class="dropdown-text">Probabilistic Forecasting Infrastructure</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../NEWS.html"> 
+<span class="menu-text">News</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../CITATION.html"> 
+<span class="menu-text">Citation</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../contact.html"> 
+<span class="menu-text">Contact</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels"> <i class="bi bi-code" role="img" aria-label="topmodels @ R-Forge">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation"><span class="header-section-number">2</span> Notation</a></li>
+  <li><a href="#marginal-calibration-observed-vs.-expected-frequencies" id="toc-marginal-calibration-observed-vs.-expected-frequencies" class="nav-link" data-scroll-target="#marginal-calibration-observed-vs.-expected-frequencies"><span class="header-section-number">3</span> Marginal calibration: Observed vs.&nbsp;expected frequencies</a></li>
+  <li><a href="#probabilistic-calibration-pit-and-randomized-quantile-residuals" id="toc-probabilistic-calibration-pit-and-randomized-quantile-residuals" class="nav-link" data-scroll-target="#probabilistic-calibration-pit-and-randomized-quantile-residuals"><span class="header-section-number">4</span> Probabilistic calibration: PIT and (randomized) quantile residuals</a></li>
+  <li><a href="#similarities-and-differences" id="toc-similarities-and-differences" class="nav-link" data-scroll-target="#similarities-and-differences"><span class="header-section-number">5</span> Similarities and differences</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header"><h1 class="title display-7">Goodness of Fit of Probabilistic Regression Models</h1>
+
+</header><div class="cell">
+<style type="text/css">
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+</style>
+</div>
+<div class="cell">
+<script>
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+</script>
+</div>
+<section id="introduction" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="introduction">
+<span class="header-section-number">1</span> Introduction</h2>
+<p>Over the last decades there has been an increasing interest in regression models that not only capture the mean of a dependent variable but model its entire probability distribution <span class="citation" data-cites="Stasinopoulos+Rigby:2007 Klein+Kneib+Lang+Sohn:2015 Hothorn+Kneib+Buehlmann:2014">(<a href="#ref-Stasinopoulos+Rigby:2007" role="doc-biblioref">Stasinopoulos and Rigby 2007</a>; <a href="#ref-Klein+Kneib+Lang+Sohn:2015" role="doc-biblioref">Klein et al. 2015</a>; <a href="#ref-Hothorn+Kneib+Buehlmann:2014" role="doc-biblioref">Hothorn, Kneib, and Bühlmann 2014</a>)</span>. In the simplest case this could be a generalized linear model <span class="citation" data-cites="Nelder+Wedderburn:1972 McCullagh+Nelder:1989">(GLM, <a href="#ref-Nelder+Wedderburn:1972" role="doc-biblioref">Nelder and Wedderburn 1972</a>; <a href="#ref-McCullagh+Nelder:1989" role="doc-biblioref">McCullagh and Nelder 1989</a>)</span> where higher moments of the probability distribution co-vary with the expectation. Instead, multiple distribution parameters could also be linked to explanatory variables as in distributional regression <span class="citation" data-cites="Klein+Kneib+Lang+Sohn:2015">(<a href="#ref-Klein+Kneib+Lang+Sohn:2015" role="doc-biblioref">Klein et al. 2015</a>)</span> or generalized additive models of location, scale, and shape <span class="citation" data-cites="Stasinopoulos+Rigby:2007">(<a href="#ref-Stasinopoulos+Rigby:2007" role="doc-biblioref">Stasinopoulos and Rigby 2007</a>)</span>. Moreover, many other flexible modeling techniques yield fitted distributions, including transformation models <span class="citation" data-cites="Hothorn+Kneib+Buehlmann:2014">(<a href="#ref-Hothorn+Kneib+Buehlmann:2014" role="doc-biblioref">Hothorn, Kneib, and Bühlmann 2014</a>)</span>, Bayesian modeling <span class="citation" data-cites="Umlauf+Klein+Zeileis:2018">(<a href="#ref-Umlauf+Klein+Zeileis:2018" role="doc-biblioref">Umlauf, Klein, and Zeileis 2018</a>)</span>, machine learning approaches <span class="citation" data-cites="Rasp+Lerch:2018">(e.g., <a href="#ref-Rasp+Lerch:2018" role="doc-biblioref">Rasp and Lerch 2018</a>)</span>, and many others.</p>
+<p>For assessing the goodness of fit of such probabilistic regression models, (proper) scoring rules <span class="citation" data-cites="Gneiting+Raftery:2007">(<a href="#ref-Gneiting+Raftery:2007" role="doc-biblioref">Gneiting and Raftery 2007</a>)</span> are widely used, e.g., using the log-likelihood (also known as the log-score) or the continuous ranked probability score <span class="citation" data-cites="Gneiting+Raftery:2007">(CRPS, <a href="#ref-Gneiting+Raftery:2007" role="doc-biblioref">Gneiting and Raftery 2007</a>)</span>. In addition to such numerical summaries, visualizations capturing the goodness of fit are also of interest as they may also be able to shed some more light on the sources of a potential lack of fit.</p>
+<p>While various visualizations have been suggested in the literature and implemented in software packages, a unified framework for these visualizations has not yet been established. Therefore, we investigate the following questions:</p>
+<ul>
+<li>What are useful elements of such visualizations?</li>
+<li>What are relative (dis)advantages?</li>
+</ul>
+<p>The insights help us to establish a unified framework that facilitates:</p>
+<ul>
+<li>Adoption of these visualizations for a broad range of models/distributions.</li>
+<li>Understanding what the graphics have in common and what sets them apart.</li>
+<li>Demonstration of strengths and weaknesses in uncovering sources of lack of fit.</li>
+<li>Fine-tuning the graphics for certain models or data sets.</li>
+</ul></section><section id="notation" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="notation">
+<span class="header-section-number">2</span> Notation</h2>
+<p>In this article, we focus on several graphical diagnostic tools to assess the calibration of a probabilistic forecast <span class="math inline">\(F( \cdot | \boldsymbol{\theta}_{i})\)</span>, issued in form of a predictive distribution <span class="math inline">\(f( \cdot |
+\boldsymbol{\theta}_{i})\)</span>. Given observations <span class="math inline">\(y_i (i = 1, \ldots, n)\)</span>, we assume a set of observation-specific fitted parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i}
+= (\hat{\theta}_{i1}, \ldots, \hat{\theta}_{iK})^\top\)</span>, where the estimation may have been performed on the same observations <span class="math inline">\(i = 1, \ldots, n\)</span> (i.e., corresponding to an in-sample assessment) or on a different data set (i.e., corresponding to an out-of-sample evaluation). The estimation procedure itself can be either fully parametric or semi-parametric, as long as fitted parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i}\)</span> exist for all observations of interest. However, since the uncertainty in the estimation of the parameters is not accounted for, small deviations from asymptotic theoretical properties will be apparent in all graphical displays due to some sampling variation.</p>
+<p>According to the seminal work of <span class="citation" data-cites="Gneiting+Balabdaoui+Raftery:2007">Gneiting, Balabdaoui, and Raftery (<a href="#ref-Gneiting+Balabdaoui+Raftery:2007" role="doc-biblioref">2007</a>)</span>, probabilistic forecasts aim to <em>maximize the sharpness of the predictive distributions subject to calibration</em>. Calibration here refers to the statistical concordance between the forecast and the observation, and is thus a joint property of the forecast and observation. Sharpness, on the other hand, is a property of the forecast only and indicates how concentrated a predictive distribution is. In general, the more concentrated the sharper the forecast. In the assessment whether probabilistic predictions are calibrated, we further distinguish between <em>marginal</em> and <em>probabilistic</em> calibration.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org">"ggplot2"</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m</span>, style <span class="op">=</span> <span class="st">"standing"</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, fitted <span class="op">=</span> <span class="cn">FALSE</span>, xlab <span class="op">=</span> <span class="st">"Goals"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"random"</span>, nsim <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  ref <span class="op">=</span> <span class="cn">FALSE</span>, confint <span class="op">=</span> <span class="cn">FALSE</span>, simint <span class="op">=</span> <span class="cn">FALSE</span>, fill <span class="op">=</span> <span class="st">"darkgray"</span>, alpha <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"random"</span>, nsim <span class="op">=</span> <span class="fl">10</span>, trafo <span class="op">=</span> <span class="va">qnorm</span>,</span>
+<span>  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Randomized quantile residuals"</span>,</span>
+<span>  ref <span class="op">=</span> <span class="cn">FALSE</span>, confint <span class="op">=</span> <span class="cn">FALSE</span>, simint <span class="op">=</span> <span class="cn">FALSE</span>, fill <span class="op">=</span> <span class="st">"darkgray"</span>, alpha <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="goodness_of_fit_files/figure-html/calibration-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:30.0%"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="goodness_of_fit_files/figure-html/calibration-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:30.0%"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="goodness_of_fit_files/figure-html/calibration-3.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:30.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="marginal-calibration-observed-vs.-expected-frequencies" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="marginal-calibration-observed-vs.-expected-frequencies">
+<span class="header-section-number">3</span> Marginal calibration: Observed vs.&nbsp;expected frequencies</h2>
+<p><em>Advantage:</em> Scale of observations is natural, direct interpretation.</p>
+<p><em>Disadvantage:</em> Needs to be compared with a combination of distributions.</p>
+<p>Marginal calibration is generally concerned with whether the oberseved frequencies match the frequencies expected by the model. For discrete observations, frequencies for the observations themselves can be considered; for continuous observations or more generally, frequencies for intevals of observations are being used. Here, the expected frequencies are computed by differences between the predictive CDFs <span class="math inline">\(F( \cdot )\)</span>, evaluated at the interval breaks. Hence, mariginal calibration is always obtained on the observation scale compared to the probabilistic calibration performed on the probability scale. Although there are some previous studies that display observation points rather than intervals <span class="citation" data-cites="Gneiting+Balabdaoui+Raftery:2007">(e.g., <a href="#ref-Gneiting+Balabdaoui+Raftery:2007" role="doc-biblioref">Gneiting, Balabdaoui, and Raftery 2007</a>)</span>, here we stick to the former and discuss only the so-called rootograms which are histogram-style plots <span class="citation" data-cites="Kleiber+Zeileis:2016">(<a href="#ref-Kleiber+Zeileis:2016" role="doc-biblioref">Kleiber and Zeileis 2016</a>)</span>.</p>
+<p>For the special case of a binary event, the observed event frequency is typically plotted against the predictive probability in a so-called reliability diagram <span class="citation" data-cites="Wilks:2011 Broecker+Smith:2007">(<a href="#ref-Wilks:2011" role="doc-biblioref">Wilks 2011</a>; <a href="#ref-Broecker+Smith:2007" role="doc-biblioref">Bröcker and Smith 2007</a>)</span>. Here, the predicted probability for a binary event is partitioned into a certain number of bins and the averaged forecast probability within each bin is plotted against the observerd relative frequency. Typically, equidistant binning is employed, but here the rather arbitrary number of bins can be quite sensible. A simple and common enhancement is therefore to use evenly populated bins, though even here instabilities can be a major issue <span class="citation" data-cites="Dimitriadis+Gneiting+Jordan:2021">(<a href="#ref-Dimitriadis+Gneiting+Jordan:2021" role="doc-biblioref">Dimitriadis, Gneiting, and Jordan 2021</a>)</span>.</p>
+</section><section id="probabilistic-calibration-pit-and-randomized-quantile-residuals" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="probabilistic-calibration-pit-and-randomized-quantile-residuals">
+<span class="header-section-number">4</span> Probabilistic calibration: PIT and (randomized) quantile residuals</h2>
+<p><em>Advantage:</em> Needs to be compared with only one distribution (uniform or normal).</p>
+<p><em>Disadvantage:</em> Scale is not so natural. May require randomization for discrete distributions.</p>
+<p>According to <span class="citation" data-cites="Gneiting+Balabdaoui+Raftery:2007">Gneiting, Balabdaoui, and Raftery (<a href="#ref-Gneiting+Balabdaoui+Raftery:2007" role="doc-biblioref">2007</a>)</span>, model calibration can be further distinguished between probabilistic calibration and marginal calibration. Probabilistic calibration is usually assessed using probability integral transform (PIT) values <span class="citation" data-cites="Dawid:1984 Diebold+Gunther+Tay:1998 Gneiting+Balabdaoui+Raftery:2007">(<a href="#ref-Dawid:1984" role="doc-biblioref">Dawid 1984</a>; <a href="#ref-Diebold+Gunther+Tay:1998" role="doc-biblioref">Diebold, Gunther, and Tay 1998</a>; <a href="#ref-Gneiting+Balabdaoui+Raftery:2007" role="doc-biblioref">Gneiting, Balabdaoui, and Raftery 2007</a>)</span> or so-called PIT residuals <span class="citation" data-cites="Warton:2017">(<a href="#ref-Warton:2017" role="doc-biblioref">Warton, Thibaut, and Wang 2017</a>)</span>. These are simply the predictive cumulative distribution function (CDF) evaluated at the observations</p>
+<p><span class="math display">\[u_i = F(y_i | \, \hat{\boldsymbol{\theta}}_i),\]</span></p>
+<p>where <span class="math inline">\(F( \cdot )\)</span> denotes the CDF of the modeled distribution <span class="math inline">\(f( \cdot )\)</span> with estimated parameters <span class="math inline">\(\hat{\boldsymbol{\theta}}_{i}\)</span>. PIT residuals have the desirable property, that if the model is a good approximation to the true data-generating process, i.e., the observation is drawn from the predictive distribution, the PIT residuals <span class="math inline">\(u_i\)</span> are approximately uniformly distributed on <span class="math inline">\([0, 1]\)</span> for continous predictive distributions <span class="math inline">\(F( \cdot )\)</span>. PIT residuals or variants have therefore been used extensively for model diagnosis and depending on their implementation are known under various names, among them forecast distribution transformed residuals <span class="citation" data-cites="Smith:1985">(<a href="#ref-Smith:1985" role="doc-biblioref">Smith 1985</a>)</span>, randomized quantile residuals <span class="citation" data-cites="Dunn+Smyth:1996">(<a href="#ref-Dunn+Smyth:1996" role="doc-biblioref">Dunn and Smyth 1996</a>)</span>, and universal residuals <span class="citation" data-cites="Brockwell:2007">(<a href="#ref-Brockwell:2007" role="doc-biblioref">Brockwell 2007</a>)</span>.</p>
+<p>In case of a discrete predictive distribution or a distribution with a discrete component, e.g., in case of censoring, <span class="math inline">\(u_i\)</span> can be generated as a random draw <span class="math inline">\(\text{U}\)</span> from the interval:</p>
+<p><span class="math display">\[u_i = \text{U}[F(y_i - 1 | \, \hat{\boldsymbol{\theta}}_i), F(y_i | \,
+\hat{\boldsymbol{\theta}}_i)].\]</span></p>
+<p>Here, we follow the definition by <span class="citation" data-cites="Dunn+Smyth:1996">Dunn and Smyth (<a href="#ref-Dunn+Smyth:1996" role="doc-biblioref">1996</a>)</span>, but similar approaches have also been proposed in, e.g., <span class="citation" data-cites="Brockwell:2007">Brockwell (<a href="#ref-Brockwell:2007" role="doc-biblioref">2007</a>)</span> and <span class="citation" data-cites="Smith:1985">Smith (<a href="#ref-Smith:1985" role="doc-biblioref">1985</a>)</span>. Again <span class="math inline">\(u_i\)</span> is uniformally distributed, apart from sampling variability.</p>
+<p>Since the PIT residuals are an iid sample from the standard uniform distribution, the PIT residuals can also be mapped to other distribution scales, e.g.&nbsp;to the standard normal scale, and should follow a standard normal distribution here. In the simplest case, the PIT residuals <span class="math inline">\(u_i\)</span> can be plotted against the probabilities of a uniform distribution in so-called P-P plots <span class="citation" data-cites="Wilk:1968 Handcock+Morris:1999">(<a href="#ref-Wilk:1968" role="doc-biblioref">Wilk and Gnanadesikan 1968</a>; <a href="#ref-Handcock+Morris:1999" role="doc-biblioref">Handcock and Morris 1999</a>)</span>. However, it is far more common to transform the PIT residuals to the normal scale and compare them to the standard normal quantiles in a normal Q-Q plot <span class="citation" data-cites="Hoaglin:2006">(<a href="#ref-Hoaglin:2006" role="doc-biblioref">Hoaglin 2006</a>)</span>. Alternatively, in a PIT histogram, the uniformally distributed PIT residuals are divided into intervals by a certain number of breakpoints and plotted in a histogram-style plot. Regardless of the graphical display, the PIT residuals are always on the probability scale, which might be transformed to the normal scale or another scale if preferred.</p>
+</section><section id="similarities-and-differences" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="similarities-and-differences">
+<span class="header-section-number">5</span> Similarities and differences</h2>
+<p>In the graphical displays for assessing the goodness of fit, several recurring elements can be seen:</p>
+<ul>
+<li><p>PIT residuals are asymptotically uniformly distributed or transformed to another probability scale: The PIT histogram is on the uniform probability scale versus the normal Q-Q plot on the normal scale. Whereas, the transformation to the normal scale spreads the values in the tails further apart and thus better highlights possible discrepancies in the distribuional tails.</p></li>
+<li><p>The marginal calibration is usually evaluated on the observation scale by checking whether observed and expected frequencies match. The rootogram, on the observation scale, is therefore especially useful for count data with values close to zero.</p></li>
+<li><p>Discretization: Instead of plotting the raw values, e.g.&nbsp;PIT residuals, often some discretization improves readability of the graphical displays. The disadvantage here is that the breakpoint are often kind of arbitrary and certain misspecification might therefore be masked by plotting the values as intervals. For example, misscpecifications in the outer tails of the distribution are often not visible in PIT histograms, as the intervals are averaving over many data points; here, Q-Q plots are clearly superior. Another example is the reliabitiliy diagram, which can be quite instable when using equidistant binning.</p></li>
+<li><p>The uncertainty due to the estimation of the parameters is not taken into account. Therefore, some sampling variation is seen in all graphical displays.</p></li>
+</ul></section><section id="references" class="level2" data-number="6">
+
+
+
+</section><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">
+6 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Broecker+Smith:2007" class="csl-entry" role="listitem">
+Bröcker, Jochen, and Leonard A. Smith. 2007. <span>“Increasing the Reliability of Reliability Diagrams.”</span> <em>Weather and Forecasting</em> 22 (3): 651–61. <a href="https://doi.org/10.1175/WAF993.1">https://doi.org/10.1175/WAF993.1</a>.
+</div>
+<div id="ref-Brockwell:2007" class="csl-entry" role="listitem">
+Brockwell, A. E. 2007. <span>“Universal Residuals: A Multivariate Transformation.”</span> <em>Statistics &amp; Probability Letters</em> 77 (14): 1473–78. https://doi.org/<a href="https://doi.org/10.1016/j.spl.2007.02.008">https://doi.org/10.1016/j.spl.2007.02.008</a>.
+</div>
+<div id="ref-Dawid:1984" class="csl-entry" role="listitem">
+Dawid, A. P. 1984. <span>“Present Position and Potential Developments: <span>S</span>ome Personal Views: <span>S</span>tatistical Theory: <span>T</span>he Prequential Approach.”</span> <em>Journal of the Royal Statistical Society: Series A (General)</em> 147 (2): 278–92. <a href="https://doi.org/10.2307/2981683">https://doi.org/10.2307/2981683</a>.
+</div>
+<div id="ref-Diebold+Gunther+Tay:1998" class="csl-entry" role="listitem">
+Diebold, Francis X., Todd A. Gunther, and Anthony S. Tay. 1998. <span>“Evaluating Density Forecasts with Applications to Financial Risk Management.”</span> <em>International Economic Review</em> 39 (4): 863–83. <a href="https://doi.org/10.2307/2527342">https://doi.org/10.2307/2527342</a>.
+</div>
+<div id="ref-Dimitriadis+Gneiting+Jordan:2021" class="csl-entry" role="listitem">
+Dimitriadis, Timo, Tilmann Gneiting, and Alexander I. Jordan. 2021. <span>“Stable Reliability Diagrams for Probabilistic Classifiers.”</span> <em>Proceedings of the National Academy of Sciences</em> 118 (8). <a href="https://doi.org/10.1073/pnas.2016191118">https://doi.org/10.1073/pnas.2016191118</a>.
+</div>
+<div id="ref-Dunn+Smyth:1996" class="csl-entry" role="listitem">
+Dunn, Peter K., and Gordon K. Smyth. 1996. <span>“Randomized Quantile Residuals.”</span> <em>Journal of Computational and Graphical Statistics</em> 5 (3): 236–44. <a href="https://doi.org/10.2307/1390802">https://doi.org/10.2307/1390802</a>.
+</div>
+<div id="ref-Gneiting+Balabdaoui+Raftery:2007" class="csl-entry" role="listitem">
+Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007. <span>“Probabilistic Forecasts, Calibration and Sharpness.”</span> <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.
+</div>
+<div id="ref-Gneiting+Raftery:2007" class="csl-entry" role="listitem">
+Gneiting, Tilmann, and Adrian E. Raftery. 2007. <span>“Strictly Proper Scoring Rules, Prediction, and Estimation.”</span> <em>Journal of the American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437">https://doi.org/10.1198/016214506000001437</a>.
+</div>
+<div id="ref-Handcock+Morris:1999" class="csl-entry" role="listitem">
+Handcock, Mark S., and Martina Morris. 1999. <em>Relative Distribution Methods in the Social Sciences</em>. New York: Springer. <a href="http://www.stat.ucla.edu/~handcock/RelDist">http://www.stat.ucla.edu/~handcock/RelDist</a>.
+</div>
+<div id="ref-Hoaglin:2006" class="csl-entry" role="listitem">
+Hoaglin, David C. 2006. <span>“Using Quantiles to Study Shape.”</span> In <em>Exploring Data Tables, Trends, and Shapes</em>, 417–60. John Wiley &amp; Sons, Ltd. https://doi.org/<a href="https://doi.org/10.1002/9781118150702.ch10">https://doi.org/10.1002/9781118150702.ch10</a>.
+</div>
+<div id="ref-Hothorn+Kneib+Buehlmann:2014" class="csl-entry" role="listitem">
+Hothorn, Torsten, Thomas Kneib, and Peter Bühlmann. 2014. <span>“Conditional Transformation Models.”</span> <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 76 (1): 3–27. <a href="https://doi.org/10.1111/rssb.12017">https://doi.org/10.1111/rssb.12017</a>.
+</div>
+<div id="ref-Kleiber+Zeileis:2016" class="csl-entry" role="listitem">
+Kleiber, Christian, and Achim Zeileis. 2016. <span>“Visualizing Count Data Regressions Using Rootograms.”</span> <em>The American Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590">https://doi.org/10.1080/00031305.2016.1173590</a>.
+</div>
+<div id="ref-Klein+Kneib+Lang+Sohn:2015" class="csl-entry" role="listitem">
+Klein, Nadja, Thomas Kneib, Stefan Lang, and Alexander Sohn. 2015. <span>“<span>B</span>ayesian Structured Additive Distributional Regression with an Application to Regional Income Inequality in <span>G</span>ermany.”</span> <em>Annals of Applied Statistics</em> 9: 1024–52. <a href="https://doi.org/10.1214/15-aoas823">https://doi.org/10.1214/15-aoas823</a>.
+</div>
+<div id="ref-McCullagh+Nelder:1989" class="csl-entry" role="listitem">
+McCullagh, P., and John A. Nelder. 1989. <em>Generalized Linear Models</em>. 2nd ed. London: Chapman &amp; Hall. <a href="https://doi.org/10.1007/978-1-4899-3242-6">https://doi.org/10.1007/978-1-4899-3242-6</a>.
+</div>
+<div id="ref-Nelder+Wedderburn:1972" class="csl-entry" role="listitem">
+Nelder, John A., and Robert W. M. Wedderburn. 1972. <span>“Generalized Linear Models.”</span> <em>Journal of the Royal Statistical Society A</em> 135: 370–84. <a href="https://doi.org/10.2307/2344614">https://doi.org/10.2307/2344614</a>.
+</div>
+<div id="ref-Rasp+Lerch:2018" class="csl-entry" role="listitem">
+Rasp, Stephan, and Sebastian Lerch. 2018. <span>“Neural Networks for Postprocessing Ensemble Weather Forecasts.”</span> <em>Monthly Weather Review</em> 146 (11): 3885–3900. <a href="https://doi.org/10.1175/MWR-D-18-0187.1">https://doi.org/10.1175/MWR-D-18-0187.1</a>.
+</div>
+<div id="ref-Smith:1985" class="csl-entry" role="listitem">
+Smith, J. Q. 1985. <span>“Diagnostic Checks of Non-Standard Time Series Models.”</span> <em>Journal of Forecasting</em> 4 (3): 283–91. https://doi.org/<a href="https://doi.org/10.1002/for.3980040305">https://doi.org/10.1002/for.3980040305</a>.
+</div>
+<div id="ref-Stasinopoulos+Rigby:2007" class="csl-entry" role="listitem">
+Stasinopoulos, D Mikis, and Robert A Rigby. 2007. <span>“Generalized Additive Models for Location Scale and Shape (<span>GAMLSS</span>) in <span><span class="sans-serif">R</span></span>.”</span> <em>Journal of Statistical Software</em> 23 (7): 1–46. <a href="https://doi.org/10.18637/jss.v023.i07">https://doi.org/10.18637/jss.v023.i07</a>.
+</div>
+<div id="ref-Umlauf+Klein+Zeileis:2018" class="csl-entry" role="listitem">
+Umlauf, Nikolaus, Nadja Klein, and Achim Zeileis. 2018. <span>“<span>BAMLSS</span>: <span>B</span>ayesian Additive Models for Location, Scale and Shape (and Beyond).”</span> <em>Journal of Computational and Graphical Statistics</em> 27 (3): 612–27. <a href="https://doi.org/10.1080/10618600.2017.1407325">https://doi.org/10.1080/10618600.2017.1407325</a>.
+</div>
+<div id="ref-Warton:2017" class="csl-entry" role="listitem">
+Warton, David I., Loïc Thibaut, and Yi Alice Wang. 2017. <span>“The PIT-Trap—<span>A</span> <span>‘Model-Free’</span> Bootstrap Procedure for Inference about Regression Models with Discrete, Multivariate Responses.”</span> <em>PLOS ONE</em> 12 (7): 1–18. <a href="https://doi.org/10.1371/journal.pone.0181790">https://doi.org/10.1371/journal.pone.0181790</a>.
+</div>
+<div id="ref-Wilk:1968" class="csl-entry" role="listitem">
+Wilk, M. B., and R. Gnanadesikan. 1968. <span>“Probability Plotting Methods for the Analysis of Data.”</span> <em>Biometrika</em> 55 (1): 1–17.
+</div>
+<div id="ref-Wilks:2011" class="csl-entry" role="listitem">
+Wilks, Daniel. 2011. <em>Statistical Methods in the Atmospheric Sciences</em>. 3rd ed. Academic Press.
+</div>
+</div></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/topmodels\.R-Forge\.R-project\.org\/topmodels\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

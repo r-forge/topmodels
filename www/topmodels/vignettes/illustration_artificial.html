@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.53">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Illustration: Artificial Data – topmodels</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../topmodels.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<meta property="og:title" content="Illustration: Artificial Data – topmodels">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://topmodels.R-Forge.R-project.org/topmodels/vignettes/topmodels.png">
+<meta property="og:site_name" content="topmodels">
+<meta name="twitter:title" content="Illustration: Artificial Data – topmodels">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://topmodels.R-Forge.R-project.org/topmodels/vignettes/topmodels.png">
+<meta name="twitter:image:alt" content="topmodels: Infrastructure for Forecasting and Assessment of Probabilistic Models">
+<meta name="twitter:site" content="@AchimZeileis">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../topmodels-wide.png" alt="topmodels logo" class="navbar-logo"></a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../vignettes/topmodels.html"> 
+<span class="menu-text">Get started</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-documentation" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Documentation</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">
+<li>
+    <a class="dropdown-item" href="../man/procast.html">
+ <span class="dropdown-text">Procast infrastructure</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/rootogram.html">
+ <span class="dropdown-text">Probabilistic model diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/plot.rootogram.html">
+ <span class="dropdown-text">Plotting probabilistic model diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/Empirical.html">
+ <span class="dropdown-text">Interfacs to models/distributions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../man/SerumPotassium.html">
+ <span class="dropdown-text">Data sets</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Vignettes</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">
+<li>
+    <a class="dropdown-item" href="../vignettes/goodness_of_fit.html">
+ <span class="dropdown-text">Goodness of Fit of Probabilistic Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/graphics.html">
+ <span class="dropdown-text">Graphics for Assessing Goodness of Fit</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/illustration_fifa_2018.html">
+ <span class="dropdown-text">Illustration: Goals in the 2018 FIFA World Cup</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/illustration_rain_ibk.html">
+ <span class="dropdown-text">Illustration: Precipitation Forecasts in Innsbruck</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/illustration_artificial.html">
+ <span class="dropdown-text">Illustration: Artificial Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/implementation.html">
+ <span class="dropdown-text">Implementation Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/procast.html">
+ <span class="dropdown-text">Probabilistic Forecasting Infrastructure</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../NEWS.html"> 
+<span class="menu-text">News</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../CITATION.html"> 
+<span class="menu-text">Citation</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../contact.html"> 
+<span class="menu-text">Contact</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels"> <i class="bi bi-code" role="img" aria-label="topmodels @ R-Forge">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#summary" id="toc-summary" class="nav-link active" data-scroll-target="#summary"><span class="header-section-number">1</span> Summary</a></li>
+  <li><a href="#artifical-data" id="toc-artifical-data" class="nav-link" data-scroll-target="#artifical-data"><span class="header-section-number">2</span> Artifical data</a></li>
+  <li>
+<a href="#continuous-data" id="toc-continuous-data" class="nav-link" data-scroll-target="#continuous-data"><span class="header-section-number">3</span> Continuous data</a>
+  <ul class="collapse">
+<li><a href="#homoscedastic-normal" id="toc-homoscedastic-normal" class="nav-link" data-scroll-target="#homoscedastic-normal"><span class="header-section-number">3.1</span> Homoscedastic normal</a></li>
+  <li><a href="#conditional-heteroscedasticity" id="toc-conditional-heteroscedasticity" class="nav-link" data-scroll-target="#conditional-heteroscedasticity"><span class="header-section-number">3.2</span> Conditional heteroscedasticity</a></li>
+  <li><a href="#censoring-0-100" id="toc-censoring-0-100" class="nav-link" data-scroll-target="#censoring-0-100"><span class="header-section-number">3.3</span> Censoring (0, 100)</a></li>
+  <li><a href="#truncation-0" id="toc-truncation-0" class="nav-link" data-scroll-target="#truncation-0"><span class="header-section-number">3.4</span> Truncation (&gt; 0)</a></li>
+  <li><a href="#student-t-distribution-df-4" id="toc-student-t-distribution-df-4" class="nav-link" data-scroll-target="#student-t-distribution-df-4"><span class="header-section-number">3.5</span> Student-t distribution (<code>df = 4</code>)</a></li>
+  <li><a href="#skewness" id="toc-skewness" class="nav-link" data-scroll-target="#skewness"><span class="header-section-number">3.6</span> Skewness</a></li>
+  <li><a href="#other-misspecified-distribution-uniform-laplace" id="toc-other-misspecified-distribution-uniform-laplace" class="nav-link" data-scroll-target="#other-misspecified-distribution-uniform-laplace"><span class="header-section-number">3.7</span> Other misspecified distribution: uniform, laplace</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#count-data" id="toc-count-data" class="nav-link" data-scroll-target="#count-data"><span class="header-section-number">4</span> Count data</a>
+  <ul class="collapse">
+<li><a href="#poisson" id="toc-poisson" class="nav-link" data-scroll-target="#poisson"><span class="header-section-number">4.1</span> Poisson</a></li>
+  <li><a href="#negative-binomial" id="toc-negative-binomial" class="nav-link" data-scroll-target="#negative-binomial"><span class="header-section-number">4.2</span> Negative binomial</a></li>
+  <li><a href="#zero-inflation" id="toc-zero-inflation" class="nav-link" data-scroll-target="#zero-inflation"><span class="header-section-number">4.3</span> Zero-inflation</a></li>
+  </ul>
+</li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header"><h1 class="title display-7">Illustration: Artificial Data</h1>
+
+</header><div class="cell">
+<style type="text/css">
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+</style>
+</div>
+<div class="cell">
+<script>
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+</script>
+</div>
+<section id="summary" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">1</span> Summary</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in qqrplot_plot(x[x$group == i, ], ...): infinite sample quantile
+drawn; limited to +/- 100 for plotting
+Warning in qqrplot_plot(x[x$group == i, ], ...): infinite sample quantile
+drawn; limited to +/- 100 for plotting</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/plot-summary-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead><tr class="header">
+<th>Predictive distribution</th>
+<th>well calibrated</th>
+<th>too skew to the left</th>
+<th>too skew to the right</th>
+<th>tails too light</th>
+<th>tails too heavy</th>
+<th>underdispersed (underestimated variance)</th>
+<th>overdispersed (overestimated variance)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>Resdiuals</strong></td>
+<td>normal</td>
+<td>right skewed</td>
+<td>left skewed</td>
+<td>heavy tailed</td>
+<td>light tailed</td>
+<td>overdispersed</td>
+<td>underdispersed</td>
+</tr>
+<tr class="even">
+<td><strong>Q-Q plot</strong></td>
+<td>bisecting line</td>
+<td>positive curvature (bends up the line at both ends)</td>
+<td>negative curvature (bends down at both ends)</td>
+<td>reverse S-shape (dips below the line at the low end and rises above it at the high end)</td>
+<td>S-shape</td>
+<td>crossing qqline from below (?)</td>
+<td>crossing qqline from above ?</td>
+</tr>
+<tr class="odd">
+<td><strong>Worm plot</strong></td>
+<td>horizontal line</td>
+<td>U-shape</td>
+<td>inverse U-shape</td>
+<td>S-shape on the left bent down</td>
+<td>S-shape on the left bent up</td>
+<td>positive slope</td>
+<td>negative slope</td>
+</tr>
+<tr class="even">
+<td><strong>PIT histogram</strong></td>
+<td>uniform</td>
+<td>skewed</td>
+<td>skewed</td>
+<td>superimposed U-shape</td>
+<td>superimposed inverse U-shape”</td>
+<td>U-shape</td>
+<td>inverse U-shape</td>
+</tr>
+<tr class="odd">
+<td><strong>Rootogram</strong></td>
+<td>no deviations</td>
+<td>?</td>
+<td>?</td>
+<td>wave-like (underfitting in the tails and the center)</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr class="even">
+<td><strong>Interpretation</strong></td>
+<td>no misspecifications</td>
+<td>?</td>
+<td>?</td>
+<td>values more extrem as expected</td>
+<td>values less extrem as expected</td>
+<td>?</td>
+<td>?</td>
+</tr>
+</tbody>
+</table></section><section id="artifical-data" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="artifical-data">
+<span class="header-section-number">2</span> Artifical data</h2>
+<p>The following artificial data sets are simulated, with response values always depending on regressor variables, in order to obtain a realistic scenario for regression models:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">make_residuals_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">breaks</span> <span class="op">=</span> <span class="va">breaks</span><span class="op">)</span> <span class="op">{</span></span>
+<span></span>
+<span>  <span class="va">name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/deparse.html">deparse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substitute.html">substitute</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu">pithist</span><span class="op">(</span><span class="va">object</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.01</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">9</span> <span class="op">/</span> <span class="fl">10</span>, <span class="fl">0.99</span>, <span class="fl">1</span><span class="op">)</span>, main <span class="op">=</span> <span class="va">name</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="va">qq</span> <span class="op">&lt;-</span> <span class="fu">proresiduals</span><span class="op">(</span><span class="va">object</span><span class="op">)</span>, freq <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"Histogram of proresiduals(%s)"</span>, <span class="va">name</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Q-Q residuals"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/curve.html">curve</a></span><span class="op">(</span><span class="va">dnorm</span>, from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">qq</span><span class="op">)</span>, to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">qq</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">2</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, <span class="st">"std. norm"</span>, lty <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="fl">2</span>, bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html">boxplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="st">"Q-Q residuals"</span> <span class="op">=</span> <span class="fu">proresiduals</span><span class="op">(</span><span class="va">object</span><span class="op">)</span>, <span class="st">"std. norm"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu">proresiduals</span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">make_topmodels_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">topmodels</span><span class="op">(</span><span class="va">object</span>, which <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, ask <span class="op">=</span> <span class="cn">FALSE</span>, spar <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## regressors</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span> </span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">500</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  z <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">500</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## parameters</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html">transform</a></span><span class="op">(</span><span class="va">d</span>,</span>
+<span>  lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">x</span><span class="op">)</span>,</span>
+<span>  theta <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  mu <span class="op">=</span> <span class="fl">50</span> <span class="op">+</span> <span class="fl">22</span> <span class="op">*</span> <span class="va">x</span>,</span>
+<span>  sigma <span class="op">=</span> <span class="fl">22</span>,</span>
+<span>  sigmaz <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fl">3</span> <span class="op">+</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">z</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## responses</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html">transform</a></span><span class="op">(</span><span class="va">d</span>,</span>
+<span>  ynorm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">500</span>, mean <span class="op">=</span> <span class="va">mu</span>, sd <span class="op">=</span> <span class="va">sigma</span><span class="op">)</span>,</span>
+<span></span>
+<span>  yhnorm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">500</span>, mean <span class="op">=</span> <span class="va">mu</span>, sd <span class="op">=</span> <span class="va">sigmaz</span><span class="op">)</span>,</span>
+<span>  ytnorm <span class="op">=</span> <span class="fu">crch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/crch/man/tnorm.html">rtnorm</a></span><span class="op">(</span><span class="fl">500</span>, mean <span class="op">=</span> <span class="va">mu</span>, sd <span class="op">=</span> <span class="va">sigma</span>, left <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  ycnorm <span class="op">=</span> <span class="fu">crch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/crch/man/cnorm.html">rcnorm</a></span><span class="op">(</span><span class="fl">500</span>, mean <span class="op">=</span> <span class="va">mu</span>, sd <span class="op">=</span> <span class="va">sigma</span>, left <span class="op">=</span> <span class="fl">0</span>, right <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>,</span>
+<span></span>
+<span>  yt <span class="op">=</span> <span class="va">mu</span> <span class="op">+</span> <span class="va">sigma</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/TDist.html">rt</a></span><span class="op">(</span><span class="fl">500</span>, df <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  ylaplace <span class="op">=</span> <span class="va">mu</span> <span class="op">+</span> <span class="fu">rmutil</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmutil/man/Laplace.html">rlaplace</a></span><span class="op">(</span><span class="fl">500</span>, s <span class="op">=</span> <span class="va">sigma</span><span class="op">)</span>,</span>
+<span>  yrskew <span class="op">=</span> <span class="fu">sn</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/sn/man/dsn.html">rsn</a></span><span class="op">(</span><span class="fl">500</span>, xi <span class="op">=</span> <span class="va">mu</span>, omega <span class="op">=</span> <span class="va">sigma</span>, alpha <span class="op">=</span> <span class="fl">5</span>, tau <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  ylskew <span class="op">=</span> <span class="fu">sn</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/sn/man/dsn.html">rsn</a></span><span class="op">(</span><span class="fl">500</span>, xi <span class="op">=</span> <span class="va">mu</span>, omega <span class="op">=</span> <span class="va">sigma</span>, alpha <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>, tau <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  yunif <span class="op">=</span> <span class="va">mu</span> <span class="op">+</span> <span class="va">sigma</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">500</span>, min <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, max <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span></span>
+<span>  ypois <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="fl">500</span>, lambda <span class="op">=</span> <span class="va">lambda</span><span class="op">)</span>,</span>
+<span>  ynegbin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html">rnbinom</a></span><span class="op">(</span><span class="fl">500</span>, mu <span class="op">=</span> <span class="va">lambda</span>, size <span class="op">=</span> <span class="va">theta</span><span class="op">)</span>,</span>
+<span>  yzip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.25</span>, <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="fl">500</span>, lambda <span class="op">=</span> <span class="va">lambda</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="continuous-data" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="continuous-data">
+<span class="header-section-number">3</span> Continuous data</h2>
+<section id="homoscedastic-normal" class="level3" data-number="3.1"><h3 data-number="3.1" class="anchored" data-anchor-id="homoscedastic-normal">
+<span class="header-section-number">3.1</span> Homoscedastic normal</h3>
+<p>As a reference, a linear normal model is fitted to simulated normally distributed data without conditional heteroscedasticity.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## correct model fit</span></span>
+<span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">ynorm</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The model fit experiences no misspecifications resulting in a well calibrated predictive distribution (compare the case “well calibrated” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>):</p>
+<ul>
+<li>The rootogram shows that the observed and expected frequencies match rather well, without any clear patterns of departure, hence, the deviations between observed and predicted frequences are very small for most values.</li>
+<li>The PIT histogram is uniform, corresponding to a well calibrated predicitve distribution.</li>
+<li>The Q-Q residuals plot shows most points are located along the bisecting line.</li>
+<li>The worm plot is within its confidence intervals and shows only slight deviations from a horizontal line (FIXME: why not completely horizontal).</li>
+</ul></section><section id="conditional-heteroscedasticity" class="level3" data-number="3.2"><h3 data-number="3.2" class="anchored" data-anchor-id="conditional-heteroscedasticity">
+<span class="header-section-number">3.2</span> Conditional heteroscedasticity</h3>
+<p>In the “conditional heteroscedasticity” example, two models are fitted to simulated data from the normal distribution where both the location and scale parameters depend on a regressor. The model <code>m2</code> estimated with <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> cannot account for conditional heteroscedasticity, unlike the model <code>m3</code> which is fitted with <code>crch()</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## not accounting for heteroscedasticity</span></span>
+<span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">yhnorm</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">### accounting for heteroscedasticity</span></span>
+<span><span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu">crch</span><span class="op">(</span><span class="va">yhnorm</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="va">z</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Not accounting for conditional heteroscedasticity results here in a model fit where the tails of the distribution are too light (compare the case “tails too light” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>):</p>
+<ul>
+<li>This leads to underfitting the observed values in the tails and the center of the predictive distribution, whereas the values in between are overfitted, which is visible as a typical wave-like pattern in the rootogram. This indicates some overdispersion in the data wich is not accounted for in the model.</li>
+<li>In the PIT histogram, only the underfitting in the middle of the predictive distribution is observed, indicating that more values occur here than expected. A possibly expected U-shaped PIT histogram, typically corresponding to a underdispersive model fit, is not visible here; hence, the PIT histogram is obviously not well suited with the usual number of bins to detect the significant probability mass in the outermost tails of the distribution.</li>
+<li>In the Q-Q residuals plot, due to a transformation to the normal distribution, the tails are more widely spread, whereby the deviations correctly show that the observed values are more extreme than expected. This leads to a so-call reverse S-shape of the Q-Q plot.</li>
+<li>In the wormplot, the misshape is further emphasized by plotting the deviation between the empirical and theoretical quantiles on the Y-axis, which results in a S-shape pattern bending down towards the left.</li>
+</ul></section><section id="censoring-0-100" class="level3" data-number="3.3"><h3 data-number="3.3" class="anchored" data-anchor-id="censoring-0-100">
+<span class="header-section-number">3.3</span> Censoring (0, 100)</h3>
+<p>To investigate the graphical evaluation tools under the misspecification of not accounting for censoring in the estimation, homoscedastic normally distributed data are simulated with censoring at 0 and 100. The model <code>m4</code> fitted with <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> cannot account for the censored data, contrary to the model <code>m5</code> estimated with <code>crch()</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## not accounting for censoring</span></span>
+<span><span class="va">m4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">ycnorm</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## accounting for censoring</span></span>
+<span><span class="va">m5</span> <span class="op">&lt;-</span> <span class="fu">crch</span><span class="op">(</span><span class="va">ycnorm</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">d</span>, left <span class="op">=</span> <span class="fl">0</span>, right <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-3-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-3-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Not accounting for the censoring at 0 and 100 leads to an incorrect distributional assumption in the tails of the predictive distribution, similar to the case “tails too heavy” discussed in <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>:</p>
+<ul>
+<li>In the rootogram, this can be seen by the clear lack of fit for low and high values due to not accounting for the point masses at the censoring points; hence, the values at the censoring points are both underfitted (FIXME: Right censoring in the rootogram, adapt default breaks).</li>
+<li>In contrast to the rootogram, the misspecification is barely visible in the PIT histogram and only weakly visible in the Q-Q residual plot in the form of some deviations at both ends, indicating that the values are a bit less extrem than expected.</li>
+<li>In the worm plot, the drift at both ends towards the upper left corner and the lower right corner, respectively, indicates that the observed values are not as extreme as expected. This is in agreement with the pattern “tails too heavy” discussed in <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>, but without the typical S-shape pattern in the worm plot.</li>
+</ul></section><section id="truncation-0" class="level3" data-number="3.4"><h3 data-number="3.4" class="anchored" data-anchor-id="truncation-0">
+<span class="header-section-number">3.4</span> Truncation (&gt; 0)</h3>
+<p>Here, the homoscedastic normally distributed response values are truncated at zero. The model <code>m6</code> fitted with <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> cannot account correctly for this, contrary to the model <code>m7</code> estimated with <code>crch()</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## not accounting for truncation</span></span>
+<span><span class="va">m6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">ytnorm</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># not accounting for truncation</span></span>
+<span><span class="va">m7</span> <span class="op">&lt;-</span> <span class="fu">trch</span><span class="op">(</span><span class="va">ytnorm</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">d</span>, left <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Not accounting for the truncation at 0 leads to an incorrect distributional assumption in the lower tail of the predictive distribution:</p>
+<ul>
+<li>In the rootogram, the lower values within the two first bins are clearly underfitted by the model. Howeverr, for the model correctly accounting for the truncation, some underfitting is also present, indicating a slight misfit of the model (FIXME: Check again if all correct).</li>
+<li>As for the example with censored data, the incorrect model fit due to not accounting for truncation is not visible in the PIT histogram and only weakly visible in the Q-Q residuals plot.</li>
+<li>In the worm plot, there is a weak S-shaped pattern bending upward towards the left, suggesting that the tails of the predictive distribution are too heavy. At least for for the lower tail, this is in line with the misspecification due to truncation. (FIXME: Why is it in the right part?)</li>
+</ul></section><section id="student-t-distribution-df-4" class="level3" data-number="3.5"><h3 data-number="3.5" class="anchored" data-anchor-id="student-t-distribution-df-4">
+<span class="header-section-number">3.5</span> Student-t distribution (<code>df = 4</code>)</h3>
+<p>In the following example, data is simulated from the student-t distribution with 4 degrees of freedom. The model <code>m8</code> incorrectly assumes normally distributed data, while the model <code>m9</code> correctly incorporates t-distributed data.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## not accounting for t_4 distributed data</span></span>
+<span><span class="va">m8</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">yt</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## accounting for t_4 distributed data</span></span>
+<span><span class="va">m9</span> <span class="op">&lt;-</span> <span class="fu">crch</span><span class="op">(</span><span class="va">yt</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">d</span>, dist <span class="op">=</span> <span class="st">"student"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-5-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-5-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Not accounting for the underlying student-t response distribution (<code>df = 4</code>), which is characterized by heavier tails than the normal distribution, leads to a model fit where the tails of the predictive distribution are to light (compare the previous example with “conditional heteroscedasticity” and the case “tails too light” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>):</p>
+<ul>
+<li>This leads to underfitting the values in the tails and the center of the predictive distribution, whereas the values in between are overfitted, which is visible as a typical wave-like pattern in the rootogram. This indicates some overdispersion in the data wich is not accounted for in the model.</li>
+<li>In the PIT histogram, even if the first bin is slightly higher, mostly the underfitting in the middle of the predictive distribution is observed, indicating that more values occur here than expected. A possibly expected U-shaped PIT histogram, corresponding to a underdispersive model fit, is not detectable, since the heavier tails concern only few values, which are not sufficiently resolved by the usual bin width within the PIT.</li>
+<li>In the Q-Q residuals plot, due to a transformation to the normal distribution, the values in the tails are more widely spread, correctly showing that the observed values are more extreme than expected. This leads to a so-call reverse S-shape of the Q-Q plot.</li>
+<li>In the wormplot, the misshape is further emphasized by plotting the deviation between the empirical and theoretical quantiles on the Y-axis, which results in a S-shape pattern bending down towards the left.</li>
+</ul></section><section id="skewness" class="level3" data-number="3.6"><h3 data-number="3.6" class="anchored" data-anchor-id="skewness">
+<span class="header-section-number">3.6</span> Skewness</h3>
+<p>In the example “skewness”, both right-skewed and left-skewed data are simulated, which are not correctly accounted for by the linear models <code>m10</code> and <code>m11</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## not accounting for right skewed data</span></span>
+<span><span class="va">m10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">yrskew</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## not accounting for left skewed data</span></span>
+<span><span class="va">m11</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">ylskew</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-6-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-6-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Not accounting for right-skewed or left-skewed data leads to a estimated model with a predictive distribution which is too skewed to the left or right, respectively (compare the cases “too skew to the left/right” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>):</p>
+<ul>
+<li>In the rootogram for the right-skewed and left-skewed data, a clear underfitting of higher and lower values at the ends can be observed, respectively. In other words, the freqeuncies of the observed values are higher than the expected frequencies resulting from estimating a normal distribution without accounting for skewness.</li>
+<li>In the PIT histogram the misspecification is not clearly detectable, but generally a skewed PIT histograms, as seen here, indicates that the central tendencies of the fit must be biased.</li>
+<li>The Q-Q residual plots are positively and negatively curved for right-skewed and left-skewed data, respectively. For right-skewed data, corresponding to a model fit that is too skewed to the left, due to the high frequency of low values in the lower range, the empirical quantile residuals increase more slowly than the standard normal quantiles. However, at the upper end of the distribution, the empirical quantiles increase faster than the standard quantiles. In total, the Q-Q residual plot must be positively curved. For the left-skewed data, corresponding to a model fit that is too skewed to the right, the opposite is true.</li>
+<li>The worm plot shows the typical U-shape or reverse U-shape for the model fits that are too skewed to the left or right, corresponding to right and left skewed response values.</li>
+</ul></section><section id="other-misspecified-distribution-uniform-laplace" class="level3" data-number="3.7"><h3 data-number="3.7" class="anchored" data-anchor-id="other-misspecified-distribution-uniform-laplace">
+<span class="header-section-number">3.7</span> Other misspecified distribution: uniform, laplace</h3>
+<p>In the following, two further examples are shown, one with simulated data from a uniform distribution, the second with simulated data from a Laplace distribution. For both data sets, a linear model is estimated without considering the true underlying response distribution.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## not accounting for uniform distributed data</span></span>
+<span><span class="va">m12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">yunif</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## not accounting for laplace distributed data</span></span>
+<span><span class="va">m13</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">ylaplace</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Uniformly distributed data generally have lighter tails than the normal distribution (depending on the lower and upper bounds, of course), while the Laplace distribution here is characterized by heavier tails and a higher probability mass in the center of the distribution than in the normal distribution. Therefore, the uniformly and Laplace distributed data lead to misspecified predictive distributions where the tails are either too heavy or too light, respectively (compare the previous examples “conditional heteroscedasticity” and “Student-t distribution”, where the tails are too light, as well aa the cases “tails too light/heavy” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>).</p>
+<p>Here, uniformly distributed data result in a misspecifed model where the tails of the predictive distribution are too heavy:</p>
+<ul>
+<li>In the rootogram, the overfitting of the values at both ends of the predictive distribution is clearly visible. Here, the observed frequencies are much lower than the expected frequencies, which is consistent with the light tailed distributed data fitted by a linear normal model. The present underfitting of intermediate values in the rootogram likely relates to values drawn from the uniform distribution, where a higher probability mass exists than in the normal distribution.</li>
+<li>In the PIT histogram, the misspecifications at the tails of the underlying distribution are are not visible. In addition, the PIT focuses on the difference between the probability masses of the uniform distribution and the normal distribution located in the middle on both tails. This superimposes a perhaps expected inverted U-shape, which would match the underdispersion in the data corresponding to the overdispersed model fit.</li>
+<li>As before in the Q-Q residuals plot, the transformation of the values to the normal distribution spreads the tails further, correctly showing that the observed values are less extreme than expected. This leads to a pronounced S-shape of the Q-Q plot.</li>
+<li>In the wormplot, the misshape is further emphasized by plotting the deviation between the empirical and theoretical quantiles on the Y-axis, resulting in a distinct S-shape pattern, bending upwards on the left side.</li>
+</ul>
+<p>Here, Laplace distributed data result in a misspecifed model where the tails of the predictive distribution are too light:</p>
+<ul>
+<li>The values in the tails and the center of the predictive distribution are underfitted, whereas the values in between are overfitted. This is visible as a typical wave-like pattern in the rootogram.</li>
+<li>In the PIT histogram, even if the last bin is in this example slightly higher, mostly the underfitting in the middle of the predictive distribution is observed, indicating that more values occur here than expected. A possibly expected U-shaped PIT histogram is not detectable, since the heavier tails concern only few values, which are not sufficiently resolved by the usual bin width within the PIT histogram.</li>
+<li>In the Q-Q residuals plot, due to a transformation to the normal distribution, the tails are more widely spread, correctly showing that the observed values are more extreme than expected. This leads to a pronounced reverse S-shape of the Q-Q plot.</li>
+<li>In the wormplot, the misshape is further emphasized by plotting the deviation between the empirical and theoretical quantiles on the Y-axis, which results in a clear S-shape pattern, bending down towards the left.</li>
+</ul></section></section><section id="count-data" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="count-data">
+<span class="header-section-number">4</span> Count data</h2>
+<section id="poisson" class="level3" data-number="4.1"><h3 data-number="4.1" class="anchored" data-anchor-id="poisson">
+<span class="header-section-number">4.1</span> Poisson</h3>
+<p>As a reference, first a Poisson model is fitted to Poisson distributed data.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## correct model fit</span></span>
+<span><span class="va">m14</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">ypois</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-8-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The model fit experiences no misspecifications resulting in a well calibrated predictive distribution (compare the case “well calibrated” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>):</p>
+<ul>
+<li>The rootogram shows that the observed and expected frequencies match rather well, without any clear patterns of departure indicating a rather good fit.</li>
+<li>The PIT histogram is uniform, correspoding to a well calibrated predicitve distribution.</li>
+<li>The Q-Q residuals plot shows most points are located along the bisecting line.</li>
+<li>The worm plot is within its confidence intervals and shows only slight deviations from a horizontal line (FIXME: why not completely horizontal).</li>
+</ul></section><section id="negative-binomial" class="level3" data-number="4.2"><h3 data-number="4.2" class="anchored" data-anchor-id="negative-binomial">
+<span class="header-section-number">4.2</span> Negative binomial</h3>
+<p>Two models are fitted to simulated data from a negative binomial distribution. In model <code>m15</code> an underlying Poisson distribution is incorrectly assumed, in model <code>m16</code> the negative binomial distribution is correctly accounted for by using <code>glm.nb()</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## misspecified distribution leading to an overdispersed predictive distribution</span></span>
+<span><span class="va">m15</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">ynegbin</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## correct distributional assumption</span></span>
+<span><span class="va">m16</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/glm.nb.html">glm.nb</a></span><span class="op">(</span><span class="va">ynegbin</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-9-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-9-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The wrong distribution assumption results in not accounting for the overdispersion in the data, which corresponds to an underdispersed predictive disitriubtion (compare the case “underdispersed” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>):</p>
+<ul>
+<li>In the rootogram, the wave-like pattern around the horizontal reference line indicates that low and higher values are clearly underfitted, while the values in between are overfitted. This is in agreement with an uderdispersed model, underestimating the underlying variance. The significant lack of fit for 0 could be an additional indication of excess zeros.</li>
+<li>The typical U-shape in the PIT histogram supports that the model is underdispersed: The values attained by the predictive CDF at the observations are located with increased frequency at both ends of the CDF.</li>
+<li>The Q-Q residuals plot shows that many observed values are more extreme than expected, i.e., the data exhibit considerable overdispersion that is not accounted for in the model fit. Probably due to using positive count data, this is more ponounced for positive quantile residuals shown in the upper right part of the Q-Q plot.</li>
+<li>In the worm plot, the positive slope corresponds to the underdispersed predictive distribution.</li>
+</ul></section><section id="zero-inflation" class="level3" data-number="4.3"><h3 data-number="4.3" class="anchored" data-anchor-id="zero-inflation">
+<span class="header-section-number">4.3</span> Zero-inflation</h3>
+<p>Two models are fitted to simulated count data with excess zeros; the model <code>m17</code> is unable to account for zero inflation, while model <code>m18</code> fits a zero-inflation regression model that combines a point mass at zero with a Poisson model for higher counts and therefore fits the excess zeros perfectly.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## not accouting for zero inflation</span></span>
+<span><span class="va">m17</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">yzip</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## accouting for zero inflation</span></span>
+<span><span class="va">m18</span> <span class="op">&lt;-</span> <span class="fu">pscl</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/pscl/man/zeroinfl.html">zeroinfl</a></span><span class="op">(</span><span class="va">yzip</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">d</span>, dist <span class="op">=</span> <span class="st">"poisson"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/proresiduals-10-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="illustration_artificial_files/figure-html/topmodels-10-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Excess zeros are inevitably linked to overdispersion, so the misspecified model fit without accounting for zero inflation has similar patterns to an underdispersive predictive distribution (compare the previous example with “negative binomial” distributed data and “underdispersed” in the summary plot of <a href="graphical_evaluation_methodology.html">Graphical Evaluation: Methodology</a>):</p>
+<ul>
+<li>In the rootogram, the wave-like pattern indicates that excess zeros are clearly underfitted, high values are slightly underfitted and values in between are overfitted. The significant lack of fit for 0 corresponds well with the excess zeros.</li>
+<li>The typical U-shape in the PIT histogram supports that the model is underdispersed.</li>
+<li>The Q-Q residuals plot indicates that some observed values are more extreme than expected, i.e., the data exhibit overdispersion that is not accounted for in the model fit.</li>
+<li>In the worm plot, the positive slope corresponds to the underdispersed predictive distribution. The reverse trends at the outer tails of the wormplot are due to (FIXME: why?).</li>
+</ul></section></section><section id="references" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="references">
+<span class="header-section-number">5</span> References</h2>
+
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/topmodels\.R-Forge\.R-project\.org\/topmodels\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
