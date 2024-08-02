@@ -15,15 +15,15 @@ For discussions we also try to follow these channels:
 
 * Achim Zeileis
   [![ORCID](orcid.svg){width=18px}](https://orcid.org/0000-0003-0918-3766)
-  [🌐](https://www.zeileis.org/)
+  [<i class="bi bi-globe" role="img" aria-label="Personal web page"></i>](https://www.zeileis.org/)
 * Jakob W. Messner
   [![ORCID](orcid.svg){width=18px}](https://orcid.org/0000-0002-1027-3673)
 * Reto Stauffer
   [![ORCID](orcid.svg){width=18px}](https://orcid.org/0000-0002-3798-5507)
-  [🌐](https://retostauffer.org)
+  [<i class="bi bi-globe" role="img" aria-label="Personal web page"></i>](https://retostauffer.org)
 * Ioannis Kosmidis
   [![ORCID](orcid.svg){width=18px}](https://orcid.org/0000-0003-1556-0302)
-  [🌐](https://ikosmidis.com/)
+  [<i class="bi bi-globe" role="img" aria-label="Personal web page"></i>](https://ikosmidis.com/)
 * Georg J. Mayr
   [![ORCID](orcid.svg){width=18px}](https://orcid.org/0000-0001-6661-9453)
 
