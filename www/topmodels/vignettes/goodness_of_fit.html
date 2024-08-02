@@ -240,14 +240,24 @@ window.Quarto = {
     <a class="nav-link" href="../CITATION.html"> 
 <span class="menu-text">Citation</span></a>
   </li>  
-</ul>
-<ul class="navbar-nav navbar-nav-scroll ms-auto">
-<li class="nav-item">
+  <li class="nav-item">
     <a class="nav-link" href="../contact.html"> 
 <span class="menu-text">Contact</span></a>
   </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://fosstodon.org/@zeileis" target="_blank"> <i class="bi bi-mastodon" role="img" aria-label="@zeileis@fosstodon.org">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels"> <i class="bi bi-code" role="img" aria-label="topmodels @ R-Forge">
+    <a class="nav-link" href="https://x.com/AchimZeileis" target="_blank"> <i class="bi bi-twitter-x" role="img" aria-label="@AchimZeileis">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels" target="_blank"> <i class="bi bi-code-square" role="img" aria-label="topmodels @ R-Forge">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -552,6 +562,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {

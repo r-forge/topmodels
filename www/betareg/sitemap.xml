@@ -2,138 +2,138 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/MockJurors.html</loc>
-    <lastmod>2024-08-02T11:03:26.739Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.977Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/XBeta.html</loc>
-    <lastmod>2024-08-02T11:03:26.919Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.157Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/dbeta4.html</loc>
-    <lastmod>2024-08-02T11:03:27.371Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.593Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/ReadingSkills.html</loc>
-    <lastmod>2024-08-02T11:03:26.791Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.029Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/Beta4.html</loc>
-    <lastmod>2024-08-02T11:03:26.419Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.641Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/plot.betareg.html</loc>
-    <lastmod>2024-08-02T11:03:27.583Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.805Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/dbetar.html</loc>
-    <lastmod>2024-08-02T11:03:27.411Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.633Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/summary.betareg.html</loc>
-    <lastmod>2024-08-02T11:03:27.723Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.941Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/betareg.control.html</loc>
-    <lastmod>2024-08-02T11:03:27.227Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.457Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/CarTask.html</loc>
-    <lastmod>2024-08-02T11:03:26.519Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.737Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/ImpreciseTask.html</loc>
-    <lastmod>2024-08-02T11:03:26.647Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.877Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/dbeta01.html</loc>
-    <lastmod>2024-08-02T11:03:27.327Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.553Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/LossAversion.html</loc>
-    <lastmod>2024-08-02T11:03:26.699Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.933Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/GasolineYield.html</loc>
-    <lastmod>2024-08-02T11:03:26.603Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.837Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/NEWS.html</loc>
-    <lastmod>2024-08-02T11:03:23.659Z</lastmod>
+    <lastmod>2024-08-02T16:54:31.925Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/vignettes/betareg.html</loc>
-    <lastmod>2024-08-02T11:03:27.755Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.973Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/contact.html</loc>
-    <lastmod>2024-08-02T11:03:27.771Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.989Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/index.html</loc>
-    <lastmod>2024-08-02T11:03:23.675Z</lastmod>
+    <lastmod>2024-08-02T16:54:31.941Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/vignettes/betareg-ext.html</loc>
-    <lastmod>2024-08-02T11:03:27.755Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.973Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/CITATION.html</loc>
-    <lastmod>2024-08-02T11:03:26.287Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.493Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/BetaR.html</loc>
-    <lastmod>2024-08-02T11:03:26.479Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.697Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/dxbetax.html</loc>
-    <lastmod>2024-08-02T11:03:27.495Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.717Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/gleverage.html</loc>
-    <lastmod>2024-08-02T11:03:27.531Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.757Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/FoodExpenditure.html</loc>
-    <lastmod>2024-08-02T11:03:26.555Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.781Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/betamix.html</loc>
-    <lastmod>2024-08-02T11:03:27.055Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.289Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/residuals.betareg.html</loc>
-    <lastmod>2024-08-02T11:03:27.671Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.889Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/Beta01.html</loc>
-    <lastmod>2024-08-02T11:03:26.383Z</lastmod>
+    <lastmod>2024-08-02T16:54:34.601Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/XBetaX.html</loc>
-    <lastmod>2024-08-02T11:03:26.963Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.201Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/WeatherTask.html</loc>
-    <lastmod>2024-08-02T11:03:26.879Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.117Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/StressAnxiety.html</loc>
-    <lastmod>2024-08-02T11:03:26.835Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.065Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/predict.betareg.html</loc>
-    <lastmod>2024-08-02T11:03:27.623Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.845Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/betatree.html</loc>
-    <lastmod>2024-08-02T11:03:27.287Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.513Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/dxbeta.html</loc>
-    <lastmod>2024-08-02T11:03:27.447Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.673Z</lastmod>
   </url>
   <url>
     <loc>https://topmodels.R-Forge.R-project.org/betareg/man/betareg.html</loc>
-    <lastmod>2024-08-02T11:03:27.171Z</lastmod>
+    <lastmod>2024-08-02T16:54:35.405Z</lastmod>
   </url>
 </urlset>

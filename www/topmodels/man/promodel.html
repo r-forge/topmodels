@@ -193,14 +193,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="../CITATION.html"> 
 <span class="menu-text">Citation</span></a>
   </li>  
-</ul>
-<ul class="navbar-nav navbar-nav-scroll ms-auto">
-<li class="nav-item">
+  <li class="nav-item">
     <a class="nav-link" href="../contact.html"> 
 <span class="menu-text">Contact</span></a>
   </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://fosstodon.org/@zeileis" target="_blank"> <i class="bi bi-mastodon" role="img" aria-label="@zeileis@fosstodon.org">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels"> <i class="bi bi-code" role="img" aria-label="topmodels @ R-Forge">
+    <a class="nav-link" href="https://x.com/AchimZeileis" target="_blank"> <i class="bi bi-twitter-x" role="img" aria-label="@AchimZeileis">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels" target="_blank"> <i class="bi bi-code-square" role="img" aria-label="topmodels @ R-Forge">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -511,8 +521,8 @@ further arguments passed on to <code>procast</code> or <code>proresiduals</code>
 </div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">residuals</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>         1          2          3          4          5          6 
- 2.1102041 -0.2337276 -1.0558252 -0.4780094  0.9527616 -0.3918773 </code></pre>
+<pre><code>          1           2           3           4           5           6 
+ 1.95624646 -1.47094048 -0.45759493 -0.03438468  1.32198681 -0.08179274 </code></pre>
 </div>
 </div>
 
@@ -623,6 +633,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {

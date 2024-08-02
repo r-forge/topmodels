@@ -90,7 +90,10 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -216,14 +219,24 @@ div.csl-indent {
     <a class="nav-link" href="../CITATION.html"> 
 <span class="menu-text">Citation</span></a>
   </li>  
-</ul>
-<ul class="navbar-nav navbar-nav-scroll ms-auto">
-<li class="nav-item">
+  <li class="nav-item">
     <a class="nav-link" href="../contact.html"> 
 <span class="menu-text">Contact</span></a>
   </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://fosstodon.org/@zeileis" target="_blank"> <i class="bi bi-mastodon" role="img" aria-label="@zeileis@fosstodon.org">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels"> <i class="bi bi-code" role="img" aria-label="topmodels @ R-Forge">
+    <a class="nav-link" href="https://x.com/AchimZeileis" target="_blank"> <i class="bi bi-twitter-x" role="img" aria-label="@AchimZeileis">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://R-Forge.R-project.org/projects/topmodels" target="_blank"> <i class="bi bi-code-square" role="img" aria-label="topmodels @ R-Forge">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -277,7 +290,7 @@ div.csl-indent {
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="topmodels_files/figure-html/example-rootogram-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="topmodels_files/figure-html/example-rootogram-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="topmodels_files/figure-html/example-rootogram-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -286,7 +299,7 @@ div.csl-indent {
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/pithist.html">pithist</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="topmodels_files/figure-html/example-pithist-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="topmodels_files/figure-html/example-pithist-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="topmodels_files/figure-html/example-pithist-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -295,7 +308,7 @@ div.csl-indent {
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="topmodels_files/figure-html/example-qqrplot-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="topmodels_files/figure-html/example-qqrplot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="topmodels_files/figure-html/example-qqrplot-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -304,7 +317,7 @@ div.csl-indent {
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="topmodels_files/figure-html/example-wormplot-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="topmodels_files/figure-html/example-wormplot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="topmodels_files/figure-html/example-wormplot-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -313,7 +326,7 @@ div.csl-indent {
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/reliagram.html">reliagram</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="topmodels_files/figure-html/example-reliagram-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="topmodels_files/figure-html/example-reliagram-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="topmodels_files/figure-html/example-reliagram-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -472,6 +485,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -787,7 +805,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","openEffect":"zoom","loop":false,"descPosition":"bottom"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 </body></html>
