@@ -2,19 +2,20 @@
 
 <!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
 
-<img src="https://topmodels.R-Forge.R-project.org/crch/crch.png" align="right" alt="countreg logo" width="120" />
+<img src="https://topmodels.R-Forge.R-project.org/crch/crch.png" align="right" alt="countreg logo" width="110" />
 
-# crch: Heteroscedastic Censored and Truncated Regression
+# Heteroscedastic Censored and Truncated Regression
 
 ## Overview
 
-The package `crch` provides various regression models for continuous or
-mixed discrete-continuous data with right- and/or left-censoring or
-truncation of the response. The models use separate linear predictors
-for the mean/location and variance/scale parameters and can thus
-incorporate heteroscedasticity (conditional on regressors). This has
-prompted the package name `crch` (pronounced like *search*) which stands
-for censored regression with conditional heteroscedasticity.
+The R package [crch](https://topmodels.R-Forge.R-project.org/crch/)
+provides various regression models for continuous or mixed
+discrete-continuous data with right- and/or left-censoring or truncation
+of the response. The models use separate linear predictors for the
+mean/location and variance/scale parameters and can thus incorporate
+heteroscedasticity (conditional on regressors). This has prompted the
+package name `crch` (pronounced like *search*) which stands for censored
+regression with conditional heteroscedasticity.
 
 A number of different estimation methods can be used:
 
@@ -35,13 +36,15 @@ is also available.
 
 ## Installation
 
-The stable version of `crch` is available on CRAN:
+The stable version of `crch` is available on
+[CRAN](https://CRAN.R-project.org/package=crch):
 
 ``` r
 install.packages("crch")
 ```
 
-The latest development version can be installed from R-universe:
+The latest development version can be installed from
+[R-universe](https://zeileis.R-universe.dev/crch):
 
 ``` r
 install.packages("crch", repos = "https://zeileis.R-universe.dev")
