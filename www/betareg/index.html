@@ -201,7 +201,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li>
-<a href="#betareg-beta-regression-in-r" id="toc-betareg-beta-regression-in-r" class="nav-link active" data-scroll-target="#betareg-beta-regression-in-r">betareg: Beta Regression in R</a>
+<a href="#beta-regression" id="toc-beta-regression" class="nav-link active" data-scroll-target="#beta-regression">Beta Regression</a>
   <ul class="collapse">
 <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
@@ -222,16 +222,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm --><p><img src="https://topmodels.R-Forge.R-project.org/betareg/betareg.png" align="right" alt="countreg logo" width="100"></p>
-<section id="betareg-beta-regression-in-r" class="level1"><h1>betareg: Beta Regression in R</h1>
+<section id="beta-regression" class="level1"><h1>Beta Regression</h1>
 <section id="overview" class="level2"><h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>The R package <a href="https://topmodels.R-Forge.R-project.org/betareg/">betareg</a> provides:</p>
 <ul>
 <li><p>Beta regression for modeling beta-distributed dependent variables on the open unit interval (0, 1), e.g., rates and proportions, see Cribari-Neto and Zeileis (2010, <a href="https://doi.org/10.18637/jss.v034.i02">doi:10.18637/jss.v034.i02</a>).</p></li>
 <li><p>Extended-support beta regression models for variables on the closed unit interval [0, 1] with boundary observations at 0 and/or 1 see Kosmidis and Zeileis (2024, forthcoming).</p></li>
 <li><p>Alternative specifications of the classical beta regression model: Bias-corrected and bias-reduced estimation, finite mixture models, and recursive partitioning for (0, 1) beta regression, see Grün, Kosmidis, and Zeileis (2012, <a href="https://doi.org/10.18637/jss.v048.i11">doi:10.18637/jss.v048.i11</a>).</p></li>
 </ul></section><section id="installation" class="level2"><h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<p>The stable version of <code>betareg</code> is available on CRAN:</p>
+<p>The stable version of <code>betareg</code> is available on <a href="https://CRAN.R-project.org/package=betareg">CRAN</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"betareg"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The latest development version can be installed from R-universe:</p>
+<p>The latest development version can be installed from <a href="https://zeileis.R-universe.dev/betareg">R-universe</a>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"betareg"</span>, repos <span class="op">=</span> <span class="st">"https://zeileis.R-universe.dev"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
 <p>The package is available under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">General Public License version 3</a> or <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">version 2</a></p>

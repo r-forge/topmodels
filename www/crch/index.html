@@ -197,7 +197,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li>
-<a href="#crch-heteroscedastic-censored-and-truncated-regression" id="toc-crch-heteroscedastic-censored-and-truncated-regression" class="nav-link active" data-scroll-target="#crch-heteroscedastic-censored-and-truncated-regression">crch: Heteroscedastic Censored and Truncated Regression</a>
+<a href="#heteroscedastic-censored-and-truncated-regression" id="toc-heteroscedastic-censored-and-truncated-regression" class="nav-link active" data-scroll-target="#heteroscedastic-censored-and-truncated-regression">Heteroscedastic Censored and Truncated Regression</a>
   <ul class="collapse">
 <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
@@ -208,10 +208,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm --><p><img src="https://topmodels.R-Forge.R-project.org/crch/crch.png" align="right" alt="countreg logo" width="120"></p>
-<section id="crch-heteroscedastic-censored-and-truncated-regression" class="level1"><h1>crch: Heteroscedastic Censored and Truncated Regression</h1>
+<main class="content" id="quarto-document-content"><!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm --><p><img src="https://topmodels.R-Forge.R-project.org/crch/crch.png" align="right" alt="countreg logo" width="110"></p>
+<section id="heteroscedastic-censored-and-truncated-regression" class="level1"><h1>Heteroscedastic Censored and Truncated Regression</h1>
 <section id="overview" class="level2"><h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>The package <code>crch</code> provides various regression models for continuous or mixed discrete-continuous data with right- and/or left-censoring or truncation of the response. The models use separate linear predictors for the mean/location and variance/scale parameters and can thus incorporate heteroscedasticity (conditional on regressors). This has prompted the package name <code>crch</code> (pronounced like <em>search</em>) which stands for censored regression with conditional heteroscedasticity.</p>
+<p>The R package <a href="https://topmodels.R-Forge.R-project.org/crch/">crch</a> provides various regression models for continuous or mixed discrete-continuous data with right- and/or left-censoring or truncation of the response. The models use separate linear predictors for the mean/location and variance/scale parameters and can thus incorporate heteroscedasticity (conditional on regressors). This has prompted the package name <code>crch</code> (pronounced like <em>search</em>) which stands for censored regression with conditional heteroscedasticity.</p>
 <p>A number of different estimation methods can be used:</p>
 <ul>
 <li>Maximum likelihood estimation.</li>
@@ -227,9 +227,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>Heteroscedastic extended logistic regression (HXLR) via cumulative link models for ordinal data, obtained by interval-censoring continuous data, is also available.</p>
 </section><section id="installation" class="level2"><h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<p>The stable version of <code>crch</code> is available on CRAN:</p>
+<p>The stable version of <code>crch</code> is available on <a href="https://CRAN.R-project.org/package=crch">CRAN</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"crch"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The latest development version can be installed from R-universe:</p>
+<p>The latest development version can be installed from <a href="https://zeileis.R-universe.dev/crch">R-universe</a>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"crch"</span>, repos <span class="op">=</span> <span class="st">"https://zeileis.R-universe.dev"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
 <p>The package is available under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">General Public License version 3</a> or <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">version 2</a></p>
