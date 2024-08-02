@@ -14,18 +14,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-<img src="https://topmodels.R-Forge.R-project.org/topmodels/topmodels.png" align="right" alt="" width="150"/>
+<img src="https://topmodels.R-Forge.R-project.org/topmodels/topmodels.png" align="right" alt="" width="120"/>
 
 # Infrastructure for Forecasting and Assessment of Probabilistic Models
 
-Unified infrastructure for probabilistic models and distributional regressions:
-Probabilistic forecasting of in-sample and out-of-sample of probabilities,
+The R package [topmodels](https://topmodels.R-Forge.R-project.org/topmodels/)
+provides unified infrastructure for probabilistic models and distributional regressions:
+Probabilistic forecasting, in-sample and out-of-sample, of probabilities,
 densities, quantiles, and moments. Probabilistic residuals and scoring via log-score (or log-likelihood),
 (continuous) ranked probability score, etc. Diagnostic graphics like rootograms, PIT histograms,
 (randomized) quantile residual Q-Q plots, and reliagrams (reliability diagrams).
 
 Modular object-oriented implementation with support for many model objects, including
-`lm`, `glm`, `glm.nb`, `gamlss`, `bamlss`, `hurdle`, `zeroinfl`, `zerotrunc`, `crch`,
+`lm`, `glm`, `glm.nb`, `gamlss`, `bamlss`, `hurdle`, `zeroinfl`, `zerotrunc`, `nbreg`, `crch`,
 `betareg`, and more to come.
 
 ```{r topmodels}
