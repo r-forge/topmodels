@@ -1,7 +1,6 @@
 ---
 title: "topmodels: Infrastructure for Inference and Forecasting in Probabilistic Models"
 author: "Moritz Lang, Reto Stauffer, Achim Zeileis"
-lightbox: true
 format: 
   html:
     html-math-method: mathjax
@@ -36,14 +35,14 @@ Probabilistic predictions are often based on distributional regression models,
 for which a wide range of different packages is readily available: from basic
 models like `lm()` and `glm()` in base R (which can be interpreted as probabilistic
 models and not just mean regression models), over general packages for distributional regression like
-[`gamlss`](https://CRAN.R-project.org/package=gamlss) [@Stasinopoulos+Rigby:2007] or
-[`bamlss`](https://CRAN.R-project.org/package=bamlss) [@Umlauf+Klein+Zeileis:2018, @Umlauf+Klein+Simon:2021]
+[gamlss](https://CRAN.R-project.org/package=gamlss) [@Stasinopoulos+Rigby:2007] or
+[bamlss](https://CRAN.R-project.org/package=bamlss) [@Umlauf+Klein+Zeileis:2018, @Umlauf+Klein+Simon:2021]
 to more specific packages for certain purposes. Examples for the latter include
-[`pscl`](https://CRAN.R-project.org/package=pscl) or [`countreg`](https://CRAN.R-project.org/package=countreg)
+[pscl](https://CRAN.R-project.org/package=pscl) or [countreg](https://CRAN.R-project.org/package=countreg)
 [@Zeileis+Kleiber+Jackman:2008] for count regression,
-[`crch`](https://CRAN.R-project.org/package=crch) [@Messner+Mayr+Zeileis:2016]
+[crch](https://CRAN.R-project.org/package=crch) [@Messner+Mayr+Zeileis:2016]
 for certain censored regression models, or
-[`betareg`](https://CRAN.R-project.org/package=betareg) [@Cribari-Neto+Zeileis:2010]
+[betareg](https://CRAN.R-project.org/package=betareg) [@Cribari-Neto+Zeileis:2010]
 for beta regression, among many others.
 However, there is no unified and object-oriented approach available for all these
 different models/packages that allows to compute predictive distributions, probabilities, and
@@ -53,8 +52,8 @@ An easy-to-use unified infrastructure for graphically
 assessing and comparing different probabilistic models is not available, yet.
 
 The
-[**topmodels**](https://R-Forge.R-project.org/projects/topmodels/)
-packages is designed to fill this gap and provide such an unifiying infrastructure to obtain
+[topmodels](https://topmodels.R-Forge.R-project.org/topmodels/)
+package is designed to fill this gap and provide such an unifiying infrastructure to obtain
 predictions of probabilities, densities, etc. for
 probabilistic models. The unifying prediction infrastructure is the basis for numerous
 graphical evaluation tools, such as rootograms [@Kleiber+Zeileis:2016], PIT
@@ -63,21 +62,21 @@ diagrams, @Wilks:2011], randomized quantile Q-Q plots [@Dunn+Smyth:1996], and
 worm plots [@Buuren+Fredriks:2001]. 
 
 To be able to use the object-oriented framework of
-[**topmodels**](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/),
+[topmodels](https://topmodels.R-Forge.R-project.org/topmodels/),
 solely a `procast()` method must exist for the model class of interest.
 Currently the package provides generic `procast` methods for the model classes
-`lm`, `glm`, [`crch`](https://CRAN.R-project.org/package=crch)
+`lm`, `glm`, [crch](https://CRAN.R-project.org/package=crch)
 [@Messner+Mayr+Zeileis:2016], and
-[`disttree`](https://R-Forge.R-project.org/projects/partykit/pkg/disttree/)
+[disttree](https://R-Forge.R-project.org/projects/partykit/)
 [@Schlosser+Hothorn+Stauffer+Zeileis:2019].
 
 
 ## Installation
 
 For the package
-[**topmodels**](https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/)
+[topmodels](https://topmodels.R-Forge.R-project.org/topmodels/)
 so far only a development version is available, which is hosted on R-Forge at
-<https://R-Forge.R-project.org/projects/topmodels/pkg/topmodels/> in a
+<https://R-Forge.R-project.org/projects/topmodels/> in a
 Subversion (SVN) repository. The package can be installed via
 
 ```{r installation-cran, eval=FALSE}
@@ -96,10 +95,10 @@ where a specific revision can be installed by setting the optional argument `rev
 ## Usage
 
 The package
-[**topmodels**](https://R-Forge.R-project.org/R/?group_id=2305)
+[topmodels](https://R-Forge.R-project.org/R/?group_id=2305)
 provides various routines to easily graphically assess and compare different
 probabilistic models and model types using `ggplot2` [@Wickham:2016] and base
-*R* graphics:
+R graphics:
 
 ```{r example-model}
 library("topmodels")

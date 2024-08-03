@@ -25,9 +25,9 @@ This vignette provides two real cases discussing the graphical evaluation of
 the marginal and probabilistic calibration of probabilistic regression models.
 The first example provides a short case study modeling the goals at the 2018
 FIFA World Cup employing a Poisson distribution. It is a direct extension of
-the vignette ["The Poisson Distribution: From Basic Probability Theory to
-Regression Models"](https://alexpghayes.github.io/distributions3/dev/articles/poisson.html)
-given in [`distributions3`](https://github.com/alexpghayes/distributions3).
+the vignette [The Poisson Distribution: From Basic Probability Theory to
+Regression Models](https://alexpghayes.github.io/distributions3/articles/poisson.html)
+given in [distributions3](https://alexpghayes.github.io/distributions3/).
 
 
 ## Goals in the 2018 FIFA World Cup
@@ -36,8 +36,8 @@ This use-case employs the Poisson distribution for modeling count data along
 predicted probabilities for the number of goals in soccer matches from the 2018
 FIFA World Cup. The full analysis with an illustrative introduction from basic
 probability theory to regression models using the R package
-[`distributions3`](https://github.com/alexpghayes/distributions3) is given
-[here](https://alexpghayes.github.io/distributions3/dev/articles/poisson.html).
+[distributions3](https://alexpghayes.github.io/distributions3/) is given
+[here](https://alexpghayes.github.io/distributions3/articles/poisson.html).
 
 To investigate the number of goals scored per match in the 2018 FIFA World Cup,
 the `FIFA2018` data set provides two rows, one for each team, for each of the 64 matches

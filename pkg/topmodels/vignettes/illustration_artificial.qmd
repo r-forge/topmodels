@@ -5,7 +5,6 @@ format:
     html-math-method: mathjax
     toc: true
     number-sections: true
-    lightbox: true
 bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{Illustration: Artificial Data}
@@ -23,18 +22,6 @@ library("rmutil")  # for laplace dist
 library("sn") # for skewed N dist
 options(digits = 4)
 knitr::opts_chunk$set(fig.align = "center")
-
-#make_residuals_plot <- function(object, xlim = c(-4, 4), ylim = c(0, 0.5)) {
-#
-#  ## histogram
-#  hist(proresiduals(object), breaks = 15, main = "", freq = FALSE, xlim = xlim, ylim = ylim)
-#
-#  ## standard normal distribution
-#  curve(dnorm, col = 2, from = -4, to = 4, add = TRUE)
-#
-#  ## legend
-#  legend("topright", "std. norm", lty = 1, col = 2, bty = "n")
-#}
 
 make_residuals_plot <- function(object, breaks = "Sturges", main = "") {
   name <- deparse(substitute(object))
@@ -88,7 +75,7 @@ m_udisp <- glm(y_udisp ~ x, family = "poisson", data = d)
 ```
 
 ```{r plot-summary, echo = FALSE, fig.height = 14, fig.width = 14, out.width = "100%", fig.align = "center"}
-par(mfrow = c(6, 7), bg = "#f7f7f7")
+par(mfrow = c(6, 7))
 make_residuals_plot(m_norm, breaks = 20, main = "Well calibrated")
 make_residuals_plot(m_rskew, breaks = 20, main = "Too skew to the left")
 make_residuals_plot(m_lskew, breaks = 20, main = "Too skew to the right")
@@ -236,7 +223,7 @@ m1 <- lm(ynorm ~ x, data = d)
 ```
 
 ```{r topmodels-1, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 4), bg = "#f7f7f7")
+par(mfrow = c(1, 4))
 make_topmodels_plot(m1)
 par(mfrow = c(1, 1))
 ```
@@ -272,14 +259,14 @@ m3 <- crch(yhnorm ~ x | z, data = d)
 ```
 
 ```{r proresiduals-2, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m2)
 make_residuals_plot(m3)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-2, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m2)
 make_topmodels_plot(m3)
 ```
@@ -326,14 +313,14 @@ m5 <- crch(ycnorm ~ x | 1, data = d, left = 0, right = 100)
 ```
 
 ```{r proresiduals-3, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m4)
 make_residuals_plot(m5)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-3, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m4)
 make_topmodels_plot(m5)
 ```
@@ -373,14 +360,14 @@ m7 <- trch(ytnorm ~ x | 1, data = d, left = 0)
 ```
 
 ```{r proresiduals-4, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m6)
 make_residuals_plot(m7)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-4, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m6)
 make_topmodels_plot(m7)
 ```
@@ -417,14 +404,14 @@ m9 <- crch(yt ~ x | 1, data = d, dist = "student")
 ```
 
 ```{r proresiduals-5, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m8)
 make_residuals_plot(m9)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-5, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m8)
 make_topmodels_plot(m9)
 ```
@@ -470,14 +457,14 @@ m11 <- lm(ylskew ~ x, data = d)
 ```
 
 ```{r proresiduals-6, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m10)
 make_residuals_plot(m11)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-6, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m10)
 make_topmodels_plot(m11)
 ```
@@ -526,14 +513,14 @@ m13 <- lm(ylaplace ~ x, data = d)
 ```
 
 ```{r proresiduals-7, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m12)
 make_residuals_plot(m13)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-7, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m12)
 make_topmodels_plot(m13)
 ```
@@ -606,7 +593,7 @@ m14 <- glm(ypois ~ x, data = d, family = poisson)
 ```
 
 ```{r topmodels-8, echo = FALSE, fig.height = 2.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(1, 4), bg = "#f7f7f7")
+par(mfrow = c(1, 4))
 make_topmodels_plot(m14)
 par(mfrow = c(1, 1))
 ```
@@ -639,14 +626,14 @@ m16 <- MASS::glm.nb(ynegbin ~ x, data = d)
 ```
 
 ```{r proresiduals-9, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m15)
 make_residuals_plot(m16)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-9, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m15)
 make_topmodels_plot(m16)
 ```
@@ -690,14 +677,14 @@ m18 <- pscl::zeroinfl(yzip ~ x | 1, data = d, dist = "poisson")
 ```
 
 ```{r proresiduals-10, echo = FALSE,  fig.height = 4.5, out.width = "80%", fig.align = "center"}
-par(mfrow = c(2, 3), bg = "#f7f7f7")
+par(mfrow = c(2, 3))
 make_residuals_plot(m17)
 #make_residuals_plot(m18)
 par(mfrow = c(1, 1))
 ```
 
 ```{r topmodels-10, echo = FALSE, fig.height = 4.5, out.width = "100%", fig.align = "center"}
-par(mfrow = c(2, 4), bg = "#f7f7f7")
+par(mfrow = c(2, 4))
 make_topmodels_plot(m17)
 #make_topmodels_plot(m18)
 # FIXME: Implement S3 methods for `countreg` or `pscl`.

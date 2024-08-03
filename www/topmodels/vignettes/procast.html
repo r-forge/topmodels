@@ -289,28 +289,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header"><h1 class="title display-7">Probabilistic Forecasting Infrastructure</h1>
 
-</header><div class="cell">
-<style type="text/css">
-script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
-</style>
-</div>
-<div class="cell">
-<script>
- $(document).ready(function() {
-    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
-    // onClick function for all plots (img's)
-    $('img:not(.zoomImg)').click(function() {
-      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
-      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
-    });
-    // onClick function for zoomImg
-    $('img.zoomImg').click(function() {
-      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
-    });
-  });
-</script>
-</div>
-<section id="overview" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="overview">
+</header><section id="overview" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="overview">
 <span class="header-section-number">1</span> Overview</h2>
 <p>The functionality provided by the <code>topmodels</code> package can be broadly placed into three groups:</p>
 <ol type="1">
@@ -679,14 +658,14 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">random</span><span class="op">(</span><span class="va">Y</span>, <span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.8131 1.9221 0.6498</code></pre>
+<pre><code>[1] 0.000 2.593 4.435</code></pre>
 </div>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">random</span><span class="op">(</span><span class="va">Y</span>, <span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        r_1    r_2   r_3
-[1,]  1.958 1.2206 1.122
-[2,]  2.978 2.5229 2.114
-[3,] 14.105 0.2434 0.000</code></pre>
+<pre><code>       r_1    r_2   r_3
+[1,] 2.902 2.2861 1.117
+[2,] 1.446 0.3598 0.000
+[3,] 0.000 0.0000 0.000</code></pre>
 </div>
 </div>
 <p>The <code>support()</code> method should return a matrix of <code>"min"</code> and <code>"max"</code> for the distribution. The <code>make_support()</code> function helps to set the right names and dimension.</p>

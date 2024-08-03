@@ -23,18 +23,18 @@ knitr::opts_chunk$set(fig.align = "center")
 
 The second example models 3 day-accumulated precipitation sums using a Logistic
 distribution censored at zero accounting for non-negative precipitation sums.
-The use case builds heavily on the vignette ["Heteroscedastic Censored and Truncated
-Regression with crch"](https://cran.r-project.org/web/packages/crch/vignettes/crch.pdf) given in
-[`crch`](https://CRAN.R-project.org/package=crch) by
+The use case builds heavily on the vignette [Heteroscedastic Censored and Truncated
+Regression with crch](https://topmodels.R-Forge.R-project.org/crch/vignettes/crch.html) given in
+[crch](https://topmodels.R-Forge.R-project.org/crch/) by
 @Messner+Mayr+Zeileis:2016. 
 
 ## Precipitation forecasts
 
 This use-case discusses a weather forecast example application of censored
-regression models. The example is taken from the vignette ["Heteroscedastic
+regression models. The example is taken from the vignette [Heteroscedastic
 Censored and Truncated Regression with
-crch"](https://cran.r-project.org/web/packages/crch/vignettes/crch.pdf)
-provided for the package [`crch`](https://CRAN.R-project.org/package=crch) by
+crch](https://topmodels.R-Forge.R-project.org/crch/vignettes/crch.html)
+provided for the package [crch](https://topmodels.R-Forge.R-project.org/crch/) by
 @Messner+Mayr+Zeileis:2016. 
 
 Weather forecasts are usually based on numerical weather prediction (NWP)

@@ -284,28 +284,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header"><h1 class="title display-7">Goodness of Fit of Probabilistic Regression Models</h1>
 
-</header><div class="cell">
-<style type="text/css">
-script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
-</style>
-</div>
-<div class="cell">
-<script>
- $(document).ready(function() {
-    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
-    // onClick function for all plots (img's)
-    $('img:not(.zoomImg)').click(function() {
-      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
-      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
-    });
-    // onClick function for zoomImg
-    $('img.zoomImg').click(function() {
-      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
-    });
-  });
-</script>
-</div>
-<section id="introduction" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="introduction">
+</header><section id="introduction" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="introduction">
 <span class="header-section-number">1</span> Introduction</h2>
 <p>Over the last decades there has been an increasing interest in regression models that not only capture the mean of a dependent variable but model its entire probability distribution <span class="citation" data-cites="Stasinopoulos+Rigby:2007 Klein+Kneib+Lang+Sohn:2015 Hothorn+Kneib+Buehlmann:2014">(<a href="#ref-Stasinopoulos+Rigby:2007" role="doc-biblioref">Stasinopoulos and Rigby 2007</a>; <a href="#ref-Klein+Kneib+Lang+Sohn:2015" role="doc-biblioref">Klein et al. 2015</a>; <a href="#ref-Hothorn+Kneib+Buehlmann:2014" role="doc-biblioref">Hothorn, Kneib, and Bühlmann 2014</a>)</span>. In the simplest case this could be a generalized linear model <span class="citation" data-cites="Nelder+Wedderburn:1972 McCullagh+Nelder:1989">(GLM, <a href="#ref-Nelder+Wedderburn:1972" role="doc-biblioref">Nelder and Wedderburn 1972</a>; <a href="#ref-McCullagh+Nelder:1989" role="doc-biblioref">McCullagh and Nelder 1989</a>)</span> where higher moments of the probability distribution co-vary with the expectation. Instead, multiple distribution parameters could also be linked to explanatory variables as in distributional regression <span class="citation" data-cites="Klein+Kneib+Lang+Sohn:2015">(<a href="#ref-Klein+Kneib+Lang+Sohn:2015" role="doc-biblioref">Klein et al. 2015</a>)</span> or generalized additive models of location, scale, and shape <span class="citation" data-cites="Stasinopoulos+Rigby:2007">(<a href="#ref-Stasinopoulos+Rigby:2007" role="doc-biblioref">Stasinopoulos and Rigby 2007</a>)</span>. Moreover, many other flexible modeling techniques yield fitted distributions, including transformation models <span class="citation" data-cites="Hothorn+Kneib+Buehlmann:2014">(<a href="#ref-Hothorn+Kneib+Buehlmann:2014" role="doc-biblioref">Hothorn, Kneib, and Bühlmann 2014</a>)</span>, Bayesian modeling <span class="citation" data-cites="Umlauf+Klein+Zeileis:2018">(<a href="#ref-Umlauf+Klein+Zeileis:2018" role="doc-biblioref">Umlauf, Klein, and Zeileis 2018</a>)</span>, machine learning approaches <span class="citation" data-cites="Rasp+Lerch:2018">(e.g., <a href="#ref-Rasp+Lerch:2018" role="doc-biblioref">Rasp and Lerch 2018</a>)</span>, and many others.</p>
 <p>For assessing the goodness of fit of such probabilistic regression models, (proper) scoring rules <span class="citation" data-cites="Gneiting+Raftery:2007">(<a href="#ref-Gneiting+Raftery:2007" role="doc-biblioref">Gneiting and Raftery 2007</a>)</span> are widely used, e.g., using the log-likelihood (also known as the log-score) or the continuous ranked probability score <span class="citation" data-cites="Gneiting+Raftery:2007">(CRPS, <a href="#ref-Gneiting+Raftery:2007" role="doc-biblioref">Gneiting and Raftery 2007</a>)</span>. In addition to such numerical summaries, visualizations capturing the goodness of fit are also of interest as they may also be able to shed some more light on the sources of a potential lack of fit.</p>

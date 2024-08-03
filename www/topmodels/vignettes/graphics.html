@@ -284,28 +284,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header"><h1 class="title display-7">Graphics for Assessing Goodness of Fit</h1>
 
-</header><div class="cell">
-<style type="text/css">
-script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
-</style>
-</div>
-<div class="cell">
-<script>
- $(document).ready(function() {
-    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
-    // onClick function for all plots (img's)
-    $('img:not(.zoomImg)').click(function() {
-      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
-      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
-    });
-    // onClick function for zoomImg
-    $('img.zoomImg').click(function() {
-      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
-    });
-  });
-</script>
-</div>
-<section id="overview" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="overview">
+</header><section id="overview" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="overview">
 <span class="header-section-number">1</span> Overview</h2>
 <p>Marginal: Rootogram</p>
 <p>Conditional: PIT histogram, Q-Q plot of randomized residuals, worm plot.</p>
