@@ -179,7 +179,13 @@ proresiduals.default <- function(object, newdata = NULL, type = c("quantile", "p
   ## simple special cases: continuous quantile or PIT residuals, replicated if nsim > 1 or length(prob) > 1
   if (all(is_continuous(pd))) {
     res <- cdf(pd, y, elementwise = TRUE)
-    if (type == "quantile") res <- qnorm(res)
+    if (type == "quantile") {
+      res <- qnorm(res)
+      ## try to catch infinite quantile residuals due to CDF = 0 or = 1
+      if (length(ix <- which(!is.finite(res))) > 0L) {
+        res[ix] <- qnorm(cdf(pd[ix], y[ix], elementwise = TRUE, log.p = TRUE), log.p = TRUE)
+      }
+    }
     if (nc > 1L) {
       res <- rep.int(res, nc)
       res <- matrix(res, nrow = n, ncol = nc, dimnames = list(names(y), paste("r", clab, sep = "_")))
