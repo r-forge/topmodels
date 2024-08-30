@@ -12,7 +12,7 @@
   detrend = NULL,
   simint = NULL,
   confint = NULL,
-  confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
+  confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
   confint_level = 0.95,
   ref = NULL,
   ref_identity = TRUE,
@@ -55,7 +55,7 @@
   detrend = NULL,
   simint = NULL,
   confint = NULL,
-  confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
+  confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
   confint_level = 0.95,
   ref = NULL,
   ref_identity = TRUE,
@@ -100,9 +100,13 @@ quantiles of the randomized quantile residuals be visualized?}
 
 \item{confint}{logical or character string describing the style for plotting `c("polygon", "line")`.}
 
-\item{confint_type}{character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
-of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
-on the Kolmogorov-Smirnov test.}
+\item{confint_type}{character. Method for creating the confidence intervals. By
+default, an internal point-wise routine (`pointwise_internal`) is used.
+Alternatively, band methods provided by [qqconf::get_qq_band()] can be used:
+"ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
+and "pointwise" uses a slightly alternative implementation of pointwise bands.
+Note that for uniform scales, the identity line must be used for reference
+(`ref_identity = TRUE`).}
 
 \item{confint_level}{numeric. The confidence level required, defaults to \code{0.95}.}
 

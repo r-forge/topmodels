@@ -485,9 +485,13 @@ rbind.qqrplot <- c.qqrplot
 #' @param simint logical or quantile specification. Should the simint of
 #' quantiles of the randomized quantile residuals be visualized? 
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
-#' @param confint_type character. Should \code{"pointwise"} or \code{"simultaneous"} confidence intervals
-#' of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based 
-#' on the Kolmogorov-Smirnov test. 
+#' @param confint_type character. Method for creating the confidence intervals. By
+#' default, an internal point-wise routine (`pointwise_internal`) is used.
+#' Alternatively, band methods provided by [qqconf::get_qq_band()] can be used:
+#' "ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
+#' and "pointwise" uses a slightly alternative implementation of pointwise bands.
+#' Note that for uniform scales, the identity line must be used for reference
+#' (`ref_identity = TRUE`).
 #' @param confint_level numeric. The confidence level required, defaults to \code{0.95}.
 #' @param ref logical. Should a reference line be plotted?
 #' @param ref_identity,ref_probs Should the identity line be plotted as reference 
@@ -571,7 +575,7 @@ plot.qqrplot <- function(x,
                          detrend = NULL,
                          simint = NULL,
                          confint = NULL,  # TODO: (ML) Implement different plotting styles
-                         confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
+                         confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
                          confint_level = 0.95,
                          ref = NULL,
                          ref_identity = TRUE,
@@ -632,10 +636,10 @@ plot.qqrplot <- function(x,
   scale <- match.arg(scale, c("normal", "uniform"))
   confint_type <- match.arg(confint_type)
 
-  ## TODO: Implement additional confidence intervals
-  if (detrend && confint_type != "pointwise") {
-    warning('For detrended Q-Q Plots only pointwise confidence intervals are currently implemented, set accordingly."`')
-    confint_type <- "pointwise"
+  ## TODO: (ML) Can this be supported?
+  if (scale == "uniform" && isFALSE(ref_identity)) {
+    warning('For uniform scale "ref_identity" must be TRUE, set accordingly.')
+    ref_identity <- TRUE
   }
 
   ## get input object on correct scale
@@ -823,45 +827,56 @@ plot.qqrplot <- function(x,
 
       ## plot confidence lines
       if (plot_arg$confint[j] == "line") {
-        lapply(c("lower", "upper"), function(lowerupper) curve(
-          compute_qqrplot_confint(
-            x,
-            n = NROW(d),
-            scale = scale,
-            type = confint_type,
-            level = confint_level,
-            which = lowerupper,
-            slope = slope,
-            intercept = intercept
-          ),
-          col = set_minimum_transparency(plot_arg$confint_col[j],
-                                         alpha_min = plot_arg$confint_alpha[j]),
+
+        conf_tmp <- compute_qqrplot_confint(
+          d$observed,
+          d$expected,
+          scale = scale,
+          detrend = detrend,
+          identity = ref_identity,
+          probs = ref_probs,
+          type = confint_type,
+          level = confint_level,
+          transform_infinity = TRUE
+        )
+        
+        lines(
+          sort(d$expected),
+          conf_tmp$lower,
           lty = plot_arg$confint_lty[j],
           lwd = plot_arg$confint_lwd[j],
-          from = plot_arg$xlim1[j],
-          to = plot_arg$xlim2[j],
-          add = TRUE
-        ))
+          col = set_minimum_transparency(plot_arg$confint_col[j],
+                                         alpha_min = plot_arg$confint_alpha[j])
+        )
+
+        lines(
+          sort(d$expected),
+          conf_tmp$upper,
+          lty = plot_arg$confint_lty[j],
+          lwd = plot_arg$confint_lwd[j],
+          col = set_minimum_transparency(plot_arg$confint_col[j],
+                                         alpha_min = plot_arg$confint_alpha[j])
+        )
+
       ## Draw confint as polygon
       } else if (plot_arg$confint[j] == "polygon") {
-        xx  <- seq(plot_arg$xlim1[j], plot_arg$xlim2[j], length.out = 201)
-        tmp <- setNames(lapply(c("lower", "upper"), function(lowerupper) {
-                    compute_qqrplot_confint(
-                      x = xx,
-                      n = NROW(d),
-                      scale = scale,
-                      type = confint_type,
-                      level = confint_level,
-                      which = lowerupper,
-                      slope = slope,
-                      intercept = intercept
-                    )
-                }), c("lower", "upper"))
-        polygon(c(xx, rev(xx)), c(tmp$lower, rev(tmp$upper)),
-                border = NA,
-                col = set_minimum_transparency(plot_arg$confint_col[j],
-                                               alpha_min = plot_arg$confint_alpha[j]))
-        rm(xx, tmp)
+        conf_tmp <- compute_qqrplot_confint(
+          d$observed,
+          d$expected,
+          scale = scale,
+          detrend = detrend,
+          identity = ref_identity,
+          probs = ref_probs,
+          type = confint_type,
+          level = confint_level,
+          transform_infinity = TRUE
+        )
+  
+        polygon(c(sort(d$expected), sort(d$expected, decreasing = TRUE)), c(conf_tmp$lower, rev(conf_tmp$upper)),
+          border = NA,
+          col = set_minimum_transparency(plot_arg$confint_col[j],
+                                         alpha_min = plot_arg$confint_alpha[j]))
+  
       }
     }
 
@@ -980,7 +995,7 @@ autoplot.qqrplot <- function(object,
                              detrend = NULL,
                              simint = NULL,
                              confint = NULL,
-                             confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
+                             confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
                              confint_level = 0.95,
                              ref = NULL,
                              ref_identity = TRUE, 
@@ -1053,9 +1068,10 @@ autoplot.qqrplot <- function(object,
   scale <- match.arg(scale, c("normal", "uniform"))
   confint_type <- match.arg(confint_type)
 
-  if (detrend && confint_type != "pointwise") {
-    warning('For detrended qqrplots only pointwise confidence intervals are currently implemented, set accordingly."`')
-    confint_type <- "pointwise"
+  ## TODO: (ML) Can this be supported?
+  if (scale == "uniform" && isFALSE(ref_identity)) {
+    warning('For uniform scale "ref_identity" must be TRUE, set accordingly.')
+    ref_identity <- TRUE
   }
 
   ## get input object on correct scale
@@ -1199,7 +1215,6 @@ autoplot.qqrplot <- function(object,
         probs = ref_probs, 
         scale = scale,
         style = confint,
-        xlim = xlim,
         colour = aes_confint$colour,
         fill = aes_confint$fill,
         size = aes_confint$size,
@@ -1322,12 +1337,14 @@ autoplot.qqrplot <- function(object,
 #' line used.
 #' @param detrend logical, default \code{FALSE}. If set to \code{TRUE} the qqrplot is detrended,
 #' i.e, plotted as a \code{\link{wormplot}}.
-#' @param type character. Should \code{"pointwise"} (default), \code{"simultaneous"}, or
-#' \code{"tail-sensitive"} confidence intervals of the (randomized) quantile residuals be visualized.
-#' Simultaneous confidence intervals are based on the Kolmogorov-Smirnov test.
+#' @param type character. Method for creating the confidence intervals. By
+#' default, an internal point-wise routine (`pointwise_internal`) is used.
+#' Alternatively, band methods provided by [qqconf::get_qq_band()] can be used:
+#' "ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
+#' and "pointwise" uses a slightly alternative implementation of pointwise bands.
+#' Note that for uniform scales, the identity line must be used for reference
+#' (`ref_identity = TRUE`).
 #' @param level numeric. The confidence level required, defaults to \code{0.95}.
-#' @param xlim \code{NULL} (default) or numeric. The x limits for computing the confidence intervals.
-#' @param n positive numeric. Number of points used to compute the confidence intervals, the more the smoother.
 #' @param style character. Style for plotting confidence intervals. Either \code{"polygon"} (default)
 #' or \code{"line"}).
 #'
@@ -1680,9 +1697,8 @@ GeomQqrplotRef <- ggplot2::ggproto("GeomQqrplotRef", ggplot2::GeomAbline,
 stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_confint", 
                              position = "identity", na.rm = FALSE,
                              show.legend = NA, inherit.aes = TRUE,
-                             xlim = NULL, n = 101, 
                              detrend = FALSE, 
-                             type = c("pointwise", "simultaneous", "tail-sensitive"), level = 0.95,
+                             type = c("pointwise_internal", "ell", "ks", "pointwise"), level = 0.95,
                              identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                              style = c("polygon", "line"), ...) {
 
@@ -1700,8 +1716,6 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      xlim = xlim,
-      n = n,
       detrend = detrend,
       type = type,
       level = level,
@@ -1726,8 +1740,6 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
 
   compute_group = function(data, 
                            scales, 
-                           xlim = NULL, 
-                           n = 101, 
                            detrend = FALSE,
                            type = "pointwise",
                            level = 0.95,
@@ -1736,88 +1748,41 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
                            scale = "normal",
                            style = "polygon") {
 
-    ## Copied and modified from `StatFunction$compute_group()`
-    if (is.null(scales$x)) {
-      simint <- if(is.null(xlim)) c(0, 1) else xlim
-      xseq <- seq(simint[1], simint[2], length.out = n)
-      x_trans <- xseq
-    } else {
-      simint <- if(is.null(xlim)) scales$x$dimension() else xlim
-
-      ## Make sure simint is not NA and add default ggplot2 expansion
-      simint[is.na(simint)] <- scales$x$dimension()[is.na(simint)]
-      simint <- simint + c(-1, 1) * diff(simint) * 0.05 
-      ## TODO: (ML) Better idea how to get the scales of the plot?
-      xseq <- seq(simint[1], simint[2], length.out = n) # alternative: xseq <- trafo(ppoints(xseq))
-
-      if (scales$x$is_discrete()) {
-        x_trans <- xseq
-      } else {
-        # For continuous scales, need to back transform from transformed simint
-        # to original values
-        x_trans <- scales$x$trans$inverse(xseq)
-      }
-    }
-
-    ## Employing StatQqrplotRef Method
-    slope <- StatQqrplotRef$compute_group(data = data,
-      scales = scales,
+    conf_tmp <- compute_qqrplot_confint(
+      observed = data$y,
+      expected = data$x,
+      scale = scale,
       detrend = detrend,
       identity = identity,
       probs = probs,
-      scale = scale)$slope
-
-    intercept <- StatQqrplotRef$compute_group(
-      data = data,
-      scales = scales,
-      detrend = detrend,
-      identity = identity,
-      probs = probs,
-      scale = scale)$intercept
-
-    y_out1 <- do.call(
-      compute_qqrplot_confint, 
-      c(list(quote(x_trans)), 
-      list(n = length(data$x), scale = scale, type = type, level = level, which = "upper", slope = slope, intercept = intercept))
+      type = type,
+      level = level,
+      transform_infinity = TRUE
     )
-    if (!is.null(scales$y) && !scales$y$is_discrete()) {
-      # For continuous scales, need to apply transform
-      y_out1 <- scales$y$trans$transform(y_out1)
-    }
-    y_out2 <- do.call(
-      compute_qqrplot_confint, 
-      c(list(quote(x_trans)), 
-      list(n = length(data$x), scale = scale, type = type, level = level, which = "lower", slope = slope, intercept = intercept))
-    )
-    if (!is.null(scales$y) && !scales$y$is_discrete()) {
-      # For continuous scales, need to apply transform
-      y_out2 <- scales$y$trans$transform(y_out2)
-    }
 
-    # Must make sure that is not NA for specific trafo (due to extension of plot simint)
-    idx_na <- is.na(y_out1) | is.na(y_out2)
+    # Must make sure that is uuunot NA for specific trafo (due to extension of plot simint)
+    idx_na <- is.na(conf_tmp$lower) | is.na(conf_tmp$upper)
 
     if (style == "line") {
       ## prepare long format with group variable
-      d <- with(list(x_noaes = x_trans[!idx_na], y1 = y_out1[!idx_na], y2 = y_out2[!idx_na]), {
+      d <- with(list(x_noaes = sort(data$x[!idx_na]), y1 = conf_tmp$lower[!idx_na], y2 = conf_tmp$upper[!idx_na]), {
         n <- length(x_noaes)
         data.frame(x_noaes   = rep(x_noaes, each = 2),
                    topbottom = rep(1:2, n),
-                   y_noaes   = as.numeric(rbind(y1, y2))) 
+                   y_noaes   = as.numeric(rbind(conf_tmp$lower, conf_tmp$upper))) 
       })
       rbind(subset(d, subset = topbottom == 1), c(NA, NA, NA), subset(d, subset = topbottom == 2))
 
     } else {
       ## prepare short format
       data.frame(
-        x_noaes = c(x_trans, rev(x_trans)),
+        x_noaes = c(sort(data$x), sort(data$x, decreasing = TRUE)),
         y_noaes = c(
-          y_out2,
-          rev(y_out1)
+          conf_tmp$lower,
+          rev(conf_tmp$upper)
         )
       )[!idx_na, ]
     }
-     
   }
 )
 
@@ -1827,9 +1792,8 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
 geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_confint",
                             position = "identity", na.rm = FALSE,
                             show.legend = NA, inherit.aes = TRUE,
-                            xlim = NULL, n = 101, 
                             detrend = FALSE,
-                            type = c("pointwise", "simultaneous", "tail-sensitive"), level = 0.95,
+                            type = c("pointwise_internal", "ell", "ks", "pointwise"), level = 0.95,
                             identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                             style = c("polygon", "line"), ...) {
   style <- match.arg(style)
@@ -1846,8 +1810,6 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
     inherit.aes = inherit.aes,
     params = list(
       na.rm = na.rm,
-      xlim = xlim,
-      n = n,
       detrend = detrend,
       type = type,
       level = level,
@@ -1931,109 +1893,129 @@ set_default_aes_qqrplot_confint <- function(style) {
 # HELPER FUNCTIONS FOR `qqrplot`
 # -------------------------------------------------------------------
 ## helper function for plotting confint lines
-compute_qqrplot_confint <- function(x, 
-                                    n, 
+compute_qqrplot_confint <- function(observed,
+                                    expected, 
                                     scale = c("normal", "uniform"), 
-                                    type = c("pointwise", "simultaneous", "tail-sensitive"),
-                                    level = 0.95, 
-                                    which = c("both", "lower", "upper"), 
-                                    slope = 1, 
-                                    intercept = 0) {
+                                    detrend = FALSE,
+                                    identity = TRUE,
+                                    probs = c(0.25, 0.75), 
+                                    type = c("pointwise_internal", "ell", "ks", "pointwise"),
+                                    level = 0.95,
+                                    transform_infinity = FALSE) {
+
   ## checks
-  stopifnot(is.numeric(n), length(n) == 1)
+  stopifnot(length(observed) > 0 && is.numeric(observed))
+  stopifnot(length(expected) > 0 && is.numeric(expected))
+  stopifnot(length(observed) == length(expected))
+  stopifnot(is.logical(detrend))
+  stopifnot(is.logical(identity))
+  stopifnot(is.numeric(probs) && length(probs) == 2L && probs[1] <= probs[2])
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
+  stopifnot(is.logical(transform_infinity))
   scale <- match.arg(scale)
   type <- match.arg(type)
-  which <- match.arg(which)
-  
-  ## get trafos
-  if (scale == "uniform") {
-    dFun <- dunif
-    pFun <- punif
-    qFun <- qunif
-  } else {
-    dFun <- dnorm
-    pFun <- pnorm
-    qFun <- qnorm
+
+  ## TODO: (ML) Can this be supported?
+  if (scale == "uniform" && isFALSE(identity)) {
+    warning('For uniform scale "identity" must be TRUE, set accordingly.')
+    identity <- TRUE
   }
 
-  if (type == "tail-sensitive" && scale == "uniform") {
-    ## FIXME: (ML) Is this possible? Maybe obsolete if we are able
-    ## to implement the Einbeck 2021 alternative KIs
-    warning('tail-sensitive confidence intervals are not implemented for uniform scale: \n * `type` set to `"simultaneous"`')
-    type <- "simultaneous"
-  }
+  ## default supported type
+  if (type == "pointwise_internal") {
 
-  ## NOTE: (ML) For detrended Q-Q Plots, only "pointwise" is implemented (same as in `qqplotr`).
-  
-  ## compute pointwise or simultanous CI
-  if (type == "pointwise") {
-    p <- pFun(x) 
-    # FIXME: (ML) Currently "slope = 0" for wormplots, so if needed.
-    if (slope == 0) {
-      se <- (1 / dFun(x)) * (sqrt(p * (1 - p) / n)) 
+    ## get trafos
+    if (scale == "normal") {
+      dFun <- dnorm
+      pFun <- pnorm
     } else {
-      se <- (slope / dFun(x)) * (sqrt(p * (1 - p) / n)) 
+      dFun <- dunif
+      pFun <- punif
     }
-    rval <- as.numeric(qnorm(1 - (1 - level) / 2) * se)
+
+    p <- pFun(expected) 
+    if (detrend) {
+      slope <- 0
+      int <- 0
+      se <- (1 / dFun(expected)) * (sqrt(p * (1 - p) / length(observed))) 
+    } else {
+      if (scale == "normal" && isFALSE(identity)) {
+        quants <- quantile(observed, probs)
+        nquants <- qnorm(probs)
+        slope <- diff(quants) / diff(qnorm(probs))
+        int <- quants[1] - nquants[1] * slope
+      } else {
+        slope <- 1
+        int <- 0
+      }
+      se <- (slope / dFun(expected)) * (sqrt(p * (1 - p) / length(observed))) 
+    }
+    tmp <- data.frame(se = as.numeric(qnorm(1 - (1 - level) / 2) * se))
     
     ## add to reference line and return
-    lower <- (intercept + slope * x) - rval
-    upper <- (intercept + slope * x) + rval
+    tmp$lower_bound <- (int + slope * expected) - tmp$se
+    tmp$upper_bound <- (int + slope * expected) + tmp$se
 
-  } else if (type == "simultaneous") {
-    p <- pFun(x)
-    ## FIXME: (ML) Use exact Komogorov quantile. Exported? Maybe
-    ##        obsolete if we are able to implement the Einbeck 2021 alternative KIs
-    epsilon <- sqrt((1 / (2 * n)) * log(2 / (1 - level)))
-    lp <- pmax(p - epsilon, rep(0, length(p)))
-    up <- pmin(p + epsilon, rep(1, length(p)))
-    lower <- intercept + slope * qFun(lp)
-    upper <- intercept + slope * qFun(up)
+    rval <- data.frame(lower = sort(tmp$lower_bound), upper = sort(tmp$upper_bound))
+  } else {
+    ## confint types qqconf
 
-  } else { # tail sensitive
+    if(detrend) {
+      tmp_observed <- observed + expected
+    } else {
+      tmp_observed <- observed
+    }
+    if (scale == "normal") {
+      if (identity) {
+        dparams <- list(mean = 0, sd = 1)
+        tmp_ref <- expected
+      } else {
+        quants <- quantile(tmp_observed, probs)
+        dparams <- list(
+          mean = mean(quants),
+          sd = 1 / diff(qnorm(probs)) * diff(quants)
+        )
+        nquants <- qnorm(probs)
+        slope <- diff(quants) / diff(qnorm(probs))
+        int <- quants[1] - nquants[1] * slope
+        tmp_ref <- int + slope * expected
+      }
+    
+      tmp <- qqconf::get_qq_band(
+        n = length(observed),
+        alpha = 1 - level,
+        distribution = qnorm,
+        dparams = dparams,
+        band_method = type
+      )
 
-    ## FIXME: (ML) May possibly also become obsolete
-    warning("The implementation of tail-sensitive confidence intervals is not yet tested and are currently not suggested to be used.")
-
-    B <- 1000 # number of simulations
-    nx <- length(x)
-
-    sim <- NULL
-    for (i in 1:B) sim <- cbind(sim, sort(rnorm(nx)))
-
-    # convert simulated values to probabilities
-    sim <- t(apply(sim, 1, pnorm))
-
-    # widen the CIs to get simultanoues (100 * conf)% CIs
-    pValue <- matrix(NA, nrow = nx, ncol = B)
-    for (i in 1:nx) {
-      tmp <- pbeta(sim[i, ], shape1 = i, shape2 = nx + 1 - i)
-      pValue[i, ] <- apply(cbind(tmp, 1 - tmp), 1, min)
+    } else { # scale == "uniform"
+      tmp <- qqconf::get_qq_band(
+        n = length(observed),
+        alpha = 1 - level,
+        distribution = qunif,
+        band_method = type
+      )
+    
+      tmp_ref <- expected
     }
 
-    critical <- apply(pValue, 2, min)
-    criticalC <- quantile(critical, prob = 1 - level)
-
-    # FIXME: (ML) How are the shape parameters computed - this is just an educated guess!
-    upperCi <- qbeta(1 - criticalC, shape1 = pnorm(x) * nx, shape2 = pnorm(x, lower.tail = FALSE) * nx)
-    lowerCi <- qbeta(criticalC, shape1 = pnorm(x) * nx, shape2 = pnorm(x, lower.tail = FALSE) * nx)
-
-    # translate back to sample quantiles
-    upper <- qnorm(upperCi)
-    lower <- qnorm(lowerCi)
+    # optionally return only finite values
+    if (transform_infinity) {
+      tmp$lower_bound[is.infinite(tmp$lower_bound)] <- .Machine$double.xmax * sign(tmp$lower_bound)[is.infinite(tmp$lower_bound)]
+      tmp$upper_bound[is.infinite(tmp$upper_bound)] <- .Machine$double.xmax *  sign(tmp$upper_bound)[is.infinite(tmp$upper_bound)]
+    }
+    
+    ## Sort reference values as CI returned by qqconf are always sorted
+    rval <- data.frame(lower = tmp$lower_bound, upper = tmp$upper_bound)
+    
+    if (detrend) {
+      rval$lower <- tmp$lower - sort(tmp_ref)
+      rval$upper <- tmp$upper - sort(tmp_ref)
+    }
   }
 
-  if (which == "lower") {
-    lower
-  } else if (which == "upper") {
-    upper
-  } else {
-    data.frame(
-      confint_lwr = lower,
-      confint_upr = upper
-    )
-  }
+  return(rval)
 }
 
 
@@ -2108,3 +2090,6 @@ print.qqrplot <- function(x, ...) {
   ## call next print method
   NextMethod()
 }
+
+
+

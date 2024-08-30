@@ -92,10 +92,8 @@ geom_qqrplot_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  xlim = NULL,
-  n = 101,
   detrend = FALSE,
-  type = c("pointwise", "simultaneous", "tail-sensitive"),
+  type = c("pointwise_internal", "ell", "ks", "pointwise"),
   level = 0.95,
   identity = TRUE,
   probs = c(0.25, 0.75),
@@ -222,13 +220,13 @@ be shown: \code{"uniform"} (default) for uniform scale or \code{"normal"} for no
 Used for the reference line which goes through the first and third quartile
 of theoretical distributions.}
 
-\item{xlim}{\code{NULL} (default) or numeric. The x limits for computing the confidence intervals.}
-
-\item{n}{positive numeric. Number of points used to compute the confidence intervals, the more the smoother.}
-
-\item{type}{character. Should \code{"pointwise"} (default), \code{"simultaneous"}, or
-\code{"tail-sensitive"} confidence intervals of the (randomized) quantile residuals be visualized.
-Simultaneous confidence intervals are based on the Kolmogorov-Smirnov test.}
+\item{type}{character. Method for creating the confidence intervals. By
+default, an internal point-wise routine (`pointwise_internal`) is used.
+Alternatively, band methods provided by [qqconf::get_qq_band()] can be used:
+"ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
+and "pointwise" uses a slightly alternative implementation of pointwise bands.
+Note that for uniform scales, the identity line must be used for reference
+(`ref_identity = TRUE`).}
 
 \item{level}{numeric. The confidence level required, defaults to \code{0.95}.}
 
