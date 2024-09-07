@@ -9,6 +9,9 @@
 * New package web page (via `altdoc`/`quarto`) at
   <https://topmodels.R-Forge.R-project.org/crch/>
 
+* Achim Zeileis takes over maintenance from Jakob W. Messner. Added Ioannis Kosmidis
+  and Georg J. Mayr as contributors.
+
 
 # crch 1.1-2
 

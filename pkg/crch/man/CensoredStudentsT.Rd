@@ -122,7 +122,9 @@ X <- CensoredStudentsT(
   left     = c(-Inf,   0, 0),
   right    = c( Inf, Inf, 5)
 )
+\donttest{
 X
+}
 
 ## compute mean of the censored distribution
 mean(X)
