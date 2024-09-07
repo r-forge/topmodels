@@ -68,14 +68,6 @@ expect_identical(sort(names(r1r2r3)), sort(c(names(r1), tmp_additional_variables
 expect_identical(sort(unique(r1r2r3$group)), 1:3)
 expect_identical(c(r1, r2, r3), rbind(r1, r2, r3))
 
-# NOTE: Combining rootogramd does not work.
-# TODO: (RS2ML) Is this intended?
-expect_error(c(r1_summary, r2_summary, r3_summary), info = "combining rootograms not possible")
-##### expect_silent(s1s2s3 <- c(r1_summary, r2_summary, r3_summary))
-##### identical(r1r2r3, s1s2s3)
-##### expect_silent(s1s2s3 <- rbind(r1_summary, r2_summary, r3_summary))
-##### identical(r1r2r3, s1s2s3)
-
 # Testing the same method for c("rootogram", "tbl_df", ...) objects; only for the
 # tribble-combo (combining tbl_r1, tbl_r2 and tbl_r3).
 expect_silent(tbl_r1 <- rootogram(m1, class = "tibble", plot = FALSE))

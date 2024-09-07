@@ -1736,7 +1736,8 @@ GeomRootogramConfint <- ggplot2::ggproto("GeomRootogramConfint", ggplot2::Geom,
 # -------------------------------------------------------------------
 # HELPER FUNCTIONS FOR GETTING AN EXTENDED ROOTOGRAM OBJECT
 # -------------------------------------------------------------------
-#' @importFrom distributions3 is_discrete is_continuous PoissonBinomial
+#' @importFrom distributions3 is_discrete is_continuous
+#' @importFrom utils packageVersion getFromNamespace
 compute_rootogram_confint <- function(object,
                                       level = 0.95,
                                       nrep = 1000,
@@ -1758,14 +1759,26 @@ compute_rootogram_confint <- function(object,
     dist <- do.call("rbind", dist)
     colnames(dist) <- paste0("p", 1L:ncol(dist))
   }
-  dist <- PoissonBinomial(dist)
+
+  ## number of original observations
+  n <- NCOL(dist)
+  m <- object$mid
+  
+  ## FIXME: Once distributions3 version 0.2.2 is released,
+  ## require this in the DESCRIPTION and add it to importFrom above
+  ## and omit the code conditioning on it
+  if(packageVersion("distributions3") > "0.2.1") {
+    PoissonBinomial <- getFromNamespace("PoissonBinomial", ns = "distributions3")
+    dist <- PoissonBinomial(dist)
+  } else {
+    if(type != "tukey") {
+      warning("confidence intervals of type 'pointwise' or 'simultaneous' require a version of the 'distributions3' package greater than 0.2.1, using 'tukey' instead")
+      type <- "tukey"
+    }
+  }
 
   ## two-sided alpha at level
   alpha <- c((1 - level)/2, 1 - (1 - level)/2)
-
-  ## number of original observations
-  n <- length(unclass(dist))
-  m <- object$mid
 
   ## raw expected
   y <- object$expected
