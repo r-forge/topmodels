@@ -43,19 +43,25 @@
 #' @param na.action function determining what should be done with missing
 #' values in \code{newdata}.  The default is to employ \code{NA}.
 #' @param type character specifying the type of probabilistic forecast to
-#' compute. Note that \code{type = "probability"} corresponds to cumulative
-#' probability as in \code{pnorm}, \code{pbinom}, etc.
-#' @param at specification of values at which the forecasts should be
-#' evaluated, typically a numeric vector but possibly also a matrix or data
-#' frame.  Additionally, \code{at} can be the character string
-#' \code{"function"} or \code{"list"}, see details below.
+#' compute. The default is to return a \code{"distribution"} object (using
+#' the infrastructure from \pkg{distributions3}). Alternatively, just the \code{"parameters"}
+#' of the distribution can be computed or the corresponding moments:
+#' \code{"mean"}, \code{"variance"}, \code{"skewness"}, \code{"kurtosis"}.
+#' Finally, standard functions for the distribution can be evaluated (at
+#' argument \code{at}, see below), namely
+#' the \code{"density"} (or equivalently \code{"pdf"} or \code{"pmf"}),
+#' the \code{"log_likelihood"} (or equivalently \code{"log_pdf"}),
+#' the \code{"quantile"} function, or the cumulative \code{"probability"}
+#' (or equivalently \code{"cdf"}).
+#' @param at numeric vector at which the forecasts should be
+#' evaluated if \code{type} specifies a function that takes an additional argument.
 #' @param drop logical. Should forecasts be returned in a data frame (default)
 #' or (if possible) dropped to a vector, see return value description below.
 #' @param \dots further parameters passed to methods. In particular, this includes
 #' the logical argument \code{elementwise = NULL}. Should each element of distribution only be evaluated at the
 #' corresponding element of \code{at} (\code{elementwise = TRUE}) or at all elements
 #' in \code{at} (\code{elementwise = FALSE}). Elementwise evaluation is only possible
-#' if the number of observations is length of \code{at} are the same and in that case a vector of
+#' if the number of observations is the same as the length of \code{at} and in that case a vector of
 #' the same length is returned. Otherwise a matrix is returned. The default is to use
 #' \code{elementwise = TRUE} if possible, and otherwise \code{elementwise = FALSE}.
 #' @param sigma character or numeric or \code{NULL}. Specification of the standard
@@ -145,14 +151,6 @@ procast.default <- function(object, newdata = NULL, na.action = na.pass,
   if(type == "log_pdf") type <- "loglikelihood"
   label <- type
   
-  ## TODO: one could also support type = function but it's not clear how easy that would really be for the users...
-  ## fargs <- FALSE
-  ## if(!is.function(type)) stop("'type' must either be a character string or a function")
-  ## label <- "user-defined" ## FIXME
-  ## f <- type
-  ## fargs <- length(setdiff(names(formals(f)), "...")) > 1L
-  ## type <- "custom"
-
   ## FIXME: how to handle 'size' in binomial family?
   ## extract probability distribution object
   pd <- if(inherits(object, "distribution")) {
@@ -173,10 +171,18 @@ procast.default <- function(object, newdata = NULL, na.action = na.pass,
     "density"       = distributions3::pdf(pd, at, ...),
     "loglikelihood" = distributions3::log_pdf(pd, at, ...),
     "parameters"    = as.matrix(pd),
-    "skewness"      = distributions3::skewness(pd, at, ...),
-    "kurtosis"      = distributions3::kurtosis(pd, at, ...)
-    ## "custom"        = if(fargs) f(pd, at, ...) else f(pd, ...)
+    "skewness"      = distributions3::skewness(pd, ...),
+    "kurtosis"      = distributions3::kurtosis(pd, ...)
   )
+  
+  ## preserve names
+  if(!is.null(n <- names(pd))) {
+    if(is.null(dim(pc))) {
+      names(pc) <- n
+    } else {
+      rownames(pc) <- n
+    }
+  }
   
   ## convert to data frame if drop = FALSE
   if(drop) {

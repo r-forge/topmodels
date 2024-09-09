@@ -86,13 +86,19 @@ which to predict. If omitted, the original observations are used.}
 values in \code{newdata}.  The default is to employ \code{NA}.}
 
 \item{type}{character specifying the type of probabilistic forecast to
-compute. Note that \code{type = "probability"} corresponds to cumulative
-probability as in \code{pnorm}, \code{pbinom}, etc.}
+compute. The default is to return a \code{"distribution"} object (using
+the infrastructure from \pkg{distributions3}). Alternatively, just the \code{"parameters"}
+of the distribution can be computed or the corresponding moments:
+\code{"mean"}, \code{"variance"}, \code{"skewness"}, \code{"kurtosis"}.
+Finally, standard functions for the distribution can be evaluated (at
+argument \code{at}, see below), namely
+the \code{"density"} (or equivalently \code{"pdf"} or \code{"pmf"}),
+the \code{"log_likelihood"} (or equivalently \code{"log_pdf"}),
+the \code{"quantile"} function, or the cumulative \code{"probability"}
+(or equivalently \code{"cdf"}).}
 
-\item{at}{specification of values at which the forecasts should be
-evaluated, typically a numeric vector but possibly also a matrix or data
-frame.  Additionally, \code{at} can be the character string
-\code{"function"} or \code{"list"}, see details below.}
+\item{at}{numeric vector at which the forecasts should be
+evaluated if \code{type} specifies a function that takes an additional argument.}
 
 \item{drop}{logical. Should forecasts be returned in a data frame (default)
 or (if possible) dropped to a vector, see return value description below.}
@@ -101,7 +107,7 @@ or (if possible) dropped to a vector, see return value description below.}
 the logical argument \code{elementwise = NULL}. Should each element of distribution only be evaluated at the
 corresponding element of \code{at} (\code{elementwise = TRUE}) or at all elements
 in \code{at} (\code{elementwise = FALSE}). Elementwise evaluation is only possible
-if the number of observations is length of \code{at} are the same and in that case a vector of
+if the number of observations is the same as the length of \code{at} and in that case a vector of
 the same length is returned. Otherwise a matrix is returned. The default is to use
 \code{elementwise = TRUE} if possible, and otherwise \code{elementwise = FALSE}.}
 
