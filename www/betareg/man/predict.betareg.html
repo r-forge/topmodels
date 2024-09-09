@@ -449,6 +449,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
+  <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul>
 </li>
@@ -462,8 +463,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code class="language-R">## S3 method for class 'betareg'
 predict(object, newdata = NULL,
   type = c("response", "link", "precision", "variance", "parameters",
-    "density", "probability", "quantile"),
-  na.action = na.pass, at = 0.5, ...)
+    "distribution", "density", "probability", "quantile"),
+  na.action = na.pass, at = 0.5, elementwise = NULL, ...)
 </code></pre>
 </section><section id="arguments" class="level3"><h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
 <table>
@@ -488,7 +489,7 @@ optionally, a data frame in which to look for variables with which to predict. I
 <code id="type">type</code>
 </td>
 <td>
-character indicating type of predictions: fitted means of response (<code>“response”</code>), corresponding linear predictor (<code>“link”</code>), fitted precision parameter phi (<code>“precision”</code>), fitted variances of response (<code>“variance”</code>), or fitted quantile(s) of the response distribution (<code>“quantile”</code>).
+character indicating type of predictions: fitted means of the response (default, <code>“response”</code> or equivalently <code>“mean”</code>), corresponding linear predictor (<code>“link”</code>), fitted precision parameter phi (<code>“precision”</code>), fitted variances of the response (<code>“variance”</code>), all <code>“parameters”</code> of the response distribution, or the corresponding <code>“distribution”</code> object (using the infrastructure from <span class="pkg">distributions3</span>). Finally, standard functions for the distribution can be evaluated (at argument <code>at</code>, see below), namely the <code>“density”</code> (or equivalently <code>“pdf”</code>), the <code>“quantile”</code> function, or the cumulative <code>“probability”</code> (or equivalently <code>“cdf”</code>).
 </td>
 </tr>
 <tr>
@@ -504,7 +505,15 @@ function determining what should be done with missing values in <code>newdata</c
 <code id="at">at</code>
 </td>
 <td>
-numeric vector indicating the level(s) at which quantiles should be predicted (only if <code>type = “quantile”</code>), defaulting to the median <code>at = 0.5</code>.
+numeric vector at which the predictions should be evaluated if <code>type</code> specifies a function that takes an additional argument.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="elementwise">elementwise</code>
+</td>
+<td>
+logical. Should each element of the distribution only be evaluated at the corresponding element of <code>at</code> (<code>elementwise = TRUE</code>) or at all elements in <code>at</code> (<code>elementwise = FALSE</code>). Elementwise evaluation is only possible if the number of observations is the same as the length of <code>at</code> and in that case a vector of the same length is returned. Otherwise a matrix is returned. The default is to use <code>elementwise = TRUE</code> if possible, and otherwise <code>elementwise = FALSE</code>.
 </td>
 </tr>
 <tr>
@@ -512,12 +521,13 @@ numeric vector indicating the level(s) at which quantiles should be predicted (o
 <code id="...">…</code>
 </td>
 <td>
-currently not used.
+further arguments when <code>type</code> specifies a function, e.g., <code>type = “density”</code> with <code>log = TRUE</code> computes log-densities (or log-likelihoods).
 </td>
 </tr>
 </tbody></table></section><section id="details" class="level3"><h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>FIXME: Update to extended type and at processing.</p>
-<p>FIXME: Add comments about pit and rootogram.</p>
+<p>Each prediction for a <code>betareg</code> model internally first computes the parameters for all observations in <code>newdata</code> (or the original data if <code>newdata</code> is missing). These parameters correspond to a predicted beta distribution (or extended-support beta distribution) for each observation. Then the actual predictions can also be moments of the distributions or standard quantities such as densities, cumulative probabilities, or quantiles. The latter are computed with the <code>d</code>/<code>p</code>/<code>q</code> functions such as <code>dbetar</code> (or <code>dxbetax</code> or <code>dxbeta</code>).</p>
+</section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
+<p>Either a vector or matrix of predictions with the same number of observations as rows in <code>newdata</code>.</p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://betareg.R-Forge.R-project.org/">"betareg"</a></span><span class="op">)</span></span>
@@ -572,6 +582,7 @@ currently not used.
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## evaluate cumulative _p_robabilities for (small) new data set</span></span>
 <span><span class="va">gyd</span> <span class="op">&lt;-</span> <span class="va">GasolineYield</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>, <span class="op">]</span></span>
+<span></span>
 <span><span class="co">## CDF at 0.1 for each observation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gy2</span>, newdata <span class="op">=</span> <span class="va">gyd</span>, type <span class="op">=</span> <span class="st">"probability"</span>, at <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -586,14 +597,19 @@ currently not used.
 5  7.165e-01 9.991e-01
 10 6.053e-40 5.828e-09</code></pre>
 </div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## CDF at pairwise combinations of 0.1/0.2/0.3 and observations</span></span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## CDF at elementwise combinations of 0.1/0.2/0.3 and observations</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gy2</span>, newdata <span class="op">=</span> <span class="va">gyd</span>, type <span class="op">=</span> <span class="st">"probability"</span>, at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     1      5     10 
 0.5407 0.9991 0.4549 </code></pre>
 </div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## CDF at all combinations of 0.1/0.2/0.3 and observations</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gy2</span>, newdata <span class="op">=</span> <span class="va">gyd</span>, type <span class="op">=</span> <span class="st">"probability"</span>, at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gy2</span>, newdata <span class="op">=</span> <span class="va">gyd</span>, type <span class="op">=</span> <span class="st">"probability"</span>, at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span><span class="op">)</span>, elementwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     1      5     10 
+0.5407 0.9991 0.4549 </code></pre>
+</div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## CDF at all combinations of 0.1/0.2/0.3 and observations</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gy2</span>, newdata <span class="op">=</span> <span class="va">gyd</span>, type <span class="op">=</span> <span class="st">"probability"</span>, at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span><span class="op">)</span>, elementwise <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       p_0.1     p_0.2  p_0.3
 1  5.407e-01 9.933e-01 1.0000
