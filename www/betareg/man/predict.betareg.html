@@ -458,7 +458,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content"><section id="prediction-method-for-betareg-objects" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="prediction-method-for-betareg-objects">Prediction Method for betareg Objects</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Extract various types of predictions from beta regression models: either on the scale of responses in (0, 1) or the scale of the linear predictor.</p>
+<p>Extract various types of predictions from beta regression models: First, GLM-style predictions on the scale of responses in (0, 1) or the scale of the linear predictor are provided. Second, various quantities based on the predicted beta distributions are available, e.g., moments, quantiles, probabilities, densities, etc.</p>
 </section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'betareg'
 predict(object, newdata = NULL,
