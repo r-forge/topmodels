@@ -497,16 +497,15 @@ numeric. The precision parameter of the beta distribution.
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">6020</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## three beta distributions</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://betareg.R-Forge.R-project.org/man/BetaR.html">BetaR</a></span><span class="op">(</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/betareg/man/BetaR.html">BetaR</a></span><span class="op">(</span></span>
 <span>  mu  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.50</span>, <span class="fl">0.75</span><span class="op">)</span>,</span>
 <span>  phi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">X</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "BetaR distribution (mu = 0.25, phi = 1)"
-[2] "BetaR distribution (mu = 0.50, phi = 1)"
-[3] "BetaR distribution (mu = 0.75, phi = 2)"</code></pre>
+<pre><code>[1] "BetaR(mu = 0.25, phi = 1)" "BetaR(mu = 0.50, phi = 1)"
+[3] "BetaR(mu = 0.75, phi = 2)"</code></pre>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## compute moments of the distribution</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

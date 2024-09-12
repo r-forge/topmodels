@@ -539,7 +539,7 @@ F-statistic: 21.3 on 3 and 40 DF,  p-value: 2.08e-08</code></pre>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Beta regression (with numerical rather than analytic standard errors)</span></span>
 <span><span class="co">## (Note: Smithson &amp; Verkuilen erroneously compute one-sided p-values)</span></span>
-<span><span class="va">rs_beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://betareg.R-Forge.R-project.org/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>,</span>
+<span><span class="va">rs_beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ReadingSkills</span>, hessian <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">rs_beta</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -573,7 +573,7 @@ Pseudo R-squared: 0.576
 Number of iterations in BFGS optimization: 25 </code></pre>
 </div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Extended-support beta mixture regression (Kosmidis &amp; Zeileis 2024)</span></span>
-<span><span class="va">rs_xbx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://betareg.R-Forge.R-project.org/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy1</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span><span class="op">)</span></span>
+<span><span class="va">rs_xbx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy1</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">rs_xbx</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -582,7 +582,7 @@ betareg(formula = accuracy1 ~ dyslexia * iq | dyslexia + iq, data = ReadingSkill
 
 Randomized quantile residuals:
    Min     1Q Median     3Q    Max 
--2.418 -0.598  0.010  0.914  2.687 
+-2.418 -0.598  0.010  0.748  1.361 
 
 Coefficients (mu model with logit link):
             Estimate Std. Error z value Pr(&gt;|z|)    
