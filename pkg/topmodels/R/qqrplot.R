@@ -836,9 +836,12 @@ plot.qqrplot <- function(x,
           identity = ref_identity,
           probs = ref_probs,
           type = confint_type,
-          level = confint_level,
-          transform_infinity = TRUE
+          level = confint_level
         )
+
+        # transform to finite values for plotting
+        conf_tmp$lower[is.infinite(conf_tmp$lower)] <- plot_arg$ylim1 * 10^2
+        conf_tmp$upper[is.infinite(conf_tmp$upper)] <- plot_arg$ylim2 * 10^2
         
         lines(
           sort(d$expected),
@@ -868,9 +871,12 @@ plot.qqrplot <- function(x,
           identity = ref_identity,
           probs = ref_probs,
           type = confint_type,
-          level = confint_level,
-          transform_infinity = TRUE
+          level = confint_level
         )
+
+        # transform to finite values for plotting
+        conf_tmp$lower[is.infinite(conf_tmp$lower)] <- plot_arg$ylim1 * 10^2
+        conf_tmp$upper[is.infinite(conf_tmp$upper)] <- plot_arg$ylim2 * 10^2
   
         polygon(c(sort(d$expected), sort(d$expected, decreasing = TRUE)), c(conf_tmp$lower, rev(conf_tmp$upper)),
           border = NA,
@@ -1756,9 +1762,13 @@ StatQqrplotConfint <- ggplot2::ggproto("StatQqrplotConfint", ggplot2::Stat,
       identity = identity,
       probs = probs,
       type = type,
-      level = level,
-      transform_infinity = TRUE
+      level = level
     )
+
+    # transform to finite values for plotting 
+    # TODO: (ML) Check again if that also works if scales are modified for ggplot2
+    conf_tmp$lower[is.infinite(conf_tmp$lower)] <- scales$y$range$range[1] * 10^2
+    conf_tmp$upper[is.infinite(conf_tmp$upper)] <- scales$y$range$range[2] * 10^2
 
     # Must make sure that is uuunot NA for specific trafo (due to extension of plot simint)
     idx_na <- is.na(conf_tmp$lower) | is.na(conf_tmp$upper)
@@ -1900,8 +1910,7 @@ compute_qqrplot_confint <- function(observed,
                                     identity = TRUE,
                                     probs = c(0.25, 0.75), 
                                     type = c("pointwise_internal", "ell", "ks", "pointwise"),
-                                    level = 0.95,
-                                    transform_infinity = FALSE) {
+                                    level = 0.95) {
 
   ## checks
   stopifnot(length(observed) > 0 && is.numeric(observed))
@@ -1911,7 +1920,6 @@ compute_qqrplot_confint <- function(observed,
   stopifnot(is.logical(identity))
   stopifnot(is.numeric(probs) && length(probs) == 2L && probs[1] <= probs[2])
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
-  stopifnot(is.logical(transform_infinity))
   scale <- match.arg(scale)
   type <- match.arg(type)
 
@@ -1998,12 +2006,6 @@ compute_qqrplot_confint <- function(observed,
       )
     
       tmp_ref <- expected
-    }
-
-    # optionally return only finite values
-    if (transform_infinity) {
-      tmp$lower_bound[is.infinite(tmp$lower_bound)] <- .Machine$double.xmax * sign(tmp$lower_bound)[is.infinite(tmp$lower_bound)]
-      tmp$upper_bound[is.infinite(tmp$upper_bound)] <- .Machine$double.xmax *  sign(tmp$upper_bound)[is.infinite(tmp$upper_bound)]
     }
     
     ## Sort reference values as CI returned by qqconf are always sorted
