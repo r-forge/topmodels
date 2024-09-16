@@ -31,7 +31,7 @@ website:
           file: man/rootogram.qmd
         - text: "Plotting probabilistic model diagnostics"
           file: man/plot.rootogram.qmd
-        - text: "Interfacs to models/distributions"
+        - text: "Interfaces to models/distributions"
           file: man/Empirical.qmd
         - text: "Data sets"
           file: man/SerumPotassium.qmd
@@ -120,7 +120,7 @@ website:
               file: man/geom_qqrplot.qmd
             - text: topmodels
               file: man/topmodels.qmd
-        - section: "Interfacs to models/distributions"
+        - section: "Interfaces to models/distributions"
           contents:
             - text: Empirical
               file: man/Empirical.qmd
