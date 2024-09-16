@@ -173,6 +173,8 @@ cbind(
 )
 
 ## evaluate continuous ranked probability score (CRPS) using scoringRules
+\donttest{
 library("scoringRules")
 crps(X, x)
+}
 }

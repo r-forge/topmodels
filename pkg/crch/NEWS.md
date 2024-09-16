@@ -1,3 +1,12 @@
+# crch 1.2-1
+
+* Due to a bug in the `crps()` computation for censored and truncated Student's
+  T distributions in the `scoringRules` package, some example output in
+  `?CensoredStudentsT` and `?TruncatedStudentsT` was in error. The problem has
+  been fixed in version 1.1.3 of `scoringRules` and reference output in `crch`
+  was updated.
+
+
 # crch 1.2-0
 
 * Improved implementations of expectation and variance of censored and truncated

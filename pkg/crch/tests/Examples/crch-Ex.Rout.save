@@ -422,15 +422,12 @@ The following object is masked from ‘package:grDevices’:
 [3,]    2.135302 2.14667243
 > 
 > ## evaluate continuous ranked probability score (CRPS) using scoringRules
-> library("scoringRules")
-> crps(X, x)
-[1]        Inf 0.00000000 0.06200845
 > 
 > 
 > 
 > cleanEx()
 
-detaching ‘package:scoringRules’, ‘package:distributions3’
+detaching ‘package:distributions3’
 
 > nameEx("RainIbk")
 > ### * RainIbk
@@ -871,15 +868,12 @@ The following object is masked from ‘package:grDevices’:
 [3,]    2.287847  2.29976419
 > 
 > ## evaluate continuous ranked probability score (CRPS) using scoringRules
-> library("scoringRules")
-> crps(X, x)
-[1]       Inf 0.0000000 0.3016241
 > 
 > 
 > 
 > cleanEx()
 
-detaching ‘package:scoringRules’, ‘package:distributions3’
+detaching ‘package:distributions3’
 
 > nameEx("crch")
 > ### * crch
@@ -1103,7 +1097,7 @@ Iteration 1/2000 parameters added 1/42Iteration 2/2000 parameters added 1/42It
 
   Selected formula:
    y ~ V2 + V3 | V4
-<environment: 0x5603816df5e8>
+<environment: 0x55d975443ff8>
 > 
 > CRCH2 <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0 )
 > BOOST <- crch(stabsel$formula.new, data = data, dist = "gaussian", left = 0,
@@ -1290,7 +1284,7 @@ detaching ‘package:lmtest’, ‘package:zoo’
 
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  6.172 0.076 6.249 0 0 
+Time elapsed:  4.139 0.07 4.211 0 0 
 > grDevices::dev.off()
 null device 
           1 
