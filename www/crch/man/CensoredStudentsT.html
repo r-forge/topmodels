@@ -571,11 +571,12 @@ otherwise
 <span>  left     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>,   <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  right    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span> <span class="cn">Inf</span>, <span class="cn">Inf</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">X</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "CensoredStudentsT(df = 5, location = 0, scale = 1, left = -Inf, right = Inf)"
-[2] "CensoredStudentsT(df = 5, location = 1, scale = 1, left =    0, right = Inf)"
-[3] "CensoredStudentsT(df = 5, location = 2, scale = 2, left =    0, right =   5)"</code></pre>
+<pre><code>[1] "CensoredStudentsT distribution (df = 5, location = 0, scale = 1, left = -Inf, right = Inf)"
+[2] "CensoredStudentsT distribution (df = 5, location = 1, scale = 1, left =    0, right = Inf)"
+[3] "CensoredStudentsT distribution (df = 5, location = 2, scale = 2, left =    0, right =   5)"</code></pre>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## compute mean of the censored distribution</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -690,10 +691,11 @@ otherwise
 [3,]    2.135302 2.14667243</code></pre>
 </div>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## evaluate continuous ranked probability score (CRPS) using scoringRules</span></span>
+<span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/FK83/scoringRules">"scoringRules"</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/scoringRules/man/scores.html">crps</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">x</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1]        Inf 0.00000000 0.06200845</code></pre>
+<pre><code>[1] 0.2570254 0.5906767 0.6655784</code></pre>
 </div>
 </div>
 
