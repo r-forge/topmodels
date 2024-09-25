@@ -146,6 +146,7 @@ qqrplot <- function(object, ...) {
 #' @rdname qqrplot
 #' @method qqrplot default
 #' @importFrom utils getS3method
+#' @importFrom stats complete.cases
 #' @export
 qqrplot.default <- function(
                             ## computation arguments
@@ -212,6 +213,7 @@ qqrplot.default <- function(
   rtyp <- if (scale == "normal") "quantile" else "pit"
   qres <- proresiduals(object, newdata = newdata, type = rtyp, nsim = nsim, delta = delta)
   if (is.null(dim(qres))) qres <- matrix(qres, ncol = 1L)
+  qres <- qres[complete.cases(qres), , drop = FALSE]
 
   ## compute corresponding quantiles on the transformed scale (default: normal)
   if (scale == "uniform") {
@@ -230,6 +232,8 @@ qqrplot.default <- function(
   ## TODO: (ML) Implement exact method if exists (see "inst/misc/2021_04_16_errorsearch_qqrplot.Rmd")
   if (!isFALSE(simint)) {
     tmp <- proresiduals(object, newdata = newdata, type = rtyp, nsim = simint_nrep, delta = delta)
+    if (is.null(dim(tmp))) tmp <- matrix(tmp, ncol = 1L)
+    tmp <- tmp[complete.cases(tmp), , drop = FALSE]
     simint_prob <- (1 - simint_level) / 2
     simint_prob <- c(simint_prob, 1 - simint_prob)
     qres_rg_lwr <- apply(apply(tmp, 2, sort), 1, quantile, probs = simint_prob[1], na.rm = TRUE)
