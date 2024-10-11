@@ -64,6 +64,12 @@
 #' \code{tibble} is loaded.
 #' @param detrend logical, defaults to \code{FALSE}.
 #' Should the qqrplot be detrended, i.e, plotted as a \code{\link{wormplot}}?
+#' @param ref_type character specifying that the "identity" line should be used
+#' as as a reference or the "quartiles" of the quantile residuals should be used
+#' for defining the reference line.  Alternatively, also a numeric vector of
+#' length two can be used to define the probabilities to be used for defining the
+#' reference line. Note, that the reference is also used for detrending the
+#' quantile residuals.
 #' @param scale character. On which scale should the quantile residuals be
 #' shown: on the probability scale (\code{"uniform"}) or on the normal scale (\code{"normal"}).
 #' @param nsim,delta arguments passed to \code{\link{proresiduals}}.
@@ -155,6 +161,7 @@ qqrplot.default <- function(
                             plot = TRUE,
                             class = NULL,
                             detrend = FALSE,
+                            ref_type = "identity",
                             scale = c("normal", "uniform"),
                             nsim = 1L,
                             delta = NULL,
@@ -178,6 +185,10 @@ qqrplot.default <- function(
   ## * `delta` w/i `proresiduals()`
   ## * `...` in `plot()` and `autoplot()`
   stopifnot(isTRUE(detrend) || isFALSE(detrend))
+  stopifnot(
+    (length(ref_type) == 1L && ref_type %in% c("identity", "quartiles")) || 
+    (length(ref_type) == 2L && all(is.numeric(ref_type)) && all(ref_type >= 0) && all(ref_type <= 1) && ref_type[1] <= ref_type[2])
+  )
   stopifnot(is.numeric(simint_level), length(simint_level) == 1, simint_level >= 0, simint_level <= 1)
   stopifnot(is.character(xlab), length(xlab) == 1)
   stopifnot(is.character(ylab), length(ylab) == 1)
@@ -293,13 +304,37 @@ qqrplot.default <- function(
       )
     }
   } else { 
+
+    if (all(ref_type != "identity")) {
+
+      if (all(ref_type == "quartiles")) {
+        ref_probs <- c(0.25, 0.75)
+      } else  {
+        ref_probs <- ref_type
+      }
+
+      if (scale == "uniform") {
+        qFun <- identity
+      } else {
+        qFun <- qnorm
+      }
+
+      y_tmp <- quantile(qres, ref_probs, names = FALSE, na.rm = TRUE)
+      x_tmp <- qFun(ref_probs)
+      slope <- diff(y_tmp) / diff(x_tmp)
+      intercept <- y_tmp[1L] - slope * x_tmp[1L]
+    } else {
+      slope = 1
+      intercept = 0
+    }
+
     if (any(vapply(
       list(qres_rg_lwr, qres_rg_upr, qthe_rg_lwr, 1),
       FUN = is.null,
       FUN.VALUE = FALSE
     ))) {
       rval <- data.frame(
-        observed = qres - qthe,
+        observed = qres - (intercept + slope * qthe),
         expected = qthe,
         simint_observed_lwr = NA_real_,
         simint_observed_upr = NA_real_,
@@ -309,8 +344,8 @@ qqrplot.default <- function(
       rval <- data.frame(
         observed = qres - qthe,
         expected = qthe,
-        simint_observed_lwr = qres_rg_lwr - qthe_rg_lwr,
-        simint_observed_upr = qres_rg_upr - qthe_rg_upr,
+        simint_observed_lwr = qres_rg_lwr - (intercept + slope * qthe_rg_lwr),
+        simint_observed_upr = qres_rg_upr - (intercept + slope * qthe_rg_upr),
         simint_expected = qthe_rg_lwr
       )
     }
@@ -321,6 +356,7 @@ qqrplot.default <- function(
   ## attributes for graphical display
   attr(rval, "detrend") <- detrend
   attr(rval, "scale") <- scale
+  attr(rval, "ref_type") <- list(ref_type)
 
   attr(rval, "simint") <- simint
   attr(rval, "confint") <- confint
@@ -399,6 +435,15 @@ c.qqrplot <- function(...) {
   ref <- prepare_arg_for_attributes(rval, "ref")
   n <- unlist(n)
 
+  ref_type <- sapply(rval, function(x) {
+    if (is.null(attr(x, "ref_type"))) {
+      "identity"
+    } else {
+      attr(x, "ref_type")
+    }
+  })
+
+
   # -------------------------------------------------------------------
   # CHECK FOR COMPATIBILITY
   # -------------------------------------------------------------------
@@ -438,6 +483,7 @@ c.qqrplot <- function(...) {
   ## add attributes
   attr(rval, "detrend") <- detrend
   attr(rval, "scale") <- scale
+  attr(rval, "ref_type") <- ref_type
 
   attr(rval, "simint") <- simint
   attr(rval, "confint") <- confint
@@ -495,11 +541,15 @@ rbind.qqrplot <- c.qqrplot
 #' "ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
 #' and "pointwise" uses a slightly alternative implementation of pointwise bands.
 #' Note that for uniform scales, the identity line must be used for reference
-#' (`ref_identity = TRUE`).
+#' (`ref_type = "identity"`).
 #' @param confint_level numeric. The confidence level required, defaults to \code{0.95}.
 #' @param ref logical. Should a reference line be plotted?
-#' @param ref_identity,ref_probs Should the identity line be plotted as reference 
-#' and otherwise which probabilities should be used for defining the reference line?
+#' @param ref_type character specifying that the "identity" line should be used
+#' as as a reference or the "quartiles" of the quantile residuals should be used
+#' for defining the reference line.  Alternatively, also a numeric vector of
+#' length two can be used to define the probabilities to be used for defining the
+#' reference line. Note, that the reference is also used for detrending the
+#' quantile residuals.
 #' @param xlab,ylab,main,\dots graphical plotting parameters passed to
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
@@ -579,11 +629,10 @@ plot.qqrplot <- function(x,
                          detrend = NULL,
                          simint = NULL,
                          confint = NULL,  # TODO: (ML) Implement different plotting styles
-                         confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
+                         confint_type = c("pointwise_internal", "pointwise", "ks", "ell"),
                          confint_level = 0.95,
                          ref = NULL,
-                         ref_identity = TRUE,
-                         ref_probs = c(0.25, 0.75),
+                         ref_type = NULL,
                          xlim = c(NA, NA),
                          ylim = c(NA, NA),
                          xlab = NULL,
@@ -603,6 +652,7 @@ plot.qqrplot <- function(x,
                          ref_lty = 2,
                          ref_lwd = 1.25,
                          ...) {
+
   # -------------------------------------------------------------------
   # SET UP PRELIMINARIES
   # -------------------------------------------------------------------
@@ -612,6 +662,9 @@ plot.qqrplot <- function(x,
   simint <- use_arg_from_attributes(x, "simint", default = TRUE, force_single = FALSE)
   confint <- use_arg_from_attributes(x, "confint", default = TRUE, force_single = TRUE)
   ref <- use_arg_from_attributes(x, "ref", default = TRUE, force_single = FALSE)
+
+  ref_type <- attr(x, "ref_type")
+  if (!is.list(ref_type)) ref_type <- list(ref_type)
 
   ## sanity checks
   ## * lengths of all arguments are checked by recycling
@@ -623,8 +676,12 @@ plot.qqrplot <- function(x,
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(simint))
   stopifnot(is.logical(ref))
-  stopifnot(is.logical(ref_identity))
-  stopifnot(is.numeric(ref_probs), length(ref_probs) == 2)
+  stopifnot(
+    all(sapply(ref_type, function(x) {
+      (length(x) == 1L && x %in% c("identity", "quartiles")) || 
+      (length(x) == 2L && all(is.numeric(x)) && all(x >= 0) && all(x <= 1) && x[1] <= x[2])
+    }))
+  )
   stopifnot(length(detrend) <= 1, is.null(detrend) || is.logical(detrend))
   stopifnot(is.logical(axes))
   stopifnot(is.logical(box))
@@ -639,12 +696,6 @@ plot.qqrplot <- function(x,
   ## match arguments
   scale <- match.arg(scale, c("normal", "uniform"))
   confint_type <- match.arg(confint_type)
-
-  ## TODO: (ML) Can this be supported?
-  if (scale == "uniform" && isFALSE(ref_identity)) {
-    warning('For uniform scale "ref_identity" must be TRUE, set accordingly.')
-    ref_identity <- TRUE
-  }
 
   ## get input object on correct scale
   x <- summary(x, detrend = detrend)
@@ -713,6 +764,21 @@ plot.qqrplot <- function(x,
     ## get xlim and ylim (needs data for all groups) 
     ylim_idx <- c(is.na(plot_arg$ylim1[j]), is.na(plot_arg$ylim2[j])) 
     xlim_idx <- c(is.na(plot_arg$xlim1[j]), is.na(plot_arg$xlim2[j])) 
+
+    ## get ref type per group
+    j_ref_type <- ref_type[[j]]
+    ## TODO: (ML) Can this be supported?
+    if (scale == "uniform" && all(j_ref_type != "identity")) {
+      warning('For uniform scale "ref_type" must be equal "identity", set accordingly.')
+      j_ref_type <- "identity"
+    }
+
+    ## get probs for reference line (not used for identity)
+    if (all(j_ref_type %in% c("identity", "quartiles"))) {
+      j_ref_probs <- c(0.25, 0.75)
+    } else {
+      j_ref_probs <- j_ref_type
+    }
 
     ## Calculate the x limits. If singlegraph = FALSE,
     ## xlim based on d, else on x (overall)
@@ -803,10 +869,10 @@ plot.qqrplot <- function(x,
       }
 
       if (!detrend) {
-        if (!ref_identity) {
+        if (all(j_ref_type != "identity")) {
           y_tmp <- quantile(d[grepl("^observed(_[0-9]+)?$", names(d))],
-                            ref_probs, names = FALSE, na.rm = TRUE)
-          x_tmp <- qFun(ref_probs)
+                            j_ref_probs, names = FALSE, na.rm = TRUE)
+          x_tmp <- qFun(j_ref_probs)
           slope <- diff(y_tmp) / diff(x_tmp)
           intercept <- y_tmp[1L] - slope * x_tmp[1L]
         } else { 
@@ -837,8 +903,8 @@ plot.qqrplot <- function(x,
           d$expected,
           scale = scale,
           detrend = detrend,
-          identity = ref_identity,
-          probs = ref_probs,
+          identity = if (all(j_ref_type == "identity")) TRUE else FALSE,
+          probs = j_ref_probs,
           type = confint_type,
           level = confint_level
         )
@@ -872,8 +938,8 @@ plot.qqrplot <- function(x,
           d$expected,
           scale = scale,
           detrend = detrend,
-          identity = ref_identity,
-          probs = ref_probs,
+          identity = if (all(j_ref_type == "identity")) TRUE else FALSE,
+          probs = j_ref_probs,
           type = confint_type,
           level = confint_level
         )
@@ -1005,11 +1071,10 @@ autoplot.qqrplot <- function(object,
                              detrend = NULL,
                              simint = NULL,
                              confint = NULL,
-                             confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
+                             confint_type = c("pointwise_internal", "pointwise", "ks", "ell"),
                              confint_level = 0.95,
                              ref = NULL,
-                             ref_identity = TRUE, 
-                             ref_probs = c(0.25, 0.75), 
+                             ref_type = NULL,
                              xlim = c(NA, NA),
                              ylim = c(NA, NA),
                              xlab = NULL,
@@ -1052,6 +1117,15 @@ autoplot.qqrplot <- function(object,
     force_single = TRUE
   )
 
+  ref_type <- attr(object, "ref_type")
+  if (is.list(ref_type) && length(ref_type) > 1L && !all(sapply(ref_type[-1], function(x) isTRUE(all.equal(ref_type[[1]], x))))) {
+    stop("A combined object of various `qqrplot` objects must have the same `ref_type` for `ggplot2` plotting routines. Use either `base` plotting routines or generate individual plots and combine these with the R package `patchwork`.")
+  } else if (is.list(ref_type) && length(ref_type) > 1L && all(sapply(ref_type[-1], function(x) isTRUE(all.equal(ref_type[[1]], x))))) {
+    ref_type <- ref_type[[1]]
+  } else if (is.list(ref_type) && length(ref_type) == 1L) {
+    ref_type <- ref_type[[1]]
+  }
+
   ## get base style arguments
   add_arg <- list(...)
   if (!is.null(add_arg$pch)) shape <- add_arg$pch
@@ -1067,8 +1141,10 @@ autoplot.qqrplot <- function(object,
   stopifnot(is.logical(single_graph))
   stopifnot(is.logical(simint))
   stopifnot(is.logical(ref))
-  stopifnot(is.logical(ref_identity))
-  stopifnot(is.numeric(ref_probs), length(ref_probs) == 2)
+  stopifnot(
+    (length(ref_type) == 1L && ref_type %in% c("identity", "quartiles")) || 
+    (length(ref_type) == 2L && all(is.numeric(ref_type)) && all(ref_type >= 0) && all(ref_type <= 1) && ref_type[1] <= ref_type[2])
+  )
   stopifnot(length(detrend) <= 1, is.null(detrend) || is.logical(detrend))
   stopifnot(is.logical(legend))
   stopifnot(all(sapply(xlim, function(x) is.numeric(x) || is.na(x))))
@@ -1079,9 +1155,16 @@ autoplot.qqrplot <- function(object,
   confint_type <- match.arg(confint_type)
 
   ## TODO: (ML) Can this be supported?
-  if (scale == "uniform" && isFALSE(ref_identity)) {
-    warning('For uniform scale "ref_identity" must be TRUE, set accordingly.')
-    ref_identity <- TRUE
+  if (scale == "uniform" && all(ref_type != "identity")) {
+    warning('For uniform scale "ref_type" must be equal "identity", set accordingly.')
+    ref_type <- "identity"
+  }
+
+  ## get probs for reference line (not used for identity)
+  if (all(ref_type %in% c("identity", "quartiles"))) {
+    ref_probs <- c(0.25, 0.75)
+  } else {
+    ref_probs <- ref_type
   }
 
   ## get input object on correct scale
@@ -1205,7 +1288,7 @@ autoplot.qqrplot <- function(object,
     rval <- rval +
       geom_qqrplot_ref(
         detrend = detrend,
-        identity = ref_identity, 
+        identity = if (all(ref_type == "identity")) TRUE else FALSE,
         probs = ref_probs, 
         scale = scale,
         colour = aes_ref$colour,
@@ -1221,7 +1304,7 @@ autoplot.qqrplot <- function(object,
         detrend = detrend,
         type = confint_type,
         level = confint_level,
-        identity = ref_identity, 
+        identity = if (all(ref_type == "identity")) TRUE else FALSE,
         probs = ref_probs, 
         scale = scale,
         style = confint,
@@ -1353,7 +1436,7 @@ autoplot.qqrplot <- function(object,
 #' "ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
 #' and "pointwise" uses a slightly alternative implementation of pointwise bands.
 #' Note that for uniform scales, the identity line must be used for reference
-#' (`ref_identity = TRUE`).
+#' (`ref_type = "identity"`).
 #' @param level numeric. The confidence level required, defaults to \code{0.95}.
 #' @param style character. Style for plotting confidence intervals. Either \code{"polygon"} (default)
 #' or \code{"line"}).
@@ -1708,7 +1791,7 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
                              position = "identity", na.rm = FALSE,
                              show.legend = NA, inherit.aes = TRUE,
                              detrend = FALSE, 
-                             type = c("pointwise_internal", "ell", "ks", "pointwise"), level = 0.95,
+                             type = c("pointwise_internal", "pointwise", "ks", "ell"), level = 0.95,
                              identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                              style = c("polygon", "line"), ...) {
 
@@ -1807,7 +1890,7 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
                             position = "identity", na.rm = FALSE,
                             show.legend = NA, inherit.aes = TRUE,
                             detrend = FALSE,
-                            type = c("pointwise_internal", "ell", "ks", "pointwise"), level = 0.95,
+                            type = c("pointwise_internal", "pointwise", "ks", "ell"), level = 0.95,
                             identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                             style = c("polygon", "line"), ...) {
   style <- match.arg(style)
@@ -1913,7 +1996,7 @@ compute_qqrplot_confint <- function(observed,
                                     detrend = FALSE,
                                     identity = TRUE,
                                     probs = c(0.25, 0.75), 
-                                    type = c("pointwise_internal", "ell", "ks", "pointwise"),
+                                    type = c("pointwise_internal", "pointwise", "ks", "ell"),
                                     level = 0.95) {
 
   ## checks
@@ -1933,93 +2016,54 @@ compute_qqrplot_confint <- function(observed,
     identity <- TRUE
   }
 
-  ## default supported type
-  if (type == "pointwise_internal") {
-
-    ## get trafos
-    if (scale == "normal") {
-      dFun <- dnorm
-      pFun <- pnorm
-    } else {
-      dFun <- dunif
-      pFun <- punif
-    }
-
-    p <- pFun(expected) 
-    if (detrend) {
-      slope <- 0
-      int <- 0
-      se <- (1 / dFun(expected)) * (sqrt(p * (1 - p) / length(observed))) 
-    } else {
-      if (scale == "normal" && isFALSE(identity)) {
-        quants <- quantile(observed, probs)
-        nquants <- qnorm(probs)
-        slope <- diff(quants) / diff(qnorm(probs))
-        int <- quants[1] - nquants[1] * slope
-      } else {
-        slope <- 1
-        int <- 0
-      }
-      se <- (slope / dFun(expected)) * (sqrt(p * (1 - p) / length(observed))) 
-    }
-    tmp <- data.frame(se = as.numeric(qnorm(1 - (1 - level) / 2) * se))
-    
-    ## add to reference line and return
-    tmp$lower_bound <- (int + slope * expected) - tmp$se
-    tmp$upper_bound <- (int + slope * expected) + tmp$se
-
-    rval <- data.frame(lower = sort(tmp$lower_bound), upper = sort(tmp$upper_bound))
+  if(detrend) {
+    tmp_observed <- observed + expected
   } else {
-    ## confint types qqconf
-
-    if(detrend) {
-      tmp_observed <- observed + expected
-    } else {
-      tmp_observed <- observed
-    }
-    if (scale == "normal") {
-      if (identity) {
-        dparams <- list(mean = 0, sd = 1)
-        tmp_ref <- expected
-      } else {
-        quants <- quantile(tmp_observed, probs)
-        dparams <- list(
-          mean = mean(quants),
-          sd = 1 / diff(qnorm(probs)) * diff(quants)
-        )
-        nquants <- qnorm(probs)
-        slope <- diff(quants) / diff(qnorm(probs))
-        int <- quants[1] - nquants[1] * slope
-        tmp_ref <- int + slope * expected
-      }
-    
-      tmp <- qqconf::get_qq_band(
-        n = length(observed),
-        alpha = 1 - level,
-        distribution = qnorm,
-        dparams = dparams,
-        band_method = type
-      )
-
-    } else { # scale == "uniform"
-      tmp <- qqconf::get_qq_band(
-        n = length(observed),
-        alpha = 1 - level,
-        distribution = qunif,
-        band_method = type
-      )
-    
-      tmp_ref <- expected
-    }
-    
-    ## Sort reference values as CI returned by qqconf are always sorted
-    rval <- data.frame(lower = tmp$lower_bound, upper = tmp$upper_bound)
-    
-    if (detrend) {
-      rval$lower <- tmp$lower - sort(tmp_ref)
-      rval$upper <- tmp$upper - sort(tmp_ref)
-    }
+    tmp_observed <- observed
   }
+  if (scale == "normal") {
+    if (identity) {
+      dparams <- list(mean = 0, sd = 1)
+      tmp_ref <- expected
+    } else {
+      quants <- quantile(tmp_observed, probs)
+      dparams <- list(
+        mean = mean(quants),
+        sd = 1 / diff(qnorm(probs)) * diff(quants)
+      )
+      nquants <- qnorm(probs)
+      slope <- diff(quants) / diff(qnorm(probs))
+      int <- quants[1] - nquants[1] * slope
+      tmp_ref <- int + slope * expected
+    }
+  
+    tmp <- get_qq_band_internal(
+      n = length(observed),
+      alpha = 1 - level,
+      distribution = qnorm,
+      dparams = dparams,
+      band_method = type
+    )
+
+  } else { # scale == "uniform"
+    tmp <- get_qq_band_internal(
+      n = length(observed),
+      alpha = 1 - level,
+      distribution = qunif,
+      band_method = type
+    )
+  
+    tmp_ref <- expected
+  }
+  
+  ## Sort reference values as CI returned by qqconf are always sorted
+  rval <- data.frame(lower = tmp$lower_bound, upper = tmp$upper_bound)
+  
+  if (detrend) {
+    rval$lower <- tmp$lower - sort(tmp_ref)
+    rval$upper <- tmp$upper - sort(tmp_ref)
+  }
+  
 
   return(rval)
 }
