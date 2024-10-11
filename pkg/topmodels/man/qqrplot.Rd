@@ -14,6 +14,7 @@ qqrplot(object, ...)
   plot = TRUE,
   class = NULL,
   detrend = FALSE,
+  ref_type = "identity",
   scale = c("normal", "uniform"),
   nsim = 1L,
   delta = NULL,
@@ -49,6 +50,13 @@ or a \code{tibble}. Either set \code{class} expicitly to \code{"data.frame"} vs.
 
 \item{detrend}{logical, defaults to \code{FALSE}.
 Should the qqrplot be detrended, i.e, plotted as a \code{\link{wormplot}}?}
+
+\item{ref_type}{character specifying that the "identity" line should be used
+as as a reference or the "quartiles" of the quantile residuals should be used
+for defining the reference line.  Alternatively, also a numeric vector of
+length two can be used to define the probabilities to be used for defining the
+reference line. Note, that the reference is also used for detrending the
+quantile residuals.}
 
 \item{scale}{character. On which scale should the quantile residuals be
 shown: on the probability scale (\code{"uniform"}) or on the normal scale (\code{"normal"}).}

@@ -12,11 +12,10 @@
   detrend = NULL,
   simint = NULL,
   confint = NULL,
-  confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
+  confint_type = c("pointwise_internal", "pointwise", "ks", "ell"),
   confint_level = 0.95,
   ref = NULL,
-  ref_identity = TRUE,
-  ref_probs = c(0.25, 0.75),
+  ref_type = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -55,11 +54,10 @@
   detrend = NULL,
   simint = NULL,
   confint = NULL,
-  confint_type = c("pointwise_internal", "ell", "ks", "pointwise"),
+  confint_type = c("pointwise_internal", "pointwise", "ks", "ell"),
   confint_level = 0.95,
   ref = NULL,
-  ref_identity = TRUE,
-  ref_probs = c(0.25, 0.75),
+  ref_type = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -112,8 +110,12 @@ Note that for uniform scales, the identity line must be used for reference
 
 \item{ref}{logical. Should a reference line be plotted?}
 
-\item{ref_identity, ref_probs}{Should the identity line be plotted as reference 
-and otherwise which probabilities should be used for defining the reference line?}
+\item{ref_type}{character specifying that the "identity" line should be used
+as as a reference or the "quartiles" of the quantile residuals should be used
+for defining the reference line.  Alternatively, also a numeric vector of
+length two can be used to define the probabilities to be used for defining the
+reference line. Note, that the reference is also used for detrending the
+quantile residuals.}
 
 \item{xlim, ylim, axes, box}{additional graphical
 parameters for base plots, whereby \code{x} is a object of class \code{qqrplot}.}

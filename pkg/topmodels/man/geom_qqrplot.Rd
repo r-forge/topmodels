@@ -93,7 +93,7 @@ geom_qqrplot_confint(
   show.legend = NA,
   inherit.aes = TRUE,
   detrend = FALSE,
-  type = c("pointwise_internal", "ell", "ks", "pointwise"),
+  type = c("pointwise_internal", "pointwise", "ks", "ell"),
   level = 0.95,
   identity = TRUE,
   probs = c(0.25, 0.75),
