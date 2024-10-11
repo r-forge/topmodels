@@ -2142,4 +2142,67 @@ print.qqrplot <- function(x, ...) {
 }
 
 
+get_qq_band_internal <- function(n, alpha = 0.05, distribution = qnorm, dparams = NULL, band_method = "pointwise_internal")
+{
+  ## qqconf methods and current topmodels implementation
+  band_method <- match.arg(band_method, c("pointwise_internal", "pointwise", "ks", "ell"))
 
+  ## currently only normal and uniform scales are supported
+  if(isTRUE(all.equal(distribution, qnorm))) {
+    scale <- "normal"
+  } else if(isTRUE(all.equal(distribution, qunif))) {
+    scale <- "uniform"
+  } else {
+    stop("'distribution' not supported")
+  }
+  
+  ## distribution parameters are only supported for normal
+  if(!is.null(dparams)) {
+    if(scale == "uniform") stop("'dparams' only supported for normal distribution")
+  } else {
+    if(scale == "normal") dparams <- list(mean = 0, sd = 1)
+  }
+  
+  ## expected line
+  p <- ppoints(n)  
+  expected <- if(scale == "normal") qnorm(p, mean = dparams$mean, sd = dparams$sd) else p
+
+  ## FIXME: qqconf seems to use expected = (1:n)/(n + 1) for scale = "uniform"?
+
+  ## lower and upper bound from different band methods
+  if(band_method == "pointwise_internal") {
+    serr <- sqrt(p * (1 - p) / n)
+    dfac <- if(scale == "normal") dparams$sd / dnorm(expected, mean = dparams$mean, sd = dparams$sd) else 1
+    crit <- qnorm(1 - alpha/2)
+    lower_bound <- expected - dfac * crit * serr
+    upper_bound <- expected + dfac * crit * serr
+  } else if(band_method == "pointwise") {
+    lower_bound <- qbeta(alpha/2, 1:n, n:1)
+    upper_bound <- qbeta(1 - alpha/2, 1:n, n:1)
+    if(scale == "normal") {
+      lower_bound <- qnorm(lower_bound, mean = dparams$mean, sd = dparams$sd)
+      upper_bound <- qnorm(upper_bound, mean = dparams$mean, sd = dparams$sd)
+    }
+  } else if(band_method == "ks") {
+    eps <- sqrt((1/(2 * n)) * log(2/alpha))
+    lower_bound <- pmax(p - eps, rep(0, n))
+    upper_bound <- pmin(p + eps, rep(1, n))
+    if(scale == "normal") {
+      lower_bound <- qnorm(lower_bound, mean = dparams$mean, sd = dparams$sd)
+      upper_bound <- qnorm(upper_bound, mean = dparams$mean, sd = dparams$sd)
+    }
+  } else if(band_method == "ell") {
+    band <- qqconf::get_qq_band(n = n, alpha = alpha, distribution = distribution, dparams = dparams, band_method = "ell")
+    lower_bound <- band$lower_bound
+    upper_bound <- band$upper_bound
+  }
+
+  ## collect everything and return
+  rval <- list(
+    lower_bound = lower_bound,
+    upper_bound = upper_bound,
+    expected_value = expected,
+    dparams = dparams
+  )
+  return(rval)
+}
