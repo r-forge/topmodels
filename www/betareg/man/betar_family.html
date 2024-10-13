@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.5.53">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-
-<title>dxbeta – betareg</title>
+<title>betar_family – betareg</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,8 +17,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
-
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
@@ -39,8 +69,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -67,8 +96,6 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-
-
 <meta property="og:title" content="betareg">
 <meta property="og:image" content="https://topmodels.R-Forge.R-project.org/betareg/man/betareg.png">
 <meta property="og:site_name" content="betareg">
@@ -78,17 +105,13 @@ ul.task-list li input[type="checkbox"] {
 <meta name="twitter:site" content="@AchimZeileis">
 <meta name="twitter:card" content="summary">
 </head>
-
 <body class="nav-sidebar floating nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
-      <div class="navbar-container container-fluid">
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../betareg-wide.png" alt="betareg logo" class="navbar-logo">
-    </a>
+    <img src="../betareg-wide.png" alt="betareg logo" class="navbar-logo"></a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -96,7 +119,7 @@ ul.task-list li input[type="checkbox"] {
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
+<li class="nav-item">
     <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Get started</span></a>
   </li>  
@@ -104,8 +127,8 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-documentation" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Documentation</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">    
-        <li>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">
+<li>
     <a class="dropdown-item" href="../man/betareg.html">
  <span class="dropdown-text">Beta regression</span></a>
   </li>  
@@ -126,13 +149,13 @@ ul.task-list li input[type="checkbox"] {
  <span class="dropdown-text">distributions3 objects</span></a>
   </li>  
     </ul>
-  </li>
+</li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-articles" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Articles</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-articles">    
-        <li>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-articles">
+<li>
     <a class="dropdown-item" href="../vignettes/betareg.html">
  <span class="dropdown-text">Beta Regression in R (JSS 2010)</span></a>
   </li>  
@@ -141,7 +164,7 @@ ul.task-list li input[type="checkbox"] {
  <span class="dropdown-text">Extended Beta Regression in R: Shaken, Stirred, Mixed, and Partitioned (JSS 2012)</span></a>
   </li>  
     </ul>
-  </li>
+</li>
   <li class="nav-item">
     <a class="nav-link" href="../NEWS.html"> 
 <span class="menu-text">News</span></a>
@@ -155,8 +178,8 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Contact</span></a>
   </li>  
 </ul>
-            <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item compact">
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
     <a class="nav-link" href="https://fosstodon.org/@zeileis" target="_blank"> <i class="bi bi-mastodon" role="img" aria-label="@zeileis@fosstodon.org">
 </i> 
 <span class="menu-text"></span></a>
@@ -172,29 +195,23 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text"></span></a>
   </li>  
 </ul>
-          </div> <!-- /navcollapse -->
+</div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
       </div> <!-- /container-fluid -->
-    </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/dbetar.html">Distributions</a></li><li class="breadcrumb-item"><a href="../man/dxbeta.html">dxbeta</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/betatree.html">Beta regression extensions</a></li><li class="breadcrumb-item"><a href="../man/betar_family.html">betar_family</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
-  </nav>
-</header>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item sidebar-item-section">
+<li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
  <span class="menu-text">Beta regression</span></a>
@@ -202,8 +219,8 @@ ul.task-list li input[type="checkbox"] {
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/betareg.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">betareg</span></a>
@@ -246,17 +263,17 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
  <span class="menu-text">Beta regression extensions</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/betatree.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">betatree</span></a>
@@ -270,12 +287,12 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/betar_family.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/betar_family.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">betar_family</span></a>
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
@@ -284,8 +301,8 @@ ul.task-list li input[type="checkbox"] {
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/CarTask.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">CarTask</span></a>
@@ -340,17 +357,17 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
  <span class="menu-text">Distributions</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/dbetar.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">dbetar</span></a>
@@ -370,7 +387,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/dxbeta.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/dxbeta.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">dxbeta</span></a>
   </div>
 </li>
@@ -381,7 +398,7 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
@@ -390,8 +407,8 @@ ul.task-list li input[type="checkbox"] {
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/BetaR.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">BetaR</span></a>
@@ -422,139 +439,213 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </li>
       </ul>
-  </li>
+</li>
     </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-extended-support-beta-distribution" id="toc-the-extended-support-beta-distribution" class="nav-link active" data-scroll-target="#the-extended-support-beta-distribution">The Extended-Support Beta Distribution</a>
+<li>
+<a href="#family-objects-for-extended-support-beta-regression" id="toc-family-objects-for-extended-support-beta-regression" class="nav-link active" data-scroll-target="#family-objects-for-extended-support-beta-regression">Family Objects for (Extended-Support) Beta Regression</a>
   <ul class="collapse">
-  <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+<li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
-  </ul></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul>
-</nav>
+</li>
+  </ul></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content" id="quarto-document-content"><section id="family-objects-for-extended-support-beta-regression" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="family-objects-for-extended-support-beta-regression">Family Objects for (Extended-Support) Beta Regression</h2>
+<section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
+<p>Family objects for distributional regression with the (extended-support) beta distribution via <span class="pkg">bamlss</span> or <span class="pkg">gamlss2</span>.</p>
+</section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<pre><code class="language-R">betar_family(link = "logit", link.phi = "log", ...)
 
-
-
-
-<section id="the-extended-support-beta-distribution" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="the-extended-support-beta-distribution">The Extended-Support Beta Distribution</h2>
-<section id="description" class="level3">
-<h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Density, distribution function, quantile function, and random generation for the extended-support beta distribution (in regression parameterization) on [0, 1].</p>
-</section>
-<section id="usage" class="level3">
-<h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">dxbeta(x, mu, phi, nu = 0, log = FALSE)
-
-pxbeta(q, mu, phi, nu = 0, lower.tail = TRUE, log.p = FALSE)
-
-qxbeta(p, mu, phi, nu = 0, lower.tail = TRUE, log.p = FALSE)
-
-rxbeta(n, mu, phi, nu = 0)
+xbetax_family(link = "logit", link.phi = "log", link.nu = "log",
+  quad = 20, tol = .Machine\$double.eps^0.7, ...)
 </code></pre>
-</section>
-<section id="arguments" class="level3">
-<h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
+</section><section id="arguments" class="level3"><h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
 <table>
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="x">x</code>, <code id="q">q</code>
+<code id="link">link</code>
 </td>
 <td>
-numeric. Vector of quantiles.
+character specification of the link function in the mean model (mu). Currently, <code>“logit”</code>, <code>“probit”</code>, <code>“cloglog”</code>, <code>“cauchit”</code>, <code>“log”</code>, <code>“loglog”</code> are supported.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="p">p</code>
+<code id="link.phi">link.phi</code>
 </td>
 <td>
-numeric. Vector of probabilities.
+character specification of the link function in the precision model (phi). Currently, <code>“log”</code>, <code>“identity”</code>, <code>“sqrt”</code> are supported.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="n">n</code>
+<code id="link.nu">link.nu</code>
 </td>
 <td>
-numeric. Number of observations. If <code>length(n) &gt; 1</code>, the length is taken to be the number required.
+character specification of the link function in the exceedence model (nu). Currently, <code>“log”</code>, <code>“identity”</code>, <code>“sqrt”</code> are supported.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="mu">mu</code>
+<code id="quad">quad</code>
 </td>
 <td>
-numeric. The mean of the underlying beta distribution on [-nu, 1 + nu].
+numeric. The number of quadrature points for numeric integration of the continuous mixture in <code>dxbetax</code>. Alternatively, a matrix with nodes and weights for the quadrature points can be specified.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="phi">phi</code>
+<code id="tol">tol</code>
 </td>
 <td>
-numeric. The precision parameter of the underlying beta distribution on [-nu, 1 + nu].
+numeric. Accuracy (convergence tolerance) for numerically determining quantiles based on <code>uniroot</code> and <code>pxbetax</code>.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="nu">nu</code>
+<code id="...">…</code>
 </td>
 <td>
-numeric. Exceedence parameter for the support of the underlying beta distribution on [-nu, 1 + nu] that is censored to [0, 1].
+Arguments passed to functions that are called within the family object.
 </td>
 </tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="log">log</code>, <code id="log.p">log.p</code>
-</td>
-<td>
-logical. If TRUE, probabilities p are given as log(p).
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="lower.tail">lower.tail</code>
-</td>
-<td>
-logical. If TRUE (default), probabilities are P[X &lt;= x] otherwise, P[X &gt; x].
-</td>
-</tr>
-</tbody></table>
-</section>
-<section id="details" class="level3">
-<h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>In order to obtain an extended-support beta distribution on [0, 1] an additional exceedence parameter <code>nu</code> is introduced. If <code>nu &gt; 0</code>, this scales the underlying beta distribution to the interval [-nu, 1 + nu] where the tails are subsequently censored to the unit interval [0, 1] with point masses on the boundaries 0 and 1. Thus, <code>nu</code> controls how likely boundary observations are and for <code>nu = 0</code> (the default), the distribution reduces to the classic beta distribution (in regression parameterization) without boundary observations.</p>
-</section>
-<section id="value" class="level3">
-<h3 class="anchored" data-anchor-id="value">Value</h3>
-<p><code>dxbeta</code> gives the density, <code>pxbeta</code> gives the distribution function, <code>qxbeta</code> gives the quantile function, and <code>rxbeta</code> generates random deviates.</p>
-</section>
-<section id="see-also" class="level3">
-<h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>dbetar</code>, <code>XBeta</code></p>
+</tbody></table></section><section id="details" class="level3"><h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>Family objects for <span class="pkg">bamlss</span> (Umlauf et al.&nbsp;2019, 2021) and <span class="pkg">gamlss2</span> (Umlauf et al.&nbsp;2024) are essentially lists of functions providing a standardized interface to the d/p/q/r functions of distributions. Hence, <code>betar_family</code> interfaces the classical beta distribution in regression specification, see <code>dbetar</code>. Analogously, <code>xbetax_family</code> interfaces the extended-support beta mixture specification (Kosmidis and Zeileis 2024), see <code>dxbetax</code>.</p>
+</section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
+<p>A list of class <code>family.bamlss</code>.</p>
+</section><section id="references" class="level3"><h3 class="anchored" data-anchor-id="references">References</h3>
+<p>Kosmidis I, Zeileis A (2024). Extended-Support Beta Regression for [0, 1] Responses. 2409.07233, <em>arXiv.org E-Print Archive</em>. <a href="https://doi.org/10.48550/arXiv.2409.07233">doi:10.48550/arXiv.2409.07233</a></p>
+<p>Umlauf N, Klein N, Zeileis A (2019). BAMLSS: Bayesian Additive Models for Location, Scale and Shape (and Beyond). <em>Journal of Computational and Graphical Statistics</em>, <b>27</b>(3), 612–627. <a href="https://doi.org/10.1080/10618600.2017.1407325">doi:10.1080/10618600.2017.1407325</a></p>
+<p>Umlauf N, Klein N, Simon T, Zeileis A (2021). bamlss: A Lego Toolbox for Flexible Bayesian Regression (and Beyond). <em>Journal of Statistical Software</em>, <b>100</b>(4), 1–53. <a href="https://doi.org/10.18637/jss.v100.i04">doi:10.18637/jss.v100.i04</a></p>
+<p>Umlauf N, Stasinopoulos M, Rigby R, Stauffer R (2024). gamlss2: Infrastructure for Flexible Distributional Regression. R package version 0.1-0. <a href="https://gamlss-dev.github.io/gamlss2/">https://gamlss-dev.github.io/gamlss2/</a></p>
+</section><section id="see-also" class="level3"><h3 class="anchored" data-anchor-id="see-also">See Also</h3>
+<p><code>dbetar</code>, <code>dxbetax</code>, <code>family.bamlss</code></p>
+</section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/betareg/">"betareg"</a></span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co">## package and data</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/betareg/">"betareg"</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="http://www.bamlss.org/">"bamlss"</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"ReadingSkills"</span>, package <span class="op">=</span> <span class="st">"betareg"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## classical beta regression via ML</span></span>
+<span><span class="va">rs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## IGNORE_RDIFF_BEGIN</span></span>
+<span><span class="co">## Bayesian additive model (with low number of iterations to speed up the example)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">rs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://www.bamlss.org/reference/bamlss.html">bamlss</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html">s</a></span><span class="op">(</span><span class="va">iq</span>, by <span class="op">=</span> <span class="va">dyslexia</span><span class="op">)</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/betareg/man/betar_family.html">betar_family</a></span><span class="op">(</span><span class="op">)</span>, eps <span class="op">=</span> <span class="fl">1e-7</span>, n.iter <span class="op">=</span> <span class="fl">400</span>, burnin <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>AICc  -0.8829 logPost -64.6792 logLik  21.6241 edf 13.973 eps 1.0000 iteration   1
+AICc -51.8915 logPost -25.8044 logLik  39.7035 edf 10.242 eps 2.8731 iteration   2
+AICc -68.1251 logPost  -7.3858 logLik  46.8183 edf 9.6642 eps 0.5561 iteration   3
+AICc -73.1290 logPost   4.7269 logLik  48.3399 edf 9.0783 eps 0.0895 iteration   4
+AICc -74.7842 logPost   5.5545 logLik  49.1675 edf 9.0783 eps 0.0629 iteration   5
+AICc -75.7464 logPost   6.0357 logLik  49.6487 edf 9.0783 eps 0.0559 iteration   6
+AICc -76.3072 logPost   6.3160 logLik  49.9291 edf 9.0783 eps 0.2490 iteration   7
+AICc -77.3399 logPost   6.8324 logLik  50.4454 edf 9.0783 eps 0.2694 iteration   8
+AICc -77.6557 logPost   6.9903 logLik  50.6033 edf 9.0783 eps 0.0207 iteration   9
+AICc -77.8176 logPost   7.0713 logLik  50.6843 edf 9.0783 eps 0.0123 iteration  10
+AICc -80.2391 logPost   8.7295 logLik  50.7321 edf 8.3559 eps 0.0099 iteration  11
+AICc -81.1323 logPost -61.6299 logLik  50.7922 edf 8.1090 eps 0.0333 iteration  12
+AICc -81.3164 logPost -654.389 logLik  50.8351 edf 8.0774 eps 0.0089 iteration  13
+AICc -81.3726 logPost -4694.96 logLik  50.8579 edf 8.0740 eps 0.0054 iteration  14
+AICc -81.4322 logPost -25766.3 logLik  50.8816 edf 8.0700 eps 0.0077 iteration  15
+AICc -81.6598 logPost -2043.53 logLik  50.9498 edf 8.0406 eps 0.0179 iteration  16
+AICc -82.3830 logPost -8852.97 logLik  51.1594 edf 7.9421 eps 0.0137 iteration  17
+AICc -82.7904 logPost -13085.5 logLik  51.2898 edf 7.8944 eps 0.0124 iteration  18
+AICc -82.9776 logPost -13740.2 logLik  51.3740 edf 7.8883 eps 0.0431 iteration  19
+AICc -83.0956 logPost -13809.0 logLik  51.4431 edf 7.8949 eps 0.0096 iteration  20
+AICc -83.2026 logPost -13815.6 logLik  51.4812 edf 7.8848 eps 0.0058 iteration  21
+AICc -83.2582 logPost -13816.0 logLik  51.5109 edf 7.8861 eps 0.0574 iteration  22
+AICc -83.3488 logPost -13815.9 logLik  51.5729 edf 7.8970 eps 0.0084 iteration  23
+AICc -83.4298 logPost -13815.7 logLik  51.5929 edf 7.8836 eps 0.0035 iteration  24
+AICc -83.4578 logPost -13815.6 logLik  51.6069 edf 7.8837 eps 0.0029 iteration  25
+AICc -83.4771 logPost -13815.4 logLik  51.6166 edf 7.8837 eps 0.0025 iteration  26
+AICc -83.4921 logPost -13815.3 logLik  51.6242 edf 7.8837 eps 0.0042 iteration  27
+AICc -83.5087 logPost -13815.3 logLik  51.6291 edf 7.8815 eps 0.0021 iteration  28
+AICc -83.5136 logPost -13815.2 logLik  51.6323 edf 7.8820 eps 0.0016 iteration  29
+AICc -83.5176 logPost -13815.1 logLik  51.6343 edf 7.8820 eps 0.0013 iteration  30
+AICc -83.5199 logPost -13815.1 logLik  51.6355 edf 7.8820 eps 0.0011 iteration  31
+AICc -83.5219 logPost -13815.1 logLik  51.6365 edf 7.8820 eps 0.0042 iteration  32
+AICc -83.5216 logPost -13815.0 logLik  51.6382 edf 7.8832 eps 0.0022 iteration  33
+AICc -83.5300 logPost -13815.0 logLik  51.6383 edf 7.8806 eps 0.0009 iteration  34
+AICc -83.5294 logPost -13815.0 logLik  51.6384 edf 7.8808 eps 0.0003 iteration  35
+AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  36
+AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  37
+AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  38
+AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  39
+AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  39
+elapsed time:  2.17sec
+Starting the sampler...
+
+|                    |   0%  2.07sec
+|*                   |   5%  2.24sec  0.12sec
+|**                  |  10%  2.03sec  0.23sec
+|***                 |  15%  1.88sec  0.33sec
+|****                |  20%  1.75sec  0.44sec
+|*****               |  25%  1.65sec  0.55sec
+|******              |  30%  1.56sec  0.67sec
+|*******             |  35%  1.45sec  0.78sec
+|********            |  40%  1.34sec  0.90sec
+|*********           |  45%  1.25sec  1.02sec
+|**********          |  50%  1.13sec  1.13sec
+|***********         |  55%  1.02sec  1.25sec
+|************        |  60%  0.91sec  1.36sec
+|*************       |  65%  0.80sec  1.49sec
+|**************      |  70%  0.69sec  1.61sec
+|***************     |  75%  0.57sec  1.72sec
+|****************    |  80%  0.46sec  1.83sec
+|*****************   |  85%  0.35sec  1.96sec
+|******************  |  90%  0.23sec  2.07sec
+|******************* |  95%  0.12sec  2.19sec
+|********************| 100%  0.00sec  2.30sec</code></pre>
+</div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Bayesian model shrinks the effects compared to ML</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="va">dyslexia</span><span class="op">)</span></span>
+<span><span class="va">nd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  iq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="op">-</span><span class="fl">19</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  dyslexia <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"no"</span>, <span class="st">"yes"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">40</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"no"</span>, <span class="st">"yes"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">nd</span><span class="op">$</span><span class="va">betareg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">rs1</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span>
+<span><span class="va">nd</span><span class="op">$</span><span class="va">bamlss</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">rs2</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"parameter"</span>, model <span class="op">=</span> <span class="st">"mu"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">betareg</span> <span class="op">~</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">nd</span>, subset <span class="op">=</span> <span class="va">dyslexia</span> <span class="op">==</span> <span class="st">"no"</span>,  col <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">betareg</span> <span class="op">~</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">nd</span>, subset <span class="op">=</span> <span class="va">dyslexia</span> <span class="op">==</span> <span class="st">"yes"</span>, col <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">bamlss</span>  <span class="op">~</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">nd</span>, subset <span class="op">=</span> <span class="va">dyslexia</span> <span class="op">==</span> <span class="st">"no"</span>,  col <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">bamlss</span>  <span class="op">~</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">nd</span>, subset <span class="op">=</span> <span class="va">dyslexia</span> <span class="op">==</span> <span class="st">"yes"</span>, col <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Dyslexia: no"</span>, <span class="st">"Dyslexia: yes"</span>, <span class="st">"betareg"</span>, <span class="st">"bamlss"</span><span class="op">)</span>,</span>
+<span>  lty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">19</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="betar_family_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## IGNORE_RDIFF_END</span></span>
+<span></span>
+<span><span class="co">## xbetax_family(): requires more time due to Gaussian quadrature</span></span>
+<span><span class="co">## for gamlss2: install.packages("gamlss2", repos = "https://gamlss-dev.R-universe.dev")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
-</section>
-</section>
-
-</main> <!-- /main -->
-<script id="quarto-html-after-body" type="application/javascript">
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -980,7 +1071,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-
 
 
 

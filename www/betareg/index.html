@@ -138,7 +138,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="./man/betatree.html">
- <span class="dropdown-text">Beta regression trees and finite mixtures</span></a>
+ <span class="dropdown-text">Beta regression extensions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./man/CarTask.html">
@@ -249,7 +249,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="illustration" class="level2"><h2 class="anchored" data-anchor-id="illustration">Illustration</h2>
 <p>A nice first illustration of beta regression is the analysis of reading accuracy scores from primary school children from Smithson &amp; Verkuilen (2006). Package and data can be loaded via:</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://betareg.R-Forge.R-project.org/">"betareg"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/betareg/">"betareg"</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"ReadingSkills"</span>, package <span class="op">=</span> <span class="st">"betareg"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The reading <code>accuracy</code> was scaled to be within (0, 1). Its mean is explained by verbal <code>iq</code> score with separate lines by <code>dyslexia</code> (control vs.&nbsp;dyslexic). The precision parameter is explained by main effects of the two explanatory variables. More details are provided in <code><a href="https://rdrr.io/pkg/betareg/man/ReadingSkills.html">?ReadingSkills</a></code>.</p>
