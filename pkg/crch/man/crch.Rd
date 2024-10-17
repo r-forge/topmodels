@@ -50,9 +50,11 @@ crch.fit(x, z, y, left, right, truncated = FALSE, dist = "gaussian",
   \item{df}{optional degrees of freedom for \code{dist="student"}. If omitted
   the degrees of freedom are estimated.}
   \item{left}{left limit for the censored dependent variable \code{y}.  If set
-  to \code{-Inf}, \code{y} is assumed not to be left-censored.}
+  to \code{-Inf}, \code{y} is assumed not to be left-censored. Can also be
+  a vector of limits of the same length as \code{y}.}
   \item{right}{right limit for the censored dependent variable \code{y}.  If
-  set to \code{Inf}, \code{y} is assumed not to be right-censored.}
+  set to \code{Inf}, \code{y} is assumed not to be right-censored. Can also be
+  a vector of limits of the same length as \code{y}.}
   \item{truncated}{logical. If \code{TRUE} truncated model is fitted
   with \code{left} and \code{right} interpreted as truncation points,
   If \code{FALSE} censored model is fitted. Default is \code{FALSE}}
