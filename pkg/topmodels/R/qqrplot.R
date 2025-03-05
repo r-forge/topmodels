@@ -535,21 +535,22 @@ rbind.qqrplot <- c.qqrplot
 #' @param simint logical or quantile specification. Should the simint of
 #' quantiles of the randomized quantile residuals be visualized? 
 #' @param confint logical or character string describing the style for plotting `c("polygon", "line")`.
-#' @param confint_type character. Method for creating the confidence intervals. By
-#' default, an internal point-wise routine (`pointwise_internal`) is used.
-#' Alternatively, band methods provided by [qqconf::get_qq_band()] can be used:
-#' "ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
-#' and "pointwise" uses a slightly alternative implementation of pointwise bands.
-#' Note that for uniform scales, the identity line must be used for reference
-#' (`ref_type = "identity"`).
+#' @param confint_type character. Method for creating the confidence intervals. There
+#' are two methods for pointwise confidence intervals: Based on the `"beta"` or `"normal"`
+#' distribution, yielding very similar results. And there are two methods for simultaneous
+#' confidence intervals: Based on the Kolmogorov-Smirnov test (`"ks"`) or equal local levels
+#' (`"ell"`), where the latter has much better properties but requires the \pkg{qqconf}
+#' package to be installed ([qqconf::get_qq_band()]). Finally, the methods `"pointwise"` and `"simultaneous"`
+#' are simply aliases for the preferred corresponding methods `"beta"` and `"ell"`,
+#' respectively.
 #' @param confint_level numeric. The confidence level required, defaults to \code{0.95}.
 #' @param ref logical. Should a reference line be plotted?
-#' @param ref_type character specifying that the "identity" line should be used
-#' as as a reference or the "quartiles" of the quantile residuals should be used
-#' for defining the reference line.  Alternatively, also a numeric vector of
-#' length two can be used to define the probabilities to be used for defining the
-#' reference line. Note, that the reference is also used for detrending the
-#' quantile residuals.
+#' @param ref_type character specifying that the `"identity"` line should be used
+#' as a reference or, alternatively, a line through the `"quartiles"` of the quantile residuals.
+#' Moreover, also a numeric vector of length two can be used to define the probabilities of
+#' the quantiles to be used for defining the reference line. Note, that the reference is also used
+#' for detrending the quantile residuals.
+#' For uniform scales, the identity line must be used for reference (`ref_type = "identity"`).
 #' @param xlab,ylab,main,\dots graphical plotting parameters passed to
 #' \code{\link[graphics]{plot}} or \code{\link[graphics]{points}},
 #' respectively.
@@ -629,7 +630,7 @@ plot.qqrplot <- function(x,
                          detrend = NULL,
                          simint = NULL,
                          confint = NULL,  # TODO: (ML) Implement different plotting styles
-                         confint_type = c("pointwise_internal", "pointwise", "ks", "ell"),
+                         confint_type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"),
                          confint_level = 0.95,
                          ref = NULL,
                          ref_type = NULL,
@@ -695,7 +696,7 @@ plot.qqrplot <- function(x,
 
   ## match arguments
   scale <- match.arg(scale, c("normal", "uniform"))
-  confint_type <- match.arg(confint_type)
+  confint_type <- match.arg(confint_type, c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"))
 
   ## get input object on correct scale
   x <- summary(x, detrend = detrend)
@@ -1071,7 +1072,7 @@ autoplot.qqrplot <- function(object,
                              detrend = NULL,
                              simint = NULL,
                              confint = NULL,
-                             confint_type = c("pointwise_internal", "pointwise", "ks", "ell"),
+                             confint_type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"),
                              confint_level = 0.95,
                              ref = NULL,
                              ref_type = NULL,
@@ -1152,7 +1153,7 @@ autoplot.qqrplot <- function(object,
 
   # match arguments
   scale <- match.arg(scale, c("normal", "uniform"))
-  confint_type <- match.arg(confint_type)
+  confint_type <- match.arg(confint_type, c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"))
 
   ## TODO: (ML) Can this be supported?
   if (scale == "uniform" && all(ref_type != "identity")) {
@@ -1430,13 +1431,14 @@ autoplot.qqrplot <- function(object,
 #' line used.
 #' @param detrend logical, default \code{FALSE}. If set to \code{TRUE} the qqrplot is detrended,
 #' i.e, plotted as a \code{\link{wormplot}}.
-#' @param type character. Method for creating the confidence intervals. By
-#' default, an internal point-wise routine (`pointwise_internal`) is used.
-#' Alternatively, band methods provided by [qqconf::get_qq_band()] can be used:
-#' "ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
-#' and "pointwise" uses a slightly alternative implementation of pointwise bands.
-#' Note that for uniform scales, the identity line must be used for reference
-#' (`ref_type = "identity"`).
+#' @param type character. Method for creating the confidence intervals. There
+#' are two methods for pointwise confidence intervals: Based on the `"beta"` or `"normal"`
+#' distribution, yielding very similar results. And there are two methods for simultaneous
+#' confidence intervals: Based on the Kolmogorov-Smirnov test (`"ks"`) or equal local levels
+#' (`"ell"`), where the latter has much better properties but requires the \pkg{qqconf}
+#' package to be installed ([qqconf::get_qq_band()]). Finally, the methods `"pointwise"` and `"simultaneous"`
+#' are simply aliases for the preferred corresponding methods `"beta"` and `"ell"`,
+#' respectively.
 #' @param level numeric. The confidence level required, defaults to \code{0.95}.
 #' @param style character. Style for plotting confidence intervals. Either \code{"polygon"} (default)
 #' or \code{"line"}).
@@ -1791,13 +1793,13 @@ stat_qqrplot_confint <- function(mapping = NULL, data = NULL, geom = "qqrplot_co
                              position = "identity", na.rm = FALSE,
                              show.legend = NA, inherit.aes = TRUE,
                              detrend = FALSE, 
-                             type = c("pointwise_internal", "pointwise", "ks", "ell"), level = 0.95,
+                             type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"), level = 0.95,
                              identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                              style = c("polygon", "line"), ...) {
 
   style <- match.arg(style)
   scale <- match.arg(scale)
-  type <- match.arg(type)
+  type <- match.arg(type, c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"))
 
   ggplot2::layer(
     geom = geom, 
@@ -1890,12 +1892,12 @@ geom_qqrplot_confint <- function(mapping = NULL, data = NULL, stat = "qqrplot_co
                             position = "identity", na.rm = FALSE,
                             show.legend = NA, inherit.aes = TRUE,
                             detrend = FALSE,
-                            type = c("pointwise_internal", "pointwise", "ks", "ell"), level = 0.95,
+                            type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"), level = 0.95,
                             identity = TRUE, probs = c(0.25, 0.75), scale = c("normal", "uniform"),
                             style = c("polygon", "line"), ...) {
   style <- match.arg(style)
   scale <- match.arg(scale)
-  type <- match.arg(type)
+  type <- match.arg(type, c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"))
 
   ggplot2::layer(
     geom = GeomQqrplotConfint,
@@ -1996,7 +1998,7 @@ compute_qqrplot_confint <- function(observed,
                                     detrend = FALSE,
                                     identity = TRUE,
                                     probs = c(0.25, 0.75), 
-                                    type = c("pointwise_internal", "pointwise", "ks", "ell"),
+                                    type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"),
                                     level = 0.95) {
 
   ## checks
@@ -2008,7 +2010,7 @@ compute_qqrplot_confint <- function(observed,
   stopifnot(is.numeric(probs) && length(probs) == 2L && probs[1] <= probs[2])
   stopifnot(is.numeric(level), length(level) == 1, level >= 0, level <= 1)
   scale <- match.arg(scale)
-  type <- match.arg(type)
+  type <- match.arg(type, c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"))
 
   ## TODO: (ML) Can this be supported?
   if (scale == "uniform" && isFALSE(identity)) {
@@ -2142,10 +2144,12 @@ print.qqrplot <- function(x, ...) {
 }
 
 
-get_qq_band_internal <- function(n, alpha = 0.05, distribution = qnorm, dparams = NULL, band_method = "pointwise_internal")
+get_qq_band_internal <- function(n, alpha = 0.05, distribution = qnorm, dparams = NULL, band_method = "pointwise")
 {
   ## qqconf methods and current topmodels implementation
-  band_method <- match.arg(band_method, c("pointwise_internal", "pointwise", "ks", "ell"))
+  band_method <- match.arg(band_method, c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"))
+  if(band_method == "pointwise") band_method <- "beta"
+  if(band_method == "simultaneous") band_method <- "ell"
 
   ## currently only normal and uniform scales are supported
   if(isTRUE(all.equal(distribution, qnorm))) {
@@ -2153,7 +2157,7 @@ get_qq_band_internal <- function(n, alpha = 0.05, distribution = qnorm, dparams 
   } else if(isTRUE(all.equal(distribution, qunif))) {
     scale <- "uniform"
   } else {
-    stop("'distribution' not supported")
+    stop("'distribution' not supported yet")
   }
   
   ## distribution parameters are only supported for normal
@@ -2170,19 +2174,19 @@ get_qq_band_internal <- function(n, alpha = 0.05, distribution = qnorm, dparams 
   ## FIXME: qqconf seems to use expected = (1:n)/(n + 1) for scale = "uniform"?
 
   ## lower and upper bound from different band methods
-  if(band_method == "pointwise_internal") {
-    serr <- sqrt(p * (1 - p) / n)
-    dfac <- if(scale == "normal") dparams$sd / dnorm(expected, mean = dparams$mean, sd = dparams$sd) else 1
-    crit <- qnorm(1 - alpha/2)
-    lower_bound <- expected - dfac * crit * serr
-    upper_bound <- expected + dfac * crit * serr
-  } else if(band_method == "pointwise") {
+  if(band_method == "beta") {
     lower_bound <- qbeta(alpha/2, 1:n, n:1)
     upper_bound <- qbeta(1 - alpha/2, 1:n, n:1)
     if(scale == "normal") {
       lower_bound <- qnorm(lower_bound, mean = dparams$mean, sd = dparams$sd)
       upper_bound <- qnorm(upper_bound, mean = dparams$mean, sd = dparams$sd)
     }
+  } else if(band_method == "normal") {
+    serr <- sqrt(p * (1 - p) / n)
+    dfac <- if(scale == "normal") dparams$sd / dnorm(expected, mean = dparams$mean, sd = dparams$sd) else 1
+    crit <- qnorm(1 - alpha/2)
+    lower_bound <- expected - dfac * crit * serr
+    upper_bound <- expected + dfac * crit * serr
   } else if(band_method == "ks") {
     eps <- sqrt((1/(2 * n)) * log(2/alpha))
     lower_bound <- pmax(p - eps, rep(0, n))

@@ -93,7 +93,7 @@ geom_qqrplot_confint(
   show.legend = NA,
   inherit.aes = TRUE,
   detrend = FALSE,
-  type = c("pointwise_internal", "pointwise", "ks", "ell"),
+  type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"),
   level = 0.95,
   identity = TRUE,
   probs = c(0.25, 0.75),
@@ -220,13 +220,14 @@ be shown: \code{"uniform"} (default) for uniform scale or \code{"normal"} for no
 Used for the reference line which goes through the first and third quartile
 of theoretical distributions.}
 
-\item{type}{character. Method for creating the confidence intervals. By
-default, an internal point-wise routine (`pointwise_internal`) is used.
-Alternatively, band methods provided by [qqconf::get_qq_band()] can be used:
-"ell" uses the equal local level method, "ks" uses the Kolmogorov-Smirnov test,
-and "pointwise" uses a slightly alternative implementation of pointwise bands.
-Note that for uniform scales, the identity line must be used for reference
-(`ref_identity = TRUE`).}
+\item{type}{character. Method for creating the confidence intervals. There
+are two methods for pointwise confidence intervals: Based on the `"beta"` or `"normal"`
+distribution, yielding very similar results. And there are two methods for simultaneous
+confidence intervals: Based on the Kolmogorov-Smirnov test (`"ks"`) or equal local levels
+(`"ell"`), where the latter has much better properties but requires the \pkg{qqconf}
+package to be installed ([qqconf::get_qq_band()]). Finally, the methods `"pointwise"` and `"simultaneous"`
+are simply aliases for the preferred corresponding methods `"beta"` and `"ell"`,
+respectively.}
 
 \item{level}{numeric. The confidence level required, defaults to \code{0.95}.}
 

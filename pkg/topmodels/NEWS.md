@@ -35,9 +35,15 @@
   rather than its binomial approximation.
   
 * In addition to pointwise and simultaneous confidence intervals for `rootogram()`,
-  `"tukey"` confidence intervals are now available which simply correspond to
+  `"tukey"` confidence intervals are now available (and the default) which simply correspond to
   limits of -1 and 1 for hanging or suspended rootograms. For other flavors of
   rootograms these limits are transformed correspondingly.
+
+* For Q-Q residual plots in `qqrplot()` there are two methods for pointwise
+  confidence intervals (`"beta"` and `"normal"`) and two for simultaneous intervals
+  (`"ks"` and `"ell"`, the latter requiring package `qqconf`). Additionally,
+  `"pointwise"` and `"simultaneous"` are simply aliases for the preferred
+  corresponding methods `"beta"` and `"ell"`, respectively.
 
 * New distribution/model interfaces were added first in `topmodels` but some
   subsequently moved to other packages: `GAMLSS()` is now in `gamlss.dist`,
