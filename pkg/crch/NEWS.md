@@ -1,3 +1,9 @@
+# crch 1.2-2
+
+* Improved vignette source to consistently use pipe comments and avoid
+  duplicated figure labels.
+
+
 # crch 1.2-1
 
 * Due to a bug in the `crps()` computation for censored and truncated Student's

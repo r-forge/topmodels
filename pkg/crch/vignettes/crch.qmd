@@ -46,7 +46,9 @@ vignette: >
   %\VignettePackage{crch}
 ---
 
-```{r preliminaries, include = FALSE}
+```{r}
+#| label: preliminaries
+#| include: false
 knitr::opts_chunk$set(
   engine = "R",
   collapse = TRUE,
