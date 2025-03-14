@@ -52,5 +52,5 @@ autoplot(pithist(m, plot = FALSE), confint_colour = hex[1], colour = hex[2], fil
 ```{r reliagram-qqrplot}
 #| layout-nrow: 1
 autoplot(reliagram(m, plot = FALSE), colour = hex[1], fill = hex[2], ref_colour = hex[2], ref_linetype = 1, ref_size = 1.2) + ggtitle("Reliagram") + theme_minimal()
-autoplot(qqrplot(m, plot = FALSE), alpha = 1, colour = hex[2], confint_colour = hex[2], simint_fill = hex[3], ref_colour = hex[1], ref_linetype = 1, ref_size = 1.2) + ggtitle("Q-Q Residuals plot") + theme_minimal()
+autoplot(qqrplot(m, ref_type = "quartiles", plot = FALSE), alpha = 1, colour = hex[2], confint_colour = hex[2], simint_fill = hex[3], ref_colour = hex[1], ref_linetype = 1, ref_size = 1.2) + ggtitle("Q-Q Residuals plot") + theme_minimal()
 ```
