@@ -167,7 +167,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -406,7 +406,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -573,7 +573,7 @@ logical. Should scores be returned in a data frame (default) or (if possible) dr
 <p>Either a <code>data.frame</code> of scores (if <code>drop = FALSE</code>, default) or a named numeric vector (if <code>drop = TRUE</code> and the scores are not a matrix). The names are the <code>type</code> specified by the user (i.e., are not canonicalized by partial matching etc.).</p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Poisson regression model for FIFA 2018 data:</span></span>
 <span><span class="co">## number of goals scored by each team in each game, explained by</span></span>
@@ -582,21 +582,21 @@ logical. Should scores be returned in a data frame (default) or (if possible) dr
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## default: in-sample mean log-score and CRPS</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      logs      crps
 1 1.388258 0.5619936</code></pre>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## element-wise score using a new data set (final of the tournament)</span></span>
 <span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="va">FIFA2018</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">final</span>, aggregate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">final</span>, aggregate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        logs      crps
 127 2.891437 1.7744030
 128 1.741564 0.7205361</code></pre>
 </div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## replicate in-sample log-likelihood</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"loglik"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="st">"loglik"</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     loglik
 1 -177.6971</code></pre>
@@ -606,18 +606,18 @@ logical. Should scores be returned in a data frame (default) or (if possible) dr
 <pre><code>'log Lik.' -177.6971 (df=2)</code></pre>
 </div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## compute mean of all available scores</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      logs loglikelihood      crps       mae      mse      dss
 1 1.388258     -1.388258 0.5619936 0.8320441 1.162032 1.085419</code></pre>
 </div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## upper vs. lower case spelling is matched internally but preserved in output</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"logs"</span>, <span class="st">"crps"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"logs"</span>, <span class="st">"crps"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      logs      crps
 1 1.388258 0.5619936</code></pre>
 </div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Log-score"</span>, <span class="st">"CRPS"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Log-score"</span>, <span class="st">"CRPS"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Log-score      CRPS
 1  1.388258 0.5619936</code></pre>
@@ -629,7 +629,7 @@ logical. Should scores be returned in a data frame (default) or (if possible) dr
 <span><span class="co">## replicate in-sample log-likelihood and residual sum of squares</span></span>
 <span><span class="co">## (aka deviance) by taking the sum (rather than the mean) of the</span></span>
 <span><span class="co">## log-density and squared errors, respectively</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"loglik"</span>, <span class="st">"MSE"</span><span class="op">)</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proscore.html">proscore</a></span><span class="op">(</span><span class="va">m</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"loglik"</span>, <span class="st">"MSE"</span><span class="op">)</span>, aggregate <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     loglik      MSE
 1 -206.5784 11353.52</code></pre>

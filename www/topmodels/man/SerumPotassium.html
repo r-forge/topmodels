@@ -142,7 +142,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -458,16 +458,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Martin HF, Gudzinowicz BJ, Fanger H (1975). <em>Normal Values in Clinical Chemistry: A Guide to Statistical Analysis of Laboratory Data</em>. Marcel Dekker, New York.</p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"SerumPotassium"</span>, package <span class="op">=</span> <span class="st">"topmodels"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Figure 9.3a-c from Rice (2007), and actual hanging rootogram</span></span>
 <span><span class="co">## (note that Rice erroneously refers to suspended rootograms as hanging)</span></span>
 <span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">SerumPotassium</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">br</span> <span class="op">&lt;-</span> <span class="fl">32</span><span class="op">:</span><span class="fl">54</span><span class="op">/</span><span class="fl">10</span> <span class="op">-</span> <span class="fl">0.05</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, style <span class="op">=</span> <span class="st">"standing"</span>,</span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, style <span class="op">=</span> <span class="st">"standing"</span>,</span>
 <span>  breaks <span class="op">=</span> <span class="va">br</span>, col <span class="op">=</span> <span class="st">"transparent"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -475,7 +475,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, style <span class="op">=</span> <span class="st">"suspended"</span>,</span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, scale <span class="op">=</span> <span class="st">"raw"</span>, style <span class="op">=</span> <span class="st">"suspended"</span>,</span>
 <span>  breaks <span class="op">=</span> <span class="va">br</span>, col <span class="op">=</span> <span class="st">"transparent"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2.8</span>, <span class="op">-</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -483,7 +483,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, scale <span class="op">=</span> <span class="st">"sqrt"</span>, style <span class="op">=</span> <span class="st">"suspended"</span>,</span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, scale <span class="op">=</span> <span class="st">"sqrt"</span>, style <span class="op">=</span> <span class="st">"suspended"</span>,</span>
 <span>  breaks <span class="op">=</span> <span class="va">br</span>, col <span class="op">=</span> <span class="st">"transparent"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1.5</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -491,7 +491,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, breaks <span class="op">=</span> <span class="va">br</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/rootogram.html">rootogram</a></span><span class="op">(</span><span class="va">sp</span>, breaks <span class="op">=</span> <span class="va">br</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="SerumPotassium_files/figure-html/unnamed-chunk-1-4.png" class="img-fluid figure-img" width="672"></p>

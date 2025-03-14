@@ -142,7 +142,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -452,11 +452,10 @@ plot(
   detrend = NULL,
   simint = NULL,
   confint = NULL,
-  confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
+  confint_type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"),
   confint_level = 0.95,
   ref = NULL,
-  ref_identity = TRUE,
-  ref_probs = c(0.25, 0.75),
+  ref_type = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -497,11 +496,10 @@ autoplot(
   detrend = NULL,
   simint = NULL,
   confint = NULL,
-  confint_type = c("pointwise", "simultaneous", "tail-sensitive"),
+  confint_type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"),
   confint_level = 0.95,
   ref = NULL,
-  ref_identity = TRUE,
-  ref_probs = c(0.25, 0.75),
+  ref_type = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab = NULL,
@@ -575,7 +573,7 @@ logical or character string describing the style for plotting ‘c("polygon", "l
 <code id="confint_type">confint_type</code>
 </td>
 <td>
-character. Should <code>“pointwise”</code> or <code>“simultaneous”</code> confidence intervals of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based on the Kolmogorov-Smirnov test.
+character. Method for creating the confidence intervals. There are two methods for pointwise confidence intervals: Based on the ‘"beta"’ or ‘"normal"’ distribution, yielding very similar results. And there are two methods for simultaneous confidence intervals: Based on the Kolmogorov-Smirnov test (‘"ks"’) or equal local levels (‘"ell"’), where the latter has much better properties but requires the <span class="pkg">qqconf</span> package to be installed ([qqconf::get_qq_band()]). Finally, the methods ‘"pointwise"’ and ‘"simultaneous"’ are simply aliases for the preferred corresponding methods ‘"beta"’ and ‘"ell"’, respectively.
 </td>
 </tr>
 <tr>
@@ -596,10 +594,10 @@ logical. Should a reference line be plotted?
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="ref_identity">ref_identity</code>, <code id="ref_probs">ref_probs</code>
+<code id="ref_type">ref_type</code>
 </td>
 <td>
-Should the identity line be plotted as reference and otherwise which probabilities should be used for defining the reference line?
+character specifying that the ‘"identity"’ line should be used as a reference or, alternatively, a line through the ‘"quartiles"’ of the quantile residuals. Moreover, also a numeric vector of length two can be used to define the probabilities of the quantiles to be used for defining the reference line. Note, that the reference is also used for detrending the quantile residuals. For uniform scales, the identity line must be used for reference (‘ref_type = "identity"’).
 </td>
 </tr>
 <tr>
@@ -675,14 +673,14 @@ Further graphical parameters for the ‘confint’ and ‘simint’ line/polygon
 <p><code>qqrplot</code>, <code>wormplot</code>, <code>proresiduals</code>, <code>qqnorm</code></p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="co">## speed and stopping distances of cars</span></span>
 <span><span class="va">m1_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## compute and plot qqrplot</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="plot.qqrplot_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
@@ -690,12 +688,12 @@ Further graphical parameters for the ‘confint’ and ‘simint’ line/polygon
 </div>
 </div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## customize colors</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span>, plot <span class="op">=</span> <span class="st">"base"</span>, ref_col <span class="op">=</span> <span class="st">"blue"</span>, lty <span class="op">=</span> <span class="fl">2</span>, pch <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_lm</span>, plot <span class="op">=</span> <span class="st">"base"</span>, ref_col <span class="op">=</span> <span class="st">"blue"</span>, lty <span class="op">=</span> <span class="fl">2</span>, pch <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## add separate model</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/crch/">"crch"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">m1_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html">crch</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span> <span class="op">|</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">2</span>, simint <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">2</span>, simint <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -723,8 +721,8 @@ Further graphical parameters for the ‘confint’ and ‘simint’ line/polygon
 <span>  <span class="va">m2_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/crch/man/crch.html">crch</a></span><span class="op">(</span><span class="va">rain</span> <span class="op">~</span> <span class="va">ensmean</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">enssd</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">RainIbk</span>, left <span class="op">=</span> <span class="fl">0</span>, dist <span class="op">=</span> <span class="st">"logistic"</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="co">## compute qqrplots</span></span>
-<span>  <span class="va">qq2_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_lm</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span>  <span class="va">qq2_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">qq2_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_lm</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">qq2_crch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_crch</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="co">## plot in single graph</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">qq2_lm</span>, <span class="va">qq2_crch</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, simint_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, single_graph <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -743,7 +741,7 @@ Further graphical parameters for the ‘confint’ and ‘simint’ line/polygon
 <span><span class="va">m3_pois</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## compute and plot qqrplot as "ggplot2" graphic</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m3_pois</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m3_pois</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="plot.qqrplot_files/figure-html/unnamed-chunk-1-4.png" class="img-fluid figure-img" width="672"></p>

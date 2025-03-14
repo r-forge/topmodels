@@ -142,7 +142,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -515,10 +515,8 @@ geom_qqrplot_confint(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  xlim = NULL,
-  n = 101,
   detrend = FALSE,
-  type = c("pointwise", "simultaneous", "tail-sensitive"),
+  type = c("pointwise", "simultaneous", "beta", "normal", "ks", "ell"),
   level = 0.95,
   identity = TRUE,
   probs = c(0.25, 0.75),
@@ -687,26 +685,10 @@ character. Scale on which the quantile residuals will be shown: <code>“uniform
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="xlim">xlim</code>
-</td>
-<td>
-<code>NULL</code> (default) or numeric. The x limits for computing the confidence intervals.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="n">n</code>
-</td>
-<td>
-positive numeric. Number of points used to compute the confidence intervals, the more the smoother.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
 <code id="type">type</code>
 </td>
 <td>
-character. Should <code>“pointwise”</code> (default), <code>“simultaneous”</code>, or <code>“tail-sensitive”</code> confidence intervals of the (randomized) quantile residuals be visualized. Simultaneous confidence intervals are based on the Kolmogorov-Smirnov test.
+character. Method for creating the confidence intervals. There are two methods for pointwise confidence intervals: Based on the ‘"beta"’ or ‘"normal"’ distribution, yielding very similar results. And there are two methods for simultaneous confidence intervals: Based on the Kolmogorov-Smirnov test (‘"ks"’) or equal local levels (‘"ell"’), where the latter has much better properties but requires the <span class="pkg">qqconf</span> package to be installed ([qqconf::get_qq_band()]). Finally, the methods ‘"pointwise"’ and ‘"simultaneous"’ are simply aliases for the preferred corresponding methods ‘"beta"’ and ‘"ell"’, respectively.
 </td>
 </tr>
 <tr>
@@ -729,7 +711,7 @@ character. Style for plotting confidence intervals. Either <code>“polygon”</
 <p>An object of class <code>GeomQqrplotConfint</code> (inherits from <code>Geom</code>, <code>ggproto</code>, <code>gg</code>) of length 6.</p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org">"ggplot2"</a></span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co">## Fit model</span></span>
@@ -738,8 +720,8 @@ character. Style for plotting confidence intervals. Either <code>“polygon”</
 <span>  <span class="va">m2_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="co">## Compute qqrplot</span></span>
-<span>  <span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span>  <span class="va">q2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">q2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">q1</span>, <span class="va">q2</span><span class="op">)</span> </span>
 <span>  </span>
@@ -752,10 +734,10 @@ character. Style for plotting confidence intervals. Either <code>“polygon”</
 <span>  </span>
 <span>  <span class="co">## Polygon CI around identity line used as reference </span></span>
 <span>  <span class="va">gg1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">d</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">expected</span>, y <span class="op">=</span> <span class="va">observed</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_simint</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_simint</a></span><span class="op">(</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span></span>
 <span>        x <span class="op">=</span> <span class="va">simint_expected</span>, </span>
 <span>        ymin <span class="op">=</span> <span class="va">simint_observed_lwr</span>, </span>
@@ -770,10 +752,10 @@ character. Style for plotting confidence intervals. Either <code>“polygon”</
 <span>  </span>
 <span>  <span class="co">## Polygon CI around robust reference line</span></span>
 <span>  <span class="va">gg2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">d</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">expected</span>, y <span class="op">=</span> <span class="va">observed</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span>identity <span class="op">=</span> <span class="cn">FALSE</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"scale"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>identity <span class="op">=</span> <span class="cn">FALSE</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"scale"</span><span class="op">)</span>, style <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_simint</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span>identity <span class="op">=</span> <span class="cn">FALSE</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"scale"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>identity <span class="op">=</span> <span class="cn">FALSE</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"scale"</span><span class="op">)</span>, style <span class="op">=</span> <span class="st">"line"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_simint</a></span><span class="op">(</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span></span>
 <span>        x <span class="op">=</span> <span class="va">simint_expected</span>, </span>
 <span>        ymin <span class="op">=</span> <span class="va">simint_observed_lwr</span>, </span>
@@ -787,19 +769,19 @@ character. Style for plotting confidence intervals. Either <code>“polygon”</
 <span>  <span class="va">gg2</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">group</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="co">## Use different `scale`s with confidence intervals</span></span>
-<span>  <span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_pois</span>, scale <span class="op">=</span> <span class="st">"uniform"</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span>  <span class="va">q2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m1_pois</span>, scale <span class="op">=</span> <span class="st">"uniform"</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">q2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/qqrplot.html">qqrplot</a></span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="va">gg3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">q1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">expected</span>, y <span class="op">=</span> <span class="va">observed</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"red"</span>, scale <span class="op">=</span> <span class="st">"uniform"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"red"</span>, scale <span class="op">=</span> <span class="st">"uniform"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">gg3</span></span>
 <span>  </span>
 <span>  <span class="va">gg4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">q2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">expected</span>, y <span class="op">=</span> <span class="va">observed</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"red"</span>, scale <span class="op">=</span> <span class="st">"uniform"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_ref</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot_confint</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"red"</span>, scale <span class="op">=</span> <span class="st">"uniform"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/geom_qqrplot.html">geom_qqrplot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">gg4</span></span>
 <span><span class="op">}</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">

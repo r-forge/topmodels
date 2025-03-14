@@ -123,7 +123,7 @@ ul.task-list li input[type="checkbox"] {
   </li>  
         <li>
     <a class="dropdown-item" href="./man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./man/SerumPotassium.html">
@@ -233,7 +233,8 @@ ul.task-list li input[type="checkbox"] {
 <li><p>For the CRPS one can either leverage the functions from the <code>scoringRules</code> package (if available) or the new <code>crps.distribution()</code> method for numeric approximation/numeric integration to calculate the CRPS for univariate distributions. This is also used when no analytic solution is available in the <code>scoringRules</code> package.</p></li>
 <li><p>The graphical functions <code>rootogram()</code>, <code>pithist()</code>, <code>qqrplot()</code>, <code>wormplot()</code>, and <code>reliagram()</code> are also switched to the new infrastructure based on <code>distributions3</code>, notably via <code>procast()</code> and <code>proresiduals()</code>.</p></li>
 <li><p>The pointwise and simultaneous confidence intervals in <code>rootogram()</code> now rely on the exact <code>PoissonBinomial()</code> distribution (now available in <code>distributions3</code>) rather than its binomial approximation.</p></li>
-<li><p>In addition to pointwise and simultaneous confidence intervals for <code>rootogram()</code>, <code>"tukey"</code> confidence intervals are now available which simply correspond to limits of -1 and 1 for hanging or suspended rootograms. For other flavors of rootograms these limits are transformed correspondingly.</p></li>
+<li><p>In addition to pointwise and simultaneous confidence intervals for <code>rootogram()</code>, <code>"tukey"</code> confidence intervals are now available (and the default) which simply correspond to limits of -1 and 1 for hanging or suspended rootograms. For other flavors of rootograms these limits are transformed correspondingly.</p></li>
+<li><p>For Q-Q residual plots in <code>qqrplot()</code> there are two methods for pointwise confidence intervals (<code>"beta"</code> and <code>"normal"</code>) and two for simultaneous intervals (<code>"ks"</code> and <code>"ell"</code>, the latter requiring package <code>qqconf</code>). Additionally, <code>"pointwise"</code> and <code>"simultaneous"</code> are simply aliases for the preferred corresponding methods <code>"beta"</code> and <code>"ell"</code>, respectively.</p></li>
 <li><p>New distribution/model interfaces were added first in <code>topmodels</code> but some subsequently moved to other packages: <code>GAMLSS()</code> is now in <code>gamlss.dist</code>, <code>BAMLSS()</code> is now in <code>bamlss</code>, and <code>Empirical()</code> is still in <code>topmodels</code> for now.</p></li>
 <li><p>New wrapper function <code>promodel()</code> that adds the class <code>"promodel"</code> (for probabilistic model) to an existing model object so that <code>predict()</code> dispatches to <code>procast()</code> and <code>residuals()</code> dispatches to <code>proresiduals()</code>. This facilitates using model functionality based on the standard <code>predict()</code> and <code>residuals()</code> methods like <code>marginaleffects</code>.</p></li>
 </ul>

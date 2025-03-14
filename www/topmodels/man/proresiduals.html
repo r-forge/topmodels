@@ -142,7 +142,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -534,90 +534,90 @@ numeric. The minimal difference to compute the range of proabilities correspondi
 <p><code>qnorm</code>, <code>qqrplot</code></p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Poisson GLM for FIFA 2018 data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"FIFA2018"</span>, package <span class="op">=</span> <span class="st">"distributions3"</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">goals</span> <span class="op">~</span> <span class="va">difference</span>, data <span class="op">=</span> <span class="va">FIFA2018</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## random quantile residuals (on original data)</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           1            2            3            4            5            6 
- 2.318279308 -0.439931985 -0.635993592 -0.228517939  1.330527083  0.119408070 
+ 2.289184821 -2.320291437 -1.148267216 -0.665716344  0.959913633 -0.017759155 
            7            8            9           10           11           12 
--0.691318098 -1.261475234  1.124774783 -1.135364668  0.854345941 -0.287203588 
+-0.544601709 -0.550226938  1.166493615 -1.332815600  0.637924950 -0.670423168 
           13           14           15           16           17           18 
--1.399154818 -0.537545526  1.673296348  1.357837429 -0.266163653 -1.017095274 
+-1.326745493 -0.308207419  1.564068587  0.887045899 -0.771511553 -0.537176089 
           19           20           21           22           23           24 
--0.299647076 -1.097565534  0.200564160 -0.492341182  1.451596357 -0.280079627 
+-1.332671638 -0.556593442  0.601992343 -0.377951217  1.768688549  0.162250251 
           25           26           27           28           29           30 
- 0.029813079  0.162864349 -0.541493790 -0.022916654 -0.110272407  0.472344302 
+ 0.095846534  0.072503808 -0.600992745 -0.213043319 -0.026337487  0.099642903 
           31           32           33           34           35           36 
--0.655038103 -0.239935047 -0.590378265 -1.368867509 -0.981775647  0.654456294 
+-0.393804601 -0.493666778 -0.636003421 -1.262663703 -1.183786550  0.308122935 
           37           38           39           40           41           42 
--0.341237660  0.241671459  0.390024291 -1.430509899 -1.324529903  1.806258033 
+-0.877283868  0.184610242  0.588704855 -0.832296578 -1.313400062  1.947233306 
           43           44           45           46           47           48 
- 0.526121929 -0.866904934  0.691701969  0.277048344  0.003968664  0.538077181 
+ 0.677829678 -0.898451772  0.719902684 -0.114990186 -0.273351103  0.268074673 
           49           50           51           52           53           54 
--0.607479271  0.204036555 -0.288478316  0.418802618  0.055265025 -2.376580687 
+-1.086967300  0.165240651 -0.351549416  0.213588087 -0.373351261 -0.567344165 
           55           56           57           58           59           60 
- 0.241669307  0.412564619 -0.982275787  0.372820416  0.399655286  0.609147364 
+ 0.341472996  0.439242589 -0.770422544 -0.204435515  0.372605981  0.697387769 
           61           62           63           64           65           66 
--1.563183304  0.233149815  0.154015780 -1.309397229  0.004820310  0.366256689 
+-1.884488452  0.154855006  0.067508255 -1.289388323 -0.270976336  0.382865705 
           67           68           69           70           71           72 
--0.142231828  0.098483468  1.500628982 -2.431065324 -0.971027143  1.722132733 
+-0.262202918  0.236843011  1.326709217 -2.128993638 -0.712374253  1.317745632 
           73           74           75           76           77           78 
- 0.600758550 -0.703870635  0.007808108  0.387749309  1.659018660  1.084594729 
+ 0.460477956 -0.244425590 -0.064070789  0.019979728  1.953681669  1.230831210 
           79           80           81           82           83           84 
- 2.211095304 -0.105437518 -1.609917554 -0.568191736 -0.239958229  0.900466604 
+ 2.331490479  0.247705814 -1.673780588 -0.287854828 -0.363200996  1.013789441 
           85           86           87           88           89           90 
--0.284024653  1.267558961 -0.055485926  0.685955773  0.560048454  0.723589880 
+-0.223886958  1.109387678 -0.544188788  0.745242218  0.541045786  0.385666328 
           91           92           93           94           95           96 
--2.278037098  1.122593637 -0.559633824 -0.280754871 -0.440682995 -0.325560998 
+-0.896243684  1.665321321 -0.824040207 -0.271424807 -1.490120641 -0.159278702 
           97           98           99          100          101          102 
- 1.716262817  1.829753025  0.838321759 -0.241908939 -0.676976786  0.162228314 
+ 1.707510008  1.673916721  0.583274420  0.271807455 -0.487886377  0.423172158 
          103          104          105          106          107          108 
- 0.011839452  0.428791284  0.047707767 -1.092360288  0.844860351  0.873321161 
+-0.690691485  0.403945186  0.238085392 -0.944049714  0.885626069  0.892908396 
          109          110          111          112          113          114 
--0.090481912 -1.401157372  0.368627520  0.253662417 -2.178782142  0.481688254 
+ 0.357874686 -1.216578393 -0.297478999 -0.182100690 -0.505680314  0.195952324 
          115          116          117          118          119          120 
--0.174440541  0.756226623 -1.321670808  0.648270922 -0.219040241 -0.244000497 
+-0.367787410  1.240412359 -1.414058679  0.268676235 -0.507405149 -0.008448913 
          121          122          123          124          125          126 
--0.482504430 -1.766159153  0.355420094 -0.485690358  0.383893837 -0.564370527 
+-0.334918447 -1.957901826  0.043837147 -0.173806468  0.423475497 -0.912033559 
          127          128 
- 1.727234532  1.358035641 </code></pre>
+ 1.537113510  1.173474927 </code></pre>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## various flavors of residuals on small new data</span></span>
 <span><span class="va">nd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>goals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, difference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## quantile residuals: random (1 sample), random (5 samples), mid-quantile (non-random)</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"quantile"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"quantile"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          1           2           3 
- 0.08206473  0.16794331 -0.79489784 </code></pre>
+ 0.19069385  0.06536608 -0.21642858 </code></pre>
 </div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"quantile"</span>, nsim <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"quantile"</span>, nsim <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>             r_1        r_2        r_3        r_4        r_5
-[1,]  0.04045295  0.6490735  0.4708528  0.3654437  0.1385858
-[2,] -0.30342326 -0.3126504 -0.5265108  0.2468159  0.2474505
-[3,] -0.67560752 -0.5234960 -0.9314298 -0.2693369 -0.3895383</code></pre>
+<pre><code>             r_1         r_2         r_3         r_4         r_5
+[1,] -0.09136406 -0.06937834  0.51243663 -0.05318274  0.75502457
+[2,] -0.39455014  0.14267940  0.01132843 -0.47175261  0.04236594
+[3,] -0.75703554 -0.86973087 -0.42646290 -0.83734989 -0.29166917</code></pre>
 </div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"quantile"</span>, prob <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"quantile"</span>, prob <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          1           2           3 
  0.31008612 -0.07586646 -0.52976162 </code></pre>
 </div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## PIT residuals (without transformation to normal): random vs. minimum/maximum quantile</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"pit"</span>, nsim <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"pit"</span>, nsim <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           r_1       r_2       r_3       r_4       r_5
-[1,] 0.7852379 0.5106289 0.5752134 0.5817532 0.6255251
-[2,] 0.4736438 0.5205103 0.3377620 0.3443584 0.5022730
-[3,] 0.2387543 0.2392821 0.2178502 0.1982118 0.3296159</code></pre>
+[1,] 0.7707732 0.6311015 0.5857071 0.6441628 0.7489573
+[2,] 0.4822441 0.5284415 0.6402218 0.3750698 0.3730858
+[3,] 0.3193514 0.3206553 0.3757851 0.3678444 0.3074102</code></pre>
 </div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"pit"</span>, prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"pit"</span>, prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           r_0       r_1
 [1,] 0.4412492 0.8022553
@@ -625,13 +625,13 @@ numeric. The minimal difference to compute the range of proabilities correspondi
 [3,] 0.1540605 0.4422167</code></pre>
 </div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## raw response residuals (observation - expected mean)</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3 
  0.1818546 -0.2370397 -0.8704100 </code></pre>
 </div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## standardized Pearson residuals (response residuals divided by standard deviation)</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"pearson"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/proresiduals.html">proresiduals</a></span><span class="op">(</span><span class="va">m</span>, newdata <span class="op">=</span> <span class="va">nd</span>, type <span class="op">=</span> <span class="st">"pearson"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3 
  0.2010523 -0.2131225 -0.6364371 </code></pre>

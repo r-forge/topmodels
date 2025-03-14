@@ -142,7 +142,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -557,7 +557,7 @@ Arguments to be passed to <code>rootogram</code>, <code>pithist</code>, <code>re
 <p><code>rootogram</code>, <code>pithist</code>, <code>reliagram</code> <code>qqrplot</code>, <code>wormplot</code></p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span>
@@ -567,14 +567,14 @@ Arguments to be passed to <code>rootogram</code>, <code>pithist</code>, <code>re
 <span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">width</span> <span class="op">+</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites2</span>, family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## ggplot2 graphics</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/topmodels.html">topmodels</a></span><span class="op">(</span><span class="va">m1</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/topmodels.html">topmodels</a></span><span class="op">(</span><span class="va">m1</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="topmodels_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/topmodels.html">topmodels</a></span><span class="op">(</span><span class="va">m2</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/topmodels.html">topmodels</a></span><span class="op">(</span><span class="va">m2</span>, single_page <span class="op">=</span> <span class="cn">TRUE</span>, nsim <span class="op">=</span> <span class="fl">30</span>, plot <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="topmodels_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>

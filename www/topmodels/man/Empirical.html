@@ -167,7 +167,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -248,7 +248,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/Empirical.html">Interfacs to models/distributions</a></li><li class="breadcrumb-item"><a href="../man/Empirical.html">Empirical</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/Empirical.html">Interfaces to models/distributions</a></li><li class="breadcrumb-item"><a href="../man/Empirical.html">Empirical</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -406,7 +406,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -677,13 +677,13 @@ A vector of probabilities.
 <p>Joanes DN and Gill CA (1998). “Comparing Measures of Sample Skewness and Kurtosis.” <em>Journal of the Royal Statistical Society D</em>, <b>47</b>(1), 183–189. <a href="https://doi.org/10.1111/1467-9884.00122">doi:10.1111/1467-9884.00122</a></p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st"><a href="https://github.com/alexpghayes/distributions3">"distributions3"</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">28</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/Empirical.html">Empirical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/Empirical.html">Empirical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">X</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Empirical distribution (Min. -2.100, Max.  2.187, N = 50)"</code></pre>
@@ -729,7 +729,7 @@ A vector of probabilities.
 <span></span>
 <span><span class="co">## Single vector (will be coerced to numeric)</span></span>
 <span><span class="va">Y1</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">3</span>, mean <span class="op">=</span> <span class="op">-</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="va">d1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y1</span><span class="op">)</span></span>
+<span><span class="va">d1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y1</span><span class="op">)</span></span>
 <span><span class="va">d1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Empirical distribution (Min. -10.70, Max.  -9.95, N = 3)"</code></pre>
@@ -742,7 +742,7 @@ A vector of probabilities.
 <span><span class="va">Y2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">3</span>, mean <span class="op">=</span> <span class="op">-</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>,</span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="fl">4</span>, lambda <span class="op">=</span> <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y2</span><span class="op">)</span></span>
+<span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y2</span><span class="op">)</span></span>
 <span><span class="va">d2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Empirical distribution (Min. -10.6917, Max.  -8.1584, N = 3)"
@@ -757,7 +757,7 @@ A vector of probabilities.
 <span><span class="va">Y3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Normal"</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">3</span>, mean <span class="op">=</span> <span class="op">-</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>           <span class="st">"Uniform"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>,</span>
 <span>           <span class="st">"Poisson"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="fl">4</span>, lambda <span class="op">=</span> <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">d3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y3</span><span class="op">)</span></span>
+<span><span class="va">d3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y3</span><span class="op">)</span></span>
 <span><span class="va">d3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                                        Normal 
@@ -774,7 +774,7 @@ A vector of probabilities.
 </div>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Matrix or data.frame</span></span>
 <span><span class="va">Y4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">5</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"D_%d"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"obs_%d"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">d4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y4</span><span class="op">)</span></span>
+<span><span class="va">d4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/Empirical.html">Empirical</a></span><span class="op">(</span><span class="va">Y4</span><span class="op">)</span></span>
 <span><span class="va">d4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                                         D_1 
@@ -786,7 +786,7 @@ A vector of probabilities.
                                                          D_4 
 "Empirical distribution (Min. -1.5264, Max.  2.4897, N = 5)" </code></pre>
 </div>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/Empirical.html">Empirical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">Y4</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/Empirical.html">Empirical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">Y4</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">d5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                                       obs_1 

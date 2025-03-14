@@ -142,7 +142,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../man/Empirical.html">
- <span class="dropdown-text">Interfacs to models/distributions</span></a>
+ <span class="dropdown-text">Interfaces to models/distributions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../man/SerumPotassium.html">
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Interfacs to models/distributions</span></a>
+ <span class="menu-text">Interfaces to models/distributions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -606,16 +606,21 @@ deviations between theoretical and empirical quantiles.
 <p><code>qqrplot</code>, <code>plot.qqrplot</code>, <code>qqrplot</code>, <code>proresiduals</code>, <code>qqnorm</code></p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/">"topmodels"</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/topmodels/">"topmodels"</a></span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="co">## speed and stopping distances of cars</span></span>
 <span><span class="va">m1_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">~</span> <span class="va">speed</span>, data <span class="op">=</span> <span class="va">cars</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## compute and plot wormplot</span></span>
-<span><span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m1_lm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="wormplot_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">#-------------------------------------------------------------------------------</span></span>
 <span><span class="co">## determinants for male satellites to nesting horseshoe crabs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"CrabSatellites"</span>, package <span class="op">=</span> <span class="st">"countreg"</span><span class="op">)</span></span>
 <span></span>
@@ -624,17 +629,11 @@ deviations between theoretical and empirical quantiles.
 <span><span class="va">m2_pois</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">satellites</span> <span class="op">~</span> <span class="va">color</span>, data <span class="op">=</span> <span class="va">CrabSatellites</span>, family <span class="op">=</span> <span class="va">poisson</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## compute and plot wormplot as base graphic</span></span>
-<span><span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://topmodels.R-Forge.R-project.org/reference/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m1_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/topmodels/man/wormplot.html">wormplot</a></span><span class="op">(</span><span class="va">m2_pois</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## plot combined wormplot as "ggplot2" graphic</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">w1</span>, <span class="va">w2</span><span class="op">)</span>, single_graph <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure"><p><img src="wormplot_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="wormplot_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
