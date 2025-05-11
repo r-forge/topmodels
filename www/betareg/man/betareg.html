@@ -476,7 +476,7 @@ betareg.fit(x, y, z = NULL, weights = NULL, offset = NULL,
   dist = NULL, nu = NULL)
 </code></pre>
 </section><section id="arguments" class="level3"><h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
-<table>
+<table role="presentation">
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
 <code id="formula">formula</code>
@@ -593,7 +593,7 @@ arguments passed to <code>betareg.control</code>.
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p><code>betareg</code> returns an object of class <code>“betareg”</code>, i.e., a list with components as follows. For classic beta regressions (<code>dist = “beta”</code>) several elements are lists with the names <code>“mean”</code> and <code>“precision”</code> for the information from the respective submodels. For extended-support beta regressions (<code>dist = “xbetax”</code> or <code>“xbeta”</code>), the corresponding names are <code>“mu”</code> and <code>“phi”</code> because they are not exactly the mean and precision due to the censoring in the response variable.</p>
 <p><code>betareg.fit</code> returns an unclassed list with components up to <code>converged</code>.</p>
-<table>
+<table role="presentation">
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
 <code>coefficients</code>

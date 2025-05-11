@@ -473,7 +473,7 @@ xbetax_family(link = "logit", link.phi = "log", link.nu = "log",
   quad = 20, tol = .Machine\$double.eps^0.7, ...)
 </code></pre>
 </section><section id="arguments" class="level3"><h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
-<table>
+<table role="presentation">
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
 <code id="link">link</code>
@@ -537,6 +537,7 @@ Arguments passed to functions that are called within the family object.
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/betareg/">"betareg"</a></span><span class="op">)</span></span>
 <span></span>
+<span><span class="co">## IGNORE_RDIFF_BEGIN</span></span>
 <span></span>
 <span><span class="co">## package and data</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://topmodels.R-Forge.R-project.org/betareg/">"betareg"</a></span><span class="op">)</span></span>
@@ -546,7 +547,6 @@ Arguments passed to functions that are called within the family object.
 <span><span class="co">## classical beta regression via ML</span></span>
 <span><span class="va">rs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## IGNORE_RDIFF_BEGIN</span></span>
 <span><span class="co">## Bayesian additive model (with low number of iterations to speed up the example)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">rs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://www.bamlss.org/reference/bamlss.html">bamlss</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html">s</a></span><span class="op">(</span><span class="va">iq</span>, by <span class="op">=</span> <span class="va">dyslexia</span><span class="op">)</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span>,</span>
@@ -592,30 +592,30 @@ AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  
 AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  38
 AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  39
 AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  39
-elapsed time:  2.67sec
+elapsed time:  3.19sec
 Starting the sampler...
 
-|                    |   0%  2.57sec
-|*                   |   5%  2.47sec  0.13sec
-|**                  |  10%  2.26sec  0.25sec
-|***                 |  15%  2.20sec  0.39sec
-|****                |  20%  2.08sec  0.52sec
-|*****               |  25%  1.93sec  0.64sec
-|******              |  30%  1.81sec  0.78sec
-|*******             |  35%  1.70sec  0.92sec
-|********            |  40%  1.60sec  1.07sec
-|*********           |  45%  1.47sec  1.20sec
-|**********          |  50%  1.34sec  1.34sec
-|***********         |  55%  1.21sec  1.48sec
-|************        |  60%  1.08sec  1.61sec
-|*************       |  65%  0.94sec  1.75sec
-|**************      |  70%  0.81sec  1.89sec
-|***************     |  75%  0.68sec  2.03sec
-|****************    |  80%  0.54sec  2.16sec
-|*****************   |  85%  0.41sec  2.30sec
-|******************  |  90%  0.27sec  2.44sec
-|******************* |  95%  0.14sec  2.57sec
-|********************| 100%  0.00sec  2.71sec</code></pre>
+|                    |   0%  3.55sec
+|*                   |   5%  3.33sec  0.18sec
+|**                  |  10%  3.00sec  0.33sec
+|***                 |  15%  2.77sec  0.49sec
+|****                |  20%  2.58sec  0.65sec
+|*****               |  25%  2.45sec  0.82sec
+|******              |  30%  2.30sec  0.99sec
+|*******             |  35%  2.14sec  1.15sec
+|********            |  40%  1.99sec  1.32sec
+|*********           |  45%  1.84sec  1.51sec
+|**********          |  50%  1.68sec  1.68sec
+|***********         |  55%  1.51sec  1.85sec
+|************        |  60%  1.34sec  2.01sec
+|*************       |  65%  1.18sec  2.20sec
+|**************      |  70%  1.02sec  2.37sec
+|***************     |  75%  0.85sec  2.54sec
+|****************    |  80%  0.68sec  2.72sec
+|*****************   |  85%  0.51sec  2.89sec
+|******************  |  90%  0.34sec  3.06sec
+|******************* |  95%  0.17sec  3.25sec
+|********************| 100%  0.00sec  3.43sec</code></pre>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Bayesian model shrinks the effects compared to ML</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="va">dyslexia</span><span class="op">)</span></span>
