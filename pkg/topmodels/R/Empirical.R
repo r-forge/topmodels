@@ -3,8 +3,8 @@
 ## Should be located in distributions3/R/utils.R
 
 #' @export
-median.distribution <- function(x, na.rm = TRUE, ...) {
-    quantile(x, probs = 0.5, na.rm = na.rm, ...)
+median.distribution <- function(x, na.rm = FALSE, ...) {
+    quantile(x, probs = 0.5, ...)
 }
 
 
