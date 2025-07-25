@@ -37,10 +37,10 @@
  *      width * (p[lo]^2 + p[x]^2) / 2
  *      width * ((1. - p[x])^2 + (1. - p[up])^2 / 2
  * 
- * x: observation; if length == 1 but length px > 1 the same observation will
+ * x: observation; if length(x) == 1 but length px > 1 the same observation will
  *    be used for all observations.
- * px: pdf at observation (vector of length(y))
- * p: pdf along a grid; matrix of dimension (length(y) x K), or vector of length(y)
+ * px: cdf at observation (vector of length(y))
+ * p: cdf along a grid; matrix of dimension (length(y) x K), or vector of length(y)
  * q: quantile along a grid; matrix of dimension (length(y) x K)
  *
  * December 2022

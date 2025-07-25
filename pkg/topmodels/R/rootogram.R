@@ -374,6 +374,8 @@ rootogram.default <- function(
                drop = FALSE, at = breaks, elementwise = FALSE)
   p <- p[, -1L, drop = FALSE] - p[, -ncol(p), drop = FALSE]
 
+  print(range(p))
+
   ## NOTE: Setting small negative expected values to 0.0; Occurs infrequently,
   ##       e.g., compare "underdispersive model fits"
   p[abs(p) < sqrt(.Machine$double.eps)] <- 0

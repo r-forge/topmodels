@@ -1,6 +1,8 @@
 
 
 
+# Extracting current package version
+VERSION := $(shell grep '^Version:' DESCRIPTION | awk '{print $$2}')
 
 # ---------------------------------------------------
 # Devtools based cmds
@@ -8,11 +10,22 @@
 document:
 	Rscript -e "library('scoringRules'); devtools::document()"
 
-install: document
-	Rscript -e "devtools::install()"
+.PHONY: install build clean
+.PHONY: clean
+clean:
+	-rm src/*.so
+	-rm src/*.o
+	-rm ../topmodels_*.tar.gz
+build: clean document
+	@echo Building current version: $(VERSION)
+	(cd ../ && R CMD build topmodels)
+install: build
+	@echo Installing current version: $(VERSION)
+	(cd ../ && R CMD INSTALL topmodels_$(VERSION).tar.gz)
+check: build
+	@echo Checking current version: $(VERSION)
+	(cd ../ && R CMD check --as-cran topmodels_$(VERSION).tar.gz)
 
-check: document
-	Rscript -e "library('distributions3'); library('scoringRules'); devtools::check()"
 
 test: install
 	Rscript -e "tinytest::test_package('topmodels')"
