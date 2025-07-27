@@ -19,7 +19,6 @@ double integrate_2d(double xlo, double xhi, double ylo, double yhi, double x);
 
 /* Functions calculating numeric moments */
 SEXP c_d2moments_numeric(SEXP at, SEXP pdf, SEXP dim, SEXP continuous, SEXP what);
-void c_d2moments_calculate_weights(int i, int n, double* pdf, doubleVec* w);
 double c_d2moments_calculate_moment(int i, int n, double* at, doubleVec* w, int what);
 
 const R_CallMethodDef CallEntries[] = {

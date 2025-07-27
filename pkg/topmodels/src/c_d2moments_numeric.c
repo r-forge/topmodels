@@ -6,65 +6,69 @@
 #include "topmodels.h"
 
 
-/* Calculating weights
- * 
- * @param i   index of distribution (row index for 'at').
- * @param n   number of distributions (rows).
- * @param pdf numeric matrix of dimension (n x w->length) with the PDFs.
- *
- * No return, overwrites w->values, where
- * the sum over w->values equals 1.0 */
-void c_d2moments_calculate_weights(int i, int n, double* pdf, doubleVec* w) {
-    double sump = 0.0;
-    int k;
-    // Sum up PDF
-    for (k = 0; k < w->length; k++) { sump += pdf[i + n * k]; }
-    // Calculating weights
-    for (k = 0; k < w->length; k++) { w->values[k] = pdf[i + n * k] / sump; }
-}
-
-/* Calculating weighted mean based on PDF.
+/* Calculating moments based on a PDF vector.
  *
  * @param i    index of distribution (row index for 'at').
- * @param n    number of distributions (rows).
+ * @param dim  dimension of matrices 'at' and 'p'.
  * @param at   numeric matrix of grid position (n x w->length) where the PDF was
  *             provided. The weights are stored on 'w'.
- * @param w    doubleVec with weights, also contains the number of columns in 'at' on
- *             its attribute w->length.
+ * @param p    numeric matrix with PDF evaluated at 'at', same dimension as 'at'.
  * @param what 1 = mean, 2 = variance, 3 = skewness, 4 = kurtosis
  * Returns single numeric value.
  */
-double c_d2moments_calculate_moment(int i, int n, double* at, doubleVec* w, int what) {
+double c_d2moments_calculate_moment(int i, int* dim, double* at, double* p, int what) {
+
+    // Extracting matrix dimensions for convenience
+    int n = dim[0], nk = dim[1];
+
+    // Temporary vector to store width of intervals
+    doubleVec width;
+    width.values = (double*)malloc((nk - 1) * sizeof(double));
+    width.length = nk - 1;
+
+    // Normalization using Trapezoidal Rule
+    double cdfint = 0.0, avgp;
+    for (int k = 0; k < (nk - 1); k++) {
+        width.values[k] = at[i + n * (k + 1)] - at[i + n * k]; // Width of the trapezoid
+        avgp            = (p[i + n * k]  + p[i + n * (k + 1)])  * 0.5; // Average pdf
+        cdfint += width.values[k] * avgp;
+    }
+    if (cdfint <= 1e-9) { error("Error: The area under the 'pdf' curve is zero or negative."); }
+    Rprintf("   pfactor = %.5f\n", cdfint);
 
     // Calculating mean
+    double y1, y2;
     double mean = 0.0;
-    for (int k = 0; k < w->length; k++) {
-       mean += w->values[k] * at[i + n * k];
+    for (int k = 0; k < (nk - 1); k++) {
+        y1 = at[i + n * k]       * p[i + n * k];
+        y2 = at[i + n * (k + 1)] * p[i + n * (k + 1)];
+        mean += width.values[k] * (y1 + y2) * 0.5;
     }
-    if (what == 1) { return mean; }
+    mean = mean / cdfint; // Normalize
+    if (what == 1) { return mean / cdfint; }
+
 
     // Calculating variance
     double variance = 0.0;
-    for (int k = 0; k < w->length; k++) {
-       variance += w->values[k] * pow(at[i + n * k] - mean, 2.0);
+    for (int k = 0; k < (nk - 1); k++) {
+        y1 = pow(at[i + n * k]       - mean, 2.0) * p[i + n * k];
+        y2 = pow(at[i + n * (k + 1)] - mean, 2.0) * p[i + n * (k + 1)];
+        variance += width.values[k] * (y1 + y2) * 0.5;
     }
-    if (what == 2) { return variance; }
-
-    // If the variance is ~0 we return NA for skewness/kurtosis
-    Rprintf(" variance = %.10f\n", variance);
-    if (variance < 1e-9) {
-        return R_NaN;
-    }
+    variance = variance / cdfint; // Normalize
+    if (what == 2) { return variance / cdfint; }
 
     // Calculating skewness or kurtosis
-    double p = (double)what;   // Define power parameter (3 for skewness, 4 = kurtosis)
+    double powexp = (double)what;   // Define power parameter (3 for skewness, 4 = kurtosis)
     variance = sqrt(variance); // Convert to standard deviation
     double res = 0.0;
-    Rprintf("  p = %.3f\n", p);
-    for (int k = 0; k < w->length; k++) {
-       res += w->values[k] * pow((at[i + n * k] - mean) / variance, p);
+    Rprintf("  powexp = %.3f\n", powexp);
+    for (int k = 0; k < (nk - 1); k++) {
+       y1 = pow((at[i + n * k]       - mean) / variance, powexp) * p[i + n * k];
+       y2 = pow((at[i + n * (k + 1)] - mean) / variance, powexp) * p[i + n * (k + 1)];
+       res += width.values[k] * (y1 + y2) * 0.5;
     }
-    // Calculate excess kurtosis if needed
+    res = res / cdfint; // Normalize
     if (what == 4) { res = res - 3.0; }
 
     return res;
@@ -116,11 +120,8 @@ SEXP c_d2moments_numeric(SEXP at, SEXP p, SEXP dim, SEXP continuous, SEXP whatin
 
     // Looping trough all observations i = 1, ..., n;
     for (i = 0; i < n; i++) {
-        // Calculating weights (overwrites weights.values)
-        c_d2moments_calculate_weights(i, n, pptr, &weights);
-
         // Calculate requested moment
-        rvalptr[i] = c_d2moments_calculate_moment(i, n, atptr, &weights, what);
+        rvalptr[i] = c_d2moments_calculate_moment(i, dimptr, atptr, pptr, what);
     }
 
     // Releasing allocated memory
