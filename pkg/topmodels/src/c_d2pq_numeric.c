@@ -181,8 +181,6 @@ void c_d2q_calculate(SEXP dim, SEXP x, double* at, double* pdf, double* res) {
 
             for (; j < k; j++) {
                 idx = i + n * j; // Current element index for matrices
-                Rprintf("i = %d, j = %d, n = %d, nx = %d, k = %d,    ix = %d, residx = %d, idx = %d\n",
-                        i, j, n, nx, k, ix, residx, idx);
 
                 // Numerical integration of the current interval
                 tmp = integrate_2d(at[idx - n], at[idx], pdf[idx - n], pdf[idx], infinity);
@@ -193,8 +191,6 @@ void c_d2q_calculate(SEXP dim, SEXP x, double* at, double* pdf, double* res) {
                     // Found what we are looking for, interpolate.and overwrite
                     // our CDF currently stored on res[residx] with the quantile.
                     res[residx] = interpolate_2d(cdf, cdf + tmp, at[idx - n], at[idx], xptr[ix]);
-                    Rprintf(" found ix = %d, xptr[ix] = %.3f [%.4f,%.4f] p = [%.4f, %.4f]  quantile = %.4f\n",
-                            ix, xptr[ix], at[idx - n], at[idx], cdf, cdf + tmp, res[residx]);
                     found = true;
                     break;
                 }

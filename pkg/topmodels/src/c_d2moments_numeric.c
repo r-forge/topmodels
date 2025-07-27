@@ -34,7 +34,6 @@ double c_d2moments_calculate_moment(int i, int* dim, double* at, double* p, int 
         cdfint += width.values[k] * avgp;
     }
     if (cdfint <= 1e-9) { error("Error: The area under the 'pdf' curve is zero or negative."); }
-    Rprintf("   pfactor = %.5f\n", cdfint);
 
     // Calculating mean
     double y1, y2;
@@ -62,7 +61,7 @@ double c_d2moments_calculate_moment(int i, int* dim, double* at, double* p, int 
     double powexp = (double)what;   // Define power parameter (3 for skewness, 4 = kurtosis)
     variance = sqrt(variance); // Convert to standard deviation
     double res = 0.0;
-    Rprintf("  powexp = %.3f\n", powexp);
+
     for (int k = 0; k < (nk - 1); k++) {
        y1 = pow((at[i + n * k]       - mean) / variance, powexp) * p[i + n * k];
        y2 = pow((at[i + n * (k + 1)] - mean) / variance, powexp) * p[i + n * (k + 1)];
