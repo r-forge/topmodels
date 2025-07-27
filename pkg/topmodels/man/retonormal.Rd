@@ -49,6 +49,10 @@ lines(quantile(r, qq, n = 5L), qq, col = 4, lwd = 3)
 legend("topleft",
        legend = c("Normal", "retonormal n = 101", "retonormal n = 5"),
        pch = c(1, NA, NA), lty = c(NA, 1, 1), lwd = c(NA, 3, 3), col = c(1, 2, 4))
+
+## Central moments
+c(mean = mean(r), variance = variance(r),
+  skewness = skewness(r), kurtosis = kurtosis(r))
 }
 
 }

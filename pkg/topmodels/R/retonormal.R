@@ -40,6 +40,10 @@
 #' legend("topleft",
 #'        legend = c("Normal", "retonormal n = 101", "retonormal n = 5"),
 #'        pch = c(1, NA, NA), lty = c(NA, 1, 1), lwd = c(NA, 3, 3), col = c(1, 2, 4))
+#'
+#' ## Central moments
+#' c(mean = mean(r), variance = variance(r),
+#'   skewness = skewness(r), kurtosis = kurtosis(r))
 #' }
 #'
 #' @rdname retonormal
@@ -71,12 +75,12 @@ pdf.retonormal <- function(d, x, ...) {
     return(res)
 }
 
-#' @param n integer, number of grid points used for numerical integration.
-#'
-#' @rdname retornormal
-#' @exportS3Method
-cdf.retonormal <- function(d, x, ..., n = 101L) {
-
+# TODO(R): This is only for testing; sets up a grid for each
+#          distribution alongside a matrix with the corresponding PDF.
+#          Used for implementing the basic C functions allowing us to
+#          retrieve CDF, quantiles, and moments from a distribution
+#          of which we only know the PDF.
+retonormal_get_grid <- function(d, n) {
     stopifnot(is.numeric(n))
     n <- as.integer(n)[1L]
     stopifnot(is.finite(n) && n >= 5L) # For testing
@@ -94,15 +98,27 @@ cdf.retonormal <- function(d, x, ..., n = 101L) {
     }
     at  <- t(sapply(seq_along(d), get_grid, n = n))
     pat <- t(sapply(seq_along(d), get_dens))
+    return(list(at = at, pat = pat))
+}
+
+#' @param n integer, number of grid points used for numerical integration.
+#'
+#' @rdname retornormal
+#' @exportS3Method
+cdf.retonormal <- function(d, x, ..., n = 101L) {
+
+    # TODO(R): This is solely for testing purposes
+    dev <- retonormal_get_grid(x, n)
+    at <- dev$at; pat <- dev$pat; rm(dev)
 
     res <- .Call("c_d2pq_numeric",
-                 at  = as.numeric(at),     # grid points
-                 pat = as.numeric(pat),    # matrix of dimension length(d) x length(at)
-                 dim = dim(at),            # dimension of matrices at/pat
-                 x   = as.numeric(x),      # point(s) to calculate the cdf for
+                 at       = as.numeric(at),     # grid points
+                 pat      = as.numeric(pat),    # matrix of dimension length(d) x length(at)
+                 dim      = dim(at),            # dimension of matrices at/pat
+                 x        = as.numeric(x),      # point(s) to calculate the cdf for
                  discrete = FALSE,
-                 what = "cdf",
-                 PACKAGE = "topmodels")
+                 what     = "cdf",
+                 PACKAGE  = "topmodels")
 
     if (length(d) == length(x) || length(d) == 1L) {
         return(res)
@@ -120,23 +136,9 @@ cdf.retonormal <- function(d, x, ..., n = 101L) {
 #' @exportS3Method
 quantile.retonormal <- function(x, probs, ..., n = 101L) {
 
-    stopifnot(is.numeric(n))
-    n <- as.integer(n)[1L]
-    stopifnot(is.finite(n) && n >= 5L) # For testing
-
-    # Must guess useful range to calculate the density
-    # which is used for numerical integration to calculate the cdf.
-    # These are the grid points.
-    get_grid <- function(i, n) {
-        matrix(seq(x[i]$mu - 4 * sqrt(x[i]$var),
-                   x[i]$mu + 4 * sqrt(x[i]$var),
-                   length.out = n), nrow = 1L)
-    }
-    get_dens <- function(i) {
-        matrix(pdf(x[i], at[i, ]))
-    }
-    at  <- t(sapply(seq_along(x), get_grid, n = n))
-    pat <- t(sapply(seq_along(x), get_dens))
+    # TODO(R): This is solely for testing purposes
+    dev <- retonormal_get_grid(x, n)
+    at <- dev$at; pat <- dev$pat; rm(dev)
 
     # Important, 'probs' must be sorted for the C code to work properly.
     # To be able to restore the original order we keep the order
@@ -145,13 +147,13 @@ quantile.retonormal <- function(x, probs, ..., n = 101L) {
     probs      <- as.numeric(sort(probs))
 
     res <- .Call("c_d2pq_numeric",
-                 at  = as.numeric(at),     # grid points
-                 pat = as.numeric(pat),    # matrix of dimension length(d) x length(at)
-                 dim = dim(at),            # dimension of matrices at/pat
-                 x   = probs,              # point(s) to calculate the cdf for
+                 at       = as.numeric(at),     # grid points
+                 pat      = as.numeric(pat),    # matrix of dimension length(d) x length(at)
+                 dim      = dim(at),            # dimension of matrices at/pat
+                 x        = probs,              # point(s) to calculate the cdf for
                  discrete = FALSE,
-                 what = "quantile",
-                 PACKAGE = "topmodels")
+                 what     = "quantile",
+                 PACKAGE  = "topmodels")
 
     if (length(x) == length(probs) || length(x) == 1L) {
         return(res[probsorder])
@@ -161,5 +163,97 @@ quantile.retonormal <- function(x, probs, ..., n = 101L) {
 
 }
 
+
+
+#' @param x object of class `c("retonormal", "distribution")`.
+#' @param \dots ignored.
+#'
+#' @rdname retornormal
+#' @exportS3Method
+mean.retonormal <- function(x, ..., n = 101L) {
+
+    # TODO(R): This is solely for testing purposes
+    dev <- retonormal_get_grid(x, n)
+    at <- dev$at; pat <- dev$pat; rm(dev)
+
+    res <- .Call("c_d2moments_numeric",
+                 at       = as.numeric(at),     # grid points
+                 pat      = as.numeric(pat),    # matrix of dimension length(d) x length(at)
+                 dim      = dim(at),            # dimension of matrices at/pat
+                 discrete = FALSE,
+                 what     = 1L,                 # 1L = mean
+                 PACKAGE  = "topmodels")
+
+    return(res)
+}
+
+
+#' @param x object of class `c("retonormal", "distribution")`.
+#' @param \dots ignored.
+#'
+#' @rdname retornormal
+#' @exportS3Method
+variance.retonormal <- function(x, ..., n = 101L) {
+
+    # TODO(R): This is solely for testing purposes
+    dev <- retonormal_get_grid(x, n)
+    at <- dev$at; pat <- dev$pat; rm(dev)
+
+    res <- .Call("c_d2moments_numeric",
+                 at       = as.numeric(at),     # grid points
+                 pat      = as.numeric(pat),    # matrix of dimension length(d) x length(at)
+                 dim      = dim(at),            # dimension of matrices at/pat
+                 discrete = FALSE,
+                 what     = 2L,                 # 2L = variance
+                 PACKAGE  = "topmodels")
+
+    return(res)
+}
+
+
+#' @param x object of class `c("retonormal", "distribution")`.
+#' @param \dots ignored.
+#'
+#' @rdname retornormal
+#' @exportS3Method
+skewness.retonormal <- function(x, ..., n = 101L) {
+
+    # TODO(R): This is solely for testing purposes
+    dev <- retonormal_get_grid(x, n)
+    at <- dev$at; pat <- dev$pat; rm(dev)
+
+    res <- .Call("c_d2moments_numeric",
+                 at       = as.numeric(at),     # grid points
+                 pat      = as.numeric(pat),    # matrix of dimension length(d) x length(at)
+                 dim      = dim(at),            # dimension of matrices at/pat
+                 discrete = FALSE,
+                 what     = 3L,                 # 3L = skewness
+                 PACKAGE  = "topmodels")
+
+    return(res)
+}
+
+
+#' @param x object of class `c("retonormal", "distribution")`.
+#' @param \dots ignored.
+#'
+#' @rdname retornormal
+#' @exportS3Method
+kurtosis.retonormal <- function(x, ..., n = 101L) {
+
+    # TODO(R): This is solely for testing purposes
+    dev <- retonormal_get_grid(x, n)
+    at <- dev$at; pat <- dev$pat; rm(dev)
+
+    res <- .Call("c_d2moments_numeric",
+                 at       = as.numeric(at),     # grid points
+                 pat      = as.numeric(pat),    # matrix of dimension length(d) x length(at)
+                 dim      = dim(at),            # dimension of matrices at/pat
+                 discrete = FALSE,
+                 what     = 4L,                 # 4L = kurtosis
+                 PACKAGE  = "topmodels")
+
+    return(res)
+}
 
 
