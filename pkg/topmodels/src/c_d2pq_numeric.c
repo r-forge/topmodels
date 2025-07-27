@@ -39,7 +39,10 @@ double interpolate_2d(double xlo, double xhi, double ylo, double yhi, double x) 
 double integrate_2d(double xlo, double xhi, double ylo, double yhi, double x) {
     if (ISNAN(xlo) || ISNAN(yhi) || ISNAN(ylo) || ISNAN(yhi) || ISNAN(x)) { return NA_REAL; }
     // Sanity check
-    if (x < xlo || xlo > xhi) { error("Problematic arguments - can't perform integration."); }
+    if (x < xlo || xlo > xhi) {
+        Rprintf("[debug] x = %.3f   interval [xlo, xhi] = [%.3f, %.3f]\n", x, xlo, xhi);
+        error("Problematic arguments - can't perform integration.");
+    }
     // If 'x < xlo' we must integrate "xlo to x", wherefore we re-calculate 'yhi' by performing
     // linear interpolation first and overwrite xhi by x, so that we can use the same formula.
     if (x < xhi) {
@@ -75,13 +78,22 @@ void c_d2p_calculate(SEXP dim, SEXP x, double* at, double* pdf, double* res) {
     // Vector x
     int nx = length(x);
     double *xptr = REAL(x);
+    int j;
+
+    double foo = 0.0;
+    for (int i = 0; i < k; i++) { foo += pdf[i]; }
 
     // Integer counter for current position in 'x'
     for (int i = 0; i < n; i++) {
+        // To efficiently calculate multiple quantiles (x) for the same distribution (index i)
+        // we only loop trough each distribution once (j = 1, k).
+        // 'ix' stores the index of our vector 'x' which we are currently look for.
+        j = 1;
+
         // Looping over elements in 'x' (at which the CDF is evaluated)
         for (int ix = 0; ix < nx; ix++) {
             // Index pointer for results matrix
-            residx = i * n + ix;
+            residx = i + n * ix;
 
             // Catching the simple case where x[ix] <= lowest 'at' (below defined grid)
             // Or where x[idx] is >= highest 'at' value (above defined grid)
@@ -89,20 +101,24 @@ void c_d2p_calculate(SEXP dim, SEXP x, double* at, double* pdf, double* res) {
             // - Assign 1.0 if above (assuming we cover the entire range)
             if (xptr[ix] <= at[i]) {
                 res[residx] = 0.0; continue;
-            } else if (xptr[nx] >= at[i + (k - 1) * n]) {
+            } else if (xptr[ix] >= at[i + (k - 1) * n]) {
                 res[residx] = 1.0;  continue;
             }
 
-            // TODO(R): Inefficiently solved as I go trough the entire matrix j=0, ... every time;
-            //          should take a shortcut and use the result from the previous 'ix'.
-            // Else perform numeric integration
-            res[residx] = pdf[i];  // Initialization
-            for (int j = 1; j < k; j++) {
-                idx = i * n + j; // Current element index for matrices
-                // If x is below the current interval we already reached our result; breaking loop
-                if (xptr[ix] < at[idx - n]) { break; }
-                // Numerical integration
+            // Initialize with very first pdf
+            if (ix == 0) { res[residx] = pdf[i]; }
+
+            for (; j < k; j++) {
+                idx = i + n * j; // Current element index for matrices
+
+                // If xptr[ix] falls into the current interval (and we did not reach ix = (nx - 1))
+                // we must initialize the element for the next observation res[residx + n]. This is done
+                // for efficiency so that we only have to loop trough each distribution once.
+                if (xptr[ix] < at[idx] && ix < (nx - 1)) { res[residx + n] = res[residx]; }
+
+                // Integrate
                 res[residx] += integrate_2d(at[idx - n], at[idx], pdf[idx - n], pdf[idx], xptr[ix]);
+                if (xptr[ix] < at[idx]) { break; } // Found our result, continue
             }
         }
     }
@@ -134,45 +150,57 @@ void c_d2q_calculate(SEXP dim, SEXP x, double* at, double* pdf, double* res) {
     double *xptr = REAL(x);
     double tmp;
     double infinity = 1./0.;
+    double cdf;
 
     // Flag used to check if we found the quantile we were looking for; required
     // to be able to store the highest 'grid point' if the quantile falls above
     // the grid we use for evaluation.
     bool found;
+    int j;
 
-    // Integer counter for current position in 'x'
+    // Loop over distributions
     for (int i = 0; i < n; i++) {
+        // To efficiently calculate multiple quantiles (x) for the same distribution (index i)
+        // we only loop trough each distribution once (j = 1, k).
+        // 'ix' stores the index of our vector 'x' which we are currently look for.
+        j = 1;
+        cdf = pdf[i];
+
         // Looping over elements in 'x' (at which the CDF is evaluated)
         for (int ix = 0; ix < nx; ix++) {
             // Flag used to check if we have fou
             // Index pointer for results matrix
-            residx = i * n + ix;
+            residx = i + n * ix;
             found = false; // Default
 
-            // Carching the simplest case: if the current quantile (xptr[ix])
-            // falls below the lowest pdf[i] we assign x[i] as our result.
-            if (xptr[ix] <= pdf[i]) { res[residx] = at[i]; continue; }
+            // If the quantile lies below the cdf (lowest one); set to at[i].
+            if (xptr[ix] <= cdf) { res[residx] = at[i]; continue; }
 
-            // TODO(R): Inefficiently solved as I go trough the entire matrix j=0, ... every time;
-            //          should take a shortcut and use the result from the previous 'ix'.
             // Else perform numeric integration
-            res[residx] = pdf[i];  // Initialization
-            for (int j = 1; j < k; j++) {
-                idx = i * n + j; // Current element index for matrices
+            if (ix == 0) { res[residx] = pdf[i]; } // Initialization for ix = 0
+
+            for (; j < k; j++) {
+                idx = i + n * j; // Current element index for matrices
+                Rprintf("i = %d, j = %d, n = %d, nx = %d, k = %d,    ix = %d, residx = %d, idx = %d\n",
+                        i, j, n, nx, k, ix, residx, idx);
 
                 // Numerical integration of the current interval
                 tmp = integrate_2d(at[idx - n], at[idx], pdf[idx - n], pdf[idx], infinity);
 
                 // If xptr[ix] < (res[residx] + tmp) the quantile we are looking for falls into
                 // the current interval. Interpolate, store the result and continue the loop.
-                if (xptr[ix] < (res[residx] + tmp)) {
-                    res[residx] = interpolate_2d(res[residx], res[residx] + tmp, at[idx - n], at[idx], xptr[ix]);
-                    found = true; // Result found
+                if (xptr[ix] < (cdf + tmp)) {
+                    // Found what we are looking for, interpolate.and overwrite
+                    // our CDF currently stored on res[residx] with the quantile.
+                    res[residx] = interpolate_2d(cdf, cdf + tmp, at[idx - n], at[idx], xptr[ix]);
+                    Rprintf(" found ix = %d, xptr[ix] = %.3f [%.4f,%.4f] p = [%.4f, %.4f]  quantile = %.4f\n",
+                            ix, xptr[ix], at[idx - n], at[idx], cdf, cdf + tmp, res[residx]);
+                    found = true;
                     break;
                 }
 
-                // Else adding 'tmp' to the current numeric integral.
-                res[residx] += tmp;
+                // Else adding 'tmp' to the current numeric integral (CDF)
+                cdf += tmp;
             }
 
             // Not found? Seems we are above the grid; store highest grid value

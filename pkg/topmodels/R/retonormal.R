@@ -108,22 +108,28 @@ retonormal_get_grid <- function(d, n) {
 cdf.retonormal <- function(d, x, ..., n = 101L) {
 
     # TODO(R): This is solely for testing purposes
-    dev <- retonormal_get_grid(x, n)
+    dev <- retonormal_get_grid(d, n)
     at <- dev$at; pat <- dev$pat; rm(dev)
+
+    # Important, 'probs' must be sorted for the C code to work properly.
+    # To be able to restore the original order we keep the order
+    # on probsorder
+    xorder <- order(x)
+    x      <- as.numeric(sort(x))
 
     res <- .Call("c_d2pq_numeric",
                  at       = as.numeric(at),     # grid points
                  pat      = as.numeric(pat),    # matrix of dimension length(d) x length(at)
                  dim      = dim(at),            # dimension of matrices at/pat
-                 x        = as.numeric(x),      # point(s) to calculate the cdf for
+                 x        = x,                  # point(s) to calculate the cdf for
                  discrete = FALSE,
                  what     = "cdf",
                  PACKAGE  = "topmodels")
 
     if (length(d) == length(x) || length(d) == 1L) {
-        return(res)
+        return(res[xorder])
     } else {
-        return(matrix(res, nrow = length(d)))
+        return(matrix(res, nrow = length(d))[, xorder])
     }
 
 }
