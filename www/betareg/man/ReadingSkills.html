@@ -497,13 +497,13 @@ numeric. Unrestricted reading score with a maximum of 1 (see below).
 </dd>
 </dl></section><section id="details" class="level3"><h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The data were collected by Pammer and Kevan (2004) and employed by Smithson and Verkuilen (2006). The original reading accuracy score was transformed by Smithson and Verkuilen (2006) so that <code>accuracy</code> is in the open unit interval (0, 1) and beta regression can be employed. First, the original accuracy was scaled using the minimal and maximal score (<code>a</code> and <code>b</code>, respectively) that can be obtained in the test: <code>accuracy1 = (original_accuracy - a) / (b - a)</code> (<code>a</code> and <code>b</code> are not provided). Subsequently, <code>accuracy</code> was obtained from <code>accuracy1</code> by replacing all observations with a value of 1 with 0.99.</p>
-<p>Kosmidis and Zeileis (2024) propose to investigate the original unrestricted <code>accuracy1</code> variable using their extended-support beta mixture regression.</p>
+<p>Kosmidis and Zeileis (2025) propose to investigate the original unrestricted <code>accuracy1</code> variable using their extended-support beta mixture regression.</p>
 </section><section id="source" class="level3"><h3 class="anchored" data-anchor-id="source">Source</h3>
 <p>Example 3 from Smithson and Verkuilen (2006) supplements.</p>
 </section><section id="references" class="level3"><h3 class="anchored" data-anchor-id="references">References</h3>
 <p>Cribari-Neto F, Zeileis A (2010). Beta Regression in R. <em>Journal of Statistical Software</em>, <b>34</b>(2), 1–24. <a href="https://doi.org/10.18637/jss.v034.i02">doi:10.18637/jss.v034.i02</a></p>
 <p>Grün B, Kosmidis I, Zeileis A (2012). Extended Beta Regression in R: Shaken, Stirred, Mixed, and Partitioned. <em>Journal of Statistical Software</em>, <b>48</b>(11), 1–25. <a href="https://doi.org/10.18637/jss.v048.i11">doi:10.18637/jss.v048.i11</a></p>
-<p>Kosmidis I, Zeileis A (2024). Extended-Support Beta Regression for [0, 1] Responses. 2409.07233, <em>arXiv.org E-Print Archive</em>. <a href="https://doi.org/10.48550/arXiv.2409.07233">doi:10.48550/arXiv.2409.07233</a></p>
+<p>Kosmidis I, Zeileis A (2025). Extended-Support Beta Regression for [0, 1] Responses. <em>Journal of the Royal Statistical Society C</em>, forthcoming. <a href="https://doi.org/10.1093/jrsssc/qlaf039">doi:10.1093/jrsssc/qlaf039</a></p>
 <p>Pammer K, Kevan A (2004). The Contribution of Visual Sensitivity, Phonological Processing and Non-Verbal IQ to Children’s Reading. <em>Unpublished manuscript</em>, The Australian National University, Canberra.</p>
 <p>Smithson M, Verkuilen J (2006). A Better Lemon Squeezer? Maximum-Likelihood Regression with Beta-Distributed Dependent Variables. <em>Psychological Methods</em>, <b>11</b>(7), 54–71.</p>
 </section><section id="see-also" class="level3"><h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -577,7 +577,7 @@ Log-likelihood: 65.9 on 7 Df
 Pseudo R-squared: 0.576
 Number of iterations in BFGS optimization: 25 </code></pre>
 </div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Extended-support beta mixture regression (Kosmidis &amp; Zeileis 2024)</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Extended-support beta mixture regression (Kosmidis &amp; Zeileis 2025)</span></span>
 <span><span class="va">rs_xbx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy1</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">rs_xbx</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -587,7 +587,7 @@ betareg(formula = accuracy1 ~ dyslexia * iq | dyslexia + iq, data = ReadingSkill
 
 Randomized quantile residuals:
    Min     1Q Median     3Q    Max 
--2.418 -0.598  0.010  0.959  2.450 
+-2.418 -0.598 -0.007  0.823  2.305 
 
 Coefficients (mu model with logit link):
             Estimate Std. Error z value Pr(&gt;|z|)    

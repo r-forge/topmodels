@@ -232,7 +232,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The R package <a href="https://topmodels.R-Forge.R-project.org/betareg/">betareg</a> provides:</p>
 <ul>
 <li><p>Beta regression for modeling beta-distributed dependent variables on the open unit interval (0, 1), e.g., rates and proportions, see Cribari-Neto and Zeileis (2010, <a href="https://doi.org/10.18637/jss.v034.i02">doi:10.18637/jss.v034.i02</a>).</p></li>
-<li><p>Extended-support beta regression models for variables on the closed unit interval [0, 1] with boundary observations at 0 and/or 1, see Kosmidis and Zeileis (2024, <a href="https://doi.org/10.48550/arXiv.2409.07233">doi:10.48550/arXiv.2409.07233</a>).</p></li>
+<li><p>Extended-support beta regression models for variables on the closed unit interval [0, 1] with boundary observations at 0 and/or 1, see Kosmidis and Zeileis (2025, <a href="https://doi.org/10.1093/jrsssc/qlaf039">doi:10.1093/jrsssc/qlaf039</a>).</p></li>
 <li><p>Alternative specifications of the classical beta regression model: Bias-corrected and bias-reduced estimation, finite mixture models, and recursive partitioning for (0, 1) beta regression, see Grün, Kosmidis, and Zeileis (2012, <a href="https://doi.org/10.18637/jss.v048.i11">doi:10.18637/jss.v048.i11</a>).</p></li>
 </ul></section><section id="installation" class="level2"><h2 class="anchored" data-anchor-id="installation">Installation</h2>
 <p>The stable version of <code>betareg</code> is available on <a href="https://CRAN.R-project.org/package=betareg">CRAN</a>:</p>
@@ -302,7 +302,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg</a></span><span class="op">(</span><span class="va">accuracy1</span> <span class="op">~</span> <span class="va">dyslexia</span> <span class="op">*</span> <span class="va">iq</span> <span class="op">|</span> <span class="va">dyslexia</span> <span class="op">+</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>See Kosmidis and Zeileis (2024) and the documentation of <code><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg()</a></code> for more details.</p>
+<p>See Kosmidis and Zeileis (2025) and the documentation of <code><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg()</a></code> for more details.</p>
 </section><section id="bias-reduction" class="level3"><h3 class="anchored" data-anchor-id="bias-reduction">Bias reduction</h3>
 <p>Bias-reduced estimation (instead of the default maximum likelihood estimation) can be used by adding the argument <code>type = "BR"</code> in <code><a href="https://rdrr.io/pkg/betareg/man/betareg.html">betareg()</a></code>. This slightly shrinks all coefficient estimates but, on this data, leads to qualitatively identical results.</p>
 <div class="cell">

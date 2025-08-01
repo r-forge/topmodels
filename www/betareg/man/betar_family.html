@@ -523,14 +523,14 @@ Arguments passed to functions that are called within the family object.
 </td>
 </tr>
 </tbody></table></section><section id="details" class="level3"><h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Family objects for <span class="pkg">bamlss</span> (Umlauf et al.&nbsp;2019, 2021) and <span class="pkg">gamlss2</span> (Umlauf et al.&nbsp;2024) are essentially lists of functions providing a standardized interface to the d/p/q/r functions of distributions. Hence, <code>betar_family</code> interfaces the classical beta distribution in regression specification, see <code>dbetar</code>. Analogously, <code>xbetax_family</code> interfaces the extended-support beta mixture specification (Kosmidis and Zeileis 2024), see <code>dxbetax</code>.</p>
+<p>Family objects for <span class="pkg">bamlss</span> (Umlauf et al.&nbsp;2019, 2021) and <span class="pkg">gamlss2</span> (Umlauf et al.&nbsp;2025) are essentially lists of functions providing a standardized interface to the d/p/q/r functions of distributions. Hence, <code>betar_family</code> interfaces the classical beta distribution in regression specification, see <code>dbetar</code>. Analogously, <code>xbetax_family</code> interfaces the extended-support beta mixture specification (Kosmidis and Zeileis 2025), see <code>dxbetax</code>.</p>
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>A list of class <code>family.bamlss</code>.</p>
 </section><section id="references" class="level3"><h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Kosmidis I, Zeileis A (2024). Extended-Support Beta Regression for [0, 1] Responses. 2409.07233, <em>arXiv.org E-Print Archive</em>. <a href="https://doi.org/10.48550/arXiv.2409.07233">doi:10.48550/arXiv.2409.07233</a></p>
+<p>Kosmidis I, Zeileis A (2025). Extended-Support Beta Regression for [0, 1] Responses. <em>Journal of the Royal Statistical Society C</em>, forthcoming. <a href="https://doi.org/10.1093/jrsssc/qlaf039">doi:10.1093/jrsssc/qlaf039</a></p>
 <p>Umlauf N, Klein N, Zeileis A (2019). BAMLSS: Bayesian Additive Models for Location, Scale and Shape (and Beyond). <em>Journal of Computational and Graphical Statistics</em>, <b>27</b>(3), 612–627. <a href="https://doi.org/10.1080/10618600.2017.1407325">doi:10.1080/10618600.2017.1407325</a></p>
 <p>Umlauf N, Klein N, Simon T, Zeileis A (2021). bamlss: A Lego Toolbox for Flexible Bayesian Regression (and Beyond). <em>Journal of Statistical Software</em>, <b>100</b>(4), 1–53. <a href="https://doi.org/10.18637/jss.v100.i04">doi:10.18637/jss.v100.i04</a></p>
-<p>Umlauf N, Stasinopoulos M, Rigby R, Stauffer R (2024). gamlss2: Infrastructure for Flexible Distributional Regression. R package version 0.1-0. <a href="https://gamlss-dev.github.io/gamlss2/">https://gamlss-dev.github.io/gamlss2/</a></p>
+<p>Umlauf N, Stasinopoulos M, Rigby R, Stauffer R (2025). gamlss2: Infrastructure for Flexible Distributional Regression. R package version 0.1-0. <a href="https://gamlss-dev.github.io/gamlss2/">https://gamlss-dev.github.io/gamlss2/</a></p>
 </section><section id="see-also" class="level3"><h3 class="anchored" data-anchor-id="see-also">See Also</h3>
 <p><code>dbetar</code>, <code>dxbetax</code>, <code>family.bamlss</code></p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
@@ -592,30 +592,30 @@ AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  
 AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  38
 AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  39
 AICc -83.5293 logPost -13815.0 logLik  51.6384 edf 7.8809 eps 0.0000 iteration  39
-elapsed time:  3.19sec
+elapsed time:  1.63sec
 Starting the sampler...
 
-|                    |   0%  3.55sec
-|*                   |   5%  3.33sec  0.18sec
-|**                  |  10%  3.00sec  0.33sec
-|***                 |  15%  2.77sec  0.49sec
-|****                |  20%  2.58sec  0.65sec
-|*****               |  25%  2.45sec  0.82sec
-|******              |  30%  2.30sec  0.99sec
-|*******             |  35%  2.14sec  1.15sec
-|********            |  40%  1.99sec  1.32sec
-|*********           |  45%  1.84sec  1.51sec
-|**********          |  50%  1.68sec  1.68sec
-|***********         |  55%  1.51sec  1.85sec
-|************        |  60%  1.34sec  2.01sec
-|*************       |  65%  1.18sec  2.20sec
-|**************      |  70%  1.02sec  2.37sec
-|***************     |  75%  0.85sec  2.54sec
-|****************    |  80%  0.68sec  2.72sec
-|*****************   |  85%  0.51sec  2.89sec
-|******************  |  90%  0.34sec  3.06sec
-|******************* |  95%  0.17sec  3.25sec
-|********************| 100%  0.00sec  3.43sec</code></pre>
+|                    |   0%  2.18sec
+|*                   |   5%  1.94sec  0.10sec
+|**                  |  10%  1.70sec  0.19sec
+|***                 |  15%  1.55sec  0.27sec
+|****                |  20%  1.41sec  0.35sec
+|*****               |  25%  1.32sec  0.44sec
+|******              |  30%  1.23sec  0.53sec
+|*******             |  35%  1.16sec  0.62sec
+|********            |  40%  1.08sec  0.72sec
+|*********           |  45%  1.01sec  0.83sec
+|**********          |  50%  0.92sec  0.92sec
+|***********         |  55%  0.82sec  1.00sec
+|************        |  60%  0.73sec  1.10sec
+|*************       |  65%  0.65sec  1.20sec
+|**************      |  70%  0.55sec  1.29sec
+|***************     |  75%  0.46sec  1.38sec
+|****************    |  80%  0.37sec  1.47sec
+|*****************   |  85%  0.28sec  1.56sec
+|******************  |  90%  0.18sec  1.65sec
+|******************* |  95%  0.09sec  1.75sec
+|********************| 100%  0.00sec  1.85sec</code></pre>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Bayesian model shrinks the effects compared to ML</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">accuracy</span> <span class="op">~</span> <span class="va">iq</span>, data <span class="op">=</span> <span class="va">ReadingSkills</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="va">dyslexia</span><span class="op">)</span></span>

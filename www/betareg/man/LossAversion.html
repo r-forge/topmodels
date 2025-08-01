@@ -532,12 +532,12 @@ factor. Is the player a single player or team of two?
 </li>
 </ul>
 <p>See Glätzle-Rützler et al.&nbsp;(2015) for more details and references to the literature. In their original analysis, the investments are analyzes using a panel structure (i.e., 9 separate investments for each team). Here, the data are averaged across rounds for each player, leading to qualitatively similar results. The full data along with replication materials are available in the Harvard Dataverse.</p>
-<p>Kosmidis and Zeileis (2024) revisit the data using extended-support beta mixture (XBX) regression, which can simultaneously capture both the probability of rational behavior and the mean amount of loss aversion.</p>
+<p>Kosmidis and Zeileis (2025) revisit the data using extended-support beta mixture (XBX) regression, which can simultaneously capture both the probability of rational behavior and the mean amount of loss aversion.</p>
 </section><section id="source" class="level3"><h3 class="anchored" data-anchor-id="source">Source</h3>
 <p>Glätzle-Rützler D, Sutter M, Zeileis A (2020). Replication Data for: No Myopic Loss Aversion in Adolescents? - An Experimental Note. <em>Harvard Dataverse</em>, UNF:6:6hVtbHavJAFYfL7dDl7jqA==. <a href="https://doi.org/10.7910/DVN/IHFZAK">doi:10.7910/DVN/IHFZAK</a></p>
 </section><section id="references" class="level3"><h3 class="anchored" data-anchor-id="references">References</h3>
 <p>Glätzle-Rützler D, Sutter M, Zeileis A (2015). No Myopic Loss Aversion in Adolescents? – An Experimental Note. <em>Journal of Economic Behavior &amp; Organization</em>, <b>111</b>, 169–176. <a href="https://doi.org/10.1016/j.jebo.2014.12.021">doi:10.1016/j.jebo.2014.12.021</a></p>
-<p>Kosmidis I, Zeileis A (2024). Extended-Support Beta Regression for [0, 1] Responses. 2409.07233, <em>arXiv.org E-Print Archive</em>. <a href="https://doi.org/10.48550/arXiv.2409.07233">doi:10.48550/arXiv.2409.07233</a></p>
+<p>Kosmidis I, Zeileis A (2025). Extended-Support Beta Regression for [0, 1] Responses. <em>Journal of the Royal Statistical Society C</em>, forthcoming. <a href="https://doi.org/10.1093/jrsssc/qlaf039">doi:10.1093/jrsssc/qlaf039</a></p>
 </section><section id="see-also" class="level3"><h3 class="anchored" data-anchor-id="see-also">See Also</h3>
 <p><code>betareg</code></p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
@@ -628,7 +628,7 @@ betareg(formula = invest ~ grade * (arrangement + age) + male | arrangement +
 
 Randomized quantile residuals:
    Min     1Q Median     3Q    Max 
--3.265 -0.693 -0.015  0.698  3.531 
+-2.870 -0.693 -0.015  0.698  3.219 
 
 Coefficients (mu model with logit link):
                            Estimate Std. Error z value Pr(&gt;|z|)    
