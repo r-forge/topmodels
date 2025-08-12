@@ -1,20 +1,17 @@
-
-
-
-#' Retos Gaussian distribution for Testing Numeric Moment Calculations
+#' Normal Distribution for Testing Numeric Moment Calculations
 #'
 #' @param mu numeric vector with means.
 #' @param var numeric vector with variances.
 #'
-#' @return Object of class `c("retonormal", "distribution")`.
+#' @return Object of class `c("NumericNormal", "distribution")`.
 #'
 #' @examples
 #' \dontrun{
 #' n <- Normal(5, sqrt(4))
-#' r <- retonormal(5, 4)
+#' r <- NumericNormal(5, 4)
 #'
 #' ## ---------------- CDF ----------------
-#' ## 'retonormal' only knows the (exact) pdf of a Gaussian distribution
+#' ## 'NumericNormal' only knows the (exact) pdf of a Gaussian distribution
 #' ## and approximates the CDF via numeric integration (default grid size n = 101L).
 #' cdf(n, 3.5)
 #' cdf(r, 3.5)
@@ -24,11 +21,11 @@
 #' plot(xx, cdf(n, xx), main = "Testing numeric PDF->CDF")
 #' lines(xx, cdf(r, xx), col = 2, lwd = 3)
 #' lines(xx, cdf(r, xx, n = 5L), col = 4, lwd = 3)
-#' legend("topleft", legend = c("Normal", "retonormal n = 101", "retonormal n = 5"),
+#' legend("topleft", legend = c("Normal", "NumericNormal n = 101", "NumericNormal n = 5"),
 #'        pch = c(1, NA, NA), lty = c(NA, 1, 1), lwd = c(NA, 3, 3), col = c(1, 2, 4))
 #'
 #' ## -------------- Quantile -------------
-#' ## 'retonormal' only knows the PDF from which it calculates the CDF
+#' ## 'NumericNormal' only knows the PDF from which it calculates the CDF
 #' ## to retrieve the quantiles.
 #' quantile(n, 0.3)
 #' quantile(r, 0.3)
@@ -38,7 +35,7 @@
 #' lines(quantile(r, qq), qq, col = 2, lwd = 3)
 #' lines(quantile(r, qq, n = 5L), qq, col = 4, lwd = 3)
 #' legend("topleft",
-#'        legend = c("Normal", "retonormal n = 101", "retonormal n = 5"),
+#'        legend = c("Normal", "NumericNormal n = 101", "NumericNormal n = 5"),
 #'        pch = c(1, NA, NA), lty = c(NA, 1, 1), lwd = c(NA, 3, 3), col = c(1, 2, 4))
 #'
 #' ## Central moments
@@ -46,14 +43,14 @@
 #'   skewness = skewness(r), kurtosis = kurtosis(r))
 #' }
 #'
-#' @rdname retonormal
+#' @rdname NumericNormal
 #' @export
-retonormal <- function(mu, var) {
+NumericNormal <- function(mu, var) {
     stopifnot(is.numeric(mu), is.numeric(var),
               length(mu) > 0L, length(var) > 0L,
               all(is.finite(mu)), all(is.finite(var)), all(var > 0))
     structure(data.frame(mu = mu, var = var),
-              class = c("retonormal", "distribution"))
+              class = c("NumericNormal", "distribution"))
 }
 
 #' @param d object of class `"retornormal"`.
@@ -61,7 +58,7 @@ retonormal <- function(mu, var) {
 #'
 #' @rdname retornormal
 #' @exportS3Method
-pdf.retonormal <- function(d, x, ...) {
+pdf.NumericNormal <- function(d, x, ...) {
     # Just for testing-simplifying the elementwise case
     stopifnot(is.numeric(x) && all(is.finite(x)))
 
@@ -80,7 +77,7 @@ pdf.retonormal <- function(d, x, ...) {
 #          Used for implementing the basic C functions allowing us to
 #          retrieve CDF, quantiles, and moments from a distribution
 #          of which we only know the PDF.
-retonormal_get_grid <- function(d, n) {
+NumericNormal_get_grid <- function(d, n) {
     stopifnot(is.numeric(n))
     n <- as.integer(n)[1L]
     stopifnot(is.finite(n) && n >= 5L) # For testing
@@ -105,10 +102,10 @@ retonormal_get_grid <- function(d, n) {
 #'
 #' @rdname retornormal
 #' @exportS3Method
-cdf.retonormal <- function(d, x, ..., n = 101L) {
+cdf.NumericNormal <- function(d, x, ..., n = 101L) {
 
     # TODO(R): This is solely for testing purposes
-    dev <- retonormal_get_grid(d, n)
+    dev <- NumericNormal_get_grid(d, n)
     at <- dev$at; pat <- dev$pat; rm(dev)
 
     # Important, 'probs' must be sorted for the C code to work properly.
@@ -134,16 +131,16 @@ cdf.retonormal <- function(d, x, ..., n = 101L) {
 
 }
 
-#' @param x object of class `c("retonormal", "distribution")`.
+#' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param probs numeric vector, probabilities.
 #' @param n integer, number of grid points used for numerical integration.
 #'
 #' @rdname retornormal
 #' @exportS3Method
-quantile.retonormal <- function(x, probs, ..., n = 101L) {
+quantile.NumericNormal <- function(x, probs, ..., n = 101L) {
 
     # TODO(R): This is solely for testing purposes
-    dev <- retonormal_get_grid(x, n)
+    dev <- NumericNormal_get_grid(x, n)
     at <- dev$at; pat <- dev$pat; rm(dev)
 
     # Important, 'probs' must be sorted for the C code to work properly.
@@ -171,15 +168,15 @@ quantile.retonormal <- function(x, probs, ..., n = 101L) {
 
 
 
-#' @param x object of class `c("retonormal", "distribution")`.
+#' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
 #' @rdname retornormal
 #' @exportS3Method
-mean.retonormal <- function(x, ..., n = 101L) {
+mean.NumericNormal <- function(x, ..., n = 101L) {
 
     # TODO(R): This is solely for testing purposes
-    dev <- retonormal_get_grid(x, n)
+    dev <- NumericNormal_get_grid(x, n)
     at <- dev$at; pat <- dev$pat; rm(dev)
 
     res <- .Call("c_d2moments_numeric",
@@ -194,15 +191,15 @@ mean.retonormal <- function(x, ..., n = 101L) {
 }
 
 
-#' @param x object of class `c("retonormal", "distribution")`.
+#' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
 #' @rdname retornormal
 #' @exportS3Method
-variance.retonormal <- function(x, ..., n = 101L) {
+variance.NumericNormal <- function(x, ..., n = 101L) {
 
     # TODO(R): This is solely for testing purposes
-    dev <- retonormal_get_grid(x, n)
+    dev <- NumericNormal_get_grid(x, n)
     at <- dev$at; pat <- dev$pat; rm(dev)
 
     res <- .Call("c_d2moments_numeric",
@@ -217,15 +214,15 @@ variance.retonormal <- function(x, ..., n = 101L) {
 }
 
 
-#' @param x object of class `c("retonormal", "distribution")`.
+#' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
 #' @rdname retornormal
 #' @exportS3Method
-skewness.retonormal <- function(x, ..., n = 101L) {
+skewness.NumericNormal <- function(x, ..., n = 101L) {
 
     # TODO(R): This is solely for testing purposes
-    dev <- retonormal_get_grid(x, n)
+    dev <- NumericNormal_get_grid(x, n)
     at <- dev$at; pat <- dev$pat; rm(dev)
 
     res <- .Call("c_d2moments_numeric",
@@ -240,15 +237,15 @@ skewness.retonormal <- function(x, ..., n = 101L) {
 }
 
 
-#' @param x object of class `c("retonormal", "distribution")`.
+#' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
 #' @rdname retornormal
 #' @exportS3Method
-kurtosis.retonormal <- function(x, ..., n = 101L) {
+kurtosis.NumericNormal <- function(x, ..., n = 101L) {
 
     # TODO(R): This is solely for testing purposes
-    dev <- retonormal_get_grid(x, n)
+    dev <- NumericNormal_get_grid(x, n)
     at <- dev$at; pat <- dev$pat; rm(dev)
 
     res <- .Call("c_d2moments_numeric",
@@ -261,5 +258,3 @@ kurtosis.retonormal <- function(x, ..., n = 101L) {
 
     return(res)
 }
-
-
