@@ -53,10 +53,10 @@ NumericNormal <- function(mu, var) {
               class = c("NumericNormal", "distribution"))
 }
 
-#' @param d object of class `"retornormal"`.
+#' @param d object of class `"NumericNormal"`.
 #' @param x numeric, where to evaluate the distribution object.
 #'
-#' @rdname retornormal
+#' @rdname NumericNormal
 #' @exportS3Method
 pdf.NumericNormal <- function(d, x, ...) {
     # Just for testing-simplifying the elementwise case
@@ -100,7 +100,7 @@ NumericNormal_get_grid <- function(d, n) {
 
 #' @param n integer, number of grid points used for numerical integration.
 #'
-#' @rdname retornormal
+#' @rdname NumericNormal
 #' @exportS3Method
 cdf.NumericNormal <- function(d, x, ..., n = 101L) {
 
@@ -135,7 +135,7 @@ cdf.NumericNormal <- function(d, x, ..., n = 101L) {
 #' @param probs numeric vector, probabilities.
 #' @param n integer, number of grid points used for numerical integration.
 #'
-#' @rdname retornormal
+#' @rdname NumericNormal
 #' @exportS3Method
 quantile.NumericNormal <- function(x, probs, ..., n = 101L) {
 
@@ -171,7 +171,7 @@ quantile.NumericNormal <- function(x, probs, ..., n = 101L) {
 #' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
-#' @rdname retornormal
+#' @rdname NumericNormal
 #' @exportS3Method
 mean.NumericNormal <- function(x, ..., n = 101L) {
 
@@ -194,7 +194,7 @@ mean.NumericNormal <- function(x, ..., n = 101L) {
 #' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
-#' @rdname retornormal
+#' @rdname NumericNormal
 #' @exportS3Method
 variance.NumericNormal <- function(x, ..., n = 101L) {
 
@@ -217,7 +217,7 @@ variance.NumericNormal <- function(x, ..., n = 101L) {
 #' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
-#' @rdname retornormal
+#' @rdname NumericNormal
 #' @exportS3Method
 skewness.NumericNormal <- function(x, ..., n = 101L) {
 
@@ -240,7 +240,7 @@ skewness.NumericNormal <- function(x, ..., n = 101L) {
 #' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param \dots ignored.
 #'
-#' @rdname retornormal
+#' @rdname NumericNormal
 #' @exportS3Method
 kurtosis.NumericNormal <- function(x, ..., n = 101L) {
 

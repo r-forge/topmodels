@@ -2,14 +2,45 @@
 % Please edit documentation in R/NumericNormal.R
 \name{NumericNormal}
 \alias{NumericNormal}
+\alias{pdf.NumericNormal}
+\alias{cdf.NumericNormal}
+\alias{quantile.NumericNormal}
+\alias{mean.NumericNormal}
+\alias{variance.NumericNormal}
+\alias{skewness.NumericNormal}
+\alias{kurtosis.NumericNormal}
 \title{Normal Distribution for Testing Numeric Moment Calculations}
 \usage{
 NumericNormal(mu, var)
+
+\method{pdf}{NumericNormal}(d, x, ...)
+
+\method{cdf}{NumericNormal}(d, x, ..., n = 101L)
+
+\method{quantile}{NumericNormal}(x, probs, ..., n = 101L)
+
+\method{mean}{NumericNormal}(x, ..., n = 101L)
+
+\method{variance}{NumericNormal}(x, ..., n = 101L)
+
+\method{skewness}{NumericNormal}(x, ..., n = 101L)
+
+\method{kurtosis}{NumericNormal}(x, ..., n = 101L)
 }
 \arguments{
 \item{mu}{numeric vector with means.}
 
 \item{var}{numeric vector with variances.}
+
+\item{d}{object of class `"NumericNormal"`.}
+
+\item{x}{object of class `c("NumericNormal", "distribution")`.}
+
+\item{\dots}{ignored.}
+
+\item{n}{integer, number of grid points used for numerical integration.}
+
+\item{probs}{numeric vector, probabilities.}
 }
 \value{
 Object of class `c("NumericNormal", "distribution")`.
