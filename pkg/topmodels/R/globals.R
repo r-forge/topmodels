@@ -1,3 +1,3 @@
 
 # Global bindings for package checks
-utils::globalVariables(c("group"))
+utils::globalVariables(c("group", ".data"))
