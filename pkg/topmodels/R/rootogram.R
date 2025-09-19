@@ -606,11 +606,11 @@ rbind.rootogram <- c.rootogram
 #' @param confint_nrep numeric. The repetition number of simulation for computing the confidence intervals.
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the histogram style part of the base plot.
-#' @param colour,fill,size,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
+#' @param colour,fill,linewidth,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
-#' @param expected_col,expected_pch,expected_lty,expected_lwd,ref_col,ref_lty,ref_lwd,expected_colour,expected_size,expected_linetype,expected_alpha,expected_fill,expected_stroke,expected_shape,ref_colour,ref_size,ref_linetype,ref_alpha,confint_col,confint_lty,confint_lwd,confint_colour,confint_size,confint_linetype,confint_alpha Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
+#' @param expected_col,expected_pch,expected_lty,expected_lwd,ref_col,ref_lty,ref_lwd,expected_colour,expected_linewidth,expected_linetype,expected_size,expected_alpha,expected_fill,expected_stroke,expected_shape,ref_colour,ref_linewidth,ref_linetype,ref_alpha,confint_col,confint_lty,confint_lwd,confint_colour,confint_linewidth,confint_linetype,confint_alpha Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{rootogram}}, \code{\link{procast}}
 #'
@@ -961,22 +961,23 @@ autoplot.rootogram <- function(object,
                                theme = NULL,
                                colour = "black",
                                fill = "darkgray",
-                               size = 0.5,
+                               linewidth = 0.5,
                                linetype = 1,
                                alpha = NA,
                                expected_colour = 2,
-                               expected_size = 1,
+                               expected_linewidth = 1,
                                expected_linetype = 1,
+                               expected_size = 1,
                                expected_alpha = 1,
                                expected_fill = NA,
                                expected_stroke = 0.5,
                                expected_shape = 19,
                                confint_colour = "black",
-                               confint_size = 0.5,
+                               confint_linewidth = 0.5,
                                confint_linetype = 2,
                                confint_alpha = NA,
                                ref_colour = "black",
-                               ref_size = 0.5,
+                               ref_linewidth = 0.5,
                                ref_linetype = 1,
                                ref_alpha = NA,
                                ...) {
@@ -1005,7 +1006,7 @@ autoplot.rootogram <- function(object,
 
   ## get base style arguments
   add_arg <- list(...)
-  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  if (!is.null(add_arg$lwd)) linewidth <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
   ## sanity checks
@@ -1067,7 +1068,7 @@ autoplot.rootogram <- function(object,
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
-    colour, fill, size, linetype, alpha
+    colour, fill, linewidth, linetype, alpha
   )[, -1]
 
   # -------------------------------------------------------------------
@@ -1076,25 +1077,25 @@ autoplot.rootogram <- function(object,
   ## actual plotting
   rval <- ggplot2::ggplot(
     object,
-    ggplot2::aes_string(
-      observed = "observed",
-      expected = "expected",
-      mid = "mid",
-      width = "width",
-      group = "group",
-      distribution = "distribution"
+    ggplot2::aes(
+      observed = .data$observed,
+      expected = .data$expected,
+      mid = .data$mid,
+      width = .data$width,
+      group = .data$group,
+      distribution = .data$distribution
     )
   )
 
   ## add rootogram
   rval <- rval +
     geom_rootogram(
-      ggplot2::aes_string(
-        colour = "group",
-        fill = "group",
-        size = "group",
-        linetype = "group",
-        alpha = "group"
+      ggplot2::aes(
+        colour = .data$group,
+        fill = .data$group,
+        linewidth = .data$group,
+        linetype = .data$group,
+        alpha = .data$group
       ),
       scale = "raw",
       style = style
@@ -1107,8 +1108,9 @@ autoplot.rootogram <- function(object,
         scale = "raw",
         linestyle = expected,
         colour = expected_colour,
-        size = expected_size,
+        linewidth = expected_linewidth,
         linetype = expected_linetype,
+        size = expected_size,
         alpha = expected_alpha,
         fill = expected_fill,
         stroke = expected_stroke,
@@ -1121,7 +1123,7 @@ autoplot.rootogram <- function(object,
     rval <- rval +
       geom_rootogram_ref(
         colour = ref_colour,
-        size = ref_size,
+        linewidth = ref_linewidth,
         linetype = ref_linetype,
         alpha = ref_alpha,
       )
@@ -1136,7 +1138,7 @@ autoplot.rootogram <- function(object,
         scale = scale,
         rootogram_style = style,
         colour = confint_colour,
-        size = confint_size,
+        linewidth = confint_linewidth,
         linetype = confint_linetype,
         alpha = confint_alpha
       )
@@ -1146,7 +1148,7 @@ autoplot.rootogram <- function(object,
   rval <- rval +
     ggplot2::scale_colour_manual(values = plot_arg$colour) +
     ggplot2::scale_fill_manual(values = plot_arg$fill) +
-    ggplot2::scale_size_manual(values = plot_arg$size) +
+    ggplot2::scale_linewidth_manual(values = plot_arg$linewidth) +
     ggplot2::scale_linetype_manual(values = plot_arg$linetype) +
     ggplot2::scale_alpha_manual(values = plot_arg$alpha)
 
@@ -1159,14 +1161,14 @@ autoplot.rootogram <- function(object,
       ggplot2::labs(
         colour = "Model",
         fill = "Model",
-        size = "Model",
+        linewidth = "Model",
         linetype = "Model",
         alpha = "Model"
       ) +
       ggplot2::guides(
         colour = "legend",
         fill = "legend",
-        size = "legend",
+        linewidth = "legend",
         linetype = "legend",
         alpha = "legend"
       )
@@ -1175,7 +1177,7 @@ autoplot.rootogram <- function(object,
       ggplot2::guides(
         colour = "none",
         fill = "none",
-        size = "none",
+        linewidth = "none",
         linetype = "none",
         alpha = "none"
       )
@@ -1380,7 +1382,7 @@ geom_rootogram <- function(mapping = NULL,
 #' @export
 GeomRootogram <- ggplot2::ggproto("GeomRootogram", ggplot2::GeomRect,
   default_aes = ggplot2::aes(
-    colour = "black", fill = "darkgray", size = 0.5, linetype = 1,
+    colour = "black", fill = "darkgray", linewidth = 0.5, linetype = 1,
     alpha = NA
   ),
   required_aes = c("xmin", "xmax", "ymin", "ymax")
@@ -1491,7 +1493,7 @@ geom_rootogram_expected <- function(mapping = NULL,
 #' @export
 GeomRootogramExpected <- ggplot2::ggproto("GeomRootogramExpected", ggplot2::GeomPath,
   default_aes = ggplot2::aes(
-    colour = 2, size = 1, linetype = 1,
+    colour = 2, size = 1, linewidth = 1, linetype = 1,
     alpha = 1, fill = NA, stroke = 0.5, shape = 19
   ),
   draw_panel = function(data, panel_params, coord, arrow = NULL,
@@ -1505,20 +1507,20 @@ GeomRootogramExpected <- ggplot2::ggproto("GeomRootogramExpected", ggplot2::Geom
       data2 <- transform(data, size = size * 2)
 
       grid::grobTree(
-        ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
+        ggplot2::GeomPath$draw_panel(data = data, panel_params = panel_params, coord = coord, arrow = NULL,
           lineend = "butt", linejoin = "round", linemitre = 10,
           na.rm = FALSE
         ),
-        ggplot2::GeomPoint$draw_panel(data2, panel_params, coord, na.rm = FALSE)
+        ggplot2::GeomPoint$draw_panel(data = data2, panel_params = panel_params, coord = coord, na.rm = FALSE)
       )
     } else if (linestyle == "line") {
-      ggplot2::GeomPath$draw_panel(data, panel_params, coord, arrow = NULL,
+      ggplot2::GeomPath$draw_panel(data = data, panel_params = panel_params, coord = coord, arrow = NULL,
         lineend = "butt", linejoin = "round", linemitre = 10,
         na.rm = FALSE
       )
     } else {
       data <- transform(data, size = size * 2)
-      ggplot2::GeomPoint$draw_panel(data, panel_params, coord, na.rm = FALSE)
+      ggplot2::GeomPoint$draw_panel(data = data, panel_params = panel_params, coord = coord, na.rm = FALSE)
     }
   }
 )
@@ -1561,7 +1563,7 @@ geom_rootogram_ref <- function(mapping = NULL,
 GeomRootogramRef <- ggplot2::ggproto("GeomRootogramRef", ggplot2::GeomHline,
   default_aes = ggplot2::aes(
     colour = "black",
-    size = 0.5,
+    linewidth = 0.5,
     linetype = 1,
     alpha = NA,
     yintercept = 0
@@ -1706,7 +1708,7 @@ GeomRootogramConfint <- ggplot2::ggproto("GeomRootogramConfint", ggplot2::Geom,
   ## Setting up all defaults needed for `GeomPolygon` and `GeomStep`
   default_aes = ggplot2::aes(
     colour = "black",
-    size = 0.5,
+    linewidth = 0.5,
     linetype = 2,
     alpha = NA,
     yintercept = 0

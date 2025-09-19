@@ -490,7 +490,7 @@ rbind.reliagram <- c.reliagram
 #' @param \dots further graphical parameters.
 #' @param minimum,ref,xlim,ylim,col,fill,alpha_min,lwd,pch,lty,type,add_hist,add_info,add_rug,add_min,axes,box additional graphical
 #' parameters for base plots, whereby \code{x} is a object of class \code{reliagram}.
-#' @param colour,size,shape,linetype,legend graphical parameters passed for 
+#' @param colour,size,shape,linewidth,linetype,legend graphical parameters passed for 
 #' \code{ggplot2} style plots, whereby \code{object} is a object of class \code{reliagram}.
 #' @seealso \code{link{reliagram}}, \code{\link{procast}}
 #' @references Wilks DS (2011) \emph{Statistical Methods in the Atmospheric
@@ -911,6 +911,7 @@ autoplot.reliagram <- function(object,
                                fill = adjustcolor("black", alpha.f = 0.2),
                                alpha_min = 0.2,
                                size = 1,
+                               linewidth = 1,
                                shape = 19,
                                linetype = 1,
                                type = NULL,
@@ -926,7 +927,8 @@ autoplot.reliagram <- function(object,
   ## get base style arguments
   add_arg <- list(...)
   if (!is.null(add_arg$pch)) shape <- add_arg$pch
-  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  if (!is.null(add_arg$cex)) size <- add_arg$cex
+  if (!is.null(add_arg$lwd)) linewidth <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
   ## sanity checks
@@ -1012,7 +1014,7 @@ autoplot.reliagram <- function(object,
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
-    colour, fill, size, linetype, confint, alpha_min, minimum, add_rug
+    colour, fill, size, linewidth, linetype, confint, alpha_min, minimum, add_rug
   )[, -1]
 
   ## prepare fill color for confint (must be done on vector to match args)
@@ -1046,46 +1048,49 @@ autoplot.reliagram <- function(object,
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   ## actual plotting
-  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "x", y = "y")) +
-    ggplot2::geom_abline(ggplot2::aes_string(intercept = 0, slope = 1),
+  rval <- ggplot2::ggplot(object, ggplot2::aes(x = .data$x, y = .data$y)) +
+    ggplot2::geom_abline(ggplot2::aes(intercept = 0, slope = 1),
       linetype = 2, colour = plot_arg2$ref
     ) +
     ggplot2::geom_polygon(
-      ggplot2::aes_string(
-        ci_lwr = "ci_lwr", ci_upr = "ci_upr",
-        bin_lwr = "bin_lwr", bin_upr = "bin_upr", fill = "group"
+      ggplot2::aes(
+        ci_lwr = .data$ci_lwr, ci_upr = .data$ci_upr,
+        bin_lwr = .data$bin_lwr, bin_upr = .data$bin_upr, fill = .data$group
       ),
       stat = calc_confint_polygon, show.legend = FALSE, na.rm = TRUE
     ) +
-    ggplot2::geom_line(ggplot2::aes_string(colour = "group", size = "group", linetype = "group"),
+    ggplot2::geom_line(ggplot2::aes(colour = .data$group, linewidth = .data$group, linetype = .data$group),
       na.rm = TRUE
     ) +
-    ggplot2::geom_point(ggplot2::aes_string(colour = "group"),
+    ggplot2::geom_point(ggplot2::aes(colour = .data$group),
       alpha = plot_arg2$type, size = plot_arg2$size * 2, shape = plot_arg2$shape,
       show.legend = FALSE, na.rm = TRUE
     )
 
-  ## add points below minimum
-  rval <- rval +
-    ggplot2::geom_point(ggplot2::aes_string(x = "x", y = "y"),
-      data = object2,
-      alpha = plot_arg2$type[idx_min], size = plot_arg2$size[idx_min] * 2, shape = plot_arg2$add_min[idx_min],
-      show.legend = FALSE, na.rm = TRUE
-    )
+  ## add points below minimum (if any)
+  if (nrow(object2) > 0L) {
+    rval <- rval +
+      ggplot2::geom_point(ggplot2::aes(x = .data$x, y = .data$y),
+        data = object2,
+        alpha = plot_arg2$type[idx_min], size = plot_arg2$size[idx_min] * 2, shape = plot_arg2$add_min[idx_min],
+        show.legend = FALSE, na.rm = TRUE
+      )
+  }
 
   ## add rugs
   rval <- rval +
-    ggplot2::geom_rug(ggplot2::aes_string(x = "x"),
+    ggplot2::geom_rug(ggplot2::aes(x = .data$x),
       data = data.frame(x = object$bin_lwr[1], group = factor(1L:n, labels = main)),
       inherit.aes = FALSE, colour = plot_arg$add_rug
     ) +
-    ggplot2::geom_rug(ggplot2::aes_string(x = "bin_upr"), y = NA, colour = plot_arg2$add_rug)
+    ggplot2::geom_rug(ggplot2::aes(x = na.omit(.data$bin_upr), y = NULL), colour = plot_arg2$add_rug)
 
   ## set the colors, shapes, etc. for the groups
   rval <- rval +
     ggplot2::scale_colour_manual(values = plot_arg$colour) +
     ggplot2::scale_fill_manual(values = plot_arg$fill) +
     ggplot2::scale_size_manual(values = plot_arg$size) +
+    ggplot2::scale_linewidth_manual(values = plot_arg$linewidth) +
     ggplot2::scale_linetype_manual(values = plot_arg$linetype)
 
   ## add annotation
@@ -1094,9 +1099,9 @@ autoplot.reliagram <- function(object,
   ## add legend
   if (legend) {
     rval <- rval + ggplot2::labs(colour = "Model") +
-      ggplot2::guides(colour = "legend", size = "none", linetype = "none")
+      ggplot2::guides(colour = "legend", size = "none", linewidth = "none", linetype = "none")
   } else {
-    rval <- rval + ggplot2::guides(colour = "none", size = "none", linetype = "none")
+    rval <- rval + ggplot2::guides(colour = "none", size = "none", linewidth = "none", linetype = "none")
   }
 
   ## set x and y limits
@@ -1115,23 +1120,23 @@ autoplot.reliagram <- function(object,
       ## draw histogram
       rval_inset <- ggplot2::ggplot(
         df,
-        ggplot2::aes_string(
-          x = "x", y = "y", xmin = "bin_lwr", xmax = "bin_upr", ymin = 0, ymax = "n_pred",
-          fill = "above_min"
+        ggplot2::aes(
+          x = .data$x, y = .data$y, xmin = .data$bin_lwr, xmax = .data$bin_upr, ymin = 0, ymax = .data$n_pred,
+          fill = .data$above_min
         )
       ) +
-        ggplot2::geom_rect(show.legend = FALSE, colour = "black", size = 0.25) +
+        ggplot2::geom_rect(show.legend = FALSE, colour = "black", linewidth = 0.25) +
         ggplot2::scale_fill_manual(values = c(add_hist, "white")) +
         ggplot2::theme_void()
 
       ## add minimum line
       if (any(df$minimum > 0)) {
         rval_inset <- rval_inset +
-          ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"),
+          ggplot2::geom_segment(ggplot2::aes(x = .data$x, xend = .data$xend, y = .data$y, yend = .data$yend),
             data = data.frame(x = 0, xend = 1, y = unique(df$minimum), yend = unique(df$minimum)),
             inherit.aes = FALSE
           ) +
-          ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
+          ggplot2::geom_text(ggplot2::aes(x = .data$x, y = .data$y, label = .data$label),
             data = data.frame(x = 0, y = unique(df$minimum), label = "Min."), inherit.aes = FALSE,
             size = 3, hjust = 1, nudge_x = -0.01
           )
@@ -1142,18 +1147,18 @@ autoplot.reliagram <- function(object,
       ytick <- ytick[ytick > 0 & ytick < max(df$n_pred)]
 
       rval_inset <- rval_inset +
-        ggplot2::geom_segment(ggplot2::aes_string(x = "x", xend = "xend", y = "y", yend = "yend"),
+        ggplot2::geom_segment(ggplot2::aes(x = .data$x, xend = .data$xend, y = .data$y, yend = .data$yend),
           data = data.frame(x = 0.985, xend = 1.015, y = ytick, yend = ytick),
           inherit.aes = FALSE
         ) +
-        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
+        ggplot2::geom_text(ggplot2::aes(x = .data$x, y = .data$y, label = .data$label),
           data = data.frame(x = 1.015, y = ytick, label = ytick), inherit.aes = FALSE,
           size = 3, hjust = 0, nudge_x = 0.01
         )
 
       # add nobs
       rval_inset <- rval_inset +
-        ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
+        ggplot2::geom_text(ggplot2::aes(x = .data$x, y = .data$y, label = .data$label),
           data = data.frame(
             x = mean(c(df$bin_lwr, df$bin_upr), na.rm = TRUE),
             y = max(df$n_pred) + max(df$n_pred) * 0.15,
@@ -1188,7 +1193,7 @@ autoplot.reliagram <- function(object,
   # -------------------------------------------------------------------
   if (add_info & (n == 1 | !single_graph && n > 1L)) {
     rval <- rval +
-      ggplot2::geom_text(ggplot2::aes_string(x = "x", y = "y", label = "label"),
+      ggplot2::geom_text(ggplot2::aes(x = .data$x, y = .data$y, label = .data$label),
         data = data.frame(
           x = 1, y = 0.06,
           label = sprintf(

@@ -606,12 +606,12 @@ rbind.pithist <- c.pithist
 #' If \code{freq = NULL} it is taken from the \code{object}.
 #' @param xlim,ylim,xlab,ylab,main,axes,box graphical parameters.
 #' @param col,border,lwd,lty,alpha_min graphical parameters for the main part of the base plot.
-#' @param colour,fill,size,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
+#' @param colour,fill,linewidth,linetype,alpha graphical parameters for the histogram style part in the \code{autoplot}.
 #' @param legend logical. Should a legend be added in the \code{ggplot2} style
 #' graphic?
 #' @param theme Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.
 #' @param simint_col,simint_lty,simint_lwd,confint_col,confint_lty,confint_lwd,confint_alpha,expected_col,expected_lty,expected_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
-#' @param simint_colour,simint_size,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_size,confint_linetype,expected_colour,expected_size,expected_linetype,expected_alpha Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
+#' @param simint_colour,simint_linewidth,simint_linetype,simint_alpha,confint_colour,confint_fill,confint_linewidth,confint_linetype,expected_colour,expected_linewidth,expected_linetype,expected_alpha Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
 #' @param \dots further graphical parameters passed to the plotting function.
 #' @seealso \code{\link{pithist}}, \code{\link{procast}}, \code{\link[graphics]{hist}}
 #' @references
@@ -1307,20 +1307,20 @@ autoplot.pithist <- function(object,
                              theme = NULL,
                              colour = NULL,
                              fill = NULL,
-                             size = NULL,
+                             linewidth = NULL,
                              linetype = NULL,
                              alpha = NULL,
                              expected_colour = NULL,
-                             expected_size = 0.75,
+                             expected_linewidth = 0.75,
                              expected_linetype = NULL,
                              expected_alpha = NA,
                              confint_colour = NULL,
                              confint_fill = NULL,
-                             confint_size = 0.75,
+                             confint_linewidth = 0.75,
                              confint_linetype = NULL,
                              confint_alpha = NULL,
                              simint_colour = "black",
-                             simint_size = 0.5,
+                             simint_linewidth = 0.5,
                              simint_linetype = 1,
                              simint_alpha = NA,
                              ...) {
@@ -1346,7 +1346,7 @@ autoplot.pithist <- function(object,
 
   ## get base style arguments
   add_arg <- list(...)
-  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  if (!is.null(add_arg$lwd)) linewidth <- add_arg$lwd
   if (!is.null(add_arg$lty)) linetype <- add_arg$lty
 
   ## fix `ylab` according to possible new `freq`
@@ -1382,7 +1382,7 @@ autoplot.pithist <- function(object,
   alpha <- if (is.null(alpha)) NA else alpha
   colour <- if (is.null(colour)) NA else colour
   fill <- if (is.null(fill)) NA else fill
-  size <- if (is.null(size)) NA else size
+  linewidth <- if (is.null(linewidth)) NA else linewidth
   linetype <- if (is.null(linetype)) NA else linetype
 
   ## transform to `freq = TRUE` scale and check if allowed (not for non-equidistant breaks)
@@ -1454,7 +1454,7 @@ autoplot.pithist <- function(object,
     GeomPithistExpected$default_aes,
     list(
       colour = expected_colour,
-      size = expected_size,
+      linewidth = expected_linewidth,
       linetype = expected_linetype,
       alpha = expected_alpha
     ),
@@ -1466,7 +1466,7 @@ autoplot.pithist <- function(object,
     list(
       colour = confint_colour,
       fill = confint_fill,
-      size = confint_size,
+      linewidth = confint_linewidth,
       linetype = confint_linetype,
       alpha = confint_alpha
     )
@@ -1476,7 +1476,7 @@ autoplot.pithist <- function(object,
     GeomPithistSimint$default_aes,
     list(
       colour = simint_colour,
-      size = simint_size,
+      linewidth = simint_linewidth,
       linetype = simint_linetype,
       alpha = simint_alpha
     )
@@ -1485,7 +1485,7 @@ autoplot.pithist <- function(object,
   ## recycle arguments for plotting to match the number of groups (for `scale_<...>_manual()`)
   plot_arg <- data.frame(
     1:n,
-    colour, fill, size, linetype, alpha
+    colour, fill, linewidth, linetype, alpha
   )[, -1]
 
   # -------------------------------------------------------------------
@@ -1494,23 +1494,23 @@ autoplot.pithist <- function(object,
   ## actual plotting
   rval <- ggplot2::ggplot(
     object,
-    ggplot2::aes_string(
-      x = "mid",
-      y = "observed",
-      width = "width",
-      group = "group"
+    ggplot2::aes(
+      x = .data$mid,
+      y = .data$observed,
+      width = .data$width,
+      group = .data$group
     )
   )
 
   ## add histogram
   rval <- rval +
     geom_pithist(
-      ggplot2::aes_string(
-        colour = "group",
-        fill = "group",
-        size = "group",
-        linetype = "group",
-        alpha = "group"
+      ggplot2::aes(
+        colour = .data$group,
+        fill = .data$group,
+        linewidth = .data$group,
+        linetype = .data$group,
+        alpha = .data$group
       ),
       freq = freq,
       style = style
@@ -1520,16 +1520,16 @@ autoplot.pithist <- function(object,
   if (simint) {
     rval <- rval +
       geom_pithist_simint(
-        ggplot2::aes_string(
-          x = "mid",
-          ymin = "simint_lwr",
-          ymax = "simint_upr",
-          group = "group"
+        ggplot2::aes(
+          x = .data$mid,
+          ymin = .data$simint_lwr,
+          ymax = .data$simint_upr,
+          group = .data$group
         ),
         na.rm = TRUE,
         freq = freq,
         colour = aes_simint$colour,
-        size = aes_simint$size,
+        linewidth = aes_simint$linewidth,
         linetype = aes_simint$linetype,
         alpha = aes_simint$alpha
       )
@@ -1539,10 +1539,10 @@ autoplot.pithist <- function(object,
   if (confint != "none") {
     rval <- rval +
       geom_pithist_confint(
-        ggplot2::aes_string(
-          x = "mid",
-          y = "observed",
-          width = "width"
+        ggplot2::aes(
+          x = .data$mid,
+          y = .data$observed,
+          width = .data$width
         ),
         level = confint_level,
         type = confint_type,
@@ -1551,7 +1551,7 @@ autoplot.pithist <- function(object,
         style = confint,
         colour = aes_confint$colour,
         fill = aes_confint$fill,
-        size = aes_confint$size,
+        linewidth = aes_confint$linewidth,
         linetype = aes_confint$linetype,
         alpha = aes_confint$alpha
       )
@@ -1561,15 +1561,15 @@ autoplot.pithist <- function(object,
   if (expected) {
     rval <- rval +
       geom_pithist_expected(
-        ggplot2::aes_string(
-          x = "mid",
-          y = "observed",
-          width = "width"
+        ggplot2::aes(
+          x = .data$mid,
+          y = .data$observed,
+          width = .data$width
         ),
         freq = freq,
         scale = scale,
         colour = aes_expected$colour,
-        size = aes_expected$size,
+        linewidth = aes_expected$linewidth,
         linetype = aes_expected$linetype,
         alpha = aes_expected$alpha
       )
@@ -1582,7 +1582,7 @@ autoplot.pithist <- function(object,
     ggplot2::scale_alpha_manual(values = plot_arg$alpha, na.value = NA) +
     ggplot2::scale_colour_manual(values = plot_arg$colour, na.value = NA) +
     ggplot2::scale_fill_manual(values = plot_arg$fill, na.value = NA) +
-    ggplot2::scale_size_manual(values = plot_arg$size, na.value = 0.999) +
+    ggplot2::scale_linewidth_manual(values = plot_arg$linewidth, na.value = 0.999) +
     ggplot2::scale_linetype_manual(values = plot_arg$linetype, na.value = NA)
 
   ## annotation
@@ -1595,14 +1595,14 @@ autoplot.pithist <- function(object,
         alpha = "Model",
         colour = "Model",
         fill = "Model",
-        size = "Model",
+        linewidth = "Model",
         linetype = "Model"
       ) +
       ggplot2::guides(
         alpha = "legend",
         colour = "legend",
         fill = "legend",
-        size = "legend",
+        linewidth = "legend",
         linetype = "legend"
       )
   } else {
@@ -1611,7 +1611,7 @@ autoplot.pithist <- function(object,
         alpha = "none",
         colour = "none",
         fill = "none",
-        size = "none",
+        linewidth = "none",
         linetype = "none"
       )
   }
@@ -1851,7 +1851,7 @@ GeomPithist <- ggplot2::ggproto("GeomPithist", ggplot2::Geom,
   default_aes = ggplot2::aes(
     colour = NA,
     fill = NA,
-    size = 0.999, # TODO: (ML) resolve this hack (NA leads to error, even if it is modified w/i draw_panel() -> why?)
+    linewidth = 0.999, # TODO: (ML) resolve this hack (NA leads to error, even if it is modified w/i draw_panel() -> why?)
     linetype = NA,
     alpha = NA,
     subgroup = NULL
@@ -1911,11 +1911,11 @@ set_default_aes_pithist <- function(style) {
   if (style == "bar") {
     my_modify_list(
       ggplot2::GeomPolygon$default_aes, 
-      list(colour = "black", fill = "darkgray", size = 0.5, linetype = 1, alpha = NA, subgroup = NULL),
+      list(colour = "black", fill = "darkgray", linewidth = 0.5, linetype = 1, alpha = NA, subgroup = NULL),
       force = TRUE
     )
   } else { # "line" style
-    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", size = 0.75, linetype = 1, alpha = NA),
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", linewidth = 0.75, linetype = 1, alpha = NA),
       force = TRUE
     )
   }
@@ -2026,7 +2026,7 @@ geom_pithist_expected <- function(mapping = NULL,
 GeomPithistExpected <- ggplot2::ggproto("GeomPithistExpected", ggplot2::GeomStep,
   default_aes = ggplot2::aes(
     colour = 2,
-    size = 0.75,
+    linewidth = 0.75,
     linetype = 1,
     alpha = NA
   ),
@@ -2180,7 +2180,7 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
   default_aes = ggplot2::aes(
     colour = NA,
     fill = NA,
-    size = 0.999,
+    linewidth = 0.999,
     linetype = NA,
     alpha = NA
   ),
@@ -2223,12 +2223,12 @@ GeomPithistConfint <- ggplot2::ggproto("GeomPithistConfint", ggplot2::Geom,
 ## helper function inspired by internal from `ggplot2` defined in `geom-sf.r`
 set_default_aes_pithist_confint <- function(style) {
   if (style == "line") {
-    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, fill = NA, size = 0.75, linetype = 2, alpha = NA),
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = 2, fill = NA, linewidth = 0.75, linetype = 2, alpha = NA),
       force = TRUE
     )
   } else { # "polygon" style
     my_modify_list(ggplot2::GeomPolygon$default_aes, list(
-      colour = NA, fill = "black", size = 0.5,
+      colour = NA, fill = "black", linewidth = 0.5,
       linetype = 1, alpha = 0.2, subgroup = NULL
     ), force = TRUE)
   }
@@ -2330,7 +2330,7 @@ GeomPithistSimint <- ggplot2::ggproto("GeomPithistSimint", ggplot2::GeomLinerang
   required_aes = c("x", "ymin", "ymax"),
   default_aes = ggplot2::aes(
     colour = "black",
-    size = 0.5,
+    linewidth = 0.5,
     linetype = 1,
     alpha = NA
   )

@@ -563,7 +563,7 @@ rbind.qqrplot <- c.qqrplot
 #' graphic?
 #' @param theme name of the `ggplot2` theme to be used. If \code{theme = NULL}, the \code{\link[ggplot2]{theme_bw}} is employed.
 #' @param simint_col,simint_alpha,confint_col,confint_lty,confint_lwd,ref_col,ref_lty,ref_lwd Further graphical parameters for the `confint` and `simint` line/polygon in the base plot.
-#' @param simint_fill,confint_colour,confint_fill,confint_size,confint_linetype,confint_alpha,ref_colour,ref_size,ref_linetype Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
+#' @param simint_fill,confint_colour,confint_fill,confint_linewidth,confint_linetype,confint_alpha,ref_colour,ref_linewidth,ref_linetype Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.
 #'
 #' @seealso \code{\link{qqrplot}}, \code{\link{wormplot}},
 #' \code{\link{proresiduals}}, \code{\link[stats]{qqnorm}}
@@ -737,7 +737,7 @@ plot.qqrplot <- function(x,
   } else {
     xlab <- use_arg_from_attributes(x, "xlab", default = rep("Theoretical quantiles", 2), force_single = FALSE)
     ylab <- use_arg_from_attributes(x, "ylab", default = rep(if (detrend) "Deviation" else "Quantile residuals", n), force_single = FALSE)
-    main <- use_arg_from_attributes(x, "main", default = paste(if (detrend) "Wormplot Model" else "Q-Q residuals plot model", seq_len(n)), force_single = FALSE)
+    main <- use_arg_from_attributes(x, "main", default = paste(if (detrend) "Wormplot model" else "Q-Q residuals plot model", seq_len(n)), force_single = FALSE)
   }
 
   ## fix `ylabel` according to possible new `detrend`
@@ -1049,7 +1049,6 @@ points.qqrplot <- function(x,
 
     ## Adding qq plot (qq plots if nsim > 1)
     for (cn in names(d)[grep("^expected(_[0-9]+)?$", names(d))]) {
-        print(cn)
         points.default(d[[cn]], d[[gsub("^expected", "observed", cn)]],
                        col = plot_arg$col[j], pch = plot_arg$pch[j], ...)
     }
@@ -1093,11 +1092,11 @@ autoplot.qqrplot <- function(object,
                              simint_alpha = 0.2,
                              confint_colour = NULL,
                              confint_fill = NULL,
-                             confint_size = NULL,
+                             confint_linewidth = NULL,
                              confint_linetype = NULL,
                              confint_alpha = NULL,
                              ref_colour = "black",
-                             ref_size = 0.5,
+                             ref_linewidth = 0.5,
                              ref_linetype = 2,
                              ...) {
   # -------------------------------------------------------------------
@@ -1130,7 +1129,7 @@ autoplot.qqrplot <- function(object,
   ## get base style arguments
   add_arg <- list(...)
   if (!is.null(add_arg$pch)) shape <- add_arg$pch
-  if (!is.null(add_arg$lwd)) size <- add_arg$lwd
+  if (!is.null(add_arg$cex)) size <- add_arg$cex
 
   ## fix `ylab` according to possible new `detrend`
   if (ylab_missing) {
@@ -1247,7 +1246,7 @@ autoplot.qqrplot <- function(object,
     GeomQqrplotRef$default_aes,
     list(
       colour = ref_colour,
-      size = ref_size,
+      linewidth = ref_linewidth,
       linetype = ref_linetype
     )
   )
@@ -1257,7 +1256,7 @@ autoplot.qqrplot <- function(object,
     list(
       colour = confint_colour,
       fill = confint_fill,
-      size = confint_size,
+      linewidth = confint_linewidth,
       linetype = confint_linetype,
       alpha = confint_alpha
     )
@@ -1282,7 +1281,7 @@ autoplot.qqrplot <- function(object,
   # MAIN PLOTTING
   # -------------------------------------------------------------------
   ## actual plotting
-  rval <- ggplot2::ggplot(object, ggplot2::aes_string(x = "expected", y = "observed")) 
+  rval <- ggplot2::ggplot(object, ggplot2::aes(x = .data$expected, y = .data$observed)) 
 
   ## add ref
   if (ref) {
@@ -1293,7 +1292,7 @@ autoplot.qqrplot <- function(object,
         probs = ref_probs, 
         scale = scale,
         colour = aes_ref$colour,
-        size = aes_ref$size,
+        linewidth = aes_ref$linewidth,
         linetype = aes_ref$linetype
       )
   }
@@ -1311,7 +1310,7 @@ autoplot.qqrplot <- function(object,
         style = confint,
         colour = aes_confint$colour,
         fill = aes_confint$fill,
-        size = aes_confint$size,
+        linewidth = aes_confint$linewidth,
         linetype = aes_confint$linetype,
         alpha = aes_confint$alpha
       )
@@ -1321,11 +1320,11 @@ autoplot.qqrplot <- function(object,
   if (simint) {
     rval <- rval +
       geom_qqrplot_simint(
-        ggplot2::aes_string(
-          x = "simint_expected", 
-          ymin = "simint_observed_lwr", 
-          ymax = "simint_observed_upr",
-          group = "group"
+        ggplot2::aes(
+          x = .data$simint_expected, 
+          ymin = .data$simint_observed_lwr, 
+          ymax = .data$simint_observed_upr,
+          group = .data$group
         ),
         na.rm = TRUE,
         fill = aes_simint$fill,
@@ -1335,9 +1334,9 @@ autoplot.qqrplot <- function(object,
 
   ## add points
   rval <- rval +
-    geom_qqrplot(ggplot2::aes_string(x = "expected", y = "observed", 
-      alpha = "group", colour = "group", fill = "group", 
-      shape = "group", size = "group"), data = object_long, stroke = stroke
+    geom_qqrplot(ggplot2::aes(x = .data$expected, y = .data$observed, 
+      alpha = .data$group, colour = .data$group, fill = .data$group, 
+      shape = .data$group, size = .data$group), data = object_long, stroke = stroke
     )
   ## FIXME: alpha is not correctly represented in the legend
   ##  Bug in ggplot2?
@@ -1654,7 +1653,7 @@ geom_qqrplot_simint <- function(mapping = NULL, data = NULL, stat = "qqrplot_sim
 #' @usage NULL
 #' @export
 GeomQqrplotSimint <- ggplot2::ggproto("GeomQqrplotSimint", ggplot2::GeomPolygon,
-  default_aes = ggplot2::aes(colour = "NA", fill = "black", size = 0.5, linetype = 1,
+  default_aes = ggplot2::aes(colour = "NA", fill = "black", linewidth = 0.5, linetype = 1,
   alpha = 0.2, subgroup = NULL)
 )
 
@@ -1776,7 +1775,7 @@ geom_qqrplot_ref <- function(mapping = NULL, data = NULL, stat = "qqrplot_ref",
 #' @export
 GeomQqrplotRef <- ggplot2::ggproto("GeomQqrplotRef", ggplot2::GeomAbline, 
   # FIXME: (ML) Maybe change it to a GeomPath to be plotted equivalent to `geom_qqrplot_confint()`
-  default_aes = ggplot2::aes(colour = "black", size = 0.5, linetype = 2,
+  default_aes = ggplot2::aes(colour = "black", linewidth = 0.5, linetype = 2,
   alpha = NA)
 )
 
@@ -1937,7 +1936,7 @@ GeomQqrplotConfint <- ggplot2::ggproto("GeomQqrplotConfint", ggplot2::Geom,
   default_aes = ggplot2::aes(
     colour = NA,
     fill = NA,
-    size = 0.5,
+    linewidth = 0.5,
     linetype = NA,
     alpha = NA,
     subgroup = NULL
@@ -1956,10 +1955,10 @@ GeomQqrplotConfint <- ggplot2::ggproto("GeomQqrplotConfint", ggplot2::Geom,
     data$y <- data$y_noaes
 
     if (style == "polygon") {
-      ggplot2::GeomPolygon$draw_panel(data, panel_params, coord, rule)
+      ggplot2::GeomPolygon$draw_panel(data = data, panel_params = panel_params, coord = coord, rule = rule)
     } else {
-      ggplot2::GeomPath$draw_panel(data, panel_params, coord,
-                          arrow, lineend, linejoin, linemitre, na.rm)
+      ggplot2::GeomPath$draw_panel(data = data, panel_params = panel_params, coord = coord,
+                          arrow = arrow, lineend = lineend, linejoin = linejoin, linemitre = linemitre, na.rm = na.rm)
     }
 
   },
@@ -1979,10 +1978,10 @@ GeomQqrplotConfint <- ggplot2::ggproto("GeomQqrplotConfint", ggplot2::Geom,
 ## Helper function inspired by internal from `ggplot2` defined in `geom-sf.R`
 set_default_aes_qqrplot_confint <- function(style) {
   if (style == "line") {
-    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", fill = NA, size = 0.5, linetype = 2, alpha = NA), 
+    my_modify_list(ggplot2::GeomPath$default_aes, list(colour = "black", fill = NA, linewidth = 0.5, linetype = 2, alpha = NA), 
       force = TRUE)
   } else {
-    my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = "NA", fill = "black", size = 0.5, 
+    my_modify_list(ggplot2::GeomPolygon$default_aes, list(colour = "NA", fill = "black", linewidth = 0.5, 
       linetype = 1, alpha = 0.2, subgroup = NULL), force = TRUE)
   }
 }
