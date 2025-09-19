@@ -24,6 +24,9 @@ install: build
 	(cd ../ && R CMD INSTALL topmodels_$(VERSION).tar.gz)
 check: build
 	@echo Checking current version: $(VERSION)
+	(cd ../ && R CMD check topmodels_$(VERSION).tar.gz)
+crancheck: build
+	@echo Checking current version: $(VERSION)
 	(cd ../ && R CMD check --as-cran topmodels_$(VERSION).tar.gz)
 
 
