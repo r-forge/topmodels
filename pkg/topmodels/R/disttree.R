@@ -1,4 +1,4 @@
-## old procast.disttree/distforest
+## old procast_disttree/distforest
 ## still relying on procast_setup (included at the end)
 ## ignored for now
 ##
@@ -6,7 +6,7 @@
 ## - could either use the pdist, ddist, etc. from within the disttree
 ## - or resort to GAMLSS() family instead, provided this is used 
 
-procast.disttree <- function(object,
+procast_disttree <- function(object,
                              newdata = NULL,
                              na.action = na.pass, # FIXME: (ML) Currently not supported
                              type = c("quantile", "location", "scale", "parameter", "density", "probability"),
@@ -117,7 +117,7 @@ procast.disttree <- function(object,
   procast_setup(pars, FUN = FUN, at = at, drop = drop, type = type, ...)
 }
 
-procast.distforest <- procast.disttree
+procast_distforest <- procast_disttree
 
 procast_setup <- function(pars,
                           FUN,
