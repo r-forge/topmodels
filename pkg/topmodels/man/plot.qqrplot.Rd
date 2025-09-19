@@ -75,11 +75,11 @@
   simint_alpha = 0.2,
   confint_colour = NULL,
   confint_fill = NULL,
-  confint_size = NULL,
+  confint_linewidth = NULL,
   confint_linetype = NULL,
   confint_alpha = NULL,
   ref_colour = "black",
-  ref_size = 0.5,
+  ref_linewidth = 0.5,
   ref_linetype = 2,
   ...
 )
@@ -137,7 +137,7 @@ graphic?}
 \item{colour, fill, alpha, shape, size, stroke}{graphical parameters passed to \code{ggplot2} 
 style plots.}
 
-\item{simint_fill, confint_colour, confint_fill, confint_size, confint_linetype, confint_alpha, ref_colour, ref_size, ref_linetype}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
+\item{simint_fill, confint_colour, confint_fill, confint_linewidth, confint_linetype, confint_alpha, ref_colour, ref_linewidth, ref_linetype}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
 }
 \description{
 Generic plotting functions for Q-Q residual plots for objects of class \code{"qqrplot"}

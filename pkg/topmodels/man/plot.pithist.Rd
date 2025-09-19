@@ -84,20 +84,20 @@
   theme = NULL,
   colour = NULL,
   fill = NULL,
-  size = NULL,
+  linewidth = NULL,
   linetype = NULL,
   alpha = NULL,
   expected_colour = NULL,
-  expected_size = 0.75,
+  expected_linewidth = 0.75,
   expected_linetype = NULL,
   expected_alpha = NA,
   confint_colour = NULL,
   confint_fill = NULL,
-  confint_size = 0.75,
+  confint_linewidth = 0.75,
   confint_linetype = NULL,
   confint_alpha = NULL,
   simint_colour = "black",
-  simint_size = 0.5,
+  simint_linewidth = 0.5,
   simint_linetype = 1,
   simint_alpha = NA,
   ...
@@ -147,9 +147,9 @@ graphic?}
 
 \item{theme}{Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.}
 
-\item{colour, fill, size, linetype, alpha}{graphical parameters for the histogram style part in the \code{autoplot}.}
+\item{colour, fill, linewidth, linetype, alpha}{graphical parameters for the histogram style part in the \code{autoplot}.}
 
-\item{simint_colour, simint_size, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_size, confint_linetype, expected_colour, expected_size, expected_linetype, expected_alpha}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
+\item{simint_colour, simint_linewidth, simint_linetype, simint_alpha, confint_colour, confint_fill, confint_linewidth, confint_linetype, expected_colour, expected_linewidth, expected_linetype, expected_alpha}{Further graphical parameters for the `confint` and `simint` line/polygon using \code{\link[ggplot2]{autoplot}}.}
 }
 \description{
 Generic plotting functions for probability integral transform (PIT)

@@ -63,6 +63,7 @@
   fill = adjustcolor("black", alpha.f = 0.2),
   alpha_min = 0.2,
   size = 1,
+  linewidth = 1,
   shape = 19,
   linetype = 1,
   type = NULL,
@@ -89,7 +90,7 @@ parameters for base plots, whereby \code{x} is a object of class \code{reliagram
 
 \item{object, x}{an object of class \code{reliagram}.}
 
-\item{colour, size, shape, linetype, legend}{graphical parameters passed for 
+\item{colour, size, shape, linewidth, linetype, legend}{graphical parameters passed for 
 \code{ggplot2} style plots, whereby \code{object} is a object of class \code{reliagram}.}
 }
 \description{

@@ -59,22 +59,23 @@
   theme = NULL,
   colour = "black",
   fill = "darkgray",
-  size = 0.5,
+  linewidth = 0.5,
   linetype = 1,
   alpha = NA,
   expected_colour = 2,
-  expected_size = 1,
+  expected_linewidth = 1,
   expected_linetype = 1,
+  expected_size = 1,
   expected_alpha = 1,
   expected_fill = NA,
   expected_stroke = 0.5,
   expected_shape = 19,
   confint_colour = "black",
-  confint_size = 0.5,
+  confint_linewidth = 0.5,
   confint_linetype = 2,
   confint_alpha = NA,
   ref_colour = "black",
-  ref_size = 0.5,
+  ref_linewidth = 0.5,
   ref_linetype = 1,
   ref_alpha = NA,
   ...
@@ -104,7 +105,7 @@ roots (default) should be drawn.}
 
 \item{col, border, lwd, lty, alpha_min}{graphical parameters for the histogram style part of the base plot.}
 
-\item{expected_col, expected_pch, expected_lty, expected_lwd, ref_col, ref_lty, ref_lwd, expected_colour, expected_size, expected_linetype, expected_alpha, expected_fill, expected_stroke, expected_shape, ref_colour, ref_size, ref_linetype, ref_alpha, confint_col, confint_lty, confint_lwd, confint_colour, confint_size, confint_linetype, confint_alpha}{Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.}
+\item{expected_col, expected_pch, expected_lty, expected_lwd, ref_col, ref_lty, ref_lwd, expected_colour, expected_linewidth, expected_linetype, expected_size, expected_alpha, expected_fill, expected_stroke, expected_shape, ref_colour, ref_linewidth, ref_linetype, ref_alpha, confint_col, confint_lty, confint_lwd, confint_colour, confint_linewidth, confint_linetype, confint_alpha}{Further graphical parameters for the `expected` and `ref` line using either \code{\link[ggplot2]{autoplot}} or \code{plot}.}
 
 \item{\dots}{further graphical parameters passed to the plotting function.}
 
@@ -113,7 +114,7 @@ graphic?}
 
 \item{theme}{Which `ggplot2` theme should be used. If not set, \code{\link[ggplot2]{theme_bw}} is employed.}
 
-\item{colour, fill, size, linetype, alpha}{graphical parameters for the histogram style part in the \code{autoplot}.}
+\item{colour, fill, linewidth, linetype, alpha}{graphical parameters for the histogram style part in the \code{autoplot}.}
 }
 \description{
 Generic plotting functions for rootograms of the class \code{"rootogram"}
