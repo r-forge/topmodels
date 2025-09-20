@@ -65,7 +65,7 @@
   expected_colour = 2,
   expected_linewidth = 1,
   expected_linetype = 1,
-  expected_size = 1,
+  expected_size = expected_linewidth * 2,
   expected_alpha = 1,
   expected_fill = NA,
   expected_stroke = 0.5,

@@ -967,7 +967,7 @@ autoplot.rootogram <- function(object,
                                expected_colour = 2,
                                expected_linewidth = 1,
                                expected_linetype = 1,
-                               expected_size = 1,
+                               expected_size = expected_linewidth * 2,
                                expected_alpha = 1,
                                expected_fill = NA,
                                expected_stroke = 0.5,
@@ -1493,7 +1493,7 @@ geom_rootogram_expected <- function(mapping = NULL,
 #' @export
 GeomRootogramExpected <- ggplot2::ggproto("GeomRootogramExpected", ggplot2::GeomPath,
   default_aes = ggplot2::aes(
-    colour = 2, size = 1, linewidth = 1, linetype = 1,
+    colour = 2, size = 2, linewidth = 1, linetype = 1,
     alpha = 1, fill = NA, stroke = 0.5, shape = 19
   ),
   draw_panel = function(data, panel_params, coord, arrow = NULL,
@@ -1503,15 +1503,12 @@ GeomRootogramExpected <- ggplot2::ggproto("GeomRootogramExpected", ggplot2::Geom
     linestyle <- match.arg(linestyle)
 
     if (linestyle == "both") {
-      ## TODO: (ML) Do not copy data.
-      data2 <- transform(data, size = size * 2)
-
       grid::grobTree(
         ggplot2::GeomPath$draw_panel(data = data, panel_params = panel_params, coord = coord, arrow = NULL,
           lineend = "butt", linejoin = "round", linemitre = 10,
           na.rm = FALSE
         ),
-        ggplot2::GeomPoint$draw_panel(data = data2, panel_params = panel_params, coord = coord, na.rm = FALSE)
+        ggplot2::GeomPoint$draw_panel(data = data, panel_params = panel_params, coord = coord, na.rm = FALSE)
       )
     } else if (linestyle == "line") {
       ggplot2::GeomPath$draw_panel(data = data, panel_params = panel_params, coord = coord, arrow = NULL,
@@ -1519,7 +1516,6 @@ GeomRootogramExpected <- ggplot2::ggproto("GeomRootogramExpected", ggplot2::Geom
         na.rm = FALSE
       )
     } else {
-      data <- transform(data, size = size * 2)
       ggplot2::GeomPoint$draw_panel(data = data, panel_params = panel_params, coord = coord, na.rm = FALSE)
     }
   }
