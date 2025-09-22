@@ -2,88 +2,200 @@
 % Please edit documentation in R/NumericNormal.R
 \name{NumericNormal}
 \alias{NumericNormal}
-\alias{pdf.NumericNormal}
+\alias{support.NumericNormal}
+\alias{is_discrete.NumericNormal}
+\alias{is_continuous.NumericNormal}
 \alias{cdf.NumericNormal}
-\alias{quantile.NumericNormal}
-\alias{mean.NumericNormal}
-\alias{variance.NumericNormal}
-\alias{skewness.NumericNormal}
-\alias{kurtosis.NumericNormal}
+\alias{NumericPoisson}
+\alias{support.NumericPoisson}
+\alias{is_discrete.NumericPoisson}
+\alias{is_continuous.NumericPoisson}
+\alias{cdf.NumericPoisson}
+\alias{pdf.distribution}
+\alias{quantile.distribution}
+\alias{distribution_calculate_moments}
+\alias{mean.distribution}
+\alias{variance.distribution}
+\alias{skewness.distribution}
+\alias{kurtosis.distribution}
 \title{Normal Distribution for Testing Numeric Moment Calculations}
 \usage{
 NumericNormal(mu, var)
 
-\method{pdf}{NumericNormal}(d, x, ...)
+\method{support}{NumericNormal}(d, drop = TRUE, ...)
 
-\method{cdf}{NumericNormal}(d, x, ..., n = 101L)
+\method{is_discrete}{NumericNormal}(d, ...)
 
-\method{quantile}{NumericNormal}(x, probs, ..., n = 101L)
+\method{is_continuous}{NumericNormal}(d, ...)
 
-\method{mean}{NumericNormal}(x, ..., n = 101L)
+\method{cdf}{NumericNormal}(d, x, drop = TRUE, elementwise = NULL, ...)
 
-\method{variance}{NumericNormal}(x, ..., n = 101L)
+NumericPoisson(lambda)
 
-\method{skewness}{NumericNormal}(x, ..., n = 101L)
+\method{support}{NumericPoisson}(d, drop = TRUE, ...)
 
-\method{kurtosis}{NumericNormal}(x, ..., n = 101L)
+\method{is_discrete}{NumericPoisson}(d, ...)
+
+\method{is_continuous}{NumericPoisson}(d, ...)
+
+\method{cdf}{NumericPoisson}(d, x, drop = TRUE, elementwise = NULL, ...)
+
+\method{pdf}{distribution}(d, x, drop = TRUE, elementwise = NULL, ...)
+
+\method{quantile}{distribution}(
+  x,
+  probs,
+  drop = TRUE,
+  elementwise = NULL,
+  lower = -1/sqrt(.Machine$double.eps),
+  upper = +1/sqrt(.Machine$double.eps),
+  tol = .Machine$double.eps^0.5,
+  ...
+)
+
+distribution_calculate_moments(
+  x,
+  what,
+  gridsize = 500L,
+  batchsize = 10000L,
+  applyfun = NULL,
+  cores = NULL,
+  method = NULL,
+  ...
+)
+
+\method{mean}{distribution}(x, ...)
+
+\method{variance}{distribution}(x, ...)
+
+\method{skewness}{distribution}(x, ...)
+
+\method{kurtosis}{distribution}(x, ...)
 }
 \arguments{
 \item{mu}{numeric vector with means.}
 
 \item{var}{numeric vector with variances.}
 
-\item{d}{object of class `"NumericNormal"`.}
+\item{d}{object of class `"NumericPoisson"`.}
+
+\item{drop}{logical. Should the result be simplified to a vector if possible?}
+
+\item{...}{[mean.distribution()], [variance.distribution()], [skewness.distribution()] and
+[kurtosis.distribution()] forward the additional arguments (`...`) to
+[distribution_calculate_moments()]; all other functions/methods ignore additional arguments.}
 
 \item{x}{object of class `c("NumericNormal", "distribution")`.}
 
-\item{\dots}{ignored.}
+\item{elementwise}{`NULL` (default; auto-detect) or logical. Should the
+quantiles defined by `probs` be evaluated at each distribution (`x`)?}
 
-\item{n}{integer, number of grid points used for numerical integration.}
+\item{lambda}{vector of (non-negative) means.}
 
-\item{probs}{numeric vector, probabilities.}
+\item{probs}{numeric. Vector of probabilities.}
+
+\item{lower, upper}{numeric. Lower and upper end points for the interval to
+be searched, forwarded to [stats::uniroot()].}
+
+\item{tol}{numeric. Desired accuracy for [stats::uniroot()].}
+
+\item{what}{single integer, controls what the C code returns. 1L (mean) 2L
+(variance) 3L (skewness) 4L (kurtosis).}
+
+\item{gridsize}{integer, number of grid points used for approximation. Defaults to `500L`.}
+
+\item{batchsize}{maximum batch size. Used to split the input into batches.
+Lower values reduce required memory but may increase computation time.}
+
+\item{applyfun}{an optional \code{\link[base]{lapply}}-style function with arguments
+\code{function(X, FUN, \dots)}. It is used to compute the CRPS for each element
+of \code{y}. The default is to use the basic \code{lapply}
+function unless the \code{cores} argument is specified (see below).}
+
+\item{cores}{numeric. If set to an integer the \code{applyfun} is set to····
+\code{\link[parallel]{mclapply}} with the desired number of \code{cores},
+except on Windows where \code{\link[parallel]{parLapply}} with
+\code{makeCluster(cores)} is used.}
+
+\item{method}{character. Should the grid be set up on the observation scale
+and \code{method = "cdf"} be used to compute the corresponding probabilities?
+Or should the grid be set up on the probability scale and \code{method = "quantile"}
+be used to compute the corresponding observations? By default, \code{"cdf"}
+is used for discrete observations whose range is smaller than the \code{gridsize}
+and \code{"quantile"} otherwise.}
 }
 \value{
 Object of class `c("NumericNormal", "distribution")`.
+
+A (potentially named) numeric vector of length `length(x)` with the requested central moment.
 }
 \description{
-Normal Distribution for Testing Numeric Moment Calculations
+Method used to evaluate (approximate) the central moments (mean, variance, skewness, and kurtosis)
+for probability distributions for which only the cummulative distribution function (CDF) and -
+potentially - the quantile function is provided.
+}
+\details{
+For discrete distributions spanning a range less than `gridsize` the PDF is calculated
+at $i = \{0, 1, 2, 3, \dots\}$ by differenciating the CDF provided which is then used
+to calculate the central moments.
+
+For continuous distributions as well as discrete distributions spanning a
+wide range of values (larger than `gridsize`) a grid with `gridsize`
+intervals is created. Given the distribution provides a quantile function,
+this grid is specified on a (mostly) uniform grid on the quantile scale. If
+no quantile function is provided, the $0.01$ and $99.99$ percentile are
+calculated approximated via the CDF, between which a uniform grid is
+spanned. For each interval the density is approximated using numeric
+forward differences
+
+* $f(x[j]) = (F(x[i+1]) - F(x_i)) / (x[i+1] - x[i])$
+
+at each $x[j] = (x[i+1] + x[i]) * 0.5$ with interval width $x_[i+1] - x[i]$.
+The densities $f(x[j])$ and interval mids $x_j$ are used to calculate
+weighted moments using the trapezoidal rule.
 }
 \examples{
 \dontrun{
 n <- Normal(5, sqrt(4))
 r <- NumericNormal(5, 4)
 
-## ---------------- CDF ----------------
-## 'NumericNormal' only knows the (exact) pdf of a Gaussian distribution
-## and approximates the CDF via numeric integration (default grid size n = 101L).
-cdf(n, 3.5)
-cdf(r, 3.5)
+## ---------------- PDF ----------------
+## 'NumericNormal' only knows the (exact) CDF of a Gaussian distribution
+## and approximates the PDF via numeric derivation ([stats::numericDeriv()]).
+pdf(n, 3.5)
+pdf(r, 3.5)
 
 ## Visual example
 xx <- seq(-5, 15, by = 0.1)
-plot(xx, cdf(n, xx), main = "Testing numeric PDF->CDF")
-lines(xx, cdf(r, xx), col = 2, lwd = 3)
-lines(xx, cdf(r, xx, n = 5L), col = 4, lwd = 3)
-legend("topleft", legend = c("Normal", "NumericNormal n = 101", "NumericNormal n = 5"),
-       pch = c(1, NA, NA), lty = c(NA, 1, 1), lwd = c(NA, 3, 3), col = c(1, 2, 4))
+plot(xx, pdf(n, xx), main = "Testing numeric CDF->PDF")
+lines(xx, pdf(r, xx), col = 2, lwd = 3)
+legend("topleft", legend = c("Normal", "NumericNormal"),
+       pch = c(1, NA), lty = c(NA, 1), lwd = c(NA, 3), col = c(1, 2))
 
 ## -------------- Quantile -------------
-## 'NumericNormal' only knows the PDF from which it calculates the CDF
-## to retrieve the quantiles.
+## 'NumericNormal' only knows the CDF from which it calculates the quantiles.
 quantile(n, 0.3)
 quantile(r, 0.3)
 
 qq <- c(0.0001, seq(0.01, 0.99, by = 0.005), 0.9999)
 plot(quantile(n, qq), qq, main = "Testing numeric PDF->Quantile")
 lines(quantile(r, qq), qq, col = 2, lwd = 3)
-lines(quantile(r, qq, n = 5L), qq, col = 4, lwd = 3)
 legend("topleft",
-       legend = c("Normal", "NumericNormal n = 101", "NumericNormal n = 5"),
-       pch = c(1, NA, NA), lty = c(NA, 1, 1), lwd = c(NA, 3, 3), col = c(1, 2, 4))
+       legend = c("Normal", "NumericNormal"),
+       pch = c(1, NA), lty = c(NA, 1), lwd = c(NA, 3), col = c(1, 2))
 
-## Central moments
-c(mean = mean(r), variance = variance(r),
-  skewness = skewness(r), kurtosis = kurtosis(r))
+## ----------- Central Moments ---------
+## Uses 'gridsize = 500L' by default (number of grid size to approximate the distribution).
+c(mean     = mean(r),
+  variance = variance(r),
+  skewness = skewness(r),
+  kurtosis = kurtosis(r))
+
+## Central moments with 'gridsize = 100L' (rougher numeric approximation).
+c(mean     = mean(r, gridsize = 100),
+  variance = variance(r, gridsize = 100),
+  skewness = skewness(r, gridsize = 100),
+  kurtosis = kurtosis(r, gridsize = 100))
 }
 
 }
