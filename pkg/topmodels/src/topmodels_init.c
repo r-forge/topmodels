@@ -14,12 +14,13 @@ double interpolate_linear(double xlo, double xhi, double ylo, double yhi, double
 double integrate_2d(double xlo, double xhi, double ylo, double yhi, double x);
 
 /* Functions calculating numeric moments */
-SEXP c_d2moments_numeric(SEXP at, SEXP pdf, SEXP dim, SEXP continuous, SEXP what);
-double c_d2moments_calculate_moment(int i, int n, double* at, doubleVec* w, int what);
+SEXP c_moments_numeric(SEXP p, SEXP q, SEXP dim, SEXP discrete, SEXP whatint);
+double c_moments_calculate_trapezoidal(int i, double* p, double* q, int* dim, int what);
+double c_moments_calculate_discrete(int i,    double* p, double* q, int* dim, int what);
 
 const R_CallMethodDef CallEntries[] = {
   {"c_CRPS_numeric", (DL_FUNC) &c_CRPS_numeric, 5},
-  {"c_d2moments_numeric", (DL_FUNC) &c_d2moments_numeric, 5},
+  {"c_moments_numeric", (DL_FUNC) &c_moments_numeric, 5},
   {NULL, NULL, 0}
 };
 

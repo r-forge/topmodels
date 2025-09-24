@@ -42,6 +42,7 @@
  * px: cdf at observation (vector of length(y))
  * p: cdf along a grid; matrix of dimension (length(y) x K), or vector of length(y)
  * q: quantile along a grid; matrix of dimension (length(y) x K)
+ * continuous: integer, 1 = continuous distribution, 0 = discrete
  *
  * December 2022
  * Reto Stauffer

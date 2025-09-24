@@ -257,5 +257,31 @@ make_unique <- function(x) {
 }
 
 
-
+# Create Column Name Suffix (dpqr)
+#
+# apply_dpqr (pdf, cdf, quantile) with `elementwise = FALSE` return
+# matrices named 'q_4', 'p_2.4', 'q_0.01' etc. This function turns
+# the numeric input values 'x' into the column name suffix.
+# TODO: This is a copy of the `make_suffix()` function in the
+# \pkg{distributions3} package as it is a non-exported function. In case
+# the `*.distribution` methods are merged into the \pkg{distributions3}
+# package this copy would become obsolete and could be removed.
+#
+# @param x Numeric vector.
+# @param digits Integer. Number of significant digits used for the suffix.
+#
+# @return Character vector of length `length(x)` with the suffix (prefix
+# must be added outside).
+make_suffix <- function(x, digits = 3L) {
+  rval <- format(x, digits = digits, trim = TRUE, drop0trailing = TRUE)
+  nok <- duplicated(rval)
+  while (any(nok) && digits < 10L) {
+    digits <- digits + 1L
+    rval[nok] <- format(x[nok], digits = digits, trim = TRUE, drop0trailing = TRUE)
+    nok <- duplicated(rval)
+  }
+  nok <- duplicated(rval) | duplicated(rval, fromLast = TRUE)
+  if (any(nok)) rval[nok] <- make.unique(rval[nok], sep = "_")
+  return(rval)
+}
 

@@ -1,237 +1,148 @@
 
-# ------------------------------- NumericNormal -------------------------------
-
-#' Normal Distribution for Testing Numeric Moment Calculations
+#' Methods for Numerically Approximating PDF and Quantile Functions
 #'
-#' @param mu numeric vector with means.
-#' @param var numeric vector with variances.
+#' Methods to the generic \link[distributions3]{pdf} and \link[stats]{quantile} functions from the
+#' \pkg{distributions3} package for numerically approximating the probability density function (PDF)
+#' or the quantile function (inverse CDF) if only the cummulative distribution function (CDF) is given.
 #'
-#' @return Object of class `c("NumericNormal", "distribution")`.
+#' @param d An object of class `"distribution"`.
+#' @param x Either a numeric vector of probabilities to be evaluated (if `pdf()` is called),
+#'        or an object of class `"distributions"` (as `d`) when calling the `quantile()` function.
+#' @param log Logical. If `TRUE`, probabilities are given as `log(p)`.
+#' @param drop Logical. Should the result be simplified to a vector if possible?
+#' @param elementwise Logical. Should each distribution (in `d`/`x`) be evaluated at all
+#'        elements in `x` (when `pdf()` is called) or `probs` (if `quantile()` is called)?
+#'        The default `NULL` means that `elementwise = TRUE` is used if the lengths match,
+#'        else `elementwise` is set `FALSE`.
 #'
 #' @examples
-#' \dontrun{
-#' n <- Normal(5, sqrt(4))
-#' r <- NumericNormal(5, 4)
-#' 
-#' ## ---------------- PDF ----------------
-#' ## 'NumericNormal' only knows the (exact) CDF of a Gaussian distribution
-#' ## and approximates the PDF via numeric derivation ([stats::numericDeriv()]).
-#' pdf(n, 3.5)
-#' pdf(r, 3.5)
-#' 
-#' ## Visual example
-#' xx <- seq(-5, 15, by = 0.1)
-#' plot(xx, pdf(n, xx), main = "Testing numeric CDF->PDF")
-#' lines(xx, pdf(r, xx), col = 2, lwd = 3)
-#' legend("topleft", legend = c("Normal", "NumericNormal"),
-#'        pch = c(1, NA), lty = c(NA, 1), lwd = c(NA, 3), col = c(1, 2))
-#' 
-#' ## -------------- Quantile -------------
-#' ## 'NumericNormal' only knows the CDF from which it calculates the quantiles.
-#' quantile(n, 0.3)
-#' quantile(r, 0.3)
-#' 
-#' qq <- c(0.0001, seq(0.01, 0.99, by = 0.005), 0.9999)
-#' plot(quantile(n, qq), qq, main = "Testing numeric PDF->Quantile")
-#' lines(quantile(r, qq), qq, col = 2, lwd = 3)
-#' legend("topleft",
-#'        legend = c("Normal", "NumericNormal"),
-#'        pch = c(1, NA), lty = c(NA, 1), lwd = c(NA, 3), col = c(1, 2))
-#' 
-#' ## ----------- Central Moments ---------
-#' ## Uses 'gridsize = 500L' by default (number of grid size to approximate the distribution).
-#' c(mean     = mean(r),
-#'   variance = variance(r),
-#'   skewness = skewness(r),
-#'   kurtosis = kurtosis(r))
-#' 
-#' ## Central moments with 'gridsize = 100L' (rougher numeric approximation).
-#' c(mean     = mean(r, gridsize = 100),
-#'   variance = variance(r, gridsize = 100),
-#'   skewness = skewness(r, gridsize = 100),
-#'   kurtosis = kurtosis(r, gridsize = 100))
+#' library("distributions3")
+#' library("ggplot2")
+#'
+#' ## ------------- custom Normal distribution (MyNormal) ----------------
+#'
+#' ## Constructor function for new 'MyNormal' distribution
+#' MyNormal <- function(mu, sigma) {
+#'     d <- data.frame(mu = mu, sigma = sigma)
+#'     class(d) <- c("MyNormal", "distribution")
+#'     return(d)
 #' }
 #'
-#' @rdname NumericNormal
-#' @export
-NumericNormal <- function(mu, var) {
-    stopifnot(is.numeric(mu), is.numeric(var),
-              length(mu) > 0L, length(var) > 0L,
-              all(is.finite(mu)), all(is.finite(var)), all(var > 0))
-    structure(data.frame(mu = mu, var = var),
-              class = c("NumericNormal", "distribution"))
-}
-
-
-#' @rdname NumericNormal
-#' @exportS3Method
-support.NumericNormal <- function(d, drop = TRUE, ...) {
-    min <- rep(-Inf, length(d))
-    max <- rep(+Inf, length(d))
-    make_support(min, max, d, drop = drop)
-}
-
-
-#' @rdname NumericNormal
-#' @exportS3Method
-is_discrete.NumericNormal <- function(d, ...) {
-    setNames(rep.int(FALSE, length(d)), names(d))
-}
-
-
-#' @rdname NumericNormal
-#' @exportS3Method
-is_continuous.NumericNormal <- function(d, ...) {
-    setNames(rep.int(TRUE, length(d)), names(d))
-}
-
-
-#' @param d object of class `"NumericNormal"`.
-#' @param x numeric, where to evaluate the distribution object.
+#' ## Additional S3 methods required
+#' cdf.MyNormal <- getS3method("cdf", class = "Normal")
+#' is_discrete.MyNormal   <- getS3method("is_discrete", class = "Normal")
+#' support.MyNormal       <- getS3method("support", class = "Normal")
 #'
-#' @rdname NumericNormal
-#' @exportS3Method
-cdf.NumericNormal <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
-
-    stopifnot(is.numeric(x) && all(is.finite(x)))
-    drop <- as.logical(drop)[[1L]]
-    stopifnot(isTRUE(drop) || isFALSE(drop))
-    stopifnot(is.null(drop) || isTRUE(drop) || isFALSE(drop))
-
-    # Check if calculation is performed elementwise or not
-    k <- length(x); n <- length(d)
-    if (is.null(elementwise))
-        elementwise <- (k == 1L & n == 1L) || (k > 1L && k == n)
-    if (elementwise && k > 1L && k != n)
-        stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
-
-    if (elementwise) {
-        res <- sapply(seq_along(d), function(i) {
-                          pnorm(x[i], mean = d[i]$mu, sd = sqrt(d[i]$var))
-               })
-    } else {
-        res <- sapply(seq_along(d), function(i) {
-                          pnorm(x, mean = d[i]$mu, sd = sqrt(d[i]$var))
-               })
-        if (is.matrix(res)) {
-            res <- t(res)
-            colnames(res) <- paste0("p_", format(x))
-        }
-        if (drop && any(dim(res) == 1L))
-            res <- as.numeric(res)
-    }
-    return(res)
-}
-
-## for testing ## # --- this was only for testing the moments calculation algorithm ---
-## for testing ## #' @rdname NumericNormal
-## for testing ## #' @exportS3Method
-## for testing ## quantile.NumericNormal <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
-## for testing ## 
-## for testing ##     stopifnot(is.numeric(x) && all(is.finite(x)))
-## for testing ##     drop <- as.logical(drop)[[1L]]
-## for testing ##     stopifnot(isTRUE(drop) || isFALSE(drop))
-## for testing ##     stopifnot(is.null(drop) || isTRUE(drop) || isFALSE(drop))
-## for testing ## 
-## for testing ##     # Check if calculation is performed elementwise or not
-## for testing ##     k <- length(x); n <- length(d)
-## for testing ##     if (is.null(elementwise))
-## for testing ##         elementwise <- (k == 1L & n == 1L) || (k > 1L && k == n)
-## for testing ##     if (elementwise && k > 1L && k != n)
-## for testing ##         stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
-## for testing ## 
-## for testing ##     if (elementwise) {
-## for testing ##         res <- sapply(seq_along(d), function(i) {
-## for testing ##                           qnorm(x[i], mean = d[i]$mu, sd = sqrt(d[i]$var))
-## for testing ##                })
-## for testing ##     } else {
-## for testing ##         res <- sapply(seq_along(d), function(i) {
-## for testing ##                           qnorm(x, mean = d[i]$mu, sd = sqrt(d[i]$var))
-## for testing ##                })
-## for testing ##         if (is.matrix(res)) {
-## for testing ##             res <- t(res)
-## for testing ##             colnames(res) <- paste0("p_", format(x))
-## for testing ##         }
-## for testing ##         if (drop && any(dim(res) == 1L))
-## for testing ##             res <- as.numeric(res)
-## for testing ##     }
-## for testing ##     return(res)
-## for testing ## }
-# ----------------------------- End NumericNormal --------------------------------
-
-# ------------------------------- NumericPoisson -------------------------------
-#' @param lambda vector of (non-negative) means.
-#' @rdname NumericNormal
-#' @export
-NumericPoisson <- function(lambda) {
-    stopifnot(is.numeric(lambda), length(lambda) > 0L,
-              all(is.finite(lambda)), all(lambda > 0))
-    structure(data.frame(lambda = lambda),
-              class = c("NumericPoisson", "distribution"))
-}
-
-
-#' @rdname NumericNormal
-#' @exportS3Method
-support.NumericPoisson <- function(d, drop = TRUE, ...) {
-    min <- rep(0L, length(d))
-    max <- rep(+Inf, length(d))
-    make_support(min, max, d, drop = drop)
-}
-
-
-#' @rdname NumericNormal
-#' @exportS3Method
-is_discrete.NumericPoisson <- function(d, ...) {
-    setNames(rep.int(TRUE, length(d)), names(d))
-}
-
-
-#' @rdname NumericNormal
-#' @exportS3Method
-is_continuous.NumericPoisson <- function(d, ...) {
-    setNames(rep.int(FALSE, length(d)), names(d))
-}
-
-
-#' @param d object of class `"NumericPoisson"`.
-#' @param x numeric, where to evaluate the distribution object.
+#' ## Constructing objects; three normal distributions with
+#' ## mean c(1, 2, 3) and standard deviation c(1, 2.5, 5).
+#' ## n3: Based on MyNormal where only cdf, id_discrete, and support are defined.
+#' ## N3: Analytic solution (distributions3::Normal()) with analytic
+#' ##     functions for all distribution functions (pdf, cdf, quantile)
+#' ##     as well as for the first four central moments
+#' ##     (mean, variance, skewness, kurtosis)
+#' n3 <- MyNormal(mu = 1:3, sigma = c(1, 2.5, 5))
+#' N3 <- Normal(mu = 1:3, sigma = c(1, 2.5, 5))
 #'
-#' @rdname NumericNormal
+#' ## Class 'MyNormal' knows the analytic cdf:
+#' cdf(n3, x = 2)
+#' identical(cdf(n3, x = 2), cdf(N3, x = 2))
+#'
+#' ## Calculating probability at x = 2
+#' pdf(n3, x = 2) ## Numeric approximation
+#' pdf(N3, x = 2) ## Analytic solution
+#' pdf(n3, x = 2) - pdf(N3, x = 2) ## Pairwise differences/precision
+#'
+#' ## Calculating quantiles
+#' probs <- c(0.0, 0.01, 0.25, 0.5, 0.75, 0.99, 1.0)
+#' quantile(n3, probs = probs) ## Numeric approximation
+#' quantile(N3, probs = probs) ## Analytic solution
+#'
+#' probs2 <- seq(0.01, 0.99, by = 0.01)
+#' qn3 <- quantile(n3, probs = probs2) ## Numeric approximation
+#' qN3 <- quantile(N3, probs = probs2) ## Analytic solution
+#' range(qn3 - qN3) ## Range of pairwise differences/precision
+#'
+#' ## Visual comparison
+#' x <- seq(-3, 5, by = 0.1)
+#'
+#' d <- data.frame(x = rep(x, times = 2),
+#'                 y = c(pdf(n3[1], x = x), pdf(N3[1], x = x)),
+#'                 solution = rep(c("analytic (Normal)", "approximation (MyNormal)"), each = length(x)))
+#' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
+#'     scale_color_manual(values = c("tomato", "black")) +
+#'     labs(title = "Density function")
+#'
+#' probs <- seq(0.01, 0.99, by = 0.01)
+#' d <- data.frame(x = c(quantile(n3[1], probs = probs), quantile(N3[1], probs = probs)),
+#'                 y = rep(probs, times = 2),
+#'                 solution = rep(c("analytic (Normal)", "approximation (MyNormal)"), each = length(probs)))
+#' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
+#'     scale_color_manual(values = c("tomato", "black")) +
+#'     labs(title = "Quantile function")
+#'
+#' ## ------------- custom Poisson distribution (MyPoisson) --------------
+#'
+#' ## Custom constructor function for the 'MyPoisson' distribution
+#' MyPoisson <- function(lambda) {
+#'     d <- data.frame(lambda = lambda)
+#'     class(d) <- c("MyPoisson", "distribution")
+#'     return(d)
+#' }
+#'
+#' ## Additional S3 methods required
+#' cdf.MyPoisson <- getS3method("cdf", class = "Poisson")
+#' is_discrete.MyPoisson   <- getS3method("is_discrete", class = "Poisson")
+#' support.MyPoisson       <- getS3method("support", class = "Poisson")
+#'
+#' ## Constructing objects; three normal distributions with
+#' ## parameter lambda = c(1, 2.5, 5).
+#' ## p3: Based on MyPoisson where only cdf, id_discrete, and support are defined.
+#' ## P3: Analytic solution (distributions3::Poisson()) with analytic
+#' ##     functions for all distribution functions (pdf, cdf, quantile)
+#' ##     as well as for the first four central moments
+#' ##     (mean, variance, skewness, kurtosis)
+#' p3 <- MyPoisson(lambda = c(1, 2.5, 5))
+#' P3 <- Poisson(lambda = c(1, 2.5, 5))
+#'
+#' ## Class 'MyPoisson' knows the analytic cdf:
+#' cdf(p3, x = 2)
+#' identical(cdf(p3, x = 2), cdf(P3, x = 2))
+#'
+#' ## Calculating probability at x = 2
+#' pdf(p3, x = 2) ## Numeric approximation
+#' pdf(P3, x = 2) ## Analytic solution
+#' pdf(p3, x = 2) - pdf(P3, x = 2) ## Pairwise differences/precision
+#'
+#' ## Calculating quantiles
+#' probs <- c(0.0, 0.01, 0.25, 0.5, 0.75, 0.99, 1.0)
+#' quantile(p3, probs = probs) ## Numeric approximation
+#' quantile(P3, probs = probs) ## Analytic solution
+#'
+#' probs2 <- seq(0.01, 0.99, by = 0.01)
+#' qp3 <- quantile(p3, probs = probs2) ## Numeric approximation
+#' qP3 <- quantile(P3, probs = probs2) ## Analytic solution
+#' range(qp3 - qP3) ## Range of pairwise differences/precision
+#'
+#' ## Visual comparison
+#' x <- seq(-1, 11, by = 0.1)
+#' d <- data.frame(x = rep(x, times = 2),
+#'                 y = c(pdf(p3[2], x = x), pdf(P3[2], x = x)),
+#'                 solution = rep(c("analytic (Poisson)", "approximation (MyPoisson)"), each = length(x)))
+#' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
+#'     scale_color_manual(values = c("tomato", "black")) +
+#'     labs(title = "Density function")
+#'
+#' probs <- seq(0.01, 0.99, by = 0.01)
+#' d <- data.frame(x = c(quantile(p3[2], probs = probs), quantile(P3[2], probs = probs)),
+#'                 y = rep(probs, times = 2),
+#'                 solution = rep(c("analytic (Poisson)", "approximation (MyPoisson)"), each = length(probs)))
+#' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
+#'     scale_color_manual(values = c("tomato", "black")) +
+#'     labs(title = "Quantile function")
+#'
+#' @rdname pdf.distribution
 #' @exportS3Method
-cdf.NumericPoisson <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
-
-    stopifnot(is.numeric(x) && all(is.finite(x)))
-    drop <- as.logical(drop)[[1L]]
-    stopifnot(isTRUE(drop) || isFALSE(drop))
-    stopifnot(is.null(drop) || isTRUE(drop) || isFALSE(drop))
-
-    # Check if calculation is performed elementwise or not
-    k <- length(x); n <- length(d)
-    if (is.null(elementwise))
-        elementwise <- (k == 1L & n == 1L) || (k > 1L && k == n)
-    if (elementwise && k > 1L && k != n)
-        stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
-
-    if (elementwise) {
-        res <- sapply(seq_along(d), function(i) ppois(x[i], lambda = d[i]$lambda))
-    } else {
-        res <- sapply(seq_along(d), function(i) ppois(x, lambda = d[i]$lambda))
-        if (is.matrix(res)) {
-            res <- t(res)
-            colnames(res) <- paste0("p_", format(x))
-        }
-        if (drop && any(dim(res) == 1L))
-            res <- as.numeric(res)
-    }
-    return(res)
-}
-
-# ----------------------------- End NumericPoisson -------------------------------
-
-#' @rdname NumericNormal
-#' @exportS3Method
-pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
+pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE, ...) {
     if (!hasS3method("cdf", class(d)))
         stop("no S3 method 'cdf' found for object of class: ", paste(class(d), collapse = ", "))
 
@@ -240,6 +151,7 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
     drop <- as.logical(drop)[[1L]]
     stopifnot(isTRUE(drop) || isFALSE(drop))
     stopifnot(is.null(drop) || isTRUE(drop) || isFALSE(drop))
+    stopifnot(isTRUE(log) || isFALSE(log))
 
     ## Check if calculation is performed elementwise or not
     k <- length(x); n <- length(d)
@@ -248,16 +160,18 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
     if (elementwise && k > 1L && k != n)
         stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
 
-    ## Setting up results matrix of dimension 'n x k'
-    res <- matrix(NA, nrow = n, ncol = k, dimnames = list(NULL, paste0("d_", format(x))))
+    ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
+    row_names <- if (elementwise && k > 1L) "density" else paste0("d_", format(x))
+    res <- matrix(NA, nrow = n,
+                      ncol = if (elementwise) 1L else k,
+                      dimnames = list(names(d), row_names))
 
     ## Discrete distribution?
-    discrete <- all(distributions3::is_discrete(d))
+    discrete <- all(is_discrete(d))
 
     ## For discrete distributions: Take difference F(floor(x_i)) - F(floor(x_i) - 1) and
     ## and F(x_i) for x_i == 0.
     if (discrete) {
-
         ## Elementwise: one 'x[i]' per distribution 'x[i]' or
         ## same probability 'x[1L]' for a set of distributions 'x[i]'.
         if (elementwise || k == 1L) {
@@ -285,44 +199,63 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 
     ## For non-discrete (continuous) distributions, calculate numeric derivative
     } else {
+        ## Check which numeric derivative function to be used.
+        ## By default, numDeriv::grad is used (if the package is available),
+        ## else we use stats::numericDeriv. For testing, `deriv.method`
+        ## can be specified via the `...` argument (non-documented feature).
+        args <- list(...)
+        if ("deriv.method" %in% names(args)) {
+            deriv.method <- match.arg(args$deriv.method, c("grad", "numericDeriv"))
+            if (deriv.method == "grad" && !requireNamespace("numDeriv", quietly = TRUE)) {
+                deriv.method <- "numericDeriv"
+                warning("deriv.method = \"grad\" was requested, but package 'numDeriv' not available.",
+                        "Falling back to 'stats::numericDeriv' (deriv.method = \"numericDeriv\").")
+            }
+        } else {
+            deriv.method <- if (requireNamespace("numDeriv", quietly = TRUE)) "grad" else "numericDeriv"
+        }
 
-        ## Elementwise: one 'x[i]' per distribution 'x[i]' or
-        ## same probability 'x[1L]' for a set of distributions 'x[i]'.
-        if (elementwise || k == 1L) {
-            # Numeric approximation of the CDF
+        ## Helper functions for the numeric derivatives
+        fn_numericDeriv <- function(d, x) {
             myenv   <- new.env()
-            myenv$d <- d; myenv$x <- if (k == 1L) x[[1L]] else x[i]
+            myenv$d <- d; myenv$x <- x
             nd <- tryCatch(numericDeriv(quote(cdf(d, x)), "x", myenv),
                            error = function(e) stop("problem calculating numeric derivative (cdf->pdf)"))
-            res[, 1L] <- attr(nd, "gradient")[, 1L]
+            attr(nd, "gradient")[, 1L]
+        }
+        fn_grad <- function(d, x) {
+            ## Using numDeriv::grad if 'numDeriv' is available
+            sapply(seq_along(d), function(i) numDeriv::grad(function(x) cdf(d[i], x), x))
+        }
+        fn <- if (deriv.method == "grad") fn_grad else fn_numericDeriv
+
+        ## Calculating numeric derivatives
+        if (elementwise) {
+            for (i in seq_len(k)) res[i, 1L] <- fn(d[i], x[i])
         } else {
-            for (i in seq_len(k)) {
-                myenv   <- new.env()
-                myenv$d <- d; myenv$x <- x[i]
-                numericDeriv(quote(cdf(d, x)), "x", myenv)
-                nd <- tryCatch(numericDeriv(quote(cdf(d, x)), "x", myenv),
-                               error = function(e) stop("problem calculating numeric derivative (cdf->pdf): ", e))
-                res[, i] <- attr(nd, "gradient")[, 1L]
-            }
+            for (i in seq_len(k)) res[, i] <- fn(d, x[i])
         }
     }
 
-    ## Drop dimensions if requested/possible
-    if (drop & any(dim(res) == 1L)) dim(res) <- NULL
-    return(res)
+    ## Handle dimensions
+    if ((k == 1L || ncol(res) == 1L) && drop) {
+        res <- as.vector(res)
+        names(res) <- names(d)
+    } else if (n == 1L && drop) {
+        res <- as.vector(res)
+    }
+    return(if (!log) res else log(res))
 }
 
 
-#' @param probs numeric. Vector of probabilities.
-#' @param drop logical. Should the result be simplified to a vector if possible?
-#' @param elementwise `NULL` (default; auto-detect) or logical. Should the
-#'        quantiles defined by `probs` be evaluated at each distribution (`x`)? 
+#' @param probs Numeric vector of probabilities with values in [0,1].
 #' @param lower,upper numeric. Lower and upper end points for the interval to
 #'        be searched, forwarded to [stats::uniroot()].
 #' @param tol numeric. Desired accuracy for [stats::uniroot()].
 #' @param ... currently ignored.
 #'
-#' @rdname NumericNormal
+#' @importFrom distributions3 is_discrete
+#' @rdname pdf.distribution
 #' @exportS3Method
 quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
                                   lower = -1 / sqrt(.Machine$double.eps),
@@ -346,40 +279,60 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
 
     ## Numeric approximation of quantiles
     inverse_cdf <- function(d, p, lower, upper, tol, ...) {
-        uniroot(function(y, d, ...) cdf(d, y, ...) - p, d = d, lower = lower, upper = upper, tol = tol, ...)$root
+        # Extracting support of distribution 'd'. If uniroot
+        # (tries to) draw a value outside the support we set
+        # the corresponding quantile to 0 or 1.
+        supp <- support(d)
+        uniroot(function(y, d, ...) {
+                 (if (y < supp[1L]) 0.0 else if (y > supp[2L]) 1.0 else cdf(d, y, ...)) - p
+                },
+                d = d, lower = lower - 1.0, upper = upper + 1.0, tol = tol, ...)$root
     }
 
-    # Evaluate support; define lower/upper bounds for uniroot
-    sup <- support(d = x, drop = FALSE)
-    sup[sup[, "min"] < lower, "min"] <- lower
-    sup[sup[, "max"] > upper, "max"] <- upper
+    # Evaluate support of the distributions ('sup'); 'lim_uniroot' is used to properly
+    # set the lower and upper limit for uniroot (input argument to inverse_cdf).
+    sup <- lim_uniroot <- support(d = x, drop = FALSE)
+    lim_uniroot[sup[, "min"] < lower, "min"] <- lower
+    lim_uniroot[sup[, "max"] > upper, "max"] <- upper
 
     ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
-    if (elementwise) {
-        res <- matrix(NA, nrow = n, ncol = 1L)
-    } else {
-        res <- matrix(NA, nrow = n, ncol = k, dimnames = list(NULL, paste0("q_", format(probs))))
-    }
+    row_names <- if (elementwise && k > 1L) NULL else paste0("q_", make_suffix(probs, digits = pmax(3L, getOption("digits") - 3L)))
+    res <- matrix(NA, nrow = n,
+                      ncol = if (elementwise) 1L else k,
+                      dimnames = list(names(x), row_names))
 
     for (i in seq_len(n)) {
         ## Elementwise: one probability 'probs[i]' per distribution 'x[i]' or
         ## same probability 'probs[1L]' for a set of distributions 'x[i]'.
         if (elementwise || k == 1L) {
             res[i, 1L] <- inverse_cdf(d = x[i], if (k == 1) probs[1L] else probs[i],
-                                      lower = sup[[i, "min"]], upper = sup[[i, "max"]], tol = tol)
+                                      lower = lim_uniroot[[i, "min"]], upper = lim_uniroot[[i, "max"]], tol = tol)
         ## Calculate quantiles for each probability 'probs[j]' for each distribution 'x[i]';
         ## Scoping variable 'tol'.
         } else {
             res[i, ] <- sapply(probs, function(p, d, l, u) inverse_cdf(d = d, p = p, lower = l, upper = u, tol = tol),
-                               d = x[i], l = sup[[i, "min"]], u = sup[[i, "max"]])
+                               d = x[i], l = lim_uniroot[[i, "min"]], u = lim_uniroot[[i, "max"]])
         }
     }
 
-    ## Discrete distribution? Round result
-    if (all(distributions3::is_discrete(x))) res <- round(res)
+    ## Replacing quantiles reaching the limits 'lim_uniroot' with the support of the
+    ## distribution (e.g., the 0'th percentile of the Normal distribution will evaluate to 'lower', though
+    ## the correct quantile is -Inf (as defined by the support of the distribution).
+    for (i in seq_len(nrow(res))) {
+        res[i, res[i, ] <= lim_uniroot[i, "min"]] <- sup[i, "min"]
+        res[i, res[i, ] >= lim_uniroot[i, "max"]] <- sup[i, "max"]
+    }
 
-    ## Drop dimensions if requested/possible
-    if (drop & any(dim(res) == 1L)) dim(res) <- NULL
+    ## Discrete distribution? Round result
+    if (all(is_discrete(x))) res <- round(res)
+
+    ## Handle dimensions
+    if (k == 1L && drop) {
+        res <- as.vector(res)
+        names(res) <- names(x)
+    } else if (n == 1L && drop) {
+        res <- as.vector(res)
+    }
     return(res)
 }
 
@@ -436,16 +389,56 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
 #'
 #' @return A (potentially named) numeric vector of length `length(x)` with the requested central moment.
 #'
-#' @rdname NumericNormal
+#' @examples
+#' library("distributions3")
+#'
+#' ## ------------- custom Normal distribution (MyNormal) ----------------
+#'
+#' ## Constructor function for new 'MyNormal' distribution
+#' MyNormal <- function(mu, sigma) {
+#'     d <- data.frame(mu = mu, sigma = sigma)
+#'     class(d) <- c("MyNormal", "distribution")
+#'     return(d)
+#' }
+#'
+#' ## Additional S3 methods required
+#' cdf.MyNormal <- getS3method("cdf", class = "Normal")
+#' is_discrete.MyNormal   <- getS3method("is_discrete", class = "Normal")
+#' support.MyNormal       <- getS3method("support", class = "Normal")
+#'
+#' ## ------------- custom Poisson distribution (MyPoisson) --------------
+#'
+#' ## Custom constructor function for the 'MyPoisson' distribution
+#' MyPoisson <- function(lambda) {
+#'     d <- data.frame(lambda = lambda)
+#'     class(d) <- c("MyPoisson", "distribution")
+#'     return(d)
+#' }
+#'
+#' ## Additional S3 methods required
+#' cdf.MyPoisson <- getS3method("cdf", class = "Poisson")
+#' is_discrete.MyPoisson   <- getS3method("is_discrete", class = "Poisson")
+#' support.MyPoisson       <- getS3method("support", class = "Poisson")
+#'
+#' @rdname mean.distribution
 distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize = 1e4L, applyfun = NULL, cores = NULL, method = NULL, ...) {
+  ## essentially follow apply_dpqr() but try to exploit specific structure of CRPS
 
   ## sanity checks
   stopifnot(inherits(x, "distribution"))
-  stopifnot(is.integer(what), length(what) == 1L, what >= 1L && what <= 4L)
-  stopifnot(is.numeric(gridsize), length(gridsize) == 1L, gridsize >= 2L)
-  gridsize <- as.integer(gridsize)
-  stopifnot(is.numeric(batchsize), length(batchsize) == 1L, batchsize >= 1L)
-  stopifnot(is.null(cores) || is.numeric(cores))
+
+  stopifnot(is.numeric(what) && length(what) > 0)
+  if (length(what) > 1L) warning("length(what) > 1L, taking first element")
+  what <- as.integer(what); stopifnot(what >= 1L && what <= 4L)
+
+  stopifnot(is.numeric(gridsize), length(gridsize) >= 1L)
+  if (length(gridsize) > 1L) warning("length(gridsize) > 1L, taking first element")
+  gridsize <- as.integer(gridsize); stopifnot(gridsize >= 10L)
+
+  stopifnot(is.numeric(batchsize), length(batchsize) >= 1L)
+  if (length(batchsize) > 1L) warning("length(batchsize) > 1L, taking first element")
+  batchsize <- as.integer(batchsize); stopifnot(batchsize >= 1L)
+
   stopifnot(is.null(applyfun) || is.function(applyfun))
   if (is.numeric(cores)) {
     cores <- as.integer(cores)
@@ -453,14 +446,15 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
   }
 
   ## basic properties:
-  ## n = number of distributions
-  n <- length(x)
+  ## rows n = number of distributions
+  rnam <- names(x)
+  n    <- length(x)
 
   ## handle zero-length distribution vector
-  if (n == 0L) return(numeric(0L))
+  if (n == 0L) return(vector("numeric", 0L))
 
-  ## Names of 'x' (if any) to be added later
-  xnam <- names(x)
+  ## Else setting up the return vector
+  res <- setNames(rep(NA_real_, n), rnam)
 
   ## define apply functions for parallelization
   if(is.null(applyfun)) {
@@ -479,7 +473,7 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
 
   ## calculate batches
   ## batch_n:   number of batches required
-  ## batch_id:  integer vector of same length as x
+  ## batch_id:  integer vector of same length as y
   batch_n  <- (function(cores, N, b) {
                   rval <- max(ifelse(is.null(cores), 0, cores), N %/% b + as.integer(N %% b != 0))
                   if (!is.null(cores) && rval %% cores != 0) rval <- (rval %/% cores + 1) * cores
@@ -487,169 +481,86 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
                 })(cores, length(x), batchsize)
   batch_id <- if (batch_n == 1) rep(1L, length(x)) else rep(seq_len(batch_n), each = ceiling(length(x) / batch_n))[seq_along(x)]
 
-  ## selecting default method
+  ## selecting default method based on support of 'x'
   xrange <- range(support(x), na.rm = TRUE)
-  if (!is.finite(xrange[1L])) xrange[1L] <- min(quantile(x, 0.0001), na.rm = TRUE)
-  if (!is.finite(xrange[2L])) xrange[2L] <- max(quantile(x, 0.9999), na.rm = TRUE)
-  discrete <- all(distributions3::is_discrete(x))
-
-  ## decide on method to use. If discrete and the range is <= gridsize
-  ## we use the discrete CDF.
-  ## Else we span up a grid across the range where we can calculate the
-  ## density (numerical differences of the CDF). If a quantile function is
-  ## available the quantile function is used to span a nice grid, else we
-  ## use a univariate grid (method = "cdf") as we expect the approximated
-  ## inverse cdf (i.e., the quantile function) will be inefficient/slow.
-  if (is.null(method) && discrete) {
-    method <- if (diff(xrange) <= gridsize) "cdf" else "quantile"
-  } else if (is.null(method)) {
-    method <- if (!hasS3method("quantile", class(x)[!class(x) == "distribution"])) "cdf" else "quantile"
+  if(!is.finite(xrange[1L])) xrange[1L] <- min(quantile(x, 0.0001), na.rm = TRUE)
+  if(!is.finite(xrange[2L])) xrange[2L] <- max(quantile(x, 0.9999), na.rm = TRUE)
+  discrete <- all(is_discrete(x))
+  if(is.null(method)) {
+    method <- if(discrete && (diff(xrange) <= gridsize)) "cdf" else "quantile"
   }
-
-
-  ## Discrete and 'cdf': Calculate true PDF for all counts from 0 to max(xrange)
-  if (discrete && method == "cdf") {
-    q <- seq(min(xrange), max(max(xrange) * 1.5, gridsize), by = 1.0) # Must be numeric!
-
-    ## Scoping `batch_id`, `x`
-    batch_fn <- function(i) {
-        ## Index of `x` falling into current batch `i`
-        idx  <- which(batch_id == i)
-
-        ## Calculate CDF, convert to PDF
-        d <- sapply(idx, function(i) cdf(x[i], q, drop = TRUE, elementwise = FALSE)) # <- transposed
-        d <- cbind(d[1, ], t(apply(d, MARGIN = 2, diff)))
-
-        ## Mean
-        mean <- sapply(seq_along(idx), function(i) weighted.mean(q, d[idx[i], ]))
-        if (what == 1L) return(mean)
-
-        ## Variance
-        variance <- sapply(seq_along(idx), function(i) weighted.mean((q - mean[i])^2, d[idx[i], ]))
-        if (what == 2L) return(variance)
-
-        ## Skewness or kurtosis
-        pow <- if (what == 3) 3.0 else 4.0
-        offset <- if (what == 3) 0.0 else 3.0 # To get excess kurtosis
-        return(sapply(seq_along(idx), function(i) weighted.mean((q - mean[i])^pow, d[idx[i], ]) / variance[i]^(pow/2)) - offset)
-    }
-    rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
-  }
-
-  ## Discrete and 'quantile': Approximation oft he discrete distribution using a grid
-  cat("  ---- is discrete? ", discrete, "\n")
-  cat("       method selected to be \"", method, "\"\n", sep = "")
-  if (discrete && method == "quantile") {
-      stop("This must be implemented (discrete + method = 'quantile')")
-  }
+  ## TODO(R): Split data in discrete case; using "quantile" approximation only where
+  ##          xrange exceeds gridsize but use the more accurate "cdf" approximation
+  ##          for the others?
 
   ## cdf method: set up observations and compute probabilities via cdf()
-  if (!discrete && method == "cdf") {
-    ## Drawing one set of quantiles; calculate probabilities for all distributions
-    q <- if (discrete && (diff(xrange) <= gridsize)) {
-      seq(xrange[1L], xrange[2L] + 1, by = 1.0)
-    } else {
-      seq(xrange[1L], xrange[2L], length.out = gridsize)
-    }
-    qdelta <- diff(q)         # Interval width
-    qmid   <- q[-1] - diff(q) # Interval mid
+  if (method == "cdf") {
+      ## Drawing one set of quantiles; calculate probabilities for all distributions
+      q <- if(discrete && (diff(xrange) <= gridsize)) {
+        seq(xrange[1L], pmax(xrange[2L] + 1, pmin(xrange[2L] * 1.5, gridsize)), by = 1.0)
+      } else {
+        ## RESETTING 'discrete': approximate discrete distribution by a continuous
+        discrete <- FALSE
+        seq(xrange[1L], xrange[2L], length.out = gridsize)
+      }
 
-    ## Scoping `batch_id`, `x`
-    batch_fn <- function(i) {
-        ## Index of `x` falling into current batch `i`
-        idx  <- which(batch_id == i)
-
-        ## Getting xlimits
-        xlims <- quantile(x[idx], c(0.0001, 0.9999), drop = FALSE, elementwise = FALSE)
-
-        ## Calculate (uniform) grid; note that the matrix is transposed to
-        ## avoid flipping it back and force unnecessarily.
-        grd       <- apply(xlims, MARGIN = 1, function(z) seq(z[1L], z[2L], length.out = gridsize + 1))
-        ## Grid widths and mid points
-        grd_width <- grd[2L, ] - grd[1L, ]
-        grd_mids  <- t(apply(grd, MARGIN = 2, function(z) (z[-1] + z[-length(z)]) / 2))
-
-        ## Approximate density
-        d <- t(sapply(idx, function(i) diff(cdf(x[i], grd[, i], drop = TRUE, elementwise = FALSE)) / grd_width[i]))
-
-        ## - q: grid points (quantiles)
-        ## - d: density at these grid points
-        ## Based on these two matrices the C code calculates a weighted mean
-        .Call("c_d2moments_numeric",
-              at       = as.numeric(grd_mids),
-              pat      = as.numeric(d),
-              dim      = dim(grd_mids),       # dimension of matrices 'at/pat'.
-              discrete = FALSE,
-              what     = what,                # mean (1L), variance (2L), skewness (3L), kurtosis (4L)
-              PACKAGE  = "topmodels")
-    }
-    rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
+      ## Scoping `batch_id`, `x`, `q`
+      batch_fn <- function(i) {
+          idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
+          p    <- cdf(x[idx], q, elementwise = FALSE, drop = FALSE) ## Calculating quantiles at `p` for `x[idx]`
+          ## Here 'p' is our matrix (n x k) whilst q is just a numeric vector
+          .Call("c_moments_numeric", p = p, q = q, dim(p),
+                discrete = as.integer(discrete), what = what, PACKAGE = "topmodels")
+      }
+      rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
   }
 
   ## quantile method: set up probabilities and compute observations via quantile()
-  if (!discrete && method == "quantile") {
+  if (method == "quantile") {
     ## Drawing one set of probabilities; calculate quantiles for all distributions
     p <- c(0.001, 0.01, 0.1, 1L:(gridsize - 1L), gridsize - c(0.1, 0.01, 0.001)) / gridsize
 
-    ## Scoping `batch_id`, `x`, `p`
+    ## Scoping `batch_id`, `y`, `x`, `p`
     batch_fn <- function(i) {
-        ## Index of `x`/`y` falling into current batch `i`
-        idx  <- which(batch_id == i)
+        idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
+        q    <- quantile(x[idx], p, elementwise = FALSE, drop = FALSE) ## Calculating quantiles at `p` for `y[idx]`
 
-
-        ## Calculate quantile-based grid; note that the matrix is transposed to
-        ## avoid flipping it back and force unnecessarily.
-        grd <- sapply(idx, function(i) quantile(x[i], p, drop = FALSE, elementwise = FALSE))
-        ## Grid widths and mid points
-        grd_width <- apply(grd, MARGIN = 2, function(z) diff(z))
-        grd_mids  <- t(apply(grd, MARGIN = 2, function(z) (z[-1] + z[-length(z)]) / 2))
-
-        ## Approximate density
-        d <- t(sapply(idx, function(i) diff(cdf(x[i], grd[, i], drop = TRUE, elementwise = FALSE)) / grd_width[, i]))
-
-        ## - q: grid points (quantiles)
-        ## - d: density at these grid points
-        ## Based on these two matrices the C code calculates a weighted mean
-        .Call("c_d2moments_numeric",
-              at       = as.numeric(grd_mids),
-              pat      = as.numeric(d),
-              dim      = dim(grd_mids),       # dimension of matrices 'at/pat'.
-              discrete = FALSE,
-              what     = what,                # mean (1L), variance (2L), skewness (3L), kurtosis (4L)
-              PACKAGE  = "topmodels")
+        ## Here 'q' is our matrix (n x k) whilst p is just a numeric vector
+        .Call("c_moments_numeric", p = p, q = q, dim(q),
+              discrete = as.integer(discrete), what = what, PACKAGE = "topmodels")
     }
     rval <- do.call(c, applyfun(seq_len(batch_n), batch_fn))
   }
 
-  ## handle dimensions
-  return(setNames(rval, xnam))
+  return(setNames(rval, rnam))
 }
+
 
 #' @param x object of class `c("NumericNormal", "distribution")`.
 #' @param gridsize integer, number of grid points used for approximation. Defaults to `500L`.
 #'
-#' @rdname NumericNormal
+#' @rdname mean.distribution
 #' @exportS3Method
 mean.distribution <- function(x, ...) {
     distribution_calculate_moments(x = x, what = 1L, ...)
 }
 
 
-#' @rdname NumericNormal
+#' @rdname mean.distribution
 #' @exportS3Method
 variance.distribution <- function(x, ...) {
     distribution_calculate_moments(x = x, what = 2L, ...)
 }
 
 
-#' @rdname NumericNormal
+#' @rdname mean.distribution
 #' @exportS3Method
 skewness.distribution <- function(x, ...) {
     distribution_calculate_moments(x = x, what = 3L, ...)
 }
 
 
-#' @rdname NumericNormal
+#' @rdname mean.distribution
 #' @exportS3Method
 kurtosis.distribution <- function(x, ...) {
     distribution_calculate_moments(x = x, what = 4L, ...)
