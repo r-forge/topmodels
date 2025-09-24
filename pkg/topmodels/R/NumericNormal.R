@@ -161,7 +161,7 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
         stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
 
     ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
-    row_names <- if (elementwise && k > 1L) "density" else paste0("d_", format(x))
+    row_names <- if (elementwise && k > 1L) "density" else paste0("d_", make_suffix(x))
     res <- matrix(NA, nrow = n,
                       ncol = if (elementwise) 1L else k,
                       dimnames = list(names(d), row_names))
@@ -174,25 +174,49 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
     if (discrete) {
         ## Elementwise: one 'x[i]' per distribution 'x[i]' or
         ## same probability 'x[1L]' for a set of distributions 'x[i]'.
+        ## Checking for (near) integers; setting x[idx_int] to round(x[idx_int])
+        ## and all other elements to NA_real_ as they will not have a valid pdf (i.e., a pdf of 0)
+        idx_int     <- abs(x - round(x)) < 1e-6
+
+        ## Warning messages in line with dpois() ...
+        for (i in which(!idx_int)) warning("x = ", format(x[i], nsmall = 6L))
+
+        ## Setting non-integers to NA, rounding (near-)integers
+        x[idx_int]  <- round(x[idx_int])
+        x[!idx_int] <- NA_real_
+
+        ## Support of the distribution(s)
+        sup <- support(d, drop = FALSE)
+
+        ## TODO(R): This can be written sexier (using functions)
         if (elementwise || k == 1L) {
-            x <- rep(floor(x), length(d))
-            is_zero <- x == 0
-            if (any(is_zero)) {
-                res[is_zero, 1L]  <- cdf(d[is_zero], 0, drop = TRUE, elementwise = TRUE)
-            }
-            if (any(!is_zero)) {
-                res[!is_zero, 1L] <- cdf(d[!is_zero], x[!is_zero],     drop = TRUE, elementwise = TRUE) -
-                                     cdf(d[!is_zero], x[!is_zero] - 1, drop = TRUE, elementwise = TRUE)
+            ## 'x' not integer, point density assumed to be zero
+            res[!idx_int, 1L] <- 0
+            ## 'x' is integer but 'x' falls onto lower bound of the support: take cdf(x) as pdf
+            tmp <- idx_int & x == sup[, "min"]
+            if (any(tmp)) res[tmp, 1L] <- cdf(d[tmp], sup[tmp, "min"])
+            ## For all (near-)integers > lower end of the support, calculate numeric difference
+            ## of CDF to approximate the PDF.
+            tmp <- idx_int & !x == sup[, "min"]
+            if (any(tmp)) {
+                res[tmp, 1L] <- cdf(d[tmp], x[tmp],        drop = TRUE, elementwise = TRUE) -
+                                cdf(d[tmp], x[tmp] - 1e-6, drop = TRUE, elementwise = TRUE)
             }
         } else {
-            x <- floor(x)
             for (i in seq_len(k)) {
-                tmpx <- rep(x[i], length(d))
-                if (x[i] == 0) {
-                    res[, i] <- cdf(d, tmpx, drop = TRUE, elementwise = TRUE)
-                } else {
-                    res[, i] <- cdf(d, tmpx,     drop = TRUE, elementwise = TRUE) -
-                                cdf(d, tmpx - 1, drop = TRUE, elementwise = TRUE)
+                ## 'x' not integer, point density assumed to be zero
+                if (!idx_int[i] || is.na(x[i])) { res[, i] <- 0; next }
+                ## 'x' is integer but 'x' falls onto lower bound of the support: take cdf(x) as pdf
+                tmp <- x[i] == sup[, "min"]
+                if (any(tmp)) res[tmp, i] <- cdf(d[tmp], sup[tmp, "min"])
+                tmp <- x[i] < sup[, "min"]
+                if (any(tmp)) res[tmp, i] <- 0.0
+                ## For all (near-)integers > lower end of the support, calculate numeric difference
+                ## of CDF to approximate the PDF.
+                tmp <- idx_int[i] & x[i] > sup[, "min"]
+                if (any(tmp)) {
+                    res[tmp, i] <- cdf(d[tmp], x[i],        drop = TRUE, elementwise = TRUE) -
+                                   cdf(d[tmp], x[i] - 1e-6, drop = TRUE, elementwise = TRUE)
                 }
             }
         }
