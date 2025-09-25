@@ -125,28 +125,42 @@
 #' probs <- c(0.0, 0.01, 0.25, 0.5, 0.75, 0.99, 1.0)
 #' quantile(p3, probs = probs) ## Numeric approximation
 #' quantile(P3, probs = probs) ## Analytic solution
-#'
+#' 
 #' probs2 <- seq(0.01, 0.99, by = 0.01)
 #' qp3 <- quantile(p3, probs = probs2) ## Numeric approximation
 #' qP3 <- quantile(P3, probs = probs2) ## Analytic solution
 #' range(qp3 - qP3) ## Range of pairwise differences/precision
 #'
 #' ## Visual comparison
-#' x <- seq(-1, 11, by = 0.1)
+#' x <- seq(-1, 11, by = 1)
 #' d <- data.frame(x = rep(x, times = 2),
 #'                 y = c(pdf(p3[2], x = x), pdf(P3[2], x = x)),
-#'                 solution = rep(c("analytic Poisson", "approximation MyPoisson"), each = length(x)))
-#' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
-#'     scale_color_manual(values = c("tomato", "black")) +
-#'     labs(title = "Density function")
+#'                 solution = rep(c("approximated MyPoisson", "analytic Poisson"), each = length(x)))
+#' ggplot(data = d, aes(x = x, y = y, fill = solution)) +
+#'     geom_bar(stat = "identity", position = "dodge") +
+#'     scale_fill_manual(values = c("tomato", "black")) +
+#'     labs(title = "Density (lambda = 5.0)")
 #'
 #' probs <- seq(0.01, 0.99, by = 0.01)
 #' d <- data.frame(x = c(quantile(p3[2], probs = probs), quantile(P3[2], probs = probs)),
 #'                 y = rep(probs, times = 2),
-#'                 solution = rep(c("analytic Poisson", "approximation MyPoisson"), each = length(probs)))
-#' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
+#'                 solution = rep(c("approximated MyPoisson", "analytic Poisson"), each = length(probs)))
+#' ggplot(data = d, aes(x = x, y = y, col = solution, lty = solution)) +
+#'     geom_line(lwd = 1) +
 #'     scale_color_manual(values = c("tomato", "black")) +
 #'     labs(title = "Quantile function")
+#'
+#' ## Drawing random numbers
+#' set.seed(6020)
+#' d <- data.frame(x = c(random(p3[2], 500L), random(p3[2], 500L)),
+#'                 distribution = rep(c("approximated MyPoisson", "analytic Poisson"), each = 500L))
+#' aggregate(x ~ distribution, data = d, FUN = function(x) c(mean = mean(x), var = var(x)))
+#'
+#' freq <- as.data.frame(with(d, table(x, distribution))) # Calculating frequency
+#' ggplot(data = freq, aes(x = x, y = Freq, fill = distribution)) +
+#'     geom_bar(stat = "identity", position = "dodge") +
+#'     scale_fill_manual(values = 1:2) +
+#'     labs(title = "Density of random numbers (lambda = 2.5)")
 #'
 #' @rdname pdf.distribution
 #' @exportS3Method
@@ -177,6 +191,9 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
     ## Discrete distribution?
     discrete <- all(is_discrete(d))
 
+    ## Evaluating dots argument (used for undocumented development option(s) only
+    args <- list(...) # Not used if 'discrete = TRUE' but must be evaluated for rlang not to complain
+
     ## For discrete distributions: Take difference F(floor(x_i)) - F(floor(x_i) - 1) and
     ## and F(x_i) for x_i == 0.
     if (discrete) {
@@ -198,6 +215,7 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
 
         ## TODO(R): This can be written sexier (using functions)
         if (elementwise || k == 1L) {
+            x <- rep(x, length.out = length(d))
             ## 'x' not integer, point density assumed to be zero
             res[!idx_int, 1L] <- 0
             ## 'x' is integer but 'x' falls onto lower bound of the support: take cdf(x) as pdf
@@ -235,7 +253,6 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
         ## By default, numDeriv::grad is used (if the package is available),
         ## else we use stats::numericDeriv. For testing, `deriv.method`
         ## can be specified via the `...` argument (non-documented feature).
-        args <- list(...)
         if ("deriv.method" %in% names(args)) {
             deriv.method <- match.arg(args$deriv.method, c("grad", "numericDeriv"))
             if (deriv.method == "grad" && !requireNamespace("numDeriv", quietly = TRUE)) {
@@ -539,7 +556,6 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
         discrete <- FALSE
         seq(xrange[1L], xrange[2L], length.out = gridsize)
       }
-
 
       ## Scoping `batch_id`, `x`, `q`
       batch_fn <- function(i) {

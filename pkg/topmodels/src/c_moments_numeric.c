@@ -40,10 +40,10 @@ double c_moments_calculate_trapezoidal(int i, double* p, int np, double* q, int 
         mids->values[j]  = (q_hi + q_lo) * 0.5;
         dens->values[j]  = (p_hi - p_lo);
 
-        //Rprintf(" --- j=%d: q = [%10.5f, %10.5f] mid = %10.5f ... w = %10.5f, dens = %10.5f\n", j, q_lo, q_hi, mids->values[j], width->values[j], dens->values[j]);
+        //testing// Rprintf(" --- j=%d: q = [%10.5f, %10.5f] mid = %10.5f ... w = %10.5f, dens = %10.5f\n", j, q_lo, q_hi, mids->values[j], width->values[j], dens->values[j]);
         cdfint += dens->values[j];
     }
-    //Rprintf(" --- [cdf integral] cdfint = %.5f\n", cdfint);
+    //testing// Rprintf(" --- [cdf integral] cdfint = %.5f\n", cdfint);
 
     // TODO(R): Calculating the area under the curve which - analytically - should be 1.0.
     //          Here I am just stopping if the area is <= 1e-9 and makes no sense at all, however,
@@ -107,7 +107,7 @@ double c_moments_calculate_discrete(int i, double* p, int np, double* q, int nq,
         //testing// Rprintf(" --- j=%d: mid (count) = %10.5f ... dens = %10.5f\n", j, mids->values[j], dens->values[j]);
         cdfint         += dens->values[j];
     }
-    Rprintf(" --- [cdf integral] cdfint = %.5f\n", cdfint);
+    //testing// Rprintf(" --- [cdf integral] cdfint = %.5f\n", cdfint);
 
     // TODO(R): Calculating the area under the curve which - analytically - should be 1.0.
     //          Here I am just stopping if the area is <= 1e-9 and makes no sense at all, however,

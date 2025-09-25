@@ -164,20 +164,34 @@ qP3 <- quantile(P3, probs = probs2) ## Analytic solution
 range(qp3 - qP3) ## Range of pairwise differences/precision
 
 ## Visual comparison
-x <- seq(-1, 11, by = 0.1)
+x <- seq(-1, 11, by = 1)
 d <- data.frame(x = rep(x, times = 2),
                 y = c(pdf(p3[2], x = x), pdf(P3[2], x = x)),
-                solution = rep(c("analytic Poisson", "approximation MyPoisson"), each = length(x)))
-ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
-    scale_color_manual(values = c("tomato", "black")) +
-    labs(title = "Density function")
+                solution = rep(c("approximated MyPoisson", "analytic Poisson"), each = length(x)))
+ggplot(data = d, aes(x = x, y = y, fill = solution)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    scale_fill_manual(values = c("tomato", "black")) +
+    labs(title = "Density (lambda = 5.0)")
 
 probs <- seq(0.01, 0.99, by = 0.01)
 d <- data.frame(x = c(quantile(p3[2], probs = probs), quantile(P3[2], probs = probs)),
                 y = rep(probs, times = 2),
-                solution = rep(c("analytic Poisson", "approximation MyPoisson"), each = length(probs)))
-ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
+                solution = rep(c("approximated MyPoisson", "analytic Poisson"), each = length(probs)))
+ggplot(data = d, aes(x = x, y = y, col = solution, lty = solution)) +
+    geom_line(lwd = 1) +
     scale_color_manual(values = c("tomato", "black")) +
     labs(title = "Quantile function")
+
+## Drawing random numbers
+set.seed(6020)
+d <- data.frame(x = c(random(p3[2], 500L), random(p3[2], 500L)),
+                distribution = rep(c("approximated MyPoisson", "analytic Poisson"), each = 500L))
+aggregate(x ~ distribution, data = d, FUN = function(x) c(mean = mean(x), var = var(x)))
+
+freq <- as.data.frame(with(d, table(x, distribution))) # Calculating frequency
+ggplot(data = freq, aes(x = x, y = Freq, fill = distribution)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    scale_fill_manual(values = 1:2) +
+    labs(title = "Density of random numbers (lambda = 2.5)")
 
 }
