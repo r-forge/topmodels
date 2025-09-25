@@ -90,6 +90,9 @@ expect_equal(pdf(n3, x = 1:3, deriv.method = "numericDeriv"), pdf(N3, x = 1:3),
 expect_equal(pdf(n3, x = 1:3, deriv.method = "numericDeriv"), pdf(N3, x = 1:3),
         info = "pdf of cdfNormal using stats::numericDeriv and Normal should be nearly identical.")
 
+expect_identical(pdf(n3, x = 2), pdf(n3, x = rep(2, 3L)),
+        info = "Argument 'x' not properly replicated.")
+
 # Testing return objects when using w/ and w/o drop, elementwise, ...
 expect_equal(pdf(n1, x = 2, drop = FALSE), pdf(N1, x = 2, drop = FALSE))
 expect_equal(pdf(n3, x = 1:3, drop = FALSE), pdf(N3, x = 1:3, drop = FALSE))
@@ -156,15 +159,6 @@ expect_inherits(r3, "matrix",                     info = "random(n3, 5, drop = F
 expect_identical(dim(r3), c(3L, 5L),              info = "random(n3, 5, drop = FALSE) should return matrix of dimension 3x5.")
 expect_identical(dimnames(r3), list(names(n3), paste("r", 1:5, sep = "_")), info = "dimension names of random(n3, 5, drop = FALSE) incorrect.")
 rm(r3)
-
-
-# 
-random(n1)
-random(n1, drop = FALSE)
-
-random(n3, drop = FALSE)
-random(n3, 5)
-
 
 # --------- central moments ---------
 
