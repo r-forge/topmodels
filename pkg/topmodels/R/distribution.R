@@ -5,15 +5,15 @@
 #' \pkg{distributions3} package for numerically approximating the probability density function (PDF)
 #' or the quantile function (inverse CDF) if only the cummulative distribution function (CDF) is given.
 #'
-#' @param d An object of class `"distribution"`.
-#' @param x Either a numeric vector of probabilities to be evaluated (if `pdf()` is called),
-#'        or an object of class `"distributions"` (as `d`) when calling the `quantile()` function.
-#' @param log Logical. If `TRUE`, probabilities are given as `log(p)`.
+#' @param d An object of class \code{"distribution"}.
+#' @param x Either a numeric vector of probabilities to be evaluated (if \code{pdf()} is called),
+#'        or an object of class \code{"distributions"} (as \code{d}) when calling the \code{quantile()} function.
+#' @param log Logical. If \code{TRUE}, probabilities are given as \code{log(p)}.
 #' @param drop Logical. Should the result be simplified to a vector if possible?
-#' @param elementwise Logical. Should each distribution (in `d`/`x`) be evaluated at all
-#'        elements in `x` (when `pdf()` is called) or `probs` (if `quantile()` is called)?
-#'        The default `NULL` means that `elementwise = TRUE` is used if the lengths match,
-#'        else `elementwise` is set `FALSE`.
+#' @param elementwise Logical. Should each distribution (in \code{d}/\code{x}) be evaluated at all
+#'        elements in \code{x} (when \code{pdf()} is called) or \code{probs} (if \code{quantile()} is called)?
+#'        The default \code{NULL} means that \code{elementwise = TRUE} is used if the lengths match,
+#'        else \code{elementwise} is set \code{FALSE}.
 #'
 #' @examples
 #' library("distributions3")
@@ -67,18 +67,26 @@
 #'
 #' d <- data.frame(x = rep(x, times = 2),
 #'                 y = c(pdf(n3[1], x = x), pdf(N3[1], x = x)),
-#'                 solution = rep(c("analytic (Normal)", "approximation (MyNormal)"), each = length(x)))
+#'                 solution = rep(c("approximated MyNormal", "analytic Normal"), each = length(x)))
 #' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
-#'     scale_color_manual(values = c("tomato", "black")) +
-#'     labs(title = "Density function")
+#'     scale_color_manual(values = 1:2) +
+#'     labs(title = "Density function (mean = 1, sigma = 1)")
 #'
 #' probs <- seq(0.01, 0.99, by = 0.01)
 #' d <- data.frame(x = c(quantile(n3[1], probs = probs), quantile(N3[1], probs = probs)),
 #'                 y = rep(probs, times = 2),
-#'                 solution = rep(c("analytic (Normal)", "approximation (MyNormal)"), each = length(probs)))
+#'                 solution = rep(c("approximated MyNormal", "analytic Normal"), each = length(probs)))
 #' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
-#'     scale_color_manual(values = c("tomato", "black")) +
-#'     labs(title = "Quantile function")
+#'     scale_color_manual(values = 1:2) +
+#'     labs(title = "Quantile function (mean = 3, sigma = 5)")
+#'
+#' ## Drawing random numbers
+#' set.seed(6020)
+#' d <- data.frame(x = c(random(n3[3], 500L), random(N3[3], 500L)),
+#'                 distribution = rep(c("approximated MyNormal", "analytic Normal"), each = 500L))
+#' ggplot(data = d) + geom_density(aes(x = x, col = distribution)) +
+#'     scale_color_manual(values = 1:2) +
+#'     labs(title = "Density of random numbers (mean = 3, sigma = 5)")
 #'
 #' ## ------------- custom Poisson distribution (MyPoisson) --------------
 #'
@@ -127,7 +135,7 @@
 #' x <- seq(-1, 11, by = 0.1)
 #' d <- data.frame(x = rep(x, times = 2),
 #'                 y = c(pdf(p3[2], x = x), pdf(P3[2], x = x)),
-#'                 solution = rep(c("analytic (Poisson)", "approximation (MyPoisson)"), each = length(x)))
+#'                 solution = rep(c("analytic Poisson", "approximation MyPoisson"), each = length(x)))
 #' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
 #'     scale_color_manual(values = c("tomato", "black")) +
 #'     labs(title = "Density function")
@@ -135,7 +143,7 @@
 #' probs <- seq(0.01, 0.99, by = 0.01)
 #' d <- data.frame(x = c(quantile(p3[2], probs = probs), quantile(P3[2], probs = probs)),
 #'                 y = rep(probs, times = 2),
-#'                 solution = rep(c("analytic (Poisson)", "approximation (MyPoisson)"), each = length(probs)))
+#'                 solution = rep(c("analytic Poisson", "approximation MyPoisson"), each = length(probs)))
 #' ggplot(data = d) + geom_line(aes(x = x, y = y, col = solution, lty = solution), lwd = 1) +
 #'     scale_color_manual(values = c("tomato", "black")) +
 #'     labs(title = "Quantile function")
@@ -320,10 +328,10 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
     lim_uniroot[sup[, "max"] > upper, "max"] <- upper
 
     ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
-    row_names <- if (elementwise && k > 1L) NULL else paste0("q_", make_suffix(probs, digits = pmax(3L, getOption("digits") - 3L)))
+    col_names <- if (elementwise && k > 1L) "quantile" else paste0("q_", make_suffix(probs, digits = pmax(3L, getOption("digits") - 3L)))
     res <- matrix(NA, nrow = n,
                       ncol = if (elementwise) 1L else k,
-                      dimnames = list(names(x), row_names))
+                      dimnames = list(names(x), col_names))
 
     for (i in seq_len(n)) {
         ## Elementwise: one probability 'probs[i]' per distribution 'x[i]' or
@@ -351,7 +359,7 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
     if (all(is_discrete(x))) res <- round(res)
 
     ## Handle dimensions
-    if (k == 1L && drop) {
+    if ((k == 1L || ncol(res) == 1L) && drop) {
         res <- as.vector(res)
         names(res) <- names(x)
     } else if (n == 1L && drop) {
@@ -367,24 +375,25 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
 #' for probability distributions for which only the cummulative distribution function (CDF) and -
 #' potentially - the quantile function is provided.
 #'
-#' For discrete distributions spanning a range less than `gridsize` the PDF is calculated
-#' at $i = \{0, 1, 2, 3, \dots\}$ by differenciating the CDF provided which is then used
+#' For discrete distributions spanning a range less than \code{gridsize} the PDF is calculated
+#' at \eqn{i = \{0, 1, 2, 3, \dots\}} by differenciating the CDF provided which is then used
 #' to calculate the central moments.
 #'
 #' For continuous distributions as well as discrete distributions spanning a
-#' wide range of values (larger than `gridsize`) a grid with `gridsize`
+#' wide range of values (larger than \code{gridsize}) a grid with \code{gridsize}
 #' intervals is created. Given the distribution provides a quantile function,
 #' this grid is specified on a (mostly) uniform grid on the quantile scale. If
-#' no quantile function is provided, the $0.01$ and $99.99$ percentile are
+#' no quantile function is provided, the \code{0.01} and \code{99.99} percentile are
 #' calculated approximated via the CDF, between which a uniform grid is
 #' spanned. For each interval the density is approximated using numeric
 #' forward differences
 #'
-#' * $f(x[j]) = (F(x[i+1]) - F(x_i)) / (x[i+1] - x[i])$
+#' \deqn{f(x_j) = (F(x_{i+1}) - F(x_i)) / (x_{i+1} - x_i)}{f(x[j]) = (F(x[i+1]) - F(x[i])) / (x[i+1] - x[i])}
 #'
-#' at each $x[j] = (x[i+1] + x[i]) * 0.5$ with interval width $x_[i+1] - x[i]$.
-#' The densities $f(x[j])$ and interval mids $x_j$ are used to calculate
-#' weighted moments using the trapezoidal rule.
+#' at each \eqn{x_j = (x_{i+1} + x_i) * 0.5}{x[j] = (x[i+1] + x[i]) * 0.5}
+#' with interval width of \eqn{x_{i+1} - x_i}{x[i+1] - x[i]}.
+#' The densities \eqn{f(x_j)}{f(x[j])} and interval mids \eqn{x_j}{x[j]} are used to calculate
+#' the weighted moments.
 #'
 #' @param x  Object of class 'distribution'
 #' @param what single integer, controls what the C code returns. 1L (mean) 2L
@@ -397,7 +406,7 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
 #'   \code{function(X, FUN, \dots)}. It is used to compute the CRPS for each element
 #'   of \code{y}. The default is to use the basic \code{lapply}
 #'   function unless the \code{cores} argument is specified (see below).
-#' @param cores numeric. If set to an integer the \code{applyfun} is set to····
+#' @param cores numeric. If set to an integer the \code{applyfun} is set to
 #'   \code{\link[parallel]{mclapply}} with the desired number of \code{cores},
 #'   except on Windows where \code{\link[parallel]{parLapply}} with
 #'   \code{makeCluster(cores)} is used.
@@ -407,11 +416,12 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
 #'   be used to compute the corresponding observations? By default, \code{"cdf"}
 #'   is used for discrete observations whose range is smaller than the \code{gridsize}
 #'   and \code{"quantile"} otherwise.
-#' @param ... [mean.distribution()], [variance.distribution()], [skewness.distribution()] and
-#'   [kurtosis.distribution()] forward the additional arguments (`...`) to
-#'   [distribution_calculate_moments()]; all other functions/methods ignore additional arguments.
+#' @param ... \code{\link{mean.distribution}}, \code{\link{variance.distribution}},
+#'            \code{\link{skewness.distribution}} and
+#'   \code{\link{kurtosis.distribution}} forward the additional arguments (\code{...}) to
+#'   \code{\link{distribution_calculate_moments}}; all other functions/methods ignore additional arguments.
 #'
-#' @return A (potentially named) numeric vector of length `length(x)` with the requested central moment.
+#' @return A (potentially named) numeric vector of length \code{length(x)} with the requested central moment.
 #'
 #' @examples
 #' library("distributions3")
@@ -507,15 +517,17 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
 
   ## selecting default method based on support of 'x'
   xrange <- range(support(x), na.rm = TRUE)
-  if(!is.finite(xrange[1L])) xrange[1L] <- min(quantile(x, 0.0001), na.rm = TRUE)
-  if(!is.finite(xrange[2L])) xrange[2L] <- max(quantile(x, 0.9999), na.rm = TRUE)
+  if (!is.finite(xrange[1L])) xrange[1L] <- min(quantile(x, 0.0001), na.rm = TRUE)
+  if (!is.finite(xrange[2L])) xrange[2L] <- max(quantile(x, 0.9999), na.rm = TRUE)
   discrete <- all(is_discrete(x))
-  if(is.null(method)) {
-    method <- if(discrete && (diff(xrange) <= gridsize)) "cdf" else "quantile"
+
+  ## Selecting method used to approximate the density required
+  ## to calculate the moments (pdf approximation).
+  if (is.null(method)) {
+    method <- if (hasS3method("quantile", class(x)[!class(x) == "distribution"])) "quantile" else "cdf"
+  } else {
+    method <- match.arg(method, c("cdf", "quantile"))
   }
-  ## TODO(R): Split data in discrete case; using "quantile" approximation only where
-  ##          xrange exceeds gridsize but use the more accurate "cdf" approximation
-  ##          for the others?
 
   ## cdf method: set up observations and compute probabilities via cdf()
   if (method == "cdf") {
@@ -527,6 +539,7 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
         discrete <- FALSE
         seq(xrange[1L], xrange[2L], length.out = gridsize)
       }
+
 
       ## Scoping `batch_id`, `x`, `q`
       batch_fn <- function(i) {
@@ -548,7 +561,6 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
     batch_fn <- function(i) {
         idx  <- which(batch_id == i) ## Index of `x`/`y` falling into current batch `i`
         q    <- quantile(x[idx], p, elementwise = FALSE, drop = FALSE) ## Calculating quantiles at `p` for `y[idx]`
-
         ## Here 'q' is our matrix (n x k) whilst p is just a numeric vector
         .Call("c_moments_numeric", p = p, q = q, dim(q),
               discrete = as.integer(discrete), what = what, PACKAGE = "topmodels")
@@ -560,8 +572,23 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
 }
 
 
-#' @param x object of class `c("NumericNormal", "distribution")`.
-#' @param gridsize integer, number of grid points used for approximation. Defaults to `500L`.
+#' @param n Integer. Number of observations to be drawn.
+#' @param drop Logical. Should the result be simplified to a vector if possible?
+#'
+#' @rdname mean.distribution
+#' @exportS3Method
+random.distribution <- function(x, n = 1L, drop = TRUE, ...) {
+  n <- make_positive_integer(n)
+  if (n == 0L) {
+    return(numeric(0L))
+  }
+  FUN <- function(at, d) quantile(d, runif(n = at))
+  apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
+}
+
+
+#' @param x object of class \code{c("NumericNormal", "distribution")}.
+#' @param gridsize integer, number of grid points used for approximation. Defaults to \code{500L}.
 #'
 #' @rdname mean.distribution
 #' @exportS3Method

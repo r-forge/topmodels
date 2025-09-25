@@ -27,7 +27,6 @@ double c_moments_calculate_trapezoidal(int i, double* p, int np, double* q, int 
     bool q_is_vector = (nq == k) ? true : false;
     bool p_is_vector = (np == k) ? true : false;
 
-    // Normalization using Trapezoidal Rule
     // cdfint: integral of the CDF to check if the density (pdf; p) provided looks OKish
     double cdfint = 0.0, q_lo, q_hi, p_lo, p_hi;
     for (int j = 0; j < (k - 1); j++) {
@@ -39,12 +38,12 @@ double c_moments_calculate_trapezoidal(int i, double* p, int np, double* q, int 
 
         width->values[j] = q_hi - q_lo;
         mids->values[j]  = (q_hi + q_lo) * 0.5;
-        dens->values[j]  = (p_hi - p_lo) * width->values[j];
+        dens->values[j]  = (p_hi - p_lo);
 
         //Rprintf(" --- j=%d: q = [%10.5f, %10.5f] mid = %10.5f ... w = %10.5f, dens = %10.5f\n", j, q_lo, q_hi, mids->values[j], width->values[j], dens->values[j]);
-        cdfint         += dens->values[j];
+        cdfint += dens->values[j];
     }
-    Rprintf(" --- [cdf integral] cdfint = %.5f\n", cdfint);
+    //Rprintf(" --- [cdf integral] cdfint = %.5f\n", cdfint);
 
     // TODO(R): Calculating the area under the curve which - analytically - should be 1.0.
     //          Here I am just stopping if the area is <= 1e-9 and makes no sense at all, however,
