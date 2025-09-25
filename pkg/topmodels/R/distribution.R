@@ -172,7 +172,6 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
     x <- as.numeric(x) # Required for numericDeriv
     drop <- as.logical(drop)[[1L]]
     stopifnot(isTRUE(drop) || isFALSE(drop))
-    stopifnot(is.null(drop) || isTRUE(drop) || isFALSE(drop))
     stopifnot(isTRUE(log) || isFALSE(log))
 
     ## Check if calculation is performed elementwise or not
@@ -183,10 +182,10 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
         stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
 
     ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
-    row_names <- if (elementwise && k > 1L) "density" else paste0("d_", make_suffix(x))
+    col_names <- if (elementwise && k > 1L) "density" else paste0("d_", make_suffix(x))
     res <- matrix(NA, nrow = n,
                       ncol = if (elementwise) 1L else k,
-                      dimnames = list(names(d), row_names))
+                      dimnames = list(names(d), col_names))
 
     ## Discrete distribution?
     discrete <- all(is_discrete(d))
@@ -326,6 +325,22 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
     if (elementwise && k > 1L && k != n)
         stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
 
+    ## Check which S3 methods are available
+    has <- setdiff(class(x), "distribution")
+    has <- list(cdf = hasS3method("cdf", has), pdf = hasS3method("pdf", has))
+
+    ## Discrete distribution?
+    discrete <- all(is_discrete(x))
+
+    ## Extract support
+    sup <- support(x, drop = FALSE)
+
+    ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
+    col_names <- if (elementwise && k > 1L) "quantile" else paste0("q_", make_suffix(probs, digits = pmax(3L, getOption("digits") - 3L)))
+    res <- matrix(NA, nrow = n,
+                      ncol = if (elementwise) 1L else k,
+                      dimnames = list(names(x), col_names))
+
     ## Numeric approximation of quantiles
     inverse_cdf <- function(d, p, lower, upper, tol, ...) {
         # Extracting support of distribution 'd'. If uniroot
@@ -338,47 +353,172 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
                 d = d, lower = lower - 1.0, upper = upper + 1.0, tol = tol, ...)$root
     }
 
-    # Evaluate support of the distributions ('sup'); 'lim_uniroot' is used to properly
-    # set the lower and upper limit for uniroot (input argument to inverse_cdf).
-    sup <- lim_uniroot <- support(d = x, drop = FALSE)
-    lim_uniroot[sup[, "min"] < lower, "min"] <- lower
-    lim_uniroot[sup[, "max"] > upper, "max"] <- upper
+    ## If the distribution family provides a cdf
+    if (has$cdf) {
 
-    ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
-    col_names <- if (elementwise && k > 1L) "quantile" else paste0("q_", make_suffix(probs, digits = pmax(3L, getOption("digits") - 3L)))
-    res <- matrix(NA, nrow = n,
-                      ncol = if (elementwise) 1L else k,
-                      dimnames = list(names(x), col_names))
+        # 'lim_uniroot' is used to properly set the lower and upper limit for
+        # uniroot (input argument to inverse_cdf).
+        lim_uniroot <- sup
+        lim_uniroot[sup[, "min"] < lower, "min"] <- lower
+        lim_uniroot[sup[, "max"] > upper, "max"] <- upper
 
-    for (i in seq_len(n)) {
-        ## Elementwise: one probability 'probs[i]' per distribution 'x[i]' or
-        ## same probability 'probs[1L]' for a set of distributions 'x[i]'.
-        if (elementwise || k == 1L) {
-            res[i, 1L] <- inverse_cdf(d = x[i], if (k == 1) probs[1L] else probs[i],
-                                      lower = lim_uniroot[[i, "min"]], upper = lim_uniroot[[i, "max"]], tol = tol)
-        ## Calculate quantiles for each probability 'probs[j]' for each distribution 'x[i]';
-        ## Scoping variable 'tol'.
+        for (i in seq_len(n)) {
+            ## Elementwise: one probability 'probs[i]' per distribution 'x[i]' or
+            ## same probability 'probs[1L]' for a set of distributions 'x[i]'.
+            if (elementwise || k == 1L) {
+                res[i, 1L] <- inverse_cdf(d = x[i], if (k == 1) probs[1L] else probs[i],
+                                          lower = lim_uniroot[[i, "min"]], upper = lim_uniroot[[i, "max"]], tol = tol)
+            ## Calculate quantiles for each probability 'probs[j]' for each distribution 'x[i]';
+            ## Scoping variable 'tol'.
+            } else {
+                res[i, ] <- sapply(probs, function(p, d, l, u) inverse_cdf(d = d, p = p, lower = l, upper = u, tol = tol),
+                                   d = x[i], l = lim_uniroot[[i, "min"]], u = lim_uniroot[[i, "max"]])
+            }
+        }
+
+        ## Replacing quantiles reaching the limits 'lim_uniroot' with the support of the
+        ## distribution (e.g., the 0'th percentile of the Normal distribution will evaluate to 'lower', though
+        ## the correct quantile is -Inf (as defined by the support of the distribution).
+        for (i in seq_len(nrow(res))) {
+            res[i, res[i, ] <= lim_uniroot[i, "min"]] <- sup[i, "min"]
+            res[i, res[i, ] >= lim_uniroot[i, "max"]] <- sup[i, "max"]
+        }
+
+        ## Discrete distribution? Round result
+        if (discrete) res <- round(res)
+
+    } else if (has$pdf) {
+
+        ## Discrete distributions: Sum up pdf along x until quantile is found.
+        if (discrete) {
+            pdf2quantile <- function(d, probs, x = 0L, xmax = 100L) {
+                # Recursive function searching for the quantile(s)
+                recursive_fn <- function(p, cdf, x, xmax) {
+                    if (cdf >= p) return(list(x = x, cdf = cdf))
+                    cdf <- cdf + pdf(d, x)
+                    x <- x + 1L
+                    if (cdf >= p) return(list(x = x, cdf = cdf))
+                    recursive_fn(p, cdf, x, xmax)
+                }
+
+                res <- rep(NA_real_, length(probs))
+                tmp <- list(cdf = 0.0, x = -1L) # starting -1L is important
+                for (i in seq_along(probs)) {
+                    tmp <- recursive_fn(probs[i], tmp$cdf, tmp$x, xmax)
+                    res[i] <- tmp$x - 1L # store previous 'x', our result before exceeding probs[i]
+                }
+                res
+            }
+
+            if (elementwise || k == 1L) {
+                probs <- rep(probs, length.out = n)
+                for (i in seq_len(n)) {
+                    res[i, 1L] <- pdf2quantile(d = x[i], p = probs[[i]],
+                                               x = sup[[i, "min"]], xmax = max(sup[[i, "max"]], 100L))
+                }
+                ## Ensure lowest/uppest quantile are correct
+                tmp <- probs == 0; if (any(tmp)) res[tmp, 1L] <- sup[[tmp, "min"]]
+                tmp <- probs == 1; if (any(tmp)) res[tmp, 1L] <- sup[[tmp, "max"]]
+            } else {
+                porder <- order(probs, decreasing = FALSE)
+                probs  <- sort(probs)
+                for (i in seq_len(n)) {
+                    res[i, porder] <- pdf2quantile(d = x[i], p = probs,
+                                                   x = sup[[i, "min"]], xmax = max(sup[[i, "max"]], 100L))
+                    ## Ensure lowest/uppest quantile are correct
+                    tmp <- probs == 0; if (any(tmp)) res[i, tmp] <- sup[[i, "min"]]
+                    tmp <- probs == 1; if (any(tmp)) res[i, tmp] <- sup[[i, "max"]]
+                }
+            }
         } else {
-            res[i, ] <- sapply(probs, function(p, d, l, u) inverse_cdf(d = d, p = p, lower = l, upper = u, tol = tol),
-                               d = x[i], l = lim_uniroot[[i, "min"]], u = lim_uniroot[[i, "max"]])
+            stop("Must be implemented first")
         }
     }
-
-    ## Replacing quantiles reaching the limits 'lim_uniroot' with the support of the
-    ## distribution (e.g., the 0'th percentile of the Normal distribution will evaluate to 'lower', though
-    ## the correct quantile is -Inf (as defined by the support of the distribution).
-    for (i in seq_len(nrow(res))) {
-        res[i, res[i, ] <= lim_uniroot[i, "min"]] <- sup[i, "min"]
-        res[i, res[i, ] >= lim_uniroot[i, "max"]] <- sup[i, "max"]
-    }
-
-    ## Discrete distribution? Round result
-    if (all(is_discrete(x))) res <- round(res)
 
     ## Handle dimensions
     if ((k == 1L || ncol(res) == 1L) && drop) {
         res <- as.vector(res)
         names(res) <- names(x)
+    } else if (n == 1L && drop) {
+        res <- as.vector(res)
+    }
+    return(res)
+}
+
+
+#' @param lower.tail Logical. If \code{TRUE} (default), probabilities are
+#'        \eqn{P[X \le x]}{P[X <= x]}, else \eqn{P[X \ge x]}{P[X >= x]}.
+#'
+#' @rdname pdf.distribution
+#' @exportS3Method
+cdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, lower.tail = TRUE, ...) {
+    if (!hasS3method("cdf", class(d)))
+        stop("no S3 method 'cdf' found for object of class: ", paste(class(d), collapse = ", "))
+
+    stopifnot(is.numeric(x) && all(is.finite(x)))
+    x <- as.numeric(x) # Required for numericDeriv
+    drop <- as.logical(drop)[[1L]]
+    stopifnot(isTRUE(drop) || isFALSE(drop))
+    stopifnot(isTRUE(lower.tail) || isFALSE(lower.tail))
+
+    ## Check if calculation is performed elementwise or not
+    k <- length(x); n <- length(d)
+    if (is.null(elementwise))
+        elementwise <- (k == 1L & n == 1L) || (k > 1L && k == n)
+    if (elementwise && k > 1L && k != n)
+        stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
+
+    ## Setting up results matrix of dimension 'n x k' or 'n x 1' (elementwise)
+    col_names <- if (elementwise && k > 1L) "probability" else paste0("p_", make_suffix(x))
+    res <- matrix(NA, nrow = n,
+                      ncol = if (elementwise) 1L else k,
+                      dimnames = list(names(d), col_names))
+
+    ## Discrete distribution?
+    discrete <- all(is_discrete(d))
+
+    ## Support of the distribution(s)
+    sup <- support(d, drop = FALSE)
+
+    ## For discrete distributions, calculate pdf on integer grid and sum up accordingly.
+    if (discrete) {
+        ## Round to closest integer (keep numeric)
+        x <- floor(x)
+
+        ## Helper function
+        fn <- function(i, x) {
+            if (x <  sup[i, "min"])  return(0.0)
+            if (x >= sup[i, "max"]) return(1.0)
+            sum(pdf(d[i], seq(sup[i, "min"], x, by = 1.0)))
+        }
+
+        if (elementwise || k == 1L) {
+            x <- rep(x, length.out = n)
+            res[, 1L] <- sapply(seq_along(d), function(i) fn(i, x[i]))
+        } else {
+            for (i in seq_len(k)) {
+                res[, i] <- sapply(seq_along(d), function(j) fn(j, x[i]))
+            }
+        }
+    ## For non-discrete (continuous) distributions, calculate numeric derivative
+    } else {
+        if (elementwise || k == 1L) {
+            x <- rep(x, length.out = n)
+            res[, 1L] <- sapply(seq_len(n), function(i) integrate(function(x) pdf(d[i], x), sup[i, "min"], x[i])$value)
+        } else {
+            for (i in seq_len(n)) {
+                res[i, ] <- sapply(seq_len(k), function(j) integrate(function(x) pdf(d[i], x), sup[i, "min"], x[j])$value)
+            }
+        }
+    }
+
+    ## Lower tail?
+    if (!lower.tail) res <- 1.0 - res
+
+    ## Handle dimensions
+    if ((k == 1L || ncol(res) == 1L) && drop) {
+        res <- as.vector(res)
+        names(res) <- names(d)
     } else if (n == 1L && drop) {
         res <- as.vector(res)
     }

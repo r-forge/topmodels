@@ -3,6 +3,7 @@
 \name{pdf.distribution}
 \alias{pdf.distribution}
 \alias{quantile.distribution}
+\alias{cdf.distribution}
 \title{Methods for Numerically Approximating PDF and Quantile Functions}
 \usage{
 \method{pdf}{distribution}(d, x, drop = TRUE, elementwise = NULL, log = FALSE, ...)
@@ -17,6 +18,8 @@
   tol = .Machine$double.eps^0.5,
   ...
 )
+
+\method{cdf}{distribution}(d, x, drop = TRUE, elementwise = NULL, lower.tail = TRUE, ...)
 }
 \arguments{
 \item{d}{An object of class \code{"distribution"}.}
@@ -41,6 +44,9 @@ else \code{elementwise} is set \code{FALSE}.}
 be searched, forwarded to [stats::uniroot()].}
 
 \item{tol}{numeric. Desired accuracy for [stats::uniroot()].}
+
+\item{lower.tail}{Logical. If \code{TRUE} (default), probabilities are
+\eqn{P[X \le x]}{P[X <= x]}, else \eqn{P[X \ge x]}{P[X >= x]}.}
 }
 \description{
 Methods to the generic \link[distributions3]{pdf} and \link[stats]{quantile} functions from the
