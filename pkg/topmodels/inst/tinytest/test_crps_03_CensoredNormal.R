@@ -6,6 +6,7 @@
 
 if (interactive()) library("tinytest")
 
+suppressPackageStartupMessages(library("crch"))
 library("scoringRules")
 library("distributions3")
 

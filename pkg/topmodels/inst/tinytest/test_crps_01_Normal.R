@@ -5,6 +5,8 @@
 
 if (interactive()) library("tinytest")
 
+suppressPackageStartupMessages(library("parallel"))
+suppressPackageStartupMessages(library("crch"))
 library("scoringRules")
 library("distributions3")
 
