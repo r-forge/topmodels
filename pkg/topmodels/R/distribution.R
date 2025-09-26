@@ -14,6 +14,14 @@
 #'        elements in \code{x} (when \code{pdf()} is called) or \code{probs} (if \code{quantile()} is called)?
 #'        The default \code{NULL} means that \code{elementwise = TRUE} is used if the lengths match,
 #'        else \code{elementwise} is set \code{FALSE}.
+#' @param applyfun an optional \code{\link[base]{lapply}}-style function with arguments
+#'   \code{function(X, FUN, \dots)}. It is used to compute the CRPS for each element
+#'   of \code{y}. The default is to use the basic \code{lapply}
+#'   function unless the \code{cores} argument is specified (see below).
+#' @param cores numeric. If set to an integer the \code{applyfun} is set to
+#'   \code{\link[parallel]{mclapply}} with the desired number of \code{cores},
+#'   except on Windows where \code{\link[parallel]{parLapply}} with
+#'   \code{makeCluster(cores)} is used.
 #'
 #' @examples
 #' library("distributions3")
@@ -164,7 +172,7 @@
 #'
 #' @rdname pdf.distribution
 #' @exportS3Method
-pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE, ...) {
+pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE, applyfun = NULL, cores = NULL, ...) {
     # To be able to numerically approximate the pdf the object must have
     # a cdf method. If not available, exit.
     cls <- setdiff(class(d), "distribution")
@@ -180,6 +188,27 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
     drop <- as.logical(drop)[[1L]]
     stopifnot(isTRUE(drop) || isFALSE(drop))
     stopifnot(isTRUE(log) || isFALSE(log))
+
+    stopifnot(is.null(applyfun) || is.function(applyfun))
+    if (is.numeric(cores)) {
+      cores <- as.integer(cores)
+      stopifnot(length(cores) == 1L, cores >= 1L)
+    }
+
+    ## define apply functions for parallelization
+    if(is.null(applyfun)) {
+      applyfun <- if(is.null(cores)) {
+        lapply
+      } else {
+        if(.Platform$OS.type == "windows") {
+          cl_cores <- parallel::makeCluster(cores)
+          on.exit(parallel::stopCluster(cl_cores))
+          function(X, FUN, ...) parallel::parLapply(cl = cl_cores, X, FUN, ...)
+        } else {
+          function(X, FUN, ...) parallel::mclapply(X, FUN, ..., mc.cores = cores)
+        }
+      }
+    }
 
     ## Check if calculation is performed elementwise or not
     k <- length(x); n <- length(d)
@@ -285,10 +314,13 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
         fn <- if (deriv.method == "grad") fn_grad else fn_numericDeriv
 
         ## Calculating numeric derivatives
-        if (elementwise) {
-            for (i in seq_len(k)) res[i, 1L] <- fn(d[i], x[i])
+        if (elementwise || k == 1L) {
+            x <- rep(x, length.out = n)
+            res[, 1L] <- unlist(applyfun(seq_len(n), function(i) fn(d[i], x[i])))
         } else {
-            for (i in seq_len(k)) res[, i] <- fn(d, x[i])
+            for (j in seq_len(k)) {
+                res[, j] <- unlist(applyfun(seq_len(n), function(i) fn(d[i], x[j])))
+            }
         }
     }
 

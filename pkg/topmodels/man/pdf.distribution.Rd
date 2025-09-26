@@ -6,7 +6,16 @@
 \alias{cdf.distribution}
 \title{Methods for Numerically Approximating PDF and Quantile Functions}
 \usage{
-\method{pdf}{distribution}(d, x, drop = TRUE, elementwise = NULL, log = FALSE, ...)
+\method{pdf}{distribution}(
+  d,
+  x,
+  drop = TRUE,
+  elementwise = NULL,
+  log = FALSE,
+  applyfun = NULL,
+  cores = NULL,
+  ...
+)
 
 \method{quantile}{distribution}(
   x,
@@ -36,6 +45,16 @@ The default \code{NULL} means that \code{elementwise = TRUE} is used if the leng
 else \code{elementwise} is set \code{FALSE}.}
 
 \item{log}{Logical. If \code{TRUE}, probabilities are given as \code{log(p)}.}
+
+\item{applyfun}{an optional \code{\link[base]{lapply}}-style function with arguments
+\code{function(X, FUN, \dots)}. It is used to compute the CRPS for each element
+of \code{y}. The default is to use the basic \code{lapply}
+function unless the \code{cores} argument is specified (see below).}
+
+\item{cores}{numeric. If set to an integer the \code{applyfun} is set to
+\code{\link[parallel]{mclapply}} with the desired number of \code{cores},
+except on Windows where \code{\link[parallel]{parLapply}} with
+\code{makeCluster(cores)} is used.}
 
 \item{...}{currently ignored.}
 
