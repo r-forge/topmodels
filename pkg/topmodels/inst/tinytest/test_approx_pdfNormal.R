@@ -17,23 +17,50 @@ pdfNormal <- function(mu, sigma) {
     return(d)
 }
 
-## Additional S3 methods required
+## Additional S3 methods required (currently unregistered, thus invisible to tinytest)
 pdf.pdfNormal <- getS3method("pdf", class = "Normal")
 is_discrete.pdfNormal   <- getS3method("is_discrete", class = "Normal")
 support.pdfNormal       <- getS3method("support", class = "Normal")
 
-## Registering S3 methods (required for testing)
-registerS3method("pdf",         "pdfNormal", pdf.pdfNormal,         envir = asNamespace("topmodels"))
-registerS3method("is_discrete", "pdfNormal", is_discrete.pdfNormal, envir = asNamespace("topmodels"))
-registerS3method("support",     "pdfNormal", support.pdfNormal,     envir = asNamespace("topmodels"))
-
-
-## Setting up single-distribution object
+## Setting up single-distribution object, testing constructor function
 expect_silent(n1 <- pdfNormal(mu = 3, sigma = 2),
     info = "Creator function must be silent")
 expect_identical(n1,
     structure(data.frame(mu = 3, sigma = 2), class = c("pdfNormal", "distribution")),
     info = "Object returned by pdfNormal not as expected.")
+
+
+## --------------- Checking behavior when S3 methods are missing -----------------
+## Currently pdf.pdfNormal is not defined which we need (in these tests)
+## to approximate cdf/quantile. In this case cdf() and quantile() must throw errors.
+expect_error(cdf(n1, x = 0),
+             pattern = "^no S3 method 'pdf' found for object of class: pdfNormal$",
+             info = "No 'pdf.pdfNormal' method available must throw an error.")
+expect_error(quantile(n1, probs = 0.5),
+             pattern = "^no S3 method 'cdf' or 'quantile' found for object of class: pdfNormal$",
+             info = "No method 'cdf.pdfNormal' or 'quantile.pdfNormal' available must throw an error.")
+## ... registering pdf (required for tinytest)
+registerS3method("pdf", "pdfNormal", pdf.pdfNormal, envir = asNamespace("topmodels"))
+
+## Now the pdf method is registered which is used to approximate cdf/quantile.
+## However, is_discrete (required) still missing.
+expect_error(cdf(n1, x = 0),
+             pattern = "^S3 method 'is_discrete' missing for object of class: pdfNormal$",
+             info = "Method is_discrete is required, else an error must be thrown.")
+## ... registering is_discrete (required for tinytest)
+registerS3method("is_discrete", "pdfNormal", is_discrete.pdfNormal, envir = asNamespace("topmodels"))
+
+## Same (error) should happen as support is missing
+expect_error(cdf(n1, x = 0),
+             pattern = "^S3 method 'support' missing for object of class: pdfNormal$",
+             info = "Method support is required, else an error must be thrown.")
+## ... registering support (required for tinytest)
+registerS3method("support", "pdfNormal", support.pdfNormal, envir = asNamespace("topmodels"))
+## ------------- End of checking behavior when S3 methods are missing -------------
+
+
+
+## Testing required S3 methods needed
 expect_identical(is_discrete(n1), FALSE,
     info = "is_discrete() must return FALSE.")
 expect_identical(support(n1), c(min = -Inf, max = Inf),
@@ -100,8 +127,13 @@ expect_equal(cdf(n3, x = 1:3, drop = FALSE, elementwise = TRUE), cdf(N3, x = 1:3
 expect_equal(cdf(n3, x = 1:5, lower.tail = FALSE), cdf(N3, x = 1:5, lower.tail = FALSE),
         info = "cdf of pdfNormal using lower.tail = FALSE should be equal.")
 
-#### TODO(R): Currently not implemented, must be coded first.
-### # ------------- quantile ------------
+# ------------- quantile ------------
+# Approximating the quantile function based on the PDF for continuous distributions
+# is currently not implemented; expecting error message.
+expect_error(quantile(n3, probs = 0.5),
+             pattern = "^approximation for quantile function via pdf for continuous distributions currently not possible$",
+             info = "Expected an error message as numeric pdf->quantile for continuous distributions not implemented.")
+
 ### p <- c(0, 0.00001, 0.001, seq(0.01, 0.99, by = 0.01), 0.999, 0.99999, 1)
 ### expect_equal(quantile(n1, probs = p), quantile(N1, probs = p),
 ###         info = "quantile of pdfNormal and Normal should be nearly identical.")
@@ -115,12 +147,16 @@ expect_equal(cdf(n3, x = 1:5, lower.tail = FALSE), cdf(N3, x = 1:5, lower.tail =
 ### expect_equal(quantile(n3, probs = c(0.25, 0.5, 0.75), elementwise = FALSE),
 ###              quantile(N3, probs = c(0.25, 0.5, 0.75), elementwise = FALSE),
 ###         info = "quantile of pdfNormal and Normal should be nearly identical.")
-### 
-### 
-### # ------- random number gen ---------
-### 
-### ## Given this is random by nature I am only checking the return objects
-### 
+
+
+# ------- random number gen ---------
+# As the approximation for the quantile function (based on the pdf) is not yet
+# implemented for continuous distributions, random() will not work (is based
+# on the quantile function); expecting the same error message as for quantile(...) for now.
+expect_error(random(n3, 3L),
+             pattern = "^approximation for quantile function via pdf for continuous distributions currently not possible$",
+             info = "Expected an error message as numeric pdf->quantile currently missing for continuous distributions (which random is based on).")
+
 ### expect_silent(r1 <- random(n1),                   info = "random(n1) should run silent.")
 ### expect_inherits(r1, "numeric",                    info = "random(n1) should return numeric.")
 ### expect_identical(length(r1), 1L,                  info = "random(n1) should return single numeric.")
@@ -152,12 +188,25 @@ expect_equal(cdf(n3, x = 1:5, lower.tail = FALSE), cdf(N3, x = 1:5, lower.tail =
 ### expect_identical(dim(r3), c(3L, 5L),              info = "random(n3, 5, drop = FALSE) should return matrix of dimension 3x5.")
 ### expect_identical(dimnames(r3), list(names(n3), paste("r", 1:5, sep = "_")), info = "dimension names of random(n3, 5, drop = FALSE) incorrect.")
 ### rm(r3)
-### 
-### # --------- central moments ---------
-### 
-### # Using a farily small gridsize to make these tests decently fast, on cost of
-### # the precision. Thus the tolerance is sometimes fairly big. By default, gridsize = 500 is used.
-### 
+
+# --------- central moments ---------
+# As the approximation for the quantile function (based on the pdf) is not yet
+# implemented for continuous distributions, numeric approximation of central
+# moments not yet possible; expecting errors.
+
+expect_error(mean(n1),
+             pattern = "^approximation for quantile function via pdf for continuous distributions currently not possible$",
+             info = "Currently missing pdf->quantile, thus mean.distribution should throw error.")
+expect_error(variance(n1),
+             pattern = "^approximation for quantile function via pdf for continuous distributions currently not possible$",
+             info = "Currently missing pdf->quantile, thus variance.distribution should throw error.")
+expect_error(skewness(n1),
+             pattern = "^approximation for quantile function via pdf for continuous distributions currently not possible$",
+             info = "Currently missing pdf->quantile, thus skewness.distribution should throw error.")
+expect_error(kurtosis(n1),
+             pattern = "^approximation for quantile function via pdf for continuous distributions currently not possible$",
+             info = "Currently missing pdf->quantile, thus kurtosis.distribution should throw error.")
+
 ### # Testing mean
 ### 
 ### # default method falls to 'cdf' as we have no quantile function for MyMean

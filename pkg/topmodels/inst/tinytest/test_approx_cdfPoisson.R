@@ -17,23 +17,49 @@ cdfPoisson <- function(lambda) {
     return(d)
 }
 
-## Additional S3 methods required
+## Additional S3 methods required (currently unregistered, thus invisible to tinytest)
 cdf.cdfPoisson         <- getS3method("cdf", class = "Poisson")
 is_discrete.cdfPoisson <- getS3method("is_discrete", class = "Poisson")
 support.cdfPoisson     <- getS3method("support", class = "Poisson")
 
-## Registering S3 methods (required for testing)
-registerS3method("cdf",         "cdfPoisson", cdf.cdfPoisson,         envir = asNamespace("topmodels"))
-registerS3method("is_discrete", "cdfPoisson", is_discrete.cdfPoisson, envir = asNamespace("topmodels"))
-registerS3method("support",     "cdfPoisson", support.cdfPoisson,     envir = asNamespace("topmodels"))
-
-
-## Setting up single-distribution object
+## Setting up single-distribution object, testing constructor function
 expect_silent(p1 <- cdfPoisson(lambda = 5),
     info = "Creator function must be silent")
 expect_identical(p1,
     structure(data.frame(lambda = 5), class = c("cdfPoisson", "distribution")),
     info = "Object returned by cdfPoisson not as expected.")
+
+
+## --------------- Checking behavior when S3 methods are missing -----------------
+## Currently cdf.cdfPoisson is not defined which we need (in these tests)
+## to approximate pdf/quantile. In this case pdf() and quantile() must throw errors.
+expect_error(pdf(p1, x = 0),
+             pattern = "^no S3 method 'cdf' found for object of class: cdfPoisson$",
+             info = "No 'cdf.cdfPoisson' method available must throw an error.")
+expect_error(quantile(p1, probs = 0.5),
+             pattern = "^no S3 method 'cdf' or 'quantile' found for object of class: cdfPoisson$",
+             info = "No method 'cdf.cdfPoisson' or 'quantile.cdfPoisson' available must throw an error.")
+# ... registering pdf (required for tinytest)
+registerS3method("cdf", "cdfPoisson", cdf.cdfPoisson, envir = asNamespace("topmodels"))
+
+## Now the cdf method is registered which is used to approximate cdf/quantile.
+## However, is_discrete (required) still missing.
+expect_error(pdf(p1, x = 0),
+             pattern = "^S3 method 'is_discrete' missing for object of class: cdfPoisson$",
+             info = "Method is_discrete is required, else an error must be thrown.")
+## ... registering is_discrete
+registerS3method("is_discrete", "cdfPoisson", is_discrete.cdfPoisson, envir = asNamespace("topmodels"))
+
+## Same (error) should happen as support is missing
+expect_error(pdf(p1, x = 0),
+             pattern = "^S3 method 'support' missing for object of class: cdfPoisson$",
+             info = "Method support is required, else an error must be thrown.")
+## ... registering support
+registerS3method("support", "cdfPoisson", support.cdfPoisson, envir = asNamespace("topmodels"))
+## ------------- End of checking behavior when S3 methods are missing -------------
+
+
+## Testing required S3 methods needed
 expect_identical(is_discrete(p1), TRUE,
     info = "is_discrete() must return FALSE.")
 expect_identical(support(p1), c(min = 0, max = Inf),
@@ -146,80 +172,150 @@ expect_identical(dim(r3), c(3L, 5L),              info = "random(p3, 5, drop = F
 expect_identical(dimnames(r3), list(names(p3), paste("r", 1:5, sep = "_")), info = "dimension names of random(p3, 5, drop = FALSE) incorrect.")
 rm(r3)
 
-# --------- central moments ---------
-
-
+# --------- central moments (default; cdf) ---------
+# These tests are written to be using the default methods which, here, is 
+# method = 'cdf' as cdf.cdfPoisson is available. We later enforce/test
+# method = 'quantile'.
 
 # Using a farily small gridsize to make these tests decently fast, on cost of
-# the precision. Thus the tolerance is sometimes fairly big. By default, gridsize = 500 is used.
+# the precision. Thus the tolerance is sometimes fairly big. By default,
+# gridsize = 500 is used.
 
-# Testing mean
-
-# default method falls to 'cdf' as we have no quantile function for MyMean
+# Testing mean (default cdf method)
 expect_equal(mean(p3, gridsize = 50), mean(P3),
         tolerance = 1e-7,
         info = "mean of cdfPoisson and Poisson should be nearly identical")
 expect_equal(mean(p3, gridsize = 50), mean(p3, gridsize = 50, method = "cdf"),
         info = "Expected mean to use method='cdf' by default, but got different results.")
-# Testing if method = "quantile" gives similar results; typically we would like to
-# use method = 'cdf' but if the range of 'x' to cover the distribution(s) is larger than
-# the grid size we fall back to 'quantile' and handle the discrete distribution as a
-# continuous distribution; this is less precise though.
-expect_equal(mean(p3, gridsize = 50, method = "quantile"), mean(P3),
-        tolerance = 1e-1,
-        info = "Results using mean(..., method = \"quantile\") are not correct.")
 
-# Testing variance
-
-# default method falls to 'cdf' as we have no quantile function for MyMean
+# Testing variance (default cdf method)
+expect_equal(variance(p3), variance(P3),
+        tolerance = 1e-5,
+        info = "variance of cdfPoisson and Poisson should be nearly identical")
 expect_equal(variance(p3, gridsize = 50), variance(p3, gridsize = 50, method = "cdf"),
         info = "Expected variance to use method='cdf' by default, but got different results.")
-# TODO(R): Incorrect # # Testing if method = "quantile" gives similar results
-# TODO(R): Incorrect # expect_equal(variance(p3, gridsize = 50, method = "quantile"), variance(P3),
-# TODO(R): Incorrect #         info = "Results using variance(..., method = \"quantile\") are not correct.")
 
-# Testing skewness
-
-# default method falls to 'cdf' as we have no quantile function for MyMean
+# Testing skewness (default cdf method)
 expect_equal(skewness(p3), skewness(P3),
         tolerance = 1e-5,
         info = "skewness of cdfPoisson and Poisson should be nearly identical")
 expect_equal(skewness(p3, gridsize = 50), skewness(p3, gridsize = 50, method = "cdf"),
         info = "Expected skewness to use method='cdf' by default, but got different results.")
-# TODO(R): Incorrect # # Testing if method = "quantile" gives similar results
-# TODO(R): Incorrect # expect_equal(skewness(p3, gridsize = 50, method = "quantile"), skewness(P3),
-# TODO(R): Incorrect #         info = "Results using skewness(..., method = \"quantile\") are not correct.")
 
-# Testing kurtosis
-
-# default method falls to 'cdf' as we have no quantile function for MyMean
+# Testing kurtosis (default cdf method)
 expect_equal(kurtosis(p3), kurtosis(P3),
         tolerance = 1e-4,
         info = "kurtosis of cdfPoisson and Poisson should be nearly identical")
 expect_equal(kurtosis(p3, gridsize = 50), kurtosis(p3, gridsize = 50, method = "cdf"),
         info = "Expected kurtosis to use method='cdf' by default, but got different results.")
-# TODO(R): Incorrect # # Testing if method = "quantile" gives similar results
-# TODO(R): Incorrect # expect_equal(kurtosis(p3, gridsize = 50, method = "quantile"), kurtosis(P3),
-# TODO(R): Incorrect #         info = "Results using kurtosis(..., method = \"quantile\") are not correct.")
 
-# TODO(R): moments for quantile.cdfPoisson(..., method = 'q') must be fixed; the code
-#          below is just for testing. Remove once that issue is resolved.
-#f <- function(...) { devtools::document("../../"); devtools:: load_all("../../") }
-#f()
-#
-#rbind(analytic     = mean(P3),
-#      via_cdf      = mean(p3, m = "c"),
-#      via_quantile = mean(p3, m = "q", gridsize = 101))
-#
-#rbind(analytic     = variance(P3),
-#      via_cdf      = variance(p3, m = "c"),
-#      via_quantile = variance(p3, m = "q", gridsize = 101))
-#
-#rbind(analytic     = skewness(P3),
-#      via_cdf      = skewness(p3, m = "c"),
-#      via_quantile = skewness(p3, m = "q", gridsize = 101))
-#
-#rbind(analytic     = kurtosis(P3),
-#      via_cdf      = kurtosis(p3, m = "c"),
-#      via_quantile = kurtosis(p3, m = "q", gridsize = 101))
 
+# --------- central moments (enforcing quantile method) -------
+# Next we enforce 'method = "quantile"' for distributions with
+# a fairly small parameter (lambda) where the method should fall 
+# back to the 'cdf' method as the 'quantile' method may result in
+# inaccurate results (mainly for third and forth order moments).
+
+# Mean (enforcing quantile, falling back to 'cdf')
+expect_warning(m <- mean(p3, method = "quantile"),
+               pattern = "switching to method = 'cdf'",
+               info = "Expected warning switching back to cdf method.")
+expect_equal(m, mean(P3),
+             tolerance = 1e-7,
+             info = "Approximated and analytic mean expected to be equal.")
+rm(m)
+
+# Variance (enforcing quantile, falling back to 'cdf')
+expect_warning(v <- variance(p3, method = "quantile"),
+               pattern = "switching to method = 'cdf'",
+               info = "Expected warning switching back to cdf method.")
+expect_equal(v, variance(P3),
+             tolerance = 1e-5,
+             info = "Approximated and analytic variance expected to be equal.")
+rm(v)
+
+# Skewness (enforcing quantile, falling back to 'cdf')
+expect_warning(s <- mean(p3, method = "quantile"),
+               pattern = "switching to method = 'cdf'",
+               info = "Expected warning switching back to cdf method.")
+expect_equal(s, mean(P3),
+             tolerance = 1e-5,
+             info = "Approximated and analytic mean expected to be equal.")
+rm(s)
+
+# Kurtosis (enforcing quantile, falling back to 'cdf')
+expect_warning(k <- kurtosis(p3, method = "quantile"),
+               pattern = "switching to method = 'cdf'",
+               info = "Expected warning switching back to cdf method.")
+expect_equal(k, kurtosis(P3),
+             tolerance = 1e-4,
+             info = "Approximated and analytic kurtosis expected to be equal.")
+rm(k)
+
+
+# --------- central moments (making use of quantiles) ---------
+# Enforcing 'method = "quantile"' where it is actually used (the
+# approximated quantiles (cdf -> quantile).
+
+# New set of distributions with large lambda to test 'quantile' approximation,
+# where the discrete distribution is handled as a continuous one. Only valid/useful
+# if the range to be evaluated exceeds the gridsize.
+p3x <- cdfPoisson(lambda = 1:3 * 100)
+P3x <- Poisson(lambda = 1:3 * 100)
+
+# Mean (once w/ default method, once enforcing quantile)
+expect_silent(m <- mean(p3x, gridsize = 100L),
+               info = "Expected mean(..., method = \"quantile\") to be executed silently.")
+expect_equal(m, mean(P3x),
+             tolerance = 1e-4,
+             info = "Approximated and analytic mean expected to be equal.")
+rm(m)
+expect_silent(m <- mean(p3x, method = "quantile", gridsize = 100L),
+               info = "Expected mean(..., method = \"quantile\") to be executed silently.")
+expect_equal(m, mean(P3x),
+             tolerance = 1e-2,
+             info = "Approximated and analytic mean expected to be equal.")
+rm(m)
+
+# Variance (once w/ default method, once enforcing quantile)
+expect_silent(v <- variance(p3x, gridsize = 100L),
+               info = "Expected variance(..., method = \"quantile\") to be executed silently.")
+expect_equal(v, variance(P3x),
+             tolerance = 1e-2,
+             info = "Approximated and analytic variance expected to be equal.")
+rm(v)
+expect_silent(v <- variance(p3x, method = "quantile", gridsize = 100L),
+               info = "Expected variance(..., method = \"quantile\") to be executed silently.")
+expect_equal(v, variance(P3x),
+             tolerance = 1e-1,
+             info = "Approximated and analytic variance expected to be equal.")
+rm(v)
+
+# Skewness (once w/ default method, once enforcing quantile)
+expect_silent(s <- skewness(p3x, gridsize = 100L),
+               info = "Expected skewness(..., method = \"quantile\") to be executed silently.")
+expect_equal(s, skewness(P3x),
+             tolerance = 0.25,
+             info = "Approximated and analytic skewness expected to be equal.")
+rm(s)
+expect_silent(s <- skewness(p3x, method = "quantile", gridsize = 100L),
+               info = "Expected skewness(..., method = \"quantile\") to be executed silently.")
+expect_equal(s, skewness(P3x),
+             tolerance = 0.25,
+             info = "Approximated and analytic skewness expected to be equal.")
+rm(s)
+
+
+# Kurtosis (once w/ default method, once enforcing quantile)
+expect_silent(k <- kurtosis(p3x, gridsize = 100L),
+               info = "Expected kurtosis(..., method = \"quantile\") to be executed silently.")
+expect_equal(k, kurtosis(P3x),
+             tolerance = 1e-1,
+             info = "Approximated and analytic kurtosis expected to be equal.")
+rm(k)
+expect_silent(k <- kurtosis(p3x, method = "quantile", gridsize = 100L),
+               info = "Expected kurtosis(..., method = \"quantile\") to be executed silently.")
+expect_equal(k, kurtosis(P3x),
+             tolerance = 0.25,
+             info = "Approximated and analytic kurtosis expected to be equal.")
+rm(k)

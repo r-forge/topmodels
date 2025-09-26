@@ -22,18 +22,46 @@ pdf.pdfPoisson         <- getS3method("pdf", class = "Poisson")
 is_discrete.pdfPoisson <- getS3method("is_discrete", class = "Poisson")
 support.pdfPoisson     <- getS3method("support", class = "Poisson")
 
-## Registering S3 methods (required for testing)
-registerS3method("pdf",         "pdfPoisson", pdf.pdfPoisson,         envir = asNamespace("topmodels"))
-registerS3method("is_discrete", "pdfPoisson", is_discrete.pdfPoisson, envir = asNamespace("topmodels"))
-registerS3method("support",     "pdfPoisson", support.pdfPoisson,     envir = asNamespace("topmodels"))
-
-
 ## Setting up single-distribution object
 expect_silent(p1 <- pdfPoisson(lambda = 5),
     info = "Creator function must be silent")
 expect_identical(p1,
     structure(data.frame(lambda = 5), class = c("pdfPoisson", "distribution")),
     info = "Object returned by pdfPoisson not as expected.")
+
+
+
+## --------------- Checking behavior when S3 methods are missing -----------------
+## Currently pdf.pdfPoisson is not defined which we need (in these tests)
+## to approximate cdf/quantile. In this case cdf() and quantile() must throw errors.
+expect_error(cdf(p1, x = 0),
+             pattern = "^no S3 method 'pdf' found for object of class: pdfPoisson$",
+             info = "No 'pdf.pdfPoisson' method available must throw an error.")
+expect_error(quantile(p1, probs = 0.5),
+             pattern = "^no S3 method 'cdf' or 'quantile' found for object of class: pdfPoisson$",
+             info = "No method 'cdf.pdfPoisson' or 'quantile.pdfPoisson' available must throw an error.")
+## ... registering pdf (required for tinytest)
+registerS3method("pdf", "pdfPoisson", pdf.pdfPoisson, envir = asNamespace("topmodels"))
+
+## Now the pdf method is registered which is used to approximate cdf/quantile.
+## However, is_discrete (required) still missing.
+expect_error(cdf(p1, x = 0),
+             pattern = "^S3 method 'is_discrete' missing for object of class: pdfPoisson$",
+             info = "Method is_discrete is required, else an error must be thrown.")
+## ... registering is_discrete (required for tinytest)
+registerS3method("is_discrete", "pdfPoisson", is_discrete.pdfPoisson, envir = asNamespace("topmodels"))
+
+## Same (error) should happen as support is missing
+expect_error(cdf(p1, x = 0),
+             pattern = "^S3 method 'support' missing for object of class: pdfPoisson$",
+             info = "Method support is required, else an error must be thrown.")
+## ... registering support (required for tinytest)
+registerS3method("support", "pdfPoisson", support.pdfPoisson, envir = asNamespace("topmodels"))
+## ------------- End of checking behavior when S3 methods are missing -------------
+
+
+
+## Testing required S3 methods needed
 expect_identical(is_discrete(p1), TRUE,
     info = "is_discrete() must return FALSE.")
 expect_identical(support(p1), c(min = 0, max = Inf),
@@ -113,6 +141,11 @@ expect_equal(quantile(p3, probs = c(0.25, 0.5, 0.75), elementwise = FALSE),
              quantile(P3, probs = c(0.25, 0.5, 0.75), elementwise = FALSE),
         info = "quantile of pdfPoisson and Poisson should be nearly identical.")
 
+# If 'maxit' is too small and we can't find the quantile we're getting an error.
+# Testing for correct behavior and message.
+expect_error(quantile(pdfPoisson(lambda = 10), 0.999, maxit = 10),
+        pattern = "^quantile \\(probs = .*?\\) not found after 10 iterations; consider increasing 'maxit'$",
+        info = "Expecting error when maxit is too small to find the quantile.")
 
 # ------- random number gen ---------
 

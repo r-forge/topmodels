@@ -17,23 +17,48 @@ cdfNormal <- function(mu, sigma) {
     return(d)
 }
 
-## Additional S3 methods required
+## Additional S3 methods required (currently unregistered, thus invisible to tinytest)
 cdf.cdfNormal         <- getS3method("cdf", class = "Normal")
 is_discrete.cdfNormal <- getS3method("is_discrete", class = "Normal")
 support.cdfNormal     <- getS3method("support", class = "Normal")
 
-## Registering S3 methods (required for testing)
-registerS3method("cdf",         "cdfNormal", cdf.cdfNormal,         envir = asNamespace("topmodels"))
-registerS3method("is_discrete", "cdfNormal", is_discrete.cdfNormal, envir = asNamespace("topmodels"))
-registerS3method("support",     "cdfNormal", support.cdfNormal,     envir = asNamespace("topmodels"))
-
-
-## Setting up single-distribution object
+## Setting up single-distribution object, testing constructor function
 expect_silent(n1 <- cdfNormal(mu = 3, sigma = 2),
     info = "Creator function must be silent")
 expect_identical(n1,
     structure(data.frame(mu = 3, sigma = 2), class = c("cdfNormal", "distribution")),
     info = "Object returned by cdfNormal not as expected.")
+
+## --------------- Checking behavior when S3 methods are missing -----------------
+## Currently cdf.cdfNormal is not defined which we need (in these tests)
+## to approximate pdf/quantile. In this case pdf() and quantile() must throw errors.
+expect_error(pdf(n1, x = 0),
+             pattern = "^no S3 method 'cdf' found for object of class: cdfNormal$",
+             info = "No 'cdf.cdfNormal' method available must throw an error.")
+expect_error(quantile(n1, probs = 0.5),
+             pattern = "^no S3 method 'cdf' or 'quantile' found for object of class: cdfNormal$",
+             info = "No method 'cdf.cdfNormal' or 'quantile.cdfNormal' available must throw an error.")
+# ... registering pdf (required for tinytest)
+registerS3method("cdf", "cdfNormal", cdf.cdfNormal, envir = asNamespace("topmodels"))
+
+## Now the cdf method is registered which is used to approximate cdf/quantile.
+## However, is_discrete (required) still missing.
+expect_error(pdf(n1, x = 0),
+             pattern = "^S3 method 'is_discrete' missing for object of class: cdfNormal$",
+             info = "Method is_discrete is required, else an error must be thrown.")
+## ... registering is_discrete
+registerS3method("is_discrete", "cdfNormal", is_discrete.cdfNormal, envir = asNamespace("topmodels"))
+
+## Same (error) should happen as support is missing
+expect_error(pdf(n1, x = 0),
+             pattern = "^S3 method 'support' missing for object of class: cdfNormal$",
+             info = "Method support is required, else an error must be thrown.")
+## ... registering support
+registerS3method("support", "cdfNormal", support.cdfNormal, envir = asNamespace("topmodels"))
+## ------------- End of checking behavior when S3 methods are missing -------------
+
+
+## Testing required S3 methods needed
 expect_identical(is_discrete(n1), FALSE,
     info = "is_discrete() must return FALSE.")
 expect_identical(support(n1), c(min = -Inf, max = Inf),

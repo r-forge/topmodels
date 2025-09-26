@@ -16,6 +16,7 @@
   lower = -1/sqrt(.Machine$double.eps),
   upper = +1/sqrt(.Machine$double.eps),
   tol = .Machine$double.eps^0.5,
+  maxit = 1000,
   ...
 )
 
@@ -44,6 +45,10 @@ else \code{elementwise} is set \code{FALSE}.}
 be searched, forwarded to [stats::uniroot()].}
 
 \item{tol}{numeric. Desired accuracy for [stats::uniroot()].}
+
+\item{maxit}{Integer (default \code{1000L}). Maximum number of iterations used when iteratively evaluating
+quantiles based on a pdf (discrete distributions only). If \code{maxit} is reached
+before the quantile has been found, an error will be thrown.}
 
 \item{lower.tail}{Logical. If \code{TRUE} (default), probabilities are
 \eqn{P[X \le x]}{P[X <= x]}, else \eqn{P[X \ge x]}{P[X >= x]}.}

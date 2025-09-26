@@ -165,8 +165,15 @@
 #' @rdname pdf.distribution
 #' @exportS3Method
 pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE, ...) {
-    if (!hasS3method("cdf", class(d)))
-        stop("no S3 method 'cdf' found for object of class: ", paste(class(d), collapse = ", "))
+    # To be able to numerically approximate the pdf the object must have
+    # a cdf method. If not available, exit.
+    cls <- setdiff(class(d), "distribution")
+    if (!hasS3method("cdf", cls))
+        stop("no S3 method 'cdf' found for object of class: ", paste(cls, collapse = ", "))
+    if (!hasS3method("is_discrete", cls))
+        stop("S3 method 'is_discrete' missing for object of class: ", paste(cls, collapse = ", "))
+    if (!hasS3method("support", cls))
+        stop("S3 method 'support' missing for object of class: ", paste(cls, collapse = ", "))
 
     stopifnot(is.numeric(x) && all(is.finite(x)))
     x <- as.numeric(x) # Required for numericDeriv
@@ -300,23 +307,35 @@ pdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, log = FALSE,
 #' @param lower,upper numeric. Lower and upper end points for the interval to
 #'        be searched, forwarded to [stats::uniroot()].
 #' @param tol numeric. Desired accuracy for [stats::uniroot()].
+#' @param maxit Integer (default \code{1000L}). Maximum number of iterations used when iteratively evaluating
+#'        quantiles based on a pdf (discrete distributions only). If \code{maxit} is reached
+#'        before the quantile has been found, an error will be thrown.
 #' @param ... currently ignored.
 #'
-#' @importFrom distributions3 is_discrete
+#' @importFrom distributions3 is_discrete support
 #' @rdname pdf.distribution
 #' @exportS3Method
 quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
                                   lower = -1 / sqrt(.Machine$double.eps),
                                   upper = +1 / sqrt(.Machine$double.eps),
-                                  tol   = .Machine$double.eps^0.5, ...) {
-
-    if (!hasS3method("cdf", class(x)))
-        stop("no S3 method 'cdf' found for object of class: ", paste(class(x), collapse = ", "))
+                                  tol   = .Machine$double.eps^0.5, maxit = 1e3, ...) {
+    ## Check which S3 methods are available
+    cls <- setdiff(class(x), "distribution")
+    has <- list(cdf = hasS3method("cdf", cls), pdf = hasS3method("pdf", cls))
+    if (!has$cdf && !has$pdf)
+        stop("no S3 method 'cdf' or 'quantile' found for object of class: ", paste(cls, collapse = ", "))
+    if (!hasS3method("is_discrete", cls))
+        stop("S3 method 'is_discrete' missing for object of class: ", paste(cls, collapse = ", "))
+    if (!hasS3method("support", cls))
+        stop("S3 method 'support' missing for object of class: ", paste(cls, collapse = ", "))
 
     stopifnot(is.numeric(lower), length(lower) == 1L)
     stopifnot(is.numeric(upper), length(upper) == 1L)
     stopifnot(lower < upper)
     stopifnot(is.numeric(tol), length(tol) == 1L, tol >= .Machine$double.eps, tol < 0.01)
+    stopifnot(is.numeric(maxit), length(maxit) >= 1L)
+    maxit <- as.integer(maxit)[1L]
+    stopifnot(maxit > 0)
 
     # Check if calculation is performed elementwise or not
     k <- length(probs); n <- length(x)
@@ -324,10 +343,6 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
         elementwise <- (k == 1L & n == 1L) || (k > 1L && k == n)
     if (elementwise && k > 1L && k != n)
         stop(sprintf("lengths of distributions and arguments do not match: %s != %s", n, k))
-
-    ## Check which S3 methods are available
-    has <- setdiff(class(x), "distribution")
-    has <- list(cdf = hasS3method("cdf", has), pdf = hasS3method("pdf", has))
 
     ## Discrete distribution?
     discrete <- all(is_discrete(x))
@@ -391,30 +406,76 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
 
         ## Discrete distributions: Sum up pdf along x until quantile is found.
         if (discrete) {
-            pdf2quantile <- function(d, probs, x = 0L, xmax = 100L) {
-                # Recursive function searching for the quantile(s)
-                recursive_fn <- function(p, cdf, x, xmax) {
-                    if (cdf >= p) return(list(x = x, cdf = cdf))
-                    cdf <- cdf + pdf(d, x)
-                    x <- x + 1L
-                    if (cdf >= p) return(list(x = x, cdf = cdf))
-                    recursive_fn(p, cdf, x, xmax)
+
+            # Iteratively find Quantile for Count Data
+            #
+            # Helper function to iteratively integrate the PDF
+            # to find the quantile; assumes count data.
+            #
+            # @param d Object of class 'distribution' (discrete).
+            # @param probs Numeric, vector of probabilities to be evaluated. NOTE: MUST BE SORTED (ascending).
+            # @param x Integer. starting value; e.g., 0L (lower support) for the Poisson distribution.
+            # @param maxit Numeric/integer. Max number of iterations for trying to find the required
+            #        quantile. If not found when reached, an error will be thrown.
+            # @param support Numeric vector (or matrix) with two elements; lower and upper limit of
+            #        the support of the distribution 'd'.
+            pdf2quantile <- function(d, probs, x, maxit, support) {
+
+                if (!is.finite(x)) stop("starting value not finite (x = ", x, "); exit")
+
+                # xmax: last value to be checked. If the requested quantile
+                # was not found when x reaches xmax an error will be thrown.
+                xmax    = min(support[2L], support[1L] + maxit)
+
+                # Used to stop if sum(cdf) ~ 1.0 to account for possible precision issues
+                quasi1 <- 1.0 - sqrt(.Machine$double.eps)
+
+                # @param p Numeric (length 1L), probabililty to be evaluated.
+                # @param cdf Numeric (length 1L), cdf of previous iteration (or 0.0 when called first).
+                #        For follow-up iterations 'cdf' is the sum over the pdf up to 'x'.
+                # @param x Numeric (integer), current 'x' (or 'x' from previous iteration) matching 'cdf'.
+                #
+                # @return Returns a list with two elements with current cdf (sum over pdf) as well
+                #         as the corresponding 'x' (position to which we've integrated already).
+                iterate <- function(p, cdf, x) {
+                    ## Outside range of support of distribution
+                    if (x < support[1L] || x > support[2L])
+                        return(list(x = x, cdf = as.numeric(x > support[2L]))) # Return cdf = 0.0 or 1.0
+                    ## Repeat until return/stop
+                    res <- NULL
+                    repeat {
+                        # Outside support
+                        if (x > xmax) stop("quantile (probs = ", p, ") not found after ", maxit, " iterations; consider increasing 'maxit'")
+                        # Found what we are looking for
+                        if (cdf > p) return(list(x = x, cdf = cdf))
+                        # Iteratively increase CDF and 'x'
+                        cdf <- cdf + pdf(d, x); x <- x + 1L
+                        # Found our result?
+                        if (cdf > p || cdf > quasi1) return(list(x = x, cdf = cdf))
+                        # ... else continue iterating
+                    }
                 }
 
-                res <- rep(NA_real_, length(probs))
-                tmp <- list(cdf = 0.0, x = -1L) # starting -1L is important
+                res <- rep(NA_real_, length(probs))     # Vector to store results
+                tmp <- list(cdf = 0.0, x = support[1L]) # Starting values
+
+                ##tmp <- list(cdf = 0.0, x = -1L) # starting -1L is important
                 for (i in seq_along(probs)) {
-                    tmp <- recursive_fn(probs[i], tmp$cdf, tmp$x, xmax)
-                    res[i] <- tmp$x - 1L # store previous 'x', our result before exceeding probs[i]
+                    ## Probability outside [0, 1]
+                    if (probs[i] < 0.0 || probs[i] > 1.0) { res[i] <- NaN; next }
+                    tmp <- iterate(probs[i], tmp$cdf, tmp$x)
+                    # store previous 'x', our result before exceeding probs[i]
+                    res[i] <- tmp$x - 1.0
                 }
-                res
+                return(res)
             }
 
             if (elementwise || k == 1L) {
                 probs <- rep(probs, length.out = n)
                 for (i in seq_len(n)) {
-                    res[i, 1L] <- pdf2quantile(d = x[i], p = probs[[i]],
-                                               x = sup[[i, "min"]], xmax = max(sup[[i, "max"]], 100L))
+                    res[i, 1L] <- pdf2quantile(d       = x[i],            probs   = probs[[i]],
+                                               x       = sup[[i, "min"]], maxit   = maxit,
+                                               support = sup[i, , drop = TRUE])
                 }
                 ## Ensure lowest/uppest quantile are correct
                 tmp <- probs == 0; if (any(tmp)) res[tmp, 1L] <- sup[[tmp, "min"]]
@@ -423,18 +484,21 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
                 porder <- order(probs, decreasing = FALSE)
                 probs  <- sort(probs)
                 for (i in seq_len(n)) {
-                    res[i, porder] <- pdf2quantile(d = x[i], p = probs,
-                                                   x = sup[[i, "min"]], xmax = max(sup[[i, "max"]], 100L))
+                    res[i, porder] <- pdf2quantile(d       = x[i],            probs   = probs,
+                                                   x       = sup[[i, "min"]], maxit   = maxit,
+                                                   support = sup[i, , drop = TRUE])
                     ## Ensure lowest/uppest quantile are correct
                     tmp <- probs == 0; if (any(tmp)) res[i, tmp] <- sup[[i, "min"]]
                     tmp <- probs == 1; if (any(tmp)) res[i, tmp] <- sup[[i, "max"]]
                 }
             }
-        } else {
-            stop("Must be implemented first")
-        }
-    }
 
+            ## Any missing values produced as probs outside limit?
+            if (any(is.nan(res))) warning("NaNs produced")
+        } else {
+            stop("approximation for quantile function via pdf for continuous distributions currently not possible")
+        }
+   }
     ## Handle dimensions
     if ((k == 1L || ncol(res) == 1L) && drop) {
         res <- as.vector(res)
@@ -452,8 +516,15 @@ quantile.distribution <- function(x, probs, drop = TRUE, elementwise = NULL,
 #' @rdname pdf.distribution
 #' @exportS3Method
 cdf.distribution <- function(d, x, drop = TRUE, elementwise = NULL, lower.tail = TRUE, ...) {
-    if (!hasS3method("cdf", class(d)))
-        stop("no S3 method 'cdf' found for object of class: ", paste(class(d), collapse = ", "))
+    # To be able to numerically approximate the cdf the object must have
+    # a pdf method. If not available, exit.
+    cls <- setdiff(class(d), "distribution")
+    if (!hasS3method("pdf", cls))
+        stop("no S3 method 'pdf' found for object of class: ", paste(cls, collapse = ", "))
+    if (!hasS3method("is_discrete", cls))
+        stop("S3 method 'is_discrete' missing for object of class: ", paste(cls, collapse = ", "))
+    if (!hasS3method("support", cls))
+        stop("S3 method 'support' missing for object of class: ", paste(cls, collapse = ", "))
 
     stopifnot(is.numeric(x) && all(is.finite(x)))
     x <- as.numeric(x) # Required for numericDeriv
@@ -680,10 +751,26 @@ distribution_calculate_moments <- function(x, what, gridsize = 500L, batchsize =
 
   ## Selecting method used to approximate the density required
   ## to calculate the moments (pdf approximation).
+  get_auto_method <- function(x) if (hasS3method("quantile", class(x)[!class(x) == "distribution"])) "quantile" else "cdf"
   if (is.null(method)) {
-    method <- if (hasS3method("quantile", class(x)[!class(x) == "distribution"])) "quantile" else "cdf"
+    method <- get_auto_method(x)
   } else {
+    ## Evaluate argument
     method <- match.arg(method, c("cdf", "quantile"))
+  }
+
+  ## Manually enforcing 'method = "cdf"' for discrete distributions if possible as 'method = "quantile"'
+  ## can lead to inaccurate results if the range the values span is < gridsize.
+  if (discrete && method == "quantile" && gridsize >= abs(diff(xrange))) {
+      if (get_auto_method(x) == "cdf") {
+          warning("switching to method = 'cdf' (method = 'quantile' can result in inaccurate results)")
+          method <- "cdf"
+      } else {
+          ## TODO(R): This is as I consider binwidth == 1.0 I guess.
+          ##          Double-check and fix C code if possible to (though inefficiently calculated)
+          ##          still get accurate results.
+          warning("approximating moments for discrete distributions based on the quantile function may result in inaccurate results")
+      }
   }
 
   ## cdf method: set up observations and compute probabilities via cdf()
